@@ -1,0 +1,152 @@
+﻿using UnityEngine;
+using System.Collections;
+
+public class PhysicalBootstrapper : MonoBehaviour {
+
+	public AudioClip[] impactSounds;
+	public AudioClip[] landSounds;
+
+	private GameObject hingeObject;
+	private GameObject groundObject;
+	private Rigidbody2D groundBody;
+	private Rigidbody2D hingeBody;
+	private HingeJoint2D hingeJoint2D;
+	private SliderJoint2D sliderJoint2D;
+	public Physical physical;
+	private Collider2D tomCollider;
+	private SpriteRenderer spriteRenderer;
+	public float initHeight;
+	public Vector2 initVelocity;
+	public bool ignoreCollisions;
+	public bool doInit = true;
+
+	void Start () {
+		tag = "Physical";
+		spriteRenderer = GetComponent<SpriteRenderer>();
+		GetComponent<Renderer>().sortingLayerName="main";
+
+		//this will need to be modified when we have more humanoids!!!!:
+		GameObject tom = GameObject.Find("Tom");
+		if (tom)
+			tomCollider = GameObject.Find("Tom").GetComponent<Collider2D>(); 
+		if (doInit)
+			InitPhysical(initHeight,initVelocity);
+
+		if (impactSounds.Length > 0){
+			if (!GetComponent<AudioSource>()){
+				gameObject.AddComponent<AudioSource>();
+			}
+			GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Logarithmic;
+			GetComponent<AudioSource>().minDistance = 0.4f;
+			GetComponent<AudioSource>().maxDistance = 5.42f;
+		}
+	}
+
+	public void DestroyPhysical(){
+		transform.parent = null;
+		Destroy(groundObject);
+		GetComponent<Rigidbody2D>().gravityScale = 0;
+		Physics2D.IgnoreCollision(tomCollider,GetComponent<Collider2D>(),false);
+		physical = null;
+		doInit = false;
+	}
+
+
+	public void InitPhysical(float height, Vector2 initialVelocity){
+		doInit = true;
+		// Set up hinge
+		hingeObject = new GameObject("hinge");
+		transform.parent = hingeObject.transform;
+		hingeBody = hingeObject.AddComponent<Rigidbody2D>();
+		hingeJoint2D = hingeObject.AddComponent<HingeJoint2D>();
+		hingeBody.mass = 1;
+		hingeBody.drag = 1;
+		hingeBody.angularDrag = 1;
+		hingeBody.gravityScale = 0;
+		hingeJoint2D.connectedBody = GetComponent<Rigidbody2D>();
+		
+		
+		// Set up ground object
+		groundObject = new GameObject(name + " Ground");
+		Vector2 tempPos = transform.position;
+
+//		Vector4 borderVector = spriteRenderer.sprite.border;
+		Bounds spriteBounds = spriteRenderer.sprite.bounds;
+//		collider2D.bounds
+//		Bounds bounds = collider2D.bounds;
+//		height = height + borderVector.w - borderVector.y + 0.07f;
+//		height = height + bounds.min.y;
+		height = height + spriteBounds.extents.y;
+
+		tempPos.y = tempPos.y - height;
+		groundObject.transform.position = tempPos;
+				
+		hingeObject.transform.parent = groundObject.transform;
+		
+		//rigidbody 2D
+		groundBody = groundObject.AddComponent<Rigidbody2D>();
+		groundBody.mass = 1f;
+		groundBody.drag = 1f;
+		groundBody.angularDrag = 0.05f;
+		groundBody.gravityScale = 0;
+		groundBody.fixedAngle = true;
+		
+		//box collider
+		BoxCollider2D groundCollider = groundObject.AddComponent<BoxCollider2D>();
+		groundCollider.size = new Vector2(0.1606f,0.0523f);
+		groundCollider.offset = new Vector2(0,-0.04f);
+		groundCollider.sharedMaterial = Resources.Load<PhysicsMaterial2D>("ground"); 
+		
+		//sprite renderer
+		SpriteRenderer groundSprite = groundObject.AddComponent<SpriteRenderer>();
+		groundSprite.sprite = Resources.Load<Sprite>("shadow");
+		groundSprite.sortingLayerName="ground";
+		
+		//Physical
+		Physical groundPhysical = groundObject.AddComponent<Physical>();
+
+		groundPhysical.ignoreCollisions = ignoreCollisions;
+		groundPhysical.objectBody = GetComponent<Rigidbody2D>();
+		groundPhysical.hingeBody = hingeBody;
+
+		//Slider joint
+		sliderJoint2D = groundObject.AddComponent<SliderJoint2D>();
+		sliderJoint2D.collideConnected = true;
+		sliderJoint2D.angle = 90f;
+		sliderJoint2D.connectedBody = hingeBody;
+		
+		groundPhysical.impactSounds = impactSounds;
+		groundPhysical.landSounds = landSounds;
+		
+		physical = groundPhysical;
+		
+		SetVelocity(initialVelocity);
+
+
+	}
+
+	void OnCollisionEnter2D(Collision2D coll){
+		if (coll.relativeVelocity.magnitude > 0.5){
+			if (impactSounds.Length > 0){
+				GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0,impactSounds.Length)]);
+			}
+		}
+	}
+
+	public void SetVelocity(Vector2 velocity){
+		Vector2 groundVelocity = Vector2.zero;
+		Vector2 objectVelocity = Vector2.zero;
+
+		groundVelocity.x = velocity.x;
+		objectVelocity.y = velocity.y;
+
+		groundBody.velocity = groundVelocity;
+		GetComponent<Rigidbody2D>().velocity = objectVelocity;
+
+	}
+
+	void OnDestroy(){
+		if (physical)
+			Destroy(physical.gameObject);
+	}
+}
