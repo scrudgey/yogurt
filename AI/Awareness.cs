@@ -54,10 +54,10 @@ public class Awareness : MonoBehaviour {
 	// not going to work right now
 	public List<GameObject> FindObjectWithTag(Knowledge.tag  tag ){
 		List<GameObject> returnArray = new List<GameObject>();
-		foreach (Knowledge k in objects.Values){
-//			if (k.attributes.Contains(tag))
-//				returnArray.Add(k.obj);
-		}
+//		foreach (Knowledge k in objects.Values){
+////			if (k.attributes.Contains(tag))
+////				returnArray.Add(k.obj);
+//		}
 		return returnArray;
 	}
 

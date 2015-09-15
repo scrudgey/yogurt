@@ -44,9 +44,7 @@ public class InventoryHandler : SaveHandler<Inventory> {
 
 		if (data.ints["holdingID"] != -1){
 			if (MySaver.loadedObjects.ContainsKey(data.ints["holdingID"]) ){
-//				instance.holding = MySaver.loadedObjects[data.ints["holdingID"]].GetComponent<Pickup>();
 				instance.GetItem( MySaver.loadedObjects[data.ints["holdingID"]].GetComponent<Pickup>() );
-//				instance.UpdateActions();
 			} else {
 				Debug.Log("tried to get loadedobject " + data.ints["holdingID"].ToString() + " but was not found!");
 			}

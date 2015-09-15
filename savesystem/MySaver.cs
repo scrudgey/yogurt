@@ -38,8 +38,8 @@ public class MySaver {
 
 	public static void CleanupSaves(){
 		string[] files = {
-			Application.persistentDataPath+"/room2_state.xml",
-			Application.persistentDataPath+"/testing_ground_state.xml"
+			Application.persistentDataPath+"/room2_state.xml"
+//			Application.persistentDataPath+"/testing_ground_state.xml"
 		};
 		foreach(string f in files){
 			if (File.Exists(f))
@@ -145,6 +145,7 @@ public class MySaver {
 
 		disabledPersistents = new List<GameObject>();
 		
+		Debug.Log("checking scene path at "+scenePath);
 		if (File.Exists(scenePath)){
 			Debug.Log("found "+scenePath);
 			var sceneStream = new FileStream(scenePath,FileMode.Open);
@@ -180,25 +181,22 @@ public class MySaver {
 		Regex reg =  new Regex("\\s+", RegexOptions.Multiline);
 //		Regex cloneremover = new Regex("");
 		loadedObjects = new Dictionary<int, GameObject>();
-		foreach( Persistent persistent in container.PersistentObjects){
-
+		foreach(Persistent persistent in container.PersistentObjects){
 			string path = @"prefabs/"+persistent.name;
 			path = reg.Replace(path,"_");
-//			Debug.Log("instantiating "+path);
 			GameObject go = GameObject.Instantiate(
 				Resources.Load(path),
 				persistent.transformPosition,
 				persistent.transformRotation) as GameObject;
 			loadedObjects.Add(persistent.id,go);
-			go.BroadcastMessage("LoadInit",SendMessageOptions.DontRequireReceiver);
-			
+			go.BroadcastMessage("LoadInit", SendMessageOptions.DontRequireReceiver);
 		}
 		//		// now that each persistent object is loaded, handle references
 		foreach (Persistent persistent in container.PersistentObjects){
-			
+//			Debug.Log("configuring "+persistent.name);
 			foreach (Component component in loadedObjects[persistent.id].GetComponents<Component>() ){
 				Func<SaveHandler> get;
-				
+//				Debug.Log("configuring "+component.GetType());
 				if ( MySaver.Handlers.TryGetValue(component.GetType(), out get ) ){
 					var handler = get();
 					//					// make this call more robust already before it ruins everything, dick!
@@ -298,19 +296,3 @@ public class ReferenceResolver{
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

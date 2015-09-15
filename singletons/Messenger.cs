@@ -22,8 +22,9 @@ public class Messenger : Singleton<Messenger> {
 	public void ClaimObject(GameObject obj, IExcludable owner){
 //		Debug.Log("claiming "+obj.name);
 		// if someone else owns the object, tell them that it's being taken.
-		if (claimedItems.ContainsKey(obj))
+		if (claimedItems.ContainsKey(obj)){
 			claimedItems[obj].DropMessage(obj);
+		}
 		
 		claimedItems[obj] = owner;
 	}

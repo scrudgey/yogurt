@@ -75,7 +75,6 @@ public class Controller : Singleton<Controller> {
 					RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition),Vector2.zero);
 					foreach (RaycastHit2D hit in hits){
 						if (hit.collider != null && hit.collider.tag != "fire" && hit.collider.tag != "sightcone" ){
-							Debug.Log(hit.collider.tag);
 							focus.lastLeftClicked = hit.collider.gameObject;
 							lastLeftClicked = hit.collider.gameObject;
 							UISystem.Instance.actions = Interactor.Instance.GetInteractions(focus.gameObject,lastLeftClicked);

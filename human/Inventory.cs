@@ -21,7 +21,7 @@ public class Inventory : Interactive, IExcludable {
 						if (value != null)
 							controllable.directable = directable;
 					}
-			}
+				}
 			}
 			_holding = value;
 		}
@@ -41,12 +41,12 @@ public class Inventory : Interactive, IExcludable {
 
 
 	void Start () {
-		controllable = GetComponent<Controllable>();
 		if (!LoadInitialized)
 			LoadInit();
 	}
 
 	public void LoadInit(){
+		controllable = GetComponent<Controllable>();
 		holdpoint = transform.Find("holdpoint");
 		interactions.Add ( new Interaction(this, "Get", "GetItem",true,false));
 		
@@ -86,7 +86,6 @@ public class Inventory : Interactive, IExcludable {
 				holding.GetComponent<Collider2D>().isTrigger = true;
 				if (holding.pickupSounds.Length > 0)
 					GetComponent<AudioSource>().PlayOneShot(holding.pickupSounds[Random.Range(0,holding.pickupSounds.Length)]);
-
 				UpdateActions();
 			}
 		}
