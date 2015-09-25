@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class UISystem : Singleton<UISystem> {
 
+	public GameObject gameObject;
 	private List<GameObject> worldButtons = new List<GameObject>();
 	private List<GameObject> handButtons = new List<GameObject>();
 	private List<GameObject> inventoryButtons = new List<GameObject>();
@@ -85,6 +86,7 @@ public class UISystem : Singleton<UISystem> {
 		handText  = UIObject.transform.Find("UIbackground/handPanel/handText").GetComponent<Text>();
 		handPanel = UIObject.transform.Find("UIbackground/handPanel/handButtons").gameObject;
 		inventoryPanel = UIObject.transform.Find("UIbackground/inventoryPanel/Scrollview/inventoryButtons").gameObject;
+		gameObject = UIObject.transform.Find("GameObject").gameObject;
 		doUpdate = true;
 	}
 
