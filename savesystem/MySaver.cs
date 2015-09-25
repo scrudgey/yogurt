@@ -178,32 +178,51 @@ public class MySaver {
 
 	public static void LoadPersistentContainer(PersistentContainer container){
 		
-		Regex reg =  new Regex("\\s+", RegexOptions.Multiline);
-		loadedObjects = new Dictionary<int, GameObject>();
-		foreach(Persistent persistent in container.PersistentObjects){
-			string path = @"prefabs/"+persistent.name;
-			path = reg.Replace(path,"_");
-			GameObject go = GameObject.Instantiate(
-				Resources.Load(path),
-				persistent.transformPosition,
-				persistent.transformRotation) as GameObject;
-			loadedObjects.Add(persistent.id,go);
-			go.BroadcastMessage("LoadInit", SendMessageOptions.DontRequireReceiver);
+		string lastName = "first";
+		string lastComponent = "first";
+		try {
+			Regex reg =  new Regex("\\s+", RegexOptions.Multiline);
+			loadedObjects = new Dictionary<int, GameObject>();
+			foreach(Persistent persistent in container.PersistentObjects){
+				lastName = persistent.name;
+				string path = @"prefabs/"+persistent.name;
+				path = reg.Replace(path,"_");
+				GameObject go = GameObject.Instantiate(
+					Resources.Load(path),
+					persistent.transformPosition,
+					persistent.transformRotation) as GameObject;
+				loadedObjects.Add(persistent.id,go);
+				go.BroadcastMessage("LoadInit", SendMessageOptions.DontRequireReceiver);
+			}
+		} catch {
+			Debug.Log("Error occurred when instantiating persistent object "+ lastName);
 		}
+
+
 		//		// now that each persistent object is loaded, handle references
+
 		foreach (Persistent persistent in container.PersistentObjects){
+			lastName = persistent.name;
 //			Debug.Log("configuring "+persistent.name);
 			foreach (Component component in loadedObjects[persistent.id].GetComponents<Component>() ){
+				lastComponent = component.GetType().ToString();
 				Func<SaveHandler> get;
 //				Debug.Log("configuring "+component.GetType());
 				if ( MySaver.Handlers.TryGetValue(component.GetType(), out get ) ){
-					var handler = get();
-					//					// make this call more robust already before it ruins everything, dick!
-					PersistentComponent data = persistent.persistentComponents[component.GetType().ToString()];
-					//					// load the data into the component using the handler
-					handler.LoadData(component,data);
-				}
+					try {
+						var handler = get();
+						//					// make this call more robust already before it ruins everything, dick!
+						PersistentComponent data = persistent.persistentComponents[component.GetType().ToString()];
+						//					// load the data into the component using the handler
+						handler.LoadData(component,data);
+					} catch {
+						Debug.Log("Error occured when configuring "+lastComponent+" on "+lastName);
+					}
+				}	
 			}
+			lastName = "finished";
+			lastComponent = "finished"; 
+
 			// handle child objects
 
 			foreach (PersistentComponent persistentChild in persistent.persistentChildComponents.Values){
@@ -212,13 +231,18 @@ public class MySaver {
 				Component childComponent = childObject.GetComponent(persistentChild.type);
 
 				if (childObject && childComponent){
+					string lastChildComponent = childComponent.GetType().ToString();
 					Func<SaveHandler> get;
 					if ( MySaver.Handlers.TryGetValue(childComponent.GetType(), out get ) ){
-						var handler = get();
-						//					// make this call more robust already before it ruins everything, dick!
-						PersistentComponent data = new PersistentComponent();
-						if ( persistent.persistentChildComponents.TryGetValue( childComponent.GetType().ToString() , out data ) )
-							handler.LoadData(childComponent,data);
+						try{
+							var handler = get();
+							//					// make this call more robust already before it ruins everything, dick!
+							PersistentComponent data = new PersistentComponent();
+							if ( persistent.persistentChildComponents.TryGetValue( childComponent.GetType().ToString() , out data ) )
+								handler.LoadData(childComponent,data);
+						} catch {
+							Debug.Log("Problem configuring child component "+lastChildComponent);
+						}
 
 					}
 				} else {
@@ -227,6 +251,7 @@ public class MySaver {
 				}
 			}
 		}
+
 	}
 
 }
