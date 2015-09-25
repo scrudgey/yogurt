@@ -179,7 +179,6 @@ public class MySaver {
 	public static void LoadPersistentContainer(PersistentContainer container){
 		
 		Regex reg =  new Regex("\\s+", RegexOptions.Multiline);
-//		Regex cloneremover = new Regex("");
 		loadedObjects = new Dictionary<int, GameObject>();
 		foreach(Persistent persistent in container.PersistentObjects){
 			string path = @"prefabs/"+persistent.name;
