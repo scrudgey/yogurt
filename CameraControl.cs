@@ -12,8 +12,14 @@ public class CameraControl : MonoBehaviour {
 	public float maxSize;
 	public float minSize;
 
+	public Vector2 maxXY;
+	public Vector2 minXY;
+
+	private Camera camera;
+
 	// Use this for initialization
 	void Start () {
+		camera = GetComponent<Camera>();
 	}
 
 	public void Shake(float intensity){
@@ -39,7 +45,7 @@ public class CameraControl : MonoBehaviour {
 			Vector3 tempVector;
 			float screenWidthWorld;
 			float screenHeightWorld;
-			
+
 			tempVector = transform.position;
 			// interpolate target velocity
 			if (focusLastPosition != Vector3.zero){
@@ -47,30 +53,51 @@ public class CameraControl : MonoBehaviour {
 			} 
 
 			// update camera zoom
-			GetComponent<Camera>().orthographicSize = Mathf.Lerp(GetComponent<Camera>().orthographicSize, minSize + focus.GetComponent<Rigidbody2D>().velocity.magnitude/8f , 0.05f);
-			if (GetComponent<Camera>().orthographicSize > maxSize) { GetComponent<Camera>().orthographicSize = maxSize;}
+			camera.orthographicSize = Mathf.Lerp(camera.orthographicSize, minSize + focus.GetComponent<Rigidbody2D>().velocity.magnitude/8f , 0.05f);
+			if (camera.orthographicSize > maxSize) { camera.orthographicSize = maxSize;}
 
 			// update camera world coordinates.
-			lowerLeftWorld = GetComponent<Camera>().ScreenToWorldPoint( Vector2.zero);
-			upperRightWorld = GetComponent<Camera>().ScreenToWorldPoint ( new Vector2(GetComponent<Camera>().pixelWidth,GetComponent<Camera>().pixelHeight) );
+			RectTransform UIRect = UISystem.Instance.gameObject.GetComponent<RectTransform>();
+			//			lowerLeftWorld = camera.ScreenToWorldPoint( Vector2.zero);
+			lowerLeftWorld = camera.ScreenToWorldPoint( new Vector2(0, camera.WorldToScreenPoint(UIRect.position).y + UIRect.rect.height/2));
+			upperRightWorld = camera.ScreenToWorldPoint ( new Vector2(camera.pixelWidth,camera.pixelHeight) );
 			screenWidthWorld = upperRightWorld.x - lowerLeftWorld.x;
 			screenHeightWorld = upperRightWorld.y - lowerLeftWorld.y;
 
-			tempVector = Vector3.SmoothDamp(transform.position,focus.transform.position + focusVelocity* focusLead,ref smoothVelocity,0.1f);
+			Vector3 POV = new Vector3();
+			// calculate the height of the UI panel
+			if (UISystem.Instance.gameObject){
+				POV = new Vector3(camera.pixelWidth/2, camera.pixelHeight/2 + camera.WorldToScreenPoint(UIRect.position).y/2 + UIRect.rect.height/4);
+				POV = transform.position - camera.ScreenToWorldPoint(POV);
+			} 
+
+			tempVector = Vector3.SmoothDamp(transform.position , focus.transform.position + POV + focusVelocity* focusLead,ref smoothVelocity,0.1f);
 			tempVector = tempVector + shakeVector;
 
 			//check for edge of level
-			if (tempVector.x - screenWidthWorld/2 < -5){
-				tempVector.x = -5f + screenWidthWorld/2;
+//			if ( lowerLeftWorld.x < minXY.x){
+//				tempVector.x = minXY.x + screenWidthWorld/2;
+//			}
+//			if ( lowerLeftWorld.y < minXY.y){
+//				tempVector.y = minXY.y + screenHeightWorld/2;
+//			}
+//			if ( upperRightWorld.x > maxXY.x){
+//				tempVector.x = maxXY.x - screenWidthWorld/2;
+//			}
+//			if (upperRightWorld.y > maxXY.y){
+//				tempVector.y = maxXY.y - screenHeightWorld/2;
+//			}
+			if (tempVector.x - screenWidthWorld/2 < minXY.x){
+				tempVector.x = minXY.x + screenWidthWorld/2;
 			}
-			if (tempVector.y - screenHeightWorld/2 < -5){
-				tempVector.y = -5f + screenHeightWorld/2;
+			if (tempVector.y - screenHeightWorld/2 - POV.y < minXY.y){
+				tempVector.y = minXY.y + screenHeightWorld/2 + POV.y;
 			}
-			if (tempVector.x + screenWidthWorld/2 > 5){
-				tempVector.x = 5f - screenWidthWorld/2;
+			if (tempVector.x + screenWidthWorld/2 > maxXY.x){
+				tempVector.x = maxXY.x - screenWidthWorld/2;
 			}
-			if (tempVector.y + screenHeightWorld/2 > 5){
-				tempVector.y = 5f - screenHeightWorld/2;
+			if (tempVector.y + screenHeightWorld/2 + POV.y > maxXY.y){
+				tempVector.y = maxXY.y - screenHeightWorld/2 - POV.y;
 			}
 
 			// update camera position
