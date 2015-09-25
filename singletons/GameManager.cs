@@ -27,7 +27,12 @@ public class GameManager : Singleton<GameManager> {
 			playerObject.SendMessage("Say","I can hear thoughts!",SendMessageOptions.DontRequireReceiver);
 			cam.cullingMask |= 1 << LayerMask.NameToLayer("thoughts");
 		} else {
-			cam.cullingMask &=  ~(1 << LayerMask.NameToLayer("thoughts"));
+			try {
+				cam.cullingMask &=  ~(1 << LayerMask.NameToLayer("thoughts"));
+			} catch {
+				Debug.Log(cam);
+				Debug.Log("Weird telepathy culling mask issue");
+			}
 		}
 	}
 
