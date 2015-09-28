@@ -15,11 +15,11 @@ public class CameraControl : MonoBehaviour {
 	public Vector2 maxXY;
 	public Vector2 minXY;
 
-	private Camera camera;
+	private Camera mainCamera;
 
 	// Use this for initialization
 	void Start () {
-		camera = GetComponent<Camera>();
+		mainCamera = GetComponent<Camera>();
 	}
 
 	public void Shake(float intensity){
@@ -53,22 +53,22 @@ public class CameraControl : MonoBehaviour {
 			} 
 
 			// update camera zoom
-			camera.orthographicSize = Mathf.Lerp(camera.orthographicSize, minSize + focus.GetComponent<Rigidbody2D>().velocity.magnitude/8f , 0.05f);
-			if (camera.orthographicSize > maxSize) { camera.orthographicSize = maxSize;}
+			mainCamera.orthographicSize = Mathf.Lerp(mainCamera.orthographicSize, minSize + focus.GetComponent<Rigidbody2D>().velocity.magnitude/8f , 0.05f);
+			if (mainCamera.orthographicSize > maxSize) { mainCamera.orthographicSize = maxSize;}
 
 			// update camera world coordinates.
-			RectTransform UIRect = UISystem.Instance.gameObject.GetComponent<RectTransform>();
-			//			lowerLeftWorld = camera.ScreenToWorldPoint( Vector2.zero);
-			lowerLeftWorld = camera.ScreenToWorldPoint( new Vector2(0, camera.WorldToScreenPoint(UIRect.position).y + UIRect.rect.height/2));
-			upperRightWorld = camera.ScreenToWorldPoint ( new Vector2(camera.pixelWidth,camera.pixelHeight) );
+			RectTransform UIRect = UISystem.Instance.background.GetComponent<RectTransform>();
+			//			lowerLeftWorld = mainCamera.ScreenToWorldPoint( Vector2.zero);
+			lowerLeftWorld = mainCamera.ScreenToWorldPoint( new Vector2(0, mainCamera.WorldToScreenPoint(UIRect.position).y + UIRect.rect.height/2));
+			upperRightWorld = mainCamera.ScreenToWorldPoint ( new Vector2(mainCamera.pixelWidth,mainCamera.pixelHeight) );
 			screenWidthWorld = upperRightWorld.x - lowerLeftWorld.x;
 			screenHeightWorld = upperRightWorld.y - lowerLeftWorld.y;
 
 			Vector3 POV = new Vector3();
 			// calculate the height of the UI panel
-			if (UISystem.Instance.gameObject){
-				POV = new Vector3(camera.pixelWidth/2, camera.pixelHeight/2 + camera.WorldToScreenPoint(UIRect.position).y/2 + UIRect.rect.height/4);
-				POV = transform.position - camera.ScreenToWorldPoint(POV);
+			if (UISystem.Instance.background){
+				POV = new Vector3(mainCamera.pixelWidth/2, mainCamera.pixelHeight/2 + mainCamera.WorldToScreenPoint(UIRect.position).y/2 + UIRect.rect.height/4);
+				POV = transform.position - mainCamera.ScreenToWorldPoint(POV);
 			} 
 
 			tempVector = Vector3.SmoothDamp(transform.position , focus.transform.position + POV + focusVelocity* focusLead,ref smoothVelocity,0.1f);
