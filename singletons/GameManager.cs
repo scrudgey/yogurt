@@ -60,7 +60,7 @@ public class GameManager : Singleton<GameManager> {
 
 	void PostLoad(){
 		// this is more of a kludge
-		playerObject = GameObject.Find ("Tom(Clone)");	
+		playerObject = GameObject.Find ("Tom");	
 		cam = GameObject.FindObjectOfType<Camera>();
 		if (playerObject){
 			SetFocus(playerObject);
