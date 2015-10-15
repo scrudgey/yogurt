@@ -13,7 +13,6 @@ public class MySaver {
 
 	public delegate void SaveAction();
 	public static event SaveAction OnSave;
-
 	public delegate void LoadAction();
 	public static event LoadAction OnPostLoad;
 	public enum SaverState{None,Saving,Loading}
@@ -37,13 +36,11 @@ public class MySaver {
 	};
 
 	public static void CleanupSaves(){
-		string[] files = {
-			Application.persistentDataPath+"/room2_state.xml"
-//			Application.persistentDataPath+"/testing_ground_state.xml"
-		};
-		foreach(string f in files){
-			if (File.Exists(f))
-				File.Delete(f);
+		DirectoryInfo info = new DirectoryInfo(Application.persistentDataPath);
+		FileInfo[] fileInfo = info.GetFiles();
+		foreach(FileInfo file in fileInfo){
+//			Debug.Log(file.FullName);
+			File.Delete(file.FullName);
 		}
 	}
 	
@@ -63,7 +60,6 @@ public class MySaver {
 		
 		// retrieve all persistent objects
 		// theres probably a nice way to do this with linq but what the hell
-
 		List<GameObject> objectList = new List<GameObject>();
 		List<MyMarker> marks = new List<MyMarker>( GameObject.FindObjectsOfType<MyMarker>() );
 		foreach (MyMarker mark in marks){
@@ -128,35 +124,38 @@ public class MySaver {
 	public static void LoadScene(){
 		try {
 		saveState = SaverState.Loading;
-		// destroy any currently existing permanent object
-		List<MyMarker> marks = new List<MyMarker>( GameObject.FindObjectsOfType<MyMarker>() );
-		for (int i = 0; i < marks.Count; i++){
-			if (marks[i] != null){
-				GameObject.DestroyImmediate(marks[i].gameObject);
-			}
-		}
-		foreach (GameObject disabledPersistent in disabledPersistents){
-			GameObject.DestroyImmediate(disabledPersistent);
-		}
-
 		string scenePath = Application.persistentDataPath+"/"+Application.loadedLevelName+"_state.xml";
 		string playerPath = GameManager.Instance.lastSavedPlayerPath;
 		var serializer = new XmlSerializer(typeof(PersistentContainer));
+		// destroy any currently existing permanent object
+		// this should only be done if there exists a savestate for the level.
+		// otherwise the default unity editor scene should be loaded as is.
+		if (File.Exists(scenePath)){
+			List<MyMarker> marks = new List<MyMarker>(GameObject.FindObjectsOfType<MyMarker>());
+			for (int i = 0; i < marks.Count; i++){
+				if (marks[i] != null){
+					GameObject.DestroyImmediate(marks[i].gameObject);
+				}
+			}
+			foreach (GameObject disabledPersistent in disabledPersistents){
+				GameObject.DestroyImmediate(disabledPersistent);
+			}
+		}
 
 		disabledPersistents = new List<GameObject>();
 		
-		Debug.Log("checking scene path at "+scenePath);
+//		Debug.Log("checking scene path at "+scenePath);
 		if (File.Exists(scenePath)){
-			Debug.Log("found "+scenePath);
+//			Debug.Log("found "+scenePath);
 			var sceneStream = new FileStream(scenePath,FileMode.Open);
 			PersistentContainer sceneContainer = serializer.Deserialize(sceneStream) as PersistentContainer;
 			sceneStream.Close();
 			LoadPersistentContainer(sceneContainer);
 		}
 		
-		Debug.Log("checking player path at "+playerPath);
+//		Debug.Log("checking player path at "+playerPath);
 		if (File.Exists(playerPath)){
-			Debug.Log("found "+playerPath);
+//			Debug.Log("found "+playerPath);
 			var playerStream = new FileStream(playerPath,FileMode.Open);
 			PersistentContainer playerContainer = serializer.Deserialize(playerStream) as PersistentContainer;
 			playerStream.Close();
@@ -168,7 +167,6 @@ public class MySaver {
 		// call the load event
 		if (OnPostLoad != null)
 			OnPostLoad();
-
 		} catch {
 			Debug.Log("problem loading!");
 		}
@@ -193,6 +191,7 @@ public class MySaver {
 					persistent.transformRotation) as GameObject;
 				loadedObjects.Add(persistent.id,go);
 				go.BroadcastMessage("LoadInit", SendMessageOptions.DontRequireReceiver);
+				go.name = Toolbox.Instance.ScrubText(go.name);
 			}
 		} catch {
 			Debug.Log("Error occurred when instantiating persistent object "+ lastName);
@@ -282,10 +281,6 @@ public class ReferenceResolver{
 	public List<Persistent> RetrieveReferenceTree(GameObject target){
 		Persistent targetPersistent = null;
 		List<Persistent> tree = new List<Persistent>();
-
-//		Debug.Log("dumping list of all referencetree keys:");
-//		Debug.Log("-----------------");
-
 		if ( persistentObjects.ContainsValue(target) )
 			targetPersistent = persistentObjects.FindKeyByValue( target );
 
