@@ -58,7 +58,6 @@ public class CameraControl : MonoBehaviour {
 
 			// update camera world coordinates.
 			RectTransform UIRect = UISystem.Instance.background.GetComponent<RectTransform>();
-			//			lowerLeftWorld = mainCamera.ScreenToWorldPoint( Vector2.zero);
 			lowerLeftWorld = mainCamera.ScreenToWorldPoint( new Vector2(0, mainCamera.WorldToScreenPoint(UIRect.position).y + UIRect.rect.height/2));
 			upperRightWorld = mainCamera.ScreenToWorldPoint ( new Vector2(mainCamera.pixelWidth,mainCamera.pixelHeight) );
 			screenWidthWorld = upperRightWorld.x - lowerLeftWorld.x;
@@ -75,18 +74,6 @@ public class CameraControl : MonoBehaviour {
 			tempVector = tempVector + shakeVector;
 
 			//check for edge of level
-//			if ( lowerLeftWorld.x < minXY.x){
-//				tempVector.x = minXY.x + screenWidthWorld/2;
-//			}
-//			if ( lowerLeftWorld.y < minXY.y){
-//				tempVector.y = minXY.y + screenHeightWorld/2;
-//			}
-//			if ( upperRightWorld.x > maxXY.x){
-//				tempVector.x = maxXY.x - screenWidthWorld/2;
-//			}
-//			if (upperRightWorld.y > maxXY.y){
-//				tempVector.y = maxXY.y - screenHeightWorld/2;
-//			}
 			if (tempVector.x - screenWidthWorld/2 < minXY.x){
 				tempVector.x = minXY.x + screenWidthWorld/2;
 			}
