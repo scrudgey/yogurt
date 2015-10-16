@@ -76,10 +76,9 @@ public class UISystem : Singleton<UISystem> {
 
 	void Start(){
 		PostLoadInit();
-		MySaver.OnPostLoad += PostLoadInit;
 	}
 
-	void PostLoadInit(){
+	public void PostLoadInit(){
 		UIObject = GameObject.Find("UI");
 		actionText = UIObject.transform.Find("UIbackground/worldPanel/worldText").GetComponent<Text>();
 		worldPanel = UIObject.transform.Find("UIbackground/worldPanel/worldButtons").gameObject;
@@ -102,14 +101,12 @@ public class UISystem : Singleton<UISystem> {
 		GameObject newButton = Instantiate( Resources.Load("UI/ActionButton"),Vector2.zero,Quaternion.identity) as GameObject;			
 		ActionButtonScript buttonScript = newButton.GetComponent<ActionButtonScript>();
 		Text buttonText = newButton.transform.FindChild("Text").GetComponent<Text>();
-		
 		if (p == panel.inventoryPanel)
 			newButton.transform.SetParent(inventoryPanel.transform,false);
 		if (p == panel.handPanel)
 			newButton.transform.SetParent(handPanel.transform,false);
 		if (p == panel.worldPanel)	
 			newButton.transform.SetParent(worldPanel.transform,false);
-		
 		but returnbut;
 		returnbut.button = newButton;
 		returnbut.buttonScript = buttonScript;
@@ -119,7 +116,6 @@ public class UISystem : Singleton<UISystem> {
 	}
 
 	public void UpdateHandActions(){
-
 		foreach (GameObject b in handButtons){
 			Destroy(b);
 		}
@@ -145,7 +141,6 @@ public class UISystem : Singleton<UISystem> {
 				}
 				handButtons.Add(newbutton.button);
 			}
-
 			foreach (Interaction action in manualActions){
 				but newbutton = spawnButton(panel.handPanel);
 				newbutton.buttonScript.action = action;
@@ -159,7 +154,6 @@ public class UISystem : Singleton<UISystem> {
 		
 
 	public void UpdateWorldActions(){
-
 		foreach (GameObject b in worldButtons){
 			Destroy(b);
 		}
@@ -173,7 +167,6 @@ public class UISystem : Singleton<UISystem> {
 	}
 
 	public void UpdateInventoryButtons(){
-
 		foreach (GameObject b in inventoryButtons)
 			Destroy(b);
 		foreach (GameObject item in inventory.items){
@@ -190,7 +183,6 @@ public class UISystem : Singleton<UISystem> {
 		if (inventory){
 			if (oldInventoryItems != inventory.items.Count)
 				UpdateInventoryButtons();
-
 			oldInventoryItems = inventory.items.Count;
 		}
 	}
@@ -232,7 +224,6 @@ public class UISystem : Singleton<UISystem> {
 	}
 
 	public void MouseOverAction(ActionButtonScript button){
-
 		if ( button.bType != ActionButtonScript.buttonType.Inventory ){
 
 			if (button.manualAction == false){
