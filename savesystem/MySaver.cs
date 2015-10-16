@@ -14,7 +14,6 @@ public class MySaver {
 	public delegate void SaveAction();
 	public static event SaveAction OnSave;
 	public delegate void LoadAction();
-	public static event LoadAction OnPostLoad;
 	public enum SaverState{None,Saving,Loading}
 	public static SaverState saveState;
 	
@@ -46,74 +45,75 @@ public class MySaver {
 	
 	public static void Save(){
 		try {
-		saveState = SaverState.Saving;
-		// open XML serialization stream
-		// make this path nicer later when i have a directory structure
-		Debug.Log("Persistent data path: "+Application.persistentDataPath);
-		string scenePath = Application.persistentDataPath+"/"+Application.loadedLevelName+"_state.xml";
-		string playerPath = Application.persistentDataPath+"/player_"+GameManager.Instance.playerObject.name+"_state.xml";
-		GameManager.Instance.lastSavedPlayerPath = playerPath;
+			saveState = SaverState.Saving;
+			// open XML serialization stream
+			// make this path nicer later when i have a directory structure
+	//		Debug.Log("Persistent data path: "+Application.persistentDataPath);
+			string scenePath = Application.persistentDataPath+"/"+Application.loadedLevelName+"_state.xml";
+			string playerPath = Application.persistentDataPath+"/player_"+GameManager.Instance.playerObject.name+"_state.xml";
+			GameManager.Instance.lastSavedPlayerPath = playerPath;
+			GameManager.Instance.lastPlayerName = GameManager.Instance.playerObject.name;
 
-		FileStream sceneStream = File.Create(scenePath);
-		FileStream playerStream = File.Create(playerPath);
-		var serializer = new XmlSerializer(typeof(PersistentContainer));
-		
-		// retrieve all persistent objects
-		// theres probably a nice way to do this with linq but what the hell
-		List<GameObject> objectList = new List<GameObject>();
-		List<MyMarker> marks = new List<MyMarker>( GameObject.FindObjectsOfType<MyMarker>() );
-		foreach (MyMarker mark in marks){
-			objectList.Add(mark.gameObject);
-		}
-		// add those objects which are disabled and would therefore not be found by our first search
-		objectList.AddRange(disabledPersistents);
+			FileStream sceneStream = File.Create(scenePath);
+			FileStream playerStream = File.Create(playerPath);
+			var serializer = new XmlSerializer(typeof(PersistentContainer));
+			
+			// retrieve all persistent objects
+			// theres probably a nice way to do this with linq but what the hell
+			List<GameObject> objectList = new List<GameObject>();
+			List<MyMarker> marks = new List<MyMarker>( GameObject.FindObjectsOfType<MyMarker>() );
+			foreach (MyMarker mark in marks){
+				objectList.Add(mark.gameObject);
+			}
+			// add those objects which are disabled and would therefore not be found by our first search
+			objectList.AddRange(disabledPersistents);
 
-		ReferenceResolver resolver = new ReferenceResolver();
-		List<Persistent> persistentObjects = new List<Persistent>();
-		int idIndex = 0;
-		// create a persistent for each gameobject with the appropriate data
-		foreach (GameObject gameObject in objectList){
-			Persistent persistent = new Persistent(gameObject);
-			persistent.id = idIndex;
-			persistentObjects.Add(persistent);
-			resolver.objectIDs.Add(gameObject,idIndex);
-			resolver.persistentObjects.Add(persistent,gameObject);
-			idIndex++;
-		}
+			ReferenceResolver resolver = new ReferenceResolver();
+			List<Persistent> persistentObjects = new List<Persistent>();
+			int idIndex = 0;
+			// create a persistent for each gameobject with the appropriate data
+			foreach (GameObject gameObject in objectList){
+				Persistent persistent = new Persistent(gameObject);
+				persistent.id = idIndex;
+				persistentObjects.Add(persistent);
+				resolver.objectIDs.Add(gameObject,idIndex);
+				resolver.persistentObjects.Add(persistent,gameObject);
+				idIndex++;
+			}
 
-		// invoke the data handling here - this will populate all the component data, and assign a unique id to everything.
-		foreach (Persistent persistent in persistentObjects){
-				persistent.HandleSave(resolver);
-		}
+			// invoke the data handling here - this will populate all the component data, and assign a unique id to everything.
+			foreach (Persistent persistent in persistentObjects){
+					persistent.HandleSave(resolver);
+			}
 
-		List<Persistent> playerTree = resolver.RetrieveReferenceTree(GameManager.Instance.playerObject);
-		List<Persistent> sceneTree = persistentObjects.Except(playerTree).ToList();
+			List<Persistent> playerTree = resolver.RetrieveReferenceTree(GameManager.Instance.playerObject);
+			List<Persistent> sceneTree = persistentObjects.Except(playerTree).ToList();
 
-		// lastly we need to clean up any references the scene objects have to the player objects
-		ReferenceResolver sceneResolver = new ReferenceResolver();
-		Dictionary<GameObject, int> sceneIDs = new Dictionary<GameObject, int>();
-		sceneResolver.persistentObjects = resolver.persistentObjects;
-		foreach (Persistent persistent in sceneTree){
-			sceneIDs.Add( resolver.persistentObjects[persistent], resolver.objectIDs[ resolver.persistentObjects[persistent] ] );
-		}
-		sceneResolver.objectIDs = sceneIDs;
-		foreach (Persistent persistenet in sceneTree)
-			persistenet.HandleSave(sceneResolver);
+			// lastly we need to clean up any references the scene objects have to the player objects
+			ReferenceResolver sceneResolver = new ReferenceResolver();
+			Dictionary<GameObject, int> sceneIDs = new Dictionary<GameObject, int>();
+			sceneResolver.persistentObjects = resolver.persistentObjects;
+			foreach (Persistent persistent in sceneTree){
+				sceneIDs.Add( resolver.persistentObjects[persistent], resolver.objectIDs[ resolver.persistentObjects[persistent] ] );
+			}
+			sceneResolver.objectIDs = sceneIDs;
+			foreach (Persistent persistenet in sceneTree)
+				persistenet.HandleSave(sceneResolver);
 
-		PersistentContainer sceneContainer = new PersistentContainer(sceneTree);
-		PersistentContainer playerContainer = new PersistentContainer(playerTree);
+			PersistentContainer sceneContainer = new PersistentContainer(sceneTree);
+			PersistentContainer playerContainer = new PersistentContainer(playerTree);
 
-		// save the persistent object container
-		serializer.Serialize(sceneStream,sceneContainer);
-		serializer.Serialize(playerStream,playerContainer);
-		
-		// close the XML serialization stream
-		sceneStream.Close();
-		playerStream.Close();
+			// save the persistent object container
+			serializer.Serialize(sceneStream,sceneContainer);
+			serializer.Serialize(playerStream,playerContainer);
+			
+			// close the XML serialization stream
+			sceneStream.Close();
+			playerStream.Close();
 
-		// call the save event
-		if (OnSave != null)
-			OnSave();
+			// call the save event
+			if (OnSave != null)
+				OnSave();
 		} catch{
 			Debug.Log("Problem saving!");
 		}
@@ -123,54 +123,46 @@ public class MySaver {
 
 	public static void LoadScene(){
 		try {
-		saveState = SaverState.Loading;
-		string scenePath = Application.persistentDataPath+"/"+Application.loadedLevelName+"_state.xml";
-		string playerPath = GameManager.Instance.lastSavedPlayerPath;
-		var serializer = new XmlSerializer(typeof(PersistentContainer));
-		// destroy any currently existing permanent object
-		// this should only be done if there exists a savestate for the level.
-		// otherwise the default unity editor scene should be loaded as is.
-		if (File.Exists(scenePath)){
-			List<MyMarker> marks = new List<MyMarker>(GameObject.FindObjectsOfType<MyMarker>());
-			for (int i = 0; i < marks.Count; i++){
-				if (marks[i] != null){
-					GameObject.DestroyImmediate(marks[i].gameObject);
+			saveState = SaverState.Loading;
+			string scenePath = Application.persistentDataPath+"/"+Application.loadedLevelName+"_state.xml";
+			string playerPath = GameManager.Instance.lastSavedPlayerPath;
+			var serializer = new XmlSerializer(typeof(PersistentContainer));
+			// destroy any currently existing permanent object
+			// this should only be done if there exists a savestate for the level.
+			// otherwise the default unity editor scene should be loaded as is.
+			if (File.Exists(scenePath)){
+				List<MyMarker> marks = new List<MyMarker>(GameObject.FindObjectsOfType<MyMarker>());
+				for (int i = 0; i < marks.Count; i++){
+					if (marks[i] != null){
+						GameObject.DestroyImmediate(marks[i].gameObject);
+					}
+				}
+				foreach (GameObject disabledPersistent in disabledPersistents){
+					GameObject.DestroyImmediate(disabledPersistent);
 				}
 			}
-			foreach (GameObject disabledPersistent in disabledPersistents){
-				GameObject.DestroyImmediate(disabledPersistent);
+			disabledPersistents = new List<GameObject>();
+	//		Debug.Log("checking scene path at "+scenePath);
+			if (File.Exists(scenePath)){
+	//			Debug.Log("found "+scenePath);
+				var sceneStream = new FileStream(scenePath,FileMode.Open);
+				PersistentContainer sceneContainer = serializer.Deserialize(sceneStream) as PersistentContainer;
+				sceneStream.Close();
+				LoadPersistentContainer(sceneContainer);
 			}
-		}
-
-		disabledPersistents = new List<GameObject>();
-		
-//		Debug.Log("checking scene path at "+scenePath);
-		if (File.Exists(scenePath)){
-//			Debug.Log("found "+scenePath);
-			var sceneStream = new FileStream(scenePath,FileMode.Open);
-			PersistentContainer sceneContainer = serializer.Deserialize(sceneStream) as PersistentContainer;
-			sceneStream.Close();
-			LoadPersistentContainer(sceneContainer);
-		}
-		
-//		Debug.Log("checking player path at "+playerPath);
-		if (File.Exists(playerPath)){
-//			Debug.Log("found "+playerPath);
-			var playerStream = new FileStream(playerPath,FileMode.Open);
-			PersistentContainer playerContainer = serializer.Deserialize(playerStream) as PersistentContainer;
-			playerStream.Close();
-			LoadPersistentContainer(playerContainer);
-		} else {
-			// put some default behavior in here
-		}
-
-		// call the load event
-		if (OnPostLoad != null)
-			OnPostLoad();
+	//		Debug.Log("checking player path at "+playerPath);
+			if (File.Exists(playerPath)){
+	//			Debug.Log("found "+playerPath);
+				var playerStream = new FileStream(playerPath,FileMode.Open);
+				PersistentContainer playerContainer = serializer.Deserialize(playerStream) as PersistentContainer;
+				playerStream.Close();
+				LoadPersistentContainer(playerContainer);
+			} else {
+				// put some default behavior in here
+			}
 		} catch {
 			Debug.Log("problem loading!");
 		}
-		
 		saveState = SaverState.None;
 	}
 
