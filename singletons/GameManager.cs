@@ -11,6 +11,7 @@ public class GameManager : Singleton<GameManager> {
 	private Camera cam;
 	public GameObject playerObject;
 	public string lastSavedPlayerPath;
+	public string lastPlayerName;
 	private int entryID;
 
 	private bool _telepathyOn;
@@ -51,16 +52,11 @@ public class GameManager : Singleton<GameManager> {
 		playerObject = GameObject.Find ("Tom");		
 		cam = GameObject.FindObjectOfType<Camera>();
 		SetFocus(playerObject);
-
-		lastSavedPlayerPath = Application.persistentDataPath+"/player_"+GameManager.Instance.playerObject.name+"_state.xml";
-
 		MySaver.CleanupSaves();
-		MySaver.OnPostLoad += PostLoad;
 	}
 
 	void PostLoad(){
-		// this is more of a kludge
-		playerObject = GameObject.Find ("Tom");	
+		playerObject = GameObject.Find(lastPlayerName);	
 		cam = GameObject.FindObjectOfType<Camera>();
 		if (playerObject){
 			SetFocus(playerObject);
@@ -71,13 +67,18 @@ public class GameManager : Singleton<GameManager> {
 	public void LeaveScene(string toSceneName,int toEntryNumber){
 		// call mysaver, tell it to save scene and player separately
 		MySaver.Save();
-		// load new scene
+		// unity load saved editor scene file
 		entryID = toEntryNumber;
 		Application.LoadLevel(toSceneName);
 	}
 	void OnLevelWasLoaded(int level) {
 		// call scene load routine & load player
 		MySaver.LoadScene();
+		// initialize values re: player object focus
+		PostLoad();
+		// initialize UI system references
+		UISystem.Instance.PostLoadInit();
+		// place player at appropriate entrance
 		PlayerEnter();
 	}
 	void PlayerEnter(){
