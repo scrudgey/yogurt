@@ -27,6 +27,8 @@ public class Intrinsics : MonoBehaviour {
 	}
 
 	public void RecalculateIntrinsics(){
+		// TODO: this whole part will change  
+
 		// set base values
 		netTelepath = false;
 		if (humanoid)
@@ -46,7 +48,7 @@ public class Intrinsics : MonoBehaviour {
 			}
 		}
 
-		//telepathy final
+
 		if (GameManager.Instance.playerObject = gameObject){
 			GameManager.Instance.telepathyOn = netTelepath;
 		}
