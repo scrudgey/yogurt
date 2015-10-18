@@ -6,9 +6,9 @@ public class Head : Interactive, IExcludable {
 	private GameObject hatPoint;
 	public Hat hat;
 	private SpriteRenderer spriteRenderer;
-	private bool LoadInitialized = false;
 	private Intrinsics intrinsics;
 	
+	private bool LoadInitialized = false;
 	void Start(){
 		if (!LoadInitialized)
 			LoadInit();
@@ -53,16 +53,17 @@ public class Head : Interactive, IExcludable {
 			hatAnimator.CheckDependencies();
 		}
 
-		if (intrinsics)
-			if (hat.intrinsic != null)
-				intrinsics.AddIntrinsic(hat.intrinsic);
+		if (intrinsics){
+			Intrinsics hatIntrinsic = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(hat.gameObject);
+			intrinsics.AddIntrinsic(hatIntrinsic);
+		}
 	}
 	
 	void RemoveHat(){
-
-		if (intrinsics)
-			if (hat.intrinsic != null)
-				intrinsics.RemoveIntrinsic(hat.intrinsic);
+		if (intrinsics){
+			Intrinsics hatIntrinsic = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(hat.gameObject);
+			intrinsics.RemoveIntrinsic(hatIntrinsic);
+		}
 		
 		Messenger.Instance.DisclaimObject(hat.gameObject,this);
 		

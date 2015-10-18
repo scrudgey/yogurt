@@ -6,6 +6,7 @@ public class Humanoid : Controllable {
 
 	private Vector2 acceleration;
 	private Vector2 deceleration;
+	private float baseSpeed;
 	public float maxSpeed;
 	public float maxAcceleration;
 	public float friction;
@@ -16,11 +17,10 @@ public class Humanoid : Controllable {
 	private Vector3 scaleVector; 
 //	private DistanceJoint2D joint;
 
-	// Use this for initialization
+	private bool LoadInitialized = false;
 	void Start () {
-
-		scaleVector = Vector3.one;
-
+		if (!LoadInitialized)
+			LoadInit();
 		// this messy nonsense is just to fix the quaternions that indicate
 		// direction tilt when running. there's probably a nicer way to do
 		// this but I was learning unity's vectors / rotations / quaternions / 2D
@@ -39,7 +39,11 @@ public class Humanoid : Controllable {
 		forward = Quaternion.LookRotation(Vector3.forward, -1 * Vector3.forward);
 
 	}
-	
+
+	void LoadInit(){
+		baseSpeed = maxSpeed;
+		scaleVector = Vector3.one;
+	}
 
 
 	void FixedUpdate(){
@@ -90,5 +94,8 @@ public class Humanoid : Controllable {
 
 	}
 
+	public void IntrinsicsChanged(Intrinsic intrinsic){
+		maxSpeed = baseSpeed + intrinsic.speed.floatValue;
+	}
 
 }

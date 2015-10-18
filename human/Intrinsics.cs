@@ -1,64 +1,75 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 
 public class Intrinsics : MonoBehaviour {
 
 	public List<Intrinsic> intrinsics = new List<Intrinsic>();
-	public bool netTelepath;
-
 	private Humanoid humanoid;
-	private float baseSpeed = 0;
 
+	private bool LoadInitialized = false;
 	void Start(){
+		if (!LoadInitialized)
+			LoadInit();
+	}
+
+	void LoadInit(){
 		humanoid = gameObject.GetComponent<Humanoid>();
-		if (humanoid)
-			baseSpeed = humanoid.maxSpeed;
 	}
 
-	public void AddIntrinsic(Intrinsic i){
-		intrinsics.Add(i);
-		RecalculateIntrinsics();
+	public void AddIntrinsic(Intrinsics i){
+		foreach(Intrinsic intrinsic in i.intrinsics){
+			intrinsics.Add(intrinsic);
+		}
+		IntrinsicsChanged();
 	}
 
-	public void RemoveIntrinsic(Intrinsic i){
-		intrinsics.Remove(i);
-		RecalculateIntrinsics();
+	public void RemoveIntrinsic(Intrinsics i){
+		foreach(Intrinsic intrinsic in i.intrinsics){
+			intrinsics.Remove(intrinsic);
+		}
+		IntrinsicsChanged();
 	}
 
-	public void RecalculateIntrinsics(){
-		// TODO: this whole part will change  
-
-		// set base values
-		netTelepath = false;
-		if (humanoid)
-			humanoid.maxSpeed = baseSpeed;
-
+	public Intrinsic NetIntrinsic(){
+		Intrinsic netIntrinsic = new Intrinsic();
 		foreach(Intrinsic i in intrinsics){
-			switch(i.type){
-			case Intrinsic.IntrinsicType.telepathy:
-				netTelepath = netTelepath || i.boolValue;
-				break;
-			case Intrinsic.IntrinsicType.speed:
-				if (humanoid)
-					humanoid.maxSpeed += i.floatValue;
-				break;
-			default:
-				break;
-			}
+			netIntrinsic.telepathy.boolValue = netIntrinsic.telepathy.boolValue || i.telepathy.boolValue;
+			netIntrinsic.armor.floatValue += i.armor.floatValue;
+			netIntrinsic.speed.floatValue += i.speed.floatValue;
+			netIntrinsic.health.floatValue += i.health.floatValue;
 		}
-
-
-		if (GameManager.Instance.playerObject = gameObject){
-			GameManager.Instance.telepathyOn = netTelepath;
-		}
+		return netIntrinsic;
 	}
 
+	public void IntrinsicsChanged(){
+		if (humanoid)
+			humanoid.IntrinsicsChanged(NetIntrinsic());
+		if (GameManager.Instance.playerObject == gameObject)
+			GameManager.Instance.FocusIntrinsicsChanged(NetIntrinsic());
+	}
+
+
+	// TODO: fix the intrinsic update. A smarter way to zero out the intrinsic when it's timed out.
+	// I could do this by adding complexity to the netintrinsic calculation but that's kind of annoying? unless I abstract it out.
 	public void Update(){
 		foreach(Intrinsic i in intrinsics){
-			i.lifetime += Time.deltaTime;
-			if (i.lifetime >= i.timeout && i.timeout > 0)
-				RemoveIntrinsic(i);
+			const BindingFlags flags = /*BindingFlags.NonPublic | */BindingFlags.Public | 
+				BindingFlags.Instance | BindingFlags.Static;
+			FieldInfo[] fields = typeof(Intrinsic).GetFields(flags);
+			foreach(FieldInfo field in fields){
+				if (field.FieldType == typeof(Buff)){
+					Buff buff = field.GetValue(i) as Buff;
+					if (buff.lifetime > 0){
+						buff.time += Time.deltaTime;
+						if (buff.time > buff.lifetime){
+							buff.boolValue = false;
+							buff.floatValue = 0;
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -67,10 +78,16 @@ public class Intrinsics : MonoBehaviour {
 
 [System.Serializable]
 public class Intrinsic {
-	public enum IntrinsicType{none,telepathy,speed}
-	public IntrinsicType type;
+	public Buff telepathy = new Buff();
+	public Buff speed = new Buff();
+	public Buff health = new Buff();
+	public Buff armor = new Buff();
+}
+
+[System.Serializable]
+public class Buff {
 	public bool boolValue;
 	public float floatValue;
 	public float lifetime;
-	public float timeout;
+	public float time;
 }

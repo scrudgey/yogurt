@@ -14,17 +14,8 @@ public class GameManager : Singleton<GameManager> {
 	public string lastPlayerName;
 	private int entryID;
 
-	private bool _telepathyOn;
-	public bool telepathyOn{
-		get {return _telepathyOn;}
-		set {
-			_telepathyOn = value;
-			TelepathyMask();
-		}
-	}
-
-	public void TelepathyMask(){
-		if (telepathyOn){
+	public void FocusIntrinsicsChanged(Intrinsic intrinsic){
+		if (intrinsic.telepathy.boolValue){
 			playerObject.SendMessage("Say","I can hear thoughts!",SendMessageOptions.DontRequireReceiver);
 			cam.cullingMask |= 1 << LayerMask.NameToLayer("thoughts");
 		} else {
@@ -47,18 +38,20 @@ public class GameManager : Singleton<GameManager> {
 	}
 
 	void Start(){
-		// this right here is the kludge
+		// TODO: add a default player condition here
 		playerObject = GameObject.Find ("Tom");		
 		cam = GameObject.FindObjectOfType<Camera>();
 		SetFocus(playerObject);
 		MySaver.CleanupSaves();
 	}
 
-	void PostLoad(){
-		playerObject = GameObject.Find(lastPlayerName);	
+	void PostLoad(GameObject playerObject){
+//		playerObject = GameObject.Find(lastPlayerName);	
 		cam = GameObject.FindObjectOfType<Camera>();
 		if (playerObject){
 			SetFocus(playerObject);
+			Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(playerObject);
+			FocusIntrinsicsChanged(intrinsics.NetIntrinsic());
 		}
 		
 	}
@@ -72,9 +65,9 @@ public class GameManager : Singleton<GameManager> {
 	}
 	void OnLevelWasLoaded(int level) {
 		// call scene load routine & load player
-		MySaver.LoadScene();
+		GameObject player = MySaver.LoadScene();
 		// initialize values re: player object focus
-		PostLoad();
+		PostLoad(player);
 		// initialize UI system references
 		UISystem.Instance.PostLoadInit();
 		// place player at appropriate entrance
@@ -92,6 +85,8 @@ public class GameManager : Singleton<GameManager> {
 			}
 		}
 	}
+
+
 
 }
 
