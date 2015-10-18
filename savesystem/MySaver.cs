@@ -38,7 +38,6 @@ public class MySaver {
 		DirectoryInfo info = new DirectoryInfo(Application.persistentDataPath);
 		FileInfo[] fileInfo = info.GetFiles();
 		foreach(FileInfo file in fileInfo){
-//			Debug.Log(file.FullName);
 			File.Delete(file.FullName);
 		}
 	}
@@ -47,19 +46,18 @@ public class MySaver {
 		try {
 			saveState = SaverState.Saving;
 			// open XML serialization stream
-			// make this path nicer later when i have a directory structure
-	//		Debug.Log("Persistent data path: "+Application.persistentDataPath);
+			// TODO: make this path nicer later when i have a directory structure
+			var serializer = new XmlSerializer(typeof(PersistentContainer));
 			string scenePath = Application.persistentDataPath+"/"+Application.loadedLevelName+"_state.xml";
 			string playerPath = Application.persistentDataPath+"/player_"+GameManager.Instance.playerObject.name+"_state.xml";
+
 			GameManager.Instance.lastSavedPlayerPath = playerPath;
 			GameManager.Instance.lastPlayerName = GameManager.Instance.playerObject.name;
-
 			FileStream sceneStream = File.Create(scenePath);
 			FileStream playerStream = File.Create(playerPath);
-			var serializer = new XmlSerializer(typeof(PersistentContainer));
 			
 			// retrieve all persistent objects
-			// theres probably a nice way to do this with linq but what the hell
+			// TODO: theres probably a nice way to do this with linq but what the hell
 			List<GameObject> objectList = new List<GameObject>();
 			List<MyMarker> marks = new List<MyMarker>( GameObject.FindObjectsOfType<MyMarker>() );
 			foreach (MyMarker mark in marks){
@@ -142,23 +140,19 @@ public class MySaver {
 				}
 			}
 			disabledPersistents = new List<GameObject>();
-	//		Debug.Log("checking scene path at "+scenePath);
 			if (File.Exists(scenePath)){
-	//			Debug.Log("found "+scenePath);
 				var sceneStream = new FileStream(scenePath,FileMode.Open);
 				PersistentContainer sceneContainer = serializer.Deserialize(sceneStream) as PersistentContainer;
 				sceneStream.Close();
 				LoadPersistentContainer(sceneContainer);
 			}
-	//		Debug.Log("checking player path at "+playerPath);
 			if (File.Exists(playerPath)){
-	//			Debug.Log("found "+playerPath);
 				var playerStream = new FileStream(playerPath,FileMode.Open);
 				PersistentContainer playerContainer = serializer.Deserialize(playerStream) as PersistentContainer;
 				playerStream.Close();
 				LoadPersistentContainer(playerContainer);
 			} else {
-				// put some default behavior in here
+				// put some default player in here
 			}
 		} catch {
 			Debug.Log("problem loading!");
@@ -188,24 +182,17 @@ public class MySaver {
 		} catch {
 			Debug.Log("Error occurred when instantiating persistent object "+ lastName);
 		}
-
-
-		//		// now that each persistent object is loaded, handle references
-
+		//		now that each persistent object is loaded, handle references
 		foreach (Persistent persistent in container.PersistentObjects){
 			lastName = persistent.name;
-//			Debug.Log("configuring "+persistent.name);
-			foreach (Component component in loadedObjects[persistent.id].GetComponents<Component>() ){
+			foreach (Component component in loadedObjects[persistent.id].GetComponents<Component>()){
 				lastComponent = component.GetType().ToString();
 				Func<SaveHandler> get;
-//				Debug.Log("configuring "+component.GetType());
-				if ( MySaver.Handlers.TryGetValue(component.GetType(), out get ) ){
+				if ( MySaver.Handlers.TryGetValue(component.GetType(), out get)){
 					try {
 						var handler = get();
-						//					// make this call more robust already before it ruins everything, dick!
 						PersistentComponent data = persistent.persistentComponents[component.GetType().ToString()];
-						//					// load the data into the component using the handler
-						handler.LoadData(component,data);
+						handler.LoadData(component, data);
 					} catch {
 						Debug.Log("Error occured when configuring "+lastComponent+" on "+lastName);
 					}
@@ -213,59 +200,46 @@ public class MySaver {
 			}
 			lastName = "finished";
 			lastComponent = "finished"; 
-
 			// handle child objects
-
 			foreach (PersistentComponent persistentChild in persistent.persistentChildComponents.Values){
-
 				GameObject childObject = loadedObjects[persistent.id].transform.FindChild(persistentChild.parentObject).gameObject;
 				Component childComponent = childObject.GetComponent(persistentChild.type);
-
 				if (childObject && childComponent){
 					string lastChildComponent = childComponent.GetType().ToString();
 					Func<SaveHandler> get;
 					if ( MySaver.Handlers.TryGetValue(childComponent.GetType(), out get ) ){
 						try{
 							var handler = get();
-							//					// make this call more robust already before it ruins everything, dick!
 							PersistentComponent data = new PersistentComponent();
 							if ( persistent.persistentChildComponents.TryGetValue( childComponent.GetType().ToString() , out data ) )
 								handler.LoadData(childComponent,data);
 						} catch {
 							Debug.Log("Problem configuring child component "+lastChildComponent);
 						}
-
 					}
 				} else {
-					Debug.Log("could not resolve child and component on load");
+					Debug.Log("could not resolve child or component on load");
 					Debug.Log(childComponent.GetType().ToString() + " " + persistentChild.parentObject);
 				}
 			}
 		}
-
 	}
-
 }
 
 
 
 public class ReferenceResolver{
-	
 	public  Dictionary<Persistent, GameObject> persistentObjects = new Dictionary<Persistent, GameObject>();
 	public  Dictionary<GameObject, int> objectIDs = new Dictionary<GameObject ,int>();
 	private Dictionary<Persistent, List<Persistent> > referenceTree = new Dictionary<Persistent, List<Persistent>>();
 	
 	public int ResolveReference(GameObject referent, Persistent requester){
-
 		int returnID = -1;
-		if ( objectIDs.ContainsKey(referent) )
+		if (objectIDs.ContainsKey(referent))
 			returnID = objectIDs[referent];
-
-		if ( ! referenceTree.ContainsKey(requester) )
+		if (!referenceTree.ContainsKey(requester))
 			referenceTree.Add(requester,new List<Persistent>());
-
-		referenceTree[requester].Add( persistentObjects.FindKeyByValue(referent)  );
-
+		referenceTree[requester].Add(persistentObjects.FindKeyByValue(referent));
 		return returnID;
 	}
 	
