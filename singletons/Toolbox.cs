@@ -10,7 +10,6 @@ public static class IDictionaryExtensions
 		TKey returnkey = default (TKey);
 		foreach (KeyValuePair<TKey, TValue> pair in dictionary)
 			if (value.Equals(pair.Value)) returnkey = pair.Key;
-
 		return returnkey;
 	}
 }
@@ -32,6 +31,17 @@ public class Toolbox : Singleton<Toolbox> {
 			return q;
 		}
 	}
+
+	public T GetOrCreateComponent<T>(GameObject g) where T: Component{
+		T component = g.GetComponent<T>();
+		if (component){
+			return component;
+		} else {
+			component = g.AddComponent<T>();
+			return component;
+		}
+	}
+
 
 	public void SpawnDroplet(Vector3 pos, Liquid l){
 		Vector2 initialVelocity = Vector2.zero;
