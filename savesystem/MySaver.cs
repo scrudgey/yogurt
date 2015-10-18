@@ -119,7 +119,8 @@ public class MySaver {
 		saveState = SaverState.None;
 	}
 
-	public static void LoadScene(){
+	public static GameObject LoadScene(){
+		GameObject playerObject = null;
 		try {
 			saveState = SaverState.Loading;
 			string scenePath = Application.persistentDataPath+"/"+Application.loadedLevelName+"_state.xml";
@@ -150,7 +151,7 @@ public class MySaver {
 				var playerStream = new FileStream(playerPath,FileMode.Open);
 				PersistentContainer playerContainer = serializer.Deserialize(playerStream) as PersistentContainer;
 				playerStream.Close();
-				LoadPersistentContainer(playerContainer);
+				playerObject = LoadPersistentContainer(playerContainer);
 			} else {
 				// put some default player in here
 			}
@@ -158,12 +159,14 @@ public class MySaver {
 			Debug.Log("problem loading!");
 		}
 		saveState = SaverState.None;
+		return playerObject;
 	}
 
-	public static void LoadPersistentContainer(PersistentContainer container){
+	public static GameObject LoadPersistentContainer(PersistentContainer container){
 		
 		string lastName = "first";
 		string lastComponent = "first";
+		GameObject rootObject = null;
 		try {
 			Regex reg =  new Regex("\\s+", RegexOptions.Multiline);
 			loadedObjects = new Dictionary<int, GameObject>();
@@ -178,6 +181,8 @@ public class MySaver {
 				loadedObjects.Add(persistent.id,go);
 				go.BroadcastMessage("LoadInit", SendMessageOptions.DontRequireReceiver);
 				go.name = Toolbox.Instance.ScrubText(go.name);
+				if (!rootObject)
+					rootObject = go;
 			}
 		} catch {
 			Debug.Log("Error occurred when instantiating persistent object "+ lastName);
@@ -223,6 +228,7 @@ public class MySaver {
 				}
 			}
 		}
+		return rootObject;
 	}
 }
 
