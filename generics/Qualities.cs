@@ -14,7 +14,5 @@ public class Quality{
 }
 
 public class Qualities : MonoBehaviour {
-
 	public Quality quality = new Quality();
-
 }
