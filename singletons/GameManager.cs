@@ -13,6 +13,7 @@ public class GameManager : Singleton<GameManager> {
 	public string lastSavedPlayerPath;
 	public string lastPlayerName;
 	private int entryID;
+	public float gravity = 1.6f;
 
 	public void FocusIntrinsicsChanged(Intrinsic intrinsic){
 		if (intrinsic.telepathy.boolValue){
@@ -40,6 +41,9 @@ public class GameManager : Singleton<GameManager> {
 	void Start(){
 		// TODO: add a default player condition here
 		playerObject = GameObject.Find ("Tom");		
+		if (!playerObject){
+			playerObject = GameObject.Instantiate(Resources.Load("prefabs/Tom")) as GameObject;
+		}
 		cam = GameObject.FindObjectOfType<Camera>();
 		SetFocus(playerObject);
 		MySaver.CleanupSaves();
