@@ -65,7 +65,7 @@ public class Destructible : MonoBehaviour {
 
 	void OnCollisionEnter2D(Collision2D col){
 		float vel = col.relativeVelocity.magnitude;
-		if (vel > 0.5){
+		if (vel > 1){
 			//if we were hit hard, take a splatter damage
 			//i should fix this to be more physical
 			float damage = col.rigidbody.mass * vel / 5.0f;
