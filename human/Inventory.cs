@@ -185,19 +185,19 @@ public class Inventory : Interactive, IExcludable {
 			
 			if (phys){
 				phys.initHeight = 0f;
-				phys.InitPhysical(0.05f, Vector2.zero);
+				phys.InitPhysical(0.06f, Vector2.zero);
 				SpriteRenderer sprite = throwObject.GetComponent<SpriteRenderer>();
 				sprite.sortingLayerName = "main";
-				phys.physical.FlyMode();
 
 				// these two commands have nothing to do with physical -- they're part of the drop code that sets physics
 				// back to normal.
 				throwObject.GetComponent<Rigidbody2D>().isKinematic = false;
 				throwObject.GetComponent<Collider2D>().isTrigger = false;
+				phys.physical.FlyMode();
 
 //				phys.Set3Motion(0.5f, -0.2f, 0.75f);
 
-				phys.Set3Motion(controllable.direction.x, controllable.direction.y, 0.25f);
+				phys.Set3Motion(controllable.direction.x * 1.5f, controllable.direction.y * 1.5f, 0.25f);
 //				throwObject.GetComponent<Rigidbody2D>().AddForce(controllable.direction * strength * 200 + Vector2.up * 600);
 //				phys.physical.groundYVelocity = controllable.direction.y;
 //				phys.physical.
