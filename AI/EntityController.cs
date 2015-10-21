@@ -50,6 +50,8 @@ public class EntityController : MonoBehaviour {
 		dj.distance = 0.3f;
 		thoughtText = thought.GetComponentInChildren<Text>();
 		thoughtText.text = "";
+//		thought.transform.SetParent(transform);
+//		thought.transform.
 	}
 
 	public void CheckPriority(){
