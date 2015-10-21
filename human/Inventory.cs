@@ -39,6 +39,8 @@ public class Inventory : Interactive, IExcludable {
 	public bool swinging;
 	private bool LoadInitialized = false;
 
+	private GameObject throwObject;
+
 
 	void Start () {
 		if (!LoadInitialized)
@@ -118,7 +120,7 @@ public class Inventory : Interactive, IExcludable {
 		if (phys){
 			Vector2 initV = Vector2.ClampMagnitude( controllable.direction + Vector2.up,1f);
 			initV = initV + GetComponent<Rigidbody2D>().velocity;
-			phys.InitPhysical(0.06f,initV);
+			phys.InitPhysical(0.06f, initV);
 		} else {
 			holding.transform.parent = null;
 		}
@@ -170,23 +172,43 @@ public class Inventory : Interactive, IExcludable {
 	}
 
 	public void ThrowItem(){
+		// set up the held object to be thrown on the next fixed update
+		throwObject = holding.gameObject;
+		holding = null;
+	}
 
-		Messenger.Instance.DisclaimObject(holding.gameObject,this);
-		PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
-		if (phys){
-			phys.InitPhysical(0.05f,Vector2.zero);
-			SpriteRenderer sprite = holding.GetComponent<SpriteRenderer>();
-			sprite.sortingLayerName = "main";
-			holding.GetComponent<Rigidbody2D>().isKinematic = false;
-			holding.GetComponent<Collider2D>().isTrigger = false;
-			holding.GetComponent<Rigidbody2D>().AddForce(controllable.direction * strength * 200 + Vector2.up * 600);
+	void FixedUpdate(){
+		// do the throwing action in fixed update if we have gotten the command to throw
+		if (throwObject){
+			Messenger.Instance.DisclaimObject(throwObject, this);
+			PhysicalBootstrapper phys = throwObject.GetComponent<PhysicalBootstrapper>();
+			
+			if (phys){
+				phys.initHeight = 0f;
+				phys.InitPhysical(0.05f, Vector2.zero);
+				SpriteRenderer sprite = throwObject.GetComponent<SpriteRenderer>();
+				sprite.sortingLayerName = "main";
+				phys.physical.FlyMode();
 
-			holding = null;
-		} 
+				// these two commands have nothing to do with physical -- they're part of the drop code that sets physics
+				// back to normal.
+				throwObject.GetComponent<Rigidbody2D>().isKinematic = false;
+				throwObject.GetComponent<Collider2D>().isTrigger = false;
+
+//				phys.Set3Motion(0.5f, -0.2f, 0.75f);
+
+				phys.Set3Motion(controllable.direction.x, controllable.direction.y, 0.25f);
+//				throwObject.GetComponent<Rigidbody2D>().AddForce(controllable.direction * strength * 200 + Vector2.up * 600);
+//				phys.physical.groundYVelocity = controllable.direction.y;
+//				phys.physical.
+
+
+			}
+			throwObject = null;
+		}
 	}
 
 	void Update(){
-
 		if (holding ){
 			if( controllable.directionAngle > 45 && controllable.directionAngle < 135){
 				holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
@@ -201,7 +223,6 @@ public class Inventory : Interactive, IExcludable {
 
 		if(controllable.shootHeldFlag && defaultInteraction != null && defaultInteraction.continuous)
 			defaultInteraction.DoAction();
-
 	}
 
 	public void SwingItem(MeleeWeapon weapon){
@@ -236,9 +257,9 @@ public class Inventory : Interactive, IExcludable {
 		holding.GetComponent<Renderer>().sortingLayerName="main";
 		holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder + 1;
 
-		slash.GetComponent<Animator>().SetBool(slashFlag,true);
+		slash.GetComponent<Animator>().SetBool(slashFlag, true);
 
-		Physics2D.IgnoreCollision(holding.GetComponent<Collider2D>(),slash.GetComponent<Collider2D>(),true);
+		Physics2D.IgnoreCollision(holding.GetComponent<Collider2D>(), slash.GetComponent<Collider2D>(), true);
 		Slasher s = slash.GetComponent<Slasher>();
 		s.impactSounds = holding.GetComponent<MeleeWeapon>().impactSounds;
 		s.direction = controllable.direction;
