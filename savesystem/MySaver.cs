@@ -153,7 +153,7 @@ public class MySaver {
 				playerStream.Close();
 				playerObject = LoadPersistentContainer(playerContainer);
 			} else {
-				// put some default player in here
+				playerObject = GameObject.Instantiate(Resources.Load("prefabs/Tom")) as GameObject;
 			}
 		} catch {
 			Debug.Log("problem loading!");
