@@ -14,17 +14,15 @@ public class Physical : MonoBehaviour {
 	public Rigidbody2D objectBody;
 	public Rigidbody2D hingeBody;
 	private GameObject hinge;
-	public enum mode{fly,ground,dormant}
+	public enum mode{fly, ground, dormant}
 	public mode currentMode;
 	public float height;
 	private float groundY;
-	private float groundYVelocity;
+	public float groundYVelocity;
 	public bool ignoreCollisions;
 
 	// Use this for initialization
 	void Start () {
-
-
 
 		if (impactSounds.Length + landSounds.Length > 0){
 			if (!GetComponent<AudioSource>()){
@@ -50,25 +48,22 @@ public class Physical : MonoBehaviour {
 		// ignore collisions between ground and all other objects
 		GameObject[] physicals = GameObject.FindGameObjectsWithTag("Physical");
 		foreach(GameObject phys in physicals){
-			Physics2D.IgnoreCollision(GetComponent<Collider2D>(),phys.GetComponent<Collider2D>(),true);
+			Physics2D.IgnoreCollision(groundCollider, phys.GetComponent<Collider2D>(), true);
 			//special types of object ignore all collisions with other objects
 			if (ignoreCollisions){
-				Physics2D.IgnoreCollision(objectCollider,tomCollider,true);
-				Physics2D.IgnoreCollision(groundCollider,tomCollider,true);
+				Physics2D.IgnoreCollision(objectCollider, tomCollider, true);
+				Physics2D.IgnoreCollision(groundCollider, tomCollider, true);
 				foreach (Collider2D col in phys.GetComponentsInParent<Collider2D>())
-					Physics2D.IgnoreCollision(objectCollider,col,true);
+					Physics2D.IgnoreCollision(objectCollider, col, true);
 			}
 		}
-		Physics2D.IgnoreCollision(GetComponent<Collider2D>(),objectCollider,false);
-
+		Physics2D.IgnoreCollision(groundCollider, objectCollider, false);
 
 		FlyMode();
 
 	}
 
 	public void Impact(Vector2 f){
-
-		// test thing
 		// objectbody is the main object
 //		objectBody.AddTorque(-100);
 		//		objectBody.AddForce(f);
@@ -81,35 +76,30 @@ public class Physical : MonoBehaviour {
 		tempV.y += GetComponent<Rigidbody2D>().velocity.y + 0.5f;
 		objectBody.velocity = tempV;
 //		groundYVelocity = tempV.y;
-
-
 //		objectBody.AddForce(Vector2.up * f.magnitude);
-
-
 		if (impactSounds.Length > 0)
 			GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0,impactSounds.Length)]);
-
 		Destructible destructible = trueObject.GetComponent<Destructible>();
-
 		if (destructible){
-			destructible.TakeDamage(Destructible.damageType.physical,  f.magnitude / 200);
+			float damage =   f.magnitude / 200;
+			destructible.TakeDamage(Destructible.damageType.physical, damage);
+			Debug.Log("Impact damage on " + gameObject.name + " to the tune of " + damage.ToString());
 		}
-
 	}
+
 	public void DirectionImpact(Vector2 f, Vector2 p){
 		// test thing
 		FlyMode();
 		objectBody.AddForceAtPosition(f,p);
-		
 	}
 
-	void Update () {
+	void FixedUpdate () {
 		if (currentMode == mode.fly){
-			Vector3 tempPosition = transform.position;
-			tempPosition.y = groundY;
-			transform.position = tempPosition;
-
-			groundY = groundY + groundYVelocity * Time.deltaTime;
+//			Vector3 tempPosition = transform.position;
+//			tempPosition.y = groundY;
+//			transform.position = tempPosition;
+//
+//			groundY = groundY + groundYVelocity * Time.deltaTime;
 
 			if(hinge.transform.localPosition.y < 0.2){
 				GetComponent<Rigidbody2D>().drag = 5;
@@ -119,8 +109,6 @@ public class Physical : MonoBehaviour {
 				GetComponent<Rigidbody2D>().mass = 1;
 			} 
 		}
-
-
 		// collision layer stuff
 		if(hinge.transform.localPosition.y < 0.2){
 			trueObject.layer = 9;
@@ -135,7 +123,6 @@ public class Physical : MonoBehaviour {
 			trueObject.layer = 12;
 		}
 		height = hinge.transform.localPosition.y;
-
 	}
 
 	public void GroundMode (){
@@ -146,9 +133,9 @@ public class Physical : MonoBehaviour {
 		Vector3 hingePosition = hinge.transform.localPosition;
 
 		// stop colliding player and object
-		Physics2D.IgnoreCollision(objectCollider,tomCollider,true);
+		Physics2D.IgnoreCollision(objectCollider, tomCollider, true);
 		// enable player - ground collision
-		Physics2D.IgnoreCollision(groundCollider,tomCollider,false);
+		Physics2D.IgnoreCollision(groundCollider, tomCollider, false);
 		// set object gravity 0
 		objectBody.gravityScale = 0;
 		// fix slider
@@ -173,19 +160,20 @@ public class Physical : MonoBehaviour {
 		hingeBody.velocity = tempVelocity;
 
 		
-		Vector3 tempPosition = transform.position;
-		tempPosition.y = groundY;
-		transform.position = tempPosition;
-		hinge.transform.localPosition = hingePosition;
+//		Vector3 tempPosition = transform.position;
+//		tempPosition.y = groundY;
+//		transform.position = tempPosition;
+//		hinge.transform.localPosition = hingePosition;
 
 		Physical[] physicals = FindObjectsOfType<Physical>();
 		foreach(Physical phys in physicals){
 			if (phys.currentMode == mode.ground){
-				Physics2D.IgnoreCollision(GetComponent<Collider2D>(),phys.GetComponent<Collider2D>(),false);
+//				Physics2D.IgnoreCollision(GetComponent<Collider2D>(), phys.GetComponent<Collider2D>(), false);
+				Physics2D.IgnoreCollision(groundCollider, phys.GetComponent<Collider2D>(), false);
 				//special types of object ignore all collisions with other objects
 				if (ignoreCollisions){
-					Physics2D.IgnoreCollision(objectCollider,phys.GetComponent<Collider2D>(),true);
-					Physics2D.IgnoreCollision(objectCollider,tomCollider,true);
+					Physics2D.IgnoreCollision(objectCollider, phys.GetComponent<Collider2D>(), true);
+					Physics2D.IgnoreCollision(objectCollider, tomCollider,true);
 				}
 			}
 		}
@@ -196,18 +184,22 @@ public class Physical : MonoBehaviour {
 
 		// enable colliding player and object
 		if (!ignoreCollisions)
-			Physics2D.IgnoreCollision(objectCollider,tomCollider,false);
+			Physics2D.IgnoreCollision(objectCollider, tomCollider, false);
 		// disable player - ground collision
-		Physics2D.IgnoreCollision(groundCollider,tomCollider,true);
-		// set object gravity 1
-		objectBody.gravityScale = 1.6f;
+		Physics2D.IgnoreCollision(groundCollider, tomCollider, true);
+		Physics2D.IgnoreCollision(objectCollider, tomCollider, true);
+
+		// set object gravity on
+		objectBody.gravityScale = GameManager.Instance.gravity;
 
 		//unfix sliderLimits = slider.limits;
+		slider = GetComponent<SliderJoint2D>();
 		slider.useLimits = false;
 
 		//fix ground Y coordinate
 		groundY = transform.position.y;
-		groundYVelocity = GetComponent<Rigidbody2D>().velocity.y;
+//		groundYVelocity = GetComponent<Rigidbody2D>().velocity.y;
+//		groundYVelocity = objectBody.velocity.y;
 
 		//update mode
 		currentMode = mode.fly;
@@ -218,7 +210,8 @@ public class Physical : MonoBehaviour {
 
 		Physical[] physicals = FindObjectsOfType<Physical>();
 		foreach(Physical phys in physicals){
-				Physics2D.IgnoreCollision(GetComponent<Collider2D>(),phys.GetComponent<Collider2D>(),true);
+//			Physics2D.IgnoreCollision(GetComponent<Collider2D>(), phys.GetComponent<Collider2D>(), true);
+			Physics2D.IgnoreCollision(groundCollider, phys.GetComponent<Collider2D>(), true);
 		}
 
 	}
@@ -230,18 +223,24 @@ public class Physical : MonoBehaviour {
 				GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0,impactSounds.Length)]);
 			}
 		}
-
 		if (coll.collider == objectCollider){
-			BroadcastMessage("OnGroundImpact",this,SendMessageOptions.DontRequireReceiver);
+			BroadcastMessage("OnGroundImpact", this, SendMessageOptions.DontRequireReceiver);
+//			if (coll.relativeVelocity.y > 0.1f && currentMode == mode.fly){
+//				Vector2 tempVelocity = objectBody.velocity;
+//				tempVelocity.y = coll.relativeVelocity.y * -0.01f;
+//				tempVelocity.y = tempVelocity.y * -0.01f;
+//				objectBody.
+//				objectBody.velocity = tempVelocity;
+//				objectBody.velocity = coll.relativeVelocity * 0.5f;
+
+//			}
 		}
 	}
 
 	void OnCollisionStay2D(Collision2D coll){
-
 		if(coll.collider == objectCollider && coll.relativeVelocity.magnitude < 0.01 && currentMode != mode.ground){
 			GroundMode();
 		}
-
 	}
 
 }
