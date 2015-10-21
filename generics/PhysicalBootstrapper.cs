@@ -88,7 +88,8 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		hingeObject.transform.parent = groundObject.transform;
 		
 		//rigidbody 2D
-		groundBody = groundObject.AddComponent<Rigidbody2D>();
+		groundBody = groundObject.AddComponent<Rigidbody2D>();s
+//		groundBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 		groundBody.mass = 1f;
 		groundBody.drag = 1f;
 		groundBody.angularDrag = 0.05f;
@@ -97,9 +98,14 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		
 		//box collider
 		BoxCollider2D groundCollider = groundObject.AddComponent<BoxCollider2D>();
+//		Vector2[] points = new Vector2[] {new Vector2(-0.1f, 0.0f), new Vector2(0.1f, 0.0f)};
+//		EdgeCollider2D groundCollider = groundObject.AddComponent<EdgeCollider2D>();
+//		groundCollider.points = points;
 		groundCollider.size = new Vector2(0.1606f,0.0523f);
-		groundCollider.offset = new Vector2(0,-0.04f);
+		groundCollider.offset = new Vector2(0.0f, -0.04f);
 		groundCollider.sharedMaterial = Resources.Load<PhysicsMaterial2D>("ground"); 
+
+
 		
 		//sprite renderer
 		SpriteRenderer groundSprite = groundObject.AddComponent<SpriteRenderer>();
