@@ -58,7 +58,7 @@ public class Controller : Singleton<Controller> {
 			// right click
 			if (Input.GetMouseButtonDown(1)){
 				//detect if we clicked anything
-				RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition),Vector2.zero);
+				RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
 				foreach (RaycastHit2D hit in hits){
 					if (hit.collider != null && hit.transform.tag != "fire" && hit.collider.tag != "sightcone" ){
 						focus.lastRightClicked = hit.collider.gameObject;
@@ -72,7 +72,7 @@ public class Controller : Singleton<Controller> {
 				//detect if we clicked anything
 				if (!EventSystem.current.IsPointerOverGameObject())
 				{
-					RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition),Vector2.zero);
+					RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
 					foreach (RaycastHit2D hit in hits){
 						if (hit.collider != null && hit.collider.tag != "fire" && hit.collider.tag != "sightcone" ){
 							focus.lastLeftClicked = hit.collider.gameObject;
