@@ -40,10 +40,10 @@ public class Physical : MonoBehaviour {
 		groundCollider = GetComponent<Collider2D>();
 		objectCollider = trueObject.GetComponent<Collider2D>();
 		
-		//this will need to be modified when we have more humanoids!!!!:
+		//TODO: this will need to be modified when we have more humanoids!!!!:
 		GameObject tom = GameObject.Find("Tom");
 		if (tom)
-			tomCollider = GameObject.Find("Tom").GetComponent<Collider2D>();
+			tomCollider = GameObject.Find("Tom").GetComponent<EdgeCollider2D>();
 
 		// ignore collisions between ground and all other objects
 		GameObject[] physicals = GameObject.FindGameObjectsWithTag("Physical");
@@ -101,7 +101,7 @@ public class Physical : MonoBehaviour {
 //
 //			groundY = groundY + groundYVelocity * Time.deltaTime;
 
-			if(hinge.transform.localPosition.y < 0.2){
+			if(hinge.transform.localPosition.y < 0.1){
 				GetComponent<Rigidbody2D>().drag = 5;
 				GetComponent<Rigidbody2D>().mass = objectBody.mass;
 			} else {
@@ -212,6 +212,7 @@ public class Physical : MonoBehaviour {
 		foreach(Physical phys in physicals){
 //			Physics2D.IgnoreCollision(GetComponent<Collider2D>(), phys.GetComponent<Collider2D>(), true);
 			Physics2D.IgnoreCollision(groundCollider, phys.GetComponent<Collider2D>(), true);
+
 		}
 
 	}
@@ -220,25 +221,18 @@ public class Physical : MonoBehaviour {
 	void OnCollisionEnter2D(Collision2D coll){
 		if (coll.relativeVelocity.magnitude > 0.5){
 			if (impactSounds.Length > 0){
-				GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0,impactSounds.Length)]);
+				GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
 			}
 		}
 		if (coll.collider == objectCollider){
 			BroadcastMessage("OnGroundImpact", this, SendMessageOptions.DontRequireReceiver);
-//			if (coll.relativeVelocity.y > 0.1f && currentMode == mode.fly){
-//				Vector2 tempVelocity = objectBody.velocity;
-//				tempVelocity.y = coll.relativeVelocity.y * -0.01f;
-//				tempVelocity.y = tempVelocity.y * -0.01f;
-//				objectBody.
-//				objectBody.velocity = tempVelocity;
-//				objectBody.velocity = coll.relativeVelocity * 0.5f;
-
-//			}
 		}
 	}
 
 	void OnCollisionStay2D(Collision2D coll){
-		if(coll.collider == objectCollider && coll.relativeVelocity.magnitude < 0.01 && currentMode != mode.ground){
+//		if(coll.collider == objectCollider && coll.relativeVelocity.magnitude < 0.01 && currentMode != mode.ground){
+		
+		if(coll.collider == objectCollider && currentMode != mode.ground){
 			GroundMode();
 		}
 	}
