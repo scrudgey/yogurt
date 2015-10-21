@@ -20,6 +20,10 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	public bool ignoreCollisions;
 	public bool doInit = true;
 
+	private float setVx;
+	private float setVy;
+	private float setVz;
+
 	void Start () {
 		tag = "Physical";
 		spriteRenderer = GetComponent<SpriteRenderer>();
@@ -30,7 +34,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		if (tom)
 			tomCollider = GameObject.Find("Tom").GetComponent<Collider2D>(); 
 		if (doInit)
-			InitPhysical(initHeight,initVelocity);
+			InitPhysical(initHeight, initVelocity);
 
 		if (impactSounds.Length > 0){
 			if (!GetComponent<AudioSource>()){
@@ -53,7 +57,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 
 
 	public void InitPhysical(float height, Vector2 initialVelocity){
-		doInit = true;
+		doInit = false;
 		// Set up hinge
 		hingeObject = new GameObject("hinge");
 		transform.parent = hingeObject.transform;
@@ -130,6 +134,23 @@ public class PhysicalBootstrapper : MonoBehaviour {
 			if (impactSounds.Length > 0){
 				GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0,impactSounds.Length)]);
 			}
+		}
+	}
+
+	public void Set3Motion(float vx, float vy, float vz){
+		setVx = vx;
+		setVy = vy;
+		setVz = vz;
+	}
+
+	void FixedUpdate(){
+		if (setVx != 0 || setVy != 0 || setVz != 0){
+			Vector2 groundVelocity = new Vector2(setVx, setVy);
+			Vector2 objectVelocity = new Vector2(setVx, setVz + setVy);
+			physical.objectBody.velocity = objectVelocity;
+			Rigidbody2D groundBody = physical.GetComponent<Rigidbody2D>();
+			groundBody.velocity = groundVelocity;
+			setVx = setVy = setVz = 0;
 		}
 	}
 
