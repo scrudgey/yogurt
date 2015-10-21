@@ -53,7 +53,7 @@ public class Container : Interactive, IExcludable {
 
 	public bool Store_Validation(Inventory inv){
 		if (inv.holding){
-			Debug.Log(this.name +" is validating a stash for "+inv.holding.name);
+//			Debug.Log(this.name +" is validating a stash for "+inv.holding.name);
 			if (inv.holding.gameObject != gameObject){
 				return true;
 			}
