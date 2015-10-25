@@ -59,7 +59,7 @@ public class Destructible : MonoBehaviour {
 			Toolbox.Instance.SpawnDroplet(transform.position, container.liquid);
 			Toolbox.Instance.SpawnDroplet(transform.position, container.liquid);
 		}
-		BroadcastMessage("OnDestruction",SendMessageOptions.DontRequireReceiver);
+		BroadcastMessage("OnDestruction", SendMessageOptions.DontRequireReceiver);
 		Messenger.Instance.WasDestroyed(gameObject);
 	}
 
