@@ -58,9 +58,15 @@ public class PhysicalBootstrapper : MonoBehaviour {
 
 	public void InitPhysical(float height, Vector2 initialVelocity){
 		doInit = false;
+
+		Vector2 initPos = transform.position;
+		Vector2 groundPos = transform.position;
+
 		// Set up hinge
 		hingeObject = new GameObject("hinge");
+		hingeObject.transform.position = initPos;
 		transform.parent = hingeObject.transform;
+
 		hingeBody = hingeObject.AddComponent<Rigidbody2D>();
 		hingeJoint2D = hingeObject.AddComponent<HingeJoint2D>();
 		hingeBody.mass = 1;
@@ -69,27 +75,22 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		hingeBody.gravityScale = 0;
 		hingeJoint2D.connectedBody = GetComponent<Rigidbody2D>();
 		
-		
 		// Set up ground object
 		groundObject = new GameObject(name + " Ground");
-		Vector2 tempPos = transform.position;
+		groundObject.transform.position = initPos;
+		Toolbox.Instance.SetUpAudioSource(groundObject);
 
-//		Vector4 borderVector = spriteRenderer.sprite.border;
-		Bounds spriteBounds = spriteRenderer.sprite.bounds;
-//		collider2D.bounds
-//		Bounds bounds = collider2D.bounds;
-//		height = height + borderVector.w - borderVector.y + 0.07f;
-//		height = height + bounds.min.y;
-		height = height + spriteBounds.extents.y;
-
-		tempPos.y = tempPos.y - height;
-		groundObject.transform.position = tempPos;
-				
 		hingeObject.transform.parent = groundObject.transform;
+		Vector2 tempPos = Vector2.zero;
+		Bounds spriteBounds = spriteRenderer.sprite.bounds;
+		height = height + spriteBounds.extents.y;
+		tempPos.y = height;
+		groundPos.y -= height;
+		hingeObject.transform.localPosition = tempPos;
+		groundObject.transform.position = groundPos;
 		
 		//rigidbody 2D
-		groundBody = groundObject.AddComponent<Rigidbody2D>();s
-//		groundBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+		groundBody = groundObject.AddComponent<Rigidbody2D>();
 		groundBody.mass = 1f;
 		groundBody.drag = 1f;
 		groundBody.angularDrag = 0.05f;
@@ -98,15 +99,10 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		
 		//box collider
 		BoxCollider2D groundCollider = groundObject.AddComponent<BoxCollider2D>();
-//		Vector2[] points = new Vector2[] {new Vector2(-0.1f, 0.0f), new Vector2(0.1f, 0.0f)};
-//		EdgeCollider2D groundCollider = groundObject.AddComponent<EdgeCollider2D>();
-//		groundCollider.points = points;
-		groundCollider.size = new Vector2(0.1606f,0.0523f);
-		groundCollider.offset = new Vector2(0.0f, -0.04f);
+		groundCollider.size = new Vector2(0.1606f, 0.05f);
+		groundCollider.offset = new Vector2(0.0f, -0.05f);
 		groundCollider.sharedMaterial = Resources.Load<PhysicsMaterial2D>("ground"); 
 
-
-		
 		//sprite renderer
 		SpriteRenderer groundSprite = groundObject.AddComponent<SpriteRenderer>();
 		groundSprite.sprite = Resources.Load<Sprite>("shadow");
