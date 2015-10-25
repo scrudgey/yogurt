@@ -182,10 +182,11 @@ public class Inventory : Interactive, IExcludable {
 		if (throwObject){
 			Messenger.Instance.DisclaimObject(throwObject, this);
 			PhysicalBootstrapper phys = throwObject.GetComponent<PhysicalBootstrapper>();
-			
 			if (phys){
+				Rigidbody2D myBody = GetComponent<Rigidbody2D>();
+				phys.doInit = false;
 				phys.initHeight = 0f;
-				phys.InitPhysical(0.06f, Vector2.zero);
+				phys.InitPhysical(0.12f, Vector2.zero);
 				SpriteRenderer sprite = throwObject.GetComponent<SpriteRenderer>();
 				sprite.sortingLayerName = "main";
 
@@ -194,15 +195,14 @@ public class Inventory : Interactive, IExcludable {
 				throwObject.GetComponent<Rigidbody2D>().isKinematic = false;
 				throwObject.GetComponent<Collider2D>().isTrigger = false;
 				phys.physical.FlyMode();
-
-//				phys.Set3Motion(0.5f, -0.2f, 0.75f);
-
-				phys.Set3Motion(controllable.direction.x * 1.5f, controllable.direction.y * 1.5f, 0.25f);
-//				throwObject.GetComponent<Rigidbody2D>().AddForce(controllable.direction * strength * 200 + Vector2.up * 600);
-//				phys.physical.groundYVelocity = controllable.direction.y;
-//				phys.physical.
-
-
+				float vx = controllable.direction.x * 1.5f;
+				float vy = controllable.direction.y * 1.5f;
+				float vz = 0.25f;
+				if (myBody){
+					vx = vx + myBody.velocity.x;
+					vy = vy + myBody.velocity.y;
+				}
+				phys.Set3Motion(vx, vy, vz);
 			}
 			throwObject = null;
 		}
