@@ -16,7 +16,7 @@ public class Speech : Interactive {
 	private Text bubbleText;
 
 	void Start () {
-		Interaction speak = new Interaction(this,"Look","Describe",true,false);
+		Interaction speak = new Interaction(this, "Look", "Describe", true, false);
 		speak.limitless = true;
 		speak.dontWipeInterface = true;
 		interactions.Add(speak);
@@ -36,8 +36,8 @@ public class Speech : Interactive {
 			speaking = true;
 			bubbleParent.SetActive(true);
 			bubbleText.text = words;
-			textRect.sizeDelta = new Vector2(bubbleText.preferredWidth,20);
-			bubble.sizeDelta = new Vector2(bubbleText.preferredWidth/100+0.1f,.20f);
+			textRect.sizeDelta = new Vector2(bubbleText.preferredWidth, 20);
+			bubble.sizeDelta = new Vector2(bubbleText.preferredWidth / 100 + 0.1f, .20f);
 			if (bubbleParent.transform.parent.transform.localScale.x < 0){
 				Vector3 tempscale = bubbleParent.transform.localScale;
 				tempscale.x = -1;
