@@ -34,6 +34,7 @@ public class Inventory : Interactive, IExcludable {
 	public bool swinging;
 	private bool LoadInitialized = false;
 	private GameObject throwObject;
+	private float dropHeight = 0.12f;
 	
 	void Start(){
 		if (!LoadInitialized)
@@ -105,9 +106,12 @@ public class Inventory : Interactive, IExcludable {
 		holding.GetComponent<Collider2D>().isTrigger = false;
 		PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
 		if (phys){
-			Vector2 initV = Vector2.ClampMagnitude(controllable.direction + Vector2.up, 1f);
+			Vector2 initV = Vector2.ClampMagnitude(controllable.direction, 0.5f);
 			initV = initV + GetComponent<Rigidbody2D>().velocity;
-			phys.InitPhysical(0.06f, initV);
+			float vx = initV.x;
+			float vy = initV.y / 2;
+			float vz = 0.5f;
+			phys.InitPhysical(dropHeight, new Vector3(vx, vy, vz));
 		} else {
 			holding.transform.parent = null;
 		}
@@ -157,33 +161,37 @@ public class Inventory : Interactive, IExcludable {
 		holding = null;
 	}
 
+	private void DoThrow(){
+		Messenger.Instance.DisclaimObject(throwObject, this);
+		PhysicalBootstrapper phys = throwObject.GetComponent<PhysicalBootstrapper>();
+		if (phys){
+			Rigidbody2D myBody = GetComponent<Rigidbody2D>();
+			phys.doInit = false;
+			phys.initHeight = 0f;
+			phys.InitPhysical(dropHeight, Vector2.zero);
+			SpriteRenderer sprite = throwObject.GetComponent<SpriteRenderer>();
+			sprite.sortingLayerName = "main";
+			// these two commands have nothing to do with physical -- they're part of the drop code that sets physics
+			// back to normal.
+			throwObject.GetComponent<Rigidbody2D>().isKinematic = false;
+			throwObject.GetComponent<Collider2D>().isTrigger = false;
+			phys.physical.FlyMode();
+			float vx = controllable.direction.x * 1.5f;
+			float vy = controllable.direction.y * 1.5f;
+			float vz = 0.25f;
+			if (myBody){
+				vx = vx + myBody.velocity.x;
+				vy = vy + myBody.velocity.y;
+			}
+			phys.Set3Motion(new Vector3(vx, vy, vz));
+		}
+		throwObject = null;
+	}
+
 	void FixedUpdate(){
 		// do the throwing action in fixed update if we have gotten the command to throw
 		if (throwObject){
-			Messenger.Instance.DisclaimObject(throwObject, this);
-			PhysicalBootstrapper phys = throwObject.GetComponent<PhysicalBootstrapper>();
-			if (phys){
-				Rigidbody2D myBody = GetComponent<Rigidbody2D>();
-				phys.doInit = false;
-				phys.initHeight = 0f;
-				phys.InitPhysical(0.12f, Vector2.zero);
-				SpriteRenderer sprite = throwObject.GetComponent<SpriteRenderer>();
-				sprite.sortingLayerName = "main";
-				// these two commands have nothing to do with physical -- they're part of the drop code that sets physics
-				// back to normal.
-				throwObject.GetComponent<Rigidbody2D>().isKinematic = false;
-				throwObject.GetComponent<Collider2D>().isTrigger = false;
-				phys.physical.FlyMode();
-				float vx = controllable.direction.x * 1.5f;
-				float vy = controllable.direction.y * 1.5f;
-				float vz = 0.25f;
-				if (myBody){
-					vx = vx + myBody.velocity.x;
-					vy = vy + myBody.velocity.y;
-				}
-				phys.Set3Motion(vx, vy, vz);
-			}
-			throwObject = null;
+			DoThrow();
 		}
 	}
 
@@ -209,10 +217,10 @@ public class Inventory : Interactive, IExcludable {
 			GetComponent<AudioSource>().PlayOneShot(weapon.swingSounds[Random.Range(0, weapon.swingSounds.Length)]);
 		}
 		slashFlag = "right";
-		if( controllable.directionAngle > 45 && controllable.directionAngle < 135){
+		if (controllable.directionAngle > 45 && controllable.directionAngle < 135){
 			slashFlag = "up";
 		}
-		if(controllable.directionAngle > 225 && controllable.directionAngle < 315){
+		if (controllable.directionAngle > 225 && controllable.directionAngle < 315){
 			slashFlag = "down";
 		}
 	}
@@ -224,10 +232,10 @@ public class Inventory : Interactive, IExcludable {
 	}
 
 	void StartSwing(){
-		GameObject slash = Instantiate(Resources.Load ("Slash2"),transform.position,transform.rotation) as GameObject;
+		GameObject slash = Instantiate(Resources.Load ("Slash2"), transform.position, transform.rotation) as GameObject;
 		slash.transform.parent = transform;
 		slash.transform.localScale = Vector3.one;
-		holding.GetComponent<Renderer>().sortingLayerName="main";
+		holding.GetComponent<Renderer>().sortingLayerName = "main";
 		holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder + 1;
 		slash.GetComponent<Animator>().SetBool(slashFlag, true);
 		Physics2D.IgnoreCollision(holding.GetComponent<Collider2D>(), slash.GetComponent<Collider2D>(), true);
