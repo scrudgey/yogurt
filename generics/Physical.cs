@@ -8,7 +8,7 @@ public class Physical : MonoBehaviour {
 	private SliderJoint2D slider;
 	private GameObject trueObject;
 	public Collider2D objectCollider;
-	private Collider2D groundCollider;
+	public Collider2D groundCollider;
 	private Collider2D tomCollider;
 	public Rigidbody2D objectBody;
 	public Rigidbody2D hingeBody;
@@ -16,7 +16,7 @@ public class Physical : MonoBehaviour {
 	public enum mode{fly, ground, dormant}
 	public mode currentMode;
 	public float height;
-	public float groundYVelocity;
+//	public float groundYVelocity;
 	public bool ignoreCollisions;
 
 	private bool doFly;
