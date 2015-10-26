@@ -60,13 +60,6 @@ public class Physical : MonoBehaviour {
 			FlyMode();
 		if (impactSounds.Length > 0)
 			GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
-//		GetComponent<Rigidbody2D>().AddForce(f * GetComponent<Rigidbody2D>().mass / objectBody.mass);
-//		GetComponent<Rigidbody2D>().AddForce(f);
-//		objectBody.AddForce(f);
-//		Vector2 tempV = objectBody.velocity;
-//		tempV.y += GetComponent<Rigidbody2D>().velocity.y + 0.5f;
-//		objectBody.velocity = tempV;
-//		bootstrapper.Set3Motion(f.x, f.y, f.y + 0.5f);
 		bootstrapper.Set3Motion(new Vector3(f.x, f.y, f.y + 0.5f));
 		if (destructible){
 			float damage = f.magnitude * 20f;
