@@ -70,8 +70,8 @@ public class Destructible : MonoBehaviour {
 			//i should fix this to be more physical
 			float damage = col.rigidbody.mass * vel / 5.0f;
 			TakeDamage(damageType.physical, damage);
-			Debug.Log("Collision damage on " + gameObject.name + " to the tune of " + damage.ToString());
-			Debug.Log("Collided with "+col.gameObject.name);
+//			Debug.Log("Collision damage on " + gameObject.name + " to the tune of " + damage.ToString());
+//			Debug.Log("Collided with "+col.gameObject.name);
 		}
 		if (hitSound.Length > 0){
 			GetComponent<AudioSource>().PlayOneShot(hitSound[Random.Range(0,hitSound.Length)]);
