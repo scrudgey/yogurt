@@ -19,10 +19,10 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	public Vector2 initVelocity;
 	public bool ignoreCollisions;
 	public bool doInit = true;
-
-	private float setVx;
-	private float setVy;
-	private float setVz;
+//	private float setVx;
+//	private float setVy;
+//	private float setVz;
+	private Vector3 setV;
 
 	public void Start () {
 		tag = "Physical";
@@ -78,13 +78,12 @@ public class PhysicalBootstrapper : MonoBehaviour {
 
 		hingeObject.transform.parent = groundObject.transform;
 		Vector2 tempPos = Vector2.zero;
-		Bounds spriteBounds = spriteRenderer.sprite.bounds;
-//		height = height + spriteBounds.extents.y;
+//		Bounds spriteBounds = spriteRenderer.sprite.bounds;
+//		height += spriteBounds.extents.y;
 		tempPos.y = height;
 		groundPos.y -= height;
 		hingeObject.transform.localPosition = tempPos;
 		groundObject.transform.position = groundPos;
-		Debug.Log("initial height "+height.ToString());
 		
 		//rigidbody 2D
 		groundBody = groundObject.AddComponent<Rigidbody2D>();
@@ -122,7 +121,8 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		groundPhysical.landSounds = landSounds;
 		
 		physical = groundPhysical;
-		Set3Motion(initialVelocity.x, initialVelocity.y, initialVelocity.z);
+		groundPhysical.bootstrapper = this;
+		Set3Motion(new Vector3(initialVelocity.x, initialVelocity.y, initialVelocity.z));
 	}
 
 	void OnCollisionEnter2D(Collision2D coll){
@@ -133,20 +133,23 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		}
 	}
 
-	public void Set3Motion(float vx, float vy, float vz){
-		setVx = vx;
-		setVy = vy;
-		setVz = vz;
+	public void Set3Motion(Vector3 velocity){
+//		setV = new Vector3(vx, vy, vz);
+		setV = velocity;
+//		setVx = vx;
+//		setVy = vy;
+//		setVz = vz;
 	}
 
 	void FixedUpdate(){
-		if (setVx != 0 || setVy != 0 || setVz != 0){
-			Vector2 groundVelocity = new Vector2(setVx, setVy);
-			Vector2 objectVelocity = new Vector2(setVx, setVz + setVy);
+		if (setV != Vector3.zero){
+			Vector2 groundVelocity = new Vector2(setV.x, setV.y);
+			Vector2 objectVelocity = new Vector2(setV.x, setV.z + setV.y);
 			physical.objectBody.velocity = objectVelocity;
 			Rigidbody2D groundBody = physical.GetComponent<Rigidbody2D>();
 			groundBody.velocity = groundVelocity;
-			setVx = setVy = setVz = 0;
+//			setVx = setVy = setVz = 0;
+			setV = Vector3.zero;
 		}
 	}
 
