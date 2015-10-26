@@ -24,7 +24,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	private float setVy;
 	private float setVz;
 
-	void Start () {
+	public void Start () {
 		tag = "Physical";
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		GetComponent<Renderer>().sortingLayerName="main";
@@ -37,12 +37,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 			InitPhysical(initHeight, initVelocity);
 
 		if (impactSounds.Length > 0){
-			if (!GetComponent<AudioSource>()){
-				gameObject.AddComponent<AudioSource>();
-			}
-			GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Logarithmic;
-			GetComponent<AudioSource>().minDistance = 0.4f;
-			GetComponent<AudioSource>().maxDistance = 5.42f;
+			Toolbox.Instance.SetUpAudioSource(gameObject);
 		}
 	}
 
@@ -56,8 +51,9 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	}
 
 
-	public void InitPhysical(float height, Vector2 initialVelocity){
+	public void InitPhysical(float height, Vector3 initialVelocity){
 		doInit = false;
+
 
 		Vector2 initPos = transform.position;
 		Vector2 groundPos = transform.position;
@@ -83,11 +79,12 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		hingeObject.transform.parent = groundObject.transform;
 		Vector2 tempPos = Vector2.zero;
 		Bounds spriteBounds = spriteRenderer.sprite.bounds;
-		height = height + spriteBounds.extents.y;
+//		height = height + spriteBounds.extents.y;
 		tempPos.y = height;
 		groundPos.y -= height;
 		hingeObject.transform.localPosition = tempPos;
 		groundObject.transform.position = groundPos;
+		Debug.Log("initial height "+height.ToString());
 		
 		//rigidbody 2D
 		groundBody = groundObject.AddComponent<Rigidbody2D>();
@@ -125,10 +122,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		groundPhysical.landSounds = landSounds;
 		
 		physical = groundPhysical;
-		
-		SetVelocity(initialVelocity);
-
-
+		Set3Motion(initialVelocity.x, initialVelocity.y, initialVelocity.z);
 	}
 
 	void OnCollisionEnter2D(Collision2D coll){
@@ -156,17 +150,17 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		}
 	}
 
-	public void SetVelocity(Vector2 velocity){
-		Vector2 groundVelocity = Vector2.zero;
-		Vector2 objectVelocity = Vector2.zero;
-
-		groundVelocity.x = velocity.x;
-		objectVelocity.y = velocity.y;
-
-		groundBody.velocity = groundVelocity;
-		GetComponent<Rigidbody2D>().velocity = objectVelocity;
-
-	}
+//	public void SetVelocity(Vector2 velocity){
+//		Vector2 groundVelocity = Vector2.zero;
+//		Vector2 objectVelocity = Vector2.zero;
+//
+//		groundVelocity.x = velocity.x;
+//		objectVelocity.y = velocity.y;
+//
+//		groundBody.velocity = groundVelocity;
+//		GetComponent<Rigidbody2D>().velocity = objectVelocity;
+//
+//	}
 
 	void OnDestroy(){
 		if (physical)
