@@ -12,16 +12,17 @@ public class Container : Interactive, IExcludable {
 	private bool isQuitting;
 
 	virtual protected void Start() {
-		Interaction stasher = new Interaction(this,"Stash","Store");
+		Interaction stasher = new Interaction(this, "Stash", "Store");
 		stasher.displayVerb = "Stash in";
 		stasher.validationFunction = true;
 		interactions.Add(stasher);
 		foreach (Pickup pickup in items){
+			Pickup closurePickup = pickup;
 			Action<Component> removeIt = (comp) => {
 				Inventory i = comp as Inventory;
-				Remove(i,pickup);
+				Remove(i, closurePickup);
 			};
-			Interaction newInteraction = new Interaction(this,pickup.itemName,removeIt);
+			Interaction newInteraction = new Interaction(this, closurePickup.itemName, removeIt);
 			newInteraction.actionDelegate = removeIt;
 			newInteraction.parameterTypes = new List<Type>();
 			newInteraction.parameterTypes.Add(typeof(Inventory));
@@ -29,7 +30,6 @@ public class Container : Interactive, IExcludable {
 			PhysicalBootstrapper bs = pickup.gameObject.GetComponent<PhysicalBootstrapper>();
 			if (bs){
 				bs.doInit = false;
-//				Destroy(bs);
 			}
 		}
 	}
@@ -37,23 +37,20 @@ public class Container : Interactive, IExcludable {
 
 	protected void RemoveRetrieveAction(Pickup pickup){
 		Interaction removeThis = null;
-		
 		foreach (Interaction interaction in interactions)
 		{
 			if (interaction.parameters.Count == 2)
-				if ( interaction.parameters[1] == pickup )
+				if (interaction.parameters[1] == pickup)
 					removeThis = interaction;
 			if (interaction.actionName == pickup.itemName)
 				    removeThis = interaction;
 		}
-		
 		if (removeThis != null)
 			interactions.Remove(removeThis);
 	}
 
 	public bool Store_Validation(Inventory inv){
 		if (inv.holding){
-//			Debug.Log(this.name +" is validating a stash for "+inv.holding.name);
 			if (inv.holding.gameObject != gameObject){
 				return true;
 			}
@@ -66,18 +63,9 @@ public class Container : Interactive, IExcludable {
 
 	virtual public void Store(Inventory inv){
 		Pickup pickup = inv.holding;
-
 		if (maxNumber == 0 || items.Count < maxNumber){
-
 			inv.SoftDropItem();
 			AddItem(pickup);
-			// add the removal interaction
-//			Interaction newInteraction = new Interaction(this,pickup.itemName,"Remove");
-//			newInteraction.parameters = new List<object> {inv,pickup};
-//			newInteraction.enabled = true;
-//			newInteraction.staticInteraction = true;
-//			interactions.Add(newInteraction);
-
 			Action<Component> removeIt = (comp) => {
 				Inventory i = comp as Inventory;
 				Remove(i,pickup);
@@ -88,7 +76,6 @@ public class Container : Interactive, IExcludable {
 			newInteraction.parameterTypes = new List<Type>();
 			newInteraction.parameterTypes.Add(typeof(Inventory));
 			interactions.Add(newInteraction);
-
 		} else {
 			inv.gameObject.SendMessage("Say","It's full.");
 		}
@@ -128,12 +115,9 @@ public class Container : Interactive, IExcludable {
 		// make rigidbody kinematic
 		if (pickup.GetComponent<Rigidbody2D>())
 			pickup.GetComponent<Rigidbody2D>().isKinematic = true;
-		
-
 	}
 	
 	public void Remove(Inventory inv, Pickup pickup){
-//		Dump(pickup);
 		Vector3 pos = inv.transform.position;
 		pickup.transform.parent = null;
 		pickup.GetComponent<Collider2D>().enabled = true;
@@ -153,7 +137,7 @@ public class Container : Interactive, IExcludable {
 		if (disableContents)
 			pickup.gameObject.SetActive(true);
 		
-		Messenger.Instance.DisclaimObject(pickup.gameObject,this);
+		Messenger.Instance.DisclaimObject(pickup.gameObject, this);
 
 		items.Remove(pickup);
 		RemoveRetrieveAction(pickup);
@@ -162,7 +146,6 @@ public class Container : Interactive, IExcludable {
 	}
 
 	public void Dump(Pickup pickup){
-
 		Vector3 pos = transform.position;
 		pickup.transform.parent = null;
 		pickup.GetComponent<Collider2D>().enabled = true;
@@ -205,7 +188,6 @@ public class Container : Interactive, IExcludable {
 		if (liquidContainer && myLiquidContainer){
 			myLiquidContainer.FillFromContainer(liquidContainer);
 		}
-
 		if (pickup){
 			items.Remove(pickup);
 			RemoveRetrieveAction(pickup);
