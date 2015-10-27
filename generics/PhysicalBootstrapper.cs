@@ -2,10 +2,8 @@
 using System.Collections;
 
 public class PhysicalBootstrapper : MonoBehaviour {
-
 	public AudioClip[] impactSounds;
 	public AudioClip[] landSounds;
-
 	private GameObject hingeObject;
 	private GameObject groundObject;
 	private Rigidbody2D groundBody;
@@ -14,31 +12,30 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	private SliderJoint2D sliderJoint2D;
 	public Physical physical;
 	private Collider2D tomCollider;
-	private SpriteRenderer spriteRenderer;
+//	private SpriteRenderer spriteRenderer;
 	public float initHeight;
 	public Vector2 initVelocity;
 	public bool ignoreCollisions;
 	public bool doInit = true;
-//	private float setVx;
-//	private float setVy;
-//	private float setVz;
 	private Vector3 setV;
 
 	public void Start () {
 		tag = "Physical";
-		spriteRenderer = GetComponent<SpriteRenderer>();
+//		spriteRenderer = GetComponent<SpriteRenderer>();
 		GetComponent<Renderer>().sortingLayerName="main";
-
 		//this will need to be modified when we have more humanoids!!!!:
 		GameObject tom = GameObject.Find("Tom");
 		if (tom)
 			tomCollider = GameObject.Find("Tom").GetComponent<Collider2D>(); 
 		if (doInit)
 			InitPhysical(initHeight, initVelocity);
-
 		if (impactSounds.Length > 0){
 			Toolbox.Instance.SetUpAudioSource(gameObject);
 		}
+	}
+
+	void LoadInit(){
+		Start();
 	}
 
 	public void DestroyPhysical(){
@@ -53,8 +50,6 @@ public class PhysicalBootstrapper : MonoBehaviour {
 
 	public void InitPhysical(float height, Vector3 initialVelocity){
 		doInit = false;
-
-
 		Vector2 initPos = transform.position;
 		Vector2 groundPos = transform.position;
 
@@ -134,11 +129,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	}
 
 	public void Set3Motion(Vector3 velocity){
-//		setV = new Vector3(vx, vy, vz);
 		setV = velocity;
-//		setVx = vx;
-//		setVy = vy;
-//		setVz = vz;
 	}
 
 	void FixedUpdate(){
@@ -148,22 +139,9 @@ public class PhysicalBootstrapper : MonoBehaviour {
 			physical.objectBody.velocity = objectVelocity;
 			Rigidbody2D groundBody = physical.GetComponent<Rigidbody2D>();
 			groundBody.velocity = groundVelocity;
-//			setVx = setVy = setVz = 0;
 			setV = Vector3.zero;
 		}
 	}
-
-//	public void SetVelocity(Vector2 velocity){
-//		Vector2 groundVelocity = Vector2.zero;
-//		Vector2 objectVelocity = Vector2.zero;
-//
-//		groundVelocity.x = velocity.x;
-//		objectVelocity.y = velocity.y;
-//
-//		groundBody.velocity = groundVelocity;
-//		GetComponent<Rigidbody2D>().velocity = objectVelocity;
-//
-//	}
 
 	void OnDestroy(){
 		if (physical)
