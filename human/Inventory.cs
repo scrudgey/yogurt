@@ -238,7 +238,8 @@ public class Inventory : Interactive, IExcludable {
 		holding.GetComponent<Renderer>().sortingLayerName = "main";
 		holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder + 1;
 		slash.GetComponent<Animator>().SetBool(slashFlag, true);
-		Physics2D.IgnoreCollision(holding.GetComponent<Collider2D>(), slash.GetComponent<Collider2D>(), true);
+		Collider2D slashCollider = slash.GetComponent<Collider2D>();
+		Physics2D.IgnoreCollision(holding.GetComponent<Collider2D>(), slashCollider, true);
 		Slasher s = slash.GetComponent<Slasher>();
 		s.impactSounds = holding.GetComponent<MeleeWeapon>().impactSounds;
 		s.direction = controllable.direction;
