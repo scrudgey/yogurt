@@ -14,7 +14,6 @@ public class Priority{
 		goalStack.Add(GoalFactory.GetItemGoal("fire extinguisher"));
 		goalStack.Add(GoalFactory.WalkTo(g));
 		goalStack.Add(GoalFactory.HoseDown(g));
-		Debug.Log("switching priority to extinguish object");
 	}
 
 	public void Wander(){
@@ -55,7 +54,6 @@ public class EntityController : MonoBehaviour {
 	}
 
 	public void CheckPriority(){
-		Debug.Log("checking priorty");
 		if (priority.goalStack.Count > 0){
 			goal = priority.goalStack[0];
 			priority.goalStack.RemoveAt(0);
