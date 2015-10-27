@@ -113,7 +113,6 @@ public class LiquidContainer : Interactive {
 		if (doSpill){
 			doSpill = false;
 			if (amount > 0 && spillTimeout <= 0){
-				Vector3 myPosition = transform.position;
 				Vector3 initialVelocity = Vector2.zero;
 				Vector3 randomVelocity = Vector2.zero;
 				randomVelocity = transform.right * Random.Range(-0.5f, 0.5f);
