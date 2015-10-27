@@ -14,7 +14,6 @@ public class ActionButtonScript: MonoBehaviour {
 	private bool mouseHeld;
 
 	public void clicked(){
-
 		switch (bType){
 		case buttonType.Action:
 			if (Controller.Instance.InteractionIsWithinRange(action) || manualAction){
@@ -40,7 +39,6 @@ public class ActionButtonScript: MonoBehaviour {
 			UISystem.Instance.ThrowCallback();
 			break;
 		}
-
 	}
 
 	void Update(){
