@@ -70,7 +70,7 @@ public class ContainerHandler: SaveHandler<Container> {
 		data.ints["itemCount"] = instance.items.Count;
 		if (instance.items.Count > 0){
 			for (int i = 0; i < instance.items.Count; i++){
-				data.ints["item"+i.ToString()] = resolver.ResolveReference(instance.items[i].gameObject,data.persistent);
+				data.ints["item"+i.ToString()] = resolver.ResolveReference(instance.items[i].gameObject, data.persistent);
 			}
 		}
 	}
