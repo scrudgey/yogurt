@@ -17,12 +17,7 @@ public class Flammable : MonoBehaviour {
 
 	void Start () {
 		//ensure that there is a speaker
-		if (!GetComponent<AudioSource>()){
-			gameObject.AddComponent<AudioSource>();
-		}
-		GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Logarithmic;
-		GetComponent<AudioSource>().minDistance = 0.4f;
-		GetComponent<AudioSource>().maxDistance = 5.42f;
+		Toolbox.Instance.SetUpAudioSource(gameObject);
 		burnSounds = Resources.Load("sounds/Crackling Fire",typeof(AudioClip)) as AudioClip;
 		igniteSounds[0] = Resources.Load("sounds/Flash Fire Ignite 01",typeof(AudioClip)) as AudioClip;
 		igniteSounds[1] = Resources.Load("sounds/Flash Fire Ignite 02",typeof(AudioClip)) as AudioClip;
