@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 
+[System.Serializable]
 public class Interaction {
 	public List<System.Type> parameterTypes;
 	public List<Interactive> targetComponents;
@@ -159,10 +160,7 @@ public class Interactive : MonoBehaviour{
 	}
 
 	public bool disableInteractions;
-
 	public List<Interaction> interactions = new List<Interaction> ();
-
-
 
 	public List<Interaction> GetEnabledActions(){
 		List<Interaction> returnList = new List<Interaction> ();
