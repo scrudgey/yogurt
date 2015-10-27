@@ -27,15 +27,12 @@ public class Physical : MonoBehaviour {
 		slider = GetComponent<SliderJoint2D>();
 		trueObject = transform.GetChild(0).transform.GetChild(0).gameObject;
 		hinge = transform.GetChild(0).gameObject;
-
 		groundCollider = GetComponent<Collider2D>();
 		objectCollider = trueObject.GetComponent<Collider2D>();
-		
 		//TODO: this will need to be modified when we have more humanoids!!!!:
 		GameObject tom = GameObject.Find("Tom");
 		if (tom)
 			tomCollider = GameObject.Find("Tom").GetComponent<EdgeCollider2D>();
-
 		// ignore collisions between ground and all other objects
 		GameObject[] physicals = GameObject.FindGameObjectsWithTag("Physical");
 		foreach(GameObject phys in physicals){
@@ -49,9 +46,7 @@ public class Physical : MonoBehaviour {
 			}
 		}
 		Physics2D.IgnoreCollision(groundCollider, objectCollider, false);
-
 		FlyMode();
-
 	}
 
 	public void Impact(Vector2 f){
@@ -64,13 +59,17 @@ public class Physical : MonoBehaviour {
 		if (destructible){
 			float damage = f.magnitude * 20f;
 			destructible.TakeDamage(Destructible.damageType.physical, damage);
-			Debug.Log("Impact damage on " + gameObject.name + " to the tune of " + damage.ToString());
 		}
 	}
 
 	void FixedUpdate () {
 		if (currentMode == mode.fly){
-			if(hinge.transform.localPosition.y < 0.1){
+			if (hinge.transform.localPosition.y < 0){
+				Vector2 hingePosition = hinge.transform.localPosition;
+				hingePosition.y = 0.1f;
+				hinge.transform.localPosition = hingePosition;
+			}
+			if (hinge.transform.localPosition.y < 0.1){
 				GetComponent<Rigidbody2D>().drag = 5;
 				GetComponent<Rigidbody2D>().mass = objectBody.mass;
 			} else {
@@ -92,12 +91,10 @@ public class Physical : MonoBehaviour {
 			trueObject.layer = 12;
 		}
 		height = hinge.transform.localPosition.y;
-
 		if (doGround){
 			doGround = false;
 			StartGroundMode();
 		}
-
 		if (doFly){
 			doFly = false;
 			StartFlyMode();
@@ -162,7 +159,6 @@ public class Physical : MonoBehaviour {
 		Physics2D.IgnoreCollision(objectCollider, tomCollider, true);
 		// set object gravity on
 		objectBody.gravityScale = GameManager.Instance.gravity;
-		//unfix sliderLimits = slider.limits;
 		slider = GetComponent<SliderJoint2D>();
 		slider.useLimits = false;
 		//update mode
@@ -190,7 +186,6 @@ public class Physical : MonoBehaviour {
 
 	void OnCollisionStay2D(Collision2D coll){
 		if(coll.collider == objectCollider && coll.relativeVelocity.magnitude < 0.01 && currentMode != mode.ground){
-//		if(coll.collider == objectCollider && currentMode != mode.ground){
 			GroundMode();
 		}
 	}
