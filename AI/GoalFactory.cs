@@ -40,8 +40,8 @@ namespace AI {
 				Routine.status routineStatus =	routines[index].Update();
 				returnStatus = successCondition.Evaluate();
 				
-				if (routineStatus == Routine.status.success)
-					Debug.Log("routine success");
+//				if (routineStatus == Routine.status.success)
+//					Debug.Log("routine success");
 				if (routineStatus == Routine.status.failure){
 					Controller.ResetInput(control);
 					index ++;
