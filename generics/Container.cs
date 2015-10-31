@@ -39,11 +39,15 @@ public class Container : Interactive, IExcludable {
 		Interaction removeThis = null;
 		foreach (Interaction interaction in interactions)
 		{
-			if (interaction.parameters.Count == 2)
-				if (interaction.parameters[1] == pickup)
-					removeThis = interaction;
-			if (interaction.actionName == pickup.itemName)
-				    removeThis = interaction;
+			if (interaction.parameters == null){
+				removeThis = interaction;
+			} else {
+				if (interaction.parameters.Count == 2)
+					if (interaction.parameters[1] == pickup)
+						removeThis = interaction;
+				if (interaction.actionName == pickup.itemName)
+					    removeThis = interaction;
+			}
 		}
 		if (removeThis != null)
 			interactions.Remove(removeThis);
@@ -68,7 +72,7 @@ public class Container : Interactive, IExcludable {
 			AddItem(pickup);
 			Action<Component> removeIt = (comp) => {
 				Inventory i = comp as Inventory;
-				Remove(i,pickup);
+				Remove(i, pickup);
 			};
 			Interaction newInteraction = new Interaction(this,pickup.itemName,removeIt);
 			newInteraction.displayVerb = "Retreive "+pickup.itemName+" from";
