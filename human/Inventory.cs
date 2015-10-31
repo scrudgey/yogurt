@@ -44,7 +44,11 @@ public class Inventory : Interactive, IExcludable {
 	public void LoadInit(){
 		controllable = GetComponent<Controllable>();
 		holdpoint = transform.Find("holdpoint");
-		interactions.Add(new Interaction(this, "Get", "GetItem",true,false));
+//		interactions.Add(new Interaction(this, "Get", "GetItem",true,false));
+		Interaction getAction = new Interaction(this, "Get", "GetItem", true, false);
+		getAction.dontWipeInterface = false;
+		interactions.Add(getAction);
+
 		Interaction swingAction = new Interaction(this, "Swing", "SwingItem", false,true);
 		swingAction.defaultPriority = 5;
 		interactions.Add(swingAction);
