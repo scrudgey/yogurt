@@ -58,8 +58,10 @@ public class CameraControl : MonoBehaviour {
 
 			// update camera world coordinates.
 			RectTransform UIRect = UISystem.Instance.background.GetComponent<RectTransform>();
-			lowerLeftWorld = mainCamera.ScreenToWorldPoint( new Vector2(0, mainCamera.WorldToScreenPoint(UIRect.position).y + UIRect.rect.height/2));
-			upperRightWorld = mainCamera.ScreenToWorldPoint ( new Vector2(mainCamera.pixelWidth,mainCamera.pixelHeight) );
+//			lowerLeftWorld = mainCamera.ScreenToWorldPoint(new Vector2(0, mainCamera.WorldToScreenPoint(UIRect.position).y + UIRect.rect.height/2));
+//			upperRightWorld = mainCamera.ScreenToWorldPoint(new Vector2(mainCamera.pixelWidth, mainCamera.pixelHeight) );
+			lowerLeftWorld = GetComponent<Camera>().ScreenToWorldPoint( Vector2.zero);
+			upperRightWorld = GetComponent<Camera>().ScreenToWorldPoint ( new Vector2(GetComponent<Camera>().pixelWidth,GetComponent<Camera>().pixelHeight) );
 			screenWidthWorld = upperRightWorld.x - lowerLeftWorld.x;
 			screenHeightWorld = upperRightWorld.y - lowerLeftWorld.y;
 
@@ -74,17 +76,30 @@ public class CameraControl : MonoBehaviour {
 			tempVector = tempVector + shakeVector;
 
 			//check for edge of level
+//			if (tempVector.x - screenWidthWorld/2 < minXY.x){
+//				tempVector.x = minXY.x + screenWidthWorld/2;
+//			}
+//			if (tempVector.y - screenHeightWorld/2 - POV.y < minXY.y){
+//				tempVector.y = minXY.y + screenHeightWorld/2 + POV.y;
+//			}
+//			if (tempVector.x + screenWidthWorld/2 > maxXY.x){
+//				tempVector.x = maxXY.x - screenWidthWorld/2;
+//			}
+//			if (tempVector.y + screenHeightWorld/2 + POV.y > maxXY.y){
+//				tempVector.y = maxXY.y - screenHeightWorld/2 - POV.y;
+//			}
+
 			if (tempVector.x - screenWidthWorld/2 < minXY.x){
 				tempVector.x = minXY.x + screenWidthWorld/2;
 			}
-			if (tempVector.y - screenHeightWorld/2 - POV.y < minXY.y){
-				tempVector.y = minXY.y + screenHeightWorld/2 + POV.y;
+			if (tempVector.y - screenHeightWorld/2 < minXY.y){
+				tempVector.y = minXY.y + screenHeightWorld/2;
 			}
 			if (tempVector.x + screenWidthWorld/2 > maxXY.x){
 				tempVector.x = maxXY.x - screenWidthWorld/2;
 			}
-			if (tempVector.y + screenHeightWorld/2 + POV.y > maxXY.y){
-				tempVector.y = maxXY.y - screenHeightWorld/2 - POV.y;
+			if (tempVector.y + screenHeightWorld/2 > maxXY.y){
+				tempVector.y = maxXY.y - screenHeightWorld/2;
 			}
 
 			// update camera position
