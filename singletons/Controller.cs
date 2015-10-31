@@ -14,38 +14,27 @@ public class Controller : Singleton<Controller> {
 		control.downFlag = false;
 		control.leftFlag = false;
 		control.rightFlag = false;
-		
 		control.shootPressedFlag = false;
 		control.shootHeldFlag = false;
 	}
 
 	// Update is called once per frame
 	void Update () {
-		
-
 		if (focus != null){
-
 			ResetInput(focus);
-
 			if( Input.GetAxis("Vertical") > 0 )
 				focus.upFlag = true;
-
 			if(Input.GetAxis("Vertical") < 0)
 				focus.downFlag = true;
-
 			if(Input.GetAxis("Horizontal") < 0)
 				focus.leftFlag = true;
-
 			if(Input.GetAxis("Horizontal") > 0)
 				focus.rightFlag = true;
-
 			//Fire key 
 			if(Input.GetButtonDown("Fire1"))
 				focus.shootPressedFlag = true;
-
 			if(Input.GetButton("Fire1"))
 				focus.shootHeldFlag = true;
-
 		}
 	}
 
@@ -77,7 +66,7 @@ public class Controller : Singleton<Controller> {
 						if (hit.collider != null && hit.collider.tag != "fire" && hit.collider.tag != "sightcone" ){
 							focus.lastLeftClicked = hit.collider.gameObject;
 							lastLeftClicked = hit.collider.gameObject;
-							UISystem.Instance.actions = Interactor.Instance.GetInteractions(focus.gameObject,lastLeftClicked);
+							UISystem.Instance.actions = Interactor.Instance.GetInteractions(focus.gameObject, lastLeftClicked);
 							UISystem.Instance.targetName = lastLeftClicked.name;
 						}
 					}
@@ -90,6 +79,10 @@ public class Controller : Singleton<Controller> {
 			}
 		}
 		
+	}
+
+	public void UpdateActions(){
+		UISystem.Instance.actions = Interactor.Instance.GetInteractions(focus.gameObject, lastLeftClicked);
 	}
 
 	public bool InteractionIsWithinRange(Interaction i){
