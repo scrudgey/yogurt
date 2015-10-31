@@ -73,7 +73,7 @@ public class GameManager : Singleton<GameManager> {
 		// initialize values re: player object focus
 		PostLoad(player);
 		// initialize UI system references
-		UISystem.Instance.PostLoadInit();
+//		UISystem.Instance.PostLoadInit();
 		// place player at appropriate entrance
 		PlayerEnter();
 	}
