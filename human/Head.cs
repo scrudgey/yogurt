@@ -15,7 +15,11 @@ public class Head : Interactive, IExcludable {
 	}
 
 	void LoadInit(){
-		interactions.Add( new Interaction(this,"Wear","DonHat"));
+//		interactions.Add( new Interaction(this,"Wear","DonHat"));
+		Interaction wearAct = new Interaction(this, "Wear", "DonHat");
+		wearAct.dontWipeInterface = false;
+		interactions.Add(wearAct);
+
 		hatPoint = transform.Find("hatPoint").gameObject;
 		spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
 		intrinsics = gameObject.GetComponentInParent<Intrinsics>();
