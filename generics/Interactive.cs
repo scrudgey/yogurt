@@ -19,7 +19,7 @@ public class Interaction {
 	public int defaultPriority;
 	public float range = 0.5f;
 	public bool limitless = false;
-	public bool dontWipeInterface = false;
+	public bool dontWipeInterface = true;
 	public string actionName;
 	public string displayVerb;
 
