@@ -108,16 +108,24 @@ public class Toolbox : Singleton<Toolbox> {
 		string output = "";
 		if (input != null){
 			Regex cloneFinder = new Regex(@"(.+)\(Clone\)$", RegexOptions.Multiline);
-			Regex underscoreFinder = new Regex(@"_",RegexOptions.Multiline);
+			Regex underscoreFinder = new Regex(@"_", RegexOptions.Multiline);
 			string name = input;
-
 			MatchCollection matches = cloneFinder.Matches(input);
 			if (matches.Count > 0){									// the object is a clone, capture just the normal name
 				foreach (Match match in matches){
 					name = match.Groups[1].Value;
 				}
 			}
-			output = underscoreFinder.Replace(name," ");
+			output = underscoreFinder.Replace(name, " ");
+		}
+		return output;
+	}
+
+	public string ReplaceUnderscore(string input){
+		string output = "";
+		if (input != null){
+			Regex spaceFinder = new Regex(@" ", RegexOptions.Multiline);
+			output = spaceFinder.Replace(input, "_");
 		}
 		return output;
 	}
@@ -132,7 +140,6 @@ public class Toolbox : Singleton<Toolbox> {
 					output = match.Groups[1].Value;
 				}
 			}
-
 		}
 		return output;
 	}
