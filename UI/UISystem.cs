@@ -219,13 +219,13 @@ public class UISystem : Singleton<UISystem> {
 			if (inventory){
 				inventory.UpdateActions();
 				UpdateInventoryButtons();
+				UpdateWorldActions();
 			}
 		}
 	}
 
 	public void MouseOverAction(ActionButtonScript button){
 		if ( button.bType != ActionButtonScript.buttonType.Inventory ){
-
 			if (button.manualAction == false){
 					verbText = button.action.displayVerb;
 			} else{
