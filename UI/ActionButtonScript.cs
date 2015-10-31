@@ -18,9 +18,10 @@ public class ActionButtonScript: MonoBehaviour {
 		case buttonType.Action:
 			if (Controller.Instance.InteractionIsWithinRange(action) || manualAction){
 				action.DoAction();
+				Controller.Instance.UpdateActions();
+				UISystem.Instance.doUpdate = true;
 				if (!action.dontWipeInterface){
 					UISystem.Instance.WipeWorldActions();
-					UISystem.Instance.doUpdate = true;
 				}
 			}
 			break;
