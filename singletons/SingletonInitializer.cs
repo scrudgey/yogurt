@@ -23,7 +23,6 @@ public class SingletonInitializer : MonoBehaviour {
 		foreach(string requirement in requirements){
 			GameObject go = GameObject.Find(requirement);
 			if (!go){
-				Debug.Log("instantitating required "+requirement);
 				string path = @"required/"+requirement;
 				GameObject newgo = GameObject.Instantiate(Resources.Load(path)) as GameObject;
 				newgo.name = Toolbox.Instance.ScrubText(newgo.name);
