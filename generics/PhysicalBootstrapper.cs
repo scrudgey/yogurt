@@ -18,6 +18,8 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	public bool ignoreCollisions;
 	public bool doInit = true;
 	private Vector3 setV;
+//	private EdgeCollider2D tableCollider;
+	private BoxCollider2D groundCollider;
 
 	public void Start () {
 		tag = "Physical";
@@ -42,7 +44,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		transform.parent = null;
 		Destroy(groundObject);
 		GetComponent<Rigidbody2D>().gravityScale = 0;
-		Physics2D.IgnoreCollision(tomCollider,GetComponent<Collider2D>(),false);
+		Physics2D.IgnoreCollision(tomCollider, GetComponent<Collider2D>(),false);
 		physical = null;
 		doInit = false;
 	}
@@ -89,9 +91,9 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		groundBody.fixedAngle = true;
 		
 		//box collider
-		BoxCollider2D groundCollider = groundObject.AddComponent<BoxCollider2D>();
+		groundCollider = groundObject.AddComponent<BoxCollider2D>();
 		groundCollider.size = new Vector2(0.1606f, 0.05f);
-		groundCollider.offset = new Vector2(0.0f, -0.05f);
+		groundCollider.offset = new Vector2(0.0f, -0.025f);
 		groundCollider.sharedMaterial = Resources.Load<PhysicsMaterial2D>("ground"); 
 
 		//sprite renderer
@@ -108,7 +110,8 @@ public class PhysicalBootstrapper : MonoBehaviour {
 
 		//Slider joint
 		sliderJoint2D = groundObject.AddComponent<SliderJoint2D>();
-		sliderJoint2D.collideConnected = true;
+//		sliderJoint2D.collideConnected = true;
+		sliderJoint2D.enableCollision = true;
 		sliderJoint2D.angle = 90f;
 		sliderJoint2D.connectedBody = hingeBody;
 		
@@ -147,4 +150,5 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		if (physical)
 			Destroy(physical.gameObject);
 	}
+
 }
