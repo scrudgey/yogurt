@@ -5,29 +5,30 @@ public class Physical : MonoBehaviour {
 
 	public AudioClip[] impactSounds;
 	public AudioClip[] landSounds;
-	private SliderJoint2D slider;
+	public SliderJoint2D slider;
 	private GameObject trueObject;
 	public Collider2D objectCollider;
-	public Collider2D groundCollider;
+	public BoxCollider2D groundCollider;
 	private Collider2D tomCollider;
 	public Rigidbody2D objectBody;
 	public Rigidbody2D hingeBody;
-	private GameObject hinge;
+	public GameObject hinge;
 	public enum mode{fly, ground, dormant}
 	public mode currentMode;
 	public float height;
-//	public float groundYVelocity;
 	public bool ignoreCollisions;
 	public PhysicalBootstrapper bootstrapper;
 	private bool doFly;
 	private bool doGround;
+	private SpriteRenderer spriteRenderer;
 
 	// Use this for initialization
 	void Start () {
+		spriteRenderer = GetComponent<SpriteRenderer>();
 		slider = GetComponent<SliderJoint2D>();
 		trueObject = transform.GetChild(0).transform.GetChild(0).gameObject;
 		hinge = transform.GetChild(0).gameObject;
-		groundCollider = GetComponent<Collider2D>();
+		groundCollider = GetComponent<BoxCollider2D>();
 		objectCollider = trueObject.GetComponent<Collider2D>();
 		//TODO: this will need to be modified when we have more humanoids!!!!:
 		GameObject tom = GameObject.Find("Tom");
@@ -63,13 +64,15 @@ public class Physical : MonoBehaviour {
 	}
 
 	void FixedUpdate () {
+//		height = hinge.transform.localPosition.y;
+		height = groundCollider.size.y / 2f - groundCollider.offset.y + hinge.transform.localPosition.y;
 		if (currentMode == mode.fly){
-			if (hinge.transform.localPosition.y < 0){
+			if (height < 0){
 				Vector2 hingePosition = hinge.transform.localPosition;
-				hingePosition.y = 0.1f;
+				hingePosition.y = 0.1f + groundCollider.size.y / 2f - groundCollider.offset.y;
 				hinge.transform.localPosition = hingePosition;
 			}
-			if (hinge.transform.localPosition.y < 0.1){
+			if (height < 0.1){
 				GetComponent<Rigidbody2D>().drag = 5;
 				GetComponent<Rigidbody2D>().mass = objectBody.mass;
 			} else {
@@ -90,7 +93,6 @@ public class Physical : MonoBehaviour {
 		if(hinge.transform.localPosition.y > 0.6 ){
 			trueObject.layer = 12;
 		}
-		height = hinge.transform.localPosition.y;
 		if (doGround){
 			doGround = false;
 			StartGroundMode();
@@ -147,6 +149,16 @@ public class Physical : MonoBehaviour {
 				}
 			}
 		}
+		GameObject[] tables = GameObject.FindGameObjectsWithTag("table");
+		foreach(GameObject table in tables){
+			Collider2D[] colliders = table.GetComponentsInChildren<Collider2D>();
+			foreach(Collider2D tableCollider in colliders){
+				if (tableCollider.isTrigger == false){
+					Physics2D.IgnoreCollision(groundCollider, tableCollider, true);
+					Physics2D.IgnoreCollision(objectCollider, tableCollider, true);
+				}
+			}
+		}
 	}
 
 	private void StartFlyMode(){
@@ -170,6 +182,16 @@ public class Physical : MonoBehaviour {
 		foreach(Physical phys in physicals){
 			Physics2D.IgnoreCollision(groundCollider, phys.GetComponent<Collider2D>(), true);
 		}
+		GameObject[] tables = GameObject.FindGameObjectsWithTag("table");
+		foreach(GameObject table in tables){
+			Collider2D[] colliders = table.GetComponentsInParent<Collider2D>();
+			foreach(Collider2D tableCollider in colliders){
+				if (tableCollider.isTrigger == false){
+					Physics2D.IgnoreCollision(groundCollider, tableCollider, true);
+					Physics2D.IgnoreCollision(objectCollider, tableCollider, true);
+				}
+			}
+		}
 	}
 	
 
@@ -179,7 +201,9 @@ public class Physical : MonoBehaviour {
 				GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
 			}
 		}
+		// this part right here is pretty essential to whether the object can fall off the world, or what
 		if (coll.collider == objectCollider){
+			GroundMode();
 			BroadcastMessage("OnGroundImpact", this, SendMessageOptions.DontRequireReceiver);
 		}
 	}
@@ -187,6 +211,50 @@ public class Physical : MonoBehaviour {
 	void OnCollisionStay2D(Collision2D coll){
 		if(coll.collider == objectCollider && coll.relativeVelocity.magnitude < 0.01 && currentMode != mode.ground){
 			GroundMode();
+		}
+	}
+
+	void OnTriggerEnter2D(Collider2D coll){
+		if (coll.tag == "table" && coll.gameObject != gameObject){
+			Table table = coll.GetComponent<Table>();
+			ActivateTableCollider(table);
+		}
+	}
+	
+	void OnTriggerExit2D(Collider2D coll){
+		if (coll.tag == "table" && coll.gameObject != gameObject){
+			Table table = coll.GetComponent<Table>();
+			DeactivateTableCollider(table);
+		}
+	}
+
+	void ActivateTableCollider(Table table){
+		if (groundCollider){
+			spriteRenderer.enabled = false;
+			groundCollider.size = new Vector2(0.1606f, 0.05f + table.height);
+			groundCollider.offset = new Vector2(0.0f, -0.025f + groundCollider.size.y / 2f);
+			Collider2D[] tableColliders = table.gameObject.GetComponentsInParent<Collider2D>();
+			foreach (Collider2D tableCollider in tableColliders){
+				if (tableCollider.isTrigger == false){
+					Physics2D.IgnoreCollision(groundCollider, tableCollider, true);
+					Physics2D.IgnoreCollision(objectCollider, tableCollider, true);
+				}
+			}
+		}
+	}
+	
+	void DeactivateTableCollider(Table table){
+		if (groundCollider){
+			spriteRenderer.enabled = true;
+			groundCollider.size = new Vector2(0.1606f, 0.05f);
+			groundCollider.offset = new Vector2(0.0f, -0.025f);
+			FlyMode();
+			Collider2D[] tableColliders = table.gameObject.GetComponentsInParent<Collider2D>();
+			foreach (Collider2D tableCollider in tableColliders){
+				if (tableCollider.isTrigger == false){
+					Physics2D.IgnoreCollision(groundCollider, tableCollider, false);
+				}
+			}
 		}
 	}
 
