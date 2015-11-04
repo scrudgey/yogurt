@@ -1,11 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
 public class Controller : Singleton<Controller> {
 
 	public Controllable focus;
 	private GameObject lastLeftClicked;
+	private List<string> forbiddenColliders = new List<string> {"fire", "sightcone", "table"};
 
 	public string message ="smoke weed every day";
 	
@@ -49,13 +51,11 @@ public class Controller : Singleton<Controller> {
 				//detect if we clicked anything
 				RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
 				foreach (RaycastHit2D hit in hits){
-					if (hit.collider != null && hit.transform.tag != "fire" && hit.collider.tag != "sightcone" ){
+					if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)){
 						focus.lastRightClicked = hit.collider.gameObject;
 					}
-
 				}
 			}
-
 			// left click
 			if (Input.GetMouseButtonDown(0)){
 				//detect if we clicked anything
@@ -63,7 +63,7 @@ public class Controller : Singleton<Controller> {
 				{
 					RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
 					foreach (RaycastHit2D hit in hits){
-						if (hit.collider != null && hit.collider.tag != "fire" && hit.collider.tag != "sightcone" ){
+						if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)){
 							focus.lastLeftClicked = hit.collider.gameObject;
 							lastLeftClicked = hit.collider.gameObject;
 							UISystem.Instance.actions = Interactor.Instance.GetInteractions(focus.gameObject, lastLeftClicked);
