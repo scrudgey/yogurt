@@ -14,8 +14,6 @@ public class SingletonInitializer : MonoBehaviour {
 		Debug.Log(tempstring);
 	}
 
-
-
 	public void RobustLoad(){
 		// this routine checks to make sure all the necessary pieces are instantiated in the scene.
 		// if they aren't, it will spawn them.
