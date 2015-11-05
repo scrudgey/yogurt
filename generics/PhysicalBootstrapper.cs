@@ -88,7 +88,8 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		groundBody.drag = 1f;
 		groundBody.angularDrag = 0.05f;
 		groundBody.gravityScale = 0;
-		groundBody.fixedAngle = true;
+//		groundBody.fixedAngle = true;
+		groundBody.freezeRotation = true;
 		
 		//box collider
 		groundCollider = groundObject.AddComponent<BoxCollider2D>();
