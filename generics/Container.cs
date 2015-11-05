@@ -90,6 +90,9 @@ public class Container : Interactive, IExcludable {
 		Messenger.Instance.ClaimObject(pickup.gameObject,this);
 		
 		// place it behind me
+		OrderByY yorder = pickup.GetComponent<OrderByY>();
+		if (yorder)
+			yorder.enabled = false;
 		SpriteRenderer rend = pickup.GetComponent<SpriteRenderer>();
 		if (rend)
 			rend.sortingOrder = GetComponent<SpriteRenderer>().sortingOrder - 1;
@@ -140,7 +143,11 @@ public class Container : Interactive, IExcludable {
 
 		if (disableContents)
 			pickup.gameObject.SetActive(true);
-		
+
+		OrderByY yorder = pickup.GetComponent<OrderByY>();
+		if (yorder)
+			yorder.enabled = true;
+
 		Messenger.Instance.DisclaimObject(pickup.gameObject, this);
 
 		items.Remove(pickup);
@@ -173,6 +180,9 @@ public class Container : Interactive, IExcludable {
 		if(physical && physical.doInit)
 			physical.InitPhysical(0.05f,Vector2.zero);
 
+		OrderByY yorder = pickup.GetComponent<OrderByY>();
+		if (yorder)
+			yorder.enabled = true;
 
 		Messenger.Instance.DisclaimObject(pickup.gameObject,this);
 		items.Remove(pickup);
