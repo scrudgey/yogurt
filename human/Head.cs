@@ -36,6 +36,10 @@ public class Head : Interactive, IExcludable {
 		PhysicalBootstrapper phys = hat.GetComponent<PhysicalBootstrapper>();
 		if (phys)
 			phys.DestroyPhysical();
+
+		OrderByY yorder = hat.GetComponent<OrderByY>();
+		if (yorder)
+			yorder.enabled = false;
 		
 		SpriteRenderer hatRenderer = hat.GetComponent<SpriteRenderer>();
 		if (hatRenderer)
@@ -83,8 +87,11 @@ public class Head : Interactive, IExcludable {
 		SpriteRenderer hatRenderer = hat.GetComponent<SpriteRenderer>();
 		if (hatRenderer){
 			hatRenderer.sortingLayerName = "main";
-			hatRenderer.sortingOrder = spriteRenderer.sortingOrder - 1;
+//			hatRenderer.sortingOrder = spriteRenderer.sortingOrder - 1;
 		}
+		OrderByY yorder = hat.GetComponent<OrderByY>();
+		if (yorder)
+			yorder.enabled = true;
 		HatAnimation hatAnimator = hat.GetComponent<HatAnimation>();
 		if (hatAnimator){
 			hatAnimator.CheckDependencies();
