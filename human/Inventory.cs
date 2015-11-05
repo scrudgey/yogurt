@@ -73,6 +73,9 @@ public class Inventory : Interactive, IExcludable {
 				PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
 				if (phys)
 					phys.DestroyPhysical();
+				OrderByY yorder = holding.GetComponent<OrderByY>();
+				if (yorder)
+					yorder.enabled = false;
 				holding.transform.position = holdpoint.position;
 				holdpoint.localScale = Vector3.one;
 				transform.localScale = Vector3.one;
@@ -99,6 +102,9 @@ public class Inventory : Interactive, IExcludable {
 		PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
 		if (phys)	
 			phys.doInit = false;
+		OrderByY yorder = holding.GetComponent<OrderByY>();
+		if (yorder)
+			yorder.enabled = true;
 		holding.GetComponent<Rigidbody2D>().isKinematic = false;
 		holding.GetComponent<Collider2D>().isTrigger = false;
 		holding = null;
@@ -119,6 +125,9 @@ public class Inventory : Interactive, IExcludable {
 		} else {
 			holding.transform.parent = null;
 		}
+		OrderByY yorder = holding.GetComponent<OrderByY>();
+		if (yorder)
+			yorder.enabled = true;
 		SpriteRenderer sprite = holding.GetComponent<SpriteRenderer>();
 		sprite.sortingLayerName = "main";
 		defaultInteraction = null;
@@ -162,6 +171,9 @@ public class Inventory : Interactive, IExcludable {
 	public void ThrowItem(){
 		// set up the held object to be thrown on the next fixed update
 		throwObject = holding.gameObject;
+		OrderByY yorder = holding.GetComponent<OrderByY>();
+		if (yorder)
+			yorder.enabled = false;
 		holding = null;
 	}
 
