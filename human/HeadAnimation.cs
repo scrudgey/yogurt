@@ -27,6 +27,7 @@ public class HeadAnimation : MonoBehaviour {
 	}
 	private Sprite[] sprites;
 	private SpriteRenderer spriteRenderer;
+	private SpriteRenderer parentSprite;
 	public string baseName;
 	private int baseFrame;
 	private int frame;
@@ -39,7 +40,7 @@ public class HeadAnimation : MonoBehaviour {
 	private float vomitCountDown;
 
 	void LoadSprites(){
-		sprites = Resources.LoadAll<Sprite>("sprites/"+spriteSheet);
+		sprites = Resources.LoadAll<Sprite>("sprites/" + spriteSheet);
 	}
 	
 	public void UpdateSequence(){
@@ -48,9 +49,12 @@ public class HeadAnimation : MonoBehaviour {
 
 	void Start () {
 		spriteRenderer = GetComponent<SpriteRenderer>();
+		foreach (SpriteRenderer renderer in GetComponentsInParent<SpriteRenderer>()){
+			if (renderer != spriteRenderer)
+				parentSprite = renderer;
+		}
 		controllable = GetComponentInParent<Controllable>();
 		speech = GetComponentInParent<Speech>();
-//		baseName = "generic3";
 
 		ParticleSystem[] ps = GetComponentsInChildren<ParticleSystem>();
 		foreach (ParticleSystem p in ps){
@@ -66,7 +70,6 @@ public class HeadAnimation : MonoBehaviour {
 			}
 			p.GetComponent<Renderer>().sortingLayerName="held item";
 		}
-
 		crumbs = GetComponentInChildren<ParticleSystem>();
 	}
 
@@ -74,13 +77,11 @@ public class HeadAnimation : MonoBehaviour {
 		this.crumbColor = crumbColor;
 		this.eating = eating;
 		crumbs.startColor = crumbColor;
-
 		if (eating){
 			eatingCountDown = 2f;
 			if (!crumbs.isPlaying)
 				crumbs.Play();
 		}
-
 	}
 
 	public void SetVomit(bool v){
@@ -134,6 +135,10 @@ public class HeadAnimation : MonoBehaviour {
 
 		spriteSheet = updateSheet;
 		sequence = updateSequence;
+
+		if (parentSprite){
+			spriteRenderer.sortingOrder = parentSprite.sortingOrder;
+		}
 	}
 	public void SetFrame(int animationFrame){
 		frame = animationFrame + baseFrame;
