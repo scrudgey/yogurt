@@ -4,6 +4,7 @@ using System.Collections;
 public class PhysicalBootstrapper : MonoBehaviour {
 	public AudioClip[] impactSounds;
 	public AudioClip[] landSounds;
+	public AudioClip[] scrapeSounds;
 	private GameObject hingeObject;
 	private GameObject groundObject;
 	private Rigidbody2D groundBody;
@@ -12,18 +13,16 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	private SliderJoint2D sliderJoint2D;
 	public Physical physical;
 	private Collider2D tomCollider;
-//	private SpriteRenderer spriteRenderer;
-	public float initHeight;
+	public float initHeight = 0.1f;
+	public float groundDrag = 10f;
 	public Vector2 initVelocity;
 	public bool ignoreCollisions;
 	public bool doInit = true;
 	private Vector3 setV;
-//	private EdgeCollider2D tableCollider;
 	private BoxCollider2D groundCollider;
 
 	public void Start () {
 		tag = "Physical";
-//		spriteRenderer = GetComponent<SpriteRenderer>();
 		GetComponent<Renderer>().sortingLayerName="main";
 		//this will need to be modified when we have more humanoids!!!!:
 		GameObject tom = GameObject.Find("Tom");
@@ -85,10 +84,9 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		//rigidbody 2D
 		groundBody = groundObject.AddComponent<Rigidbody2D>();
 		groundBody.mass = 1f;
-		groundBody.drag = 1f;
+		groundBody.drag = groundDrag;
 		groundBody.angularDrag = 0.05f;
 		groundBody.gravityScale = 0;
-//		groundBody.fixedAngle = true;
 		groundBody.freezeRotation = true;
 		
 		//box collider
@@ -108,10 +106,10 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		groundPhysical.ignoreCollisions = ignoreCollisions;
 		groundPhysical.objectBody = GetComponent<Rigidbody2D>();
 		groundPhysical.hingeBody = hingeBody;
+		groundPhysical.groundDrag = groundDrag;
 
 		//Slider joint
 		sliderJoint2D = groundObject.AddComponent<SliderJoint2D>();
-//		sliderJoint2D.collideConnected = true;
 		sliderJoint2D.enableCollision = true;
 		sliderJoint2D.angle = 90f;
 		sliderJoint2D.connectedBody = hingeBody;
