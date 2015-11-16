@@ -61,7 +61,6 @@ public class LiquidContainer : Interactive {
 	public void FillWithLiquid(Liquid l){
 		if (amount > 0){
 			l = Liquid.MixLiquids(liquid, l);
-			Debug.Log(l.color);
 		}
 		liquid = l;
 		amount = fillCapacity;
