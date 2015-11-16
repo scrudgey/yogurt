@@ -7,7 +7,7 @@ public class Controller : Singleton<Controller> {
 
 	public Controllable focus;
 	private GameObject lastLeftClicked;
-	private List<string> forbiddenColliders = new List<string> {"fire", "sightcone", "table"};
+	private List<string> forbiddenColliders = new List<string> {"fire", "sightcone", "table", "background"};
 
 	public string message ="smoke weed every day";
 	
