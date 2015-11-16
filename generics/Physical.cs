@@ -21,9 +21,11 @@ public class Physical : MonoBehaviour {
 	private bool doFly;
 	private bool doGround;
 	private SpriteRenderer spriteRenderer;
+	public float groundDrag;
 
 	// Use this for initialization
 	void Start () {
+//		bootstrapper = GetComponent<PhysicalBootstrapper>();
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		slider = GetComponent<SliderJoint2D>();
 		trueObject = transform.GetChild(0).transform.GetChild(0).gameObject;
@@ -51,6 +53,7 @@ public class Physical : MonoBehaviour {
 	}
 
 	public void Impact(Vector2 f){
+		f = f / (objectBody.mass / 25f);
 		Destructible destructible = trueObject.GetComponent<Destructible>();
 		if (currentMode != mode.fly)
 			FlyMode();
@@ -64,7 +67,6 @@ public class Physical : MonoBehaviour {
 	}
 
 	void FixedUpdate () {
-//		height = hinge.transform.localPosition.y;
 		height = groundCollider.size.y / 2f - groundCollider.offset.y + hinge.transform.localPosition.y;
 		if (currentMode == mode.fly){
 			if (height < 0){
@@ -128,7 +130,7 @@ public class Physical : MonoBehaviour {
 		slider.limits = tempLimits;
 		slider.useLimits = true;
 		// set ground friction
-		GetComponent<Rigidbody2D>().drag = 10;
+		GetComponent<Rigidbody2D>().drag = groundDrag;
 		GetComponent<Rigidbody2D>().mass = objectBody.mass;
 		// update mode
 		currentMode = mode.ground;
