@@ -4,289 +4,141 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 
 public class UINew : Singleton<UINew> {
-	
-	public GameObject background;
-	private List<GameObject> worldButtons = new List<GameObject>();
-	private List<GameObject> handButtons = new List<GameObject>();
-	private List<GameObject> inventoryButtons = new List<GameObject>();
-	private int oldInventoryItems;
-	private Text actionText;
-	private Text handText;
-	private List<Interaction> _actions = new List<Interaction>();
-	public List<Interaction> actions {
-		get{
-			return _actions;
-		}
-		set{
-			_actions = value;
-			UpdateWorldActions();
-		}
-	}
-	private List<Interaction> _manualActions = new List<Interaction>();
-	public List<Interaction> manualActions{
-		get {
-			return _manualActions;
-		}
-		set {
-			_manualActions = value;
-			UpdateHandActions();
-		}
-	}
-	private GameObject UIObject;
-	private GameObject worldPanel;
-	private GameObject handPanel;
-	private GameObject inventoryPanel;
-	public string MOTD = "smoke weed every day";
-	private string _targetName;
-	private string _verbText;
-	public string targetName{
-		get {return _targetName;}
-		set {
-			string temp = Toolbox.Instance.ScrubText(value);
-			_targetName = temp;
-			UpdateText();
-		}
-	}
-	public string verbText{
-		get {return _verbText;}
-		set {
-			_verbText = value;
-			UpdateText();
-		}
-	}
-	private string _holdingName;
-	public string holdingName{
-		get {return _holdingName;}
-		set {
-			string temp = Toolbox.Instance.ScrubText(value);
-			_holdingName = temp;
-			UpdateText();
-		}
-	}
-	private string _holdingVerb;
-	public string holdingVerb{
-		get {return _holdingVerb;}
-		set {
-			_holdingVerb = value;
-			UpdateText();
-		}
-	}
-	public Inventory inventory;
-	public bool doUpdate;
-	
-	void Start(){
-		PostLoadInit();
-	}
-	
-	public void PostLoadInit(){
-		UIObject = GameObject.Find("UI");
-		actionText = UIObject.transform.Find("UIbackground/worldPanel/worldText").GetComponent<Text>();
-		worldPanel = UIObject.transform.Find("UIbackground/worldPanel/worldButtons").gameObject;
-		handText  = UIObject.transform.Find("UIbackground/handPanel/handText").GetComponent<Text>();
-		handPanel = UIObject.transform.Find("UIbackground/handPanel/handButtons").gameObject;
-		inventoryPanel = UIObject.transform.Find("UIbackground/inventoryPanel/Scrollview/inventoryButtons").gameObject;
-		background = UIObject.transform.Find("GameObject").gameObject;
-		doUpdate = true;
-	}
-	
-	private struct but{
-		public GameObject button;
+		
+	private struct actionButton{
+		public GameObject gameobject;
 		public ActionButtonScript buttonScript;
 		public Text buttonText;
 	}
-	
-	public enum panel{inventoryPanel,worldPanel,handPanel}
-	
-	but spawnButton(panel p){
-		GameObject newButton = Instantiate( Resources.Load("UI/ActionButton"),Vector2.zero,Quaternion.identity) as GameObject;			
+	public string MOTD = "smoke weed every day";
+	private GameObject UICanvas;
+	private GameObject lastLeftClicked;
+	private List<GameObject> activeElements = new List<GameObject>();
+	private List<GameObject> bottomElements = new List<GameObject>();
+
+	void Start(){
+		UICanvas = GameObject.Find("NeoUICanvas");
+	}
+
+	public void Clicked(GameObject clicked){
+		lastLeftClicked = clicked;
+		SetClickedActions();
+	}
+
+	private void SetClickedActions(){
+		ClearButtons();
+		activeElements = new List<GameObject>();
+		List<Interaction> clickedActions = Interactor.GetInteractions(Controller.Instance.focus.gameObject, lastLeftClicked);
+		List<actionButton> actionButtons = CreateButtonsFromActions(clickedActions);;
+		foreach (actionButton button in actionButtons)
+			activeElements.Add(button.gameobject);
+		activeElements.Add(CircularizeButtons(actionButtons, lastLeftClicked));
+	}
+
+	public void ClearButtons(){
+		foreach (GameObject element in activeElements)
+			Destroy(element);
+	}
+
+	private List<actionButton> CreateButtonsFromActions(List<Interaction> interactions){
+		List<actionButton> returnList = new List<actionButton>();
+		foreach (Interaction interaction in interactions)
+			returnList.Add(spawnButton(interaction));
+		return returnList;
+	}
+
+	actionButton spawnButton(Interaction interaction){
+		GameObject newButton = Instantiate( Resources.Load("UI/NeoActionButton"), Vector2.zero, Quaternion.identity) as GameObject;			
 		ActionButtonScript buttonScript = newButton.GetComponent<ActionButtonScript>();
 		Text buttonText = newButton.transform.FindChild("Text").GetComponent<Text>();
-		if (p == panel.inventoryPanel)
-			newButton.transform.SetParent(inventoryPanel.transform,false);
-		if (p == panel.handPanel)
-			newButton.transform.SetParent(handPanel.transform,false);
-		if (p == panel.worldPanel)	
-			newButton.transform.SetParent(worldPanel.transform,false);
-		but returnbut;
-		returnbut.button = newButton;
+		actionButton returnbut;
+		returnbut.gameobject = newButton;
 		returnbut.buttonScript = buttonScript;
 		returnbut.buttonText = buttonText;
-		
+		returnbut.buttonScript.action = interaction;
+		returnbut.buttonText.text = interaction.actionName;
 		return returnbut;
 	}
-	
-	public void UpdateHandActions(){
-		foreach (GameObject b in handButtons){
-			Destroy(b);
-		}
-		handButtons = new List<GameObject>();
-		if (inventory.holding){
-			for (int i = 1; i <= 3; i ++){
-				but newbutton = spawnButton(panel.handPanel);
-				newbutton.buttonScript.manualAction = true;
-				if (i == 1){
-					newbutton.buttonScript.bType = ActionButtonScript.buttonType.Drop;
-					newbutton.buttonText.text = "Drop";
-					newbutton.buttonScript.buttonText = "Drop";
-				}
-				if (i == 2){
-					newbutton.buttonScript.bType = ActionButtonScript.buttonType.Throw;
-					newbutton.buttonText.text = "Throw";
-					newbutton.buttonScript.buttonText = "Throw";
-				}
-				if (i == 3){
-					newbutton.buttonScript.bType = ActionButtonScript.buttonType.Stash;
-					newbutton.buttonText.text = "Stash";
-					newbutton.buttonScript.buttonText = "Stash";
-				}
-				handButtons.Add(newbutton.button);
+
+	private GameObject CircularizeButtons(List<actionButton> buttons, GameObject target){
+		
+		float incrementAngle = (Mathf.PI * 2.5f) / buttons.Count; 
+		float angle = 0f;
+
+		GameObject buttonAnchor = Instantiate(Resources.Load("UI/ButtonAnchor"), UICanvas.transform.position, Quaternion.identity) as GameObject;
+		Rigidbody2D firstBody = null;
+		Rigidbody2D priorBody = null;
+		int n = 0;
+		foreach(actionButton button in buttons){
+			Vector2 initLocation = (Vector2)buttonAnchor.transform.position + Toolbox.Instance.RotateZ(Vector2.right, angle);
+			n++;
+			// instantiate button
+			button.gameobject.transform.position = initLocation;
+			button.gameobject.transform.SetParent(UICanvas.transform, false);
+			if (priorBody){
+				SpringJoint2D spring = button.gameobject.AddComponent<SpringJoint2D>();
+				spring.dampingRatio = 0.9f;
+				spring.distance = 0.5f;
+				spring.connectedBody = priorBody;
 			}
-			foreach (Interaction action in manualActions){
-				but newbutton = spawnButton(panel.handPanel);
-				newbutton.buttonScript.action = action;
-				newbutton.buttonScript.manualAction = true;
-				newbutton.buttonText.text = action.actionName;
-				handButtons.Add(newbutton.button);
+			if (!firstBody)
+				firstBody = button.gameobject.GetComponent<Rigidbody2D>();
+
+			// set up spring connection to anchor
+			SpringJoint2D anchorSpring = buttonAnchor.AddComponent<SpringJoint2D>();
+			anchorSpring.distance = 0.25f;
+			anchorSpring.dampingRatio = 0.9f;
+			anchorSpring.frequency = 15f;
+			anchorSpring.connectedBody = button.gameobject.GetComponent<Rigidbody2D>();
+
+			// connect buttons in circular sequence
+			if (n == buttons.Count && n > 2){
+				SpringJoint2D finalSpring = button.gameobject.AddComponent<SpringJoint2D>();
+				finalSpring.distance = 0.5f;
+				finalSpring.dampingRatio = 0.9f;
+				finalSpring.connectedBody = firstBody;
 			}
+
+			priorBody = button.gameobject.GetComponent<Rigidbody2D>();
+			angle += incrementAngle;
+		}
+		buttonAnchor.transform.position = target.transform.position;
+		buttonAnchor.transform.SetParent(target.transform);
+		return buttonAnchor;
+	}
+
+	private void ArrangeButtonsOnScreenBottom(List<actionButton> buttons){
+		foreach (actionButton button in buttons){
+			RectTransform rect = UICanvas.GetComponent<RectTransform>();
+			Canvas canvas = UICanvas.GetComponent<Canvas>();
+			Vector3 newpos = new Vector3(0f, 0f, 0f);
+
+			button.gameobject.transform.SetParent(UICanvas.transform, false);
+			RectTransformUtility.ScreenPointToWorldPointInRectangle(rect, new Vector2(0.1f, 0.1f), canvas.worldCamera, out newpos);
+			button.gameobject.transform.localPosition = newpos;
 		}
 	}
-	
-	
-	
-	public void UpdateWorldActions(){
-		foreach (GameObject b in worldButtons){
-			Destroy(b);
+
+	public void InventoryCallback(Inventory inventory){
+		if (inventory.gameObject != GameManager.Instance.playerObject)
+			return;
+		if (!inventory.holding)
+			return;
+
+		bottomElements = new List<GameObject>();
+
+		List<Interaction> manualActions = Interactor.GetInteractions(inventory.holding.gameObject, Controller.Instance.focus.gameObject);
+		foreach (Interaction inter in Interactor.ReportRightClickActions(Controller.Instance.focus.gameObject, inventory.holding.gameObject))
+			if (!manualActions.Contains(inter))   // inverse double-count diode
+				manualActions.Add(inter);
+		Interaction defaultInteraction = Interactor.GetDefaultAction(manualActions);
+
+		List<actionButton> manualButtons = CreateButtonsFromActions(manualActions);
+		foreach (actionButton button in manualButtons){
+			bottomElements.Add(button.gameobject);
+			button.buttonScript.manualAction = true;
 		}
-		foreach (Interaction action in actions){
-			but newbutton = spawnButton(panel.worldPanel);
-			newbutton.buttonScript.action = action;
-			newbutton.buttonScript.manualAction = false;
-			newbutton.buttonText.text = action.actionName;
-			worldButtons.Add(newbutton.button);
-		}
-	}
-	
-	public void UpdateInventoryButtons(){
-		foreach (GameObject b in inventoryButtons)
-			Destroy(b);
-		foreach (GameObject item in inventory.items){
-			but newbutton = spawnButton(panel.inventoryPanel);
-			Item i = item.GetComponent<Item>();
-			newbutton.buttonScript.itemName = i.itemName;
-			newbutton.buttonScript.bType = ActionButtonScript.buttonType.Inventory;
-			newbutton.buttonText.text = Toolbox.Instance.ScrubText( item.name );
-			inventoryButtons.Add(newbutton.button);
-		}
-	}
-	
-	void Update(){
-		if (inventory){
-			if (oldInventoryItems != inventory.items.Count)
-				UpdateInventoryButtons();
-			oldInventoryItems = inventory.items.Count;
-		}
-	}
-	
-	public void InventoryCallback(Inventory inv, List<Interaction> actions){
-		if (inv == inventory){
-			manualActions = actions;
-			if (inv.holding){
-				holdingName = inv.holding.name;
-			} else {
-				holdingName = null;
-				holdingVerb = null;
-			}
-		}
-	}
-	
-	public void WipeWorldActions(){
-		actions = new List<Interaction>();
-		UpdateWorldActions();
-		verbText = null;
-		targetName = null;
-	}
-	
-	public void WipeHandActions(){
-		manualActions = new List<Interaction>();
-		UpdateHandActions();
-		holdingVerb = null;
-		holdingName = null;
-	}
-	
-	void LateUpdate(){
-		if (doUpdate){
-			doUpdate = false;
-			if (inventory){
-				inventory.UpdateActions();
-				UpdateInventoryButtons();
-				UpdateWorldActions();
-			}
-		}
-	}
-	
-	public void MouseOverAction(ActionButtonScript button){
-		if ( button.bType != ActionButtonScript.buttonType.Inventory ){
-			if (button.manualAction == false){
-				verbText = button.action.displayVerb;
-			} else{
-				if (button.buttonText == ""){
-					holdingVerb = button.action.displayVerb;
-				} else {
-					holdingVerb = button.buttonText;
-				}
-			}
-		} else {
-			holdingVerb = "Retrieve "+button.itemName;
-		}
-	}
-	
-	public void MouseExitAction(ActionButtonScript button){
-		if (button.manualAction == false){
-			verbText = null;
-		} else {
-			holdingVerb = null;
-		}
-		if (button.bType == ActionButtonScript.buttonType.Inventory){
-			holdingVerb = null;
-		}
-	}
-	
-	// make this all nicer with an enum
-	public void InventoryButtonCallback(ActionButtonScript button){
-		inventory.RetrieveItem(button.itemName);
-	}
-	public void ThrowCallback(){
-		inventory.ThrowItem();
-		WipeHandActions();
-	}
-	public void DropCallback(){
-		inventory.DropItem();
-		WipeHandActions();
-	}
-	public void StashCallback(){
-		inventory.StashItem(inventory.holding.gameObject);
-		WipeHandActions();
-	}
-	
-	void UpdateText(){
-		string update = "";
-		if (targetName != null){
-			if (verbText != null){
-				update = verbText + " " + targetName;
-			} else {
-				update = targetName;
-			}
-		} 
-		actionText.text = update;
-		update = "";
-		if (holdingName != null){
-			if (holdingVerb != null){
-				update = holdingVerb + " " + holdingName;
-			} else {
-				update = holdingName;
-			}
-		} 
-		handText.text = update;
+		ArrangeButtonsOnScreenBottom(manualButtons);
 	}
 
 }
