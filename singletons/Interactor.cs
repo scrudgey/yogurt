@@ -2,19 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class Interactor: Singleton<Interactor> {
+public class Interactor{
 
-	public float interactionDistance = 0.4f;
-//	public GameObject focus;
-//	public GameObject target;
-	static string lastToolTip;
-//	private bool clickMenu;
-	public List<Interaction> actionDictionary = new List<Interaction>();
-	private Vector3 mouseClickLocation;
-	
-//	private bool externalVariableController = false;
-//	private int innerController = 0;
-
+	static public float interactionDistance = 0.4f;
+//	static string lastToolTip;
+//	static public List<Interaction> actionDictionary = new List<Interaction>();
+//	static private Vector3 mouseClickLocation;
 
 	//okay, why the fuck does removing this break everything?
 	// don't remove it!
@@ -24,9 +17,9 @@ public class Interactor: Singleton<Interactor> {
 
 	// maybe the most important method, it tells all available actions
 	// from the perspective of a player or whatever
-	public List<Interaction> GetInteractions(GameObject focus, GameObject target){
-		
-		actionDictionary = new List<Interaction>();
+	static public List<Interaction> GetInteractions(GameObject focus, GameObject target){
+
+		List<Interaction> actionDictionary = new List<Interaction>();
 
 		// no manual actions in here, only right click
 		actionDictionary = ReportRightClickActions(target,focus);
