@@ -3,7 +3,7 @@ using System.Collections;
 
 public class ActionButtonScript: MonoBehaviour {
 
-	public enum buttonType {Drop,Throw,Stash,Inventory,Action}
+	public enum buttonType {Drop, Throw, Stash, Inventory, Action}
 
 	public buttonType bType = buttonType.Action;
 
@@ -14,32 +14,38 @@ public class ActionButtonScript: MonoBehaviour {
 	private bool mouseHeld;
 
 	public void clicked(){
-		switch (bType){
-		case buttonType.Action:
+//		switch (bType){
+//		case buttonType.Action:
+		if (bType == buttonType.Action){
 			if (Controller.Instance.InteractionIsWithinRange(action) || manualAction){
 				action.DoAction();
 				Controller.Instance.UpdateActions();
-				UISystem.Instance.doUpdate = true;
+	//				UISystem.Instance.doUpdate = true;
 				if (!action.dontWipeInterface){
-					UISystem.Instance.WipeWorldActions();
+	//					UISystem.Instance.WipeWorldActions();
+					UINew.Instance.ClearWorldButtons();
 				}
 			}
-			break;
-		case buttonType.Drop:
-			UISystem.Instance.DropCallback();
-			break;
-		case buttonType.Inventory:
-			UISystem.Instance.InventoryButtonCallback(this);
-			UISystem.Instance.WipeHandActions();
-			UISystem.Instance.doUpdate = true;
-			break;
-		case buttonType.Stash:
-			UISystem.Instance.StashCallback();
-			break;
-		case buttonType.Throw:
-			UISystem.Instance.ThrowCallback();
-			break;
+		} else {
+			UINew.Instance.HandActionCallback(bType);
 		}
+//			break;
+//		case buttonType.Drop:
+////			UISystem.Instance.DropCallback();
+//			break;
+//		case buttonType.Inventory:
+////			UISystem.Instance.InventoryButtonCallback(this);
+////			UISystem.Instance.WipeHandActions();
+////			UISystem.Instance.doUpdate = true;
+//			break;
+//		case buttonType.Stash:
+////			UISystem.Instance.StashCallback();
+//			break;
+//		case buttonType.Throw:
+////			UISystem.Instance.ThrowCallback();
+//			break;
+//		}
+		GUI.FocusControl("none");
 	}
 
 	void Update(){
@@ -50,13 +56,13 @@ public class ActionButtonScript: MonoBehaviour {
 		}
 	}
 
-	public void MouseEnter(){
-		UISystem.Instance.MouseOverAction(this);
-	}
-
-	public void MouseExit(){
-		UISystem.Instance.MouseExitAction(this);
-	}
+//	public void MouseEnter(){
+//		UISystem.Instance.MouseOverAction(this);
+//	}
+//
+//	public void MouseExit(){
+//		UISystem.Instance.MouseExitAction(this);
+//	}
 	
 	public void MouseUp(){
 		mouseHeld = false;

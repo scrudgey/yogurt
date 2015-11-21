@@ -33,10 +33,14 @@ public class Controller : Singleton<Controller> {
 			if(Input.GetAxis("Horizontal") > 0)
 				focus.rightFlag = true;
 			//Fire key 
-			if(Input.GetButtonDown("Fire1"))
+			if(Input.GetButtonDown("Fire1")){
 				focus.shootPressedFlag = true;
-			if(Input.GetButton("Fire1"))
+				UINew.Instance.ShootPressed();
+			}
+			if(Input.GetButton("Fire1")){
 				focus.shootHeldFlag = true;
+				UINew.Instance.ShootHeld();
+			}
 		}
 	}
 
@@ -66,8 +70,10 @@ public class Controller : Singleton<Controller> {
 						if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)){
 							focus.lastLeftClicked = hit.collider.gameObject;
 							lastLeftClicked = hit.collider.gameObject;
-							UISystem.Instance.actions = Interactor.Instance.GetInteractions(focus.gameObject, lastLeftClicked);
-							UISystem.Instance.targetName = lastLeftClicked.name;
+//							UISystem.Instance.actions = Interactor.GetInteractions(focus.gameObject, lastLeftClicked);
+//							UISystem.Instance.targetName = lastLeftClicked.name;
+
+							UINew.Instance.Clicked(lastLeftClicked);
 						}
 					}
 				}
@@ -82,7 +88,7 @@ public class Controller : Singleton<Controller> {
 	}
 
 	public void UpdateActions(){
-		UISystem.Instance.actions = Interactor.Instance.GetInteractions(focus.gameObject, lastLeftClicked);
+//		UISystem.Instance.actions = Interactor.GetInteractions(focus.gameObject, lastLeftClicked);
 	}
 
 	public bool InteractionIsWithinRange(Interaction i){

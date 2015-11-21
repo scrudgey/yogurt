@@ -11,9 +11,9 @@ public class Interactor{
 
 	//okay, why the fuck does removing this break everything?
 	// don't remove it!
-	new void OnDestroy() {
-//		Debug.Log("something destroyed the interactor!!!");
-	}
+//	new void OnDestroy() {
+////		Debug.Log("something destroyed the interactor!!!");
+//	}
 
 	// maybe the most important method, it tells all available actions
 	// from the perspective of a player or whatever

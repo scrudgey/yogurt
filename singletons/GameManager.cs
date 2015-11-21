@@ -35,7 +35,8 @@ public class GameManager : Singleton<GameManager> {
 		cameraControl = FindObjectOfType<CameraControl>();
 		if (cameraControl)
 			cameraControl.focus = target;
-		UISystem.Instance.inventory = target.GetComponent<Inventory>();
+//		UISystem.Instance.inventory = target.GetComponent<Inventory>();
+//		UINew.Instance.inventory = target.GetComponent<Inventory>();
 	}
 
 	void Start(){

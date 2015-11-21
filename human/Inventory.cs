@@ -22,6 +22,7 @@ public class Inventory : Interactive, IExcludable {
 				}
 			}
 			_holding = value;
+			UINew.Instance.InventoryCallback(this);
 		}
 	}
 	private Pickup _holding;
@@ -85,7 +86,7 @@ public class Inventory : Interactive, IExcludable {
 				holding.GetComponent<Collider2D>().isTrigger = true;
 				if (holding.pickupSounds.Length > 0)
 					GetComponent<AudioSource>().PlayOneShot(holding.pickupSounds[Random.Range(0, holding.pickupSounds.Length)]);
-				UpdateActions();
+//				UpdateActions();
 			}
 		}
 	}
@@ -134,20 +135,20 @@ public class Inventory : Interactive, IExcludable {
 		holding = null;
 	}
 
-	public void UpdateActions(){
-		manualActionDictionary = new List<Interaction>();
-		if (holding){
-			//update the possible manual actions.
-			manualActionDictionary = Interactor.ReportManualActions(holding.gameObject,gameObject);
-			// add inverse manual actions - is this proper?
-			List<Interaction> inverseActions = Interactor.ReportRightClickActions(gameObject, holding.gameObject);
-			foreach (Interaction inter in inverseActions)
-				if (!manualActionDictionary.Contains(inter))   // inverse double-count diode
-					manualActionDictionary.Add(inter);
-			defaultInteraction = Interactor.GetDefaultAction(manualActionDictionary);
-		}
-		UISystem.Instance.InventoryCallback(this, manualActionDictionary);
-	}
+//	public void UpdateActions(){
+//		manualActionDictionary = new List<Interaction>();
+//		if (holding){
+//			//update the possible manual actions.
+//			manualActionDictionary = Interactor.ReportManualActions(holding.gameObject,gameObject);
+//			// add inverse manual actions - is this proper?
+//			List<Interaction> inverseActions = Interactor.ReportRightClickActions(gameObject, holding.gameObject);
+//			foreach (Interaction inter in inverseActions)
+//				if (!manualActionDictionary.Contains(inter))   // inverse double-count diode
+//					manualActionDictionary.Add(inter);
+//			defaultInteraction = Interactor.GetDefaultAction(manualActionDictionary);
+//		}
+////		UISystem.Instance.InventoryCallback(this, manualActionDictionary);
+//	}
 
 	public void RetrieveItem(string itemName){
 		for(int i=0; i < items.Count; i++){
@@ -163,7 +164,7 @@ public class Inventory : Interactive, IExcludable {
 				Messenger.Instance.ClaimObject(items[i].gameObject, this);
 				holding = items[i].GetComponent<Pickup>();
 				items.RemoveAt(i);
-				UpdateActions();
+//				UpdateActions();
 			}
 		}
 	}
@@ -216,15 +217,14 @@ public class Inventory : Interactive, IExcludable {
 			if( controllable.directionAngle > 45 && controllable.directionAngle < 135){
 				holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
 			} else {
-				
 				holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder + 2;
 			}
 			holding.transform.position = holdpoint.transform.position;
 		}
-		if(controllable.shootPressedFlag && defaultInteraction != null)
-			defaultInteraction.DoAction();
-		if(controllable.shootHeldFlag && defaultInteraction != null && defaultInteraction.continuous)
-			defaultInteraction.DoAction();
+//		if(controllable.shootPressedFlag && defaultInteraction != null)
+//			defaultInteraction.DoAction();
+//		if(controllable.shootHeldFlag && defaultInteraction != null && defaultInteraction.continuous)
+//			defaultInteraction.DoAction();
 	}
 
 	public void SwingItem(MeleeWeapon weapon){

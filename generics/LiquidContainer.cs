@@ -32,8 +32,8 @@ public class LiquidContainer : Interactive {
 	}
 
 	void Start () {
-		interactions.Add(new Interaction(this,"Fill", "FillFromReservoir"));
-		interactions.Add(new Interaction(this,"Fill", "FillFromContainer"));
+		interactions.Add(new Interaction(this, "Fill", "FillFromReservoir"));
+		interactions.Add(new Interaction(this, "Fill", "FillFromContainer"));
 		empty = true;
 		if (!LoadInitialized)
 			LoadInit();

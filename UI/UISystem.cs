@@ -95,7 +95,7 @@ public class UISystem : Singleton<UISystem> {
 		public Text buttonText;
 	}
 	
-	public enum panel{inventoryPanel,worldPanel,handPanel}
+	public enum panel{inventoryPanel, worldPanel, handPanel}
 	
 	but spawnButton(panel p){
 		GameObject newButton = Instantiate( Resources.Load("UI/ActionButton"),Vector2.zero,Quaternion.identity) as GameObject;			
@@ -217,7 +217,7 @@ public class UISystem : Singleton<UISystem> {
 		if (doUpdate){
 			doUpdate = false;
 			if (inventory){
-				inventory.UpdateActions();
+//				inventory.UpdateActions();
 				UpdateInventoryButtons();
 				UpdateWorldActions();
 			}

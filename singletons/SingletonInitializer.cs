@@ -10,14 +10,16 @@ public class SingletonInitializer : MonoBehaviour {
 		RobustLoad();
 		tempstring = GameManager.Instance.message;
 		tempstring = Messenger.Instance.MOTD;
-		tempstring = UISystem.Instance.MOTD;
+//		tempstring = UISystem.Instance.MOTD;
+		tempstring = UINew.Instance.MOTD;
 		Debug.Log(tempstring);
 	}
 
 	public void RobustLoad(){
 		// this routine checks to make sure all the necessary pieces are instantiated in the scene.
 		// if they aren't, it will spawn them.
-		string[] requirements = new string[] {"singleton initializer", "UI", "Main Camera", "EventSystem"};
+//		string[] requirements = new string[] {"singleton initializer", "UI", "Main Camera", "EventSystem"};
+		string[] requirements = new string[] {"singleton initializer", "Main Camera", "EventSystem"};
 		foreach(string requirement in requirements){
 			GameObject go = GameObject.Find(requirement);
 			if (!go){
@@ -42,7 +44,7 @@ public class SingletonInitializer : MonoBehaviour {
 			canvas.worldCamera = cam;
 		}
 
-		UISystem.Instance.PostLoadInit();
+//		UISystem.Instance.PostLoadInit();
 		
 	}
 }

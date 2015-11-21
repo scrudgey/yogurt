@@ -55,9 +55,10 @@ public class Eater : Interactive {
 	}
 
 	public void LoadInit(){
-		Interaction eatAction = new Interaction(this,"Eat","Eat");
+		Interaction eatAction = new Interaction(this, "Eat", "Eat");
 		eatAction.defaultPriority = 1;
-		interactions.Add( eatAction);
+		eatAction.dontWipeInterface = false;
+		interactions.Add(eatAction);
 		LoadInitialized = true;
 	}
 	

@@ -152,7 +152,7 @@ public class Container : Interactive, IExcludable {
 
 		items.Remove(pickup);
 		RemoveRetrieveAction(pickup);
-		inv.UpdateActions();
+//		inv.UpdateActions();
 
 	}
 
