@@ -5,11 +5,10 @@ using System.Collections.Generic;
 public class Messenger : Singleton<Messenger> {
 
 	public string MOTD = "smoke weed every day";
-	public Dictionary<GameObject,IExcludable> claimedItems;
+	public Dictionary<GameObject,IExcludable> claimedItems = new Dictionary<GameObject, IExcludable>();
 
 	void Start(){
 		claimedItems = new Dictionary<GameObject,IExcludable >();
-//		MySaver.OnPostLoad += ListObjects;
 	}
 
 	public void ListObjects(){
@@ -20,7 +19,6 @@ public class Messenger : Singleton<Messenger> {
 
 
 	public void ClaimObject(GameObject obj, IExcludable owner){
-//		Debug.Log("claiming "+obj.name);
 		// if someone else owns the object, tell them that it's being taken.
 		if (claimedItems.ContainsKey(obj)){
 			claimedItems[obj].DropMessage(obj);
