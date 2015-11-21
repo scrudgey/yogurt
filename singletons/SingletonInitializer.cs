@@ -10,7 +10,6 @@ public class SingletonInitializer : MonoBehaviour {
 		RobustLoad();
 		tempstring = GameManager.Instance.message;
 		tempstring = Messenger.Instance.MOTD;
-//		tempstring = UISystem.Instance.MOTD;
 		tempstring = UINew.Instance.MOTD;
 		Debug.Log(tempstring);
 	}
@@ -18,8 +17,7 @@ public class SingletonInitializer : MonoBehaviour {
 	public void RobustLoad(){
 		// this routine checks to make sure all the necessary pieces are instantiated in the scene.
 		// if they aren't, it will spawn them.
-//		string[] requirements = new string[] {"singleton initializer", "UI", "Main Camera", "EventSystem"};
-		string[] requirements = new string[] {"singleton initializer", "Main Camera", "EventSystem"};
+		string[] requirements = new string[] {"singleton initializer", "Main Camera", "EventSystem", "NeoUICanvas", "InventoryScreen"};
 		foreach(string requirement in requirements){
 			GameObject go = GameObject.Find(requirement);
 			if (!go){
@@ -35,7 +33,10 @@ public class SingletonInitializer : MonoBehaviour {
 			CameraControl cameraControl = mainCamera.GetComponent<CameraControl>();
 			if (!cameraControl)
 				cameraControl = mainCamera.AddComponent<CameraControl>();
-
+			Canvas uiCanvas = GameObject.Find("NeoUICanvas").GetComponent<Canvas>();
+			uiCanvas.worldCamera = cam;
+			Canvas inventoryCanvas = GameObject.Find("InventoryScreen").GetComponent<Canvas>();
+			inventoryCanvas.worldCamera = cam;
 		}
 
 		GameObject ui = GameObject.Find("UI");
@@ -43,8 +44,6 @@ public class SingletonInitializer : MonoBehaviour {
 			Canvas canvas = ui.GetComponent<Canvas>();
 			canvas.worldCamera = cam;
 		}
-
-//		UISystem.Instance.PostLoadInit();
-		
+		UINew.Instance.PostLoadInit();
 	}
 }

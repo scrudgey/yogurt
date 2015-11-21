@@ -70,9 +70,6 @@ public class Controller : Singleton<Controller> {
 						if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)){
 							focus.lastLeftClicked = hit.collider.gameObject;
 							lastLeftClicked = hit.collider.gameObject;
-//							UISystem.Instance.actions = Interactor.GetInteractions(focus.gameObject, lastLeftClicked);
-//							UISystem.Instance.targetName = lastLeftClicked.name;
-
 							UINew.Instance.Clicked(lastLeftClicked);
 						}
 					}
@@ -85,10 +82,6 @@ public class Controller : Singleton<Controller> {
 			}
 		}
 		
-	}
-
-	public void UpdateActions(){
-//		UISystem.Instance.actions = Interactor.GetInteractions(focus.gameObject, lastLeftClicked);
 	}
 
 	public bool InteractionIsWithinRange(Interaction i){

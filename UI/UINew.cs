@@ -19,13 +19,24 @@ public class UINew : Singleton<UINew> {
 	private Interaction defaultInteraction;
 	private GameObject inventoryButton;
 	private GameObject inventoryMenu;
+	private bool init = false;
 
 	void Start(){
+		if (!init)
+			PostLoadInit();
+	}
+
+	public void PostLoadInit(){
+		init = true;
 		UICanvas = GameObject.Find("NeoUICanvas");
 		inventoryButton = UICanvas.transform.Find("bottomdock/InvButtonDock/InventoryButton").gameObject;
 		inventoryMenu = GameObject.Find("InventoryScreen");
 		inventoryMenu.SetActive(false);
 		inventoryButton.SetActive(false);
+		if (inventory){
+			HandleInventoryButton();
+			InventoryCallback(inventory);
+		}
 	}
 
 	public void Clicked(GameObject clicked){
@@ -239,11 +250,17 @@ public class UINew : Singleton<UINew> {
 			return;
 
 		List<Interaction> manualActions = Interactor.ReportManualActions(inv.holding.gameObject, GameManager.Instance.playerObject);
+//		Debug.Log("manual actions count: " + manualActions.Count.ToString());
+//		List<Interaction> manualActions = new List<Interaction>();
 		foreach (Interaction inter in Interactor.ReportRightClickActions(GameManager.Instance.playerObject, inv.holding.gameObject))
 			if (!manualActions.Contains(inter))   // inverse double-count diode
 				manualActions.Add(inter);
-		List<Interaction> freeActions = Interactor.ReportFreeActions(inv.holding.gameObject);
-		manualActions.AddRange(freeActions);
+		foreach (Interaction inter in Interactor.ReportFreeActions(inv.holding.gameObject))
+			if (!manualActions.Contains(inter))
+				manualActions.Add(inter);
+
+//		List<Interaction> freeActions = Interactor.ReportFreeActions(inv.holding.gameObject);
+//		manualActions.AddRange(freeActions);
 		defaultInteraction = Interactor.GetDefaultAction(manualActions);
 
 		List<actionButton> manualButtons = CreateButtonsFromActions(manualActions);

@@ -67,11 +67,11 @@ public class CameraControl : MonoBehaviour {
 
 			Vector3 POV = new Vector3();
 			// calculate the height of the UI panel
-			if (UISystem.Instance.background){
-//				POV = new Vector3(mainCamera.pixelWidth/2, mainCamera.pixelHeight/2 + mainCamera.WorldToScreenPoint(UIRect.position).y/2 + UIRect.rect.height/4);
-				POV = new Vector3(mainCamera.pixelWidth/2, mainCamera.pixelHeight/2);
-				POV = transform.position - mainCamera.ScreenToWorldPoint(POV);
-			} 
+//			if (UISystem.Instance.background){
+////				POV = new Vector3(mainCamera.pixelWidth/2, mainCamera.pixelHeight/2 + mainCamera.WorldToScreenPoint(UIRect.position).y/2 + UIRect.rect.height/4);
+//				POV = new Vector3(mainCamera.pixelWidth/2, mainCamera.pixelHeight/2);
+//				POV = transform.position - mainCamera.ScreenToWorldPoint(POV);
+//			} 
 
 			tempVector = Vector3.SmoothDamp(transform.position , focus.transform.position + POV + focusVelocity* focusLead,ref smoothVelocity,0.1f);
 			tempVector = tempVector + shakeVector;

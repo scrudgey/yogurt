@@ -30,7 +30,6 @@ public class Inventory : Interactive, IExcludable {
 	public GameObject slasher;
 	private string slashFlag;
 	private Controllable controllable;
-	private Interaction defaultInteraction;
 	private List<Interaction> manualActionDictionary;
 	public bool swinging;
 	private bool LoadInitialized = false;
@@ -45,7 +44,6 @@ public class Inventory : Interactive, IExcludable {
 	public void LoadInit(){
 		controllable = GetComponent<Controllable>();
 		holdpoint = transform.Find("holdpoint");
-//		interactions.Add(new Interaction(this, "Get", "GetItem",true,false));
 		Interaction getAction = new Interaction(this, "Get", "GetItem", true, false);
 		getAction.dontWipeInterface = false;
 		interactions.Add(getAction);
@@ -86,7 +84,6 @@ public class Inventory : Interactive, IExcludable {
 				holding.GetComponent<Collider2D>().isTrigger = true;
 				if (holding.pickupSounds.Length > 0)
 					GetComponent<AudioSource>().PlayOneShot(holding.pickupSounds[Random.Range(0, holding.pickupSounds.Length)]);
-//				UpdateActions();
 			}
 		}
 	}
@@ -131,24 +128,8 @@ public class Inventory : Interactive, IExcludable {
 			yorder.enabled = true;
 		SpriteRenderer sprite = holding.GetComponent<SpriteRenderer>();
 		sprite.sortingLayerName = "main";
-		defaultInteraction = null;
 		holding = null;
 	}
-
-//	public void UpdateActions(){
-//		manualActionDictionary = new List<Interaction>();
-//		if (holding){
-//			//update the possible manual actions.
-//			manualActionDictionary = Interactor.ReportManualActions(holding.gameObject,gameObject);
-//			// add inverse manual actions - is this proper?
-//			List<Interaction> inverseActions = Interactor.ReportRightClickActions(gameObject, holding.gameObject);
-//			foreach (Interaction inter in inverseActions)
-//				if (!manualActionDictionary.Contains(inter))   // inverse double-count diode
-//					manualActionDictionary.Add(inter);
-//			defaultInteraction = Interactor.GetDefaultAction(manualActionDictionary);
-//		}
-////		UISystem.Instance.InventoryCallback(this, manualActionDictionary);
-//	}
 
 	public void RetrieveItem(string itemName){
 		for(int i=0; i < items.Count; i++){
@@ -164,7 +145,6 @@ public class Inventory : Interactive, IExcludable {
 				Messenger.Instance.ClaimObject(items[i].gameObject, this);
 				holding = items[i].GetComponent<Pickup>();
 				items.RemoveAt(i);
-//				UpdateActions();
 			}
 		}
 	}
@@ -221,10 +201,6 @@ public class Inventory : Interactive, IExcludable {
 			}
 			holding.transform.position = holdpoint.transform.position;
 		}
-//		if(controllable.shootPressedFlag && defaultInteraction != null)
-//			defaultInteraction.DoAction();
-//		if(controllable.shootHeldFlag && defaultInteraction != null && defaultInteraction.continuous)
-//			defaultInteraction.DoAction();
 	}
 
 	public void SwingItem(MeleeWeapon weapon){
