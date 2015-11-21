@@ -166,7 +166,7 @@ public class UINew : Singleton<UINew> {
 	}
 
 	actionButton spawnButton(Interaction interaction){
-		GameObject newButton = Instantiate( Resources.Load("UI/NeoActionButton"), Vector2.zero, Quaternion.identity) as GameObject;			
+		GameObject newButton = Instantiate(Resources.Load("UI/NeoActionButton"), Vector2.zero, Quaternion.identity) as GameObject;
 		ActionButtonScript buttonScript = newButton.GetComponent<ActionButtonScript>();
 		Text buttonText = newButton.transform.FindChild("Text").GetComponent<Text>();
 		actionButton returnbut;
@@ -217,7 +217,6 @@ public class UINew : Singleton<UINew> {
 				finalSpring.dampingRatio = 0.9f;
 				finalSpring.connectedBody = firstBody;
 			}
-
 			priorBody = button.gameobject.GetComponent<Rigidbody2D>();
 			angle += incrementAngle;
 		}
