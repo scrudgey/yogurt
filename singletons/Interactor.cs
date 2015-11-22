@@ -22,16 +22,16 @@ public class Interactor{
 		List<Interaction> actionDictionary = new List<Interaction>();
 
 		// no manual actions in here, only right click
-		actionDictionary = ReportRightClickActions(target,focus);
+		actionDictionary = ReportRightClickActions(target, focus);
 
 		// free actions are okay whatever the occasion
 		List<Interaction> freeActions = ReportFreeActions(target);
 		actionDictionary.AddRange(freeActions);
 
 		// what actions can the target do on *me* and my junk?
-		List<Interaction> inverseActions = ReportRightClickActions(focus,target);
+		List<Interaction> inverseActions = ReportRightClickActions(focus, target);
 		foreach (Interaction inter in inverseActions)
-			if (!actionDictionary.Contains(inter) )   // inverse double-count diode
+			if (!actionDictionary.Contains(inter))   // inverse double-count diode
 				actionDictionary.Add(inter);
 
 		return actionDictionary;
@@ -79,14 +79,13 @@ public class Interactor{
 
 	static public List<Interaction> ReportRightClickActions(GameObject targ, GameObject source){
 		
-		List<Interactive> interactives = new List<Interactive> (source.GetComponentsInChildren<Interactive>() );
-		List<Interaction> returnDictionary = new List<Interaction> ();
+		List<Interactive>interactives = new List<Interactive>(source.GetComponentsInChildren<Interactive>() );
+		List<Interaction>returnDictionary = new List<Interaction> ();
 		
-		foreach ( Interactive interactive in interactives)
+		foreach (Interactive interactive in interactives)
 			interactive.target = targ;
 
-		
-		foreach ( Interactive interactive in interactives){
+		foreach (Interactive interactive in interactives){
 			List<Interaction> possibleActions = interactive.GetRightClickActions();
 			foreach (Interaction action in possibleActions)
 				returnDictionary.Add(action);
