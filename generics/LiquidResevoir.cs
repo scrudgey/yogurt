@@ -1,7 +1,7 @@
-﻿// using UnityEngine;
+﻿using UnityEngine;
 // using System.Collections;
 
-public class LiquidResevoir : Item {
+public class LiquidResevoir : MonoBehaviour {
 	public Liquid liquid;
 
 	public enum liquidType{
