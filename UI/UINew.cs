@@ -20,6 +20,7 @@ public class UINew : Singleton<UINew> {
 	private GameObject inventoryButton;
 	private GameObject inventoryMenu;
 	private bool init = false;
+	public bool inventoryVisible = false;
 
 	void Start(){
 		if (!init)
@@ -33,6 +34,8 @@ public class UINew : Singleton<UINew> {
 		inventoryMenu = GameObject.Find("InventoryScreen");
 		inventoryMenu.SetActive(false);
 		inventoryButton.SetActive(false);
+		if (GameManager.Instance.playerObject)
+			inventory = GameManager.Instance.playerObject.GetComponent<Inventory>();
 		if (inventory){
 			HandleInventoryButton();
 			InventoryCallback(inventory);
@@ -95,6 +98,10 @@ public class UINew : Singleton<UINew> {
 			inventory.StashItem(inventory.holding.gameObject);
 			ClearWorldButtons();
 			HandleInventoryButton();
+			if (inventoryVisible){
+				CloseInventoryMenu();
+				ShowInventoryMenu();
+			}
 			break;
 		default:
 			break;
@@ -110,6 +117,7 @@ public class UINew : Singleton<UINew> {
 	}
 
 	public void CloseInventoryMenu(){
+		inventoryVisible = false;
 		Transform itemDrawer = inventoryMenu.transform.Find("menu/itemdrawer");
 		int children = itemDrawer.childCount;
 		for (int i = 0; i < children; ++i)
@@ -120,15 +128,14 @@ public class UINew : Singleton<UINew> {
 	}
 
 	public void ShowInventoryMenu(){
+		inventoryVisible = true;
 		inventoryMenu.SetActive(true);
 		Transform itemDrawer = inventoryMenu.transform.Find("menu/itemdrawer");
 		foreach (GameObject item in inventory.items){
 			GameObject button = Instantiate(Resources.Load("UI/ItemButton")) as GameObject;
 			button.transform.SetParent(itemDrawer.transform, false);
-			Text buttonText = button.transform.FindChild("Text").GetComponent<Text>();
-			Item itemComponent = item.GetComponent<Item>();
-			buttonText.text = itemComponent.itemName;
-			button.GetComponent<ItemButtonScript>().itemName = itemComponent.itemName;
+			// button.GetComponent<InventoryButtonScript>().SetButtonAttributes(item);
+			button.GetComponent<ItemButtonScript>().SetButtonAttributes(item);
 		}
 	}
 
