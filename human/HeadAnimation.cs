@@ -38,6 +38,7 @@ public class HeadAnimation : MonoBehaviour {
 	public Color crumbColor = Color.white;
 	private float eatingCountDown;
 	private float vomitCountDown;
+	private Head head;
 
 	void LoadSprites(){
 		sprites = Resources.LoadAll<Sprite>("sprites/" + spriteSheet);
@@ -49,6 +50,7 @@ public class HeadAnimation : MonoBehaviour {
 
 	void Start () {
 		spriteRenderer = GetComponent<SpriteRenderer>();
+		head = GetComponent<Head>();
 		foreach (SpriteRenderer renderer in GetComponentsInParent<SpriteRenderer>()){
 			if (renderer != spriteRenderer)
 				parentSprite = renderer;
@@ -136,10 +138,13 @@ public class HeadAnimation : MonoBehaviour {
 		spriteSheet = updateSheet;
 		sequence = updateSequence;
 
-		if (parentSprite){
+		if (parentSprite)
 			spriteRenderer.sortingOrder = parentSprite.sortingOrder;
-		}
+		if (head.hatRenderer)
+			head.hatRenderer.sortingOrder = parentSprite.sortingOrder + 1;
+
 	}
+
 	public void SetFrame(int animationFrame){
 		frame = animationFrame + baseFrame;
 		spriteRenderer.sprite = sprites[frame];

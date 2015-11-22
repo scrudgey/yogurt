@@ -6,6 +6,7 @@ public class Head : Interactive, IExcludable {
 	private GameObject hatPoint;
 	public Hat hat;
 	private SpriteRenderer spriteRenderer;
+	public SpriteRenderer hatRenderer;
 	private Intrinsics intrinsics;
 	
 	private bool LoadInitialized = false;
@@ -39,9 +40,9 @@ public class Head : Interactive, IExcludable {
 		if (yorder)
 			yorder.enabled = false;
 		
-		SpriteRenderer hatRenderer = hat.GetComponent<SpriteRenderer>();
-		if (hatRenderer)
-			hatRenderer.sortingOrder = spriteRenderer.sortingOrder+1;
+		hatRenderer = hat.GetComponent<SpriteRenderer>();
+//		if (hatRenderer)
+//			hatRenderer.sortingOrder = spriteRenderer.sortingOrder+1;
 		
 
 		hat.transform.position = hatPoint.transform.position;
@@ -95,6 +96,7 @@ public class Head : Interactive, IExcludable {
 			hatAnimator.CheckDependencies();
 		}
 		hat = null;
+		hatRenderer = null;
 
 	}
 
