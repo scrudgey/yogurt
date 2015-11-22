@@ -57,39 +57,15 @@ public class CameraControl : MonoBehaviour {
 			if (mainCamera.orthographicSize > maxSize) { mainCamera.orthographicSize = maxSize;}
 
 			// update camera world coordinates.
-//			RectTransform UIRect = UISystem.Instance.background.GetComponent<RectTransform>();
-//			lowerLeftWorld = mainCamera.ScreenToWorldPoint(new Vector2(0, mainCamera.WorldToScreenPoint(UIRect.position).y + UIRect.rect.height/2));
-//			upperRightWorld = mainCamera.ScreenToWorldPoint(new Vector2(mainCamera.pixelWidth, mainCamera.pixelHeight) );
 			lowerLeftWorld = GetComponent<Camera>().ScreenToWorldPoint( Vector2.zero);
 			upperRightWorld = GetComponent<Camera>().ScreenToWorldPoint ( new Vector2(GetComponent<Camera>().pixelWidth,GetComponent<Camera>().pixelHeight) );
 			screenWidthWorld = upperRightWorld.x - lowerLeftWorld.x;
 			screenHeightWorld = upperRightWorld.y - lowerLeftWorld.y;
 
-			Vector3 POV = new Vector3();
-			// calculate the height of the UI panel
-//			if (UISystem.Instance.background){
-////				POV = new Vector3(mainCamera.pixelWidth/2, mainCamera.pixelHeight/2 + mainCamera.WorldToScreenPoint(UIRect.position).y/2 + UIRect.rect.height/4);
-//				POV = new Vector3(mainCamera.pixelWidth/2, mainCamera.pixelHeight/2);
-//				POV = transform.position - mainCamera.ScreenToWorldPoint(POV);
-//			} 
-
-			tempVector = Vector3.SmoothDamp(transform.position , focus.transform.position + POV + focusVelocity* focusLead,ref smoothVelocity,0.1f);
+			tempVector = Vector3.SmoothDamp(transform.position , focus.transform.position + focusVelocity* focusLead,ref smoothVelocity,0.1f);
 			tempVector = tempVector + shakeVector;
 
 			//check for edge of level
-//			if (tempVector.x - screenWidthWorld/2 < minXY.x){
-//				tempVector.x = minXY.x + screenWidthWorld/2;
-//			}
-//			if (tempVector.y - screenHeightWorld/2 - POV.y < minXY.y){
-//				tempVector.y = minXY.y + screenHeightWorld/2 + POV.y;
-//			}
-//			if (tempVector.x + screenWidthWorld/2 > maxXY.x){
-//				tempVector.x = maxXY.x - screenWidthWorld/2;
-//			}
-//			if (tempVector.y + screenHeightWorld/2 + POV.y > maxXY.y){
-//				tempVector.y = maxXY.y - screenHeightWorld/2 - POV.y;
-//			}
-
 			if (tempVector.x - screenWidthWorld/2 < minXY.x){
 				tempVector.x = minXY.x + screenWidthWorld/2;
 			}

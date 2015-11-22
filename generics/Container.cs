@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+// using System.Collections;
 using System.Collections.Generic;
 using System;
 
@@ -43,7 +43,7 @@ public class Container : Interactive, IExcludable {
 				removeThis = interaction;
 			} else {
 				if (interaction.parameters.Count == 2)
-					if (interaction.parameters[1] == pickup)
+					if ((object)interaction.parameters[1] == pickup)
 						removeThis = interaction;
 				if (interaction.actionName == pickup.itemName)
 					    removeThis = interaction;

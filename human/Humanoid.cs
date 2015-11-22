@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System.IO;
+// using System.Collections;
+// using System.IO;
 
 public class Humanoid : Controllable {
 

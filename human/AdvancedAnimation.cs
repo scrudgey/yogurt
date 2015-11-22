@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+// using System.Collections;
 
 // how much of this should i roll into another class? it makes sense to separate all
 // animation business into one class, but it depends on so many individual parts

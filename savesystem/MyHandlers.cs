@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
-using System;
-using System.IO;
-using System.Collections;
-using System.Collections.Generic;
+// using System;
+// using System.IO;
+// using System.Collections;
+// using System.Collections.Generic;
 
 public abstract class SaveHandler{
 	public abstract void SaveData(Component instance, PersistentComponent data, ReferenceResolver resolver);

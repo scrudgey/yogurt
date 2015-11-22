@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
-using System.Collections;
+// using System.Collections;
 
 public class Head : Interactive, IExcludable {
 	
 	private GameObject hatPoint;
 	public Hat hat;
-	private SpriteRenderer spriteRenderer;
+	// private SpriteRenderer spriteRenderer;
 	public SpriteRenderer hatRenderer;
 	private Intrinsics intrinsics;
 	
@@ -20,7 +20,7 @@ public class Head : Interactive, IExcludable {
 		wearAct.dontWipeInterface = false;
 		interactions.Add(wearAct);
 		hatPoint = transform.Find("hatPoint").gameObject;
-		spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
+		// spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
 		intrinsics = gameObject.GetComponentInParent<Intrinsics>();
 		LoadInitialized = true;
 	}
