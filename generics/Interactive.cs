@@ -9,6 +9,7 @@ public class Interaction {
 	public List<System.Type> parameterTypes;
 	public List<Interactive> targetComponents;
 	public bool enabled;
+	public bool debug;
 	public Interactive parent;
 	public string action;
 	public List<object> parameters;
@@ -90,22 +91,27 @@ public class Interaction {
 		// set up the parameter list: check each Type required to be passed, check
 		// if any Component in targetComponents is of that type, if so add it to 
 		// the parameter list.
-		
+		if (debug)
+			Debug.Log("Checking the dependency for interaction "+actionName);
 		// there's probably a nicer way to do this with linq or something
-		for (int i =0; i < parameterTypes.Count; i++){
-			
+		// for (int i =0; i < parameterTypes.Count; i++){
+		foreach (Type requiredType in parameterTypes){
 			bool parameterMatched = false;
-			
-			for (int ii=0; ii < targetComponents.Count; ii++){
-				if ( (targetComponents[ii].GetType() == parameterTypes[i] || targetComponents[ii].GetType().IsSubclassOf(parameterTypes[i])) &&
-				    targetComponents[ii] != this.parent){
+			if (debug)
+				Debug.Log("Looking for the required argument of type "+requiredType.ToString());
+			// for (int ii=0; ii < targetComponents.Count; ii++){
+			foreach (Component component in targetComponents){
+				if (debug)
+					Debug.Log("Comparing against target component "+component.GetType().ToString());
+				if ( (component.GetType() == requiredType || component.GetType().IsSubclassOf(requiredType)) &&
+				    component != this.parent){
+						if (debug)
+							Debug.Log("***** MATCH *****");
 					parameterMatched=true;
 					parameterMatches++;
-					parameters.Add(targetComponents[ii]);
+					parameters.Add(component);
 				}
 			}
-			
-			
 			if (parameterMatched == false){
 				parameterMisses++;
 			}
@@ -160,18 +166,15 @@ public class Interactive : MonoBehaviour{
 	}
 
 	public bool disableInteractions;
-	public List<Interaction> interactions = new List<Interaction> ();
+	public List<Interaction> interactions = new List<Interaction>();
 
 	public List<Interaction> GetEnabledActions(){
-		List<Interaction> returnList = new List<Interaction> ();
-
+		List<Interaction> returnList = new List<Interaction>();
 		foreach (Interaction interaction in interactions){
 			if (interaction.enabled && interaction.parameterTypes.Count > 0)
 				returnList.Add(interaction);
 		}
-
 		return returnList;
-
 	}
 
 	public List<Interaction> GetRightClickActions(){
@@ -180,9 +183,7 @@ public class Interactive : MonoBehaviour{
 			if (interaction.enabled && !interaction.hideInRightClickMenu && interaction.parameterTypes.Count > 0)
 				returnList.Add(interaction);
 		}
-		
 		return returnList;
-		
 	}
 
 	public List<Interaction> GetManualActions(){
@@ -191,9 +192,7 @@ public class Interactive : MonoBehaviour{
 			if (interaction.enabled && !interaction.hideInManualActions)
 				returnList.Add(interaction);
 		}
-		
-		return returnList;
-		
+		return returnList;	
 	}
 
 	public List<Interaction> GetFreeActions(){
@@ -204,7 +203,6 @@ public class Interactive : MonoBehaviour{
 				interaction.enabled = true;
 			}
 		}
-
 		return returnList;
 	}
 
