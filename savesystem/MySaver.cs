@@ -74,8 +74,8 @@ public class MySaver {
 				Persistent persistent = new Persistent(gameObject);
 				persistent.id = idIndex;
 				persistentObjects.Add(persistent);
-				resolver.objectIDs.Add(gameObject,idIndex);
-				resolver.persistentObjects.Add(persistent,gameObject);
+				resolver.objectIDs.Add(gameObject, idIndex);
+				resolver.persistentObjects.Add(persistent, gameObject);
 				idIndex++;
 			}
 
