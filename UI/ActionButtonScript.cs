@@ -20,6 +20,7 @@ public class ActionButtonScript: MonoBehaviour {
 				if (!action.dontWipeInterface){
 					UINew.Instance.ClearWorldButtons();
 				}
+				UINew.Instance.InventoryButtonsCheck();
 			}
 		} else {
 			UINew.Instance.HandActionCallback(bType);
