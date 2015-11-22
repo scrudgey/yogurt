@@ -237,6 +237,11 @@ public class UINew : Singleton<UINew> {
 		image.sprite = Resources.Load<Sprite>("UI/BoxTexture5");
 	}
 
+	public void InventoryButtonsCheck(){
+		if (inventory)
+			InventoryCallback(inventory);
+	}
+
 	public void InventoryCallback(Inventory inv){
 		if (inv.gameObject != GameManager.Instance.playerObject)
 			return;
@@ -249,17 +254,12 @@ public class UINew : Singleton<UINew> {
 			return;
 
 		List<Interaction> manualActions = Interactor.ReportManualActions(inv.holding.gameObject, GameManager.Instance.playerObject);
-//		Debug.Log("manual actions count: " + manualActions.Count.ToString());
-//		List<Interaction> manualActions = new List<Interaction>();
 		foreach (Interaction inter in Interactor.ReportRightClickActions(GameManager.Instance.playerObject, inv.holding.gameObject))
 			if (!manualActions.Contains(inter))   // inverse double-count diode
 				manualActions.Add(inter);
 		foreach (Interaction inter in Interactor.ReportFreeActions(inv.holding.gameObject))
 			if (!manualActions.Contains(inter))
 				manualActions.Add(inter);
-
-//		List<Interaction> freeActions = Interactor.ReportFreeActions(inv.holding.gameObject);
-//		manualActions.AddRange(freeActions);
 		defaultInteraction = Interactor.GetDefaultAction(manualActions);
 
 		List<actionButton> manualButtons = CreateButtonsFromActions(manualActions);
