@@ -44,6 +44,7 @@ public class Intrinsics : MonoBehaviour {
 	}
 
 	public void IntrinsicsChanged(){
+		humanoid = GetComponent<Humanoid>();
 		if (humanoid)
 			humanoid.IntrinsicsChanged(NetIntrinsic());
 		if (GameManager.Instance.playerObject == gameObject)
