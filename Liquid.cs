@@ -3,6 +3,7 @@
 // using System.Xml;
 // using System.Xml.Serialization;
 
+[System.Serializable]
 public class Liquid {
 
 	public string name;
