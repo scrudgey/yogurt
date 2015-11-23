@@ -27,6 +27,7 @@ public class Eater : Interactive {
 	private Speech speech;
 	private GameObject eaten;
 	private bool LoadInitialized = false;
+	private Intrinsics intrinsics;
 
 	private void CheckNausea(){
 		if ( nausea > 50 && lastNausea < 50){
@@ -60,6 +61,7 @@ public class Eater : Interactive {
 		eatAction.dontWipeInterface = false;
 		interactions.Add(eatAction);
 		LoadInitialized = true;
+		intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
 	}
 	
 	// Update is called once per frame
@@ -138,6 +140,11 @@ public class Eater : Interactive {
 
 		if (nutrition > 75){
 			speech.Say("I can't eat another bite!");
+		}
+
+		if (intrinsics){
+			Intrinsics foodIntrinsic = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(food.gameObject);
+			intrinsics.AddIntrinsic(foodIntrinsic);
 		}
 
 		food.BeEaten();
