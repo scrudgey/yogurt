@@ -41,10 +41,6 @@ public class Head : Interactive, IExcludable {
 			yorder.enabled = false;
 		
 		hatRenderer = hat.GetComponent<SpriteRenderer>();
-//		if (hatRenderer)
-//			hatRenderer.sortingOrder = spriteRenderer.sortingOrder+1;
-		
-
 		hat.transform.position = hatPoint.transform.position;
 		hatPoint.transform.localScale = Vector3.one;
 		transform.localScale = Vector3.one;
