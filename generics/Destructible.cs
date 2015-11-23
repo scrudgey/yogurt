@@ -4,6 +4,8 @@
 public class Destructible : MonoBehaviour {
 
 	public float health;
+	public float maxHealth;
+	public float bonusHealth;
 	public enum damageType{physical,fire,any}
 	public damageType lastDamage;
 	public AudioClip[] hitSound;
@@ -11,10 +13,14 @@ public class Destructible : MonoBehaviour {
 	public bool invulnerable;
 	public bool fireproof;
 	public bool no_physical_damage;
+	public float armor;
 
 	void Update () {
 		if (health < 0){
 			Die();
+		}
+		if (health > maxHealth + bonusHealth){
+			health = maxHealth + bonusHealth;
 		}
 	}
 
@@ -76,6 +82,14 @@ public class Destructible : MonoBehaviour {
 		if (hitSound.Length > 0){
 			GetComponent<AudioSource>().PlayOneShot(hitSound[Random.Range(0,hitSound.Length)]);
 		}
+	}
+	
+	public void IntrinsicsChanged(Intrinsic intrinsic){
+		armor = intrinsic.armor.floatValue;
+		if (intrinsic.bonusHealth.floatValue > bonusHealth){
+			health += intrinsic.bonusHealth.floatValue;
+		}
+		bonusHealth = intrinsic.bonusHealth.floatValue;
 	}
 
 }
