@@ -42,7 +42,7 @@ public class Toolbox : Singleton<Toolbox> {
 		}
 	}
 
-	public void SetUpAudioSource(GameObject g){
+	public AudioSource SetUpAudioSource(GameObject g){
 		AudioSource source = g.GetComponent<AudioSource>();
 		if (!source){
 			source = g.AddComponent<AudioSource>();
@@ -50,6 +50,7 @@ public class Toolbox : Singleton<Toolbox> {
 		source.rolloffMode = AudioRolloffMode.Logarithmic;
 		source.minDistance = 0.4f;
 		source.maxDistance = 5.42f;
+		return source;
 	}
 
 	public void SpawnDroplet(Vector3 pos, Liquid l){
