@@ -35,8 +35,6 @@ public class GameManager : Singleton<GameManager> {
 		cameraControl = FindObjectOfType<CameraControl>();
 		if (cameraControl)
 			cameraControl.focus = target;
-//		UISystem.Instance.inventory = target.GetComponent<Inventory>();
-//		UINew.Instance.inventory = target.GetComponent<Inventory>();
 	}
 
 	void Start(){
@@ -48,6 +46,7 @@ public class GameManager : Singleton<GameManager> {
 		cam = GameObject.FindObjectOfType<Camera>();
 		SetFocus(playerObject);
 		MySaver.CleanupSaves();
+		// Cursor.SetCursor((Texture2D)Resources.Load("UI/cursor1"), Vector2.zero, CursorMode.Auto);
 	}
 
 	void PostLoad(GameObject playerObject){
