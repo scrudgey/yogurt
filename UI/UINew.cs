@@ -134,7 +134,6 @@ public class UINew : Singleton<UINew> {
 		foreach (GameObject item in inventory.items){
 			GameObject button = Instantiate(Resources.Load("UI/ItemButton")) as GameObject;
 			button.transform.SetParent(itemDrawer.transform, false);
-			// button.GetComponent<InventoryButtonScript>().SetButtonAttributes(item);
 			button.GetComponent<ItemButtonScript>().SetButtonAttributes(item);
 		}
 	}
@@ -165,10 +164,16 @@ public class UINew : Singleton<UINew> {
 			Destroy(element);
 	}
 
-	private List<actionButton> CreateButtonsFromActions(List<Interaction> interactions){
+	private List<actionButton> CreateButtonsFromActions(List<Interaction> interactions, bool removeColliders=false){
 		List<actionButton> returnList = new List<actionButton>();
-		foreach (Interaction interaction in interactions)
-			returnList.Add(spawnButton(interaction));
+		foreach (Interaction interaction in interactions){
+			actionButton newButton = spawnButton(interaction);
+			if (removeColliders){
+				Destroy(newButton.gameobject.GetComponent<CircleCollider2D>());
+				Destroy(newButton.gameobject.GetComponent<Rigidbody2D>());
+			}
+			returnList.Add(newButton);
+		}
 		return returnList;
 	}
 
@@ -188,19 +193,25 @@ public class UINew : Singleton<UINew> {
 
 	private GameObject CircularizeButtons(List<actionButton> buttons, GameObject target){
 		
-		float incrementAngle = (Mathf.PI * 2.5f) / buttons.Count; 
+		float incrementAngle = (Mathf.PI * 2f) / buttons.Count; 
 		float angle = 0f;
+		Camera renderingCamera = UICanvas.GetComponent<Canvas>().worldCamera;
 
 		GameObject buttonAnchor = Instantiate(Resources.Load("UI/ButtonAnchor"), UICanvas.transform.position, Quaternion.identity) as GameObject;
 		Rigidbody2D firstBody = null;
 		Rigidbody2D priorBody = null;
 		int n = 0;
+		Vector2 centerPosition = renderingCamera.WorldToScreenPoint(UICanvas.transform.position);
+		
 		foreach(actionButton button in buttons){
-			Vector2 initLocation = (Vector2)buttonAnchor.transform.position + Toolbox.Instance.RotateZ(Vector2.right, angle);
+			Vector2 initLocation = (Vector2)target.transform.position + Toolbox.Instance.RotateZ(Vector2.right, angle);
+			Vector2 initPosition = UICanvas.GetComponent<Canvas>().worldCamera.WorldToScreenPoint(initLocation);
 			n++;
 			// instantiate button
-			button.gameobject.transform.position = initLocation;
 			button.gameobject.transform.SetParent(UICanvas.transform, false);
+			RectTransform buttonRect = button.gameobject.GetComponent<RectTransform>();
+			button.gameobject.transform.localPosition = initPosition - centerPosition;
+			
 			if (priorBody){
 				SpringJoint2D spring = button.gameobject.AddComponent<SpringJoint2D>();
 				spring.dampingRatio = 0.9f;
@@ -269,7 +280,7 @@ public class UINew : Singleton<UINew> {
 				manualActions.Add(inter);
 		defaultInteraction = Interactor.GetDefaultAction(manualActions);
 
-		List<actionButton> manualButtons = CreateButtonsFromActions(manualActions);
+		List<actionButton> manualButtons = CreateButtonsFromActions(manualActions, true);
 		foreach (actionButton button in manualButtons){
 			bottomElements.Add(button.gameobject);
 			button.buttonScript.manualAction = true;
