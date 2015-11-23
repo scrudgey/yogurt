@@ -6,17 +6,17 @@ using System.Reflection;
 public class Intrinsics : MonoBehaviour {
 
 	public List<Intrinsic> intrinsics = new List<Intrinsic>();
-	private Humanoid humanoid;
+	// private Humanoid humanoid;
 
 	private bool LoadInitialized = false;
-	void Start(){
-		if (!LoadInitialized)
-			LoadInit();
-	}
+	// void Start(){
+	// 	if (!LoadInitialized)
+	// 		LoadInit();
+	// }
 
-	void LoadInit(){
-		humanoid = gameObject.GetComponent<Humanoid>();
-	}
+	// void LoadInit(){
+	// 	humanoid = gameObject.GetComponent<Humanoid>();
+	// }
 
 	public void AddIntrinsic(Intrinsics i){
 		foreach(Intrinsic intrinsic in i.intrinsics){
@@ -38,15 +38,20 @@ public class Intrinsics : MonoBehaviour {
 			netIntrinsic.telepathy.boolValue = netIntrinsic.telepathy.boolValue || i.telepathy.boolValue;
 			netIntrinsic.armor.floatValue += i.armor.floatValue;
 			netIntrinsic.speed.floatValue += i.speed.floatValue;
-			netIntrinsic.health.floatValue += i.health.floatValue;
+			netIntrinsic.bonusHealth.floatValue += i.bonusHealth.floatValue;
 		}
 		return netIntrinsic;
 	}
 
 	public void IntrinsicsChanged(){
-		humanoid = GetComponent<Humanoid>();
+		Humanoid humanoid = GetComponent<Humanoid>();
+		Destructible destructible = GetComponent<Destructible>();
+		
+		Intrinsic net = NetIntrinsic();
 		if (humanoid)
-			humanoid.IntrinsicsChanged(NetIntrinsic());
+			humanoid.IntrinsicsChanged(net);
+		if (destructible)
+			destructible.IntrinsicsChanged(net);
 		if (GameManager.Instance.playerObject == gameObject)
 			GameManager.Instance.FocusIntrinsicsChanged(NetIntrinsic());
 	}
@@ -81,7 +86,7 @@ public class Intrinsics : MonoBehaviour {
 public class Intrinsic {
 	public Buff telepathy = new Buff();
 	public Buff speed = new Buff();
-	public Buff health = new Buff();
+	public Buff bonusHealth = new Buff();
 	public Buff armor = new Buff();
 }
 
