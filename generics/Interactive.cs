@@ -123,7 +123,9 @@ public class Interaction {
 			// if a validation function is specified, we have to also check to see whether it 
 			// is okay with being enabled.
 			if (validationFunction){
-				bool validation = (bool)validationMethodInfo.Invoke(parent,parameters.ToArray() );
+				if (debug)
+					Debug.Log("Validating interaction.");
+				bool validation = (bool)validationMethodInfo.Invoke(parent, parameters.ToArray());
 				if (!validation)
 					enabled = false;
 			}
@@ -133,6 +135,20 @@ public class Interaction {
 		}
 		
 		
+	}
+	
+	public bool IsValid(){
+		bool validation = true;
+		if (validationFunction){
+				if (validationMethodInfo == null)
+					ConfigureValidator();
+				if (parameters != null){
+					validation = (bool)validationMethodInfo.Invoke(parent, parameters.ToArray());
+				} else {
+					validation = (bool)validationMethodInfo.Invoke(parent, null);
+				}
+		}
+		return validation;
 	}
 	
 	// this can be sped up if I store it in a delegate instead of calling Invoke
@@ -198,7 +214,7 @@ public class Interactive : MonoBehaviour{
 	public List<Interaction> GetFreeActions(){
 		List<Interaction> returnList = new List<Interaction> ();
 		foreach (Interaction interaction in interactions){
-			if (interaction.parameterTypes.Count == 0){
+			if (interaction.parameterTypes.Count == 0 && interaction.IsValid()){
 				returnList.Add(interaction);
 				interaction.enabled = true;
 			}
