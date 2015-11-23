@@ -26,7 +26,6 @@ public class UINew : Singleton<UINew> {
 		if (!init)
 			PostLoadInit();
 	}
-
 	public void PostLoadInit(){
 		init = true;
 		UICanvas = GameObject.Find("NeoUICanvas");
@@ -209,9 +208,7 @@ public class UINew : Singleton<UINew> {
 			n++;
 			// instantiate button
 			button.gameobject.transform.SetParent(UICanvas.transform, false);
-			RectTransform buttonRect = button.gameobject.GetComponent<RectTransform>();
 			button.gameobject.transform.localPosition = initPosition - centerPosition;
-			
 			if (priorBody){
 				SpringJoint2D spring = button.gameobject.AddComponent<SpringJoint2D>();
 				spring.dampingRatio = 0.9f;
