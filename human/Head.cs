@@ -21,7 +21,8 @@ public class Head : Interactive, IExcludable {
 		interactions.Add(wearAct);
 		hatPoint = transform.Find("hatPoint").gameObject;
 		// spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
-		intrinsics = gameObject.GetComponentInParent<Intrinsics>();
+		// intrinsics = gameObject.GetComponentInParent<Intrinsics>();
+		intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
 		LoadInitialized = true;
 	}
 	
