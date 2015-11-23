@@ -41,7 +41,8 @@ public class LiquidContainer : Interactive {
 
 	public void LoadInit(){
 		liquidSprite = transform.FindChild("liquidSprite").GetComponent<SpriteRenderer>();
-		if (liquidSprite) liquidSprite.enabled = false;
+		if (liquidSprite) 
+			liquidSprite.enabled = false;
 		LoadInitialized = true;
 	}
 
