@@ -2,9 +2,10 @@
 // using System.Collections;
 using System.Collections.Generic;
 
-public class cabinet : Interactive {
+public class Cabinet : Interactive {
 
 	public bool open = false;
+	public bool opened = false;
 	public Sprite closedSprite;
 	public Sprite openSprite;
 	public AudioClip openSound;
@@ -28,6 +29,7 @@ public class cabinet : Interactive {
 		spriteRenderer.sprite = openSprite;
 		foreach (GameObject prefab in contained){
 			GameObject newObj = Instantiate(prefab) as GameObject;
+			newObj.name = Toolbox.Instance.CloneRemover(newObj.name);
 			Vector2 newPos = transform.position;
 			newPos.y -= 0.2f;
 			newObj.transform.position = newPos;
@@ -35,6 +37,7 @@ public class cabinet : Interactive {
 		contained = new List<GameObject>();
 		audioSource.PlayOneShot(openSound);
 		open = true;
+		opened = true;
 	}
 
 	public void Close(){

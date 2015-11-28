@@ -23,6 +23,7 @@ public class Inventory : Interactive, IExcludable {
 			}
 			_holding = value;
 			UINew.Instance.InventoryCallback(this);
+			GameManager.Instance.CheckItemCollection(this, gameObject);
 		}
 	}
 	private Pickup _holding;
@@ -137,6 +138,9 @@ public class Inventory : Interactive, IExcludable {
 			if(items[i].GetComponent<Item>().itemName == itemName){
 				if (holding)
 					DropItem();
+				OrderByY yorder = items[i].GetComponent<OrderByY>();
+				if (yorder)
+					yorder.enabled = false;
 				items[i].SetActive(true);
 				items[i].transform.position = holdpoint.position;
 				items[i].transform.parent = holdpoint;

@@ -1,9 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.IO;
-// using System.Collections;
 using System.Collections.Generic;
-// using System.Xml;
 using System.Xml.Serialization;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -14,9 +12,8 @@ public class MySaver {
 	public delegate void SaveAction();
 	public static event SaveAction OnSave;
 	public delegate void LoadAction();
-	public enum SaverState{None,Saving,Loading}
+	public enum SaverState{None, Saving, Loading}
 	public static SaverState saveState;
-	
 	public static List<GameObject> disabledPersistents = new List<GameObject>();
 	public static Dictionary<int, GameObject> loadedObjects = new Dictionary<int, GameObject>();
 
@@ -32,10 +29,13 @@ public class MySaver {
 		{typeof(Blender),							() => new ContainerHandler() },
 		{typeof(Head),								() => new HeadHandler() },
 		{typeof(Outfit),							() => new OutfitHandler() },
+		{typeof(Cabinet),							() => new CabinetHandler() },
 	};
 
 	public static void CleanupSaves(){
-		DirectoryInfo info = new DirectoryInfo(Application.persistentDataPath);
+		string testPath = Path.Combine(Application.persistentDataPath, "test");
+		// DirectoryInfo info = new DirectoryInfo(Application.persistentDataPath);
+		DirectoryInfo info = new DirectoryInfo(testPath);
 		FileInfo[] fileInfo = info.GetFiles();
 		foreach(FileInfo file in fileInfo){
 			File.Delete(file.FullName);
@@ -48,11 +48,9 @@ public class MySaver {
 			// open XML serialization stream
 			// TODO: make this path nicer later when i have a directory structure
 			var serializer = new XmlSerializer(typeof(PersistentContainer));
-			string scenePath = Application.persistentDataPath+"/"+Application.loadedLevelName+"_state.xml";
-			string playerPath = Application.persistentDataPath+"/player_"+GameManager.Instance.playerObject.name+"_state.xml";
-
-			GameManager.Instance.lastSavedPlayerPath = playerPath;
-			GameManager.Instance.lastPlayerName = GameManager.Instance.playerObject.name;
+			string scenePath = GameManager.Instance.LevelSavePath();
+			string playerPath = GameManager.Instance.PlayerSavePath();
+			
 			FileStream sceneStream = File.Create(scenePath);
 			FileStream playerStream = File.Create(playerPath);
 			
@@ -110,8 +108,8 @@ public class MySaver {
 			playerStream.Close();
 
 			// call the save event
-			if (OnSave != null)
-				OnSave();
+			// if (OnSave != null)
+			// 	OnSave();
 		} catch{
 			Debug.Log("Problem saving!");
 		}
@@ -123,7 +121,7 @@ public class MySaver {
 		GameObject playerObject = null;
 		try {
 			saveState = SaverState.Loading;
-			string scenePath = Application.persistentDataPath+"/"+Application.loadedLevelName+"_state.xml";
+			string scenePath = GameManager.Instance.LevelSavePath();
 			string playerPath = GameManager.Instance.lastSavedPlayerPath;
 			var serializer = new XmlSerializer(typeof(PersistentContainer));
 			// destroy any currently existing permanent object
@@ -158,6 +156,7 @@ public class MySaver {
 		} catch {
 			Debug.Log("problem loading!");
 		}
+		GameManager.Instance.SaveGameData();
 		saveState = SaverState.None;
 		return playerObject;
 	}

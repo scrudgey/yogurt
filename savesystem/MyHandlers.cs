@@ -2,7 +2,7 @@
 // using System;
 // using System.IO;
 // using System.Collections;
-// using System.Collections.Generic;
+using System.Collections.Generic;
 
 public abstract class SaveHandler{
 	public abstract void SaveData(Component instance, PersistentComponent data, ReferenceResolver resolver);
@@ -175,6 +175,19 @@ public class OutfitHandler: SaveHandler<Outfit> {
 	
 	public override void LoadData(Outfit instance, PersistentComponent data){
 		instance.wornUniformName = 					data.strings["worn"];
+	}
+}
+
+public class CabinetHandler: SaveHandler<Cabinet> {
+	public override void SaveData(Cabinet instance, PersistentComponent data, ReferenceResolver resolver){
+		data.bools["opened"] = 			instance.opened;
+	}
+	
+	public override void LoadData(Cabinet instance, PersistentComponent data){
+		instance.opened = data.bools["opened"];
+		if (instance.opened){
+			instance.contained = new List<GameObject>();
+		}
 	}
 }
 

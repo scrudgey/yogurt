@@ -39,6 +39,4 @@ public class Outfit : Interactive {
 		sprite.sortingLayerName = "ground";
 	}
 
-
-
 }

@@ -18,7 +18,7 @@ public class Speech : Interactive {
 	void Start () {
 		Interaction speak = new Interaction(this, "Look", "Describe", true, false);
 		speak.limitless = true;
-		speak.dontWipeInterface = true;
+		speak.dontWipeInterface = false;
 		interactions.Add(speak);
 		bubbleParent = gameObject.transform.FindChild("Speechbubble").gameObject;
 		bubble = bubbleParent.GetComponent<RectTransform>();

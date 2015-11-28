@@ -8,7 +8,7 @@ public class Intrinsics : MonoBehaviour {
 	public List<Intrinsic> intrinsics = new List<Intrinsic>();
 	// private Humanoid humanoid;
 
-	private bool LoadInitialized = false;
+	// private bool LoadInitialized = false;
 	// void Start(){
 	// 	if (!LoadInitialized)
 	// 		LoadInit();

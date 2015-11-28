@@ -39,6 +39,7 @@ public class UINew : Singleton<UINew> {
 			HandleInventoryButton();
 			InventoryCallback(inventory);
 		}
+		CloseClosetMenu();
 	}
 
 	public void Clicked(GameObject clicked){
@@ -135,6 +136,16 @@ public class UINew : Singleton<UINew> {
 			button.transform.SetParent(itemDrawer.transform, false);
 			button.GetComponent<ItemButtonScript>().SetButtonAttributes(item);
 		}
+	}
+	
+	public void CloseClosetMenu(){
+		GameObject closetMenu = GameObject.Find("ClosetMenu");
+		Destroy(closetMenu);
+	}
+	public void ShowClosetMenu(){
+		GameObject closetMenu = Instantiate(Resources.Load("UI/ClosetMenu")) as GameObject;
+		closetMenu.name = Toolbox.Instance.CloneRemover(closetMenu.name);
+		closetMenu.GetComponent<Canvas>().worldCamera = UICanvas.GetComponent<Canvas>().worldCamera;
 	}
 
 	public void ItemButtonCallback(ItemButtonScript button){
