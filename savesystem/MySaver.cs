@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 public class MySaver {
 
 	public delegate void SaveAction();
-	public static event SaveAction OnSave;
+	// public static event SaveAction OnSave;
 	public delegate void LoadAction();
 	public enum SaverState{None, Saving, Loading}
 	public static SaverState saveState;
@@ -114,6 +114,7 @@ public class MySaver {
 			Debug.Log("Problem saving!");
 		}
 		
+		GameManager.Instance.SaveGameData();
 		saveState = SaverState.None;
 	}
 
@@ -156,7 +157,7 @@ public class MySaver {
 		} catch {
 			Debug.Log("problem loading!");
 		}
-		GameManager.Instance.SaveGameData();
+		// GameManager.Instance.SaveGameData();
 		saveState = SaverState.None;
 		return playerObject;
 	}
@@ -172,12 +173,12 @@ public class MySaver {
 			foreach(Persistent persistent in container.PersistentObjects){
 				lastName = persistent.name;
 				string path = @"prefabs/"+persistent.name;
-				path = reg.Replace(path,"_");
+				path = reg.Replace(path, "_");
 				GameObject go = GameObject.Instantiate(
 					Resources.Load(path),
 					persistent.transformPosition,
 					persistent.transformRotation) as GameObject;
-				loadedObjects.Add(persistent.id,go);
+				loadedObjects.Add(persistent.id, go);
 				go.BroadcastMessage("LoadInit", SendMessageOptions.DontRequireReceiver);
 				go.name = Toolbox.Instance.ScrubText(go.name);
 				if (!rootObject)
@@ -192,7 +193,7 @@ public class MySaver {
 			foreach (Component component in loadedObjects[persistent.id].GetComponents<Component>()){
 				lastComponent = component.GetType().ToString();
 				Func<SaveHandler> get;
-				if ( MySaver.Handlers.TryGetValue(component.GetType(), out get)){
+				if (MySaver.Handlers.TryGetValue(component.GetType(), out get)){
 					try {
 						var handler = get();
 						PersistentComponent data = persistent.persistentComponents[component.GetType().ToString()];
@@ -211,12 +212,12 @@ public class MySaver {
 				if (childObject && childComponent){
 					string lastChildComponent = childComponent.GetType().ToString();
 					Func<SaveHandler> get;
-					if ( MySaver.Handlers.TryGetValue(childComponent.GetType(), out get ) ){
+					if (MySaver.Handlers.TryGetValue(childComponent.GetType(), out get)){
 						try{
 							var handler = get();
 							PersistentComponent data = new PersistentComponent();
 							if ( persistent.persistentChildComponents.TryGetValue( childComponent.GetType().ToString() , out data ) )
-								handler.LoadData(childComponent,data);
+								handler.LoadData(childComponent, data);
 						} catch {
 							Debug.Log("Problem configuring child component "+lastChildComponent);
 						}
@@ -226,6 +227,7 @@ public class MySaver {
 					Debug.Log(childComponent.GetType().ToString() + " " + persistentChild.parentObject);
 				}
 			}
+
 		}
 		return rootObject;
 	}

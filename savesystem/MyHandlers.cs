@@ -27,7 +27,7 @@ public class InventoryHandler : SaveHandler<Inventory> {
 
 	public override void SaveData(Inventory instance, PersistentComponent data, ReferenceResolver resolver){
 		if (instance.holding != null){
-			data.ints["holdingID"] = resolver.ResolveReference(instance.holding.gameObject,data.persistent);
+			data.ints["holdingID"] = resolver.ResolveReference(instance.holding.gameObject, data.persistent);
 		} else {
 			data.ints["holdingID"] = -1;
 		}
@@ -35,7 +35,7 @@ public class InventoryHandler : SaveHandler<Inventory> {
 		data.ints["itemCount"] = instance.items.Count;
 		if (instance.items.Count > 0){
 			for (int i = 0; i < instance.items.Count; i++){
-				data.ints["item"+i.ToString()] = resolver.ResolveReference(instance.items[i],data.persistent);
+				data.ints["item"+i.ToString()] = resolver.ResolveReference(instance.items[i], data.persistent);
 			}
 		} 
 	}
@@ -55,8 +55,13 @@ public class InventoryHandler : SaveHandler<Inventory> {
 
 		if (data.ints["itemCount"] > 0){
 			for (int i = 0; i < data.ints["itemCount"]; i++){
-				instance.items.Add(MySaver.loadedObjects[data.ints["item"+i.ToString()] ] );
-				MySaver.loadedObjects[data.ints["item"+i.ToString()] ].SetActive(false);
+				GameObject theItem = MySaver.loadedObjects[data.ints["item"+i.ToString()]];
+				instance.items.Add(theItem);
+				theItem.SetActive(false);
+				PhysicalBootstrapper testBoot = theItem.GetComponent<PhysicalBootstrapper>();
+				if (testBoot){
+					testBoot.DestroyPhysical();
+				}
 			}
 		}
 

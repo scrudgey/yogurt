@@ -30,11 +30,11 @@ public class MonoLiquid : MonoBehaviour {
 	}
 
 	void OnGroundImpact(Physical phys){
-		GameObject puddle = Instantiate(Resources.Load("Puddle"),transform.position,Quaternion.identity) as GameObject;
+		GameObject puddle = Instantiate(Resources.Load("Puddle"), transform.position, Quaternion.identity) as GameObject;
 		puddle.layer = 8;
 		PhysicalBootstrapper pb = GetComponent<PhysicalBootstrapper>();
 		pb.DestroyPhysical();
-		LiquidCollection.MonoLiquidify(puddle,liquid);
+		LiquidCollection.MonoLiquidify(puddle, liquid);
 		puddle.GetComponent<Edible>().offal = true;
 
 		Destroy(gameObject);

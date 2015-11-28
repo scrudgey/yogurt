@@ -311,4 +311,16 @@ public class UINew : Singleton<UINew> {
 
 	}
 
+	public void PauseMenu(){
+		GameObject temp = GameObject.Find("PauseMenu");
+		if (temp){
+			Destroy(temp);
+		} else {
+			GameObject menu = Instantiate(Resources.Load("UI/PauseMenu")) as GameObject;
+			menu.gameObject.name = Toolbox.Instance.ScrubText(menu.gameObject.name);
+			Canvas menuCanvas = menu.GetComponent<Canvas>();
+			menuCanvas.worldCamera = UICanvas.GetComponent<Canvas>().worldCamera;
+		}
+	}
+
 }

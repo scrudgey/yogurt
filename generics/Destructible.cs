@@ -6,7 +6,7 @@ public class Destructible : MonoBehaviour {
 	public float health;
 	public float maxHealth;
 	public float bonusHealth;
-	public enum damageType{physical,fire,any}
+	public enum damageType{physical, fire, any}
 	public damageType lastDamage;
 	public AudioClip[] hitSound;
 	public AudioClip[] destroySound;

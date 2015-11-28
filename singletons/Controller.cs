@@ -42,6 +42,10 @@ public class Controller : Singleton<Controller> {
 				UINew.Instance.ShootHeld();
 			}
 		}
+		
+		if (Input.GetButtonDown("Cancel")){
+			UINew.Instance.PauseMenu();
+		}
 	}
 
 	void OnGUI(){

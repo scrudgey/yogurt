@@ -12,6 +12,7 @@ public class GameData{
 	public string lastPlayerName;
 	public System.DateTime saveDate;
 	public float secondsPlayed;
+	public string lastScene;
 	public GameData(){
 		
 	}
@@ -21,6 +22,7 @@ public class GameData{
 		lastPlayerName = instance.lastPlayerName;
 		saveDate = System.DateTime.Now;
 		secondsPlayed = instance.timePlayed + instance.timeSinceLastSave;
+		lastScene = Application.loadedLevelName;
 	}
 }
 public class GameManager : Singleton<GameManager> {
@@ -87,6 +89,7 @@ public class GameManager : Singleton<GameManager> {
 			GameData data = new GameData(this);
 			FileStream sceneStream = File.Create(path);
 			serializer.Serialize(sceneStream, data);
+			sceneStream.Close();
 			timePlayed += timeSinceLastSave;
 			timeSinceLastSave = 0f;
 	}
@@ -95,9 +98,11 @@ public class GameManager : Singleton<GameManager> {
 		var serializer = new XmlSerializer(typeof(GameData));
 		string path = Path.Combine(Application.persistentDataPath, gameName);
 		path = Path.Combine(path, "game.xml");
-		var dataStream = new FileStream(path, FileMode.Open);
-		data = serializer.Deserialize(dataStream) as GameData;
-		dataStream.Close();
+		if (File.Exists(path)){
+			var dataStream = new FileStream(path, FileMode.Open);
+			data = serializer.Deserialize(dataStream) as GameData;
+			dataStream.Close();
+		}
 		return data;
 	}
 	
@@ -107,6 +112,7 @@ public class GameManager : Singleton<GameManager> {
 		itemCheckedOut = new Dictionary<string, bool>();
 		if (data == null){
 			InitValues();
+			NewGame();
 		} else {
 			collectedItems = data.collectedItems;
 			foreach(string item in collectedItems){
@@ -117,8 +123,12 @@ public class GameManager : Singleton<GameManager> {
 			lastPlayerName = data.lastPlayerName;
 			timePlayed = data.secondsPlayed;
 			timeSinceLastSave = 0f;
+			if (data.lastScene != null){
+				Application.LoadLevel(data.lastScene);
+			} else {
+				NewGame();
+			}
 		}
-		NewGame();
 	}
 	
 	public void CollectItem(string name){
@@ -159,6 +169,9 @@ public class GameManager : Singleton<GameManager> {
 	void Start(){
 		MySaver.CleanupSaves();
 		// Cursor.SetCursor((Texture2D)Resources.Load("UI/cursor1"), Vector2.zero, CursorMode.Auto);
+		if (Application.loadedLevelName != "title"){
+			InitValues();
+		}
 	}
 	
 	public void InitValues(){
