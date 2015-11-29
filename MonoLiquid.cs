@@ -36,7 +36,6 @@ public class MonoLiquid : MonoBehaviour {
 		pb.DestroyPhysical();
 		LiquidCollection.MonoLiquidify(puddle, liquid);
 		puddle.GetComponent<Edible>().offal = true;
-
 		Destroy(gameObject);
 	}
 
