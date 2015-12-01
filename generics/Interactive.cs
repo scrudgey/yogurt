@@ -152,18 +152,33 @@ public class Interaction {
 	}
 	
 	// this can be sped up if I store it in a delegate instead of calling Invoke
-	public void DoAction(){
+	public Occurrence DoAction(){
+		Occurrence result = null;
 		if (enabled){
 			if (actionDelegate == null){
 				if (parameters != null ){
-					methodInfo.Invoke( parent,parameters.ToArray() );
+					methodInfo.Invoke(parent, parameters.ToArray());
 				} else {
 					methodInfo.Invoke(parent, new object[0]);
 				}
-			}else {
+			} else {
 				actionDelegate(parameters[0] as Component);
 			}
+			GameObject occurrenceObject = GameObject.Instantiate(Resources.Load("OccurrenceFlag"), parent.transform.position, Quaternion.identity) as GameObject;
+			result = occurrenceObject.GetComponent<Occurrence>();
+			result.functionName = this.actionName;
+			result.subjectName = parent.name;
+			result.actor = parent.gameObject;
+			result.target = parent.target;
+			// result.para
+			foreach (System.Object parameter in parameters){
+				result.parameters.Add(parameter.ToString());
+			}
+			// occurrence.objectName = 
+			// occurence.
+			// Debug.Log(parameters.ToString());
 		}
+		return result;
 	}
 
 	
