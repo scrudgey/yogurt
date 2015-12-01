@@ -21,6 +21,7 @@ public class LiquidContainer : Interactive {
 	public bool lid;
 	private bool LoadInitialized = false;
 	private bool doSpill = false;
+	public string initLiquid;
 
 	void Update(){
 		if (spillTimeout > 0){
@@ -40,9 +41,15 @@ public class LiquidContainer : Interactive {
 	}
 
 	public void LoadInit(){
-		liquidSprite = transform.FindChild("liquidSprite").GetComponent<SpriteRenderer>();
-		if (liquidSprite) 
-			liquidSprite.enabled = false;
+		Transform child = transform.FindChild("liquidSprite");
+		if (child){
+			liquidSprite = child.GetComponent<SpriteRenderer>();
+			if (liquidSprite) 
+				liquidSprite.enabled = false;
+		}
+		if (initLiquid != ""){
+			FillByLoad(initLiquid);
+		}
 		LoadInitialized = true;
 	}
 
@@ -85,7 +92,8 @@ public class LiquidContainer : Interactive {
 
 		}
 		if (amount <= 0 ){
-			liquidSprite.enabled = false;
+			if (liquidSprite)
+				liquidSprite.enabled = false;
 		}
 		if (empty && amount > 0){
 			empty = false;
