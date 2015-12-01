@@ -71,7 +71,6 @@ public class LiquidCollection{
 		LiquidCollection lc = (LiquidCollection)serializer.Deserialize(xmlReader);
 		
 		returnLiquid = lc.Liquids[0];
-		
 		foreach (Liquid l in lc.Liquids ){
 			if (l.name == type){returnLiquid = l;}
 		}
