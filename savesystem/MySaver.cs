@@ -50,7 +50,6 @@ public class MySaver {
 			var serializer = new XmlSerializer(typeof(PersistentContainer));
 			string scenePath = GameManager.Instance.LevelSavePath();
 			string playerPath = GameManager.Instance.PlayerSavePath();
-			
 			FileStream sceneStream = File.Create(scenePath);
 			FileStream playerStream = File.Create(playerPath);
 			
@@ -90,7 +89,7 @@ public class MySaver {
 			Dictionary<GameObject, int> sceneIDs = new Dictionary<GameObject, int>();
 			sceneResolver.persistentObjects = resolver.persistentObjects;
 			foreach (Persistent persistent in sceneTree){
-				sceneIDs.Add( resolver.persistentObjects[persistent], resolver.objectIDs[ resolver.persistentObjects[persistent] ] );
+				sceneIDs.Add(resolver.persistentObjects[persistent], resolver.objectIDs[resolver.persistentObjects[persistent]]);
 			}
 			sceneResolver.objectIDs = sceneIDs;
 			foreach (Persistent persistenet in sceneTree)
@@ -100,8 +99,8 @@ public class MySaver {
 			PersistentContainer playerContainer = new PersistentContainer(playerTree);
 
 			// save the persistent object container
-			serializer.Serialize(sceneStream,sceneContainer);
-			serializer.Serialize(playerStream,playerContainer);
+			serializer.Serialize(sceneStream, sceneContainer);
+			serializer.Serialize(playerStream, playerContainer);
 			
 			// close the XML serialization stream
 			sceneStream.Close();
