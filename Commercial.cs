@@ -66,13 +66,11 @@ public class CommercialProperty {
 	// public string name;
 	public float val;
 	public CommercialComparison comp;
-	
 	public CommercialProperty(){
 		// name = "default";
 		val = 0;
 		comp = CommercialComparison.equal;
 	}
-	
 	public CommercialProperty(float val, bool truth, CommercialComparison comp){
 		this.val = val;
 		this.comp = comp;
