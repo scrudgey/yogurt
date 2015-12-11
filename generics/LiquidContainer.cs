@@ -97,7 +97,7 @@ public class LiquidContainer : Interactive {
 		}
 		if (empty && amount > 0){
 			empty = false;
-			interactions.Add( new Interaction(this,"Drink","Drink"));
+			interactions.Add( new Interaction(this, "Drink", "Drink"));
 			SendMessageUpwards("UpdateActions", SendMessageOptions.DontRequireReceiver);
 		}
 		if (!empty && amount <= 0){
@@ -123,24 +123,27 @@ public class LiquidContainer : Interactive {
 			if (amount > 0 && spillTimeout <= 0){
 				Vector3 initialVelocity = Vector2.zero;
 				Vector3 randomVelocity = Vector2.zero;
-				randomVelocity = transform.right * Random.Range(-0.5f, 0.5f);
-				initialVelocity.x = transform.up.x * Random.Range(1f, 1.5f);
-				initialVelocity.z = transform.up.y;// * Random.Range(1f, 1.5f);
-				Rigidbody2D parentBody = GetComponent<Rigidbody2D>();
-				if (parentBody){
-					initialVelocity.x += parentBody.velocity.x;
-					initialVelocity.y += parentBody.velocity.y;
-				}
+				randomVelocity = transform.right * Random.Range(-0.2f, 0.2f);
+				initialVelocity.x = transform.up.x * Random.Range(0.8f, 1.3f);
+				initialVelocity.z = Random.Range(0.2f, 0.4f);
+				// Rigidbody2D parentBody = GetComponent<Rigidbody2D>();
+				// if (parentBody){
+				// 	initialVelocity.x += parentBody.velocity.x;
+				// 	initialVelocity.y += parentBody.velocity.y;
+				// }
 				initialVelocity.x += randomVelocity.x;
 				initialVelocity.z += randomVelocity.y;
 				GameObject droplet = Instantiate(Resources.Load("droplet"), transform.position, Quaternion.identity) as GameObject;
 				PhysicalBootstrapper phys = droplet.GetComponent<PhysicalBootstrapper>();
-				float initHeight = 0.05f;
+				Vector2 initpos = droplet.transform.position;
+				float initHeight = 0.01f;
 				phys.ignoreCollisions = true;
 				Physical pb = GetComponentInParent<Physical>();
 				if (pb != null){ 
-					initHeight += pb.height; 
+					initHeight = pb.height; 
 				}
+				initpos.y += initHeight;
+				droplet.transform.position = initpos;
 				phys.doInit = false;
 				phys.Start();
 				phys.InitPhysical(initHeight, initialVelocity);
