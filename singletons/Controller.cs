@@ -97,7 +97,7 @@ public class Controller : Singleton<Controller> {
 		if (i.limitless)
 			return true;
 
-		float dist = Vector3.Distance(lastLeftClicked.transform.position,focus.transform.position);
+		float dist = Vector3.Distance(lastLeftClicked.transform.position, focus.transform.position);
 
 		if (dist < i.range){
 			return true;
