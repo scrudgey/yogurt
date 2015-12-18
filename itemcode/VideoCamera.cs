@@ -3,7 +3,6 @@ using UnityEngine.UI;
 using System.Xml.Serialization;
 using System.IO;
 public class VideoCamera : MonoBehaviour {
-
 	BoxCollider2D view;
 	Text rec;
 	Image recBox;
