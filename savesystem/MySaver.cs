@@ -109,8 +109,10 @@ public class MySaver {
 			// call the save event
 			// if (OnSave != null)
 			// 	OnSave();
-		} catch{
+		} catch (System.Exception ex){
 			Debug.Log("Problem saving!");
+			Debug.Log(ex.Message);
+			Debug.Log(ex.TargetSite);
 		}
 		
 		GameManager.Instance.SaveGameData();
