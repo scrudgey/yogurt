@@ -125,7 +125,8 @@ public class LiquidContainer : Interactive {
 				Vector3 randomVelocity = Vector2.zero;
 				randomVelocity = transform.right * Random.Range(-0.2f, 0.2f);
 				initialVelocity.x = transform.up.x * Random.Range(0.8f, 1.3f);
-				initialVelocity.z = Random.Range(0.2f, 0.4f);
+				// initialVelocity.z = Random.Range(0.2f, 0.4f);
+				initialVelocity.z = Random.Range(1.0f, 1.2f);
 				// Rigidbody2D parentBody = GetComponent<Rigidbody2D>();
 				// if (parentBody){
 				// 	initialVelocity.x += parentBody.velocity.x;
