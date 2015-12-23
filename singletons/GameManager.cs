@@ -29,7 +29,6 @@ public class GameManager : Singleton<GameManager> {
 
 	protected GameManager(){}
 	public string saveGameName = "test";
-
 	public string message ="smoke weed every day";	
 	private CameraControl cameraControl;
 	private Camera cam;
@@ -195,8 +194,7 @@ public class GameManager : Singleton<GameManager> {
 			SetFocus(playerObject);
 			Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(playerObject);
 			FocusIntrinsicsChanged(intrinsics.NetIntrinsic());
-		}
-		
+		}	
 	}
 
 	public void LeaveScene(string toSceneName,int toEntryNumber){
