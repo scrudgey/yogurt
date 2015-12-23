@@ -3,18 +3,18 @@ using UnityEngine.UI;
 using System.Xml.Serialization;
 using System.IO;
 public class VideoCamera : MonoBehaviour {
-	BoxCollider2D view;
+	// BoxCollider2D view;
 	Text rec;
-	Image recBox;
+	// Image recBox;
 	float blinkTimer;
 	// public float yogurtsEaten;
 	
 	public Commercial commercial = new Commercial();
 	
 	void Start () {
-		view = transform.Find("Graphic").GetComponent<BoxCollider2D>();
+		// view = transform.Find("Graphic").GetComponent<BoxCollider2D>();
 		rec = transform.Find("Graphic/Rec").GetComponent<Text>();
-		recBox = transform.Find("Graphic").GetComponent<Image>();
+		// recBox = transform.Find("Graphic").GetComponent<Image>();
 	}
 	
 	void Update(){
