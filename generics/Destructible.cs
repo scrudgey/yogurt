@@ -80,7 +80,7 @@ public class Destructible : MonoBehaviour {
 //			Debug.Log("Collided with "+col.gameObject.name);
 		}
 		if (hitSound.Length > 0){
-			GetComponent<AudioSource>().PlayOneShot(hitSound[Random.Range(0,hitSound.Length)]);
+			GetComponent<AudioSource>().PlayOneShot(hitSound[Random.Range(0, hitSound.Length)]);
 		}
 	}
 	
