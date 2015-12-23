@@ -47,11 +47,9 @@ public class Speech : Interactive {
 			}
 		}
 		if (speakTime < 0){
-
 			speaking = false;
 			bubbleParent.SetActive(false);
 			speakTime = 0;
-
 			if (queue.Count > 0){
 				words = queue[0];
 				speakTime =  words.Length / 5;
@@ -72,11 +70,9 @@ public class Speech : Interactive {
 	}
 
 	public void Say(string phrase){
-
 		if(speaking && phrase == words ){
 			return;
 		}
-
 		words = phrase;
 		speakTime = words.Length / 5;
 	}
