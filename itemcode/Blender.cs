@@ -56,7 +56,7 @@ public class Blender : Container {
 				}
 			}
 			if(liquidContainer.amount > 0 && !liquidContainer.lid){
-				liquidContainer.Spill();
+				liquidContainer.Spill(1f);
 			}
 		}
 	}
