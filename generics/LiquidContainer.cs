@@ -21,8 +21,8 @@ public class LiquidContainer : Interactive {
 	public bool lid;
 	private bool LoadInitialized = false;
 	private bool doSpill = false;
+    private float spillSeverity;
 	public string initLiquid;
-
 	void Update(){
 		if (spillTimeout > 0){
 			spillTimeout -= Time.deltaTime;
@@ -31,7 +31,6 @@ public class LiquidContainer : Interactive {
 			Spill();
 		}
 	}
-
 	void Start () {
 		interactions.Add(new Interaction(this, "Fill", "FillFromReservoir"));
 		interactions.Add(new Interaction(this, "Fill", "FillFromContainer"));
@@ -39,7 +38,6 @@ public class LiquidContainer : Interactive {
 		if (!LoadInitialized)
 			LoadInit();
 	}
-
 	public void LoadInit(){
 		Transform child = transform.FindChild("liquidSprite");
 		if (child){
@@ -52,11 +50,9 @@ public class LiquidContainer : Interactive {
 		}
 		LoadInitialized = true;
 	}
-
 	public void FillFromReservoir(LiquidResevoir l){
 		FillWithLiquid(l.liquid);
 	}
-
 	public void FillFromContainer(LiquidContainer l){
 		if( l.amount > 0){
 			FillWithLiquid(l.liquid);
@@ -65,7 +61,6 @@ public class LiquidContainer : Interactive {
 			amount = fill;
 		}
 	}
-
 	public void FillWithLiquid(Liquid l){
 		if (amount > 0){
 			l = Liquid.MixLiquids(liquid, l);
@@ -74,17 +69,14 @@ public class LiquidContainer : Interactive {
 		amount = fillCapacity;
 		CheckLiquid();
 	}
-
 	public void FillByLoad(string type){
 		Liquid l = LiquidCollection.LoadLiquid(type);
 		liquid = l;
 		amount = fillCapacity;
 		CheckLiquid();
 	}
-
 	private void CheckLiquid(){
 		if (liquid != null && amount > 0 && liquidSprite != null){
-
 			if (liquidSprite != null){
 				liquidSprite.enabled = true;
 				liquidSprite.color = liquid.color;
@@ -113,8 +105,12 @@ public class LiquidContainer : Interactive {
 		}
 	}
 
-	public void Spill(){
+    public void Spill(){
+        Spill(0.2f);
+    }
+	public void Spill(float severity){
 		doSpill = true;
+        spillSeverity = severity;
 	}
 
 	void FixedUpdate(){
@@ -123,10 +119,9 @@ public class LiquidContainer : Interactive {
 			if (amount > 0 && spillTimeout <= 0){
 				Vector3 initialVelocity = Vector2.zero;
 				Vector3 randomVelocity = Vector2.zero;
-				randomVelocity = transform.right * Random.Range(-0.2f, 0.2f);
+                randomVelocity = transform.right * Random.Range(-0.2f, 0.2f);
 				initialVelocity.x = transform.up.x * Random.Range(0.8f, 1.3f);
-				// initialVelocity.z = Random.Range(0.2f, 0.4f);
-				initialVelocity.z = Random.Range(1.0f, 1.2f);
+				initialVelocity.z = Random.Range(spillSeverity, 0.2f + spillSeverity);
 				// Rigidbody2D parentBody = GetComponent<Rigidbody2D>();
 				// if (parentBody){
 				// 	initialVelocity.x += parentBody.velocity.x;
@@ -155,9 +150,7 @@ public class LiquidContainer : Interactive {
 			}
 		}
 	}
-
 	public void Drink(Eater eater){
-
 		if (eater){
 			GameObject sip = new GameObject();
 			sip.AddComponent<MonoLiquid>();
