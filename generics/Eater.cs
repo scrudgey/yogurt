@@ -6,7 +6,7 @@ public class Eater : Interactive {
 	
 	public float nutrition;
 
-	public enum preference{neutral,likes,dislikes}
+	public enum preference{neutral, likes, dislikes}
 
 	public preference vegetablePreference;
 	public preference meatPreference;
@@ -81,8 +81,8 @@ public class Eater : Interactive {
 	
 		//i can clean this section up with reflection-
 		// might be necessary if food types get out of control
-		bool[] types = new bool[] {food.vegetable,food.meat,food.immoral,food.offal};
-		preference[] prefs = new preference[] {vegetablePreference,meatPreference,immoralPreference,offalPreference};
+		bool[] types = new bool[] {food.vegetable, food.meat, food.immoral, food.offal};
+		preference[] prefs = new preference[] {vegetablePreference, meatPreference, immoralPreference, 	offalPreference};
 
 		for (int i =0; i< prefs.Length; i++){
 			if (types[i]){
@@ -158,10 +158,8 @@ public class Eater : Interactive {
 			eaten.SetActive(true);
 			eaten.transform.position = transform.position;
 		}
-
 		if (head)
 			head.SetVomit(true);
-
 		if (speech){
 			speech.Say("Blaaaaargh!");
 		}
