@@ -11,7 +11,7 @@ public class SingletonInitializer : MonoBehaviour {
 		tempstring = GameManager.Instance.message;
 		tempstring = Messenger.Instance.MOTD;
 		tempstring = UINew.Instance.MOTD;
-		// Debug.Log(tempstring);
+		Debug.Log(tempstring);
 	}
 
 	public void RobustLoad(){
