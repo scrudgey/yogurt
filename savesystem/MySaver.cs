@@ -8,7 +8,6 @@ using System.Text.RegularExpressions;
 
 
 public class MySaver {
-
 	public delegate void SaveAction();
 	// public static event SaveAction OnSave;
 	public delegate void LoadAction();
@@ -16,7 +15,6 @@ public class MySaver {
 	public static SaverState saveState;
 	public static List<GameObject> disabledPersistents = new List<GameObject>();
 	public static Dictionary<int, GameObject> loadedObjects = new Dictionary<int, GameObject>();
-
 	public static Dictionary<Type, Func<SaveHandler> > Handlers = new Dictionary<Type, Func<SaveHandler>>{
 		{typeof(Inventory), 						() => new InventoryHandler() },
 		{typeof(PhysicalBootstrapper), 				() => new PhysicalBootStrapperHandler() },
@@ -31,7 +29,6 @@ public class MySaver {
 		{typeof(Outfit),							() => new OutfitHandler() },
 		{typeof(Cabinet),							() => new CabinetHandler() },
 	};
-
 	public static void CleanupSaves(){
 		string testPath = Path.Combine(Application.persistentDataPath, "test");
 		// DirectoryInfo info = new DirectoryInfo(Application.persistentDataPath);
@@ -41,7 +38,6 @@ public class MySaver {
 			File.Delete(file.FullName);
 		}
 	}
-	
 	public static void Save(){
 		try {
 			saveState = SaverState.Saving;
