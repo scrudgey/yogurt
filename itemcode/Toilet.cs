@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 public class Toilet : Container {
 
@@ -22,17 +23,33 @@ public class Toilet : Container {
 			audioSource.PlayOneShot(flushSound);
 		
 		for (int i = 0; i < items.Count; i++){
-		// foreach (Pickup item in items){
 			Pickup target = items[i];
-			Dump(target);
-			Destroy(target.gameObject);
+            
+            StartCoroutine(spinCycle(target.transform));
 		}
 		items = new List<Pickup>();
 		timeout = refractoryPeriod;
+        for (int i=0; i<3; i++){
+            Toolbox.Instance.SpawnDroplet(Liquid.water, 0.5f, gameObject, 0.2f);
+        }
 	}
 	
 	void Update(){
 		if (timeout > 0)
 			timeout -= Time.deltaTime;
 	}
+    
+    IEnumerator spinCycle (Transform target)
+    {
+        float timer = 0f;
+        while(timer < 1f)
+        {
+            target.Rotate (Vector3.forward * -90);
+            timer += Time.deltaTime;
+            yield return null;
+        }
+        
+        Dump(target.GetComponent<Pickup>());
+        Destroy(target.gameObject);
+    }
 }
