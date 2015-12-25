@@ -117,34 +117,7 @@ public class LiquidContainer : Interactive {
 		if (doSpill){
 			doSpill = false;
 			if (amount > 0 && spillTimeout <= 0){
-				Vector3 initialVelocity = Vector2.zero;
-				Vector3 randomVelocity = Vector2.zero;
-                randomVelocity = transform.right * Random.Range(-0.2f, 0.2f);
-				initialVelocity.x = transform.up.x * Random.Range(0.8f, 1.3f);
-				initialVelocity.z = Random.Range(spillSeverity, 0.2f + spillSeverity);
-				// Rigidbody2D parentBody = GetComponent<Rigidbody2D>();
-				// if (parentBody){
-				// 	initialVelocity.x += parentBody.velocity.x;
-				// 	initialVelocity.y += parentBody.velocity.y;
-				// }
-				initialVelocity.x += randomVelocity.x;
-				initialVelocity.z += randomVelocity.y;
-				GameObject droplet = Instantiate(Resources.Load("droplet"), transform.position, Quaternion.identity) as GameObject;
-				PhysicalBootstrapper phys = droplet.GetComponent<PhysicalBootstrapper>();
-				Vector2 initpos = droplet.transform.position;
-				float initHeight = 0.01f;
-				phys.ignoreCollisions = true;
-				Physical pb = GetComponentInParent<Physical>();
-				if (pb != null){ 
-					initHeight = pb.height; 
-				}
-				initpos.y += initHeight;
-				droplet.transform.position = initpos;
-				phys.doInit = false;
-				phys.Start();
-				phys.InitPhysical(initHeight, initialVelocity);
-				Physics2D.IgnoreCollision(GetComponent<Collider2D>(), droplet.GetComponent<Collider2D>(), true);
-				LiquidCollection.MonoLiquidify(droplet, liquid);
+                Toolbox.Instance.SpawnDroplet(liquid, spillSeverity, gameObject);
 				amount -= 0.25f;
 				spillTimeout = 0.075f;
 			}
