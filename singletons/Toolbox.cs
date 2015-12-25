@@ -58,15 +58,44 @@ public class Toolbox : Singleton<Toolbox> {
 		initialVelocity = Random.insideUnitCircle;
 		if (initialVelocity.y < 0)
 			initialVelocity.y = initialVelocity.y * -1;
-		
 		GameObject droplet = Instantiate(Resources.Load("droplet"),pos,Quaternion.identity) as GameObject;
 		PhysicalBootstrapper phys = droplet.GetComponent<PhysicalBootstrapper>();
 		phys.initHeight = 0.05f;
 		phys.initVelocity = initialVelocity;
 		phys.ignoreCollisions = true;
-
 		LiquidCollection.MonoLiquidify(droplet,l);
 	}
+    
+    public void SpawnDroplet(Liquid l, float severity, GameObject spiller){
+        SpawnDroplet(l, severity, spiller, 0.01f);
+    }
+    public void SpawnDroplet(Liquid l, float severity, GameObject spiller, float initHeight){
+        Vector3 initialVelocity = Vector2.zero;
+        Vector3 randomVelocity = Vector2.zero;
+        randomVelocity = transform.right * Random.Range(-0.2f, 0.2f);
+        initialVelocity.x = transform.up.x * Random.Range(0.8f, 1.3f);
+        initialVelocity.z = Random.Range(severity, 0.2f + severity);
+        initialVelocity.x += randomVelocity.x;
+        initialVelocity.z += randomVelocity.y;
+        
+        GameObject droplet = Instantiate(Resources.Load("droplet"), transform.position, Quaternion.identity) as GameObject;
+        PhysicalBootstrapper phys = droplet.GetComponent<PhysicalBootstrapper>();
+        
+        Vector2 initpos = spiller.transform.position;
+        // float initHeight = 0.01f;
+        phys.ignoreCollisions = true;
+        Physical pb = spiller.GetComponentInParent<Physical>();
+        if (pb != null){ 
+            initHeight = pb.height; 
+        }
+        initpos.y += initHeight;
+        droplet.transform.position = initpos;
+        phys.doInit = false;
+        phys.Start();
+        phys.InitPhysical(initHeight, initialVelocity);
+        Physics2D.IgnoreCollision(GetComponent<Collider2D>(), droplet.GetComponent<Collider2D>(), true);
+        LiquidCollection.MonoLiquidify(droplet, l);
+    }
 
 	#region utility functions
 
