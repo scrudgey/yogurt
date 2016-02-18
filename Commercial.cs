@@ -1,4 +1,4 @@
-﻿// using UnityEngine;
+﻿using UnityEngine;
 // using System.Collections.Generic;
 using System.Xml.Serialization;
 
@@ -14,6 +14,9 @@ public enum CommercialComparison{
 
 [XmlRoot("Commercial")]
 public class Commercial {
+    public string name = "default";
+    public string description = "default";
+    public float reward = 0;
 	public SerializableDictionary<string, CommercialProperty> properties = new SerializableDictionary<string, CommercialProperty>(); 
 	
 	public Commercial(){
@@ -28,6 +31,7 @@ public class Commercial {
 			other.properties.TryGetValue(key, out otherProperty);
 			if (otherProperty == null){
 				requirementsMet = false;
+                Debug.Log("did not find key in other");
 				break;
 			}
 			switch (myProperty.comp)
