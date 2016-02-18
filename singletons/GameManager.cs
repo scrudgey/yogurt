@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
+using System.Text.RegularExpressions;
 // using System;
 
 [XmlRoot("GameData")]
@@ -31,7 +32,7 @@ public class GameManager : Singleton<GameManager> {
 	public string saveGameName = "test";
 	public string message ="smoke weed every day";	
 	private CameraControl cameraControl;
-	private Camera cam;
+	public Camera cam;
 	public GameObject playerObject;
 	public string lastSavedPlayerPath;
 	public string lastPlayerName;
@@ -44,6 +45,11 @@ public class GameManager : Singleton<GameManager> {
 	public Dictionary<string, bool> itemCheckedOut;
 	public float timeSinceLastSave = 0f;
 	public float timePlayed;
+    public List<string> unlockedCommercials;
+    public List<string> completeCommercials;
+    public string activeCommercial;
+    private float sceneTime;
+    private bool doScriptPrompt = false;
 	
 	public void CheckItemCollection(Inventory inv, GameObject owner){
 		if (owner != playerObject)
@@ -110,7 +116,7 @@ public class GameManager : Singleton<GameManager> {
 		collectedItems = new List<string>();
 		itemCheckedOut = new Dictionary<string, bool>();
 		if (data == null){
-			InitValues();
+			// InitValues();
 			NewGame();
 		} else {
 			collectedItems = data.collectedItems;
@@ -125,7 +131,7 @@ public class GameManager : Singleton<GameManager> {
 			if (data.lastScene != null){
 				Application.LoadLevel(data.lastScene);
 			} else {
-				NewGame();
+                Application.LoadLevel("house");
 			}
 		}
 	}
@@ -145,7 +151,7 @@ public class GameManager : Singleton<GameManager> {
 	}
 	public void FocusIntrinsicsChanged(Intrinsic intrinsic){
 		if (intrinsic.telepathy.boolValue){
-			playerObject.SendMessage("Say","I can hear thoughts!",SendMessageOptions.DontRequireReceiver);
+			playerObject.SendMessage("Say", "I can hear thoughts!", SendMessageOptions.DontRequireReceiver);
 			cam.cullingMask |= 1 << LayerMask.NameToLayer("thoughts");
 		} else {
 			try {
@@ -169,33 +175,29 @@ public class GameManager : Singleton<GameManager> {
 		MySaver.CleanupSaves();
 		// Cursor.SetCursor((Texture2D)Resources.Load("UI/cursor1"), Vector2.zero, CursorMode.Auto);
 		if (Application.loadedLevelName != "title"){
-			InitValues();
+			// InitValues();
+            NewGame(switchlevel: false);
 		}
 	}
-	
-	public void InitValues(){
-		// TODO: add a default player condition here
-		playerObject = GameObject.Find("Tom");		
-		collectedItems = new List<string>();
-		itemCheckedOut = new Dictionary<string, bool>();
-		timePlayed = 0f;
-		timeSinceLastSave = 0f;
-		if (!playerObject){
-			playerObject = GameObject.Instantiate(Resources.Load("prefabs/Tom")) as GameObject;
-		}
-		cam = GameObject.FindObjectOfType<Camera>();
-		SetFocus(playerObject);
-	}
-
-	void PostLoad(GameObject playerObject){
-//		playerObject = GameObject.Find(lastPlayerName);	
-		cam = GameObject.FindObjectOfType<Camera>();
-		if (playerObject){
-			SetFocus(playerObject);
-			Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(playerObject);
-			FocusIntrinsicsChanged(intrinsics.NetIntrinsic());
-		}	
-	}
+    
+    private List<string> listAllCommercials(){
+        List<string> passList = new List<string>();
+        Regex reg =  new Regex(@"xml$");
+        
+        string templateFolder = Path.Combine(Application.dataPath, "Resources");
+        templateFolder = Path.Combine(templateFolder, "data");
+        templateFolder = Path.Combine(templateFolder, "commercials");
+        
+        DirectoryInfo info = new DirectoryInfo(templateFolder);
+        FileInfo[] fileInfo = info.GetFiles();
+        foreach (FileInfo f in fileInfo){
+            if (reg.Matches(f.ToString()).Count == 0)
+                continue;
+           passList.Add(f.ToString());
+        }
+        
+        return passList;
+    }
 
 	public void LeaveScene(string toSceneName,int toEntryNumber){
 		// call mysaver, tell it to save scene and player separately
@@ -205,16 +207,17 @@ public class GameManager : Singleton<GameManager> {
 		Application.LoadLevel(toSceneName);
 	}
 	
-	public void NewGame(){
-		Application.LoadLevel("house");
-	}
-	
 	void OnLevelWasLoaded(int level) {
-		// call scene load routine & load player
-		GameObject player = MySaver.LoadScene();
-		// initialize values re: player object focus
-		PostLoad(player);
-		PlayerEnter();
+        sceneTime = 0f;
+        GameObject player = MySaver.LoadScene();
+            // initialize values re: player object focus
+        cam = GameObject.FindObjectOfType<Camera>();
+        if (player){
+            SetFocus(player);
+            Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(player);
+            FocusIntrinsicsChanged(intrinsics.NetIntrinsic());
+        }	
+        PlayerEnter();
 	}
 	void PlayerEnter(){
 		if (playerObject){
@@ -228,9 +231,43 @@ public class GameManager : Singleton<GameManager> {
 			}
 		}
 	}
-	
+    public void NewGame(bool switchlevel=true){
+        if (switchlevel){
+    		Application.LoadLevel("house");
+            doScriptPrompt = true;
+        }
+        sceneTime = 0f;
+        
+        // TODO: add a default player condition here
+		playerObject = GameObject.Find("Tom");	
+        if (!playerObject){
+            playerObject = GameObject.Find("Tom(Clone)");
+        }	
+		collectedItems = new List<string>();
+		itemCheckedOut = new Dictionary<string, bool>();
+        unlockedCommercials = listAllCommercials();
+        completeCommercials = new List<string>();
+        activeCommercial = "";
+		timePlayed = 0f;
+		timeSinceLastSave = 0f;
+		if (!playerObject){
+			playerObject = GameObject.Instantiate(Resources.Load("prefabs/Tom")) as GameObject;
+		}
+		cam = GameObject.FindObjectOfType<Camera>();
+		SetFocus(playerObject);
+	}
+    void ScriptPrompt(){
+        GameObject menu = Instantiate(Resources.Load("UI/ScriptSelector")) as GameObject;
+        menu.GetComponent<Canvas>().worldCamera = cam;
+    }
+    
 	void Update(){
 		timeSinceLastSave += Time.deltaTime;
+        sceneTime += Time.deltaTime;
+        if (sceneTime > 2f && doScriptPrompt){
+            doScriptPrompt = false;
+            ScriptPrompt();
+        }
 	}
 
 
