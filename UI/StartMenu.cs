@@ -127,7 +127,7 @@ public class StartMenu : MonoBehaviour {
 		} else {
 			// Debug.Log("New game "+newName);
 			GameManager.Instance.saveGameName = newName;
-			GameManager.Instance.InitValues();
+			// GameManager.Instance.InitValues();
 			GameManager.Instance.NewGame();
 		}
 	}
