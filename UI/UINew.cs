@@ -322,5 +322,7 @@ public class UINew : Singleton<UINew> {
 			menuCanvas.worldCamera = UICanvas.GetComponent<Canvas>().worldCamera;
 		}
 	}
+    
+    
 
 }
