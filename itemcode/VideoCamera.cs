@@ -5,49 +5,65 @@ using System.IO;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 public class VideoCamera : MonoBehaviour {
-	// BoxCollider2D view;
 	Text rec;
-	// Image recBox;
 	float blinkTimer;
-	// public float yogurtsEaten;
+    GameObject cutButton;
+    float interfaceTimeout;
 	
 	public Commercial commercial = new Commercial();
 	
 	void Start () {
-		// view = transform.Find("Graphic").GetComponent<BoxCollider2D>();
 		rec = transform.Find("Graphic/Rec").GetComponent<Text>();
-		// recBox = transform.Find("Graphic").GetComponent<Image>();
+        cutButton = transform.Find("Canvas/CutButton").gameObject;
+        cutButton.SetActive(false);
 	}
 	
 	void Update(){
 		blinkTimer += Time.deltaTime;
 		if (blinkTimer > 1 && rec.enabled == true){
 			rec.enabled = false;
-			// recBox.enabled = false;
 		}
 		if (blinkTimer > 2){
 			rec.enabled = true;
-			// recBox.enabled = true;
 			blinkTimer = 0f;
 		}
+        if (interfaceTimeout <= 0){
+            if (cutButton.activeSelf){
+                cutButton.SetActive(false);
+            }
+        } else {
+            cutButton.SetActive(true);
+            interfaceTimeout -= Time.deltaTime;
+        }
 	}
 	
-	void OnTriggerEnter2D(Collider2D col){
+	void OnTriggerEnter2D(Collider2D col){        
 		if (col.name != "OccurrenceFlag(Clone)")
 		return;
 		Occurrence occurrence = col.gameObject.GetComponent<Occurrence>();
 		if (occurrence == null)
 		return;
-		
 		if (occurrence.subjectName.Contains("yogurt") && occurrence.functionName == "Drink"){
-			Debug.Log("yogurt eaten");
 			commercial.properties["yogurt"].val ++;
-			// yogurtsEaten ++;
-			SaveCommercial();
-            // Debug.Log(EvalCommercial(commercial, "commercial.xml"));
-            Debug.Log(EvalVersusAll(commercial));
 		}
 	}
+    
+    public void CalledCut(){
+        SaveCommercial();
+        List<Commercial> success = EvalVersusAll(commercial);
+        // Debug.Log(EvalVersusAll(commercial).Count);
+        if (success.Count > 0){
+            GameObject report = Instantiate(Resources.Load("UI/CommercialReport")) as GameObject;
+            report.GetComponent<CommercialReportMenu>().Report(success[0]);
+        }
+        commercial = new Commercial();
+    }
+    
+    void OnTriggerStay2D(Collider2D col){
+        if (col.gameObject == GameManager.Instance.playerObject){
+            interfaceTimeout = 0.5f;
+        }
+    }
 	
 	void SaveCommercial(){
 		var serializer = new XmlSerializer(typeof(Commercial));
@@ -90,7 +106,6 @@ public class VideoCamera : MonoBehaviour {
         foreach (FileInfo f in fileInfo){
             if (reg.Matches(f.ToString()).Count == 0)
                 continue;
-            Debug.Log(f);
             var commercialStream = new FileStream(f.ToString(), FileMode.Open);
             Commercial templateCommercial = serializer.Deserialize(commercialStream) as Commercial;
             commercialStream.Close();
