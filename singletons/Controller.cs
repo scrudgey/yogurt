@@ -6,6 +6,17 @@ using System.Collections.Generic;
 public class Controller : Singleton<Controller> {
 
 	public Controllable focus;
+    private bool _suspendInput = false;
+    public bool suspendInput{
+        get{ 
+            return _suspendInput; 
+            }
+        set{ 
+            _suspendInput = value;
+            if (focus)
+                ResetInput(focus);
+        }
+    }
 	private GameObject lastLeftClicked;
 	private List<string> forbiddenColliders = new List<string> {"fire", "sightcone", "table", "background"};
 
@@ -22,7 +33,7 @@ public class Controller : Singleton<Controller> {
 
 	// Update is called once per frame
 	void Update () {
-		if (focus != null){
+		if (focus != null & !suspendInput){
 			ResetInput(focus);
 			if( Input.GetAxis("Vertical") > 0 )
 				focus.upFlag = true;
@@ -49,11 +60,9 @@ public class Controller : Singleton<Controller> {
 	}
 
 	void OnGUI(){
-
 		// the mousedown click events need to be a bit better- referencing fire in particular is clunky
 		Event e = Event.current;
 		if (e.isMouse){
-			
 			// right click
 			if (Input.GetMouseButtonDown(1)){
 				//detect if we clicked anything
@@ -79,13 +88,11 @@ public class Controller : Singleton<Controller> {
 					}
 				}
 			}
-			
 			// mouse up event
 			if (Input.GetMouseButtonUp(1)){
 				focus.MouseUp();
 			}
 		}
-		
 	}
 
 	public bool InteractionIsWithinRange(Interaction i){
