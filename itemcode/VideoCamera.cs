@@ -2,8 +2,8 @@
 using UnityEngine.UI;
 using System.Xml.Serialization;
 using System.IO;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
+// using System.Collections.Generic;
+// using System.Text.RegularExpressions;
 public class VideoCamera : MonoBehaviour {
 	Text rec;
 	float blinkTimer;
@@ -50,13 +50,20 @@ public class VideoCamera : MonoBehaviour {
     
     public void CalledCut(){
         SaveCommercial();
-        List<Commercial> success = EvalVersusAll(commercial);
-        // Debug.Log(EvalVersusAll(commercial).Count);
-        if (success.Count > 0){
-            GameObject report = Instantiate(Resources.Load("UI/CommercialReport")) as GameObject;
-            report.GetComponent<CommercialReportMenu>().Report(success[0]);
+        // eval this versus the selected script in gamemanager?
+        // List<Commercial> success = EvalVersusAll(commercial);
+        bool success = false;
+        if (GameManager.Instance.activeCommercial != null){
+            success = commercial.Evaluate(GameManager.Instance.activeCommercial);
         }
-        commercial = new Commercial();
+        // if (success.Count > 0){
+        if (success){
+            GameObject report = Instantiate(Resources.Load("UI/CommercialReport")) as GameObject;
+            report.GetComponent<CommercialReportMenu>().Report(GameManager.Instance.activeCommercial);
+            // commercial = new Commercial();
+        } else {
+            // do something to display why the commercial is not done yet
+        }
     }
     
     void OnTriggerStay2D(Collider2D col){
@@ -75,44 +82,50 @@ public class VideoCamera : MonoBehaviour {
 			sceneStream.Close();
 	}
     
-    bool EvalCommercial(Commercial trial, string templateName){
-        var serializer = new XmlSerializer(typeof(Commercial));
-        string templatePath = Path.Combine(Application.dataPath, "Resources");
-        templatePath = Path.Combine(templatePath, "data");
-        templatePath = Path.Combine(templatePath, "commercials");
-        templatePath = Path.Combine(templatePath,  templateName);
-        if (File.Exists(templatePath)){
-				var commercialStream = new FileStream(templatePath, FileMode.Open);
-				Commercial templateCommercial = serializer.Deserialize(commercialStream) as Commercial;
-				commercialStream.Close();
-                return trial.Evaluate(templateCommercial);
-        } else {
-            Debug.Log("couldn't find " + templatePath);
-            return false;
-        }
-    }
+    // bool EvalCommercial(Commercial trial, string templateName){
+    //     var serializer = new XmlSerializer(typeof(Commercial));
+    //     string templatePath = Path.Combine(Application.dataPath, "Resources");
+    //     templatePath = Path.Combine(templatePath, "data");
+    //     templatePath = Path.Combine(templatePath, "commercials");
+    //     templatePath = Path.Combine(templatePath,  templateName);
+    //     if (File.Exists(templatePath)){
+	// 			var commercialStream = new FileStream(templatePath, FileMode.Open);
+	// 			Commercial templateCommercial = serializer.Deserialize(commercialStream) as Commercial;
+	// 			commercialStream.Close();
+    //             return trial.Evaluate(templateCommercial);
+    //     } else {
+    //         Debug.Log("couldn't find " + templatePath);
+    //         return false;
+    //     }
+    // }
     
-    List<Commercial> EvalVersusAll(Commercial trial){
-        List<Commercial> passList = new List<Commercial>();
-        XmlSerializer serializer = new XmlSerializer(typeof(Commercial));
-        Regex reg =  new Regex(@"xml$");
+    // List<Commercial> EvalVersusAll(Commercial trial){
+    //     List<Commercial> passList = new List<Commercial>();
+    //     XmlSerializer serializer = new XmlSerializer(typeof(Commercial));
+    //     Regex reg =  new Regex(@"xml$");
         
-        string templateFolder = Path.Combine(Application.dataPath, "Resources");
-        templateFolder = Path.Combine(templateFolder, "data");
-        templateFolder = Path.Combine(templateFolder, "commercials");
+    //     string templateFolder = Path.Combine(Application.dataPath, "Resources");
+    //     templateFolder = Path.Combine(templateFolder, "data");
+    //     templateFolder = Path.Combine(templateFolder, "commercials");
         
-        DirectoryInfo info = new DirectoryInfo(templateFolder);
-        FileInfo[] fileInfo = info.GetFiles();
-        foreach (FileInfo f in fileInfo){
-            if (reg.Matches(f.ToString()).Count == 0)
-                continue;
-            var commercialStream = new FileStream(f.ToString(), FileMode.Open);
-            Commercial templateCommercial = serializer.Deserialize(commercialStream) as Commercial;
-            commercialStream.Close();
-            if (trial.Evaluate(templateCommercial)){
-                passList.Add(templateCommercial);
-            }
-        }
-        return passList;
-    }
+    //     DirectoryInfo info = new DirectoryInfo(templateFolder);
+    //     FileInfo[] fileInfo = info.GetFiles();
+    //     foreach (FileInfo f in fileInfo){
+    //         if (reg.Matches(f.ToString()).Count == 0)
+    //             continue;
+            
+    //         var commercialStream = new FileStream(f.ToString(), FileMode.Open);
+    //         Commercial templateCommercial = serializer.Deserialize(commercialStream) as Commercial;
+    //         templateCommercial.path = f.ToString();
+    //         commercialStream.Close();
+    //         Debug.Log("eval against "+templateCommercial.name);
+    //         if (trial.Evaluate(templateCommercial)){
+    //             Debug.Log("pass");
+    //             passList.Add(templateCommercial);
+    //         } else {
+    //             Debug.Log("fail");
+    //         }
+    //     }
+    //     return passList;
+    // }
 }
