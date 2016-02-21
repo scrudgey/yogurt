@@ -15,6 +15,8 @@ public enum CommercialComparison{
 [XmlRoot("Commercial")]
 public class Commercial {
     public string name = "default";
+    public string path = "default";
+    
     public string description = "default";
     public float reward = 0;
 	public SerializableDictionary<string, CommercialProperty> properties = new SerializableDictionary<string, CommercialProperty>(); 
@@ -25,16 +27,19 @@ public class Commercial {
 	
 	public bool Evaluate(Commercial other){
 		bool requirementsMet = true;
-		foreach(string key in properties.Keys){
-			CommercialProperty myProperty = properties[key];
+		foreach(string key in other.properties.Keys){
+            
+			CommercialProperty myProperty = null;
 			CommercialProperty otherProperty = null;
 			other.properties.TryGetValue(key, out otherProperty);
-			if (otherProperty == null){
+            properties.TryGetValue(key, out myProperty);
+            
+			if (myProperty == null){
 				requirementsMet = false;
                 Debug.Log("did not find key in other");
 				break;
 			}
-			switch (myProperty.comp)
+			switch (otherProperty.comp)
 			{
 				case CommercialComparison.equal:
 				requirementsMet = myProperty.val == otherProperty.val;
