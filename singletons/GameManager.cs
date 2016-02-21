@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
-using System.Text.RegularExpressions;
+// using System.Text.RegularExpressions;
 // using System;
 
 [XmlRoot("GameData")]
 public class GameData{
+    public float money;
 	public List<string> collectedItems;
 	public string lastSavedPlayerPath;
 	public string lastSavedScenePath;
@@ -24,6 +25,7 @@ public class GameData{
 		saveDate = System.DateTime.Now;
 		secondsPlayed = instance.timePlayed + instance.timeSinceLastSave;
 		lastScene = Application.loadedLevelName;
+        money = instance.money;
 	}
 }
 public class GameManager : Singleton<GameManager> {
@@ -50,6 +52,7 @@ public class GameManager : Singleton<GameManager> {
     public Commercial activeCommercial;
     private float sceneTime;
     private bool doScriptPrompt = false;
+    public float money;
 	
 	public void CheckItemCollection(Inventory inv, GameObject owner){
 		if (owner != playerObject)
@@ -70,23 +73,21 @@ public class GameManager : Singleton<GameManager> {
 		string path = "";
 		path = Path.Combine(Application.persistentDataPath, saveGameName);
 		if (!Directory.Exists(path))
-		Directory.CreateDirectory(path);
+		  Directory.CreateDirectory(path);
 		path = Path.Combine(path, Application.loadedLevelName+"_state.xml");
 		lastSavedScenePath = path;
 		return path;
 	}
-	
 	public string PlayerSavePath(){
 		string path = "";
 		path = Path.Combine(Application.persistentDataPath, saveGameName);
 		if (!Directory.Exists(path))
-		Directory.CreateDirectory(path);
+		  Directory.CreateDirectory(path);
 		path = Path.Combine(path, "player_"+GameManager.Instance.playerObject.name+"_state.xml");
 		lastSavedPlayerPath = path;
 		lastPlayerName = GameManager.Instance.playerObject.name;
 		return path;
 	}
-	
 	public void SaveGameData(){
 			var serializer = new XmlSerializer(typeof(GameData));
 			string path = Path.Combine(Application.persistentDataPath, saveGameName);
@@ -128,6 +129,7 @@ public class GameManager : Singleton<GameManager> {
 			lastPlayerName = data.lastPlayerName;
 			timePlayed = data.secondsPlayed;
 			timeSinceLastSave = 0f;
+            money = data.money;
 			if (data.lastScene != null){
 				Application.LoadLevel(data.lastScene);
 			} else {
@@ -145,7 +147,6 @@ public class GameManager : Singleton<GameManager> {
 	public void RetrieveCollectedItem(string name){
 		if (itemCheckedOut[name])
 		return;
-		// GameObject newObject = Instantiate(Resources.Load("prefabs/"+name), playerObject.transform.position, Quaternion.identity) as GameObject;
 		Instantiate(Resources.Load("prefabs/"+name), playerObject.transform.position, Quaternion.identity);
 		itemCheckedOut[name] = true;
 	}
@@ -176,50 +177,27 @@ public class GameManager : Singleton<GameManager> {
         // unlockedCommercials = listAllCommercials();
 		// Cursor.SetCursor((Texture2D)Resources.Load("UI/cursor1"), Vector2.zero, CursorMode.Auto);
 		if (Application.loadedLevelName != "title"){
-			// InitValues();
             NewGame(switchlevel: false);
 		}
 	}
     
     private List<Commercial> listAllCommercials(){
         List<Commercial> passList = new List<Commercial>();
-        Regex reg =  new Regex(@"xml$");
-        
-        // TextAsset[] xmls = (TextAsset[])Resources.LoadAll("data/commercials");
         Object[] XMLObjects = Resources.LoadAll("data/commercials");
         List<TextAsset> xmlList = new List<TextAsset>();
         for (int i = 0; i < XMLObjects.Length; i++){
             xmlList.Add((TextAsset)XMLObjects[i]);
         }
         var serializer = new XmlSerializer(typeof(Commercial));
-        
         foreach (TextAsset asset in xmlList){
             var reader = new System.IO.StringReader(asset.text);
             Commercial newCommercial = serializer.Deserialize(reader) as Commercial;
             passList.Add(newCommercial);
-            // using (var reader = new System.IO.StringReader(asset.text))
-            // {
-            //     passList.Add(serializer.Deserialize(reader)) as Commercial;
-            // }
         }
-        
-        // these lines work in editor, not in runtime?
-        // string templateFolder = Path.Combine(Application.dataPath, "Resources");
-        // templateFolder = Path.Combine(templateFolder, "data");
-        // templateFolder = Path.Combine(templateFolder, "commercials");
-        
-        // DirectoryInfo info = new DirectoryInfo(templateFolder);
-        // FileInfo[] fileInfo = info.GetFiles();
-        // foreach (FileInfo f in fileInfo){
-        //     if (reg.Matches(f.ToString()).Count == 0)
-        //         continue;
-        //    passList.Add(f.ToString());
-        // }
-        
         return passList;
     }
 
-	public void LeaveScene(string toSceneName,int toEntryNumber){
+	public void LeaveScene(string toSceneName, int toEntryNumber){
 		// call mysaver, tell it to save scene and player separately
 		MySaver.Save();
 		// unity load saved editor scene file
@@ -236,8 +214,8 @@ public class GameManager : Singleton<GameManager> {
             SetFocus(player);
             Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(player);
             FocusIntrinsicsChanged(intrinsics.NetIntrinsic());
+            PlayerEnter();
         }	
-        PlayerEnter();
 	}
 	void PlayerEnter(){
 		if (playerObject){
@@ -251,6 +229,15 @@ public class GameManager : Singleton<GameManager> {
 			}
 		}
 	}
+    
+    public void NewDay(){
+        MySaver.CleanupSaves();
+        Application.LoadLevel("house");
+        doScriptPrompt = true;
+        sceneTime = 0f;
+        entryID = 99;
+    }
+    
     public void NewGame(bool switchlevel=true){
         if (switchlevel){
     		Application.LoadLevel("house");
@@ -262,7 +249,7 @@ public class GameManager : Singleton<GameManager> {
 		playerObject = GameObject.Find("Tom");	
         if (!playerObject){
             playerObject = GameObject.Find("Tom(Clone)");
-        }	
+        }
 		collectedItems = new List<string>();
 		itemCheckedOut = new Dictionary<string, bool>();
         unlockedCommercials = listAllCommercials();
@@ -279,7 +266,6 @@ public class GameManager : Singleton<GameManager> {
         GameObject menu = Instantiate(Resources.Load("UI/ScriptSelector")) as GameObject;
         menu.GetComponent<Canvas>().worldCamera = cam;
     }
-    
 	void Update(){
 		timeSinceLastSave += Time.deltaTime;
         sceneTime += Time.deltaTime;
@@ -288,6 +274,26 @@ public class GameManager : Singleton<GameManager> {
             ScriptPrompt();
         }
 	}
+
+    public void EvaluateCommercial(Commercial commercial){
+        // eval this versus the selected script in gamemanager?
+        // List<Commercial> success = EvalVersusAll(commercial);
+        bool success = false;
+        if (GameManager.Instance.activeCommercial != null){
+            success = commercial.Evaluate(GameManager.Instance.activeCommercial);
+        }
+        // if (success.Count > 0){
+        if (success){
+            
+            //process reward
+            
+            GameObject report = Instantiate(Resources.Load("UI/CommercialReport")) as GameObject;
+            report.GetComponent<CommercialReportMenu>().Report(GameManager.Instance.activeCommercial);
+            GameManager.Instance.completeCommercials.Add(GameManager.Instance.activeCommercial);
+        } else {
+            // do something to display why the commercial is not done yet
+        }
+    }
 
 }
 
