@@ -12,7 +12,6 @@ public class Doorway : Interactive {
 		Interaction leaveaction = new Interaction(this, "Exit", "Leave");
 		interactions.Add(leaveaction);
 	}
-
 	public void Leave(){
 		GameManager.Instance.LeaveScene(destination,destinationEntry);
 	}
