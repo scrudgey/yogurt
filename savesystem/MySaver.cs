@@ -52,8 +52,9 @@ public class MySaver {
 			// retrieve all persistent objects
 			// TODO: theres probably a nice way to do this with linq but what the hell
 			List<GameObject> objectList = new List<GameObject>();
-			List<MyMarker> marks = new List<MyMarker>( GameObject.FindObjectsOfType<MyMarker>() );
+			List<MyMarker> marks = new List<MyMarker>(GameObject.FindObjectsOfType<MyMarker>());
 			foreach (MyMarker mark in marks){
+                
 				objectList.Add(mark.gameObject);
 			}
 			// add those objects which are disabled and would therefore not be found by our first search
@@ -109,6 +110,7 @@ public class MySaver {
 			Debug.Log("Problem saving!");
 			Debug.Log(ex.Message);
 			Debug.Log(ex.TargetSite);
+            // Debug.Log(ex.Source);
 		}
 		
 		GameManager.Instance.SaveGameData();
