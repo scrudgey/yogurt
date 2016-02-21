@@ -50,20 +50,7 @@ public class VideoCamera : MonoBehaviour {
     
     public void CalledCut(){
         SaveCommercial();
-        // eval this versus the selected script in gamemanager?
-        // List<Commercial> success = EvalVersusAll(commercial);
-        bool success = false;
-        if (GameManager.Instance.activeCommercial != null){
-            success = commercial.Evaluate(GameManager.Instance.activeCommercial);
-        }
-        // if (success.Count > 0){
-        if (success){
-            GameObject report = Instantiate(Resources.Load("UI/CommercialReport")) as GameObject;
-            report.GetComponent<CommercialReportMenu>().Report(GameManager.Instance.activeCommercial);
-            // commercial = new Commercial();
-        } else {
-            // do something to display why the commercial is not done yet
-        }
+        GameManager.Instance.EvaluateCommercial(commercial);
     }
     
     void OnTriggerStay2D(Collider2D col){
