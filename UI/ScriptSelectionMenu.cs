@@ -8,7 +8,8 @@ public class ScriptSelectionMenu : MonoBehaviour
 
     Text descriptionText;
     GameObject scrollContent;
-    Dictionary<string, Commercial> commercials = new Dictionary<string, Commercial>();
+    // Dictionary<string, Commercial> commercials = new Dictionary<string, Commercial>();
+    List<Commercial> commercials = new List<Commercial>();
     List<GameObject> scriptEntries = new List<GameObject>();    
     ScriptListEntry lastClicked;
 
@@ -20,7 +21,7 @@ public class ScriptSelectionMenu : MonoBehaviour
 
         descriptionText = transform.Find("Panel/Body/sidebar/DescriptionPanel/DescriptionBox/Description").GetComponent<Text>();
         scrollContent = transform.Find("Panel/Body/Left/ScriptList/Viewport/Content").gameObject;
-        foreach (string script in GameManager.Instance.unlockedCommercials)
+        foreach (Commercial script in GameManager.Instance.unlockedCommercials)
         {
             GameObject newEntry = Instantiate(Resources.Load("UI/ScriptListEntry")) as GameObject;
             RectTransform rectTransform = newEntry.GetComponent<RectTransform>();
@@ -28,14 +29,15 @@ public class ScriptSelectionMenu : MonoBehaviour
             newEntry.transform.SetParent(scrollContent.transform);
             rectTransform.localScale = new Vector3(1f, 1f, 1f);
 
-            Commercial newCommercial = Toolbox.Instance.LoadCommercialByName(script);
-            commercials[script] = newCommercial;
+            // Commercial newCommercial = Toolbox.Instance.LoadCommercialByName(script);
+            // commercials[script] = newCommercial;
+            commercials.Add(script);
 
             Text entryText = newEntry.transform.Find("ScriptName").GetComponent<Text>();
-            entryText.text = newCommercial.name;
+            entryText.text = script.name;
 
             ScriptListEntry scriptEntry = newEntry.GetComponent<ScriptListEntry>();
-            scriptEntry.commercial = newCommercial;
+            scriptEntry.commercial = script;
             scriptEntry.menu = this;
             
             scriptEntries.Add(newEntry);
@@ -51,7 +53,8 @@ public class ScriptSelectionMenu : MonoBehaviour
         Commercial freestyle = new Commercial();
         freestyle.name = "freestyle";
         freestyle.description = "Be free, little one!!!";
-        commercials["freestyle"] = freestyle;
+        // commercials["freestyle"] = freestyle;
+        commercials.Add(freestyle);
 
         GameObject freeEntry = Instantiate(Resources.Load("UI/ScriptListEntry")) as GameObject;
         RectTransform freeTransform = freeEntry.GetComponent<RectTransform>();
@@ -73,7 +76,9 @@ public class ScriptSelectionMenu : MonoBehaviour
     {
         Controller.Instance.suspendInput = false;
         if (lastClicked){
-            Debug.Log(lastClicked);
+            // Debug.Log(lastClicked);
+            // set the current script here
+            GameManager.Instance.activeCommercial = lastClicked.commercial;
         }
         Destroy(gameObject);
     }
