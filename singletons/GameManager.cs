@@ -45,9 +45,9 @@ public class GameManager : Singleton<GameManager> {
 	public Dictionary<string, bool> itemCheckedOut;
 	public float timeSinceLastSave = 0f;
 	public float timePlayed;
-    public List<string> unlockedCommercials;
-    public List<string> completeCommercials;
-    public string activeCommercial;
+    public List<Commercial> unlockedCommercials;
+    public List<Commercial> completeCommercials;
+    public Commercial activeCommercial;
     private float sceneTime;
     private bool doScriptPrompt = false;
 	
@@ -173,6 +173,7 @@ public class GameManager : Singleton<GameManager> {
 
 	void Start(){
 		MySaver.CleanupSaves();
+        // unlockedCommercials = listAllCommercials();
 		// Cursor.SetCursor((Texture2D)Resources.Load("UI/cursor1"), Vector2.zero, CursorMode.Auto);
 		if (Application.loadedLevelName != "title"){
 			// InitValues();
@@ -180,21 +181,40 @@ public class GameManager : Singleton<GameManager> {
 		}
 	}
     
-    private List<string> listAllCommercials(){
-        List<string> passList = new List<string>();
+    private List<Commercial> listAllCommercials(){
+        List<Commercial> passList = new List<Commercial>();
         Regex reg =  new Regex(@"xml$");
         
-        string templateFolder = Path.Combine(Application.dataPath, "Resources");
-        templateFolder = Path.Combine(templateFolder, "data");
-        templateFolder = Path.Combine(templateFolder, "commercials");
-        
-        DirectoryInfo info = new DirectoryInfo(templateFolder);
-        FileInfo[] fileInfo = info.GetFiles();
-        foreach (FileInfo f in fileInfo){
-            if (reg.Matches(f.ToString()).Count == 0)
-                continue;
-           passList.Add(f.ToString());
+        // TextAsset[] xmls = (TextAsset[])Resources.LoadAll("data/commercials");
+        Object[] XMLObjects = Resources.LoadAll("data/commercials");
+        List<TextAsset> xmlList = new List<TextAsset>();
+        for (int i = 0; i < XMLObjects.Length; i++){
+            xmlList.Add((TextAsset)XMLObjects[i]);
         }
+        var serializer = new XmlSerializer(typeof(Commercial));
+        
+        foreach (TextAsset asset in xmlList){
+            var reader = new System.IO.StringReader(asset.text);
+            Commercial newCommercial = serializer.Deserialize(reader) as Commercial;
+            passList.Add(newCommercial);
+            // using (var reader = new System.IO.StringReader(asset.text))
+            // {
+            //     passList.Add(serializer.Deserialize(reader)) as Commercial;
+            // }
+        }
+        
+        // these lines work in editor, not in runtime?
+        // string templateFolder = Path.Combine(Application.dataPath, "Resources");
+        // templateFolder = Path.Combine(templateFolder, "data");
+        // templateFolder = Path.Combine(templateFolder, "commercials");
+        
+        // DirectoryInfo info = new DirectoryInfo(templateFolder);
+        // FileInfo[] fileInfo = info.GetFiles();
+        // foreach (FileInfo f in fileInfo){
+        //     if (reg.Matches(f.ToString()).Count == 0)
+        //         continue;
+        //    passList.Add(f.ToString());
+        // }
         
         return passList;
     }
@@ -246,8 +266,7 @@ public class GameManager : Singleton<GameManager> {
 		collectedItems = new List<string>();
 		itemCheckedOut = new Dictionary<string, bool>();
         unlockedCommercials = listAllCommercials();
-        completeCommercials = new List<string>();
-        activeCommercial = "";
+        completeCommercials = new List<Commercial>();
 		timePlayed = 0f;
 		timeSinceLastSave = 0f;
 		if (!playerObject){
