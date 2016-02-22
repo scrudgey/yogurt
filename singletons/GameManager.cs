@@ -181,7 +181,7 @@ public class GameManager : Singleton<GameManager> {
 		}
 	}
     
-    private List<Commercial> listAllCommercials(){
+    public List<Commercial> listAllCommercials(){
         List<Commercial> passList = new List<Commercial>();
         Object[] XMLObjects = Resources.LoadAll("data/commercials");
         List<TextAsset> xmlList = new List<TextAsset>();
@@ -195,6 +195,15 @@ public class GameManager : Singleton<GameManager> {
             passList.Add(newCommercial);
         }
         return passList;
+    }
+    
+    public Commercial LoadCommercialByName(string filename){
+        Commercial commercial = null;
+        TextAsset xml = Resources.Load("data/commercials/"+filename) as TextAsset;
+        var serializer = new XmlSerializer(typeof(Commercial));
+        var reader = new System.IO.StringReader(xml.text);
+        commercial = serializer.Deserialize(reader) as Commercial;
+        return commercial;
     }
 
 	public void LeaveScene(string toSceneName, int toEntryNumber){
@@ -252,7 +261,9 @@ public class GameManager : Singleton<GameManager> {
         }
 		collectedItems = new List<string>();
 		itemCheckedOut = new Dictionary<string, bool>();
-        unlockedCommercials = listAllCommercials();
+        // unlockedCommercials = listAllCommercials();
+        unlockedCommercials = new List<Commercial>();
+        unlockedCommercials.Add(LoadCommercialByName("eat1"));
         completeCommercials = new List<Commercial>();
 		timePlayed = 0f;
 		timeSinceLastSave = 0f;
@@ -275,21 +286,25 @@ public class GameManager : Singleton<GameManager> {
         }
 	}
 
+    public void UnlockCommercial(string filename){
+        Commercial unlocked = LoadCommercialByName(filename);
+        unlockedCommercials.Add(unlocked);
+    }
     public void EvaluateCommercial(Commercial commercial){
-        // eval this versus the selected script in gamemanager?
-        // List<Commercial> success = EvalVersusAll(commercial);
         bool success = false;
-        if (GameManager.Instance.activeCommercial != null){
-            success = commercial.Evaluate(GameManager.Instance.activeCommercial);
+        if (activeCommercial != null){
+            success = commercial.Evaluate(activeCommercial);
         }
-        // if (success.Count > 0){
         if (success){
-            
             //process reward
-            
+            money += activeCommercial.reward;
+            foreach (string unlock in activeCommercial.unlockUponCompletion){
+               UnlockCommercial(unlock);
+            }
             GameObject report = Instantiate(Resources.Load("UI/CommercialReport")) as GameObject;
-            report.GetComponent<CommercialReportMenu>().Report(GameManager.Instance.activeCommercial);
-            GameManager.Instance.completeCommercials.Add(GameManager.Instance.activeCommercial);
+            report.GetComponent<CommercialReportMenu>().Report(activeCommercial);
+            if (activeCommercial.name != "freestyle")
+                completeCommercials.Add(activeCommercial);
         } else {
             // do something to display why the commercial is not done yet
         }
