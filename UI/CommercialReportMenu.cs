@@ -11,14 +11,16 @@ public class CommercialReportMenu : MonoBehaviour {
         canvas = GetComponent<Canvas>();
         canvas.worldCamera = GameManager.Instance.cam;
         SetRefs();
-        // Time.timeScale = 0.0f;
+        Controller.Instance.suspendInput = true;
     }
 
     public void ContinueButton(){
+        Controller.Instance.suspendInput = false;
         GameManager.Instance.activeCommercial = null;
         Destroy(gameObject);
     }
     public void NewDayButton(){
+        Controller.Instance.suspendInput = false;
         GameManager.Instance.NewDay();
     }
     
