@@ -23,14 +23,14 @@ public class ScriptSelectionMenu : MonoBehaviour
         scrollContent = transform.Find("Panel/Body/Left/ScriptList/Viewport/Content").gameObject;
         foreach (Commercial script in GameManager.Instance.unlockedCommercials)
         {
+            if (GameManager.Instance.completeCommercials.Contains(script))
+                continue;
             GameObject newEntry = Instantiate(Resources.Load("UI/ScriptListEntry")) as GameObject;
             RectTransform rectTransform = newEntry.GetComponent<RectTransform>();
 
             newEntry.transform.SetParent(scrollContent.transform);
             rectTransform.localScale = new Vector3(1f, 1f, 1f);
 
-            // Commercial newCommercial = Toolbox.Instance.LoadCommercialByName(script);
-            // commercials[script] = newCommercial;
             commercials.Add(script);
 
             Text entryText = newEntry.transform.Find("ScriptName").GetComponent<Text>();
