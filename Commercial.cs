@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-// using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 
 public enum CommercialComparison{
@@ -21,8 +21,12 @@ public class Commercial {
     public float reward = 0;
 	public SerializableDictionary<string, CommercialProperty> properties = new SerializableDictionary<string, CommercialProperty>(); 
 	
+    public List<string> unlockUponCompletion;
+    
 	public Commercial(){
 		properties["yogurt"] = new CommercialProperty();
+        unlockUponCompletion = new List<string>();
+        // unlockUponCompletion.Add("test");
 	}
 	
 	public bool Evaluate(Commercial other){
