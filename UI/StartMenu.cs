@@ -63,7 +63,10 @@ public class StartMenu : MonoBehaviour {
 			script.saveName = dir.Name;
 			if (dir.Name != "test"){
 				GameData data = GameManager.Instance.LoadGameData(dir.Name);
-				TimeSpan t = TimeSpan.FromSeconds(data.secondsPlayed);
+                TimeSpan t = TimeSpan.FromSeconds(0f);
+                if (data != null){
+				    t = TimeSpan.FromSeconds(data.secondsPlayed);
+                } 
 				string answer = string.Format("{0:D2}:{1:D2}:{2:D2}s", 
 												t.Hours, 
 												t.Minutes, 
