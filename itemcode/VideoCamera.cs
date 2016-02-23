@@ -2,20 +2,24 @@
 using UnityEngine.UI;
 using System.Xml.Serialization;
 using System.IO;
-// using System.Collections.Generic;
+using System.Collections.Generic;
 // using System.Text.RegularExpressions;
 public class VideoCamera : MonoBehaviour {
+    public static Dictionary<string, string> KeyDescriptions = new Dictionary<string, string>{
+        {"yogurt", "yogurts eaten"},
+        {"vomit", "vomit events"},
+	};
 	Text rec;
 	float blinkTimer;
     GameObject cutButton;
     float interfaceTimeout;
-	
 	public Commercial commercial = new Commercial();
 	
 	void Start () {
 		rec = transform.Find("Graphic/Rec").GetComponent<Text>();
         cutButton = transform.Find("Canvas/CutButton").gameObject;
         cutButton.SetActive(false);
+        // Toolbox.Instance.PopupCounter("yogurts eaten", 0f, 1f);
 	}
 	
 	void Update(){
@@ -44,9 +48,23 @@ public class VideoCamera : MonoBehaviour {
 		if (occurrence == null)
 		return;
 		if (occurrence.subjectName.Contains("yogurt") && occurrence.functionName == "Drink"){
-			commercial.properties["yogurt"].val ++;
+            IncrementCommercialValue("yogurt", 1f);
 		}
 	}
+    
+    public void IncrementCommercialValue(string valname, float increment){
+        
+        float initvalue = commercial.properties[valname].val;
+        float finalvalue = initvalue + increment;
+        
+        string poptext = "default";
+        KeyDescriptions.TryGetValue(valname, out poptext);
+        if (poptext != "default"){
+            Toolbox.Instance.PopupCounter(poptext, initvalue, finalvalue);
+        }
+        
+        commercial.properties[valname].val = finalvalue;
+    }
     
     public void CalledCut(){
         SaveCommercial();
@@ -68,51 +86,5 @@ public class VideoCamera : MonoBehaviour {
 			serializer.Serialize(sceneStream, commercial);
 			sceneStream.Close();
 	}
-    
-    // bool EvalCommercial(Commercial trial, string templateName){
-    //     var serializer = new XmlSerializer(typeof(Commercial));
-    //     string templatePath = Path.Combine(Application.dataPath, "Resources");
-    //     templatePath = Path.Combine(templatePath, "data");
-    //     templatePath = Path.Combine(templatePath, "commercials");
-    //     templatePath = Path.Combine(templatePath,  templateName);
-    //     if (File.Exists(templatePath)){
-	// 			var commercialStream = new FileStream(templatePath, FileMode.Open);
-	// 			Commercial templateCommercial = serializer.Deserialize(commercialStream) as Commercial;
-	// 			commercialStream.Close();
-    //             return trial.Evaluate(templateCommercial);
-    //     } else {
-    //         Debug.Log("couldn't find " + templatePath);
-    //         return false;
-    //     }
-    // }
-    
-    // List<Commercial> EvalVersusAll(Commercial trial){
-    //     List<Commercial> passList = new List<Commercial>();
-    //     XmlSerializer serializer = new XmlSerializer(typeof(Commercial));
-    //     Regex reg =  new Regex(@"xml$");
-        
-    //     string templateFolder = Path.Combine(Application.dataPath, "Resources");
-    //     templateFolder = Path.Combine(templateFolder, "data");
-    //     templateFolder = Path.Combine(templateFolder, "commercials");
-        
-    //     DirectoryInfo info = new DirectoryInfo(templateFolder);
-    //     FileInfo[] fileInfo = info.GetFiles();
-    //     foreach (FileInfo f in fileInfo){
-    //         if (reg.Matches(f.ToString()).Count == 0)
-    //             continue;
-            
-    //         var commercialStream = new FileStream(f.ToString(), FileMode.Open);
-    //         Commercial templateCommercial = serializer.Deserialize(commercialStream) as Commercial;
-    //         templateCommercial.path = f.ToString();
-    //         commercialStream.Close();
-    //         Debug.Log("eval against "+templateCommercial.name);
-    //         if (trial.Evaluate(templateCommercial)){
-    //             Debug.Log("pass");
-    //             passList.Add(templateCommercial);
-    //         } else {
-    //             Debug.Log("fail");
-    //         }
-    //     }
-    //     return passList;
-    // }
+
 }
