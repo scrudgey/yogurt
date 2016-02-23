@@ -44,22 +44,17 @@ public class Toolbox : Singleton<Toolbox> {
 		}
 	}
 
-    // public Commercial LoadCommercialByName(string name, bool justname=false){
-    //     XmlSerializer serializer = new XmlSerializer(typeof(Commercial));
-    //     string path = "";
-    //     if (justname){
-    //         path = Path.Combine(Application.dataPath, "Resources");
-    //         path = Path.Combine(path, "data");
-    //         path = Path.Combine(path, "commercials");
-    //         path = Path.Combine(path, name+".xml");
-    //     } else {
-    //         path = name;
-    //     }
-    //     var commercialStream = new FileStream(path, FileMode.Open);
-    //     Commercial commercial = serializer.Deserialize(commercialStream) as Commercial;
-    //     commercial.path = path;
-    //     return commercial;
-    // }
+    public void PopupCounter(string text, float initValue, float finalValue){
+        GameObject pop = Instantiate(Resources.Load("UI/Poptext")) as GameObject;
+        Canvas popCanvas = pop.GetComponent<Canvas>();
+        popCanvas.worldCamera = GameManager.Instance.cam;
+        
+        Poptext poptext = pop.GetComponent<Poptext>();
+        poptext.description = text;
+        poptext.initValue = initValue;
+        poptext.finalValue = finalValue;
+         
+    }
 
 	public AudioSource SetUpAudioSource(GameObject g){
 		AudioSource source = g.GetComponent<AudioSource>();
