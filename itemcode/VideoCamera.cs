@@ -47,10 +47,15 @@ public class VideoCamera : MonoBehaviour {
 		Occurrence occurrence = col.gameObject.GetComponent<Occurrence>();
 		if (occurrence == null)
 		return;
-		if (occurrence.subjectName.Contains("yogurt") && occurrence.functionName == "Drink"){
+        ProcessOccurrence(occurrence);
+	}
+    
+    // Handle all the various occurrences
+    void ProcessOccurrence(Occurrence oc){
+        if (oc.subjectName.Contains("yogurt") && oc.functionName == "Drink"){
             IncrementCommercialValue("yogurt", 1f);
 		}
-	}
+    }
     
     public void IncrementCommercialValue(string valname, float increment){
         
