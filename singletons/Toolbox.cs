@@ -111,8 +111,6 @@ public class Toolbox : Singleton<Toolbox> {
         LiquidCollection.MonoLiquidify(droplet, l);
     }
 
-	#region utility functions
-
 	public Component CopyComponent(Component original, GameObject destination)
 	{
 		System.Type type = original.GetType();
@@ -187,7 +185,5 @@ public class Toolbox : Singleton<Toolbox> {
 		}
 		return output;
 	}
-
-	#endregion
 
 }
