@@ -15,6 +15,9 @@ public class HueShiftText : MonoBehaviour {
 	}
     
     void OnEnable(){
+       if (!text){
+    	   text = GetComponent<Text>();
+       }
 	   color = HSBColor.FromColor(text.color);
     }
     void Update () {
