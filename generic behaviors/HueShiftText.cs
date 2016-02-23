@@ -6,13 +6,19 @@ public class HueShiftText : MonoBehaviour {
 
     private Text text;
 	private HSBColor color;
+    
+    public float speedConst = 10f;
 	// Use this for initialization
 	void Start () {
 	   text = GetComponent<Text>();
 	   color = HSBColor.FromColor(text.color);
 	}
+    
+    void OnEnable(){
+	   color = HSBColor.FromColor(text.color);
+    }
     void Update () {
-		color.h += Time.deltaTime / 10f;
+		color.h += Time.deltaTime / speedConst;
 		if (color.h > 1)
 			color.h -= 1f;
 		text.color = color.ToColor();
