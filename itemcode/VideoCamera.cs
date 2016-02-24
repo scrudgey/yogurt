@@ -47,11 +47,21 @@ public class VideoCamera : MonoBehaviour {
 		Occurrence occurrence = col.gameObject.GetComponent<Occurrence>();
 		if (occurrence == null)
 		return;
-        ProcessOccurrence(occurrence);
+        ProcessOccurrence(occurrence, true);
 	}
     
     // Handle all the various occurrences
-    void ProcessOccurrence(Occurrence oc){
+    void ProcessOccurrence(Occurrence oc, bool debug=false){
+        if (debug){
+            Debug.Log(oc.functionName);
+            Debug.Log(oc.subjectName);
+            Debug.Log(oc.actor);
+            Debug.Log(oc.target);
+            foreach (System.Object parm in oc.parameters){
+                Debug.Log(parm);
+            }
+        }
+        
         if (oc.subjectName.Contains("yogurt") && oc.functionName == "Drink"){
             IncrementCommercialValue("yogurt", 1f);
 		}
