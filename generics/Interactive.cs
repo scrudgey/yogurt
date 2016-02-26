@@ -12,7 +12,7 @@ public class Interaction {
 	public bool debug;
 	public Interactive parent;
 	public string action;
-	public List<object> parameters;
+	public List<Component> parameters;
 
 	public bool hideInManualActions;
 	public bool hideInRightClickMenu;
@@ -84,7 +84,7 @@ public class Interaction {
 	
 	
 	public void CheckDependency(){
-		parameters = new List<object> ();
+		parameters = new List<Component> ();
 		int parameterMatches = 0;
 		int parameterMisses = 0;
 		
@@ -152,8 +152,33 @@ public class Interaction {
 	}
 	
 	// this can be sped up if I store it in a delegate instead of calling Invoke
-	public Occurrence DoAction(){
-		Occurrence result = null;
+	// public Occurrence DoAction(){
+	// 	Occurrence result = null;
+	// 	if (enabled){
+	// 		if (actionDelegate == null){
+	// 			if (parameters != null ){
+	// 				methodInfo.Invoke(parent, parameters.ToArray());
+	// 			} else {
+	// 				methodInfo.Invoke(parent, new object[0]);
+	// 			}
+	// 		} else {
+	// 			actionDelegate(parameters[0] as Component);
+	// 		}
+	// 		GameObject occurrenceObject = GameObject.Instantiate(Resources.Load("OccurrenceFlag"), parent.transform.position, Quaternion.identity) as GameObject;
+	// 		result = occurrenceObject.GetComponent<Occurrence>();
+	// 		result.functionName = this.actionName;
+	// 		result.subjectName = parent.name;
+	// 		result.actor = parent.gameObject;
+	// 		result.target = parent.target;
+            
+	// 		foreach (Component parameter in parameters){
+	// 			result.parameters.Add(parameter);
+    //             result.parameterStrings.Add(parameter.ToString());
+	// 		}
+	// 	}
+	// 	return result;
+	// }
+	public void DoAction(){
 		if (enabled){
 			if (actionDelegate == null){
 				if (parameters != null ){
@@ -164,23 +189,8 @@ public class Interaction {
 			} else {
 				actionDelegate(parameters[0] as Component);
 			}
-			GameObject occurrenceObject = GameObject.Instantiate(Resources.Load("OccurrenceFlag"), parent.transform.position, Quaternion.identity) as GameObject;
-			result = occurrenceObject.GetComponent<Occurrence>();
-			result.functionName = this.actionName;
-			result.subjectName = parent.name;
-			result.actor = parent.gameObject;
-			result.target = parent.target;
-			// result.para
-			foreach (System.Object parameter in parameters){
-				result.parameters.Add(parameter.ToString());
-			}
-			// occurrence.objectName = 
-			// occurence.
-			// Debug.Log(parameters.ToString());
 		}
-		return result;
 	}
-
 	
 }
 
