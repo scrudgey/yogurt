@@ -55,6 +55,12 @@ public class Toolbox : Singleton<Toolbox> {
         poptext.finalValue = finalValue;
          
     }
+    
+    public Occurrence OccurenceFlag(GameObject spawner){
+        GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
+        Occurrence occurrence = flag.GetComponent<Occurrence>();
+        return occurrence;
+    }
 
 	public AudioSource SetUpAudioSource(GameObject g){
 		AudioSource source = g.GetComponent<AudioSource>();
@@ -72,12 +78,12 @@ public class Toolbox : Singleton<Toolbox> {
 		initialVelocity = Random.insideUnitCircle;
 		if (initialVelocity.y < 0)
 			initialVelocity.y = initialVelocity.y * -1;
-		GameObject droplet = Instantiate(Resources.Load("droplet"),pos,Quaternion.identity) as GameObject;
+		GameObject droplet = Instantiate(Resources.Load("droplet"), pos, Quaternion.identity) as GameObject;
 		PhysicalBootstrapper phys = droplet.GetComponent<PhysicalBootstrapper>();
 		phys.initHeight = 0.05f;
 		phys.initVelocity = initialVelocity;
 		phys.ignoreCollisions = true;
-		LiquidCollection.MonoLiquidify(droplet,l);
+		LiquidCollection.MonoLiquidify(droplet, l);
 	}
     
     public void SpawnDroplet(Liquid l, float severity, GameObject spiller){
