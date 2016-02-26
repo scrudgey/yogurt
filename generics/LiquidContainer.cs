@@ -70,8 +70,7 @@ public class LiquidContainer : Interactive {
 		CheckLiquid();
 	}
 	public void FillByLoad(string type){
-		Liquid l = LiquidCollection.LoadLiquid(type);
-		liquid = l;
+	    liquid = LiquidCollection.LoadLiquid(type);
 		amount = fillCapacity;
 		CheckLiquid();
 	}
@@ -127,8 +126,8 @@ public class LiquidContainer : Interactive {
 		if (eater){
 			GameObject sip = new GameObject();
 			sip.AddComponent<MonoLiquid>();
-			LiquidCollection.MonoLiquidify(sip,liquid);
-			eater.Eat( sip.GetComponent<Edible>() );
+			LiquidCollection.MonoLiquidify(sip, liquid);
+			eater.Eat(sip.GetComponent<Edible>());
 			amount -= 1f;
 		}
 	}
