@@ -11,6 +11,8 @@ public class Edible : Interactive {
 	public bool meat;
 	public bool immoral;
 	public bool offal;
+    public bool poison;
+    public bool vomit;
 	public bool blendable;
 	public Color pureeColor;
 
