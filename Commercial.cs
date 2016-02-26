@@ -15,18 +15,14 @@ public enum CommercialComparison{
 [XmlRoot("Commercial")]
 public class Commercial {
     public string name = "default";
-    public string path = "default";
-    
     public string description = "default";
     public float reward = 0;
 	public SerializableDictionary<string, CommercialProperty> properties = new SerializableDictionary<string, CommercialProperty>(); 
-	
     public List<string> unlockUponCompletion;
-    
+    public OccurrenceData data;
 	public Commercial(){
-		properties["yogurt"] = new CommercialProperty();
         unlockUponCompletion = new List<string>();
-        // unlockUponCompletion.Add("test");
+        data = new OccurrenceData();
 	}
 	
 	public bool Evaluate(Commercial other){
