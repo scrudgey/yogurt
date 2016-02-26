@@ -18,6 +18,7 @@ public class Liquid {
 	public bool immoral;
 	public bool offal;
 	public bool flammable;
+    public bool vomit;
 
     public Liquid(){
         
