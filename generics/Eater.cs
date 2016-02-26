@@ -24,6 +24,7 @@ public class Eater : Interactive {
 			CheckNausea();
 			}
 	}
+    private bool poisonNausea;
 	private Speech speech;
 	private GameObject eaten;
 	private bool LoadInitialized = false;
@@ -66,13 +67,17 @@ public class Eater : Interactive {
 	
 	// Update is called once per frame
 	void Update () {
+        if (poisonNausea){
+            nausea += Time.deltaTime * 50f;
+        }
+        
 		if (nausea > 100){
 			Vomit();
+            poisonNausea = false;
 		}
 
 		if (nutrition > 100){
 			nausea += Time.deltaTime * 2;
-
 		}
 	}
 
@@ -106,18 +111,22 @@ public class Eater : Interactive {
 		string phrase ="";
 		int reaction;
 		nutrition += food.nutrition;
+        if (food.poison)
+            poisonNausea = true;
 
 		if (head)
 			head.SetEating(true,food.pureeColor);
 
 		//randomly store a clone of the object for later vomiting
-		if(Random.Range(0,1) < 0.1){
-			if (eaten){
-				Destroy(eaten);
-			}
-			eaten = Instantiate(food.gameObject) as GameObject;
-			eaten.SetActive(false);
-		}
+		// if(Random.Range(0,1) < 0.1){
+        if (!food.poison){
+            if (eaten){
+                Destroy(eaten);
+            }
+            eaten = Instantiate(food.gameObject) as GameObject;
+            eaten.SetActive(false);
+        }
+		// }
 
 		//update our status based on our reaction to the food
 		reaction = CheckReaction(food);
@@ -146,6 +155,29 @@ public class Eater : Interactive {
 			Intrinsics foodIntrinsic = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(food.gameObject);
 			intrinsics.AddIntrinsic(foodIntrinsic);
 		}
+        
+        // set up an occurrence flag for this eating!
+        Occurrence flag = Toolbox.Instance.OccurenceFlag(gameObject);
+        OccurrenceEat eatData = new OccurrenceEat();
+        eatData.food = food.name;
+        eatData.amount = food.nutrition;
+        MonoLiquid mliquid = food.GetComponent<MonoLiquid>();
+        if (mliquid){
+            eatData.liquid = mliquid.liquid;
+            if (mliquid.liquid.vomit){
+                eatData.disgusting += 100f;
+                eatData.chaos += 200f;
+            }
+            if (mliquid.liquid.offal){
+                eatData.disgusting += 75f;
+                eatData.chaos += 50f;
+            }
+            if (mliquid.liquid.immoral){
+                eatData.disturbing += 100f;
+                eatData.chaos += 150f;
+            }
+        }
+        flag.data.Add(eatData);
 
 		food.BeEaten();
 
@@ -154,14 +186,33 @@ public class Eater : Interactive {
 	void Vomit(){
 		nausea = 0;
 		nutrition = 0;
+                
+        Occurrence flag = Toolbox.Instance.OccurenceFlag(gameObject);
+        OccurrenceVomit data = new OccurrenceVomit();
+        data.disgusting = 100f;
+        
 		if (eaten){
+            data.vomit = eaten.name;
 			eaten.SetActive(true);
 			eaten.transform.position = transform.position;
+            MonoLiquid mono = eaten.GetComponent<MonoLiquid>();
+            if (mono){
+                Toolbox.Instance.SpawnDroplet(transform.position, mono.liquid);
+                mono.liquid.vomit = true;
+                mono.edible.vomit = true;
+                data.liquid = mono.liquid;
+            }
+            Edible edible = eaten.GetComponent<Edible>();
+            if (edible){
+                edible.vomit = true;
+            }
 		}
 		if (head)
 			head.SetVomit(true);
 		if (speech){
 			speech.Say("Blaaaaargh!");
 		}
+
+        flag.data.Add(data);
 	}
 }
