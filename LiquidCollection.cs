@@ -52,6 +52,8 @@ public class LiquidCollection{
 		monoLiquid.edible.immoral = liquid.immoral;
 		monoLiquid.edible.offal = liquid.offal;
 		monoLiquid.edible.pureeColor = liquid.color;
+        monoLiquid.edible.poison = liquid.poison;
+        monoLiquid.edible.vomit = liquid.vomit;
 
 		if (liquid.flammable){
 			Flammable flam = target.AddComponent<Flammable>();
