@@ -23,6 +23,7 @@ public class LiquidContainer : Interactive {
 	private bool doSpill = false;
     private float spillSeverity;
 	public string initLiquid;
+    public string containerName;
 	void Update(){
 		if (spillTimeout > 0){
 			spillTimeout -= Time.deltaTime;
