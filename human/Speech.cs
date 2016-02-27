@@ -26,8 +26,21 @@ public class Speech : Interactive {
 		textRect = bubbleText.GetComponent<RectTransform>();
 	}
 
+    // TODO: allow liquids and things to self-describe; add modifiers etc.
 	public void Describe(Item obj){
-		Say (obj.description);
+        LiquidContainer container = obj.GetComponent<LiquidContainer>();
+        MonoLiquid mono = obj.GetComponent<MonoLiquid>();
+        if (container){
+            if (container.amount > 0 && container.containerName != ""){
+                Say("It's a "+container.containerName+" of "+container.liquid.name+".");
+            } else {
+                Say (obj.description);
+            }
+        } else if (mono){
+            Say("It's "+mono.liquid.name+".");
+        } else {
+            Say (obj.description);
+        }
 	}
 
 	void Update () {
