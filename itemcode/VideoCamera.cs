@@ -92,6 +92,7 @@ public class VideoCamera : MonoBehaviour {
         }
     }
     
+    //  TODO: tell if i am eating yogurt off the floor
     void ProcessEat(OccurrenceEat data){
         if (data.liquid.name == "Yogurt"){
             IncrementCommercialValue("yogurt", 1f);
