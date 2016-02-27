@@ -22,7 +22,7 @@ public class MonoLiquid : MonoBehaviour {
 	}
 
 	public void LoadLiquid(string type){
-		// make this fancier: retrieve liquid in buffer, only change variabel
+		// TODO: make this fancier: retrieve liquid in buffer, only change variable
 		// if liquid was returned
 		liquid = LiquidCollection.LoadLiquid(type);
 
