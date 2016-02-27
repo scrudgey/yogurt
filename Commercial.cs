@@ -3,12 +3,7 @@ using System.Collections.Generic;
 using System.Xml.Serialization;
 
 public enum CommercialComparison{
-		equal,
-		notequal,
-		greater,
-		less,
-		greaterEqual,
-		lessEqual
+		equal, notequal, greater, less, greaterEqual, lessEqual
 	}
 // [System.Serializable]
 
