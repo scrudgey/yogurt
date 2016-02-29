@@ -8,22 +8,26 @@ public class VideoCamera : MonoBehaviour {
     public static Dictionary<string, string> KeyDescriptions = new Dictionary<string, string>{
         {"yogurt", "yogurts eaten"},
         {"vomit", "vomit events"},
-        {"yogurt_vomit", "yogurt emesis"},
-        {"yogurt_vomit_eat", "eating yogurt vomit"}
+        {"yogurt_vomit", "yogurt emesis event"},
+        {"yogurt_vomit_eat", "eating yogurt vomit"},
+        {"yogurt_floor", "yogurt eaten off the floor"},
 	};
 	Text rec;
 	float blinkTimer;
     GameObject cutButton;
     float interfaceTimeout;
 	public Commercial commercial = new Commercial();
+    public OccurrenceData watchForOccurrence;
+    private ScriptReader reader;
 	
 	void Start () {
 		rec = transform.Find("Graphic/Rec").GetComponent<Text>();
         cutButton = transform.Find("Canvas/CutButton").gameObject;
         cutButton.SetActive(false);
-        // Toolbox.Instance.PopupCounter("yogurts eaten", 0f, 1f);
+        reader = GetComponent<ScriptReader>();
 	}
 	
+
 	void Update(){
 		blinkTimer += Time.deltaTime;
 		if (blinkTimer > 1 && rec.enabled == true){
@@ -55,7 +59,6 @@ public class VideoCamera : MonoBehaviour {
 		var serializer = new XmlSerializer(typeof(Commercial));
 			string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
 			path = Path.Combine(path, "commercial.xml");
-			// GameData data = new GameData(this);
 			FileStream sceneStream = File.Create(path);
 			serializer.Serialize(sceneStream, commercial);
 			sceneStream.Close();
@@ -86,23 +89,39 @@ public class VideoCamera : MonoBehaviour {
                 default:
                     break;
             }
+            
             // handle qualities
             commercial.data.AddData(data);
+            
             // trigger reaction to values increasing?
+            
+            //check vs. watchForOccurrence
+            if (watchForOccurrence != null){
+                 if (watchForOccurrence.Matches(data)){
+                     reader.OccurrenceCallback();
+                     watchForOccurrence = null;
+                 }
+            }
         }
     }
     
-    //  TODO: tell if i am eating yogurt off the floor
+    
     void ProcessEat(OccurrenceEat data){
         if (data.liquid.name == "Yogurt"){
             IncrementCommercialValue("yogurt", 1f);
             if (data.liquid.vomit)
                 IncrementCommercialValue("yogurt_vomit_eat", 1f);
+            if (data.food == "Puddle(Clone)")
+                IncrementCommercialValue("yogurt_floor", 1f);
         }
     }
     
     void ProcessVomit(OccurrenceVomit data){
         IncrementCommercialValue("vomit", 1f);
+    }
+    
+    void ProcessSpeech(OccurrenceSpeech data){
+        //add the speech to the transcript
     }
     
     public void IncrementCommercialValue(string valname, float increment){
