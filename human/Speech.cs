@@ -1,29 +1,27 @@
 ﻿using UnityEngine;
-// using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
 public class Speech : Interactive {
-
 	private string words;
 	public bool speaking;
 	public string[] randomPhrases;
 	private List<string> queue = new List<string>();
 	private float speakTime;
 	private GameObject bubbleParent;
-	private RectTransform bubble;
-	private RectTransform textRect;
+    private GameObject flipper;
 	private Text bubbleText;
+    private ScriptReader reader;
 
 	void Start () {
 		Interaction speak = new Interaction(this, "Look", "Describe", true, false);
 		speak.limitless = true;
 		speak.dontWipeInterface = false;
 		interactions.Add(speak);
-		bubbleParent = gameObject.transform.FindChild("Speechbubble").gameObject;
-		bubble = bubbleParent.GetComponent<RectTransform>();
+        flipper = transform.FindChild("SpeechChild").gameObject;
+		bubbleParent = transform.FindChild("SpeechChild/Speechbubble").gameObject;
 		bubbleText = bubbleParent.transform.FindChild("Text").gameObject.GetComponent<Text>();
-		textRect = bubbleText.GetComponent<RectTransform>();
+        reader = GetComponent<ScriptReader>();
 	}
 
     // TODO: allow liquids and things to self-describe; add modifiers etc.
@@ -49,17 +47,19 @@ public class Speech : Interactive {
 			speaking = true;
 			bubbleParent.SetActive(true);
 			bubbleText.text = words;
-			textRect.sizeDelta = new Vector2(bubbleText.preferredWidth, 20);
-			bubble.sizeDelta = new Vector2(bubbleText.preferredWidth / 100 + 0.1f, .20f);
-			if (bubbleParent.transform.parent.transform.localScale.x < 0){
-				Vector3 tempscale = bubbleParent.transform.localScale;
-				tempscale.x = -1;
-				bubbleParent.transform.localScale = tempscale;
-			} else {
-				bubbleParent.transform.localScale = Vector3.one;
+            // if the parent scale is flipped, we need to flip the flipper back to keep
+            // the text properly oriented.
+            if (flipper.transform.localScale != transform.localScale){
+                Vector3 tempscale = transform.localScale;
+                flipper.transform.localScale = tempscale; 
 			}
 		}
 		if (speakTime < 0){
+            if (speaking && reader){
+                Debug.Log("speech callback");
+                // do scriptreader callback
+                reader.SpeechCallback();
+            }
 			speaking = false;
 			bubbleParent.SetActive(false);
 			speakTime = 0;
@@ -71,10 +71,8 @@ public class Speech : Interactive {
 				bubbleText.text = words;
 				bubbleParent.SetActive(true);
 			}
-
 		}
 	}
-
 	public void SayRandom(){
 		if(randomPhrases.Length > 0 ){
 			string toSay = randomPhrases[Random.Range(0,randomPhrases.Length)];
@@ -86,6 +84,12 @@ public class Speech : Interactive {
 		if(speaking && phrase == words ){
 			return;
 		}
+        Occurrence flag = Toolbox.Instance.OccurenceFlag(gameObject);
+        OccurrenceSpeech data = new OccurrenceSpeech();
+        data.speaker = gameObject;
+        data.line = phrase;
+        flag.data.Add(data);
+        
 		words = phrase;
 		speakTime = words.Length / 5;
 	}
