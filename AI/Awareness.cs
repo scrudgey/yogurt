@@ -26,7 +26,7 @@ public class Knowledge{
 }
 
 public class PersonalAssessment{
-	public enum tag{neutral,friend,enemy}
+	public enum tag{neutral, friend, enemy}
 	public tag friendStatus;
 	public float feelingToward;
 	public float harmDealt;
@@ -111,7 +111,6 @@ public class Awareness : MonoBehaviour {
 				fieldOfView.Add(other.gameObject);
 		}
 	}
-
 	// process the list of objects in the field of view.
 	void Perceive(){
 		viewed = false;
@@ -125,7 +124,6 @@ public class Awareness : MonoBehaviour {
 			}
 		}
 	}
-
 	void OnTriggerEnter2D(Collider2D col){
 		List<GameObject> keys = new List<GameObject>(objects.Keys);
 		if (! keys.Contains(col.gameObject) && col.tag == "Physical" ){
@@ -138,7 +136,6 @@ public class Awareness : MonoBehaviour {
 			objects[col.gameObject].lastSeenPosition = col.gameObject.transform.position;
 		}
 	}
-
 	void React(GameObject g){
 		if (g.name == "pimp_hat"){
 			SendMessage("Say","That's a sweet hat!",SendMessageOptions.DontRequireReceiver);
