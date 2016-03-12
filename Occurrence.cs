@@ -33,7 +33,8 @@ public class OccurrenceData {
     
     public virtual bool Matches(OccurrenceData otherData){
         bool match = false;
-        match = disturbing == otherData.disturbing;
+        match = myType == otherData.myType;
+        match &= disturbing == otherData.disturbing;
         match &= disgusting == otherData.disgusting;
         match &= chaos == otherData.chaos;
         
