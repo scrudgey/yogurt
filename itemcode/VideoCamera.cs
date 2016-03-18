@@ -17,7 +17,7 @@ public class VideoCamera : MonoBehaviour {
     GameObject cutButton;
     float interfaceTimeout;
 	public Commercial commercial = new Commercial();
-    public OccurrenceData watchForOccurrence;
+    public OccurrenceData watchForOccurrence = null;
     private ScriptReader reader;
 	
 	void Start () {
@@ -86,6 +86,9 @@ public class VideoCamera : MonoBehaviour {
                 case occurrenceType.vomit:
                     ProcessVomit(data as OccurrenceVomit);
                     break;
+                case occurrenceType.speech:
+                    ProcessSpeech(data as OccurrenceSpeech);
+                    break;
                 default:
                     break;
             }
@@ -98,13 +101,14 @@ public class VideoCamera : MonoBehaviour {
             //check vs. watchForOccurrence
             if (watchForOccurrence != null){
                  if (watchForOccurrence.Matches(data)){
+                     Debug.Log(watchForOccurrence.myType);
+                     
                      reader.OccurrenceCallback();
                      watchForOccurrence = null;
                  }
             }
         }
     }
-    
     
     void ProcessEat(OccurrenceEat data){
         if (data.liquid.name == "Yogurt"){
@@ -122,6 +126,7 @@ public class VideoCamera : MonoBehaviour {
     
     void ProcessSpeech(OccurrenceSpeech data){
         //add the speech to the transcript
+        // Debug.Log("transcript + "+data.line);
     }
     
     public void IncrementCommercialValue(string valname, float increment){

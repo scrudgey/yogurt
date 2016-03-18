@@ -2,16 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine.UI;
 
+
 public class Speech : Interactive {
 	private string words;
-	public bool speaking;
+	public bool speaking = false;
 	public string[] randomPhrases;
 	private List<string> queue = new List<string>();
 	private float speakTime;
 	private GameObject bubbleParent;
     private GameObject flipper;
 	private Text bubbleText;
-    private ScriptReader reader;
+    // private ScriptReader reader;
+    private ScriptDirector director;
 
 	void Start () {
 		Interaction speak = new Interaction(this, "Look", "Describe", true, false);
@@ -21,7 +23,8 @@ public class Speech : Interactive {
         flipper = transform.FindChild("SpeechChild").gameObject;
 		bubbleParent = transform.FindChild("SpeechChild/Speechbubble").gameObject;
 		bubbleText = bubbleParent.transform.FindChild("Text").gameObject.GetComponent<Text>();
-        reader = GetComponent<ScriptReader>();
+        // reader = GetComponent<ScriptReader>();
+        director = GameObject.FindObjectOfType<ScriptDirector>();
 	}
 
     // TODO: allow liquids and things to self-describe; add modifiers etc.
@@ -55,17 +58,19 @@ public class Speech : Interactive {
 			}
 		}
 		if (speakTime < 0){
-            if (speaking && reader){
-                Debug.Log("speech callback");
+            if (speaking && director){
+                // Debug.Log("speech callback");
                 // do scriptreader callback
-                reader.SpeechCallback();
+                // director.SpeechCallback();
+                director.SpeechCallback(bubbleText.text);
             }
 			speaking = false;
 			bubbleParent.SetActive(false);
 			speakTime = 0;
 			if (queue.Count > 0){
 				words = queue[0];
-				speakTime =  words.Length / 5;
+				// speakTime =  words.Length / 5;
+                speakTime = DoubleSeat(words.Length, 2f, 5f, 12f, 2f);
 				queue.RemoveAt(0);
 				speaking = true;
 				bubbleText.text = words;
@@ -91,8 +96,33 @@ public class Speech : Interactive {
         flag.data.Add(data);
         
 		words = phrase;
-		speakTime = words.Length / 5;
+		// speakTime = words.Length / 5;
+        speakTime = DoubleSeat(phrase.Length, 2f, 50f, 5f, 2f);
+        // Debug.Log(speakTime);
 	}
 
 
+    // double-exponential seat easing function
+    public float DoubleSeat(float x, float a, float w, float max, float min){
+        float result = 0f;
+        if (x/w > 1){
+            x = w;
+        }
+        if (x/w <= 0.5){
+            result = Mathf.Pow(2*x/w, a) / 2 * (max - min) + min;
+        } else {
+            result = (1f - Mathf.Pow(2f - 2f *(x / w), a) / 2f ) * (max - min) + min;
+        }
+        return result;
+    }
+    
+    public void Swear(GameObject target=null){
+        if (!target){
+            Say("shazbot!");
+            return;
+        }
+        Say("that shazbotting "+target.name+"!");
+    }
+
 }
+

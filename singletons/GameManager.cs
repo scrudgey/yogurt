@@ -71,8 +71,8 @@ public partial class GameManager : Singleton<GameManager> {
             ScriptPrompt();
         }
 	}
-    
-    
+ 
+ 
     // ITEM COLLECTIONS
 	public void CheckItemCollection(Inventory inv, GameObject owner){
 		if (owner != playerObject)
