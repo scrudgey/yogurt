@@ -5,7 +5,7 @@ public class Occurrence : MonoBehaviour {
     public List<OccurrenceData> data = new List<OccurrenceData>();
 }
 public enum occurrenceType{
-        eat, vomit, act
+        eat, vomit, speech
 }
 
 /*
@@ -81,7 +81,7 @@ public class OccurrenceSpeech : OccurrenceData {
     public string line;
     public GameObject speaker;
     public OccurrenceSpeech(){
-        myType = occurrenceType.act;
+        myType = occurrenceType.speech;
     }
     
     public override bool Matches(OccurrenceData otherData){
