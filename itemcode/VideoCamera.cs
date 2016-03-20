@@ -46,9 +46,9 @@ public class VideoCamera : MonoBehaviour {
             interfaceTimeout -= Time.deltaTime;
         }
 	}
-        public void CalledCut(){
+    public void CalledCut(){
         SaveCommercial();
-        GameManager.Instance.EvaluateCommercial(commercial);
+        
     }
     void OnTriggerStay2D(Collider2D col){
         if (col.gameObject == GameManager.Instance.playerObject){

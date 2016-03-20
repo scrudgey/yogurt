@@ -21,6 +21,12 @@ public class UINew : Singleton<UINew> {
 	private GameObject inventoryMenu;
 	private bool init = false;
 	public bool inventoryVisible = false;
+	
+	private string statusText;
+	private string statusTemp;
+	private float statusTempTime;
+	
+	public Text status;
 
 	void Start(){
 		if (!init)
@@ -31,6 +37,8 @@ public class UINew : Singleton<UINew> {
 		UICanvas = GameObject.Find("NeoUICanvas");
 		inventoryButton = UICanvas.transform.Find("bottomdock/InvButtonDock/InventoryButton").gameObject;
 		inventoryMenu = GameObject.Find("InventoryScreen");
+		status = UICanvas.transform.Find("topdock/topBar/status").GetComponent<Text>();
+		status.gameObject.SetActive(false);
 		inventoryMenu.SetActive(false);
 		inventoryButton.SetActive(false);
 		if (GameManager.Instance.playerObject)
@@ -40,6 +48,24 @@ public class UINew : Singleton<UINew> {
 			InventoryCallback(inventory);
 		}
 		CloseClosetMenu();
+	}
+	
+	public void SetStatus(string text){
+		statusText = text;
+	}
+	public void SetTempStatus(string text, float time){
+		statusTemp = text;
+		statusTempTime = time;
+	}
+	void Update(){
+		if (statusTempTime > 0){
+			statusTempTime -= Time.deltaTime;
+		}
+		if (statusTempTime > 0){
+			status.text = statusTemp;
+		} else {
+			status.text = statusText;
+		}
 	}
 
 	public void Clicked(GameObject clicked){

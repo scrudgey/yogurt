@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
 
 public class Occurrence : MonoBehaviour {
@@ -52,16 +53,20 @@ public class OccurrenceEat : OccurrenceData {
     }
     public override bool Matches(OccurrenceData otherData){
         bool match = false;
-        OccurrenceEat other = (OccurrenceEat)otherData;
-        if (other == null)
-            return false;
-        
-        if (liquid != null){
-            if (other.liquid == null)
+        try {
+            OccurrenceEat other = (OccurrenceEat)otherData;
+            if (other == null)
                 return false;
-            match = liquid.name == other.liquid.name;
-        } else {
-            match = food == other.food;
+            
+            if (liquid != null){
+                if (other.liquid == null)
+                    return false;
+                match = liquid.name == other.liquid.name;
+            } else {
+                match = food == other.food;
+            }
+        } catch (Exception e) {
+           
         }
         
         return match;

@@ -21,6 +21,7 @@ public class ScriptReader : MonoBehaviour {
 	}
     public void CoStarLine(string line){
         // say my line.
+        speech = GetComponent<Speech>();
         if (!costar)
             return;
         speech.Say(line);
@@ -37,6 +38,12 @@ public class ScriptReader : MonoBehaviour {
             data.liquid = newLiquid;
             
             videoComponent.watchForOccurrence = data;
+        }
+    }
+    
+    public void Cut(){
+        if (videoComponent){
+            GameManager.Instance.EvaluateCommercial(videoComponent.commercial);
         }
     }
     

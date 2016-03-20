@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using Easings;
 // using System.Collections;
 
 public class BounceText : MonoBehaviour {
@@ -8,15 +9,13 @@ public class BounceText : MonoBehaviour {
 	private Text textObject;
 	public string text = "Success!";
 	private FollowGameObjectInCamera followScript;
-	public float tickTime = 0.1f;
-	public float lifeTime = 1f;
-	public float timer;
-	private int frame = 0;
+	public float lifeTime = 2f;
+	public float timer = 0f;
 	private RectTransform trans;
 	private Vector3 tempScale;
 	
 	void Start () {
-		followScript = GetComponent<FollowGameObjectInCamera>();
+		followScript = GetComponentInChildren<FollowGameObjectInCamera>();
 		if (target)
 			followScript.target = target;
 		trans = transform.FindChild("Text").GetComponent<RectTransform>();
@@ -27,40 +26,13 @@ public class BounceText : MonoBehaviour {
 	}
 	void Update () {
 		timer += Time.deltaTime;
-		if (timer > tickTime){
-			timer = 0f;
-			NextFrame();
-		}
-		if (frame * tickTime > lifeTime){
+		if (timer > lifeTime){
 			Destroy(gameObject);
 		}
+		tempScale.x = (float)PennerDoubleAnimation.ElasticEaseOut(timer, 0.001, 1, 0.8);
+		tempScale.y = (float)PennerDoubleAnimation.ElasticEaseOut(timer, 0.001, 1, 1.0);
+		// Debug.Log(tempScale);
+		trans.localScale = tempScale;
 	}
-	
-	void NextFrame(){
-		frame += 1;
-		tempScale = Vector3.one;
-		switch(frame){
-			case 0:
-			tempScale.x = 0.5f;
-			tempScale.y = 0.5f;
-			break;
-			case 1:
-			tempScale.x = 1.5f;
-			tempScale.y = 0.2f;
-			break;
-			case 2:
-			tempScale.x = 0.2f;
-			tempScale.y = 1.5f;
-			break;
-			case 3:
-			tempScale.x = 1.2f;
-			tempScale.y = 1.2f;
-			break;
-			default:
-			tempScale = Vector3.one;
-			break;
-		}
-		if (trans.localScale != tempScale)
-			trans.localScale = tempScale;
-	}
+
 }

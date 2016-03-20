@@ -55,6 +55,15 @@ public class Toolbox : Singleton<Toolbox> {
         poptext.finalValue = finalValue;
          
     }
+	
+	public void BounceText(string text, GameObject target){
+		GameObject bounce = Instantiate(Resources.Load("UI/BounceText")) as GameObject;
+		BounceText bounceScript = bounce.GetComponent<BounceText>();
+		if (target){
+			bounceScript.target = target;
+		}
+		bounceScript.text = text;
+	}
     
     public Occurrence OccurenceFlag(GameObject spawner){
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;

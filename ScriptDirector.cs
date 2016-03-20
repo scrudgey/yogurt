@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-// using System.Text.RegularExpressions;
-// using System.IO;
 
 public class ScriptDirector : MonoBehaviour {
 
@@ -22,6 +20,9 @@ public class ScriptDirector : MonoBehaviour {
         lines = script.text.Split('\n');
         index = 0;
         Debug.Log(lines[index]);
+        UINew.Instance.status.gameObject.SetActive(true);
+        // UINew.Instance.status.text = "- WAIT -";
+        UINew.Instance.SetStatus("-WAIT-");
         ParseLine();
 	}
 
@@ -29,6 +30,7 @@ public class ScriptDirector : MonoBehaviour {
         string line = lines[index];
         Debug.Log("next line: "+line);
         if (line.Substring(0, 8) == "COSTAR: "){
+            UINew.Instance.SetStatus("-WAIT-");
             string content = line.Substring(7, line.Length-7);
             foreach (ScriptReader reader in readers){
                 reader.CoStarLine(content);
@@ -36,14 +38,13 @@ public class ScriptDirector : MonoBehaviour {
             }
         }
         if (line.Substring(0, 5) == "TOM: "){
+            UINew.Instance.SetStatus("PROMPT: SAY LINE");
             string content = line.Substring(4, line.Length-4);
-            foreach (ScriptReader reader in readers){
-                currentLine = content;
-                tomLineNext = true;
-            }
+            currentLine = content;
+            tomLineNext = true;
         }
-        
         if (line == "[yogurt++]"){
+            UINew.Instance.SetStatus("PROMPT: EAT YOGURT");
             // watch for tom to eat yogurt
             foreach (ScriptReader reader in readers){
                 reader.TomAct("yogurt");
@@ -54,6 +55,10 @@ public class ScriptDirector : MonoBehaviour {
 
     void NextLine(){
         index += 1;
+        // catch here if index is beyond the length of the script.
+        if (index == lines.Length){
+            Debug.Log("end of script");
+        }
         while (lines[index].Length < 2){
             index += 1;
         }
@@ -62,9 +67,12 @@ public class ScriptDirector : MonoBehaviour {
     
     void TriggerNextLine(){
         if (timeToNextLine <= 0){
-            timeToNextLine = 0.5f;
+            timeToNextLine = 1f;
             if (tomLineNext){
+                tomLineNext = false;
                 Debug.Log("success tom");
+                // Toolbox.Instance.BounceText("Success!", GameManager.Instance.playerObject);
+                UINew.Instance.SetTempStatus("Success!", 1f);
             }
         }
     }
@@ -92,7 +100,6 @@ public class ScriptDirector : MonoBehaviour {
     }
     
     public void ReaderCallback(){
-        // NextLine();
         TriggerNextLine();
     }
     
@@ -100,7 +107,6 @@ public class ScriptDirector : MonoBehaviour {
         if (spoken == currentLine){
             currentLine = "";
             TriggerNextLine();
-            // NextLine();
         }
     }
 
