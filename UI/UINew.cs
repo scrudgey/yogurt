@@ -25,6 +25,9 @@ public class UINew : Singleton<UINew> {
 	private string statusText;
 	private string statusTemp;
 	private float statusTempTime;
+	private TextFX statusFX;
+	private TextFX.FXstyle statusTempStyle;
+	public TextFX.FXstyle statusStyle;
 	
 	public Text status;
 
@@ -32,13 +35,15 @@ public class UINew : Singleton<UINew> {
 		if (!init)
 			PostLoadInit();
 	}
-	public void PostLoadInit(){
+	public void PostLoadInit() {
 		init = true;
 		UICanvas = GameObject.Find("NeoUICanvas");
 		inventoryButton = UICanvas.transform.Find("bottomdock/InvButtonDock/InventoryButton").gameObject;
 		inventoryMenu = GameObject.Find("InventoryScreen");
 		status = UICanvas.transform.Find("topdock/topBar/status").GetComponent<Text>();
-		status.gameObject.SetActive(false);
+		statusFX = status.gameObject.GetComponent<TextFX>();
+		// status.gameObject.SetActive(false);
+		status.gameObject.SetActive(true);
 		inventoryMenu.SetActive(false);
 		inventoryButton.SetActive(false);
 		if (GameManager.Instance.playerObject)
@@ -53,9 +58,14 @@ public class UINew : Singleton<UINew> {
 	public void SetStatus(string text){
 		statusText = text;
 	}
-	public void SetTempStatus(string text, float time){
+	public void SetTempStatus(string text, float time, TextFX.FXstyle style){
 		statusTemp = text;
 		statusTempTime = time;
+		statusTempStyle = style;
+	}
+	public void SetStatusStyle(TextFX.FXstyle style){
+		// statusFX.style = style;
+		statusStyle = style;
 	}
 	void Update(){
 		if (statusTempTime > 0){
@@ -63,8 +73,14 @@ public class UINew : Singleton<UINew> {
 		}
 		if (statusTempTime > 0){
 			status.text = statusTemp;
+			if (statusFX.style != statusTempStyle){
+				statusFX.style = statusTempStyle;
+			}
 		} else {
 			status.text = statusText;
+			if (statusFX.style != statusStyle){
+				statusFX.style = statusStyle;
+			}
 		}
 	}
 

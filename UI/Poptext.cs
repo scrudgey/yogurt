@@ -13,11 +13,15 @@ public class Poptext : MonoBehaviour {
     private GameObject dock;
     
     public bool colorFX = false;
+    
+    private AudioSource audioSource;
+    public AudioClip incrementSound;
 	void Start () {
 	   descriptionText = transform.Find("dock/Text").GetComponent<Text>();
        valueText = transform.Find("dock/value").GetComponent<Text>();
        hueShifter = transform.Find("dock/value").GetComponent<HueShiftText>();
        dock = transform.Find("dock").gameObject;
+       audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
        
        hueShifter.enabled = false;
        hueShifter.speedConst = 0.3f;
@@ -48,6 +52,7 @@ public class Poptext : MonoBehaviour {
         yield return new WaitForSeconds(0.25f);
         
         valueText.text = finalValue.ToString();
+        audioSource.PlayOneShot(incrementSound);
         if (colorFX){
             valueText.color = Color.red;
             hueShifter.enabled = true;

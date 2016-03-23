@@ -45,9 +45,7 @@ public class Humanoid : Controllable {
 		scaleVector = Vector3.one;
 	}
 
-
 	void FixedUpdate(){
-
 		// Do the normal controls stuff
 		// set vertical force or damp if neither up nor down is held
 		if (upFlag)
@@ -57,7 +55,6 @@ public class Humanoid : Controllable {
 		if (!upFlag && !downFlag){
 			deceleration.y = -1 * friction * GetComponent<Rigidbody2D>().velocity.y;
 		}
-
 		// set horizontal force, or damp is neither left nor right held
 		if (leftFlag){
 			acceleration.x = -1 * maxAcceleration;
@@ -71,14 +68,13 @@ public class Humanoid : Controllable {
 			deceleration.x = -1 * friction * GetComponent<Rigidbody2D>().velocity.x;
 			transform.rotation = Quaternion.Lerp (transform.rotation,forward,0.1f);
 		}
-
 		// apply force
 		GetComponent<Rigidbody2D>().AddForce(acceleration+deceleration);
 
 		// clamp velocity to maximum
 		// there's probably a more efficient way to do this calculation but whatevs
 		if (GetComponent<Rigidbody2D>().velocity.magnitude > maxSpeed)
-			GetComponent<Rigidbody2D>().velocity = Vector2.ClampMagnitude(GetComponent<Rigidbody2D>().velocity,maxSpeed);
+			GetComponent<Rigidbody2D>().velocity = Vector2.ClampMagnitude(GetComponent<Rigidbody2D>().velocity, maxSpeed);
 
 		// use the scale x trick for left-facing animations
 		if (GetComponent<Rigidbody2D>().velocity.x < 0){

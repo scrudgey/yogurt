@@ -66,13 +66,11 @@ public class OccurrenceEat : OccurrenceData {
                 match = food == other.food;
             }
         } catch (Exception e) {
-           
+            UnityEngine.Debug.Log("[VSCode] " + e.Message);
         }
-        
         return match;
     }
 }
-
 
 public class OccurrenceVomit : OccurrenceData {
     public string vomit;

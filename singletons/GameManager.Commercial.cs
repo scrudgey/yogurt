@@ -54,6 +54,9 @@ public partial class GameManager : Singleton<GameManager> {
                 completeCommercials.Add(activeCommercial);
         } else {
             // do something to display why the commercial is not done yet
+            Debug.Log("commercial did not pass.");
+            Debug.Log("loaded commercial:");
+            Debug.Log(activeCommercial);
         }
     }
 

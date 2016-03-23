@@ -19,24 +19,26 @@ public class VideoCamera : MonoBehaviour {
 	public Commercial commercial = new Commercial();
     public OccurrenceData watchForOccurrence = null;
     private ScriptReader reader;
+
 	
 	void Start () {
 		rec = transform.Find("Graphic/Rec").GetComponent<Text>();
         cutButton = transform.Find("Canvas/CutButton").gameObject;
         cutButton.SetActive(false);
         reader = GetComponent<ScriptReader>();
+        rec.enabled = false;
 	}
 	
 
 	void Update(){
-		blinkTimer += Time.deltaTime;
-		if (blinkTimer > 1 && rec.enabled == true){
-			rec.enabled = false;
-		}
-		if (blinkTimer > 2){
-			rec.enabled = true;
-			blinkTimer = 0f;
-		}
+		// blinkTimer += Time.deltaTime;
+		// if (blinkTimer > 1 && rec.enabled == true){
+		// 	rec.enabled = false;
+		// }
+		// if (blinkTimer > 2){
+		// 	rec.enabled = true;
+		// 	blinkTimer = 0f;
+		// }
         if (interfaceTimeout <= 0){
             if (cutButton.activeSelf){
                 cutButton.SetActive(false);

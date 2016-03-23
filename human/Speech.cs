@@ -9,11 +9,16 @@ public class Speech : Interactive {
 	public string[] randomPhrases;
 	private List<string> queue = new List<string>();
 	private float speakTime;
+    private float speakTimeTotal;
 	private GameObject bubbleParent;
     private GameObject flipper;
 	private Text bubbleText;
+    private float speakSpeed;
     // private ScriptReader reader;
-    private ScriptDirector director;
+    // private ScriptDirector director;
+    
+    public AudioClip speakSound;
+    private AudioSource audioSource;
 
 	void Start () {
 		Interaction speak = new Interaction(this, "Look", "Describe", true, false);
@@ -24,7 +29,11 @@ public class Speech : Interactive {
 		bubbleParent = transform.FindChild("SpeechChild/Speechbubble").gameObject;
 		bubbleText = bubbleParent.transform.FindChild("Text").gameObject.GetComponent<Text>();
         // reader = GetComponent<ScriptReader>();
-        director = GameObject.FindObjectOfType<ScriptDirector>();
+        // director = GameObject.FindObjectOfType<ScriptDirector>();
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null){
+            audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
+        }
 	}
 
     // TODO: allow liquids and things to self-describe; add modifiers etc.
@@ -56,14 +65,17 @@ public class Speech : Interactive {
                 Vector3 tempscale = transform.localScale;
                 flipper.transform.localScale = tempscale; 
 			}
+            if (!audioSource.isPlaying){
+                audioSource.PlayOneShot(speakSound);
+            }
 		}
 		if (speakTime < 0){
-            if (speaking && director){
-                // Debug.Log("speech callback");
-                // do scriptreader callback
-                // director.SpeechCallback();
-                director.SpeechCallback(bubbleText.text);
-            }
+            // if (speaking && director){
+            //     // Debug.Log("speech callback");
+            //     // do scriptreader callback
+            //     // director.SpeechCallback();
+            //     director.SpeechCallback(bubbleText.text);
+            // }
 			speaking = false;
 			bubbleParent.SetActive(false);
 			speakTime = 0;
@@ -98,6 +110,8 @@ public class Speech : Interactive {
 		words = phrase;
 		// speakTime = words.Length / 5;
         speakTime = DoubleSeat(phrase.Length, 2f, 50f, 5f, 2f);
+        speakTimeTotal = speakTime;
+        speakSpeed = phrase.Length / speakTime;
         // Debug.Log(speakTime);
 	}
 
