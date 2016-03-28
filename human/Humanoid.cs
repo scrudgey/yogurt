@@ -4,8 +4,7 @@
 
 public class Humanoid : Controllable {
 
-	private Vector2 acceleration;
-	private Vector2 deceleration;
+
 	private float baseSpeed;
 	public float maxSpeed;
 	public float maxAcceleration;
@@ -37,7 +36,6 @@ public class Humanoid : Controllable {
 		rightTilt = Quaternion.LookRotation(Vector3.forward, rightTiltVector);
 		leftTilt = Quaternion.LookRotation(Vector3.forward, leftTiltVector);
 		forward = Quaternion.LookRotation(Vector3.forward, -1 * Vector3.forward);
-
 	}
 
 	void LoadInit(){
@@ -46,6 +44,8 @@ public class Humanoid : Controllable {
 	}
 
 	void FixedUpdate(){
+		Vector2 acceleration = Vector2.zero;
+		Vector2 deceleration = Vector2.zero;
 		// Do the normal controls stuff
 		// set vertical force or damp if neither up nor down is held
 		if (upFlag)
@@ -77,21 +77,34 @@ public class Humanoid : Controllable {
 			GetComponent<Rigidbody2D>().velocity = Vector2.ClampMagnitude(GetComponent<Rigidbody2D>().velocity, maxSpeed);
 
 		// use the scale x trick for left-facing animations
-		if (GetComponent<Rigidbody2D>().velocity.x < 0){
+		Vector2 vel = GetComponent<Rigidbody2D>().velocity;
+		if (vel.x < -0.1){
 			scaleVector.x = -1;
 		}
-		if (GetComponent<Rigidbody2D>().velocity.x > 0){
+		if (vel.x > 0.1){
 			scaleVector.x = 1;
 		}
 		transform.localScale = scaleVector;
-
-		acceleration = Vector2.zero;
-		deceleration = Vector2.zero;
-
 	}
 
 	public void IntrinsicsChanged(Intrinsic intrinsic){
 		maxSpeed = baseSpeed + intrinsic.speed.floatValue;
+	}
+
+	public void UpdateDirection(){
+		float angle = Toolbox.Instance.ProperAngle(direction.x, direction.y);
+		// change lastpressed because this is relevant to animation
+		if (angle > 315 || angle < 45){
+			lastPressed = "right";
+		} else if (angle >= 45 && angle <= 135) {
+			lastPressed = "up";
+		} else if (angle >= 135 && angle < 225) {
+			lastPressed = "right";
+			scaleVector.x = -1;
+		} else if (angle >= 225 && angle < 315) {
+			lastPressed = "down";
+		}
+		transform.localScale = scaleVector;
 	}
 
 }

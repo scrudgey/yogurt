@@ -92,8 +92,8 @@ public class Controller : Singleton<Controller> {
     }
     void LeftClick(){
         //detect if we clicked anything
-        if (EventSystem.current.IsPointerOverGameObject())
-            return;
+        // if (EventSystem.current.IsPointerOverGameObject())
+        //     return;
             
         RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
         if (currentSelect == SelectType.none){

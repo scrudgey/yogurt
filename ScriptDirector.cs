@@ -7,7 +7,7 @@ public class ScriptDirector : Interactive {
     public int index;
     private string[] lines;
     private List<ScriptReader> readers;
-    private string currentLine;
+    // private string currentLine;
     private float timeToNextLine;
     private bool tomLineNext;
     private VideoCamera video;
@@ -34,11 +34,7 @@ public class ScriptDirector : Interactive {
         }
         lines = script.text.Split('\n');
         index = 0;
-        // Debug.Log(lines[index]);
-        // audio = Toolbox.Instance.SetUpAudioSource(gameObject);
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
-        // UINew.Instance.status.gameObject.SetActive(true);
-        // UINew.Instance.status.text = "- WAIT -";
         UINew.Instance.SetStatus("-WAIT-");
         UINew.Instance.SetStatusStyle(TextFX.FXstyle.blink);
         ParseLine();
@@ -78,22 +74,26 @@ public class ScriptDirector : Interactive {
         string line = lines[index];
         if (!live)
             return;
-        // Debug.Log("next line: "+line);
         if (line.Substring(0, 8) == "COSTAR: "){
             UINew.Instance.SetStatus("-WAIT-");
             UINew.Instance.SetStatusStyle(TextFX.FXstyle.blink);
             string content = line.Substring(7, line.Length-7);
             foreach (ScriptReader reader in readers){
                 reader.CoStarLine(content, this);
-                currentLine = content;
+                reader.WatchForSpeech(content);
+                // currentLine = content;
             }
         }
         if (line.Substring(0, 5) == "TOM: "){
             UINew.Instance.SetStatus("PROMPT: SAY LINE");
             UINew.Instance.SetStatusStyle(TextFX.FXstyle.normal);
             string content = line.Substring(4, line.Length-4);
-            currentLine = content;
+            // currentLine = content;
             tomLineNext = true;
+            foreach (ScriptReader reader in readers){
+                // reader.TomLine(line);
+                reader.WatchForSpeech(content);
+            }
         }
         if (line == "[yogurt++]"){
             UINew.Instance.SetStatus("PROMPT: EAT YOGURT");
@@ -112,6 +112,7 @@ public class ScriptDirector : Interactive {
         if (index == lines.Length){
             Debug.Log("end of script");
             GameManager.Instance.EvaluateCommercial(video.commercial);
+            return;
         }
         while (lines[index].Length < 2){
             index += 1;
@@ -124,8 +125,6 @@ public class ScriptDirector : Interactive {
             timeToNextLine = 1f;
             if (tomLineNext){
                 tomLineNext = false;
-                // Debug.Log("success tom");
-                // Toolbox.Instance.BounceText("Success!", GameManager.Instance.playerObject);
                 UINew.Instance.SetTempStatus("Success!", 1f, TextFX.FXstyle.bounce);
                 audioSource.PlayOneShot(successSound);
             }
@@ -158,11 +157,11 @@ public class ScriptDirector : Interactive {
         TriggerNextLine();
     }
     
-    public void SpeechCallback(string spoken){
-        if (spoken == currentLine){
-            currentLine = "";
-            TriggerNextLine();
-        }
-    }
+    // public void SpeechCallback(string spoken){
+    //     if (spoken == currentLine){
+    //         currentLine = "";
+    //         TriggerNextLine();
+    //     }
+    // }
 
 }

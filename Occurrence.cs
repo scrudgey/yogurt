@@ -93,8 +93,9 @@ public class OccurrenceSpeech : OccurrenceData {
         if (other == null)
             return false;
         
-        match = speaker == other.speaker;
-        match &= line == other.line;
+        // match = speaker == other.speaker;
+        // match &= line == other.line;
+        match = line == other.line;
             
         return match;
     }

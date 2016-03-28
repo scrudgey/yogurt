@@ -103,8 +103,6 @@ public class VideoCamera : MonoBehaviour {
             //check vs. watchForOccurrence
             if (watchForOccurrence != null){
                  if (watchForOccurrence.Matches(data)){
-                     Debug.Log(watchForOccurrence.myType);
-                     
                      reader.OccurrenceCallback();
                      watchForOccurrence = null;
                  }

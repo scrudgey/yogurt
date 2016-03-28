@@ -24,20 +24,27 @@ public class ScriptReader : MonoBehaviour {
     public void CoStarLine(string line, ScriptDirector director){
         
         if (costar){
+            // Debug.Log("calling watchforspeech");
+            // WatchForSpeech(line);
             // if i am a costar, look at the camera.
             Vector3 dif = director.transform.position - transform.position;
             Vector2 direction = (Vector2)dif;
-            // controllable.direction = direction;
+            controllable.direction = direction;
             controllable.SetDirection(direction);
-            Debug.Log(controllable.direction);
+            Humanoid human = GetComponent<Humanoid>();
+            if (human){
+                human.UpdateDirection();
+            }
         }
-        
         // say my line.
         speech = GetComponent<Speech>();
         if (!costar)
             return;
         speech.Say(line);
     }
+    // public void TomLine(string line){
+    //     WatchForSpeech(line);
+    // }
 
     public void TomAct(string eventKey){
         // set the watch-for occurrence to be Tom doing something.
@@ -53,6 +60,16 @@ public class ScriptReader : MonoBehaviour {
         }
     }
     
+    public void WatchForSpeech(string line){
+        if (!videoCamera)
+            return;
+        OccurrenceSpeech data = new OccurrenceSpeech();
+        data.line = line;
+        videoComponent.watchForOccurrence = data;
+        
+        // Debug.Log("video camera is watching for line "+line);
+    }
+    
     public void Cut(){
         if (videoComponent){
             GameManager.Instance.EvaluateCommercial(videoComponent.commercial);
@@ -60,7 +77,7 @@ public class ScriptReader : MonoBehaviour {
     }
     
     public void OccurrenceCallback(){
-        Debug.Log("occurrence callback from "+gameObject.name);
+        // Debug.Log("occurrence callback from "+gameObject.name);
         director.ReaderCallback();
     }
     

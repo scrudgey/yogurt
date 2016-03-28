@@ -14,10 +14,11 @@ public class Speech : Interactive {
     private GameObject flipper;
 	private Text bubbleText;
     private float speakSpeed;
-    // private ScriptReader reader;
-    // private ScriptDirector director;
+    private char[] chars;
+    private int[] swearMask;
     
     public AudioClip speakSound;
+    public AudioClip bleepSound;
     private AudioSource audioSource;
 
 	void Start () {
@@ -28,12 +29,11 @@ public class Speech : Interactive {
         flipper = transform.FindChild("SpeechChild").gameObject;
 		bubbleParent = transform.FindChild("SpeechChild/Speechbubble").gameObject;
 		bubbleText = bubbleParent.transform.FindChild("Text").gameObject.GetComponent<Text>();
-        // reader = GetComponent<ScriptReader>();
-        // director = GameObject.FindObjectOfType<ScriptDirector>();
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null){
             audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         }
+        
 	}
 
     // TODO: allow liquids and things to self-describe; add modifiers etc.
@@ -59,6 +59,7 @@ public class Speech : Interactive {
 			speaking = true;
 			bubbleParent.SetActive(true);
 			bubbleText.text = words;
+            float charIndex = (speakTimeTotal - speakTime) * speakSpeed;
             // if the parent scale is flipped, we need to flip the flipper back to keep
             // the text properly oriented.
             if (flipper.transform.localScale != transform.localScale){
@@ -66,22 +67,31 @@ public class Speech : Interactive {
                 flipper.transform.localScale = tempscale; 
 			}
             if (!audioSource.isPlaying){
-                audioSource.PlayOneShot(speakSound);
+                // Debug.Log((int)charIndex);
+                if (swearMask[(int)charIndex] == 0){
+                    audioSource.PlayOneShot(speakSound);
+                } else {
+                    audioSource.PlayOneShot(bleepSound);
+                }
             }
 		}
 		if (speakTime < 0){
-            // if (speaking && director){
+            if (speaking){
+                Occurrence flag = Toolbox.Instance.OccurenceFlag(gameObject);
+                OccurrenceSpeech data = new OccurrenceSpeech();
+                data.speaker = gameObject;
+                data.line = words;
+                flag.data.Add(data);
             //     // Debug.Log("speech callback");
             //     // do scriptreader callback
             //     // director.SpeechCallback();
             //     director.SpeechCallback(bubbleText.text);
-            // }
+            }
 			speaking = false;
 			bubbleParent.SetActive(false);
 			speakTime = 0;
 			if (queue.Count > 0){
 				words = queue[0];
-				// speakTime =  words.Length / 5;
                 speakTime = DoubleSeat(words.Length, 2f, 5f, 12f, 2f);
 				queue.RemoveAt(0);
 				speaking = true;
@@ -97,22 +107,32 @@ public class Speech : Interactive {
 		}
 	}
 
-	public void Say(string phrase){
+	public void Say(string phrase, string swear=null){
 		if(speaking && phrase == words ){
 			return;
 		}
-        Occurrence flag = Toolbox.Instance.OccurenceFlag(gameObject);
-        OccurrenceSpeech data = new OccurrenceSpeech();
-        data.speaker = gameObject;
-        data.line = phrase;
-        flag.data.Add(data);
+        // Occurrence flag = Toolbox.Instance.OccurenceFlag(gameObject);
+        // OccurrenceSpeech data = new OccurrenceSpeech();
+        // data.speaker = gameObject;
+        // data.line = phrase;
+        // flag.data.Add(data);
         
 		words = phrase;
-		// speakTime = words.Length / 5;
         speakTime = DoubleSeat(phrase.Length, 2f, 50f, 5f, 2f);
+        
         speakTimeTotal = speakTime;
         speakSpeed = phrase.Length / speakTime;
-        // Debug.Log(speakTime);
+        chars = phrase.ToCharArray();
+        swearMask = new int[chars.Length];
+        
+        if (swear != null){
+           int index = phrase.IndexOf(swear);
+           if (index != -1){
+               for (int i = index; i < index + swear.Length; i++){
+                   swearMask[i] = 1;
+               }
+           }
+        }
 	}
 
 
@@ -132,10 +152,10 @@ public class Speech : Interactive {
     
     public void Swear(GameObject target=null){
         if (!target){
-            Say("shazbot!");
+            Say("shazbot!", "shazbot");
             return;
         }
-        Say("that shazbotting "+target.name+"!");
+        Say("that shazbotting "+target.name+"!", "shazbotting");
     }
 
 }
