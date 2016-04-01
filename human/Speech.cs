@@ -67,7 +67,6 @@ public class Speech : Interactive {
                 flipper.transform.localScale = tempscale; 
 			}
             if (!audioSource.isPlaying){
-                // Debug.Log((int)charIndex);
                 if (swearMask[(int)charIndex] == 0){
                     audioSource.PlayOneShot(speakSound);
                 } else {
@@ -82,10 +81,6 @@ public class Speech : Interactive {
                 data.speaker = gameObject;
                 data.line = words;
                 flag.data.Add(data);
-            //     // Debug.Log("speech callback");
-            //     // do scriptreader callback
-            //     // director.SpeechCallback();
-            //     director.SpeechCallback(bubbleText.text);
             }
 			speaking = false;
 			bubbleParent.SetActive(false);
@@ -111,12 +106,6 @@ public class Speech : Interactive {
 		if(speaking && phrase == words ){
 			return;
 		}
-        // Occurrence flag = Toolbox.Instance.OccurenceFlag(gameObject);
-        // OccurrenceSpeech data = new OccurrenceSpeech();
-        // data.speaker = gameObject;
-        // data.line = phrase;
-        // flag.data.Add(data);
-        
 		words = phrase;
         speakTime = DoubleSeat(phrase.Length, 2f, 50f, 5f, 2f);
         
