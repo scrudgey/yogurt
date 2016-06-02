@@ -51,6 +51,11 @@ public class Liquid {
 		returnLiquid.colorB = (l1.colorB + l2.colorB) / 2.0f;
 
 		returnLiquid.color = new Color(returnLiquid.colorR/255.0F,returnLiquid.colorG/255.0F,returnLiquid.colorB/255.0F);
+		
+		if (!l1.name.Contains("mix")){
+			l1.name = l1.name + "-" + l2.name + " mix";
+		}
+		
 		return returnLiquid;
 	}
     
