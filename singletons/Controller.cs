@@ -91,13 +91,12 @@ public class Controller : Singleton<Controller> {
         }
     }
     void LeftClick(){
-        //detect if we clicked anything
-        // if (EventSystem.current.IsPointerOverGameObject())
-        //     return;
-            
         RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-        if (currentSelect == SelectType.none){
-            foreach (RaycastHit2D hit in hits){
+        
+        // IsPointerOverGameObject is required here to exclude clicks if we are hovering over a UI element.
+        // this may or may not cause problems down the road, but I'm unsure how else to do this.
+        if (currentSelect == SelectType.none && !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()){
+            foreach (RaycastHit2D hit in hits){]
                 if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)){
                     focus.lastLeftClicked = hit.collider.gameObject;
                     lastLeftClicked = hit.collider.gameObject;
