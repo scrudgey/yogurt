@@ -264,6 +264,7 @@ public class UINew : Singleton<UINew> {
 			button.gameobject.transform.localPosition = initPosition - centerPosition;
 			if (priorBody){
 				SpringJoint2D spring = button.gameobject.AddComponent<SpringJoint2D>();
+				spring.autoConfigureDistance = false;
 				spring.dampingRatio = 0.9f;
 				spring.distance = 0.5f;
 				spring.connectedBody = priorBody;
@@ -273,6 +274,7 @@ public class UINew : Singleton<UINew> {
 
 			// set up spring connection to anchor
 			SpringJoint2D anchorSpring = buttonAnchor.AddComponent<SpringJoint2D>();
+			anchorSpring.autoConfigureDistance = false;
 			anchorSpring.distance = 0.25f;
 			anchorSpring.dampingRatio = 0.9f;
 			anchorSpring.frequency = 15f;
@@ -281,6 +283,7 @@ public class UINew : Singleton<UINew> {
 			// connect buttons in circular sequence
 			if (n == buttons.Count && n > 2){
 				SpringJoint2D finalSpring = button.gameobject.AddComponent<SpringJoint2D>();
+				finalSpring.autoConfigureDistance = false;
 				finalSpring.distance = 0.5f;
 				finalSpring.dampingRatio = 0.9f;
 				finalSpring.connectedBody = firstBody;
