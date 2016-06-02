@@ -33,6 +33,12 @@ public class Speech : Interactive {
         if (audioSource == null){
             audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         }
+        if (bubbleParent){
+            Canvas bubbleCanvas = bubbleParent.GetComponent<Canvas>();
+            if (bubbleCanvas){
+                bubbleCanvas.worldCamera = GameManager.Instance.cam;
+            }
+        }
         
 	}
 
