@@ -7,7 +7,7 @@ using System.IO;
 [XmlRoot("LiquidCollection")]
 public class LiquidCollection{
 
-	[XmlArray("Liquids"),XmlArrayItem("liquid")]
+	[XmlArray("Liquids"), XmlArrayItem("liquid")]
 	public List<Liquid> Liquids = new List<Liquid>();
 
 	public static LiquidCollection Load(){
