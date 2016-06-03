@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 // using System.Collections;
 
 public class PauseMenu : MonoBehaviour {
@@ -6,10 +7,10 @@ public class PauseMenu : MonoBehaviour {
 	public void SaveClick(){
 		MySaver.Save();
 		// GameManager.Instance.SaveGameData();
-		Application.LoadLevel("title");
+		SceneManager.LoadScene("title");
 	}
 	
 	public void QuitClick(){
-		Application.LoadLevel("title");		
+		SceneManager.LoadScene("title");
 	}
 }
