@@ -42,8 +42,7 @@ public class UINew : Singleton<UINew> {
 		inventoryMenu = GameObject.Find("InventoryScreen");
 		status = UICanvas.transform.Find("topdock/topBar/status").GetComponent<Text>();
 		statusFX = status.gameObject.GetComponent<TextFX>();
-		// status.gameObject.SetActive(false);
-		status.gameObject.SetActive(true);
+		status.gameObject.SetActive(false);
 		inventoryMenu.SetActive(false);
 		inventoryButton.SetActive(false);
 		if (GameManager.Instance.playerObject)
