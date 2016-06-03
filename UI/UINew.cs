@@ -63,7 +63,6 @@ public class UINew : Singleton<UINew> {
 		statusTempStyle = style;
 	}
 	public void SetStatusStyle(TextFX.FXstyle style){
-		// statusFX.style = style;
 		statusStyle = style;
 	}
 	void Update(){
