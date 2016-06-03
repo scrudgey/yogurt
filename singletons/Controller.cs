@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 // using System.Collections;
-using UnityEngine.EventSystems;
+// using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
 public class Controller : Singleton<Controller> {
@@ -95,8 +95,11 @@ public class Controller : Singleton<Controller> {
         
         // IsPointerOverGameObject is required here to exclude clicks if we are hovering over a UI element.
         // this may or may not cause problems down the road, but I'm unsure how else to do this.
-        if (currentSelect == SelectType.none && !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()){
-            foreach (RaycastHit2D hit in hits){]
+        // TODO: currently unresolved. UI overlapping objects in world creates problem clicks.
+        
+        // if (currentSelect == SelectType.none && !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()){
+        if (currentSelect == SelectType.none){
+            foreach (RaycastHit2D hit in hits){
                 if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)){
                     focus.lastLeftClicked = hit.collider.gameObject;
                     lastLeftClicked = hit.collider.gameObject;
