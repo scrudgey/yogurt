@@ -55,7 +55,7 @@ public class LiquidContainer : Interactive {
 		FillWithLiquid(l.liquid);
 	}
 	public void FillFromContainer(LiquidContainer l){
-		if( l.amount > 0){
+		if(l.amount > 0){
 			FillWithLiquid(l.liquid);
 			float fill = Mathf.Min(l.amount, fillCapacity);
 			l.amount -= fill;
