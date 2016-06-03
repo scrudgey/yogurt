@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
-// using System.Text.RegularExpressions;
-// using System;
+using UnityEngine.SceneManagement;
 
 [XmlRoot("GameData")]
 public class GameData{
@@ -24,7 +23,7 @@ public class GameData{
 		lastPlayerName = instance.lastPlayerName;
 		saveDate = System.DateTime.Now;
 		secondsPlayed = instance.timePlayed + instance.timeSinceLastSave;
-		lastScene = Application.loadedLevelName;
+		lastScene = SceneManager.GetActiveScene().name;
         money = instance.money;
 	}
 }
@@ -59,7 +58,7 @@ public partial class GameManager : Singleton<GameManager> {
     void Start(){
 		MySaver.CleanupSaves();
 		// Cursor.SetCursor((Texture2D)Resources.Load("UI/cursor1"), Vector2.zero, CursorMode.Auto);
-		if (Application.loadedLevelName != "title"){
+		if (SceneManager.GetActiveScene().name != "title"){
             NewGame(switchlevel: false);
 		}
 	}
@@ -90,7 +89,6 @@ public partial class GameManager : Singleton<GameManager> {
 	}
     public void CollectItem(string name){
 		// TODO: add achievement-like popup effect here
-		// Debug.Log("collecting "+name);
 		collectedItems.Add(name);
 		itemCheckedOut[name] = false;
 	}
@@ -133,7 +131,7 @@ public partial class GameManager : Singleton<GameManager> {
 		MySaver.Save();
 		// unity load saved editor scene file
 		entryID = toEntryNumber;
-		Application.LoadLevel(toSceneName);
+		SceneManager.LoadScene(toSceneName);
 	}
 	void OnLevelWasLoaded(int level) {
         sceneTime = 0f;
@@ -161,14 +159,14 @@ public partial class GameManager : Singleton<GameManager> {
 	}
     public void NewDay(){
         MySaver.CleanupSaves();
-        Application.LoadLevel("house");
+		SceneManager.LoadScene("house");
         doScriptPrompt = true;
         sceneTime = 0f;
         entryID = 99;
     }
     public void NewGame(bool switchlevel=true){
         if (switchlevel){
-    		Application.LoadLevel("house");
+			SceneManager.LoadScene("house");
             doScriptPrompt = true;
         }
         sceneTime = 0f;
@@ -198,7 +196,7 @@ public partial class GameManager : Singleton<GameManager> {
 		path = Path.Combine(Application.persistentDataPath, saveGameName);
 		if (!Directory.Exists(path))
 		  Directory.CreateDirectory(path);
-		path = Path.Combine(path, Application.loadedLevelName+"_state.xml");
+		path = Path.Combine(path, SceneManager.GetActiveScene().name+"_state.xml");
 		lastSavedScenePath = path;
 		return path;
 	}
@@ -254,9 +252,9 @@ public partial class GameManager : Singleton<GameManager> {
 			timeSinceLastSave = 0f;
             money = data.money;
 			if (data.lastScene != null){
-				Application.LoadLevel(data.lastScene);
+				SceneManager.LoadScene("house");
 			} else {
-                Application.LoadLevel("house");
+				SceneManager.LoadScene("house");
 			}
 		}
 	}
