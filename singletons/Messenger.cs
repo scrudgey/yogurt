@@ -5,10 +5,10 @@ using System.Collections.Generic;
 public class Messenger : Singleton<Messenger> {
 
 	public string MOTD = "smoke weed every day";
-	public Dictionary<GameObject,IExcludable> claimedItems = new Dictionary<GameObject, IExcludable>();
+	public Dictionary<GameObject, IExcludable> claimedItems = new Dictionary<GameObject, IExcludable>();
 
 	void Start(){
-		claimedItems = new Dictionary<GameObject,IExcludable >();
+		claimedItems = new Dictionary<GameObject, IExcludable>();
 	}
 
 	public void ListObjects(){
@@ -23,12 +23,10 @@ public class Messenger : Singleton<Messenger> {
 		if (claimedItems.ContainsKey(obj)){
 			claimedItems[obj].DropMessage(obj);
 		}
-		
 		claimedItems[obj] = owner;
 	}
 
 	public void DisclaimObject(GameObject obj, IExcludable owner){
-//		Debug.Log("disclaiming "+obj.name);
 		if (claimedItems.ContainsKey(obj))
 			if (claimedItems[obj] == owner)
 				claimedItems.Remove(obj);
