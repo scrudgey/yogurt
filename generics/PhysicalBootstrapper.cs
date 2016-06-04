@@ -1,15 +1,21 @@
 ﻿using UnityEngine;
-// using System.Collections;
 
 public class PhysicalBootstrapper : MonoBehaviour {
 	public AudioClip[] impactSounds;
 	public AudioClip[] landSounds;
 	public AudioClip[] scrapeSounds;
+	
+	
 	private GameObject hingeObject;
-	private GameObject groundObject;
-	private Rigidbody2D groundBody;
 	private Rigidbody2D hingeBody;
 	private HingeJoint2D hingeJoint2D;
+	
+	
+	private GameObject groundObject;
+	private Rigidbody2D groundBody;
+	private BoxCollider2D groundCollider;
+	
+	
 	private SliderJoint2D sliderJoint2D;
 	public Physical physical;
 	private Collider2D tomCollider;
@@ -19,15 +25,14 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	public bool ignoreCollisions;
 	public bool doInit = true;
 	private Vector3 setV;
-	private BoxCollider2D groundCollider;
 
 	public void Start () {
 		tag = "Physical";
 		GetComponent<Renderer>().sortingLayerName="main";
 		//this will need to be modified when we have more humanoids!!!!:
-		GameObject tom = GameObject.Find("Tom");
-		if (tom)
-			tomCollider = GameObject.Find("Tom").GetComponent<Collider2D>(); 
+		// GameObject tom = GameObject.Find("Tom");
+		// if (tom)
+		// 	tomCollider = GameObject.Find("Tom").GetComponent<Collider2D>(); 
 		if (doInit)
 			InitPhysical(initHeight, initVelocity);
 		if (impactSounds.Length > 0){
@@ -47,7 +52,6 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		physical = null;
 		doInit = false;
 	}
-
 
 	public void InitPhysical(float height, Vector3 initialVelocity){
 		doInit = false;
@@ -88,7 +92,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		groundBody.angularDrag = 0.05f;
 		groundBody.gravityScale = 0;
 		groundBody.freezeRotation = true;
-		// Instantiate()
+		
 		//box collider
 		groundCollider = groundObject.AddComponent<BoxCollider2D>();
 		groundCollider.size = new Vector2(0.1606f, 0.05f);
@@ -118,6 +122,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		groundPhysical.landSounds = landSounds;
 		
 		physical = groundPhysical;
+		physical.InitValues();
 		groundPhysical.bootstrapper = this;
 		Set3Motion(new Vector3(initialVelocity.x, initialVelocity.y, initialVelocity.z));
 	}
@@ -125,7 +130,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	void OnCollisionEnter2D(Collision2D coll){
 		if (coll.relativeVelocity.magnitude > 0.5){
 			if (impactSounds.Length > 0){
-				GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0,impactSounds.Length)]);
+				GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
 			}
 		}
 	}
@@ -133,13 +138,19 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	public void Set3Motion(Vector3 velocity){
 		setV = velocity;
 	}
+	
+	public void Set3MotionImmediate(Vector3 velocity){
+		Vector2 groundVelocity = new Vector2(velocity.x, velocity.y);
+		Vector2 objectVelocity = new Vector2(velocity.x, velocity.z + velocity.y);
+		physical.objectBody.velocity = objectVelocity;
+		groundBody.velocity = groundVelocity;
+	}
 
 	void FixedUpdate(){
 		if (setV != Vector3.zero){
 			Vector2 groundVelocity = new Vector2(setV.x, setV.y);
 			Vector2 objectVelocity = new Vector2(setV.x, setV.z + setV.y);
 			physical.objectBody.velocity = objectVelocity;
-			Rigidbody2D groundBody = physical.GetComponent<Rigidbody2D>();
 			groundBody.velocity = groundVelocity;
 			setV = Vector3.zero;
 		}
