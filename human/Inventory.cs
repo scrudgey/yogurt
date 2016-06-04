@@ -176,12 +176,6 @@ public class Inventory : Interactive, IExcludable {
 			// back to normal.
 			throwObject.GetComponent<Rigidbody2D>().isKinematic = false;
 			throwObject.GetComponent<Collider2D>().isTrigger = false;
-			// phys.physical.FlyMode();
-			// float vx = controllable.direction.x * 1.5f;
-			// float vy = controllable.direction.y * 1.5f;
-			// float vz = 0.25f;
-			
-			// phys.physical.ZipMode();
 			phys.physical.StartZipMode();
 			float vx = controllable.direction.x * 2.5f;
 			float vy = controllable.direction.y * 2.5f;
@@ -190,7 +184,7 @@ public class Inventory : Interactive, IExcludable {
 				vx = vx + myBody.velocity.x;
 				vy = vy + myBody.velocity.y;
 			}
-			phys.Set3Motion(new Vector3(vx, vy, vz));
+			phys.Set3MotionImmediate(new Vector3(vx, vy, vz));
 		}
 		throwObject = null;
 	}
