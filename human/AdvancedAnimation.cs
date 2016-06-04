@@ -6,7 +6,6 @@
 // (humanoid, inventory)
 
 public class AdvancedAnimation : MonoBehaviour {
-	
 	private string _spriteSheet;
 	private string spriteSheet{
 		get { return _spriteSheet;}
@@ -27,6 +26,7 @@ public class AdvancedAnimation : MonoBehaviour {
 			}
 		}
 	}
+	
 	private SpriteRenderer spriteRenderer;
 	private Controllable controllable;
 	private Inventory inventory;
@@ -43,14 +43,12 @@ public class AdvancedAnimation : MonoBehaviour {
 	
 	public void UpdateSequence(){
 		GetComponent<Animation>().Play(sequence);
-//		SetFrame(0);
 	}
 
 	void Start () {
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		controllable = GetComponent<Controllable>();
 		inventory = GetComponent<Inventory>();
-//		baseName = "generic3";
 		LoadSprites();
 	}
 
