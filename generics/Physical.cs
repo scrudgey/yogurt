@@ -5,42 +5,42 @@ public class Physical : MonoBehaviour {
 
 	public AudioClip[] impactSounds;
 	public AudioClip[] landSounds;
-	public SliderJoint2D slider;
+	
+	public PhysicalBootstrapper bootstrapper;
+	
 	private GameObject trueObject;
-	public Collider2D objectCollider;
-	public BoxCollider2D groundCollider;
-	private Collider2D tomCollider;
 	public Rigidbody2D objectBody;
+	public Collider2D objectCollider;
+	
 	public Rigidbody2D hingeBody;
 	public GameObject hinge;
-	public enum mode{fly, ground, dormant}
+	
+	public SliderJoint2D slider;
+	
+	public BoxCollider2D groundCollider;
+	
+	
+	private Collider2D tomCollider;
+	public enum mode{none, fly, ground, zip}
 	public mode currentMode;
 	public float height;
 	public bool ignoreCollisions;
-	public PhysicalBootstrapper bootstrapper;
-	private bool doFly;
+	public bool doFly;
 	private bool doGround;
+	private bool doZip;
 	private SpriteRenderer spriteRenderer;
 	public float groundDrag;
+	private float ziptime;
 
 	// Use this for initialization
-	void Start () {
-//		bootstrapper = GetComponent<PhysicalBootstrapper>();
-		spriteRenderer = GetComponent<SpriteRenderer>();
-		slider = GetComponent<SliderJoint2D>();
-		trueObject = transform.GetChild(0).transform.GetChild(0).gameObject;
-		hinge = transform.GetChild(0).gameObject;
-		groundCollider = GetComponent<BoxCollider2D>();
-		objectCollider = trueObject.GetComponent<Collider2D>();
-		//TODO: this will need to be modified when we have more humanoids!!!!:
-		GameObject tom = GameObject.Find("Tom");
-		if (tom)
-			tomCollider = GameObject.Find("Tom").GetComponent<EdgeCollider2D>();
+	 void Start() {
+		InitValues();
 		// ignore collisions between ground and all other objects
 		GameObject[] physicals = GameObject.FindGameObjectsWithTag("Physical");
 		foreach(GameObject phys in physicals){
 			Physics2D.IgnoreCollision(groundCollider, phys.GetComponent<Collider2D>(), true);
-			//special types of object ignore all collisions with other objects
+			// special types of object ignore all collisions with other objects
+			// this is true for e.g. liquid droplets 
 			if (ignoreCollisions){
 				Physics2D.IgnoreCollision(objectCollider, tomCollider, true);
 				Physics2D.IgnoreCollision(groundCollider, tomCollider, true);
@@ -49,7 +49,17 @@ public class Physical : MonoBehaviour {
 			}
 		}
 		Physics2D.IgnoreCollision(groundCollider, objectCollider, false);
-		FlyMode();
+		if (currentMode == mode.none)
+			FlyMode();
+	}
+	
+	public void InitValues(){
+		spriteRenderer = GetComponent<SpriteRenderer>();
+		slider = GetComponent<SliderJoint2D>();
+		trueObject = transform.GetChild(0).transform.GetChild(0).gameObject;
+		hinge = transform.GetChild(0).gameObject;
+		groundCollider = GetComponent<BoxCollider2D>();
+		objectCollider = trueObject.GetComponent<Collider2D>();
 	}
 
 	public void Impact(Vector2 f){
@@ -66,7 +76,7 @@ public class Physical : MonoBehaviour {
 		}
 	}
 
-	void FixedUpdate () {
+	void FixedUpdate() {
 		height = groundCollider.size.y / 2f - groundCollider.offset.y + hinge.transform.localPosition.y;
 		if (currentMode == mode.fly){
 			if (height < 0){
@@ -81,6 +91,13 @@ public class Physical : MonoBehaviour {
 				GetComponent<Rigidbody2D>().drag = 0;
 				GetComponent<Rigidbody2D>().mass = 1;
 			} 
+		}
+		if (ziptime > 0){
+			ziptime -= Time.fixedDeltaTime;
+			if (ziptime <= 0){
+				Debug.Log("zip to fly timeout");
+				doFly = true;
+			}
 		}
 		// collision layer stuff
 		if(hinge.transform.localPosition.y < 0.2){
@@ -103,6 +120,10 @@ public class Physical : MonoBehaviour {
 			doFly = false;
 			StartFlyMode();
 		}
+		if (doZip){
+			doZip = false;
+			StartZipMode();
+		}
 	}
 
 	public void GroundMode (){
@@ -112,11 +133,19 @@ public class Physical : MonoBehaviour {
 	public void FlyMode(){
 		doFly = true;
 	}
+	
+	public void ZipMode(){
+		doZip = true;
+	}
 
 	private void StartGroundMode(){
 		doGround = false;
+		ziptime = 0f;
+		// set tom collider. this is a temporary hack.
+		if (GameManager.Instance.playerObject)
+			tomCollider = GameManager.Instance.playerObject.GetComponent<EdgeCollider2D>();
 		if (landSounds.Length > 0)
-			GetComponent<AudioSource>().PlayOneShot(landSounds[Random.Range(0,landSounds.Length)]);
+			GetComponent<AudioSource>().PlayOneShot(landSounds[Random.Range(0, landSounds.Length)]);
 		// stop colliding player and object
 		Physics2D.IgnoreCollision(objectCollider, tomCollider, true);
 		// enable player - ground collision
@@ -140,8 +169,7 @@ public class Physical : MonoBehaviour {
 		GetComponent<Rigidbody2D>().velocity = tempVelocity;
 		objectBody.velocity = tempVelocity;
 		hingeBody.velocity = tempVelocity;
-		Physical[] physicals = FindObjectsOfType<Physical>();
-		foreach(Physical phys in physicals){
+		foreach(Physical phys in FindObjectsOfType<Physical>()){
 			if (phys.currentMode == mode.ground){
 				Physics2D.IgnoreCollision(groundCollider, phys.GetComponent<Collider2D>(), false);
 				//special types of object ignore all collisions with other objects
@@ -151,10 +179,8 @@ public class Physical : MonoBehaviour {
 				}
 			}
 		}
-		GameObject[] tables = GameObject.FindGameObjectsWithTag("table");
-		foreach(GameObject table in tables){
-			Collider2D[] colliders = table.GetComponentsInChildren<Collider2D>();
-			foreach(Collider2D tableCollider in colliders){
+		foreach(GameObject table in GameObject.FindGameObjectsWithTag("table")){
+			foreach(Collider2D tableCollider in table.GetComponentsInChildren<Collider2D>()){
 				if (tableCollider.isTrigger == false){
 					Physics2D.IgnoreCollision(groundCollider, tableCollider, true);
 					Physics2D.IgnoreCollision(objectCollider, tableCollider, true);
@@ -165,9 +191,14 @@ public class Physical : MonoBehaviour {
 
 	private void StartFlyMode(){
 		doFly = false;
+		ziptime = 0f;
+		// set tom collider. this is a temporary hack.
+		if (GameManager.Instance.playerObject){
+			tomCollider = GameManager.Instance.playerObject.GetComponent<EdgeCollider2D>();
+		}
 		// enable colliding player and object
-		if (!ignoreCollisions)
-			Physics2D.IgnoreCollision(objectCollider, tomCollider, false);
+		// if (!ignoreCollisions)
+		// 	Physics2D.IgnoreCollision(objectCollider, tomCollider, true);
 		// disable player - ground collision
 		Physics2D.IgnoreCollision(groundCollider, tomCollider, true);
 		Physics2D.IgnoreCollision(objectCollider, tomCollider, true);
@@ -180,20 +211,25 @@ public class Physical : MonoBehaviour {
 		// set ground friction
 		GetComponent<Rigidbody2D>().drag = 0;
 		GetComponent<Rigidbody2D>().mass = 1;
-		Physical[] physicals = FindObjectsOfType<Physical>();
-		foreach(Physical phys in physicals){
+		foreach(Physical phys in FindObjectsOfType<Physical>()){
 			Physics2D.IgnoreCollision(groundCollider, phys.GetComponent<Collider2D>(), true);
 		}
-		GameObject[] tables = GameObject.FindGameObjectsWithTag("table");
-		foreach(GameObject table in tables){
-			Collider2D[] colliders = table.GetComponentsInParent<Collider2D>();
-			foreach(Collider2D tableCollider in colliders){
+		foreach(GameObject table in GameObject.FindGameObjectsWithTag("table")){
+			foreach(Collider2D tableCollider in table.GetComponentsInParent<Collider2D>()){
 				if (tableCollider.isTrigger == false){
 					Physics2D.IgnoreCollision(groundCollider, tableCollider, true);
 					Physics2D.IgnoreCollision(objectCollider, tableCollider, true);
 				}
 			}
 		}
+	}
+	public void StartZipMode(){
+		doZip = false;
+		doFly = false;
+		StartFlyMode();
+		objectBody.gravityScale = 0;
+		ziptime = 1f;
+		currentMode = mode.zip;
 	}
 	
 
@@ -207,6 +243,11 @@ public class Physical : MonoBehaviour {
 		if (coll.collider == objectCollider){
 			GroundMode();
 			BroadcastMessage("OnGroundImpact", this, SendMessageOptions.DontRequireReceiver);
+		} else {
+			if (currentMode == mode.zip){
+				Debug.Log("zip to fly transition on collision with "+coll.gameObject.name);
+				FlyMode();
+			}
 		}
 	}
 
