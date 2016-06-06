@@ -19,7 +19,6 @@ public class Physical : MonoBehaviour {
 	
 	public BoxCollider2D groundCollider;
 	
-	
 	private Collider2D tomCollider;
 	public enum mode{none, fly, ground, zip}
 	public mode currentMode;
@@ -100,16 +99,21 @@ public class Physical : MonoBehaviour {
 			}
 		}
 		// collision layer stuff
-		if(hinge.transform.localPosition.y < 0.2){
-			trueObject.layer = 9;
+		// if(hinge.transform.localPosition.y < 0.3){
+		// 	trueObject.layer = 8;
+		// }
+		if (currentMode == mode.fly || currentMode == mode.zip){
+			trueObject.layer = 13;
+		} else {
+			trueObject.layer = 8;
 		}
-		if(hinge.transform.localPosition.y > 0.2 && hinge.transform.localPosition.y < 0.4){
+		if(hinge.transform.localPosition.y > 0.3 && hinge.transform.localPosition.y < 0.5){
 			trueObject.layer = 10;
 		}
-		if(hinge.transform.localPosition.y > 0.4 && hinge.transform.localPosition.y < 0.6){
+		if(hinge.transform.localPosition.y > 0.5 && hinge.transform.localPosition.y < 0.7){
 			trueObject.layer = 11;
 		}
-		if(hinge.transform.localPosition.y > 0.6 ){
+		if(hinge.transform.localPosition.y > 0.7 ){
 			trueObject.layer = 12;
 		}
 		if (doGround){
@@ -245,7 +249,6 @@ public class Physical : MonoBehaviour {
 			BroadcastMessage("OnGroundImpact", this, SendMessageOptions.DontRequireReceiver);
 		} else {
 			if (currentMode == mode.zip){
-				Debug.Log("zip to fly transition on collision with "+coll.gameObject.name);
 				FlyMode();
 			}
 		}
@@ -274,8 +277,9 @@ public class Physical : MonoBehaviour {
 	void ActivateTableCollider(Table table){
 		if (groundCollider){
 			spriteRenderer.enabled = false;
-			groundCollider.size = new Vector2(0.1606f, 0.05f + table.height);
-			groundCollider.offset = new Vector2(0.0f, -0.025f + groundCollider.size.y / 2f);
+			groundCollider.size = new Vector2(0.07f, 0.02f + table.height);
+			// groundCollider.size = new Vector2(0.1606f, 0.02f + table.height);
+			// groundCollider.offset = new Vector2(0.0f, -0.025f + groundCollider.size.y / 2f);
 			Collider2D[] tableColliders = table.gameObject.GetComponentsInParent<Collider2D>();
 			foreach (Collider2D tableCollider in tableColliders){
 				if (tableCollider.isTrigger == false){
@@ -289,8 +293,9 @@ public class Physical : MonoBehaviour {
 	void DeactivateTableCollider(Table table){
 		if (groundCollider){
 			spriteRenderer.enabled = true;
-			groundCollider.size = new Vector2(0.1606f, 0.05f);
-			groundCollider.offset = new Vector2(0.0f, -0.025f);
+			groundCollider.size = new Vector2(0.07f, 0.02f);
+			// groundCollider.size = new Vector2(0.1606f, 0.02f);
+			// groundCollider.offset = new Vector2(0.0f, -0.025f);
 			FlyMode();
 			Collider2D[] tableColliders = table.gameObject.GetComponentsInParent<Collider2D>();
 			foreach (Collider2D tableCollider in tableColliders){
