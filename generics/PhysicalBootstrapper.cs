@@ -18,7 +18,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	
 	private SliderJoint2D sliderJoint2D;
 	public Physical physical;
-	private Collider2D tomCollider;
+	// private Collider2D tomCollider;
 	public float initHeight = 0.1f;
 	public float groundDrag = 10f;
 	public Vector2 initVelocity;
@@ -29,10 +29,6 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	public void Start () {
 		tag = "Physical";
 		GetComponent<Renderer>().sortingLayerName="main";
-		//this will need to be modified when we have more humanoids!!!!:
-		// GameObject tom = GameObject.Find("Tom");
-		// if (tom)
-		// 	tomCollider = GameObject.Find("Tom").GetComponent<Collider2D>(); 
 		if (doInit)
 			InitPhysical(initHeight, initVelocity);
 		if (impactSounds.Length > 0){
@@ -48,7 +44,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		transform.parent = null;
 		Destroy(groundObject);
 		GetComponent<Rigidbody2D>().gravityScale = 0;
-		Physics2D.IgnoreCollision(tomCollider, GetComponent<Collider2D>(),false);
+		// Physics2D.IgnoreCollision(tomCollider, GetComponent<Collider2D>(), false);
 		physical = null;
 		doInit = false;
 	}
@@ -73,6 +69,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		
 		// Set up ground object
 		groundObject = new GameObject(name + " Ground");
+		groundObject.layer = 8;
 		groundObject.transform.position = initPos;
 		Toolbox.Instance.SetUpAudioSource(groundObject);
 
@@ -95,8 +92,8 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		
 		//box collider
 		groundCollider = groundObject.AddComponent<BoxCollider2D>();
-		groundCollider.size = new Vector2(0.1606f, 0.05f);
-		groundCollider.offset = new Vector2(0.0f, -0.025f);
+		groundCollider.size = new Vector2(0.07f, 0.02f);
+		// groundCollider.offset = new Vector2(0.0f, -0.025f);
 		groundCollider.sharedMaterial = Resources.Load<PhysicsMaterial2D>("ground"); 
 
 		//sprite renderer
