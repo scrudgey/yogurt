@@ -20,6 +20,13 @@ public class Inventory : Interactive, IExcludable {
 							controllable.directable = directable;
 					}
 				}
+				if (animator != null){
+					animator.Holding(true);
+				}
+			} else {
+				if (animator != null){
+					animator.Holding(false);
+				}
 			}
 			_holding = value;
 			UINew.Instance.InventoryCallback(this);
@@ -32,10 +39,10 @@ public class Inventory : Interactive, IExcludable {
 	private string slashFlag;
 	private Controllable controllable;
 	private List<Interaction> manualActionDictionary;
-	public bool swinging;
 	private bool LoadInitialized = false;
 	private GameObject throwObject;
-	private float dropHeight = 0.12f;
+	private float dropHeight = 0.20f;
+	private AdvancedAnimation animator;
 	
 	void Start(){
 		if (!LoadInitialized)
@@ -44,6 +51,7 @@ public class Inventory : Interactive, IExcludable {
 
 	public void LoadInit(){
 		controllable = GetComponent<Controllable>();
+		animator = GetComponent<AdvancedAnimation>();
 		holdpoint = transform.Find("holdpoint");
 		Interaction getAction = new Interaction(this, "Get", "GetItem", true, false);
 		getAction.dontWipeInterface = false;
@@ -155,11 +163,19 @@ public class Inventory : Interactive, IExcludable {
 
 	public void ThrowItem(){
 		// set up the held object to be thrown on the next fixed update
-		throwObject = holding.gameObject;
-		OrderByY yorder = holding.GetComponent<OrderByY>();
-		if (yorder)
-			yorder.enabled = false;
-		holding = null;
+		if (animator){
+			animator.Throwing(true);
+		}
+	}
+	
+	public void ActivateThrow(){
+		if (holding){
+			throwObject = holding.gameObject;
+			OrderByY yorder = holding.GetComponent<OrderByY>();
+			if (yorder)
+				yorder.enabled = false;
+			holding = null;
+		}
 	}
 
 	private void DoThrow(){
@@ -187,6 +203,10 @@ public class Inventory : Interactive, IExcludable {
 			phys.Set3MotionImmediate(new Vector3(vx, vy, vz));
 		}
 		throwObject = null;
+		if (animator){
+			animator.Throwing(false);
+		}
+		// Debug.Break();
 	}
 
 	void FixedUpdate(){
@@ -208,7 +228,8 @@ public class Inventory : Interactive, IExcludable {
 	}
 
 	public void SwingItem(MeleeWeapon weapon){
-		swinging = true;
+		if (animator)
+			animator.Swinging(true);
 		if (weapon.swingSounds.Length > 0){
 			GetComponent<AudioSource>().PlayOneShot(weapon.swingSounds[Random.Range(0, weapon.swingSounds.Length)]);
 		}
@@ -222,7 +243,8 @@ public class Inventory : Interactive, IExcludable {
 	}
 
 	void EndSwing(){
-		swinging = false;
+		if (animator)
+			animator.Swinging(false);
 		holding.GetComponent<Renderer>().sortingLayerName="main";
 		holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
 	}
