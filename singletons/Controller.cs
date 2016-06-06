@@ -97,8 +97,8 @@ public class Controller : Singleton<Controller> {
         // this may or may not cause problems down the road, but I'm unsure how else to do this.
         // TODO: currently unresolved. UI overlapping objects in world creates problem clicks.
         
-        // if (currentSelect == SelectType.none && !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()){
-        if (currentSelect == SelectType.none){
+        if (currentSelect == SelectType.none && !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()){
+        // if (currentSelect == SelectType.none){
             foreach (RaycastHit2D hit in hits){
                 if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)){
                     focus.lastLeftClicked = hit.collider.gameObject;
