@@ -20,9 +20,17 @@ public class Speech : Interactive {
     public AudioClip speakSound;
     public AudioClip bleepSound;
     private AudioSource audioSource;
+	private bool LoadInitialized = false;
 
 	void Start () {
-		Interaction speak = new Interaction(this, "Look", "Describe", true, false);
+        if (!LoadInitialized)
+			LoadInit();
+		
+	}
+    
+    void LoadInit(){
+        LoadInitialized = true;
+        Interaction speak = new Interaction(this, "Look", "Describe", true, false);
 		speak.limitless = true;
 		speak.dontWipeInterface = false;
 		interactions.Add(speak);
@@ -36,12 +44,12 @@ public class Speech : Interactive {
         if (bubbleParent){
             Canvas bubbleCanvas = bubbleParent.GetComponent<Canvas>();
             if (bubbleCanvas){
-                bubbleCanvas.worldCamera = GameManager.Instance.cam;
+                // bubbleCanvas.worldCamera = GameManager.Instance.cam;
+                bubbleCanvas.worldCamera = GameObject.FindObjectOfType<Camera>();
             }
-        }
-        
-        
-	}
+        }    
+    }
+    
 
     // TODO: allow liquids and things to self-describe; add modifiers etc.
 	public void Describe(Item obj){
