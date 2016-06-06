@@ -70,7 +70,7 @@ public class HeadAnimation : MonoBehaviour {
 			default:
 				break;
 			}
-			p.GetComponent<Renderer>().sortingLayerName="held item";
+			p.GetComponent<Renderer>().sortingLayerName="air";
 		}
 		crumbs = GetComponentInChildren<ParticleSystem>();
 	}
