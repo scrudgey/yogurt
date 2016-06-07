@@ -48,8 +48,9 @@ public class Destructible : MonoBehaviour {
 
 	private void Die(){
 		foreach (Gibs gib in GetComponents<Gibs>())
-			if(gib.damageCondition == lastDamage || gib.damageCondition == damageType.any)
+			if(gib.damageCondition == lastDamage || gib.damageCondition == damageType.any){
 				gib.Emit();
+			}
 		PhysicalBootstrapper phys = GetComponent<PhysicalBootstrapper>();
 		if (phys){
 			phys.DestroyPhysical();
@@ -77,8 +78,12 @@ public class Destructible : MonoBehaviour {
 			if (col.rigidbody){
 				float damage = col.rigidbody.mass * vel / 5.0f;
 				TakeDamage(damageType.physical, damage);
-	//			Debug.Log("Collision damage on " + gameObject.name + " to the tune of " + damage.ToString());
-	//			Debug.Log("Collided with "+col.gameObject.name);	
+				// Debug.Log("Collision damage on " + gameObject.name + " to the tune of " + damage.ToString());	
+			} else {
+				Rigidbody2D rigidbody = GetComponent<Rigidbody2D>();
+				float damage = rigidbody.mass * vel / 5.0f;
+				TakeDamage(damageType.physical, damage);
+				// Debug.Log("Collision damage on " + gameObject.name + " to the tune of " + damage.ToString());
 			}
 		}
 		if (hitSound.Length > 0){

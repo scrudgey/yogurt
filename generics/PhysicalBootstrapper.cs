@@ -125,9 +125,24 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	}
 
 	void OnCollisionEnter2D(Collision2D coll){
+		
 		if (coll.relativeVelocity.magnitude > 0.5){
 			if (impactSounds.Length > 0){
 				GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
+			}
+		}
+		if (ignoreCollisions)
+			return;
+		if (coll.gameObject == groundObject){
+			// Debug.Log("I collided with the ground.");
+		} else {
+			// Debug.Log("physical bootstrapper collision: "+gameObject.name+" + "+coll.gameObject.name);
+			if (physical.currentMode == Physical.mode.zip){
+				physical.FlyMode();
+				GameObject speaker = Instantiate(Resources.Load("Speaker"), transform.position, Quaternion.identity) as GameObject;
+				speaker.GetComponent<AudioSource>().clip = Resources.Load("sounds/8bit_impact1", typeof(AudioClip)) as AudioClip;;
+				speaker.GetComponent<AudioSource>().Play();
+				Rebound();
 			}
 		}
 	}
@@ -141,6 +156,15 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		Vector2 objectVelocity = new Vector2(velocity.x, velocity.z + velocity.y);
 		physical.objectBody.velocity = objectVelocity;
 		groundBody.velocity = groundVelocity;
+	}
+
+	public void Rebound(){
+		Vector2 objectVelocity = physical.objectBody.velocity;
+		objectVelocity.y = Random.Range(0.5f, 0.8f);
+		physical.objectBody.velocity = objectVelocity;
+		physical.objectBody.angularVelocity = Random.Range(360, 800);
+		// Debug.Log("angular vel:" + physical.objectBody.angularVelocity.ToString());
+		// Debug.Log("y vel:" + objectVelocity.y.ToString());
 	}
 
 	void FixedUpdate(){

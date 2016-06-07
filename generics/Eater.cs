@@ -107,6 +107,9 @@ public class Eater : Interactive {
 		return reaction;
 	}
 
+	public string Eat_desc(Edible food){
+		return "Eat "+food.name;
+	}
 	public void Eat (Edible food){
 		string phrase ="";
 		int reaction;

@@ -96,6 +96,9 @@ public class Inventory : Interactive, IExcludable {
 			}
 		}
 	}
+	public string GetItem_desc(Pickup pickup){
+		return "Pick up "+pickup.itemName;
+	}
 	
 	public void StashItem(GameObject item){
 		items.Add(item);
@@ -201,6 +204,12 @@ public class Inventory : Interactive, IExcludable {
 				vy = vy + myBody.velocity.y;
 			}
 			phys.Set3MotionImmediate(new Vector3(vx, vy, vz));
+			foreach(Collider2D collider in GetComponentsInChildren<Collider2D>()){
+				if (!collider.isTrigger){
+					Physics2D.IgnoreCollision(collider, phys.physical.objectCollider);
+					Physics2D.IgnoreCollision(collider, phys.physical.groundCollider);
+				}
+			}
 		}
 		throwObject = null;
 		if (animator){
@@ -240,6 +249,9 @@ public class Inventory : Interactive, IExcludable {
 		if (controllable.directionAngle > 225 && controllable.directionAngle < 315){
 			slashFlag = "down";
 		}
+	}
+	public string SwingItem_desc(MeleeWeapon weapon){
+		return "Swing "+weapon.itemName;
 	}
 
 	void EndSwing(){

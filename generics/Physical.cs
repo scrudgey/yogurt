@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
 // using System.Collections;
 
+
 public class Physical : MonoBehaviour {
 
+	public enum mode{none, fly, ground, zip}
 	public AudioClip[] impactSounds;
 	public AudioClip[] landSounds;
 	
@@ -20,7 +22,6 @@ public class Physical : MonoBehaviour {
 	public BoxCollider2D groundCollider;
 	
 	private Collider2D tomCollider;
-	public enum mode{none, fly, ground, zip}
 	public mode currentMode;
 	public float height;
 	public bool ignoreCollisions;
@@ -98,10 +99,7 @@ public class Physical : MonoBehaviour {
 				doFly = true;
 			}
 		}
-		// collision layer stuff
-		// if(hinge.transform.localPosition.y < 0.3){
-		// 	trueObject.layer = 8;
-		// }
+
 		if (currentMode == mode.fly || currentMode == mode.zip){
 			trueObject.layer = 13;
 		} else {
@@ -142,18 +140,16 @@ public class Physical : MonoBehaviour {
 		doZip = true;
 	}
 
-	private void StartGroundMode(){
+	public void StartGroundMode(){
 		doGround = false;
 		ziptime = 0f;
 		// set tom collider. this is a temporary hack.
 		if (GameManager.Instance.playerObject)
 			tomCollider = GameManager.Instance.playerObject.GetComponent<EdgeCollider2D>();
-		if (landSounds.Length > 0)
-			GetComponent<AudioSource>().PlayOneShot(landSounds[Random.Range(0, landSounds.Length)]);
-		// stop colliding player and object
+		// enable ground-feet
 		Physics2D.IgnoreCollision(objectCollider, tomCollider, true);
-		// enable player - ground collision
 		Physics2D.IgnoreCollision(groundCollider, tomCollider, false);
+
 		// set object gravity 0
 		objectBody.gravityScale = 0;
 		// fix slider
@@ -175,14 +171,14 @@ public class Physical : MonoBehaviour {
 		hingeBody.velocity = tempVelocity;
 		foreach(Physical phys in FindObjectsOfType<Physical>()){
 			if (phys.currentMode == mode.ground){
-				Physics2D.IgnoreCollision(groundCollider, phys.GetComponent<Collider2D>(), false);
-				//special types of object ignore all collisions with other objects
 				if (ignoreCollisions){
-					Physics2D.IgnoreCollision(objectCollider, phys.GetComponent<Collider2D>(), true);
-					Physics2D.IgnoreCollision(objectCollider, tomCollider,true);
+					Physics2D.IgnoreCollision(objectCollider, phys.groundCollider, true);
+				} else {
+					Physics2D.IgnoreCollision(groundCollider, phys.groundCollider, false);
 				}
 			}
 		}
+
 		foreach(GameObject table in GameObject.FindGameObjectsWithTag("table")){
 			foreach(Collider2D tableCollider in table.GetComponentsInChildren<Collider2D>()){
 				if (tableCollider.isTrigger == false){
@@ -191,18 +187,17 @@ public class Physical : MonoBehaviour {
 				}
 			}
 		}
+		if (landSounds.Length > 0)
+			GetComponent<AudioSource>().PlayOneShot(landSounds[Random.Range(0, landSounds.Length)]);
 	}
 
-	private void StartFlyMode(){
+	public void StartFlyMode(){
 		doFly = false;
 		ziptime = 0f;
 		// set tom collider. this is a temporary hack.
 		if (GameManager.Instance.playerObject){
 			tomCollider = GameManager.Instance.playerObject.GetComponent<EdgeCollider2D>();
 		}
-		// enable colliding player and object
-		// if (!ignoreCollisions)
-		// 	Physics2D.IgnoreCollision(objectCollider, tomCollider, true);
 		// disable player - ground collision
 		Physics2D.IgnoreCollision(groundCollider, tomCollider, true);
 		Physics2D.IgnoreCollision(objectCollider, tomCollider, true);
@@ -216,7 +211,13 @@ public class Physical : MonoBehaviour {
 		GetComponent<Rigidbody2D>().drag = 0;
 		GetComponent<Rigidbody2D>().mass = 1;
 		foreach(Physical phys in FindObjectsOfType<Physical>()){
-			Physics2D.IgnoreCollision(groundCollider, phys.GetComponent<Collider2D>(), true);
+			if (phys.gameObject != gameObject){
+				Physics2D.IgnoreCollision(groundCollider, phys.groundCollider, true);
+				Physics2D.IgnoreCollision(groundCollider, phys.objectCollider, true);
+				if (ignoreCollisions){
+					Physics2D.IgnoreCollision(objectCollider, phys.objectCollider, true);
+				}
+			}
 		}
 		foreach(GameObject table in GameObject.FindGameObjectsWithTag("table")){
 			foreach(Collider2D tableCollider in table.GetComponentsInParent<Collider2D>()){
@@ -232,12 +233,13 @@ public class Physical : MonoBehaviour {
 		doFly = false;
 		StartFlyMode();
 		objectBody.gravityScale = 0;
-		ziptime = 1f;
+		ziptime = 0.5f;
 		currentMode = mode.zip;
 	}
 	
 
 	void OnCollisionEnter2D(Collision2D coll){
+		// Debug.Log("ground collision between "+gameObject.name+" "+coll.gameObject.name);
 		if (coll.relativeVelocity.magnitude > 0.5){
 			if (impactSounds.Length > 0){
 				GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
@@ -248,9 +250,7 @@ public class Physical : MonoBehaviour {
 			GroundMode();
 			BroadcastMessage("OnGroundImpact", this, SendMessageOptions.DontRequireReceiver);
 		} else {
-			if (currentMode == mode.zip){
-				FlyMode();
-			}
+			
 		}
 	}
 
@@ -261,14 +261,14 @@ public class Physical : MonoBehaviour {
 	}
 
 	void OnTriggerEnter2D(Collider2D coll){
-		if (coll.tag == "table" && coll.gameObject != gameObject){
+		if (coll.tag == "table" && coll.gameObject != gameObject && currentMode != mode.zip){
 			Table table = coll.GetComponent<Table>();
 			ActivateTableCollider(table);
 		}
 	}
 	
 	void OnTriggerExit2D(Collider2D coll){
-		if (coll.tag == "table" && coll.gameObject != gameObject){
+		if (coll.tag == "table" && coll.gameObject != gameObject && currentMode != mode.zip){
 			Table table = coll.GetComponent<Table>();
 			DeactivateTableCollider(table);
 		}
@@ -278,8 +278,6 @@ public class Physical : MonoBehaviour {
 		if (groundCollider){
 			spriteRenderer.enabled = false;
 			groundCollider.size = new Vector2(0.07f, 0.02f + table.height);
-			// groundCollider.size = new Vector2(0.1606f, 0.02f + table.height);
-			// groundCollider.offset = new Vector2(0.0f, -0.025f + groundCollider.size.y / 2f);
 			Collider2D[] tableColliders = table.gameObject.GetComponentsInParent<Collider2D>();
 			foreach (Collider2D tableCollider in tableColliders){
 				if (tableCollider.isTrigger == false){
@@ -294,8 +292,6 @@ public class Physical : MonoBehaviour {
 		if (groundCollider){
 			spriteRenderer.enabled = true;
 			groundCollider.size = new Vector2(0.07f, 0.02f);
-			// groundCollider.size = new Vector2(0.1606f, 0.02f);
-			// groundCollider.offset = new Vector2(0.0f, -0.025f);
 			FlyMode();
 			Collider2D[] tableColliders = table.gameObject.GetComponentsInParent<Collider2D>();
 			foreach (Collider2D tableCollider in tableColliders){

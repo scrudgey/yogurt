@@ -82,7 +82,11 @@ public class Toolbox : Singleton<Toolbox> {
 		return source;
 	}
 
+	///<summary>
+	///Spawn a droplet of liquid l at poisition pos.
+	///</summary>
 	public void SpawnDroplet(Vector3 pos, Liquid l){
+		/// this is a test
 		Vector2 initialVelocity = Vector2.zero;
 		initialVelocity = Random.insideUnitCircle;
 		if (initialVelocity.y < 0)
@@ -117,12 +121,13 @@ public class Toolbox : Singleton<Toolbox> {
         if (pb != null){ 
             initHeight = pb.height; 
         }
-        initpos.y += initHeight;
         droplet.transform.position = initpos;
         phys.doInit = false;
-        phys.Start();
+        // phys.Start();
         phys.InitPhysical(initHeight, initialVelocity);
-        Physics2D.IgnoreCollision(GetComponent<Collider2D>(), droplet.GetComponent<Collider2D>(), true);
+		phys.physical.StartFlyMode();
+        Physics2D.IgnoreCollision(spiller.GetComponent<Collider2D>(), phys.physical.objectCollider, true);
+        Physics2D.IgnoreCollision(spiller.GetComponent<Collider2D>(), phys.physical.groundCollider, true);
         LiquidCollection.MonoLiquidify(droplet, l);
     }
 

@@ -70,6 +70,13 @@ public class Blender : Container {
 			GetComponent<AudioSource>().Play();
 		}
 	}
+	public string Power_desc(){
+		if (power){
+			return "Turn off power";
+		} else {
+			return "Turn on power";
+		}
+	}
 
 	public void Lid(){
 		liquidContainer.lid = !liquidContainer.lid;
@@ -77,6 +84,13 @@ public class Blender : Container {
 			spriteRenderer.sprite = spriteSheet[0];
 		}else{
 			spriteRenderer.sprite = spriteSheet[1];
+		}
+	}
+	public string Lid_desc(){
+		if (liquidContainer.lid){
+			return "Remove lid";
+		} else {
+			return "Put on lid";
 		}
 	}
 	public override void Store(Inventory inv){

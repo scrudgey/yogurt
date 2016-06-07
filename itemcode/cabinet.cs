@@ -39,6 +39,12 @@ public class Cabinet : Interactive {
 		open = true;
 		opened = true;
 	}
+	public string Open_desc(){
+		return "Open "+name;
+	}
+	public string Close_desc(){
+		return "Close "+name;
+	}
 
 	public void Close(){
 		SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();

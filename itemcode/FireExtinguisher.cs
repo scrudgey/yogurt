@@ -46,6 +46,9 @@ public class FireExtinguisher : Interactive, IDirectable {
 			doSpray = true;
 		}
 	}
+	public string Spray_desc(){
+		return "Spray "+name;
+	}
 
 	void FixedUpdate(){
 		if (doSpray){
@@ -75,6 +78,9 @@ public class FireExtinguisher : Interactive, IDirectable {
 			direction = Vector3.ClampMagnitude(item.transform.position - transform.position, 1f);
 			Spray();
 		}
+	}
+	public string SprayObject_desc(Item item){
+		return "Spray "+name+" at "+item.itemName;
 	}
 
 	public bool SprayObject_Validation(Item item){

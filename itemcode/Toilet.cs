@@ -33,6 +33,13 @@ public class Toilet : Container {
             Toolbox.Instance.SpawnDroplet(Liquid.water, 0.5f, gameObject, 0.2f);
         }
 	}
+	public string Flush_desc(){
+		if (items.Count > 0){
+			return "Flush "+items[0].itemName+" down the toilet";
+ 		} else {
+			return "Flush toilet";
+		 }
+	}
 	
 	void Update(){
 		if (timeout > 0)

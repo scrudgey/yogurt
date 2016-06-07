@@ -32,12 +32,14 @@ public class Interaction {
 			ConfigureValidator();
 		}
 	}
+
 	public Action<Component> actionDelegate;
 	public bool continuous;
 	
 	
 	private System.Reflection.MethodInfo methodInfo;
 	private System.Reflection.MethodInfo validationMethodInfo;
+	private System.Reflection.MethodInfo descMethodInfo;
 	
 	
 	public Interaction (Interactive o, string name, string action) : this(o,name,action,false,false){ }
@@ -62,7 +64,7 @@ public class Interaction {
 		} else {
 			Debug.Log("interaction has failed to find its parent's method");
 		}
-		
+		descMethodInfo = parent.GetType().GetMethod(action+"_desc");	
 	}
 	
 	public Interaction (Interactive o, string name, Action<Component> initAction){
@@ -129,12 +131,9 @@ public class Interaction {
 				if (!validation)
 					enabled = false;
 			}
-			
 		} else {
 			enabled = false;
 		}
-		
-		
 	}
 	
 	public bool IsValid(){
@@ -149,6 +148,18 @@ public class Interaction {
 				}
 		}
 		return validation;
+	}
+
+	public string Description(){
+		if (descMethodInfo != null){
+			if (parameters != null){
+					return (string)descMethodInfo.Invoke(parent, parameters.ToArray());
+				} else {
+					return (string)descMethodInfo.Invoke(parent, null);
+				}
+		} else {
+			return "";
+		}
 	}
 	
 	// this can be sped up if I store it in a delegate instead of calling Invoke

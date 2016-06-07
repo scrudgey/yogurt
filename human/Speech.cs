@@ -67,6 +67,9 @@ public class Speech : Interactive {
             Say (obj.description);
         }
 	}
+    public string Describe_desc(Item obj){
+        return "Look at "+obj.itemName;
+    }
 
 	void Update () {
 		if (speakTime > 0){

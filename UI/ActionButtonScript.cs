@@ -43,4 +43,10 @@ public class ActionButtonScript: MonoBehaviour {
 	public void MouseDown(){
 		mouseHeld = true;
 	}
+
+	public void MouseOver(){
+		if (bType == buttonType.Action){
+			Debug.Log(action.Description());
+		}
+	}
 }

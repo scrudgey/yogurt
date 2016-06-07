@@ -66,7 +66,7 @@ public class ScriptDirector : Interactive {
             UINew.Instance.status.gameObject.SetActive(true);
             ParseLine();
         } else {
-            UINew.Instance.status.gameObject.SetActive(false);
+            // UINew.Instance.status.gameObject.SetActive(false);
         }
     }
 

@@ -84,6 +84,13 @@ public class Container : Interactive, IExcludable {
 			inv.gameObject.SendMessage("Say","It's full.");
 		}
 	}
+	public string Store_desc(Inventory inv){
+		if (inv.holding){
+			return "Store "+inv.holding+" in "+name;
+		} else {
+			return "";
+		}
+	}
 
 	public void AddItem(Pickup pickup){
 		items.Add(pickup);
