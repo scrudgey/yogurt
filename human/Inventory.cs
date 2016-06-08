@@ -69,7 +69,7 @@ public class Inventory : Interactive, IExcludable {
 			StashItem(holding.gameObject);
 		}else{
 			// strength check to see if we can pick it up
-			if ( strength < pickup.weight){
+			if (strength < pickup.weight){
 				this.SendMessage("Say","It's too heavy!");
 			} else {
 				if (holding){
