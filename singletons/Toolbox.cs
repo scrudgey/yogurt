@@ -206,4 +206,18 @@ public class Toolbox : Singleton<Toolbox> {
 		return output;
 	}
 
+	public string GetName(GameObject obj){
+		// TODO: include extra description, like "vomited up"
+		// possibly also use intrinsics
+		string nameOut = "";
+		Item item = obj.GetComponent<Item>();
+		if (item){
+			nameOut = item.itemName;
+		} else {
+			nameOut = obj.name;
+		}
+		nameOut = ScrubText(nameOut);
+		return nameOut;
+	}
+
 }
