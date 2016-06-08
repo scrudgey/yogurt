@@ -1,6 +1,4 @@
-﻿// using UnityEngine;
-// using System.Collections;
-
+﻿
 public class LiquidResevoir : Interactive {
 	public Liquid liquid;
 
@@ -12,15 +10,14 @@ public class LiquidResevoir : Interactive {
 	public liquidType containedLiquid;
 	public string type;
 
-	// Use this for initialization
 	 void Start () {
 
 		switch (containedLiquid){
 		case liquidType.water:
-			type = "Water";
+			type = "water";
 			break;
 		case liquidType.test2:
-			type = "Test Liquid 2";
+			type = "drain cleaner";
 			break;
 		default:
 			type = "default";

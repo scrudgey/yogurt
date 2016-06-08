@@ -16,6 +16,7 @@ public class Container : Interactive, IExcludable {
 		stasher.displayVerb = "Stash in";
 		stasher.validationFunction = true;
 		interactions.Add(stasher);
+		// good example of loop closure here
 		foreach (Pickup pickup in items){
 			Pickup closurePickup = pickup;
 			Action<Component> removeIt = (comp) => {
@@ -74,7 +75,7 @@ public class Container : Interactive, IExcludable {
 				Inventory i = comp as Inventory;
 				Remove(i, pickup);
 			};
-			Interaction newInteraction = new Interaction(this,pickup.itemName,removeIt);
+			Interaction newInteraction = new Interaction(this, pickup.itemName, removeIt);
 			newInteraction.displayVerb = "Retreive "+pickup.itemName+" from";
 			newInteraction.actionDelegate = removeIt;
 			newInteraction.parameterTypes = new List<Type>();
@@ -86,7 +87,9 @@ public class Container : Interactive, IExcludable {
 	}
 	public string Store_desc(Inventory inv){
 		if (inv.holding){
-			return "Store "+inv.holding+" in "+name;
+			string itemname = Toolbox.Instance.GetName(inv.holding.gameObject);
+			string myname = Toolbox.Instance.GetName(gameObject);
+			return "Put "+itemname+" in "+myname;
 		} else {
 			return "";
 		}

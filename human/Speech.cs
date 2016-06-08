@@ -68,7 +68,8 @@ public class Speech : Interactive {
         }
 	}
     public string Describe_desc(Item obj){
-        return "Look at "+obj.itemName;
+        string itemname = Toolbox.Instance.GetName(obj.gameObject);
+        return "Look at "+itemname;
     }
 
 	void Update () {

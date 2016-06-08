@@ -40,10 +40,12 @@ public class Cabinet : Interactive {
 		opened = true;
 	}
 	public string Open_desc(){
-		return "Open "+name;
+		string myname = Toolbox.Instance.GetName(gameObject);
+		return "Open "+myname;
 	}
 	public string Close_desc(){
-		return "Close "+name;
+		string myname = Toolbox.Instance.GetName(gameObject);
+		return "Close "+myname;
 	}
 
 	public void Close(){

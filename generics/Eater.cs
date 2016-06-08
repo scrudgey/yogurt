@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-// using System.Collections;
-// using System.Collections.Generic;
 
 public class Eater : Interactive {
 	
@@ -48,7 +46,6 @@ public class Eater : Interactive {
 		}
 	}
 
-	// Use this for initialization
 	void Start () {
 		speech = GetComponent<Speech> ();
 		head = GetComponentInChildren<HeadAnimation>();
@@ -108,7 +105,8 @@ public class Eater : Interactive {
 	}
 
 	public string Eat_desc(Edible food){
-		return "Eat "+food.name;
+		string foodname = Toolbox.Instance.GetName(food.gameObject);
+		return "Eat "+foodname;
 	}
 	public void Eat (Edible food){
 		string phrase ="";
@@ -121,7 +119,6 @@ public class Eater : Interactive {
 			head.SetEating(true,food.pureeColor);
 
 		//randomly store a clone of the object for later vomiting
-		// if(Random.Range(0,1) < 0.1){
         if (!food.poison){
             if (eaten){
                 Destroy(eaten);
@@ -129,7 +126,6 @@ public class Eater : Interactive {
             eaten = Instantiate(food.gameObject) as GameObject;
             eaten.SetActive(false);
         }
-		// }
 
 		//update our status based on our reaction to the food
 		reaction = CheckReaction(food);

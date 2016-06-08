@@ -47,7 +47,8 @@ public class FireExtinguisher : Interactive, IDirectable {
 		}
 	}
 	public string Spray_desc(){
-		return "Spray "+name;
+		string myname = Toolbox.Instance.GetName(gameObject);
+		return "Spray "+myname;
 	}
 
 	void FixedUpdate(){
@@ -80,7 +81,9 @@ public class FireExtinguisher : Interactive, IDirectable {
 		}
 	}
 	public string SprayObject_desc(Item item){
-		return "Spray "+name+" at "+item.itemName;
+		string myname = Toolbox.Instance.GetName(gameObject);
+		string itemname = Toolbox.Instance.GetName(item.gameObject);
+		return "Spray "+myname+" at "+itemname;
 	}
 
 	public bool SprayObject_Validation(Item item){

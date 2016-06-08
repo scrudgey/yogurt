@@ -35,7 +35,8 @@ public class Toilet : Container {
 	}
 	public string Flush_desc(){
 		if (items.Count > 0){
-			return "Flush "+items[0].itemName+" down the toilet";
+			string itemname = Toolbox.Instance.GetName(items[0].gameObject);
+			return "Flush "+itemname+" down the toilet";
  		} else {
 			return "Flush toilet";
 		 }

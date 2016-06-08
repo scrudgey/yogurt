@@ -34,7 +34,10 @@ public class LiquidContainer : Interactive {
 	}
 	void Start () {
 		interactions.Add(new Interaction(this, "Fill", "FillFromReservoir"));
-		interactions.Add(new Interaction(this, "Fill", "FillFromContainer"));
+		Interaction fillContainer = new Interaction(this, "Fill", "FillFromContainer");
+		fillContainer.validationFunction = true;
+		interactions.Add(fillContainer);
+		// interactions.Add(new Interaction(this, "Fill", "FillFromContainer"));
 		empty = true;
 		if (!LoadInitialized)
 			LoadInit();
@@ -54,6 +57,11 @@ public class LiquidContainer : Interactive {
 	public void FillFromReservoir(LiquidResevoir l){
 		FillWithLiquid(l.liquid);
 	}
+	public string FillFromReservoir_desc(LiquidResevoir l){
+		string myname = Toolbox.Instance.GetName(gameObject);
+		string resname = Toolbox.Instance.GetName(l.gameObject);
+		return "Fill "+myname+" with "+l.liquid.name+" from "+resname;
+	}
 	public void FillFromContainer(LiquidContainer l){
 		if(l.amount > 0){
 			FillWithLiquid(l.liquid);
@@ -61,6 +69,18 @@ public class LiquidContainer : Interactive {
 			l.amount -= fill;
 			amount = fill;
 		}
+	}
+	public bool FillFromContainer_Validation(LiquidContainer l){
+		if (l.amount > 0){
+			return true;
+		} else {
+			return false;
+		}
+	}
+	public string FillFromContainer_desc(LiquidContainer l){
+		string myname = Toolbox.Instance.GetName(gameObject);
+		string resname = Toolbox.Instance.GetName(l.gameObject);
+		return "Fill "+myname+" with "+l.liquid.name+" from "+resname;
 	}
 	public void FillWithLiquid(Liquid l){
 		if (amount > 0){
@@ -131,6 +151,10 @@ public class LiquidContainer : Interactive {
 			eater.Eat(sip.GetComponent<Edible>());
 			amount -= 1f;
 		}
+	}
+	public string Drink_desc(Eater eater){
+		string myname = Toolbox.Instance.GetName(gameObject);
+		return "Drink "+liquid.name+" from "+myname;
 	}
 	void OnGroundImpact(Physical phys){
 		if (!lid)
