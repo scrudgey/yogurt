@@ -12,6 +12,7 @@ public class Blender : Container {
 	public AudioClip blendStop;
 	private LiquidContainer liquidContainer;
 	private bool LoadInitialized = false;
+	private AudioSource audioSource;
 	protected override void Start () {
 		base.Start();
 		if (!LoadInitialized)
@@ -22,15 +23,15 @@ public class Blender : Container {
 		liquidContainer = GetComponent<LiquidContainer>();
 		interactions.Add( new Interaction(this, "Power", "Power"));
 		interactions.Add( new Interaction(this, "Lid", "Lid"));
-
+		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 		LoadInitialized = true;
 	}
 	void Update () {
 
 		if(power){
-			if(!GetComponent<AudioSource>().isPlaying ){
-				GetComponent<AudioSource>().clip = blendNoise;
-				GetComponent<AudioSource>().Play();
+			if(!audioSource.isPlaying){
+				audioSource.clip = blendNoise;
+				audioSource.Play();
 			}
 			//vibrate the blender
 			Vector3 pos = transform.position;
@@ -95,7 +96,7 @@ public class Blender : Container {
 	}
 	public override void Store(Inventory inv){
 		if (liquidContainer.lid){
-			inv.gameObject.SendMessage("Say","The lid is on!");
+			inv.gameObject.SendMessage("Say", "The lid is on!");
 		} else {
 			base.Store (inv);
 		}
