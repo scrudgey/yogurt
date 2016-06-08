@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-// using System.Collections;
 
 public class ActionButtonScript: MonoBehaviour {
 
@@ -22,8 +21,10 @@ public class ActionButtonScript: MonoBehaviour {
 				}
 				UINew.Instance.InventoryButtonsCheck();
 			}
+			UINew.Instance.SetActionText("");
 		} else {
 			UINew.Instance.HandActionCallback(bType);
+			UINew.Instance.SetActionText("");
 		}
 		GUI.FocusControl("none");
 	}
@@ -46,7 +47,14 @@ public class ActionButtonScript: MonoBehaviour {
 
 	public void MouseOver(){
 		if (bType == buttonType.Action){
-			Debug.Log(action.Description());
+			// Debug.Log(action.Description());
+			UINew.Instance.SetActionText(action.Description());
+		} else {
+			UINew.Instance.SetActionText(UINew.Instance.HandActionDescription(bType));
 		}
+	}
+
+	public void MouseExit(){
+		UINew.Instance.SetActionText("");
 	}
 }
