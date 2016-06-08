@@ -140,7 +140,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 			if (physical.currentMode == Physical.mode.zip){
 				physical.FlyMode();
 				GameObject speaker = Instantiate(Resources.Load("Speaker"), transform.position, Quaternion.identity) as GameObject;
-				speaker.GetComponent<AudioSource>().clip = Resources.Load("sounds/8bit_impact1", typeof(AudioClip)) as AudioClip;;
+				speaker.GetComponent<AudioSource>().clip = Resources.Load("sounds/8bit_impact1", typeof(AudioClip)) as AudioClip;
 				speaker.GetComponent<AudioSource>().Play();
 				Rebound();
 			}
