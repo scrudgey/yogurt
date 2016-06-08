@@ -120,14 +120,18 @@ public class Toolbox : Singleton<Toolbox> {
         Physical pb = spiller.GetComponentInParent<Physical>();
         if (pb != null){ 
             initHeight = pb.height; 
-        }
+        } else {
+			initHeight = 0.05f;
+		}
         droplet.transform.position = initpos;
         phys.doInit = false;
-        // phys.Start();
         phys.InitPhysical(initHeight, initialVelocity);
 		phys.physical.StartFlyMode();
-        Physics2D.IgnoreCollision(spiller.GetComponent<Collider2D>(), phys.physical.objectCollider, true);
-        Physics2D.IgnoreCollision(spiller.GetComponent<Collider2D>(), phys.physical.groundCollider, true);
+		Collider2D[] spillerColliders = spiller.transform.root.GetComponentsInChildren<Collider2D>();
+		foreach(Collider2D collider in spillerColliders){
+			Physics2D.IgnoreCollision(collider, phys.physical.objectCollider, true);
+			Physics2D.IgnoreCollision(collider, phys.physical.groundCollider, true);
+		}
         LiquidCollection.MonoLiquidify(droplet, l);
     }
 
