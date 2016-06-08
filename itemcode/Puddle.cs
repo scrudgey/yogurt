@@ -14,6 +14,11 @@ public class Puddle : MonoBehaviour {
 		// set random small puddle sprite
 		Sprite[] sprites = Resources.LoadAll<Sprite>("smallpuddle");
 		spriteRenderer.sprite = sprites[Random.Range (0,4)];
+		MonoLiquid monoliquid = GetComponent<MonoLiquid>();
+		if (monoliquid){
+			Item item = GetComponent<Item>();
+			item.itemName = "puddle of "+monoliquid.liquid.name;
+		}
 	}
 
 	void OnTriggerStay2D(Collider2D coll){
