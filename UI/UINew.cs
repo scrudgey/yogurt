@@ -30,6 +30,8 @@ public class UINew : Singleton<UINew> {
 	public TextFX.FXstyle statusStyle;
 	
 	public Text status;
+	public Text actionTextObject;
+	public string actionTextString;
 
 	void Start(){
 		if (!init)
@@ -41,6 +43,8 @@ public class UINew : Singleton<UINew> {
 		inventoryButton = UICanvas.transform.Find("bottomdock/InvButtonDock/InventoryButton").gameObject;
 		inventoryMenu = GameObject.Find("InventoryScreen");
 		status = UICanvas.transform.Find("topdock/topBar/status").GetComponent<Text>();
+		actionTextObject = UICanvas.transform.Find("bottomdock/ActionText").GetComponent<Text>();
+
 		statusFX = status.gameObject.GetComponent<TextFX>();
 		status.gameObject.SetActive(false);
 		inventoryMenu.SetActive(false);
@@ -54,6 +58,9 @@ public class UINew : Singleton<UINew> {
 		CloseClosetMenu();
 	}
 	
+	public void SetActionText(string text){
+		actionTextString = text;
+	}
 	public void SetStatus(string text){
 		statusText = text;
 	}
@@ -80,6 +87,7 @@ public class UINew : Singleton<UINew> {
 				statusFX.style = statusStyle;
 			}
 		}
+		actionTextObject.text = actionTextString;
 	}
 
 	public void Clicked(GameObject clicked){
@@ -145,6 +153,23 @@ public class UINew : Singleton<UINew> {
 			break;
 		default:
 			break;
+		}
+	}
+
+	public string HandActionDescription(ActionButtonScript.buttonType bType){
+		string itemname = "";
+		switch (bType){
+		case ActionButtonScript.buttonType.Drop:
+			itemname = Toolbox.Instance.GetName(inventory.holding.gameObject);
+			return "Drop "+itemname;
+		case ActionButtonScript.buttonType.Throw:
+			itemname = Toolbox.Instance.GetName(inventory.holding.gameObject);
+			return "Throw "+itemname;
+		case ActionButtonScript.buttonType.Stash:
+			itemname = Toolbox.Instance.GetName(inventory.holding.gameObject);
+			return "Put "+itemname+" in pocket";
+		default:
+			return "";
 		}
 	}
 
