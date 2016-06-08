@@ -22,12 +22,12 @@
 using System;
 // using System.Collections.Generic;
 // using System.Diagnostics;
-using System.Reflection;
-using System.Text;
+// using System.Reflection;
+// using System.Text;
 // using System.Windows;
 // using System.Windows.Media.Animation;
-using System.ComponentModel;
-using System.Globalization;
+// using System.ComponentModel;
+// using System.Globalization;
 
 namespace Easings
 {
