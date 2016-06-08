@@ -64,12 +64,10 @@ public class FireExtinguisher : Interactive, IDirectable {
 			Collider2D projectileCollider = p.GetComponent<Collider2D>();
 			Physics2D.IgnoreCollision(GetComponent<Collider2D>(), projectileCollider, true);
 
-			// Collider2D[] parentColliders = gameObject.GetComponentsInParent<Collider2D>();
+			// ignore collisions with parent object: so the player doesn't spray herself with fire extinguisher
 			if (transform.parent != null){
 				Collider2D[] parentColliders = transform.root.GetComponentsInChildren<Collider2D>();
-				Debug.Log("found "+parentColliders.Length.ToString()+" colliders in parent");
 				foreach (Collider2D collider in parentColliders){
-					// Debug.Log("ignoring collisions between "+collider.ToString()+" and "+projectileCollider.ToString());
 					Physics2D.IgnoreCollision(collider, projectileCollider, true);
 				}
 			}
