@@ -97,7 +97,8 @@ public class Inventory : Interactive, IExcludable {
 		}
 	}
 	public string GetItem_desc(Pickup pickup){
-		return "Pick up "+pickup.itemName;
+		string itemname = Toolbox.Instance.GetName(pickup.gameObject);
+		return "Pick up "+itemname;
 	}
 	
 	public void StashItem(GameObject item){
@@ -215,6 +216,8 @@ public class Inventory : Interactive, IExcludable {
 		if (animator){
 			animator.Throwing(false);
 		}
+		// Resources.Load("sounds/8bit_impact1", typeof(AudioClip)) as AudioClip;
+		GetComponent<AudioSource>().PlayOneShot(Resources.Load("sounds/8bit_throw", typeof(AudioClip)) as AudioClip);
 		// Debug.Break();
 	}
 
@@ -251,7 +254,8 @@ public class Inventory : Interactive, IExcludable {
 		}
 	}
 	public string SwingItem_desc(MeleeWeapon weapon){
-		return "Swing "+weapon.itemName;
+		string weaponname = Toolbox.Instance.GetName(weapon.gameObject);
+		return "Swing "+weaponname;
 	}
 
 	void EndSwing(){
