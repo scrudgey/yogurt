@@ -25,7 +25,6 @@ public class Speech : Interactive {
 	void Start () {
         if (!LoadInitialized)
 			LoadInit();
-		
 	}
     
     void LoadInit(){
@@ -41,6 +40,7 @@ public class Speech : Interactive {
         if (audioSource == null){
             audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         }
+        audioSource.loop=true;
         if (bubbleParent){
             Canvas bubbleCanvas = bubbleParent.GetComponent<Canvas>();
             if (bubbleCanvas){
@@ -74,6 +74,7 @@ public class Speech : Interactive {
 
 	void Update () {
 		if (speakTime > 0){
+
 			speakTime -= Time.deltaTime;
 			speaking = true;
 			bubbleParent.SetActive(true);
@@ -85,15 +86,25 @@ public class Speech : Interactive {
                 Vector3 tempscale = transform.localScale;
                 flipper.transform.localScale = tempscale; 
 			}
-            if (!audioSource.isPlaying){
-                if (swearMask[(int)charIndex] == 0){
-                    audioSource.PlayOneShot(speakSound);
-                } else {
-                    audioSource.PlayOneShot(bleepSound);
-                }
+            // if (!audioSource.isPlaying){
+            
+            if (swearMask[(int)charIndex] == 0){
+                // if (audioSource.pla)
+                // audioSource.PlayOneShot(speakSound);
+                if (audioSource.clip != speakSound)
+                    audioSource.clip = speakSound;
+            } else {
+                if (audioSource.clip != bleepSound)
+                    audioSource.clip = bleepSound;
+                // audioSource.PlayOneShot(bleepSound);
             }
+            if (!audioSource.isPlaying){
+                audioSource.Play();
+            }
+            // }
 		}
 		if (speakTime < 0){
+            audioSource.Stop();
             if (speaking){
                 Occurrence flag = Toolbox.Instance.OccurenceFlag(gameObject);
                 OccurrenceSpeech data = new OccurrenceSpeech();
@@ -136,7 +147,7 @@ public class Speech : Interactive {
         if (swear != null){
            int index = phrase.IndexOf(swear);
            if (index != -1){
-               for (int i = index; i < index + swear.Length; i++){
+               for (int i = index; i < index + swear.Length-1; i++){
                    swearMask[i] = 1;
                }
            }
@@ -163,7 +174,8 @@ public class Speech : Interactive {
             Say("shazbot!", "shazbot");
             return;
         }
-        Say("that shazbotting "+target.name+"!", "shazbotting");
+        string targetname = Toolbox.Instance.GetName(target);
+        Say("that shazbotting "+targetname+"!", "shazbotting");
     }
 
 }
