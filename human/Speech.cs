@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine.UI;
 
-
 public class Speech : Interactive {
 	private string words;
 	public bool speaking = false;
@@ -87,20 +86,19 @@ public class Speech : Interactive {
                 flipper.transform.localScale = tempscale; 
 			}
             // if (!audioSource.isPlaying){
-            
-            if (swearMask[(int)charIndex] == 0){
-                // if (audioSource.pla)
-                // audioSource.PlayOneShot(speakSound);
-                if (audioSource.clip != speakSound)
-                    audioSource.clip = speakSound;
-            } else {
-                if (audioSource.clip != bleepSound)
-                    audioSource.clip = bleepSound;
-                // audioSource.PlayOneShot(bleepSound);
+            if (charIndex < swearMask.Length){
+                if (swearMask[(int)charIndex] == 0){
+                    if (audioSource.clip != speakSound)
+                        audioSource.clip = speakSound;
+                } else {
+                    if (audioSource.clip != bleepSound)
+                        audioSource.clip = bleepSound;
+                }
+                if (!audioSource.isPlaying){
+                    audioSource.Play();
+                }
             }
-            if (!audioSource.isPlaying){
-                audioSource.Play();
-            }
+
             // }
 		}
 		if (speakTime < 0){
@@ -133,25 +131,29 @@ public class Speech : Interactive {
 	}
 
 	public void Say(string phrase, string swear=null){
-		if(speaking && phrase == words ){
+		if(speaking && phrase == words){
 			return;
 		}
-		words = phrase;
-        speakTime = DoubleSeat(phrase.Length, 2f, 50f, 5f, 2f);
-        
-        speakTimeTotal = speakTime;
-        speakSpeed = phrase.Length / speakTime;
+        // string censor = "∎";
+        string censoredPhrase = phrase;
         chars = phrase.ToCharArray();
         swearMask = new int[chars.Length];
-        
         if (swear != null){
            int index = phrase.IndexOf(swear);
            if (index != -1){
                for (int i = index; i < index + swear.Length-1; i++){
                    swearMask[i] = 1;
+                //    censoredPhrase
+                   Debug.Log(phrase[i]);
+                //    censoredPhrase[i] = censor;
                }
            }
         }
+        // Toolbox.Instance.ReplaceAt();
+		words = censoredPhrase;
+        speakTime = DoubleSeat(phrase.Length, 2f, 50f, 5f, 2f);
+        speakTimeTotal = speakTime;
+        speakSpeed = phrase.Length / speakTime;
 	}
 
 
