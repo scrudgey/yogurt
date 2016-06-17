@@ -30,7 +30,6 @@ public class ScriptListEntry : MonoBehaviour {
         if (highlight){
             ColorBlock block = button.colors;
             block.normalColor = highColor;
-            
             button.colors = block;
         }
     }
