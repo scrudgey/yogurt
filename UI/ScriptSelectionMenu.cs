@@ -79,6 +79,8 @@ public class ScriptSelectionMenu : MonoBehaviour
             // Debug.Log(lastClicked);
             // set the current script here
             GameManager.Instance.activeCommercial = lastClicked.commercial;
+            ScriptDirector director = GameObject.FindObjectOfType<ScriptDirector>();
+            director.Enable();
         }
         Destroy(gameObject);
     }
