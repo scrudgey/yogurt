@@ -28,7 +28,7 @@ public partial class GameManager : Singleton<GameManager> {
         return commercial;
     }
 
-    void ScriptPrompt(){
+    public void ScriptPrompt(){
         GameObject menu = Instantiate(Resources.Load("UI/ScriptSelector")) as GameObject;
         menu.GetComponent<Canvas>().worldCamera = cam;
     }
