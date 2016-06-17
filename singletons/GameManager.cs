@@ -50,7 +50,7 @@ public partial class GameManager : Singleton<GameManager> {
     public List<Commercial> completeCommercials;
     public Commercial activeCommercial;
     private float sceneTime;
-    private bool doScriptPrompt = false;
+    // private bool doScriptPrompt = false;
     public float money;
 	
     
@@ -65,10 +65,10 @@ public partial class GameManager : Singleton<GameManager> {
     void Update(){
 		timeSinceLastSave += Time.deltaTime;
         sceneTime += Time.deltaTime;
-        if (sceneTime > 2f && doScriptPrompt){
-            doScriptPrompt = false;
-            ScriptPrompt();
-        }
+        // if (sceneTime > 2f && doScriptPrompt){
+        //     doScriptPrompt = false;
+        //     ScriptPrompt();
+        // }
 	}
  
  
@@ -160,14 +160,14 @@ public partial class GameManager : Singleton<GameManager> {
     public void NewDay(){
         MySaver.CleanupSaves();
 		SceneManager.LoadScene("house");
-        doScriptPrompt = true;
+        // doScriptPrompt = true;
         sceneTime = 0f;
         entryID = 99;
     }
     public void NewGame(bool switchlevel=true){
         if (switchlevel){
 			SceneManager.LoadScene("house");
-            doScriptPrompt = true;
+            // doScriptPrompt = true;
         }
         sceneTime = 0f;
         // TODO: add a default player condition here
