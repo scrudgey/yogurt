@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-// using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
@@ -33,6 +33,10 @@ public class UINew : Singleton<UINew> {
 	public Text actionTextObject;
 	public string actionTextString;
 
+	private Text recordText;
+	private GameObject recordStop;
+	private GameObject recordFinish;
+
 	void Start(){
 		if (!init)
 			PostLoadInit();
@@ -44,6 +48,16 @@ public class UINew : Singleton<UINew> {
 		inventoryMenu = GameObject.Find("InventoryScreen");
 		status = UICanvas.transform.Find("topdock/topBar/status").GetComponent<Text>();
 		actionTextObject = UICanvas.transform.Find("bottomdock/ActionText").GetComponent<Text>();
+
+		recordText = UICanvas.transform.Find("topdock/topRight/recStatus").gameObject.GetComponent<Text>();
+		recordStop = UICanvas.transform.Find("topdock/topRight/StopButton").gameObject;
+		recordFinish = UICanvas.transform.Find("topdock/topRight/FinishButton").gameObject;
+
+		if (recordStop){
+			recordStop.SetActive(false);
+			recordFinish.SetActive(false);
+			recordText.text = "";
+		}
 
 		statusFX = status.gameObject.GetComponent<TextFX>();
 		status.gameObject.SetActive(false);
@@ -57,6 +71,41 @@ public class UINew : Singleton<UINew> {
 		}
 		CloseClosetMenu();
 	}
+
+	public void EnableRecordButtons(bool enable){
+		if (enable){
+			recordText.text = "RECORDING";
+			recordStop.SetActive(true);
+			recordFinish.SetActive(true);
+		} else {
+			recordText.text = "";
+			recordStop.SetActive(false);
+			recordFinish.SetActive(false);	
+		}
+	}
+
+	public void UpdateRecordButtons(Commercial commercial){
+		if (GameManager.Instance.activeCommercial == null){
+			return;
+		}
+		if (commercial.Evaluate(GameManager.Instance.activeCommercial)){
+			recordText.text = "COMPLETE";
+			recordStop.SetActive(false);
+			recordFinish.SetActive(true);
+			// StartCoroutine(WaitAndFinish(1.5f));
+		} else {
+			recordText.text = "RECORDING";
+			recordStop.SetActive(true);
+			recordFinish.SetActive(false);
+		}
+	}
+
+	// public IEnumerator WaitAndFinish(float waitTime){
+	// 	yield return new WaitForSeconds(waitTime);
+	// 	recordText.text = "COMPLETE";
+	// 	recordStop.SetActive(false);
+	// 	recordFinish.SetActive(true);
+	// }
 	
 	public void SetActionText(string text){
 		actionTextString = text;
