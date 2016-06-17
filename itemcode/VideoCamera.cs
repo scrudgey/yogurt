@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
+// using UnityEngine.UI;
 using System.Xml.Serialization;
 using System.IO;
 using System.Collections.Generic;
@@ -12,51 +12,17 @@ public class VideoCamera : MonoBehaviour {
         {"yogurt_vomit_eat", "eating yogurt vomit"},
         {"yogurt_floor", "yogurt eaten off the floor"},
 	};
-	Text rec;
-	float blinkTimer;
-    GameObject cutButton;
-    float interfaceTimeout;
 	public Commercial commercial = new Commercial();
     public OccurrenceData watchForOccurrence = null;
     private ScriptReader reader;
+    public bool live;
 
 	
 	void Start () {
-		rec = transform.Find("Graphic/Rec").GetComponent<Text>();
-        cutButton = transform.Find("Canvas/CutButton").gameObject;
-        cutButton.SetActive(false);
         reader = GetComponent<ScriptReader>();
-        rec.enabled = false;
+        live = false;
 	}
-	
 
-	void Update(){
-		// blinkTimer += Time.deltaTime;
-		// if (blinkTimer > 1 && rec.enabled == true){
-		// 	rec.enabled = false;
-		// }
-		// if (blinkTimer > 2){
-		// 	rec.enabled = true;
-		// 	blinkTimer = 0f;
-		// }
-        if (interfaceTimeout <= 0){
-            if (cutButton.activeSelf){
-                cutButton.SetActive(false);
-            }
-        } else {
-            cutButton.SetActive(true);
-            interfaceTimeout -= Time.deltaTime;
-        }
-	}
-    public void CalledCut(){
-        SaveCommercial();
-        
-    }
-    void OnTriggerStay2D(Collider2D col){
-        if (col.gameObject == GameManager.Instance.playerObject){
-            interfaceTimeout = 0.5f;
-        }
-    }
 	void SaveCommercial(){
 		var serializer = new XmlSerializer(typeof(Commercial));
 			string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
@@ -69,18 +35,16 @@ public class VideoCamera : MonoBehaviour {
     // TODO: there could be an issue here with the same occurrence triggering
     // multiple collisions. I will have to handle that eventually.
 	void OnTriggerEnter2D(Collider2D col){        
-		if (col.name != "OccurrenceFlag(Clone)")
+		if (col.name != "OccurrenceFlag(Clone)" || !live)
 		return;
 		Occurrence occurrence = col.gameObject.GetComponent<Occurrence>();
 		if (occurrence == null)
 		return;
         ProcessOccurrence(occurrence);
-        // Dest
 	}
     
     void ProcessOccurrence(Occurrence oc){
         foreach (OccurrenceData data in oc.data){
-            // Debug.Log(data.myType);
             switch (data.myType){
                 case occurrenceType.eat:
                     ProcessEat(data as OccurrenceEat);
@@ -94,12 +58,9 @@ public class VideoCamera : MonoBehaviour {
                 default:
                     break;
             }
-            
             // handle qualities
             commercial.data.AddData(data);
-            
             // trigger reaction to values increasing?
-            
             //check vs. watchForOccurrence
             if (watchForOccurrence != null){
                  if (watchForOccurrence.Matches(data)){
@@ -111,7 +72,7 @@ public class VideoCamera : MonoBehaviour {
     }
     
     void ProcessEat(OccurrenceEat data){
-        if (data.liquid.name == "Yogurt"){
+        if (data.liquid.name == "yogurt"){
             IncrementCommercialValue("yogurt", 1f);
             if (data.liquid.vomit)
                 IncrementCommercialValue("yogurt_vomit_eat", 1f);
@@ -126,11 +87,10 @@ public class VideoCamera : MonoBehaviour {
     
     void ProcessSpeech(OccurrenceSpeech data){
         //add the speech to the transcript
-        // Debug.Log("transcript + "+data.line);
+        commercial.transcript.Add(data.line);
     }
     
     public void IncrementCommercialValue(string valname, float increment){
-        
         CommercialProperty property = null;
         commercial.properties.TryGetValue(valname, out property);
         if (property == null){
@@ -143,9 +103,16 @@ public class VideoCamera : MonoBehaviour {
         string poptext = "default";
         KeyDescriptions.TryGetValue(valname, out poptext);
         if (poptext != "default"){
-            Toolbox.Instance.PopupCounter(poptext, initvalue, finalvalue);
+            Toolbox.Instance.PopupCounter(poptext, initvalue, finalvalue, this);
+        } else {
+            // UI check if commercial is complete
+            CheckForFinishState();
         }
-        
         commercial.properties[valname].val = finalvalue;
+    }
+
+    public void CheckForFinishState(){
+        // UI check if commercial is complete
+        UINew.Instance.UpdateRecordButtons(commercial);
     }
 }
