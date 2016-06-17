@@ -21,7 +21,6 @@ public class ScriptReader : MonoBehaviour {
        
 	}
     public void CoStarLine(string line, ScriptDirector director){
-        
         if (costar){
             // if i am a costar, look at the camera.
             Vector3 dif = director.transform.position - transform.position;
