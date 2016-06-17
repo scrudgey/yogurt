@@ -89,15 +89,14 @@ public class OccurrenceSpeech : OccurrenceData {
     
     public override bool Matches(OccurrenceData otherData){
         bool match = false;
-        OccurrenceSpeech other = (OccurrenceSpeech)otherData;
-        if (other == null)
+        try {
+            OccurrenceSpeech other = (OccurrenceSpeech)otherData;
+            match = line == other.line;
+            return match;
+        } catch (Exception e) {
+            // UnityEngine.Debug.Log("[VSCode] " + e.Message);
             return false;
-        
-        // match = speaker == other.speaker;
-        // match &= line == other.line;
-        match = line == other.line;
-            
-        return match;
+        }
     }
 }
 
