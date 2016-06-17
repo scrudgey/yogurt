@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 public class ScriptDirector : Interactive {
 
@@ -7,22 +8,12 @@ public class ScriptDirector : Interactive {
     public int index;
     private string[] lines;
     private List<ScriptReader> readers;
-    // private string currentLine;
     private float timeToNextLine;
     private bool tomLineNext;
-    private VideoCamera video;
+    public VideoCamera video;
     private AudioSource audioSource;
     public AudioClip successSound;
-    private bool _live;
-    public bool live {
-        get {
-            return _live;
-        }
-        set {
-            _live = value;
-            CheckLiveStatus();
-        }
-    }
+    public bool live;
     
 	void Start () {
         live = false;
@@ -35,6 +26,7 @@ public class ScriptDirector : Interactive {
         lines = script.text.Split('\n');
         index = 0;
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
+        // audioSource.volume = 0.2f;
         UINew.Instance.SetStatus("-WAIT-");
         UINew.Instance.SetStatusStyle(TextFX.FXstyle.blink);
         ParseLine();
@@ -43,13 +35,33 @@ public class ScriptDirector : Interactive {
         enableAct.validationFunction = true;
         interactions.Add(enableAct);
         
-        Interaction disableAct = new Interaction(this, "Stop", "Disable");
-        disableAct.validationFunction = true;
-        interactions.Add(disableAct);
+        // Interaction disableAct = new Interaction(this, "Stop", "Disable");
+        // disableAct.validationFunction = true;
+        // interactions.Add(disableAct);
 	}
     
+    public IEnumerator WaitAndStartScript(float waitTime){
+         yield return new WaitForSeconds(waitTime);
+         ParseLine();
+    }   
+
+    public string Enable_desc(){
+        return "Start recording a new commercial";
+    }
     public void Enable(){
-        live = true;
+        if (GameManager.Instance.activeCommercial != null){
+            live = true;
+            video.live = true;
+            UINew.Instance.EnableRecordButtons(true);
+            UINew.Instance.UpdateRecordButtons(video.commercial);
+            // ParseLine();
+            // timeToNextLine = 1f;
+            StartCoroutine(WaitAndStartScript(1f));
+        } else {
+            live = false;
+            UINew.Instance.EnableRecordButtons(false);
+            GameManager.Instance.ScriptPrompt();
+        }
     }
     public bool Enable_Validation(){
         return live == false;
@@ -57,17 +69,10 @@ public class ScriptDirector : Interactive {
     
     public void Disable(){
         live = false;
+        video.live = false;
     }
     public bool Disable_Validation(){
         return live == true;
-    }
-    void CheckLiveStatus(){
-        if (live){
-            UINew.Instance.status.gameObject.SetActive(true);
-            ParseLine();
-        } else {
-            // UINew.Instance.status.gameObject.SetActive(false);
-        }
     }
 
     void ParseLine(){
@@ -81,17 +86,14 @@ public class ScriptDirector : Interactive {
             foreach (ScriptReader reader in readers){
                 reader.CoStarLine(content, this);
                 reader.WatchForSpeech(content);
-                // currentLine = content;
             }
         }
         if (line.Substring(0, 5) == "TOM: "){
             UINew.Instance.SetStatus("PROMPT: SAY LINE");
             UINew.Instance.SetStatusStyle(TextFX.FXstyle.normal);
             string content = line.Substring(4, line.Length-4);
-            // currentLine = content;
             tomLineNext = true;
             foreach (ScriptReader reader in readers){
-                // reader.TomLine(line);
                 reader.WatchForSpeech(content);
             }
         }
@@ -156,12 +158,5 @@ public class ScriptDirector : Interactive {
     public void ReaderCallback(){
         TriggerNextLine();
     }
-    
-    // public void SpeechCallback(string spoken){
-    //     if (spoken == currentLine){
-    //         currentLine = "";
-    //         TriggerNextLine();
-    //     }
-    // }
 
 }
