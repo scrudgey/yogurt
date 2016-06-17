@@ -18,6 +18,11 @@ public class CommercialReportMenu : MonoBehaviour {
         Controller.Instance.suspendInput = false;
         GameManager.Instance.activeCommercial = null;
         Destroy(gameObject);
+        UINew.Instance.EnableRecordButtons(false);
+        ScriptDirector director = GameObject.FindObjectOfType<ScriptDirector>();
+        if (director){
+            director.Disable();
+        }
     }
     public void NewDayButton(){
         Controller.Instance.suspendInput = false;
