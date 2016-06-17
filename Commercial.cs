@@ -5,8 +5,8 @@ using System.Xml.Serialization;
 public enum CommercialComparison{
 		equal, notequal, greater, less, greaterEqual, lessEqual
 	}
-// [System.Serializable]
 
+[System.Serializable]
 [XmlRoot("Commercial")]
 public class Commercial {
     public string name = "default";
@@ -19,11 +19,11 @@ public class Commercial {
         unlockUponCompletion = new List<string>();
         data = new OccurrenceData();
 	}
+	public List<string> transcript = new List<string>();
 	
 	public bool Evaluate(Commercial other){
 		bool requirementsMet = true;
 		foreach(string key in other.properties.Keys){
-            
 			CommercialProperty myProperty = null;
 			CommercialProperty otherProperty = null;
 			other.properties.TryGetValue(key, out otherProperty);
@@ -31,7 +31,6 @@ public class Commercial {
             
 			if (myProperty == null){
 				requirementsMet = false;
-                Debug.Log("did not find key in other");
 				break;
 			}
 			switch (otherProperty.comp)
