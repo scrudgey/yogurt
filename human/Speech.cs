@@ -143,13 +143,9 @@ public class Speech : Interactive {
            if (index != -1){
                for (int i = index; i < index + swear.Length-1; i++){
                    swearMask[i] = 1;
-                //    censoredPhrase
-                   Debug.Log(phrase[i]);
-                //    censoredPhrase[i] = censor;
                }
            }
         }
-        // Toolbox.Instance.ReplaceAt();
 		words = censoredPhrase;
         speakTime = DoubleSeat(phrase.Length, 2f, 50f, 5f, 2f);
         speakTimeTotal = speakTime;
