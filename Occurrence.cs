@@ -6,7 +6,7 @@ public class Occurrence : MonoBehaviour {
     public List<OccurrenceData> data = new List<OccurrenceData>();
 }
 public enum occurrenceType{
-        eat, vomit, speech
+        empty, eat, vomit, speech
 }
 
 /*
@@ -21,6 +21,8 @@ public class OccurrenceData {
     public float disturbing;
     public float disgusting;
     public float chaos;
+    public float offensive;
+    public float positive;
     
     public OccurrenceData(){}
     public OccurrenceData(occurrenceType thisType){
@@ -30,6 +32,8 @@ public class OccurrenceData {
         disturbing += otherData.disturbing;
         disgusting += otherData.disgusting;
         chaos += otherData.chaos;
+        offensive += otherData.offensive;
+        positive += otherData.positive;
     }
     
     public virtual bool Matches(OccurrenceData otherData){
@@ -38,6 +42,8 @@ public class OccurrenceData {
         match &= disturbing == otherData.disturbing;
         match &= disgusting == otherData.disgusting;
         match &= chaos == otherData.chaos;
+        match &= offensive == otherData.offensive;
+        match &= positive == otherData.positive;
         
         return match;
     }
@@ -66,7 +72,8 @@ public class OccurrenceEat : OccurrenceData {
                 match = food == other.food;
             }
         } catch (Exception e) {
-            UnityEngine.Debug.Log("[VSCode] " + e.Message);
+            // UnityEngine.Debug.Log("[VSCode] " + e.Message);
+            return false;
         }
         return match;
     }
