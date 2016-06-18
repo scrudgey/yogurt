@@ -49,7 +49,8 @@ public partial class GameManager : Singleton<GameManager> {
                UnlockCommercial(unlock);
             }
             GameObject report = Instantiate(Resources.Load("UI/CommercialReport")) as GameObject;
-            report.GetComponent<CommercialReportMenu>().Report(activeCommercial);
+            report.GetComponent<CommercialReportMenu>().Report(activeCommercial, commercial);
+            // report.GetComponent<CommercialReportMenu>().Report(activeCommercial);
             if (activeCommercial.name != "freestyle")
                 completeCommercials.Add(activeCommercial);
         } else {
