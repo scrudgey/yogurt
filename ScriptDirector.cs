@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections;
 
 public class ScriptDirector : Interactive {
-
     public TextAsset script;
     public int index;
     private string[] lines;
@@ -54,8 +53,6 @@ public class ScriptDirector : Interactive {
             video.live = true;
             UINew.Instance.EnableRecordButtons(true);
             UINew.Instance.UpdateRecordButtons(video.commercial);
-            // ParseLine();
-            // timeToNextLine = 1f;
             StartCoroutine(WaitAndStartScript(1f));
         } else {
             live = false;
@@ -74,7 +71,6 @@ public class ScriptDirector : Interactive {
     public bool Disable_Validation(){
         return live == true;
     }
-
     void ParseLine(){
         string line = lines[index];
         if (!live)
@@ -82,7 +78,7 @@ public class ScriptDirector : Interactive {
         if (line.Substring(0, 8) == "COSTAR: "){
             UINew.Instance.SetStatus("-WAIT-");
             UINew.Instance.SetStatusStyle(TextFX.FXstyle.blink);
-            string content = line.Substring(7, line.Length-7);
+            string content = line.Substring(8, line.Length-8);
             foreach (ScriptReader reader in readers){
                 reader.CoStarLine(content, this);
                 reader.WatchForSpeech(content);
