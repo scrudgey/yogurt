@@ -92,6 +92,22 @@ public class Toolbox : Singleton<Toolbox> {
         return occurrence;
     }
 
+	public Occurrence DataFlag(GameObject spawner, float chaos, float disgusting, float disturbing, float offensive, float positive){
+		GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
+        Occurrence occurrence = flag.GetComponent<Occurrence>();
+
+		OccurrenceData data = new OccurrenceData();
+		data.chaos = chaos;
+		data.disgusting = disgusting;
+		data.disturbing = disturbing;
+		data.offensive = offensive;
+		data.positive = positive;
+
+		occurrence.data.Add(data);
+
+        return occurrence;
+	}
+
 	public AudioSource SetUpAudioSource(GameObject g){
 		AudioSource source = g.GetComponent<AudioSource>();
 		if (!source){
