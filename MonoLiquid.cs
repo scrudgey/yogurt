@@ -30,6 +30,8 @@ public class MonoLiquid : MonoBehaviour {
 	}
 
 	void OnGroundImpact(Physical phys){
+		Toolbox.Instance.DataFlag(gameObject, 1f, 1f, 0f, 0f, 0f);
+		// Debug.Break();
 		GameObject puddle = Instantiate(Resources.Load("Puddle"), transform.position, Quaternion.identity) as GameObject;
 		puddle.layer = 8;
 		PhysicalBootstrapper pb = GetComponent<PhysicalBootstrapper>();

@@ -98,18 +98,16 @@ public class Speech : Interactive {
                     audioSource.Play();
                 }
             }
-
-            // }
 		}
 		if (speakTime < 0){
             audioSource.Stop();
-            if (speaking){
-                Occurrence flag = Toolbox.Instance.OccurenceFlag(gameObject);
-                OccurrenceSpeech data = new OccurrenceSpeech();
-                data.speaker = gameObject;
-                data.line = words;
-                flag.data.Add(data);
-            }
+            // if (speaking){
+            //     Occurrence flag = Toolbox.Instance.OccurenceFlag(gameObject);
+            //     OccurrenceSpeech data = new OccurrenceSpeech();
+            //     data.speaker = gameObject;
+            //     data.line = words;
+            //     flag.data.Add(data);
+            // }
 			speaking = false;
 			bubbleParent.SetActive(false);
 			speakTime = 0;
@@ -130,26 +128,37 @@ public class Speech : Interactive {
 		}
 	}
 
-	public void Say(string phrase, string swear=null){
-		if(speaking && phrase == words){
-			return;
-		}
+    public void Say(string phrase, string swear=null){
+        if(speaking && phrase == words){
+            return;
+        }
         // string censor = "∎";
         string censoredPhrase = phrase;
         chars = phrase.ToCharArray();
         swearMask = new int[chars.Length];
         if (swear != null){
-           int index = phrase.IndexOf(swear);
-           if (index != -1){
-               for (int i = index; i < index + swear.Length-1; i++){
-                   swearMask[i] = 1;
-               }
-           }
+            int index = phrase.IndexOf(swear);
+            if (index != -1){
+                for (int i = index; i < index + swear.Length-1; i++){
+                    swearMask[i] = 1;
+                }
+            }
+            float extremity = 0f;
+            foreach (int mask in swearMask){
+                extremity += mask;
+            }
+            Toolbox.Instance.DataFlag(gameObject, extremity *2f, 0f, 0f, extremity * 5f, 0f);
         }
 		words = censoredPhrase;
         speakTime = DoubleSeat(phrase.Length, 2f, 50f, 5f, 2f);
         speakTimeTotal = speakTime;
         speakSpeed = phrase.Length / speakTime;
+
+        Occurrence flag = Toolbox.Instance.OccurenceFlag(gameObject);
+        OccurrenceSpeech data = new OccurrenceSpeech();
+        data.speaker = gameObject;
+        data.line = Toolbox.Instance.GetName(gameObject)+": "+words;
+        flag.data.Add(data);
 	}
 
 

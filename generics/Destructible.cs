@@ -46,6 +46,7 @@ public class Destructible : MonoBehaviour {
 		}
 	}
 
+	//TODO: make destruction chaos somehow proportional to object
 	private void Die(){
 		foreach (Gibs gib in GetComponents<Gibs>())
 			if(gib.damageCondition == lastDamage || gib.damageCondition == damageType.any){
@@ -68,6 +69,7 @@ public class Destructible : MonoBehaviour {
 		}
 		BroadcastMessage("OnDestruction", SendMessageOptions.DontRequireReceiver);
 		Messenger.Instance.WasDestroyed(gameObject);
+		Toolbox.Instance.DataFlag(gameObject, 175f, 0f, 0f, 0f, 0f);
 	}
 
 	void OnCollisionEnter2D(Collision2D col){

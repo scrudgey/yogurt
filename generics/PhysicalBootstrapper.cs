@@ -130,6 +130,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 			if (impactSounds.Length > 0){
 				GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
 			}
+			Toolbox.Instance.DataFlag(gameObject, 50f, 0f, 0f, 0f, 0f);
 		}
 		if (ignoreCollisions)
 			return;

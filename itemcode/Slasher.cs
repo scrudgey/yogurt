@@ -28,6 +28,7 @@ public class Slasher : MonoBehaviour {
 		if (container){
 			container.Spill();
 		}
+		Toolbox.Instance.DataFlag(gameObject, 70f, 0f, 0f, 0f, 0f);
 	}
 
 	void OnTriggerEnter2D(Collider2D collider){

@@ -33,12 +33,14 @@ public class Eater : Interactive {
 			lastNausea = nausea;
 			if (speech){
 				speech.Say("I don't feel so good!");
+				Toolbox.Instance.DataFlag(gameObject, 0f, 5f, 10f, 0f, 0f);
 			}
 		}
 		if ( nausea > 75 && lastNausea < 75){
 			lastNausea = nausea;
 			if (speech){
 				speech.Say("I'm gonna puke!");
+				Toolbox.Instance.DataFlag(gameObject, 0f, 10f, 10f, 0f, 0f);
 			}
 		}
 		if (nausea < 50){
@@ -131,10 +133,12 @@ public class Eater : Interactive {
 		reaction = CheckReaction(food);
 		if(reaction > 0){
 			phrase = "Yummy!";
+			Toolbox.Instance.DataFlag(gameObject, 0f, 0f, 0f, 0f, 25f);
 		}
 		if(reaction < 0){
 			phrase = "Yuck!";
 			nausea += 30;
+			Toolbox.Instance.DataFlag(gameObject, 0f, 0f, 0f, 0f, -25f);
 		}
 
 		// if we can speak, say the thing
@@ -174,6 +178,7 @@ public class Eater : Interactive {
             if (mliquid.liquid.immoral){
                 eatData.disturbing += 100f;
                 eatData.chaos += 150f;
+				eatData.offensive += 500f;
             }
         }
         flag.data.Add(eatData);

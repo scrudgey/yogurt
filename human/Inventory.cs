@@ -70,7 +70,7 @@ public class Inventory : Interactive, IExcludable {
 		}else{
 			// strength check to see if we can pick it up
 			if (strength < pickup.weight){
-				this.SendMessage("Say","It's too heavy!");
+				this.SendMessage("Say", "It's too heavy!");
 			} else {
 				if (holding){
 					DropItem();
@@ -218,7 +218,7 @@ public class Inventory : Interactive, IExcludable {
 		}
 		// Resources.Load("sounds/8bit_impact1", typeof(AudioClip)) as AudioClip;
 		GetComponent<AudioSource>().PlayOneShot(Resources.Load("sounds/8bit_throw", typeof(AudioClip)) as AudioClip);
-		// Debug.Break();
+		Toolbox.Instance.DataFlag(gameObject, 50, 0, 0, 0, 0);
 	}
 
 	void FixedUpdate(){
