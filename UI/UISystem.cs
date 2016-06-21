@@ -217,39 +217,13 @@ public class UISystem : Singleton<UISystem> {
 		if (doUpdate){
 			doUpdate = false;
 			if (inventory){
-//				inventory.UpdateActions();
+				// inventory.UpdateActions();
 				UpdateInventoryButtons();
 				UpdateWorldActions();
 			}
 		}
 	}
 
-	public void MouseOverAction(ActionButtonScript button){
-		if ( button.bType != ActionButtonScript.buttonType.Inventory ){
-			if (button.manualAction == false){
-					verbText = button.action.displayVerb;
-			} else{
-				if (button.buttonText == ""){
-					holdingVerb = button.action.displayVerb;
-				} else {
-					holdingVerb = button.buttonText;
-				}
-			}
-		} else {
-			holdingVerb = "Retrieve "+button.itemName;
-		}
-	}
-
-	public void MouseExitAction(ActionButtonScript button){
-		if (button.manualAction == false){
-			verbText = null;
-		} else {
-			holdingVerb = null;
-		}
-		if (button.bType == ActionButtonScript.buttonType.Inventory){
-			holdingVerb = null;
-		}
-	}
 
 	// make this all nicer with an enum
 	public void InventoryButtonCallback(ActionButtonScript button){
