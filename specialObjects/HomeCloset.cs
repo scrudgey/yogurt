@@ -11,4 +11,7 @@ public class HomeCloset : Interactive {
 	public void OpenCloset(){
 		UINew.Instance.ShowClosetMenu();
 	}
+	public string OpenCloset_desc(){
+		return "Browse closet";
+	}
 }
