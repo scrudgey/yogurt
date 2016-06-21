@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-// using System.Collections;
 using System.Collections.Generic;
 using System;
 
@@ -13,7 +12,7 @@ public class Container : Interactive, IExcludable {
 
 	virtual protected void Start() {
 		Interaction stasher = new Interaction(this, "Stash", "Store");
-		stasher.displayVerb = "Stash in";
+		// stasher.displayVerb = "Stash in";
 		stasher.validationFunction = true;
 		interactions.Add(stasher);
 		// good example of loop closure here
@@ -27,6 +26,7 @@ public class Container : Interactive, IExcludable {
 			newInteraction.actionDelegate = removeIt;
 			newInteraction.parameterTypes = new List<Type>();
 			newInteraction.parameterTypes.Add(typeof(Inventory));
+			newInteraction.descString = "Retrieve "+Toolbox.Instance.GetName(closurePickup.gameObject);
 			interactions.Add(newInteraction);
 			PhysicalBootstrapper bs = pickup.gameObject.GetComponent<PhysicalBootstrapper>();
 			if (bs){
@@ -76,13 +76,14 @@ public class Container : Interactive, IExcludable {
 				Remove(i, pickup);
 			};
 			Interaction newInteraction = new Interaction(this, pickup.itemName, removeIt);
-			newInteraction.displayVerb = "Retreive "+pickup.itemName+" from";
+			// newInteraction.displayVerb = "Retreive "+pickup.itemName+" from";
 			newInteraction.actionDelegate = removeIt;
 			newInteraction.parameterTypes = new List<Type>();
 			newInteraction.parameterTypes.Add(typeof(Inventory));
+			newInteraction.descString = "Retrieve "+Toolbox.Instance.GetName(pickup.gameObject)+" from "+Toolbox.Instance.GetName(gameObject);
 			interactions.Add(newInteraction);
 		} else {
-			inv.gameObject.SendMessage("Say","It's full.");
+			inv.gameObject.SendMessage("Say", "It's full.");
 		}
 	}
 	public string Store_desc(Inventory inv){
