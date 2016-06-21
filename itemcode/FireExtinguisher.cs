@@ -25,7 +25,7 @@ public class FireExtinguisher : Interactive, IDirectable {
 		spray2.continuous = true;
 		spray2.limitless = true;
 		spray2.dontWipeInterface = true;
-		spray2.displayVerb = "Spray at";
+		// spray2.displayVerb = "Spray at";
 		spray2.validationFunction = true;
 		interactions.Add(spray2);
 
