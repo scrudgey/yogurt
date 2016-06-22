@@ -72,7 +72,7 @@ public class OccurrenceEat : OccurrenceData {
                 match = food == other.food;
             }
         } catch (Exception e) {
-            // UnityEngine.Debug.Log("[VSCode] " + e.Message);
+            UnityEngine.Debug.Log("[VSCode] " + e.Message);
             return false;
         }
         return match;
@@ -101,7 +101,7 @@ public class OccurrenceSpeech : OccurrenceData {
             match = line == other.line;
             return match;
         } catch (Exception e) {
-            // UnityEngine.Debug.Log("[VSCode] " + e.Message);
+            UnityEngine.Debug.Log("[VSCode] " + e.Message);
             return false;
         }
     }
