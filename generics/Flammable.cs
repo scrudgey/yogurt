@@ -23,10 +23,10 @@ public class Flammable : MonoBehaviour {
 		igniteSounds[1] = Resources.Load("sounds/Flash Fire Ignite 02",typeof(AudioClip)) as AudioClip;
 
 		//add the particle effect and set its position
-		GameObject thing = Instantiate(Resources.Load("particles/smoke"),transform.position,Quaternion.identity) as GameObject;
+		GameObject thing = Instantiate(Resources.Load("particles/smoke"), transform.position, Quaternion.identity) as GameObject;
 		smoke = thing.GetComponent<ParticleSystem>();
 		smoke.transform.parent = transform;
-		thing = Instantiate(Resources.Load("particles/fire"),transform.position,Quaternion.identity) as GameObject;
+		thing = Instantiate(Resources.Load("particles/fire"), transform.position, Quaternion.identity) as GameObject;
 		fireParticles = thing.GetComponent<ParticleSystem>();
 		fireParticles.transform.parent = transform;
 
@@ -56,7 +56,6 @@ public class Flammable : MonoBehaviour {
 		if (heat < -3){
 			heat += Time.deltaTime;
 		}
-
 		if (!onFire && fireParticles.isPlaying){
 			fireParticles.Stop();
 			GetComponent<AudioSource>().Stop();
@@ -69,7 +68,6 @@ public class Flammable : MonoBehaviour {
 		if (heat > 1 && smoke.isStopped){
 			smoke.Play();
 		}
-
 		if (heat > flashpoint && fireParticles.isStopped){
 			quality.quality.flaming = true;
 			fireParticles.Play();
@@ -82,7 +80,6 @@ public class Flammable : MonoBehaviour {
 			if (destructible){
 				destructible.TakeDamage(Destructible.damageType.fire,Time.deltaTime);
 			}
-
 			// now HERE's a goddamned hack!!!
 			// this keeps the colliders "alive" because otherwise they won't collide! shit!!!
 //			Quaternion r = transform.rotation;
@@ -91,7 +88,5 @@ public class Flammable : MonoBehaviour {
 			// i think i found a way to fix this, by setting the rigidbody to never sleep.
 		}
 	}
-
-
 
 }
