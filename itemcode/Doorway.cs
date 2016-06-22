@@ -6,6 +6,7 @@ public class Doorway : Interactive {
 	public string destination;
 	public int destinationEntry;
 	public int entryID;
+	public bool spawnPoint = false;
 
 	// Use this for initialization
 	void Start () {
@@ -14,6 +15,10 @@ public class Doorway : Interactive {
 	}
 	public void Leave(){
 		GameManager.Instance.LeaveScene(destination,destinationEntry);
+	}
+
+	public string Leave_desc(){
+		return "Go to "+destination;
 	}
 
 }
