@@ -13,6 +13,7 @@ public class Physical : MonoBehaviour {
 	private GameObject trueObject;
 	public Rigidbody2D objectBody;
 	public Collider2D objectCollider;
+	private OrderByY order;
 	
 	public Rigidbody2D hingeBody;
 	public GameObject hinge;
@@ -31,8 +32,8 @@ public class Physical : MonoBehaviour {
 	private SpriteRenderer spriteRenderer;
 	public float groundDrag;
 	private float ziptime;
+	private float defaultOrderOffset;
 
-	// Use this for initialization
 	 void Start() {
 		InitValues();
 		// ignore collisions between ground and all other objects
@@ -60,6 +61,9 @@ public class Physical : MonoBehaviour {
 		hinge = transform.GetChild(0).gameObject;
 		groundCollider = GetComponent<BoxCollider2D>();
 		objectCollider = trueObject.GetComponent<Collider2D>();
+		order = objectBody.GetComponent<OrderByY>();
+		if (order)
+			defaultOrderOffset = order.offset;
 	}
 
 	public void Impact(Vector2 f){
@@ -285,6 +289,11 @@ public class Physical : MonoBehaviour {
 					Physics2D.IgnoreCollision(objectCollider, tableCollider, true);
 				}
 			}
+			// OrderByY order = objectBody.GetComponent<OrderByY>();
+			OrderByY orderTable = table.GetComponentInParent<OrderByY>();
+			if (order != null && orderTable != null){
+				order.offset = -1f * (objectBody.transform.position.y - table.transform.position.y - 0.01f);
+			}
 		}
 	}
 	
@@ -298,6 +307,10 @@ public class Physical : MonoBehaviour {
 				if (tableCollider.isTrigger == false){
 					Physics2D.IgnoreCollision(groundCollider, tableCollider, false);
 				}
+			}
+			// OrderByY order = objectBody.GetComponent<OrderByY>();
+			if (order){
+				order.offset = defaultOrderOffset;
 			}
 		}
 	}
