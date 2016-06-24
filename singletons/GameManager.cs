@@ -14,33 +14,29 @@ public class GameData{
 	public System.DateTime saveDate;
 	public float secondsPlayed;
 	public string lastScene;
+	public int days;
 	public GameData(){
-		
+		days = 0;
 	}
 	public GameData(GameManager instance){
-		collectedItems = instance.collectedItems;
-		lastSavedPlayerPath = instance.lastSavedPlayerPath;
-		lastPlayerName = instance.lastPlayerName;
 		saveDate = System.DateTime.Now;
 		secondsPlayed = instance.timePlayed + instance.timeSinceLastSave;
 		lastScene = SceneManager.GetActiveScene().name;
-        money = instance.money;
 	}
 }
 public partial class GameManager : Singleton<GameManager> {
 
 	protected GameManager(){}
+
+	public GameData data;
+
 	public string saveGameName = "test";
 	public string message ="smoke weed every day";	
 	private CameraControl cameraControl;
 	public Camera cam;
 	public GameObject playerObject;
-	public string lastSavedPlayerPath;
-	public string lastPlayerName;
-	public string lastSavedScenePath;
 	private int entryID;
 	public float gravity = 1.6f;
-	public List<string> collectedItems;
 	public List<string> collectedFood;
 	public List<string> collectedClothes;
 	public Dictionary<string, bool> itemCheckedOut;
@@ -50,12 +46,11 @@ public partial class GameManager : Singleton<GameManager> {
     public List<Commercial> completeCommercials;
     public Commercial activeCommercial;
     private float sceneTime;
-    // private bool doScriptPrompt = false;
-    public float money;
 	
     
     // BASIC UNITY ROUTINES
     void Start(){
+		data = new GameData();
 		MySaver.CleanupSaves();
 		// Cursor.SetCursor((Texture2D)Resources.Load("UI/cursor1"), Vector2.zero, CursorMode.Auto);
 		if (SceneManager.GetActiveScene().name != "title"){
@@ -65,10 +60,6 @@ public partial class GameManager : Singleton<GameManager> {
     void Update(){
 		timeSinceLastSave += Time.deltaTime;
         sceneTime += Time.deltaTime;
-        // if (sceneTime > 2f && doScriptPrompt){
-        //     doScriptPrompt = false;
-        //     ScriptPrompt();
-        // }
 	}
  
  
@@ -80,7 +71,7 @@ public partial class GameManager : Singleton<GameManager> {
 			return;
 		string filename = Toolbox.Instance.CloneRemover(inv.holding.name);
 		filename = Toolbox.Instance.ReplaceUnderscore(filename);
-		if (collectedItems.Contains(filename))
+		if (data.collectedItems.Contains(filename))
 			return;
 		UnityEngine.Object testPrefab = Resources.Load("prefabs/"+filename);
 		if (testPrefab != null){
@@ -89,7 +80,7 @@ public partial class GameManager : Singleton<GameManager> {
 	}
     public void CollectItem(string name){
 		// TODO: add achievement-like popup effect here
-		collectedItems.Add(name);
+		data.collectedItems.Add(name);
 		itemCheckedOut[name] = false;
 	}
 	public void RetrieveCollectedItem(string name){
@@ -136,7 +127,7 @@ public partial class GameManager : Singleton<GameManager> {
 	void OnLevelWasLoaded(int level) {
         sceneTime = 0f;
         GameObject player = MySaver.LoadScene();
-            // initialize values re: player object focus
+		// initialize values re: player object focus
         cam = GameObject.FindObjectOfType<Camera>();
         if (player){
             SetFocus(player);
@@ -148,6 +139,7 @@ public partial class GameManager : Singleton<GameManager> {
 	void PlayerEnter(){
 		if (playerObject){
 			List<Doorway> doorways = new List<Doorway>( GameObject.FindObjectsOfType<Doorway>() );
+			// TODO: can probably make this nicer with LINQ
 			foreach (Doorway doorway in doorways){
 				if (doorway.entryID == entryID){
 					Vector3 tempPos = doorway.transform.position;
@@ -157,34 +149,54 @@ public partial class GameManager : Singleton<GameManager> {
 			}
 		}
 	}
+
+	public void NewDayCutscene(){
+		data.days += 1;
+		SceneManager.LoadScene("morning_cutscene");
+        sceneTime = 0f;
+        entryID = 99;
+	}
     public void NewDay(){
         MySaver.CleanupSaves();
 		SceneManager.LoadScene("house");
-        // doScriptPrompt = true;
         sceneTime = 0f;
         entryID = 99;
     }
     public void NewGame(bool switchlevel=true){
         if (switchlevel){
-			SceneManager.LoadScene("house");
-            // doScriptPrompt = true;
+			// SceneManager.LoadScene("house");
+			NewDayCutscene();
         }
         sceneTime = 0f;
+		timePlayed = 0f;
+		timeSinceLastSave = 0f;
         // TODO: add a default player condition here
 		playerObject = GameObject.Find("Tom");	
         if (!playerObject){
             playerObject = GameObject.Find("Tom(Clone)");
         }
-		collectedItems = new List<string>();
-		itemCheckedOut = new Dictionary<string, bool>();
-        unlockedCommercials = new List<Commercial>();
-        unlockedCommercials.Add(LoadCommercialByName("eat1"));
-        completeCommercials = new List<Commercial>();
-		timePlayed = 0f;
-		timeSinceLastSave = 0f;
 		if (!playerObject){
 			playerObject = GameObject.Instantiate(Resources.Load("prefabs/Tom")) as GameObject;
 		}
+		if (playerObject){
+			foreach(Doorway door in GameObject.FindObjectsOfType<Doorway>()){
+				if (door.spawnPoint){
+					Vector3 tempPos = door.transform.position;
+					tempPos.y = tempPos.y - 0.05f;
+					playerObject.transform.position = tempPos;
+				}
+			}
+		}
+
+
+		data.collectedItems = new List<string>();
+		itemCheckedOut = new Dictionary<string, bool>();
+
+		// TODO: change this temporary hack into something more correct.
+        unlockedCommercials = new List<Commercial>();
+        unlockedCommercials.Add(LoadCommercialByName("eat1"));
+        completeCommercials = new List<Commercial>();
+		
 		cam = GameObject.FindObjectOfType<Camera>();
 		SetFocus(playerObject);
 	}
@@ -197,7 +209,7 @@ public partial class GameManager : Singleton<GameManager> {
 		if (!Directory.Exists(path))
 		  Directory.CreateDirectory(path);
 		path = Path.Combine(path, SceneManager.GetActiveScene().name+"_state.xml");
-		lastSavedScenePath = path;
+		data.lastSavedScenePath = path;
 		return path;
 	}
 	public string PlayerSavePath(){
@@ -206,8 +218,8 @@ public partial class GameManager : Singleton<GameManager> {
 		if (!Directory.Exists(path))
 		  Directory.CreateDirectory(path);
 		path = Path.Combine(path, "player_"+GameManager.Instance.playerObject.name+"_state.xml");
-		lastSavedPlayerPath = path;
-		lastPlayerName = GameManager.Instance.playerObject.name;
+		data.lastSavedPlayerPath = path;
+		data.lastPlayerName = GameManager.Instance.playerObject.name;
 		return path;
 	}
 	public void SaveGameData(){
@@ -234,24 +246,25 @@ public partial class GameManager : Singleton<GameManager> {
 		return data;
 	}
 	public void LoadGameDataIntoMemory(string gameName){
-		GameData data = LoadGameData(gameName);
-		collectedItems = new List<string>();
+		data = new GameData();
+		GameData loadData = LoadGameData(gameName);
+		data.collectedItems = new List<string>();
 		itemCheckedOut = new Dictionary<string, bool>();
 		if (data == null){
 			// InitValues();
 			NewGame();
 		} else {
-			collectedItems = data.collectedItems;
-			foreach(string item in collectedItems){
+			data.collectedItems = loadData.collectedItems;
+			foreach(string item in data.collectedItems){
 				itemCheckedOut[item] = false;
 			}
-			lastSavedPlayerPath = data.lastSavedPlayerPath;
-			lastSavedScenePath = data.lastSavedScenePath;
-			lastPlayerName = data.lastPlayerName;
-			timePlayed = data.secondsPlayed;
+			data.lastSavedPlayerPath = loadData.lastSavedPlayerPath;
+			data.lastSavedScenePath = loadData.lastSavedScenePath;
+			data.lastPlayerName = loadData.lastPlayerName;
+			timePlayed = loadData.secondsPlayed;
 			timeSinceLastSave = 0f;
-            money = data.money;
-			if (data.lastScene != null){
+            data.money = loadData.money;
+			if (loadData.lastScene != null){
 				SceneManager.LoadScene("house");
 			} else {
 				SceneManager.LoadScene("house");

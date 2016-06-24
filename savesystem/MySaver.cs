@@ -122,7 +122,7 @@ public class MySaver {
 		try {
 			saveState = SaverState.Loading;
 			string scenePath = GameManager.Instance.LevelSavePath();
-			string playerPath = GameManager.Instance.lastSavedPlayerPath;
+			string playerPath = GameManager.Instance.data.lastSavedPlayerPath;
 			var serializer = new XmlSerializer(typeof(PersistentContainer));
 			// destroy any currently existing permanent object
 			// this should only be done if there exists a savestate for the level.

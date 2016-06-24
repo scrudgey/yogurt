@@ -44,7 +44,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
         if (success){
             //process reward
-            money += activeCommercial.reward;
+            data.money += activeCommercial.reward;
             foreach (string unlock in activeCommercial.unlockUponCompletion){
                UnlockCommercial(unlock);
             }

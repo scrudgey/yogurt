@@ -19,7 +19,7 @@ public class ClosetButtonHandler : MonoBehaviour {
 	
 	private void PopulateItemList(){
 		GameObject listObject = transform.Find("menu/body/ItemList").gameObject;
-		foreach (string name in GameManager.Instance.collectedItems){
+		foreach (string name in GameManager.Instance.data.collectedItems){
 			GameObject newEntry = spawnEntry();
 			ItemEntryScript entryScript = newEntry.GetComponent<ItemEntryScript>();
 			entryScript.itemName = name;
