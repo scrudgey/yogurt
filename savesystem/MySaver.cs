@@ -24,18 +24,20 @@ public class MySaver {
 		{typeof(Destructible),						() => new DestructibleHandler() },
 		{typeof(LiquidContainer),					() => new LiquidContainerHandler() },
 		{typeof(Container),							() => new ContainerHandler()},
-		{typeof(Blender),							() => new ContainerHandler() },
+		{typeof(Blender),							() => new BlenderHandler()},
 		{typeof(Head),								() => new HeadHandler() },
 		{typeof(Outfit),							() => new OutfitHandler() },
 		{typeof(Cabinet),							() => new CabinetHandler() },
 	};
 	public static void CleanupSaves(){
-		string testPath = Path.Combine(Application.persistentDataPath, "test");
+		// string testPath = Path.Combine(Application.persistentDataPath, "test");
+		string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
 		// DirectoryInfo info = new DirectoryInfo(Application.persistentDataPath);
-		DirectoryInfo info = new DirectoryInfo(testPath);
+		DirectoryInfo info = new DirectoryInfo(path);
 		FileInfo[] fileInfo = info.GetFiles();
 		foreach(FileInfo file in fileInfo){
-			File.Delete(file.FullName);
+			if (file.Name != "house_state.xml")
+				File.Delete(file.FullName);
 		}
 	}
 	public static void Save(){
