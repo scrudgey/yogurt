@@ -44,6 +44,9 @@ public class UINew : Singleton<UINew> {
 	public void PostLoadInit() {
 		init = true;
 		UICanvas = GameObject.Find("NeoUICanvas");
+		if (UICanvas == null){
+			UICanvas = GameObject.Instantiate(Resources.Load("required/NeoUICanvas")) as GameObject;
+		}
 		inventoryButton = UICanvas.transform.Find("bottomdock/InvButtonDock/InventoryButton").gameObject;
 		inventoryMenu = GameObject.Find("InventoryScreen");
 		status = UICanvas.transform.Find("topdock/topBar/status").GetComponent<Text>();
