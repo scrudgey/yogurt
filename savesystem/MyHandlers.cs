@@ -1,7 +1,4 @@
 ﻿using UnityEngine;
-// using System;
-// using System.IO;
-// using System.Collections;
 using System.Collections.Generic;
 
 public abstract class SaveHandler{
@@ -91,6 +88,19 @@ public class ContainerHandler: SaveHandler<Container> {
 					phys.doInit = false;
 			}
 		}
+	}
+}
+
+public class BlenderHandler: SaveHandler<Blender> {
+	public override void SaveData(Blender instance, PersistentComponent data, ReferenceResolver resolver){
+		ContainerHandler handler = new ContainerHandler();
+		handler.SaveData((Container)instance, data, resolver);
+		data.bools["power"] = instance.power;
+	}
+	public override void LoadData(Blender instance, PersistentComponent data){
+		ContainerHandler handler = new ContainerHandler();
+		handler.LoadData((Container)instance, data);
+		instance.power = data.bools["power"];
 	}
 }
 
