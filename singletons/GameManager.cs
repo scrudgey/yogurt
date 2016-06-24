@@ -135,6 +135,14 @@ public partial class GameManager : Singleton<GameManager> {
             FocusIntrinsicsChanged(intrinsics.NetIntrinsic());
             PlayerEnter();
         }	
+
+		if (entryID == 99){
+			Bed bed = GameObject.FindObjectOfType<Bed>();
+			if (bed){
+				bed.SleepCutscene();
+				playerObject.SetActive(false);
+			}
+		}
 	}
 	void PlayerEnter(){
 		if (playerObject){
@@ -151,6 +159,8 @@ public partial class GameManager : Singleton<GameManager> {
 	}
 
 	public void NewDayCutscene(){
+		MySaver.Save();
+		
 		data.days += 1;
 		SceneManager.LoadScene("morning_cutscene");
         sceneTime = 0f;
@@ -159,9 +169,15 @@ public partial class GameManager : Singleton<GameManager> {
     public void NewDay(){
         MySaver.CleanupSaves();
 		SceneManager.LoadScene("house");
+		// Bed bed = GameObject.FindObjectOfType<Bed>();
+		// bed.SleepCutscene();
         sceneTime = 0f;
         entryID = 99;
     }
+
+	// public void OnLevelWasLoaded(int level){
+
+	// }
     public void NewGame(bool switchlevel=true){
         if (switchlevel){
 			// SceneManager.LoadScene("house");
