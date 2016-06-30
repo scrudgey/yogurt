@@ -14,7 +14,11 @@ public class Bed : Doorway {
 	SpriteRenderer spriteRenderer;
 	private bool sleeping;
 	private bool frame;
+
+	public AudioClip beddingSound;
+	private AudioSource audioSource;
 	void Start(){
+		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		head = transform.Find("head").GetComponent<SpriteRenderer>();
 		bubble = transform.Find("bubble").GetComponent<SpriteRenderer>();
@@ -42,8 +46,8 @@ public class Bed : Doorway {
 	public void MakeBed(){
 		unmade = false;
 		if (spriteRenderer){
-			// Sprite[] = spriteRenderer.sprite.texture.
 			spriteRenderer.sprite = bedSprites[0];
+			audioSource.PlayOneShot(beddingSound);
 		}
 	}
 	public bool MakeBed_Validation(){
@@ -79,6 +83,7 @@ public class Bed : Doorway {
 				head.gameObject.SetActive(false);
 				bubble.gameObject.SetActive(false);
 				GameManager.Instance.playerObject.SetActive(true);
+				audioSource.PlayOneShot(beddingSound);
 			}
 		}
 	}
