@@ -47,7 +47,7 @@ public class UINew : Singleton<UINew> {
 		if (UICanvas == null){
 			UICanvas = GameObject.Instantiate(Resources.Load("required/NeoUICanvas")) as GameObject;
 		}
-		inventoryButton = UICanvas.transform.Find("bottomdock/InvButtonDock/InventoryButton").gameObject;
+		inventoryButton = UICanvas.transform.Find("topdock/InventoryButton").gameObject;
 		inventoryMenu = GameObject.Find("InventoryScreen");
 		status = UICanvas.transform.Find("topdock/topBar/status").GetComponent<Text>();
 		actionTextObject = UICanvas.transform.Find("bottomdock/ActionText").GetComponent<Text>();
@@ -444,6 +444,45 @@ public class UINew : Singleton<UINew> {
 		}
 	}
     
-    
+	public void BounceText(string text, GameObject target){
+		GameObject bounce = Instantiate(Resources.Load("UI/BounceText")) as GameObject;
+		BounceText bounceScript = bounce.GetComponent<BounceText>();
+		if (target){
+			bounceScript.target = target;
+		}
+		bounceScript.text = text;
+	}
+	public void PopupCounter(string text, float initValue, float finalValue, VideoCamera video){
+		GameObject existingPop = GameObject.Find("Poptext(Clone)");
+		if (existingPop == null){
+			GameObject pop = Instantiate(Resources.Load("UI/Poptext")) as GameObject;
+			Canvas popCanvas = pop.GetComponent<Canvas>();
+			popCanvas.worldCamera = GameManager.Instance.cam;
+			
+			Poptext poptext = pop.GetComponent<Poptext>();
+			// poptext.description = text;
+			poptext.description.Add(text);
+			poptext.initValueList.Add(initValue);
+			poptext.finalValueList.Add(finalValue);
+			poptext.video = video;
+		} else {
+			Poptext poptext = existingPop.GetComponent<Poptext>();
+			poptext.description.Add(text);
+			poptext.initValueList.Add(initValue);
+			poptext.finalValueList.Add(finalValue);
+		}
+    }
+
+	public void PopupCollected(GameObject obj){
+		GameObject existingPop = GameObject.Find("AchievementPopup(Clone)");
+		if (existingPop == null){
+			GameObject pop = Instantiate(Resources.Load("UI/AchievementPopup")) as GameObject;
+			Canvas popCanvas = pop.GetComponent<Canvas>();
+			popCanvas.worldCamera = GameManager.Instance.cam;
+			AchievementPopup achievement = pop.GetComponent<AchievementPopup>();
+
+			achievement.CollectionPopup(obj);
+		}
+	}
 
 }
