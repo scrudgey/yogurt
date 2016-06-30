@@ -15,17 +15,6 @@ public static class IDictionaryExtensions
 		return returnkey;
 	}
 }
-///<summary>
-/// str - the source string
-/// index- the start location to replace at (0-based)
-/// length - the number of characters to be removed before inserting
-/// replace - the string that is replacing characters
-///</summary>
-// public static string ReplaceAt(this string str, int index, int length, string replace)
-// 	{
-//     return str.Remove(index, Mathf.Min(length, str.Length - index))
-//             .Insert(index, replace);
-// }
 
 public class Toolbox : Singleton<Toolbox> {
 
@@ -54,37 +43,8 @@ public class Toolbox : Singleton<Toolbox> {
 			return component;
 		}
 	}
-
-    public void PopupCounter(string text, float initValue, float finalValue, VideoCamera video){
-		GameObject existingPop = GameObject.Find("Poptext(Clone)");
-		if (existingPop == null){
-			GameObject pop = Instantiate(Resources.Load("UI/Poptext")) as GameObject;
-			Canvas popCanvas = pop.GetComponent<Canvas>();
-			popCanvas.worldCamera = GameManager.Instance.cam;
-			
-			Poptext poptext = pop.GetComponent<Poptext>();
-			// poptext.description = text;
-			poptext.description.Add(text);
-			poptext.initValueList.Add(initValue);
-			poptext.finalValueList.Add(finalValue);
-			poptext.video = video;
-		} else {
-			Poptext poptext = existingPop.GetComponent<Poptext>();
-			poptext.description.Add(text);
-			poptext.initValueList.Add(initValue);
-			poptext.finalValueList.Add(finalValue);
-		}
-
-    }
 	
-	public void BounceText(string text, GameObject target){
-		GameObject bounce = Instantiate(Resources.Load("UI/BounceText")) as GameObject;
-		BounceText bounceScript = bounce.GetComponent<BounceText>();
-		if (target){
-			bounceScript.target = target;
-		}
-		bounceScript.text = text;
-	}
+
     
     public Occurrence OccurenceFlag(GameObject spawner){
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
