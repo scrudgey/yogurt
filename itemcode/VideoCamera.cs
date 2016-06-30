@@ -103,7 +103,7 @@ public class VideoCamera : MonoBehaviour {
         string poptext = "default";
         KeyDescriptions.TryGetValue(valname, out poptext);
         if (poptext != "default"){
-            Toolbox.Instance.PopupCounter(poptext, initvalue, finalvalue, this);
+            UINew.Instance.PopupCounter(poptext, initvalue, finalvalue, this);
         } else {
             // UI check if commercial is complete
             CheckForFinishState();
