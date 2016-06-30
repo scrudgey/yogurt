@@ -11,7 +11,6 @@ public class SingletonInitializer : MonoBehaviour {
 		tempstring = GameManager.Instance.message;
 		tempstring = Messenger.Instance.MOTD;
 		tempstring = UINew.Instance.MOTD;
-		// Debug.Log(tempstring);
         tempstring += " my droogs";
 	}
 
@@ -40,11 +39,6 @@ public class SingletonInitializer : MonoBehaviour {
 			inventoryCanvas.worldCamera = cam;
 		}
 
-		GameObject ui = GameObject.Find("UI");
-		if (ui){
-			Canvas canvas = ui.GetComponent<Canvas>();
-			canvas.worldCamera = cam;
-		}
 		UINew.Instance.PostLoadInit();
 	}
 }
