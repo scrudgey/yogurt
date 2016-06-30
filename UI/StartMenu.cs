@@ -128,10 +128,8 @@ public class StartMenu : MonoBehaviour {
 		if (newName.Length == 0){
 			ShowAlert("Bad name!!!");
 		} else {
-			// Debug.Log("New game "+newName);
 			GameManager.Instance.saveGameName = newName;
 			GameManager.Instance.data = new GameData();
-			// GameManager.Instance.InitValues();
 			GameManager.Instance.NewGame();
 		}
 	}
