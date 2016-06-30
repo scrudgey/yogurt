@@ -259,10 +259,11 @@ public class UINew : Singleton<UINew> {
 		GameObject closetMenu = GameObject.Find("ClosetMenu");
 		Destroy(closetMenu);
 	}
-	public void ShowClosetMenu(){
+	public ClosetButtonHandler ShowClosetMenu(){
 		GameObject closetMenu = Instantiate(Resources.Load("UI/ClosetMenu")) as GameObject;
 		closetMenu.name = Toolbox.Instance.CloneRemover(closetMenu.name);
 		closetMenu.GetComponent<Canvas>().worldCamera = UICanvas.GetComponent<Canvas>().worldCamera;
+		return closetMenu.GetComponent<ClosetButtonHandler>();
 	}
 
 	public void ItemButtonCallback(ItemButtonScript button){

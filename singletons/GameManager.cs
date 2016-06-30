@@ -7,7 +7,10 @@ using UnityEngine.SceneManagement;
 [XmlRoot("GameData")]
 public class GameData{
     public float money;
+	public List<string> collectedObjects;
 	public List<string> collectedItems;
+	public List<string> collectedFood;
+	public List<string> collectedClothes;
 	public string lastSavedPlayerPath;
 	public string lastSavedScenePath;
 	public string lastPlayerName;
@@ -37,8 +40,6 @@ public partial class GameManager : Singleton<GameManager> {
 	public GameObject playerObject;
 	private int entryID;
 	public float gravity = 1.6f;
-	public List<string> collectedFood;
-	public List<string> collectedClothes;
 	public Dictionary<string, bool> itemCheckedOut;
 	public float timeSinceLastSave = 0f;
 	public float timePlayed;
@@ -50,7 +51,8 @@ public partial class GameManager : Singleton<GameManager> {
     
     // BASIC UNITY ROUTINES
     void Start(){
-		data = new GameData();
+		if (data == null)
+			data = new GameData();
 		MySaver.CleanupSaves();
 		// Cursor.SetCursor((Texture2D)Resources.Load("UI/cursor1"), Vector2.zero, CursorMode.Auto);
 		if (SceneManager.GetActiveScene().name != "title"){
@@ -64,23 +66,32 @@ public partial class GameManager : Singleton<GameManager> {
  
  
     // ITEM COLLECTIONS
-	public void CheckItemCollection(Inventory inv, GameObject owner){
+	public void CheckItemCollection(GameObject obj, GameObject owner){
 		if (owner != playerObject)
 			return;
-		if (!inv.holding)
-			return;
-		string filename = Toolbox.Instance.CloneRemover(inv.holding.name);
+		string filename = Toolbox.Instance.CloneRemover(obj.name);
 		filename = Toolbox.Instance.ReplaceUnderscore(filename);
-		if (data.collectedItems.Contains(filename))
+		if (data.collectedObjects.Contains(filename))
 			return;
 		UnityEngine.Object testPrefab = Resources.Load("prefabs/"+filename);
 		if (testPrefab != null){
 			CollectItem(filename);
+			// data.collectedObjects.Add(name);
+			// itemCheckedOut[name] = false;
+			if (obj.GetComponent<Uniform>()){
+				data.collectedClothes.Add(filename);
+			}
+			if (obj.GetComponent<Edible>()){
+				data.collectedFood.Add(filename);
+			}
+			if (obj.GetComponent<Pickup>()){
+				data.collectedItems.Add(filename);
+			}
 		}
 	}
     public void CollectItem(string name){
 		// TODO: add achievement-like popup effect here
-		data.collectedItems.Add(name);
+		data.collectedObjects.Add(name);
 		itemCheckedOut[name] = false;
 	}
 	public void RetrieveCollectedItem(string name){
@@ -136,11 +147,18 @@ public partial class GameManager : Singleton<GameManager> {
             PlayerEnter();
         }	
 
+		// bed entry on new day
 		if (entryID == 99){
 			Bed bed = GameObject.FindObjectOfType<Bed>();
 			if (bed){
 				bed.SleepCutscene();
 				playerObject.SetActive(false);
+				Outfit outfit = playerObject.GetComponent<Outfit>();
+				AdvancedAnimation advancedAnimation = playerObject.GetComponent<AdvancedAnimation>();
+				if (outfit != null && advancedAnimation != null){
+					advancedAnimation.baseName = "pajamas";
+					outfit.wornUniformName = "pajamas";
+				}
 			}
 		}
 	}
@@ -160,7 +178,6 @@ public partial class GameManager : Singleton<GameManager> {
 
 	public void NewDayCutscene(){
 		MySaver.Save();
-		
 		data.days += 1;
 		SceneManager.LoadScene("morning_cutscene");
         sceneTime = 0f;
@@ -169,15 +186,10 @@ public partial class GameManager : Singleton<GameManager> {
     public void NewDay(){
         MySaver.CleanupSaves();
 		SceneManager.LoadScene("house");
-		// Bed bed = GameObject.FindObjectOfType<Bed>();
-		// bed.SleepCutscene();
         sceneTime = 0f;
         entryID = 99;
     }
 
-	// public void OnLevelWasLoaded(int level){
-
-	// }
     public void NewGame(bool switchlevel=true){
         if (switchlevel){
 			// SceneManager.LoadScene("house");
@@ -203,9 +215,10 @@ public partial class GameManager : Singleton<GameManager> {
 				}
 			}
 		}
-
-
 		data.collectedItems = new List<string>();
+		data.collectedObjects = new List<string>();
+		data.collectedFood = new List<string>();
+		data.collectedClothes = new List<string>();
 		itemCheckedOut = new Dictionary<string, bool>();
 
 		// TODO: change this temporary hack into something more correct.
@@ -265,6 +278,9 @@ public partial class GameManager : Singleton<GameManager> {
 		data = new GameData();
 		GameData loadData = LoadGameData(gameName);
 		data.collectedItems = new List<string>();
+		data.collectedObjects = new List<string>();
+		data.collectedFood = new List<string>();
+		data.collectedClothes = new List<string>();
 		itemCheckedOut = new Dictionary<string, bool>();
 		if (data == null){
 			// InitValues();
