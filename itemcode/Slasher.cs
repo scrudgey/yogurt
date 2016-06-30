@@ -15,6 +15,7 @@ public class Slasher : MonoBehaviour {
 
 	void OnTriggerStay2D(Collider2D collider){
 		if (collider.gameObject.tag == "Physical"){
+			Toolbox.Instance.DataFlag(gameObject, 70f, 0f, 0f, 0f, 0f);
 			Physical phys = collider.gameObject.GetComponentInParent<Physical>();
 			if (phys){
 				if(phys.currentMode == Physical.mode.ground){
@@ -28,7 +29,6 @@ public class Slasher : MonoBehaviour {
 		if (container){
 			container.Spill();
 		}
-		Toolbox.Instance.DataFlag(gameObject, 70f, 0f, 0f, 0f, 0f);
 	}
 
 	void OnTriggerEnter2D(Collider2D collider){
