@@ -3,7 +3,7 @@
 
 public class Outfit : Interactive {
 
-	private AdvancedAnimation advancedAnimation;
+	public AdvancedAnimation advancedAnimation;
 	private bool LoadInitialized = false;
 	public string wornUniformName;
 
@@ -28,6 +28,11 @@ public class Outfit : Interactive {
 		advancedAnimation.baseName = uniform.baseName;
 		wornUniformName = Toolbox.Instance.CloneRemover(uniform.gameObject.name);
 		Destroy(uniform.gameObject);
+	}
+
+	public string DonUniform_desc(Uniform uniform){
+		string uniformName = Toolbox.Instance.GetName(uniform.gameObject);
+		return "Wear "+uniformName;
 	}
 
 	void RemoveUniform(){
