@@ -30,7 +30,9 @@ public class Inventory : Interactive, IExcludable {
 			}
 			_holding = value;
 			UINew.Instance.InventoryCallback(this);
-			GameManager.Instance.CheckItemCollection(this, gameObject);
+			// GameManager.Instance.CheckItemCollection(this, gameObject);
+			if (value != null)
+				GameManager.Instance.CheckItemCollection(value.gameObject, gameObject);
 		}
 	}
 	private Pickup _holding;
