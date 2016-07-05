@@ -33,9 +33,13 @@ public class MySaver {
 		// string testPath = Path.Combine(Application.persistentDataPath, "test");
 		string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
 		// DirectoryInfo info = new DirectoryInfo(Application.persistentDataPath);
+		if (!System.IO.Directory.Exists(path))
+			return;
 		DirectoryInfo info = new DirectoryInfo(path);
 		FileInfo[] fileInfo = info.GetFiles();
 		foreach(FileInfo file in fileInfo){
+			if (file.Name == "game.xml")
+				continue;
 			if (file.Name != "house_state.xml")
 				File.Delete(file.FullName);
 		}
