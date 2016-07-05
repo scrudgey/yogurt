@@ -54,6 +54,7 @@ public class Bed : Doorway {
 		return unmade;
 	}
 	public void Sleep(){
+		MySaver.Save();
 		GameManager.Instance.NewDayCutscene();
 	}
 
