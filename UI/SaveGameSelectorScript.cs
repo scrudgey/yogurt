@@ -15,7 +15,7 @@ public class SaveGameSelectorScript : MonoBehaviour {
 	}
 
 	public void ConfigValues(){
-				GameObject temp = transform.Find("HeadShot/Icon").gameObject;
+		GameObject temp = transform.Find("HeadShot/Icon").gameObject;
 		icon = temp.GetComponent<Image>();
 		temp = transform.Find("TextPanel/Name").gameObject;
 		nameText = temp.GetComponent<Text>();
