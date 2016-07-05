@@ -2,7 +2,6 @@
 using UnityEngine.UI;
 using System.IO;
 using System;
-// using System.Collections;
 
 public class StartMenu : MonoBehaviour {
 	public AudioClip music;
@@ -64,13 +63,11 @@ public class StartMenu : MonoBehaviour {
 			if (dir.Name != "test"){
 				GameData data = GameManager.Instance.LoadGameData(dir.Name);
                 TimeSpan t = TimeSpan.FromSeconds(0f);
-                if (data != null){
-				    t = TimeSpan.FromSeconds(data.secondsPlayed);
-                } 
+				t = TimeSpan.FromSeconds(data.secondsPlayed);
 				string answer = string.Format("{0:D2}:{1:D2}:{2:D2}s", 
-												t.Hours, 
-												t.Minutes, 
-												t.Seconds);
+											t.Hours, 
+											t.Minutes, 
+											t.Seconds);
 				script.timeText.text = answer.ToString();
 				script.dateText.text = data.saveDate.ToString();
 			}
@@ -130,6 +127,7 @@ public class StartMenu : MonoBehaviour {
 		} else {
 			GameManager.Instance.saveGameName = newName;
 			GameManager.Instance.data = new GameData();
+			// GameManager.Instance.data = GameManager.Instance.InitGameData();
 			GameManager.Instance.NewGame();
 		}
 	}
