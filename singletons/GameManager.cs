@@ -5,12 +5,14 @@ using System.Xml.Serialization;
 using UnityEngine.SceneManagement;
 
 [XmlRoot("GameData")]
+[System.Serializable]
 public class GameData{
     public float money;
 	public List<string> collectedObjects;
 	public List<string> collectedItems;
 	public List<string> collectedFood;
 	public List<string> collectedClothes;
+	public SerializableDictionary<string, bool> itemCheckedOut;
 	public string lastSavedPlayerPath;
 	public string lastSavedScenePath;
 	public string lastPlayerName;
@@ -18,52 +20,46 @@ public class GameData{
 	public float secondsPlayed;
 	public string lastScene;
 	public int days;
+    public List<Commercial> unlockedCommercials;
+    public List<Commercial> completeCommercials;
+	public int entryID;
 	public GameData(){
 		days = 0;
-	}
-	public GameData(GameManager instance){
 		saveDate = System.DateTime.Now;
-		secondsPlayed = instance.timePlayed + instance.timeSinceLastSave;
-		lastScene = SceneManager.GetActiveScene().name;
 	}
 }
 public partial class GameManager : Singleton<GameManager> {
-
 	protected GameManager(){}
 
 	public GameData data;
-
 	public string saveGameName = "test";
-	public string message ="smoke weed every day";	
+	public string message = "smoke weed every day";	
 	private CameraControl cameraControl;
 	public Camera cam;
 	public GameObject playerObject;
-	private int entryID;
 	public float gravity = 1.6f;
-	public Dictionary<string, bool> itemCheckedOut;
-	public float timeSinceLastSave = 0f;
-	public float timePlayed;
-    public List<Commercial> unlockedCommercials;
-    public List<Commercial> completeCommercials;
     public Commercial activeCommercial;
     private float sceneTime;
+	public float timeSinceLastSave = 0f;
 	
     
     // BASIC UNITY ROUTINES
     void Start(){
-		if (data == null)
+		if (data == null){
 			data = new GameData();
-		MySaver.CleanupSaves();
+		}
+		if (saveGameName == "test")
+			MySaver.CleanupSaves();
 		// Cursor.SetCursor((Texture2D)Resources.Load("UI/cursor1"), Vector2.zero, CursorMode.Auto);
 		if (SceneManager.GetActiveScene().name != "title"){
             NewGame(switchlevel: false);
 		}
 	}
+
     void Update(){
 		timeSinceLastSave += Time.deltaTime;
         sceneTime += Time.deltaTime;
 	}
- 
  
     // ITEM COLLECTIONS
 	public void CheckItemCollection(GameObject obj, GameObject owner){
@@ -75,9 +71,9 @@ public partial class GameManager : Singleton<GameManager> {
 			return;
 		UnityEngine.Object testPrefab = Resources.Load("prefabs/"+filename);
 		if (testPrefab != null){
-			CollectItem(filename);
-			// data.collectedObjects.Add(name);
-			// itemCheckedOut[name] = false;
+			data.collectedObjects.Add(filename);
+			data.itemCheckedOut[filename] = false;
+			UINew.Instance.PopupCollected(obj);
 			if (obj.GetComponent<Uniform>()){
 				data.collectedClothes.Add(filename);
 			}
@@ -89,16 +85,12 @@ public partial class GameManager : Singleton<GameManager> {
 			}
 		}
 	}
-    public void CollectItem(string name){
-		// TODO: add achievement-like popup effect here
-		data.collectedObjects.Add(name);
-		itemCheckedOut[name] = false;
-	}
+
 	public void RetrieveCollectedItem(string name){
-		if (itemCheckedOut[name])
+		if (data.itemCheckedOut[name])
 		return;
 		Instantiate(Resources.Load("prefabs/"+name), playerObject.transform.position, Quaternion.identity);
-		itemCheckedOut[name] = true;
+		data.itemCheckedOut[name] = true;
 	}
     
     
@@ -132,11 +124,15 @@ public partial class GameManager : Singleton<GameManager> {
 		// call mysaver, tell it to save scene and player separately
 		MySaver.Save();
 		// unity load saved editor scene file
-		entryID = toEntryNumber;
+		data.entryID = toEntryNumber;
 		SceneManager.LoadScene(toSceneName);
 	}
 	void OnLevelWasLoaded(int level) {
+		Debug.Log("on level was loaded");
+		// TODO: check if the loaded level is a cutscene.
         sceneTime = 0f;
+		if (level <= 1)
+			return;
         GameObject player = MySaver.LoadScene();
 		// initialize values re: player object focus
         cam = GameObject.FindObjectOfType<Camera>();
@@ -148,7 +144,7 @@ public partial class GameManager : Singleton<GameManager> {
         }	
 
 		// bed entry on new day
-		if (entryID == 99){
+		if (data.entryID == 99){
 			Bed bed = GameObject.FindObjectOfType<Bed>();
 			if (bed){
 				bed.SleepCutscene();
@@ -167,7 +163,7 @@ public partial class GameManager : Singleton<GameManager> {
 			List<Doorway> doorways = new List<Doorway>( GameObject.FindObjectsOfType<Doorway>() );
 			// TODO: can probably make this nicer with LINQ
 			foreach (Doorway doorway in doorways){
-				if (doorway.entryID == entryID){
+				if (doorway.entryID == data.entryID){
 					Vector3 tempPos = doorway.transform.position;
 					tempPos.y = tempPos.y - 0.05f;
 					playerObject.transform.position = tempPos;
@@ -177,26 +173,27 @@ public partial class GameManager : Singleton<GameManager> {
 	}
 
 	public void NewDayCutscene(){
-		MySaver.Save();
 		data.days += 1;
 		SceneManager.LoadScene("morning_cutscene");
         sceneTime = 0f;
-        entryID = 99;
+        data.entryID = 99;
 	}
     public void NewDay(){
+		Debug.Log("New day");
         MySaver.CleanupSaves();
 		SceneManager.LoadScene("house");
         sceneTime = 0f;
-        entryID = 99;
+        data.entryID = 99;
+		MySaver.Save();
     }
 
     public void NewGame(bool switchlevel=true){
+		Debug.Log("New game");
         if (switchlevel){
-			// SceneManager.LoadScene("house");
 			NewDayCutscene();
         }
         sceneTime = 0f;
-		timePlayed = 0f;
+		data.secondsPlayed = 0f;
 		timeSinceLastSave = 0f;
         // TODO: add a default player condition here
 		playerObject = GameObject.Find("Tom");	
@@ -219,12 +216,16 @@ public partial class GameManager : Singleton<GameManager> {
 		data.collectedObjects = new List<string>();
 		data.collectedFood = new List<string>();
 		data.collectedClothes = new List<string>();
-		itemCheckedOut = new Dictionary<string, bool>();
+		data.itemCheckedOut = new SerializableDictionary<string, bool>();
+
+		data.collectedClothes.Add("blue_shirt");
+		data.collectedObjects.Add("blue_shirt");
+		data.itemCheckedOut["blue_shirt"] = false;
 
 		// TODO: change this temporary hack into something more correct.
-        unlockedCommercials = new List<Commercial>();
-        unlockedCommercials.Add(LoadCommercialByName("eat1"));
-        completeCommercials = new List<Commercial>();
+        data.unlockedCommercials = new List<Commercial>();
+        data.unlockedCommercials.Add(LoadCommercialByName("eat1"));
+        data.completeCommercials = new List<Commercial>();
 		
 		cam = GameObject.FindObjectOfType<Camera>();
 		SetFocus(playerObject);
@@ -252,15 +253,17 @@ public partial class GameManager : Singleton<GameManager> {
 		return path;
 	}
 	public void SaveGameData(){
-			var serializer = new XmlSerializer(typeof(GameData));
-			string path = Path.Combine(Application.persistentDataPath, saveGameName);
-			path = Path.Combine(path, "game.xml");
-			GameData data = new GameData(this);
-			FileStream sceneStream = File.Create(path);
-			serializer.Serialize(sceneStream, data);
-			sceneStream.Close();
-			timePlayed += timeSinceLastSave;
-			timeSinceLastSave = 0f;
+		data.secondsPlayed += timeSinceLastSave;
+		data.lastScene = SceneManager.GetActiveScene().name;
+
+		var serializer = new XmlSerializer(typeof(GameData));
+		string path = Path.Combine(Application.persistentDataPath, saveGameName);
+		path = Path.Combine(path, "game.xml");
+		Debug.Log("saving to "+path);
+		FileStream sceneStream = File.Create(path);
+		serializer.Serialize(sceneStream, data);
+		sceneStream.Close();
+		timeSinceLastSave = 0f;
 	}
 	public GameData LoadGameData(string gameName){
 		GameData data = null;
@@ -275,32 +278,13 @@ public partial class GameManager : Singleton<GameManager> {
 		return data;
 	}
 	public void LoadGameDataIntoMemory(string gameName){
-		data = new GameData();
-		GameData loadData = LoadGameData(gameName);
-		data.collectedItems = new List<string>();
-		data.collectedObjects = new List<string>();
-		data.collectedFood = new List<string>();
-		data.collectedClothes = new List<string>();
-		itemCheckedOut = new Dictionary<string, bool>();
-		if (data == null){
-			// InitValues();
-			NewGame();
+		Debug.Log("Loadsavegame into memory");
+		data = LoadGameData(gameName);
+		if (data.lastScene != null){
+			// SceneManager.LoadScene("house");
+			SceneManager.LoadScene(data.lastScene);
 		} else {
-			data.collectedItems = loadData.collectedItems;
-			foreach(string item in data.collectedItems){
-				itemCheckedOut[item] = false;
-			}
-			data.lastSavedPlayerPath = loadData.lastSavedPlayerPath;
-			data.lastSavedScenePath = loadData.lastSavedScenePath;
-			data.lastPlayerName = loadData.lastPlayerName;
-			timePlayed = loadData.secondsPlayed;
-			timeSinceLastSave = 0f;
-            data.money = loadData.money;
-			if (loadData.lastScene != null){
-				SceneManager.LoadScene("house");
-			} else {
-				SceneManager.LoadScene("house");
-			}
+			SceneManager.LoadScene("house");
 		}
 	}
 

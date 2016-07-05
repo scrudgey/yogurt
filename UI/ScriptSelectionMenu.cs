@@ -21,9 +21,9 @@ public class ScriptSelectionMenu : MonoBehaviour
 
         descriptionText = transform.Find("Panel/Body/sidebar/DescriptionPanel/DescriptionBox/Description").GetComponent<Text>();
         scrollContent = transform.Find("Panel/Body/Left/ScriptList/Viewport/Content").gameObject;
-        foreach (Commercial script in GameManager.Instance.unlockedCommercials)
+        foreach (Commercial script in GameManager.Instance.data.unlockedCommercials)
         {
-            if (GameManager.Instance.completeCommercials.Contains(script))
+            if (GameManager.Instance.data.completeCommercials.Contains(script))
                 continue;
             GameObject newEntry = Instantiate(Resources.Load("UI/ScriptListEntry")) as GameObject;
             RectTransform rectTransform = newEntry.GetComponent<RectTransform>();

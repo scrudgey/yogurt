@@ -39,7 +39,7 @@ public class ClosetButtonHandler : MonoBehaviour {
 			GameObject newEntry = spawnEntry();
 			ItemEntryScript entryScript = newEntry.GetComponent<ItemEntryScript>();
 			entryScript.itemName = name;
-			entryScript.enableItem = !GameManager.Instance.itemCheckedOut[name];
+			entryScript.enableItem = !GameManager.Instance.data.itemCheckedOut[name];
 			Text entryText = newEntry.GetComponent<Text>();
 			entryText.text = Toolbox.Instance.ScrubText(name);
 			newEntry.transform.SetParent(listObject.transform, false);

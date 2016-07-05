@@ -35,7 +35,7 @@ public partial class GameManager : Singleton<GameManager> {
 
     public void UnlockCommercial(string filename){
         Commercial unlocked = LoadCommercialByName(filename);
-        unlockedCommercials.Add(unlocked);
+        data.unlockedCommercials.Add(unlocked);
     }
     public void EvaluateCommercial(Commercial commercial){
         bool success = false;
@@ -52,7 +52,7 @@ public partial class GameManager : Singleton<GameManager> {
             report.GetComponent<CommercialReportMenu>().Report(activeCommercial, commercial);
             // report.GetComponent<CommercialReportMenu>().Report(activeCommercial);
             if (activeCommercial.name != "freestyle")
-                completeCommercials.Add(activeCommercial);
+                data.completeCommercials.Add(activeCommercial);
         } else {
             // do something to display why the commercial is not done yet
             Debug.Log("commercial did not pass.");
