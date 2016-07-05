@@ -99,7 +99,7 @@ public class Physical : MonoBehaviour {
 		if (ziptime > 0){
 			ziptime -= Time.fixedDeltaTime;
 			if (ziptime <= 0){
-				Debug.Log("zip to fly timeout");
+				// Debug.Log("zip to fly timeout");
 				doFly = true;
 			}
 		}
