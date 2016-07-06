@@ -51,7 +51,7 @@ public partial class GameManager : Singleton<GameManager> {
 		if (saveGameName == "test")
 			MySaver.CleanupSaves();
 		// Cursor.SetCursor((Texture2D)Resources.Load("UI/cursor1"), Vector2.zero, CursorMode.Auto);
-		if (SceneManager.GetActiveScene().name != "title"){
+		if (SceneManager.GetActiveScene().buildIndex > 1){
             NewGame(switchlevel: false);
 		}
 	}
