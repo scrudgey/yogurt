@@ -8,6 +8,7 @@ public class CommercialReportMenu : MonoBehaviour {
     Text rewardText;
     Text positiveScore, chaosScore, disgustingScore, disturbingScore, offensiveScore;
     Text transcript;
+    Text eventText;
     private Canvas canvas;
     public void Start(){
         canvas = GetComponent<Canvas>();
@@ -36,13 +37,13 @@ public class CommercialReportMenu : MonoBehaviour {
             // titleText = transform.Find("Image/titles/TitleText").GetComponent<Text>();
             descriptionText = transform.Find("Image/desc/WhatText").GetComponent<Text>();
             rewardText = transform.Find("Image/buttons/rew/RewardText").GetComponent<Text>();
-            positiveScore = transform.Find("Image/Center/RatingsPanel/Positive/Amount").GetComponent<Text>();
-            chaosScore = transform.Find("Image/Center/RatingsPanel/Chaos/Amount").GetComponent<Text>();
-            disgustingScore = transform.Find("Image/Center/RatingsPanel/Disgusting/Amount").GetComponent<Text>();
-            disturbingScore = transform.Find("Image/Center/RatingsPanel/Disturbing/Amount").GetComponent<Text>();
-            offensiveScore = transform.Find("Image/Center/RatingsPanel/Offensive/Amount").GetComponent<Text>();
+            positiveScore = transform.Find("Image/Center/RightHalf/RatingsPanel/Positive/Amount").GetComponent<Text>();
+            chaosScore = transform.Find("Image/Center/RightHalf/RatingsPanel/Chaos/Amount").GetComponent<Text>();
+            disgustingScore = transform.Find("Image/Center/RightHalf/RatingsPanel/Disgusting/Amount").GetComponent<Text>();
+            disturbingScore = transform.Find("Image/Center/RightHalf/RatingsPanel/Disturbing/Amount").GetComponent<Text>();
+            offensiveScore = transform.Find("Image/Center/RightHalf/RatingsPanel/Offensive/Amount").GetComponent<Text>();
             transcript = transform.Find("Image/Center/TranscriptPanel/Transcript").GetComponent<Text>();
-        
+            eventText = transform.Find("Image/Center/RightHalf/EventsPanel/Text").GetComponent<Text>();
         }
     }
     
@@ -60,6 +61,14 @@ public class CommercialReportMenu : MonoBehaviour {
 
         foreach (string line in commercial.transcript){
             transcript.text = transcript.text + line + "\n";
+        }
+
+        eventText.text = "";
+        foreach (string key in commercial.properties.Keys){
+            CommercialProperty prop = commercial.properties[key];
+            string elaboration = VideoCamera.KeyDescriptions[key];
+            string line = elaboration + ": " + prop.val.ToString() + "\n";
+            eventText.text = eventText.text + line;
         }
     }
     
