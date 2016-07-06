@@ -60,7 +60,6 @@ public class VideoCamera : MonoBehaviour {
             }
             // handle qualities
             commercial.data.AddData(data);
-            // trigger reaction to values increasing?
             //check vs. watchForOccurrence
             if (watchForOccurrence != null){
                  if (watchForOccurrence.Matches(data)){
@@ -83,6 +82,9 @@ public class VideoCamera : MonoBehaviour {
     
     void ProcessVomit(OccurrenceVomit data){
         IncrementCommercialValue("vomit", 1f);
+        if (data.liquid.name == "yogurt"){
+            IncrementCommercialValue("yogurt_vomit", 1f);
+        }
     }
     
     void ProcessSpeech(OccurrenceSpeech data){
