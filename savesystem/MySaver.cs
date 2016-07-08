@@ -37,8 +37,6 @@ public class MySaver {
 			return;
 		DirectoryInfo info = new DirectoryInfo(path);
 		FileInfo[] fileInfo = info.GetFiles();
-		Debug.Log("last saved player path:");
-		Debug.Log(GameManager.Instance.data.lastSavedPlayerPath);
 		foreach(FileInfo file in fileInfo){
 			if (file.Name == "game.xml")
 				continue;
