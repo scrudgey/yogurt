@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using UnityEngine.UI;
 
-public class UINew : Singleton<UINew> {
+public class UINew: Singleton<UINew> {
 		
 	private struct actionButton{
 		public GameObject gameobject;
@@ -36,6 +36,9 @@ public class UINew : Singleton<UINew> {
 	private Text recordText;
 	private GameObject recordStop;
 	private GameObject recordFinish;
+
+	private Stack<GameObject> collectedStack = new Stack<GameObject>();
+	public bool achievementPopupInProgress;
 
 	void Start(){
 		if (!init)
@@ -73,6 +76,41 @@ public class UINew : Singleton<UINew> {
 			InventoryCallback(inventory);
 		}
 		CloseClosetMenu();
+	}
+
+	public void PopupCounter(string text, float initValue, float finalValue, VideoCamera video){
+		GameObject existingPop = GameObject.Find("Poptext(Clone)");
+		if (existingPop == null){
+			GameObject pop = Instantiate(Resources.Load("UI/Poptext")) as GameObject;
+			Canvas popCanvas = pop.GetComponent<Canvas>();
+			popCanvas.worldCamera = GameManager.Instance.cam;
+			
+			Poptext poptext = pop.GetComponent<Poptext>();
+			// poptext.description = text;
+			poptext.description.Add(text);
+			poptext.initValueList.Add(initValue);
+			poptext.finalValueList.Add(finalValue);
+			poptext.video = video;
+		} else {
+			Poptext poptext = existingPop.GetComponent<Poptext>();
+			poptext.description.Add(text);
+			poptext.initValueList.Add(initValue);
+			poptext.finalValueList.Add(finalValue);
+		}
+    }
+	public void PopupCollected(GameObject obj){
+		GameObject existingPop = GameObject.Find("AchievementPopup(Clone)");
+		if (existingPop == null){
+			GameObject pop = Instantiate(Resources.Load("UI/AchievementPopup")) as GameObject;
+			Canvas popCanvas = pop.GetComponent<Canvas>();
+			popCanvas.worldCamera = GameManager.Instance.cam;
+			AchievementPopup achievement = pop.GetComponent<AchievementPopup>();
+
+			achievement.CollectionPopup(obj);
+			achievementPopupInProgress = true;
+		} else {
+			collectedStack.Push(obj);
+		}
 	}
 
 	public void EnableRecordButtons(bool enable){
@@ -138,6 +176,9 @@ public class UINew : Singleton<UINew> {
 			if (statusFX.style != statusStyle){
 				statusFX.style = statusStyle;
 			}
+		}
+		if (!achievementPopupInProgress && collectedStack.Count>0){
+			PopupCollected(collectedStack.Pop());
 		}
 		actionTextObject.text = actionTextString;
 	}
@@ -452,37 +493,6 @@ public class UINew : Singleton<UINew> {
 		}
 		bounceScript.text = text;
 	}
-	public void PopupCounter(string text, float initValue, float finalValue, VideoCamera video){
-		GameObject existingPop = GameObject.Find("Poptext(Clone)");
-		if (existingPop == null){
-			GameObject pop = Instantiate(Resources.Load("UI/Poptext")) as GameObject;
-			Canvas popCanvas = pop.GetComponent<Canvas>();
-			popCanvas.worldCamera = GameManager.Instance.cam;
-			
-			Poptext poptext = pop.GetComponent<Poptext>();
-			// poptext.description = text;
-			poptext.description.Add(text);
-			poptext.initValueList.Add(initValue);
-			poptext.finalValueList.Add(finalValue);
-			poptext.video = video;
-		} else {
-			Poptext poptext = existingPop.GetComponent<Poptext>();
-			poptext.description.Add(text);
-			poptext.initValueList.Add(initValue);
-			poptext.finalValueList.Add(finalValue);
-		}
-    }
 
-	public void PopupCollected(GameObject obj){
-		GameObject existingPop = GameObject.Find("AchievementPopup(Clone)");
-		if (existingPop == null){
-			GameObject pop = Instantiate(Resources.Load("UI/AchievementPopup")) as GameObject;
-			Canvas popCanvas = pop.GetComponent<Canvas>();
-			popCanvas.worldCamera = GameManager.Instance.cam;
-			AchievementPopup achievement = pop.GetComponent<AchievementPopup>();
-
-			achievement.CollectionPopup(obj);
-		}
-	}
 
 }
