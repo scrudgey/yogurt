@@ -38,6 +38,7 @@ public class UINew: Singleton<UINew> {
 	private GameObject recordFinish;
 
 	private Stack<GameObject> collectedStack = new Stack<GameObject>();
+	private Stack<Achievement> achievementStack = new Stack<Achievement>();
 	public bool achievementPopupInProgress;
 
 	void Start(){
@@ -113,6 +114,21 @@ public class UINew: Singleton<UINew> {
 		}
 	}
 
+	public void PopupAchievement(Achievement achieve){
+		GameObject existingPop = GameObject.Find("AchievementPopup(Clone)");
+		if (existingPop == null){
+			GameObject pop = Instantiate(Resources.Load("UI/AchievementPopup")) as GameObject;
+			Canvas popCanvas = pop.GetComponent<Canvas>();
+			popCanvas.worldCamera = GameManager.Instance.cam;
+			AchievementPopup achievement = pop.GetComponent<AchievementPopup>();
+
+			achievement.Achievement(achieve);
+			achievementPopupInProgress = true;
+		} else {
+			achievementStack.Push(achieve);
+		}
+	}
+
 	public void EnableRecordButtons(bool enable){
 		if (enable){
 			recordText.text = "RECORDING";
@@ -141,13 +157,6 @@ public class UINew: Singleton<UINew> {
 		}
 	}
 
-	// public IEnumerator WaitAndFinish(float waitTime){
-	// 	yield return new WaitForSeconds(waitTime);
-	// 	recordText.text = "COMPLETE";
-	// 	recordStop.SetActive(false);
-	// 	recordFinish.SetActive(true);
-	// }
-	
 	public void SetActionText(string text){
 		actionTextString = text;
 	}
@@ -177,8 +186,11 @@ public class UINew: Singleton<UINew> {
 				statusFX.style = statusStyle;
 			}
 		}
-		if (!achievementPopupInProgress && collectedStack.Count>0){
+		if (!achievementPopupInProgress && collectedStack.Count > 0){
 			PopupCollected(collectedStack.Pop());
+		}
+		if (!achievementPopupInProgress && achievementStack.Count > 0){
+			PopupAchievement(achievementStack.Pop());
 		}
 		actionTextObject.text = actionTextString;
 	}

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
 using UnityEngine.SceneManagement;
+using System.Linq;
 
 [XmlRoot("GameData")]
 [System.Serializable]
@@ -23,6 +24,8 @@ public class GameData{
     public List<Commercial> unlockedCommercials;
     public List<Commercial> completeCommercials;
 	public int entryID;
+	public List<Achievement> achievements;
+	public AchievementStats achievementStats = new AchievementStats();
 	public GameData(){
 		days = 0;
 		saveDate = System.DateTime.Now;
@@ -41,6 +44,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Commercial activeCommercial;
     private float sceneTime;
 	public float timeSinceLastSave = 0f;
+	private float intervalTimer;
 	
     
     // BASIC UNITY ROUTINES
@@ -59,6 +63,12 @@ public partial class GameManager : Singleton<GameManager> {
     void Update(){
 		timeSinceLastSave += Time.deltaTime;
         sceneTime += Time.deltaTime;
+		intervalTimer += Time.deltaTime;
+		if (intervalTimer > 3f){
+			data.achievementStats.secondsPlayed = timeSinceLastSave;
+			CheckAchievements();
+			intervalTimer = 0;
+		}
 	}
  
     // ITEM COLLECTIONS
@@ -93,7 +103,17 @@ public partial class GameManager : Singleton<GameManager> {
 		data.itemCheckedOut[name] = true;
 	}
     
-    
+    public void CheckAchievements(){
+		foreach (Achievement achieve in data.achievements){
+			if (!achieve.complete){
+				bool pass = achieve.Evaluate(data.achievementStats);
+				if (pass){
+					achieve.complete = true;
+					UINew.Instance.PopupAchievement(achieve);
+				}
+			}
+		}
+	}
     
     
     
@@ -212,20 +232,34 @@ public partial class GameManager : Singleton<GameManager> {
 				}
 			}
 		}
+		
+		// initialize collections
 		data.collectedItems = new List<string>();
 		data.collectedObjects = new List<string>();
 		data.collectedFood = new List<string>();
 		data.collectedClothes = new List<string>();
 		data.itemCheckedOut = new SerializableDictionary<string, bool>();
-
 		data.collectedClothes.Add("blue_shirt");
 		data.collectedObjects.Add("blue_shirt");
 		data.itemCheckedOut["blue_shirt"] = false;
 
+		// initialize commercials
 		// TODO: change this temporary hack into something more correct.
         data.unlockedCommercials = new List<Commercial>();
         data.unlockedCommercials.Add(LoadCommercialByName("eat1"));
         data.completeCommercials = new List<Commercial>();
+
+		// initialize achievements
+		data.achievements = new List<Achievement>();
+		GameObject[] achievementPrefabs = Resources.LoadAll("achievements/", typeof(GameObject))
+			.Cast<GameObject>()
+			.ToArray();
+		foreach (GameObject prefab in achievementPrefabs){
+			AchievementComponent component = prefab.GetComponent<AchievementComponent>();
+			if (component){
+				data.achievements.Add(component.achivement);
+			}
+		}
 		
 		cam = GameObject.FindObjectOfType<Camera>();
 		SetFocus(playerObject);

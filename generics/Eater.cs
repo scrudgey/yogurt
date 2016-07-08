@@ -180,6 +180,10 @@ public class Eater : Interactive {
                 eatData.chaos += 150f;
 				eatData.offensive += 500f;
             }
+			if (mliquid.liquid.name == "yogurt"){
+		        GameManager.Instance.data.achievementStats.yogurtEaten += 1;
+				GameManager.Instance.CheckAchievements();
+			}
         }
         flag.data.Add(eatData);
 
@@ -188,6 +192,9 @@ public class Eater : Interactive {
 	}
 
 	void Vomit(){
+        GameManager.Instance.data.achievementStats.vomit += 1;
+		GameManager.Instance.CheckAchievements();
+
 		nausea = 0;
 		nutrition = 0;
                 
@@ -205,6 +212,10 @@ public class Eater : Interactive {
                 mono.liquid.vomit = true;
                 mono.edible.vomit = true;
                 data.liquid = mono.liquid;
+				if (data.liquid.name == "yogurt"){
+			        GameManager.Instance.data.achievementStats.yogurtVomit += 1;
+					GameManager.Instance.CheckAchievements();
+				}
             }
             Edible edible = eaten.GetComponent<Edible>();
             if (edible){
