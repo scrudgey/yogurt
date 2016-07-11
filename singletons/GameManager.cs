@@ -139,6 +139,23 @@ public partial class GameManager : Singleton<GameManager> {
 		cameraControl = FindObjectOfType<CameraControl>();
 		if (cameraControl)
 			cameraControl.focus = target;
+		if (target.GetComponent<Inventory>()){
+			UINew.Instance.ShowFightButton();
+		} else {
+			UINew.Instance.HideFightButton();
+		}
+	}
+
+	public void ToggleFightMode(){
+		Inventory inv = playerObject.GetComponent<Inventory>();
+		if (inv){
+			inv.ToggleFightMode();
+			if (inv.fightMode){
+				UINew.Instance.ShowPunchButton();
+			} else {
+				UINew.Instance.HidePunchButton();
+			}
+		}
 	}
 	public void LeaveScene(string toSceneName, int toEntryNumber){
 		// call mysaver, tell it to save scene and player separately
@@ -257,12 +274,14 @@ public partial class GameManager : Singleton<GameManager> {
 		foreach (GameObject prefab in achievementPrefabs){
 			AchievementComponent component = prefab.GetComponent<AchievementComponent>();
 			if (component){
-				data.achievements.Add(component.achivement);
+				Achievement cloneAchievement = new Achievement(component.achivement);
+				data.achievements.Add(cloneAchievement);
 			}
 		}
 		
 		cam = GameObject.FindObjectOfType<Camera>();
 		SetFocus(playerObject);
+
 	}
 
 

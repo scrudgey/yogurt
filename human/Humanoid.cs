@@ -14,7 +14,8 @@ public class Humanoid : Controllable {
 	private Quaternion leftTilt;
 	private Quaternion forward;
 	private Vector3 scaleVector; 
-//	private DistanceJoint2D joint;
+
+	// private AdvancedAnimation animator;
 
 	private bool LoadInitialized = false;
 	void Start () {
@@ -41,7 +42,9 @@ public class Humanoid : Controllable {
 	void LoadInit(){
 		baseSpeed = maxSpeed;
 		scaleVector = Vector3.one;
+		// animator = GetComponent<AdvancedAnimation>();
 	}
+	
 
 	void FixedUpdate(){
 		Vector2 acceleration = Vector2.zero;

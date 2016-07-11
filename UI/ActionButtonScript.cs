@@ -2,7 +2,7 @@
 
 public class ActionButtonScript: MonoBehaviour {
 
-	public enum buttonType {Drop, Throw, Stash, Inventory, Action}
+	public enum buttonType {Drop, Throw, Stash, Inventory, Action, Punch}
 
 	public buttonType bType = buttonType.Action;
 

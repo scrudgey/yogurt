@@ -18,6 +18,8 @@ public class UINew: Singleton<UINew> {
 	private List<GameObject> bottomElements = new List<GameObject>();
 	private Interaction defaultInteraction;
 	private GameObject inventoryButton;
+	private GameObject fightButton;
+	private GameObject punchButton;
 	private GameObject inventoryMenu;
 	private bool init = false;
 	public bool inventoryVisible = false;
@@ -52,6 +54,9 @@ public class UINew: Singleton<UINew> {
 			UICanvas = GameObject.Instantiate(Resources.Load("required/NeoUICanvas")) as GameObject;
 		}
 		inventoryButton = UICanvas.transform.Find("topdock/InventoryButton").gameObject;
+		fightButton = UICanvas.transform.Find("topdock/FightButton").gameObject;
+		punchButton = UICanvas.transform.Find("bottomdock/PunchButton").gameObject;
+
 		inventoryMenu = GameObject.Find("InventoryScreen");
 		status = UICanvas.transform.Find("topdock/topBar/status").GetComponent<Text>();
 		actionTextObject = UICanvas.transform.Find("bottomdock/ActionText").GetComponent<Text>();
@@ -70,6 +75,9 @@ public class UINew: Singleton<UINew> {
 		status.gameObject.SetActive(false);
 		inventoryMenu.SetActive(false);
 		inventoryButton.SetActive(false);
+		fightButton.SetActive(false);
+		punchButton.SetActive(false);
+
 		if (GameManager.Instance.playerObject)
 			inventory = GameManager.Instance.playerObject.GetComponent<Inventory>();
 		if (inventory){
@@ -172,6 +180,8 @@ public class UINew: Singleton<UINew> {
 		statusStyle = style;
 	}
 	void Update(){
+		if (!inventory && GameManager.Instance.playerObject)
+			inventory = GameManager.Instance.playerObject.GetComponent<Inventory>();
 		if (statusTempTime > 0){
 			statusTempTime -= Time.deltaTime;
 		}
@@ -240,24 +250,32 @@ public class UINew: Singleton<UINew> {
 	public void HandActionCallback(ActionButtonScript.buttonType bType){
 		switch (bType){
 		case ActionButtonScript.buttonType.Drop:
-			inventory.DropItem();
-			ClearWorldButtons();
-			break;
+		inventory.DropItem();
+		ClearWorldButtons();
+		break;
+
 		case ActionButtonScript.buttonType.Throw:
-			inventory.ThrowItem();
-			ClearWorldButtons();
-			break;
+		inventory.ThrowItem();
+		ClearWorldButtons();
+		break;
+
 		case ActionButtonScript.buttonType.Stash:
-			inventory.StashItem(inventory.holding.gameObject);
-			ClearWorldButtons();
-			HandleInventoryButton();
-			if (inventoryVisible){
-				CloseInventoryMenu();
-				ShowInventoryMenu();
-			}
-			break;
+		inventory.StashItem(inventory.holding.gameObject);
+		ClearWorldButtons();
+		HandleInventoryButton();
+		if (inventoryVisible){
+			CloseInventoryMenu();
+			ShowInventoryMenu();
+		}
+		break;
+
+		case ActionButtonScript.buttonType.Punch:
+		if (inventory)
+			inventory.StartPunch();
+		break;
+
 		default:
-			break;
+		break;
 		}
 	}
 
@@ -284,6 +302,19 @@ public class UINew: Singleton<UINew> {
 		} else {
 			inventoryButton.SetActive(false);
 		}
+	}
+
+	public void ShowFightButton(){
+		fightButton.SetActive(true);
+	}
+	public void HideFightButton(){
+		fightButton.SetActive(false);
+	}
+	public void ShowPunchButton(){
+		punchButton.SetActive(true);
+	}
+	public void HidePunchButton(){
+		punchButton.SetActive(false);
 	}
 
 	public void CloseInventoryMenu(){
@@ -473,6 +504,11 @@ public class UINew: Singleton<UINew> {
 	}
 
 	public void ShootPressed(){
+		if (punchButton.activeSelf){
+			if (inventory){
+				inventory.StartPunch();
+			}
+		}
 		if (defaultInteraction != null)
 			defaultInteraction.DoAction();
 	}

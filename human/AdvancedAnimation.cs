@@ -28,6 +28,8 @@ public class AdvancedAnimation : MonoBehaviour {
 	private bool holding;
 	private bool throwing;
 	private bool oldHolding;
+	private bool fighting;
+	private bool punching;
 	private Sprite[] sprites;
 	public string baseName;
 	private int baseFrame;
@@ -48,7 +50,14 @@ public class AdvancedAnimation : MonoBehaviour {
 	public void Throwing(bool val){
 		throwing = val;
 	}
-	
+	public void Fighting(bool val){
+		fighting = val;
+		LateUpdate();
+		SetFrame(0);
+	}
+	public void Punching(bool val){
+		punching = val;
+	}
 	public void LoadSprites(){
 		sprites = Resources.LoadAll<Sprite>("sprites/"+spriteSheet);
 	}
@@ -64,8 +73,14 @@ public class AdvancedAnimation : MonoBehaviour {
 			updateSequence = GetSwingState(updateSequence);
 		} else if (throwing){
 			updateSequence = GetThrowState(updateSequence);
+		} else if (punching){
+			updateSequence = GetFightState(updateSequence);
 		} else {
-			updateSequence = GetWalkState(updateSequence);		
+			if (fighting && GetComponent<Rigidbody2D>().velocity.magnitude < 0.1){
+				updateSequence = GetFightState(updateSequence);
+			} else {
+				updateSequence = GetWalkState(updateSequence);
+			}
 			if (oldHolding != holding)
 				SetFrame(0);
 		}
@@ -109,15 +124,17 @@ public class AdvancedAnimation : MonoBehaviour {
 	string GetWalkState(string updateSequence){
 		switch (controllable.lastPressed){
 			case "down":
-				baseFrame = 7;
-				break;
+			baseFrame = 7;
+			break;
+
 			case "up":
-				baseFrame = 14;
-				break;
+			baseFrame = 14;
+			break;
+
 			default:
-				baseFrame = 0;
-				break;
-			}
+			baseFrame = 0;
+			break;
+		}
 		if (holding){
 			baseFrame += 21;
 		}
@@ -126,7 +143,27 @@ public class AdvancedAnimation : MonoBehaviour {
 			baseFrame += 1;
 		}
 		else{
-			updateSequence = updateSequence + "_idle_"+controllable.lastPressed;;
+			updateSequence = updateSequence + "_idle_"+controllable.lastPressed;
+		}
+		return updateSequence;
+	}
+
+	string GetFightState(string updateSequence){
+		switch (controllable.lastPressed){
+			case "down":
+			baseFrame = 57;
+			break;
+			case "up":
+			baseFrame = 60;
+			break;
+			default:
+			baseFrame = 54;
+			break;
+		}
+		if (!punching){
+			updateSequence = updateSequence + "_idle_"+controllable.lastPressed;
+		} else {
+			updateSequence = updateSequence + "_punch_"+controllable.lastPressed;
 		}
 		return updateSequence;
 	}

@@ -45,6 +45,8 @@ public class Inventory : Interactive, IExcludable {
 	private GameObject throwObject;
 	private float dropHeight = 0.20f;
 	private AdvancedAnimation animator;
+
+	public bool fightMode;
 	
 	void Start(){
 		if (!LoadInitialized)
@@ -268,7 +270,7 @@ public class Inventory : Interactive, IExcludable {
 	}
 
 	void StartSwing(){
-		GameObject slash = Instantiate(Resources.Load ("Slash2"), transform.position, transform.rotation) as GameObject;
+		GameObject slash = Instantiate(Resources.Load("Slash2"), transform.position, transform.rotation) as GameObject;
 		slash.transform.parent = transform;
 		slash.transform.localScale = Vector3.one;
 		holding.GetComponent<Renderer>().sortingLayerName = "main";
@@ -289,6 +291,40 @@ public class Inventory : Interactive, IExcludable {
 		if (obj == holding.gameObject){
 			holding = null;
 		}
+	}
+
+	public void ToggleFightMode(){
+		fightMode = !fightMode;
+		if (fightMode){
+			if (holding){
+				DropItem();
+			}
+			if (animator){
+				animator.Fighting(true);
+			}
+		} else {
+			if (animator){
+				animator.Fighting(false);
+			}
+		}
+	}
+
+	public void StartPunch(){
+		if (animator)
+			animator.Punching(true);
+	}
+	public void PunchImpact(){
+		GameObject slash = Instantiate(Resources.Load("PhysicalImpact"), holdpoint.position, holdpoint.rotation) as GameObject;
+		PhysicalImpact impact = slash.GetComponent<PhysicalImpact>();
+		impact.direction = controllable.direction;
+		Collider2D slashCollider = slash.GetComponent<Collider2D>();
+		foreach (Collider2D tomCollider in GetComponentsInChildren<Collider2D>()){
+			Physics2D.IgnoreCollision(tomCollider, slashCollider, true);
+		}
+	}
+	public void EndPunch(){
+		if (animator)
+			animator.Punching(false);
 	}
 
 }
