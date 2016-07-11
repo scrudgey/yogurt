@@ -18,9 +18,9 @@ public class Flammable : MonoBehaviour {
 	void Start () {
 		//ensure that there is a speaker
 		Toolbox.Instance.SetUpAudioSource(gameObject);
-		burnSounds = Resources.Load("sounds/Crackling Fire",typeof(AudioClip)) as AudioClip;
-		igniteSounds[0] = Resources.Load("sounds/Flash Fire Ignite 01",typeof(AudioClip)) as AudioClip;
-		igniteSounds[1] = Resources.Load("sounds/Flash Fire Ignite 02",typeof(AudioClip)) as AudioClip;
+		burnSounds = Resources.Load("sounds/Crackling Fire", typeof(AudioClip)) as AudioClip;
+		igniteSounds[0] = Resources.Load("sounds/Flash Fire Ignite 01", typeof(AudioClip)) as AudioClip;
+		igniteSounds[1] = Resources.Load("sounds/Flash Fire Ignite 02", typeof(AudioClip)) as AudioClip;
 
 		//add the particle effect and set its position
 		GameObject thing = Instantiate(Resources.Load("particles/smoke"), transform.position, Quaternion.identity) as GameObject;
@@ -72,13 +72,13 @@ public class Flammable : MonoBehaviour {
 			quality.quality.flaming = true;
 			fireParticles.Play();
 			onFire = true;
-			GetComponent<AudioSource>().PlayOneShot(igniteSounds[Random.Range(0,1)]);
+			GetComponent<AudioSource>().PlayOneShot(igniteSounds[Random.Range(0, 1)]);
 			GetComponent<AudioSource>().loop=true;
 			GetComponent<AudioSource>().PlayOneShot(burnSounds);
 		}
 		if (onFire){
 			if (destructible){
-				destructible.TakeDamage(Destructible.damageType.fire,Time.deltaTime);
+				destructible.TakeDamage(Destructible.damageType.fire, Time.deltaTime);
 			}
 			// now HERE's a goddamned hack!!!
 			// this keeps the colliders "alive" because otherwise they won't collide! shit!!!
