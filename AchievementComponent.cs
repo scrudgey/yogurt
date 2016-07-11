@@ -23,6 +23,14 @@ public class Achievement {
 			pass = pass && otherStats.vomit >= stats.vomit;
 		return pass;
 	}
+
+	public Achievement(Achievement source){
+		icon = source.icon;
+		complete = source.complete;
+		title = source.title;
+		description = source.description;
+		stats = new AchievementStats(source.stats);
+	}
 }
 
 [System.Serializable]
@@ -35,9 +43,11 @@ public class AchievementStats {
 
 	}
 
-	// private void UpdateStats(){
-	// 	if (GameManager.Instance.data.achievementStats == this){
-	// 		GameManager.Instance.CheckAchievements();
-	// 	}
-	// }
+	public AchievementStats(AchievementStats source){
+		secondsPlayed = source.secondsPlayed;
+		yogurtEaten = source.yogurtEaten;
+		vomit = source.vomit;
+		yogurtVomit = source.yogurtVomit;
+	}
+
 }
