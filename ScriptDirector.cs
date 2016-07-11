@@ -81,7 +81,7 @@ public class ScriptDirector : Interactive {
             string content = line.Substring(8, line.Length-8);
             foreach (ScriptReader reader in readers){
                 reader.CoStarLine(content, this);
-                reader.WatchForSpeech(content);
+                reader.WatchForSpeech("Costar: "+content);
             }
         }
         if (line.Substring(0, 5) == "TOM: "){
@@ -90,7 +90,7 @@ public class ScriptDirector : Interactive {
             string content = line.Substring(4, line.Length-4);
             tomLineNext = true;
             foreach (ScriptReader reader in readers){
-                reader.WatchForSpeech(content);
+                reader.WatchForSpeech("Tom: "+content);
             }
         }
         if (line == "[yogurt++]"){
