@@ -49,7 +49,7 @@ public class OccurrenceData {
     }
 }
 
-
+[System.Serializable]
 public class OccurrenceEat : OccurrenceData {
     public float amount;
     public string food;
@@ -79,6 +79,7 @@ public class OccurrenceEat : OccurrenceData {
     }
 }
 
+[System.Serializable]
 public class OccurrenceVomit : OccurrenceData {
     public string vomit;
     public Liquid liquid;
@@ -87,6 +88,7 @@ public class OccurrenceVomit : OccurrenceData {
     }
 }
 
+[System.Serializable]
 public class OccurrenceSpeech : OccurrenceData {
     public string line;
     public GameObject speaker;
