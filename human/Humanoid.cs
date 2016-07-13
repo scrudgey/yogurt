@@ -3,8 +3,6 @@
 // using System.IO;
 
 public class Humanoid : Controllable {
-
-
 	private float baseSpeed;
 	public float maxSpeed;
 	public float maxAcceleration;
@@ -14,8 +12,6 @@ public class Humanoid : Controllable {
 	private Quaternion leftTilt;
 	private Quaternion forward;
 	private Vector3 scaleVector; 
-
-	// private AdvancedAnimation animator;
 
 	private bool LoadInitialized = false;
 	void Start () {
@@ -42,7 +38,6 @@ public class Humanoid : Controllable {
 	void LoadInit(){
 		baseSpeed = maxSpeed;
 		scaleVector = Vector3.one;
-		// animator = GetComponent<AdvancedAnimation>();
 	}
 	
 
