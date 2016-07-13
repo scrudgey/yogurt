@@ -1,12 +1,12 @@
 ﻿using UnityEngine;
 // using System.Collections;
+public enum damageType{physical, fire, any}
 
-public class Destructible : MonoBehaviour {
+public class Destructible : MonoBehaviour, IDamagable {
 
 	public float health;
 	public float maxHealth;
 	public float bonusHealth;
-	public enum damageType{physical, fire, any}
 	public damageType lastDamage;
 	public AudioClip[] hitSound;
 	public AudioClip[] destroySound;
@@ -24,7 +24,7 @@ public class Destructible : MonoBehaviour {
 		}
 	}
 
-	public void TakeDamage( Destructible.damageType type , float damage){
+	public void TakeDamage(damageType type, float damage){
 		if (!invulnerable){
 			switch (type)
 			{
