@@ -179,7 +179,7 @@ public class DestructibleHandler: SaveHandler<Destructible> {
 		instance.invulnerable = 			data.bools["invulnerable"];
 		instance.fireproof = 				data.bools["fireproof"];
 		instance.no_physical_damage =		data.bools["noPhysDam"];
-		instance.lastDamage =				(Destructible.damageType)data.ints["lastDamage"];
+		instance.lastDamage =				(damageType)data.ints["lastDamage"];
 	}
 }
 
