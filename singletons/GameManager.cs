@@ -133,6 +133,7 @@ public partial class GameManager : Singleton<GameManager> {
 			}
 		}
 	}
+	
 	public void SetFocus(GameObject target){
 		playerObject = target;
 		Controller.Instance.focus = target.GetComponent<Controllable>();
@@ -150,11 +151,6 @@ public partial class GameManager : Singleton<GameManager> {
 		Inventory inv = playerObject.GetComponent<Inventory>();
 		if (inv){
 			inv.ToggleFightMode();
-			if (inv.fightMode){
-				UINew.Instance.ShowPunchButton();
-			} else {
-				UINew.Instance.HidePunchButton();
-			}
 		}
 	}
 	public void LeaveScene(string toSceneName, int toEntryNumber){
