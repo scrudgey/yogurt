@@ -8,7 +8,11 @@ public class Inventory : Interactive, IExcludable {
 	public Pickup holding{
 		get {return _holding;}
 		set {
+			MessageAnimation anim = new MessageAnimation();
+			anim.type = MessageAnimation.AnimType.holding;
 			if (value != null){
+				if (fightMode)
+					ToggleFightMode();
 				MonoBehaviour[] list = value.gameObject.GetComponents<MonoBehaviour>();
 				foreach(MonoBehaviour mb in list)
 				{
@@ -20,13 +24,11 @@ public class Inventory : Interactive, IExcludable {
 							controllable.directable = directable;
 					}
 				}
-				if (animator != null){
-					animator.Holding(true);
-				}
+				anim.value = true;
+				Toolbox.Instance.SendMessage(gameObject, this, anim);
 			} else {
-				if (animator != null){
-					animator.Holding(false);
-				}
+				anim.value = false;
+				Toolbox.Instance.SendMessage(gameObject, this, anim);
 			}
 			_holding = value;
 			UINew.Instance.InventoryCallback(this);
@@ -44,7 +46,6 @@ public class Inventory : Interactive, IExcludable {
 	private bool LoadInitialized = false;
 	private GameObject throwObject;
 	private float dropHeight = 0.20f;
-	private AdvancedAnimation animator;
 
 	public bool fightMode;
 	
@@ -55,7 +56,6 @@ public class Inventory : Interactive, IExcludable {
 
 	public void LoadInit(){
 		controllable = GetComponent<Controllable>();
-		animator = GetComponent<AdvancedAnimation>();
 		holdpoint = transform.Find("holdpoint");
 		Interaction getAction = new Interaction(this, "Get", "GetItem", true, false);
 		getAction.dontWipeInterface = false;
@@ -171,9 +171,8 @@ public class Inventory : Interactive, IExcludable {
 
 	public void ThrowItem(){
 		// set up the held object to be thrown on the next fixed update
-		if (animator){
-			animator.Throwing(true);
-		}
+		MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.throwing, true);
+		Toolbox.Instance.SendMessage(gameObject, this, anim);
 	}
 	
 	public void ActivateThrow(){
@@ -217,9 +216,8 @@ public class Inventory : Interactive, IExcludable {
 			}
 		}
 		throwObject = null;
-		if (animator){
-			animator.Throwing(false);
-		}
+		MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.throwing, false);
+		Toolbox.Instance.SendMessage(gameObject, this, anim);
 		// Resources.Load("sounds/8bit_impact1", typeof(AudioClip)) as AudioClip;
 		GetComponent<AudioSource>().PlayOneShot(Resources.Load("sounds/8bit_throw", typeof(AudioClip)) as AudioClip);
 		Toolbox.Instance.DataFlag(gameObject, 50, 0, 0, 0, 0);
@@ -244,8 +242,9 @@ public class Inventory : Interactive, IExcludable {
 	}
 
 	public void SwingItem(MeleeWeapon weapon){
-		if (animator)
-			animator.Swinging(true);
+		MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.swinging, true);
+		Toolbox.Instance.SendMessage(gameObject, this, anim);
+
 		if (weapon.swingSounds.Length > 0){
 			GetComponent<AudioSource>().PlayOneShot(weapon.swingSounds[Random.Range(0, weapon.swingSounds.Length)]);
 		}
@@ -263,8 +262,9 @@ public class Inventory : Interactive, IExcludable {
 	}
 
 	void EndSwing(){
-		if (animator)
-			animator.Swinging(false);
+		MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.swinging, false);
+		Toolbox.Instance.SendMessage(gameObject, this, anim);
+
 		holding.GetComponent<Renderer>().sortingLayerName="main";
 		holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
 	}
@@ -299,19 +299,20 @@ public class Inventory : Interactive, IExcludable {
 			if (holding){
 				DropItem();
 			}
-			if (animator){
-				animator.Fighting(true);
-			}
+			MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.fighting, true);
+			Toolbox.Instance.SendMessage(gameObject, this, anim);
+			
+			UINew.Instance.ShowPunchButton();
 		} else {
-			if (animator){
-				animator.Fighting(false);
-			}
+			MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.fighting, false);
+			Toolbox.Instance.SendMessage(gameObject, this, anim);
+			UINew.Instance.HidePunchButton();
 		}
 	}
 
 	public void StartPunch(){
-		if (animator)
-			animator.Punching(true);
+		MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.punching, true);
+		Toolbox.Instance.SendMessage(gameObject, this, anim);
 	}
 	public void PunchImpact(){
 		GameObject slash = Instantiate(Resources.Load("PhysicalImpact"), holdpoint.position, holdpoint.rotation) as GameObject;
@@ -323,8 +324,8 @@ public class Inventory : Interactive, IExcludable {
 		}
 	}
 	public void EndPunch(){
-		if (animator)
-			animator.Punching(false);
+		MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.punching, false);
+		Toolbox.Instance.SendMessage(gameObject, this, anim);
 	}
 
 }

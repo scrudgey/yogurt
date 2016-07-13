@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
+using System;
 
-public class AdvancedAnimation : MonoBehaviour {
+public class AdvancedAnimation : MonoBehaviour, IMessagable {
 	private string _spriteSheet;
 	private string spriteSheet{
 		get { return _spriteSheet;}
@@ -41,22 +42,32 @@ public class AdvancedAnimation : MonoBehaviour {
 		controllable = GetComponent<Controllable>();
 		LoadSprites();
 	}
-	public void Holding(bool val){
-		holding = val;
-	}
-	public void Swinging(bool val){
-		swinging = val;
-	}
-	public void Throwing(bool val){
-		throwing = val;
-	}
-	public void Fighting(bool val){
-		fighting = val;
-		LateUpdate();
-		SetFrame(0);
-	}
-	public void Punching(bool val){
-		punching = val;
+
+	public void ReceiveMessage(Message message){
+		if (message is MessageAnimation){
+			MessageAnimation anim = (MessageAnimation)message;
+			switch (anim.type){
+				case MessageAnimation.AnimType.fighting:
+				fighting = anim.value;
+				LateUpdate();
+				SetFrame(0);
+				break;
+				case MessageAnimation.AnimType.holding:
+				holding = anim.value;
+				break;
+				case MessageAnimation.AnimType.throwing:
+				throwing = anim.value;
+				break;
+				case MessageAnimation.AnimType.swinging:
+				swinging = anim.value;
+				break;
+				case MessageAnimation.AnimType.punching:
+				punching = anim.value;
+				break;
+				default:
+				break;
+			}
+		}
 	}
 	public void LoadSprites(){
 		sprites = Resources.LoadAll<Sprite>("sprites/"+spriteSheet);

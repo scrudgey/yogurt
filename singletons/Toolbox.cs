@@ -227,5 +227,12 @@ public class Toolbox : Singleton<Toolbox> {
 	}
 
 
+	public void SendMessage(GameObject host, Component messenger, Message message){
+		message.messenger = messenger;
+		IMessagable[] receivers = host.GetComponentsInChildren<IMessagable>();
+		foreach (IMessagable receiver in receivers){
+			receiver.ReceiveMessage(message);
+		}
+	}
 
 }
