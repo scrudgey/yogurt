@@ -10,7 +10,6 @@ public class Perception{
 }
 
 public class Knowledge{
-
 	public enum tag{edible,weapon};
 	public GameObject obj;
 	public Quality quality;
