@@ -53,6 +53,8 @@ public class UINew: Singleton<UINew> {
 		if (UICanvas == null){
 			UICanvas = GameObject.Instantiate(Resources.Load("required/NeoUICanvas")) as GameObject;
 		}
+		GameObject.DontDestroyOnLoad(UICanvas);
+
 		inventoryButton = UICanvas.transform.Find("topdock/InventoryButton").gameObject;
 		fightButton = UICanvas.transform.Find("topdock/FightButton").gameObject;
 		punchButton = UICanvas.transform.Find("bottomdock/PunchButton").gameObject;
@@ -75,7 +77,7 @@ public class UINew: Singleton<UINew> {
 		status.gameObject.SetActive(false);
 		inventoryMenu.SetActive(false);
 		inventoryButton.SetActive(false);
-		fightButton.SetActive(false);
+		// fightButton.SetActive(false);
 		punchButton.SetActive(false);
 
 		if (GameManager.Instance.playerObject)
