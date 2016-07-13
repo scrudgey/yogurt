@@ -24,6 +24,10 @@ public class Achievement {
 		return pass;
 	}
 
+	public Achievement(){
+
+	}
+
 	public Achievement(Achievement source){
 		icon = source.icon;
 		complete = source.complete;
@@ -39,6 +43,7 @@ public class AchievementStats {
 	public float yogurtEaten;
 	public float vomit;
 	public float yogurtVomit;
+
 	public AchievementStats(){
 
 	}
