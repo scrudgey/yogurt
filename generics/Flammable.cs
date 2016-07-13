@@ -78,7 +78,7 @@ public class Flammable : MonoBehaviour {
 		}
 		if (onFire){
 			if (destructible){
-				destructible.TakeDamage(Destructible.damageType.fire, Time.deltaTime);
+				destructible.TakeDamage(damageType.fire, Time.deltaTime);
 			}
 			// now HERE's a goddamned hack!!!
 			// this keeps the colliders "alive" because otherwise they won't collide! shit!!!

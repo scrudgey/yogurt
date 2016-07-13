@@ -53,7 +53,7 @@ public class Blender : Container {
 					items.RemoveAt(0);
 				}
 				if (d){
-					d.TakeDamage(Destructible.damageType.physical, Time.deltaTime * 10);
+					d.TakeDamage(damageType.physical, Time.deltaTime * 10);
 				}
 			}
 			if(liquidContainer.amount > 0 && !liquidContainer.lid){
