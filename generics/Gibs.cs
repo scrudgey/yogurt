@@ -3,7 +3,7 @@
 
 public class Gibs : MonoBehaviour {
 
-	public Destructible.damageType damageCondition;
+	public damageType damageCondition;
 	public int number;
 	public GameObject particle;
 	public float forceMin;
