@@ -69,16 +69,16 @@ public class Physical : MonoBehaviour {
 	public void Impact(Vector2 f){
 		Vector2 force = f / (objectBody.mass / 25f);
 		// f = f / (objectBody.mass / 25f);
-		Destructible destructible = trueObject.GetComponent<Destructible>();
+		// IDamagable destructible = trueObject.GetComponent<IDamagable>();
 		if (currentMode != mode.fly)
 			FlyMode();
 		if (impactSounds.Length > 0)
 			GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
 		bootstrapper.Set3Motion(new Vector3(force.x, force.y, force.y + 0.5f));
-		if (destructible){
-			float damage = force.magnitude * 20f;
-			destructible.TakeDamage(Destructible.damageType.physical, damage);
-		}
+		// if (destructible != null){
+		// 	float damage = force.magnitude * 20f;
+		// 	destructible.TakeDamage(damageType.physical, damage);
+		// }
 	}
 
 	void FixedUpdate() {
