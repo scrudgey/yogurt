@@ -45,12 +45,12 @@ public class Intrinsics : MonoBehaviour {
 
 	public void IntrinsicsChanged(){
 		Humanoid humanoid = GetComponent<Humanoid>();
-		Destructible destructible = GetComponent<Destructible>();
+		IDamagable destructible = GetComponent<IDamagable>();
 		
 		Intrinsic net = NetIntrinsic();
 		if (humanoid)
 			humanoid.IntrinsicsChanged(net);
-		if (destructible)
+		if (destructible != null)
 			destructible.IntrinsicsChanged(net);
 		if (GameManager.Instance.playerObject == gameObject)
 			GameManager.Instance.FocusIntrinsicsChanged(NetIntrinsic());
