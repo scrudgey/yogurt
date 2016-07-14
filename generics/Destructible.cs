@@ -2,7 +2,7 @@
 // using System.Collections;
 public enum damageType{physical, fire, any}
 
-public class Destructible : MonoBehaviour, IDamagable {
+public class Destructible : MonoBehaviour, IMessagable {
 
 	public float health;
 	public float maxHealth;
@@ -92,13 +92,22 @@ public class Destructible : MonoBehaviour, IDamagable {
 			GetComponent<AudioSource>().PlayOneShot(hitSound[Random.Range(0, hitSound.Length)]);
 		}
 	}
-	
-	public void IntrinsicsChanged(Intrinsic intrinsic){
-		armor = intrinsic.armor.floatValue;
-		if (intrinsic.bonusHealth.floatValue > bonusHealth){
-			health += intrinsic.bonusHealth.floatValue;
+
+	public void ReceiveMessage(Message message){
+		if (message is MessageIntrinsic){
+			MessageIntrinsic intrins = (MessageIntrinsic)message;
+			if (intrins.netIntrinsic != null){
+				armor = intrins.netIntrinsic.armor.floatValue;
+				if (intrins.netIntrinsic.bonusHealth.floatValue > bonusHealth){
+					health += intrins.netIntrinsic.bonusHealth.floatValue;
+				}
+				bonusHealth = intrins.netIntrinsic.bonusHealth.floatValue;
+			}
 		}
-		bonusHealth = intrinsic.bonusHealth.floatValue;
+		if (message is MessageDamage){
+			MessageDamage dam = (MessageDamage)message;
+			TakeDamage(dam.type, dam.amount);
+		}
 	}
 
 }

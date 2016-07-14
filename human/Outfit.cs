@@ -3,12 +3,10 @@
 
 public class Outfit : Interactive {
 
-	public AdvancedAnimation advancedAnimation;
 	private bool LoadInitialized = false;
 	public string wornUniformName;
 
 	void Start(){
-		advancedAnimation = GetComponent<AdvancedAnimation>();
 		if (!LoadInitialized)
 			LoadInit();
 	}
@@ -25,8 +23,12 @@ public class Outfit : Interactive {
 		PhysicalBootstrapper phys = uniform.GetComponent<PhysicalBootstrapper>();
 		if (phys)
 			phys.DestroyPhysical();
-		advancedAnimation.baseName = uniform.baseName;
+		MessageAnimation anim = new MessageAnimation();
+		anim.outfitName = uniform.baseName;
+		Toolbox.Instance.SendMessage(gameObject, this, anim);
+
 		wornUniformName = Toolbox.Instance.CloneRemover(uniform.gameObject.name);
+		GameManager.Instance.CheckItemCollection(uniform.gameObject, gameObject);
 		Destroy(uniform.gameObject);
 	}
 

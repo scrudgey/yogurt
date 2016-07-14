@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine.UI;
 
-public class Speech : Interactive {
+public class Speech : Interactive, IMessagable {
 	private string words;
 	public bool speaking = false;
 	public string[] randomPhrases;
@@ -75,6 +75,12 @@ public class Speech : Interactive {
 		if (speakTime > 0){
 
 			speakTime -= Time.deltaTime;
+            if (!speaking){
+                MessageHead head = new MessageHead();
+                head.type = MessageHead.HeadType.speaking;
+                head.value = true;
+                Toolbox.Instance.SendMessage(gameObject, this, head);
+            }
 			speaking = true;
 			bubbleParent.SetActive(true);
 			bubbleText.text = words;
@@ -101,13 +107,12 @@ public class Speech : Interactive {
 		}
 		if (speakTime < 0){
             audioSource.Stop();
-            // if (speaking){
-            //     Occurrence flag = Toolbox.Instance.OccurenceFlag(gameObject);
-            //     OccurrenceSpeech data = new OccurrenceSpeech();
-            //     data.speaker = gameObject;
-            //     data.line = words;
-            //     flag.data.Add(data);
-            // }
+            if (speaking){
+                MessageHead head = new MessageHead();
+                head.type = MessageHead.HeadType.speaking;
+                head.value = false;
+                Toolbox.Instance.SendMessage(gameObject, this, head);
+            }
 			speaking = false;
 			bubbleParent.SetActive(false);
 			speakTime = 0;
@@ -123,7 +128,7 @@ public class Speech : Interactive {
 	}
 	public void SayRandom(){
 		if(randomPhrases.Length > 0 ){
-			string toSay = randomPhrases[Random.Range(0,randomPhrases.Length)];
+			string toSay = randomPhrases[Random.Range(0, randomPhrases.Length)];
 			Say (toSay);
 		}
 	}
@@ -160,6 +165,17 @@ public class Speech : Interactive {
         data.line = Toolbox.Instance.GetName(gameObject)+": "+words;
         flag.data.Add(data);
 	}
+
+    public void ReceiveMessage(Message incoming){
+        if (incoming is MessageSpeech){
+            MessageSpeech message = (MessageSpeech)incoming;
+            if (message.swear != ""){
+                Say(message.phrase, message.swear);
+            } else {
+                Say(message.phrase);
+            }
+        }
+    }
 
 
     // double-exponential seat easing function

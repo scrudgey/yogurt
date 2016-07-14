@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System;
 
 public class AdvancedAnimation : MonoBehaviour, IMessagable {
 	private string _spriteSheet;
@@ -66,6 +65,11 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 				break;
 				default:
 				break;
+			}
+			if (anim.outfitName != ""){
+				baseName = anim.outfitName;
+				LateUpdate();
+				SetFrame(0);
 			}
 		}
 	}

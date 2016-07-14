@@ -2,7 +2,7 @@
 // using System.Collections;
 // using System.IO;
 
-public class Humanoid : Controllable {
+public class Humanoid : Controllable, IMessagable {
 	private float baseSpeed;
 	public float maxSpeed;
 	public float maxAcceleration;
@@ -85,8 +85,13 @@ public class Humanoid : Controllable {
 		transform.localScale = scaleVector;
 	}
 
-	public void IntrinsicsChanged(Intrinsic intrinsic){
-		maxSpeed = baseSpeed + intrinsic.speed.floatValue;
+	public void ReceiveMessage(Message message){
+		if (message is MessageIntrinsic){
+			MessageIntrinsic intrins = (MessageIntrinsic)message;
+			if (intrins.netIntrinsic != null){
+				maxSpeed = baseSpeed + intrins.netIntrinsic.speed.floatValue;
+			}
+		}
 	}
 
 	public void UpdateDirection(){

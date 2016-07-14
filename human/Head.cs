@@ -5,9 +5,7 @@ public class Head : Interactive, IExcludable {
 	
 	private GameObject hatPoint;
 	public Hat hat;
-	// private SpriteRenderer spriteRenderer;
 	public SpriteRenderer hatRenderer;
-	private Intrinsics intrinsics;
 	
 	private bool LoadInitialized = false;
 	void Start(){
@@ -20,9 +18,6 @@ public class Head : Interactive, IExcludable {
 		wearAct.dontWipeInterface = false;
 		interactions.Add(wearAct);
 		hatPoint = transform.Find("hatPoint").gameObject;
-		// spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
-		// intrinsics = gameObject.GetComponentInParent<Intrinsics>();
-		intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
 		LoadInitialized = true;
 	}
 	
@@ -57,17 +52,25 @@ public class Head : Interactive, IExcludable {
 			hatAnimator.CheckDependencies();
 		}
 
-		if (intrinsics){
-			Intrinsics hatIntrinsic = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(hat.gameObject);
-			intrinsics.AddIntrinsic(hatIntrinsic);
-		}
+		// if (intrinsics){
+		Intrinsics hatIntrinsic = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(hat.gameObject);
+		MessageIntrinsic message = new MessageIntrinsic();
+		message.addIntrinsic = hatIntrinsic;
+		Toolbox.Instance.SendMessage(transform.parent.gameObject, this, message);
+
+		GameManager.Instance.CheckItemCollection(h.gameObject, transform.parent.gameObject);
+		// 	intrinsics.AddIntrinsic(hatIntrinsic);
+		// }
 	}
 	
 	void RemoveHat(){
-		if (intrinsics){
-			Intrinsics hatIntrinsic = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(hat.gameObject);
-			intrinsics.RemoveIntrinsic(hatIntrinsic);
-		}
+		// if (intrinsics){
+		Intrinsics hatIntrinsic = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(hat.gameObject);
+		MessageIntrinsic message = new MessageIntrinsic();
+		message.removeIntrinsic = hatIntrinsic;
+		Toolbox.Instance.SendMessage(gameObject, this, message);
+		// intrinsics.RemoveIntrinsic(hatIntrinsic);
+		// }
 		
 		Messenger.Instance.DisclaimObject(hat.gameObject,this);
 		

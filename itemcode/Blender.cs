@@ -96,7 +96,7 @@ public class Blender : Container {
 	}
 	public override void Store(Inventory inv){
 		if (liquidContainer.lid){
-			inv.gameObject.SendMessage("Say", "The lid is on!");
+			Toolbox.Instance.SendMessage(inv.gameObject, this, new MessageSpeech("The lid is on!"));
 		} else {
 			base.Store (inv);
 		}

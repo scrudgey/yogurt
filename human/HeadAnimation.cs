@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 // using System.Collections;
 
-public class HeadAnimation : MonoBehaviour {
+public class HeadAnimation : MonoBehaviour, IMessagable {
 
 	private Controllable controllable;
-	private Speech speech;
+	// private Speech speech;
+	private bool speaking;
 	private string _spriteSheet;
 	private string spriteSheet{
 		get { return _spriteSheet;}
@@ -56,7 +57,7 @@ public class HeadAnimation : MonoBehaviour {
 				parentSprite = renderer;
 		}
 		controllable = GetComponentInParent<Controllable>();
-		speech = GetComponentInParent<Speech>();
+		// speech = GetComponentInParent<Speech>();
 
 		ParticleSystem[] ps = GetComponentsInChildren<ParticleSystem>();
 		foreach (ParticleSystem p in ps){
@@ -75,24 +76,38 @@ public class HeadAnimation : MonoBehaviour {
 		crumbs = GetComponentInChildren<ParticleSystem>();
 	}
 
-	public void SetEating(bool eating, Color crumbColor){
-		this.crumbColor = crumbColor;
-		this.eating = eating;
-		crumbs.startColor = crumbColor;
-		if (eating){
-			eatingCountDown = 2f;
-			if (!crumbs.isPlaying)
-				crumbs.Play();
-		}
-	}
+	public void ReceiveMessage(Message incoming){
+		if (incoming is MessageHead){
+			MessageHead message = (MessageHead)incoming;
+			switch (message.type){
+				case MessageHead.HeadType.eating:
+				crumbColor = message.crumbColor;
+				eating = message.value;
+				crumbs.startColor = crumbColor;
+				if (eating){
+					eatingCountDown = 2f;
+					if (!crumbs.isPlaying)
+						crumbs.Play();
+				}
+				break;
 
-	public void SetVomit(bool v){
-		vomiting = v;
-		vomit.startColor = crumbColor;
-		if (vomiting){
-			vomitCountDown = 1.5f;
-			if (!vomit.isPlaying)
-				vomit.Play();
+				case MessageHead.HeadType.vomiting:
+				vomiting = message.value;
+				vomit.startColor = crumbColor;
+				if (vomiting){
+					vomitCountDown = 1.5f;
+					if (!vomit.isPlaying)
+						vomit.Play();
+				}
+				break;
+
+				case MessageHead.HeadType.speaking:
+				speaking = message.value;
+				break;
+
+				default:
+				break;
+			}	
 		}
 	}
 
@@ -100,7 +115,7 @@ public class HeadAnimation : MonoBehaviour {
 		string updateSheet = baseName;
 		string updateSequence = "generic";
 
-		if (speech.speaking || eating){
+		if (speaking || eating){
 			updateSequence = updateSequence + "_speak";
 		}else{
 			updateSequence = updateSequence + "_idle";

@@ -255,6 +255,9 @@ public partial class GameManager : Singleton<GameManager> {
 		data.collectedClothes.Add("blue_shirt");
 		data.collectedObjects.Add("blue_shirt");
 		data.itemCheckedOut["blue_shirt"] = false;
+		data.collectedClothes.Add("pajamas");
+		data.collectedObjects.Add("pajamas");
+		data.itemCheckedOut["pajamas"] = false;
 
 		// initialize commercials
 		// TODO: change this temporary hack into something more correct.

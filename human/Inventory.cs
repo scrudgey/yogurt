@@ -32,7 +32,6 @@ public class Inventory : Interactive, IExcludable {
 			}
 			_holding = value;
 			UINew.Instance.InventoryCallback(this);
-			// GameManager.Instance.CheckItemCollection(this, gameObject);
 			if (value != null)
 				GameManager.Instance.CheckItemCollection(value.gameObject, gameObject);
 		}
@@ -218,7 +217,6 @@ public class Inventory : Interactive, IExcludable {
 		throwObject = null;
 		MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.throwing, false);
 		Toolbox.Instance.SendMessage(gameObject, this, anim);
-		// Resources.Load("sounds/8bit_impact1", typeof(AudioClip)) as AudioClip;
 		GetComponent<AudioSource>().PlayOneShot(Resources.Load("sounds/8bit_throw", typeof(AudioClip)) as AudioClip);
 		Toolbox.Instance.DataFlag(gameObject, 50, 0, 0, 0, 0);
 	}

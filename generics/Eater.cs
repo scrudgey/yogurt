@@ -5,12 +5,10 @@ public class Eater : Interactive {
 	public float nutrition;
 
 	public enum preference{neutral, likes, dislikes}
-
 	public preference vegetablePreference;
 	public preference meatPreference;
 	public preference immoralPreference;
 	public preference offalPreference;
-	private HeadAnimation head;
 	private float _nausea;
 	private float lastNausea;
 	public float nausea{
@@ -23,25 +21,22 @@ public class Eater : Interactive {
 			}
 	}
     private bool poisonNausea;
-	private Speech speech;
+	// private Speech speech;
 	private GameObject eaten;
 	private bool LoadInitialized = false;
-	private Intrinsics intrinsics;
+	// private Intrinsics intrinsics;
 
 	private void CheckNausea(){
 		if ( nausea > 50 && lastNausea < 50){
 			lastNausea = nausea;
-			if (speech){
-				speech.Say("I don't feel so good!");
-				Toolbox.Instance.DataFlag(gameObject, 0f, 5f, 10f, 0f, 0f);
-			}
+			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I don't feel so good!"));
+			Toolbox.Instance.DataFlag(gameObject, 0f, 5f, 10f, 0f, 0f);
+			// }
 		}
 		if ( nausea > 75 && lastNausea < 75){
 			lastNausea = nausea;
-			if (speech){
-				speech.Say("I'm gonna puke!");
-				Toolbox.Instance.DataFlag(gameObject, 0f, 10f, 10f, 0f, 0f);
-			}
+			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I'm gonna puke!"));
+			Toolbox.Instance.DataFlag(gameObject, 0f, 10f, 10f, 0f, 0f);
 		}
 		if (nausea < 50){
 			lastNausea = 0;
@@ -49,8 +44,6 @@ public class Eater : Interactive {
 	}
 
 	void Start () {
-		speech = GetComponent<Speech> ();
-		head = GetComponentInChildren<HeadAnimation>();
 		if (!LoadInitialized)
 			LoadInit();
 	}
@@ -61,7 +54,6 @@ public class Eater : Interactive {
 		eatAction.dontWipeInterface = false;
 		interactions.Add(eatAction);
 		LoadInitialized = true;
-		intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
 	}
 	
 	// Update is called once per frame
@@ -69,12 +61,10 @@ public class Eater : Interactive {
         if (poisonNausea){
             nausea += Time.deltaTime * 50f;
         }
-        
 		if (nausea > 100){
 			Vomit();
             poisonNausea = false;
 		}
-
 		if (nutrition > 100){
 			nausea += Time.deltaTime * 2;
 		}
@@ -82,12 +72,10 @@ public class Eater : Interactive {
 
 	public int CheckReaction(Edible food){
 		int reaction = 0;
-	
 		//i can clean this section up with reflection-
 		// might be necessary if food types get out of control
 		bool[] types = new bool[] {food.vegetable, food.meat, food.immoral, food.offal};
 		preference[] prefs = new preference[] {vegetablePreference, meatPreference, immoralPreference, 	offalPreference};
-
 		for (int i =0; i< prefs.Length; i++){
 			if (types[i]){
 				switch (prefs[i]){
@@ -102,7 +90,6 @@ public class Eater : Interactive {
 				}
 			}
 		}
-
 		return reaction;
 	}
 
@@ -117,8 +104,11 @@ public class Eater : Interactive {
         if (food.poison)
             poisonNausea = true;
 
-		if (head)
-			head.SetEating(true,food.pureeColor);
+		MessageHead head = new MessageHead();
+		head.type = MessageHead.HeadType.eating;
+		head.value = true;
+		head.crumbColor = food.pureeColor;
+		Toolbox.Instance.SendMessage(gameObject, this, head);
 
 		//randomly store a clone of the object for later vomiting
         if (!food.poison){
@@ -142,22 +132,29 @@ public class Eater : Interactive {
 		}
 
 		// if we can speak, say the thing
-		if (speech && phrase != ""){
-			speech.Say(phrase);
+		if (phrase != ""){
+			// speech.Say(phrase);
+			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech(phrase));
 		}
 
 		if (nutrition > 50){
-			speech.Say("I'm full!");
+			// speech.Say("I'm full!");
+			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I'm full!"));
 		}
 
 		if (nutrition > 75){
-			speech.Say("I can't eat another bite!");
+			// speech.Say("I can't eat another bite!");
+			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I can't eat another bite!"));
 		}
 
-		if (intrinsics){
-			Intrinsics foodIntrinsic = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(food.gameObject);
-			intrinsics.AddIntrinsic(foodIntrinsic);
-		}
+		// if (intrinsics){
+		Intrinsics foodIntrinsic = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(food.gameObject);
+		MessageIntrinsic message = new MessageIntrinsic();
+		message.addIntrinsic = foodIntrinsic;
+		Toolbox.Instance.SendMessage(gameObject, this, message);
+			// intrinsics.AddIntrinsic(foodIntrinsic);
+		// }
+
         
         // set up an occurrence flag for this eating!
         Occurrence flag = Toolbox.Instance.OccurenceFlag(gameObject);
@@ -222,12 +219,12 @@ public class Eater : Interactive {
                 edible.vomit = true;
             }
 		}
-		if (head)
-			head.SetVomit(true);
-		if (speech){
-			speech.Say("Blaaaaargh!");
-		}
 
+		MessageHead head = new MessageHead();
+		head.type = MessageHead.HeadType.vomiting;
+		head.value = true;
+		Toolbox.Instance.SendMessage(gameObject, this, head);
+		Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Blaaaaargh!"));
         flag.data.Add(data);
 	}
 }

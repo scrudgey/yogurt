@@ -1,23 +1,10 @@
 ﻿using UnityEngine;
-// using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 
-public class Intrinsics : MonoBehaviour {
+public class Intrinsics : MonoBehaviour, IMessagable {
 
 	public List<Intrinsic> intrinsics = new List<Intrinsic>();
-	// private Humanoid humanoid;
-
-	// private bool LoadInitialized = false;
-	// void Start(){
-	// 	if (!LoadInitialized)
-	// 		LoadInit();
-	// }
-
-	// void LoadInit(){
-	// 	humanoid = gameObject.GetComponent<Humanoid>();
-	// }
-
 	public void AddIntrinsic(Intrinsics i){
 		foreach(Intrinsic intrinsic in i.intrinsics){
 			intrinsics.Add(intrinsic);
@@ -32,6 +19,18 @@ public class Intrinsics : MonoBehaviour {
 		IntrinsicsChanged();
 	}
 
+	public void ReceiveMessage(Message incoming){
+		if (incoming is MessageIntrinsic){
+			MessageIntrinsic intrins = (MessageIntrinsic)incoming;
+			if (intrins.addIntrinsic && intrins.addIntrinsic != this){
+				AddIntrinsic(intrins.addIntrinsic);
+			}
+			if (intrins.removeIntrinsic && intrins.removeIntrinsic != this){
+				RemoveIntrinsic(intrins.removeIntrinsic);
+			}
+		}
+	}
+
 	public Intrinsic NetIntrinsic(){
 		Intrinsic netIntrinsic = new Intrinsic();
 		foreach(Intrinsic i in intrinsics){
@@ -44,14 +43,12 @@ public class Intrinsics : MonoBehaviour {
 	}
 
 	public void IntrinsicsChanged(){
-		Humanoid humanoid = GetComponent<Humanoid>();
-		IDamagable destructible = GetComponent<IDamagable>();
-		
 		Intrinsic net = NetIntrinsic();
-		if (humanoid)
-			humanoid.IntrinsicsChanged(net);
-		if (destructible != null)
-			destructible.IntrinsicsChanged(net);
+
+		MessageIntrinsic message = new MessageIntrinsic();
+		message.netIntrinsic = net;
+		Toolbox.Instance.SendMessage(gameObject, this, message);
+
 		if (GameManager.Instance.playerObject == gameObject)
 			GameManager.Instance.FocusIntrinsicsChanged(NetIntrinsic());
 	}

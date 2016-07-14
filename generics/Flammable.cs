@@ -9,7 +9,6 @@ public class Flammable : MonoBehaviour {
 	public bool onFire;
 	public ParticleSystem smoke;
 	public ParticleSystem fireParticles;
-	private Destructible destructible;
 	private CircleCollider2D fireRadius;
 	private AudioClip[] igniteSounds = new AudioClip[2];
 	private AudioClip burnSounds;
@@ -44,8 +43,6 @@ public class Flammable : MonoBehaviour {
 		fireRadius.isTrigger = true;
 		fireRadius.radius = 0.2f;
 		fireRadius.name = "fire";
-
-		destructible = GetComponent<Destructible>();
 		quality = Toolbox.Instance.GetQuality(gameObject);
 		}
 
@@ -77,15 +74,8 @@ public class Flammable : MonoBehaviour {
 			GetComponent<AudioSource>().PlayOneShot(burnSounds);
 		}
 		if (onFire){
-			if (destructible){
-				destructible.TakeDamage(damageType.fire, Time.deltaTime);
-			}
-			// now HERE's a goddamned hack!!!
-			// this keeps the colliders "alive" because otherwise they won't collide! shit!!!
-//			Quaternion r = transform.rotation;
-//			r.x += 0.1f;
-//			transform.rotation = r;
-			// i think i found a way to fix this, by setting the rigidbody to never sleep.
+			MessageDamage message = new MessageDamage(Time.deltaTime, damageType.fire);
+			Toolbox.Instance.SendMessage(gameObject, this, message);
 		}
 	}
 

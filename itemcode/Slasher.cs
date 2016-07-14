@@ -29,11 +29,9 @@ public class Slasher : MonoBehaviour {
 		if (container){
 			container.Spill();
 		}
-		IDamagable destructible = collider.gameObject.GetComponent<IDamagable>();
-		if (destructible != null){
-			float damage = direction.magnitude * 20f;
-			destructible.TakeDamage(damageType.physical, damage);
-		}
+		float damage = direction.magnitude * 20f;
+		MessageDamage message = new MessageDamage(damage, damageType.physical);
+		Toolbox.Instance.SendMessage(collider.gameObject, this, message);
 	}
 
 	void OnTriggerEnter2D(Collider2D collider){

@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System;
+// using System;
 using System.Collections.Generic;
 
 public class Occurrence : MonoBehaviour {
@@ -59,7 +59,8 @@ public class OccurrenceEat : OccurrenceData {
     }
     public override bool Matches(OccurrenceData otherData){
         bool match = false;
-        try {
+        // try {
+        if (otherData is OccurrenceEat){
             OccurrenceEat other = (OccurrenceEat)otherData;
             if (other == null)
                 return false;
@@ -71,9 +72,6 @@ public class OccurrenceEat : OccurrenceData {
             } else {
                 match = food == other.food;
             }
-        } catch (Exception e) {
-            UnityEngine.Debug.Log("[VSCode] " + e.Message);
-            return false;
         }
         return match;
     }
@@ -98,12 +96,11 @@ public class OccurrenceSpeech : OccurrenceData {
     
     public override bool Matches(OccurrenceData otherData){
         bool match = false;
-        try {
+        if (otherData is OccurrenceSpeech){
             OccurrenceSpeech other = (OccurrenceSpeech)otherData;
             match = line == other.line;
             return match;
-        } catch (Exception e) {
-            UnityEngine.Debug.Log("[VSCode] " + e.Message);
+        } else {
             return false;
         }
     }
