@@ -140,11 +140,11 @@ public partial class GameManager : Singleton<GameManager> {
 		cameraControl = FindObjectOfType<CameraControl>();
 		if (cameraControl)
 			cameraControl.focus = target;
-		if (target.GetComponent<Inventory>()){
-			UINew.Instance.ShowFightButton();
-		} else {
-			UINew.Instance.HideFightButton();
-		}
+		// if (target.GetComponent<Inventory>()){
+		// 	UINew.Instance.ShowFightButton();
+		// } else {
+		// 	UINew.Instance.HideFightButton();
+		// }
 	}
 
 	public void ToggleFightMode(){
