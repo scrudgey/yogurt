@@ -83,7 +83,7 @@ public class Container : Interactive, IExcludable {
 			newInteraction.descString = "Retrieve "+Toolbox.Instance.GetName(pickup.gameObject)+" from "+Toolbox.Instance.GetName(gameObject);
 			interactions.Add(newInteraction);
 		} else {
-			Toolbox.Instance.SendMessage(inv.gameObject, this, new MessageSpeech("It's full."));
+			Toolbox.Instance.SendMessage(inv.gameObject, this, new MessageSpeech("It's full.") as Message);
 		}
 	}
 	public string Store_desc(Inventory inv){
