@@ -12,6 +12,7 @@ public class Humanoid : Controllable, IMessagable {
 	private Quaternion leftTilt;
 	private Quaternion forward;
 	private Vector3 scaleVector; 
+	public bool hitstun;
 
 	private bool LoadInitialized = false;
 	void Start () {
@@ -44,6 +45,15 @@ public class Humanoid : Controllable, IMessagable {
 	void FixedUpdate(){
 		Vector2 acceleration = Vector2.zero;
 		Vector2 deceleration = Vector2.zero;
+		if (hitstun){
+			upFlag = false;
+			downFlag = false;
+			rightFlag = false;
+			leftFlag = false;
+			shootPressedFlag = false;
+			shootHeldFlag = false;
+			return;
+		}
 		// Do the normal controls stuff
 		// set vertical force or damp if neither up nor down is held
 		if (upFlag)
@@ -85,12 +95,18 @@ public class Humanoid : Controllable, IMessagable {
 		transform.localScale = scaleVector;
 	}
 
-	public void ReceiveMessage(Message message){
+	public override void ReceiveMessage(Message message){
+		base.ReceiveMessage(message);
+
 		if (message is MessageIntrinsic){
 			MessageIntrinsic intrins = (MessageIntrinsic)message;
 			if (intrins.netIntrinsic != null){
 				maxSpeed = baseSpeed + intrins.netIntrinsic.speed.floatValue;
 			}
+		}
+		if (message is MessageHitstun){
+			MessageHitstun hits = (MessageHitstun)message;
+			hitstun = hits.value;
 		}
 	}
 
@@ -99,6 +115,7 @@ public class Humanoid : Controllable, IMessagable {
 		// change lastpressed because this is relevant to animation
 		if (angle > 315 || angle < 45){
 			lastPressed = "right";
+			scaleVector.x = 1;
 		} else if (angle >= 45 && angle <= 135) {
 			lastPressed = "up";
 		} else if (angle >= 135 && angle < 225) {
@@ -108,6 +125,10 @@ public class Humanoid : Controllable, IMessagable {
 			lastPressed = "down";
 		}
 		transform.localScale = scaleVector;
+	}
+	public override void SetDirection(Vector2 d){
+		base.SetDirection(d);
+		UpdateDirection();
 	}
 
 }

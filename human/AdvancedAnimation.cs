@@ -34,6 +34,8 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 	public string baseName;
 	private int baseFrame;
 	private int frame;
+	private bool hitStun;
+	private bool doubledOver;
 
 
 	void Start () {
@@ -72,6 +74,12 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 				SetFrame(0);
 			}
 		}
+
+		if (message is MessageHitstun){
+			MessageHitstun hits = (MessageHitstun)message;
+			hitStun = hits.value;
+			doubledOver = hits.doubledOver;
+		}
 	}
 	public void LoadSprites(){
 		sprites = Resources.LoadAll<Sprite>("sprites/"+spriteSheet);
@@ -98,6 +106,11 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 			}
 			if (oldHolding != holding)
 				SetFrame(0);
+		}
+
+		if (hitStun){
+			updateSequence = GetHitStunState("generic3");
+			GetComponent<Animation>().Play(sequence);
 		}
 
 		sequence = updateSequence;
@@ -179,6 +192,27 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 			updateSequence = updateSequence + "_idle_"+controllable.lastPressed;
 		} else {
 			updateSequence = updateSequence + "_punch_"+controllable.lastPressed;
+		}
+		return updateSequence;
+	}
+
+	string GetHitStunState(string updateSequence){
+		switch (controllable.lastPressed){
+			case "down":
+			baseFrame = 64;
+			break;
+			case "up":
+			baseFrame = 65;
+			break;
+			default:
+			baseFrame = 63;
+			break;
+		}
+		if (!doubledOver){
+			updateSequence = updateSequence + "_idle_"+controllable.lastPressed;
+		} else {
+			updateSequence = updateSequence + "_doubled_"+controllable.lastPressed;
+			baseFrame += 3;
 		}
 		return updateSequence;
 	}

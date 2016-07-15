@@ -85,6 +85,9 @@ public class Intrinsic {
 	public Buff speed = new Buff();
 	public Buff bonusHealth = new Buff();
 	public Buff armor = new Buff();
+	public Buff fireproof = new Buff();
+	public Buff no_physical_damage = new Buff();
+	public Buff invulnerable = new Buff();
 }
 
 [System.Serializable]

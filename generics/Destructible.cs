@@ -107,6 +107,8 @@ public class Destructible : MonoBehaviour, IMessagable {
 		if (message is MessageDamage){
 			MessageDamage dam = (MessageDamage)message;
 			TakeDamage(dam.type, dam.amount);
+			if (dam.impactor)	
+				dam.impactor.PlayImpactSound();
 		}
 	}
 

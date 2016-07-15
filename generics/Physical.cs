@@ -2,7 +2,7 @@
 // using System.Collections;
 
 
-public class Physical : MonoBehaviour {
+public class Physical : MonoBehaviour, IMessagable {
 
 	public enum mode{none, fly, ground, zip}
 	public AudioClip[] impactSounds;
@@ -313,6 +313,15 @@ public class Physical : MonoBehaviour {
 			if (order){
 				order.offset = defaultOrderOffset;
 			}
+		}
+	}
+
+	public void ReceiveMessage(Message message){
+		if (message is MessageDamage){
+			MessageDamage dam = (MessageDamage)message;
+			Impact(dam.force);
+			if (dam.impactor)
+				dam.impactor.PlayImpactSound();
 		}
 	}
 

@@ -1,45 +1,36 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 // using System.Collections;
 
 public class Slasher : MonoBehaviour {
 	public AudioClip[] impactSounds;
 	public Vector2 direction; 
+	public List<GameObject> owners = new List<GameObject>();
 	
 	void SlashOn(){
-		GetComponent<Collider2D>().enabled = true;
-	}
+		// GetComponent<Collider2D>().enabled = true;
+		Vector3 startPoint = transform.position;
+		startPoint.x += direction.x / 4f;
+		startPoint.y += direction.y / 4f;
 
-	void SlashOff(){
-		GetComponent<Collider2D>().enabled = false;
-	}
+		GameObject impactObj = GameManager.Instantiate(Resources.Load("PhysicalImpact"), startPoint, Quaternion.identity) as GameObject;
+		PhysicalImpact impact = impactObj.GetComponent<PhysicalImpact>();
+		impact.impactSounds = impactSounds;
+		impact.direction = direction;
+		impact.size = 0.11f;
 
-	void OnTriggerStay2D(Collider2D collider){
-		if (collider.gameObject.tag == "Physical"){
-			Toolbox.Instance.DataFlag(gameObject, 70f, 0f, 0f, 0f, 0f);
-			Physical phys = collider.gameObject.GetComponentInParent<Physical>();
-			if (phys){
-				if(phys.currentMode == Physical.mode.ground){
-					Vector2 force = direction;
-					// this is the important aspect that will need changing in order to apply forces correctly.
-					phys.Impact(force);
-				}
+		CircleCollider2D impactCollider = impact.GetComponent<CircleCollider2D>();
+		foreach (GameObject owner in owners){
+			Collider2D[] ownerColliders = owner.GetComponentsInChildren<Collider2D>();
+			foreach (Collider2D ownerCollider in ownerColliders){
+				Physics2D.IgnoreCollision(impactCollider, ownerCollider, true);
 			}
 		}
-		LiquidContainer container = collider.GetComponent<LiquidContainer>();
-		if (container){
-			container.Spill();
-		}
-		float damage = direction.magnitude * 20f;
-		MessageDamage message = new MessageDamage(damage, damageType.physical);
-		Toolbox.Instance.SendMessage(collider.gameObject, this, message);
+		
 	}
-
-	void OnTriggerEnter2D(Collider2D collider){
-		if (collider.gameObject.tag == "Physical" && impactSounds.Length > 0){
-			GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0,impactSounds.Length)]);
-		}
+	void SlashOff(){
+		// GetComponent<Collider2D>().enabled = false;
 	}
-
 	void SlashEnd(){
 		Destroy(gameObject);
 	}

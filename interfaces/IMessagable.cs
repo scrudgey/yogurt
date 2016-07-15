@@ -55,10 +55,16 @@ public class MessageSpeech : Message {
 public class MessageDamage : Message {
 	public float amount;
 	public damageType type;
-
+	public Vector2 force;
+	public PhysicalImpact impactor;
 	public MessageDamage(){}
 	public MessageDamage(float amount, damageType type){
 		this.amount = amount;
 		this.type = type;
 	}
+}
+
+public class MessageHitstun : Message {
+	public bool value;
+	public bool doubledOver;
 }

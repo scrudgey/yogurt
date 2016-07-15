@@ -27,10 +27,6 @@ public class ScriptReader : MonoBehaviour {
             Vector2 direction = (Vector2)dif;
             controllable.direction = direction;
             controllable.SetDirection(direction);
-            Humanoid human = GetComponent<Humanoid>();
-            if (human){
-                human.UpdateDirection();
-            }
         }
         // say my line.
         speech = GetComponent<Speech>();

@@ -137,8 +137,14 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		if (coll.gameObject == groundObject){
 			// Debug.Log("I collided with the ground.");
 		} else {
-			// Debug.Log("physical bootstrapper collision: "+gameObject.name+" + "+coll.gameObject.name);
 			if (physical.currentMode == Physical.mode.zip){
+				// Debug.Log("physical bootstrapper collision: "+gameObject.name+" + "+coll.gameObject.name);
+				MessageDamage message = new MessageDamage();
+				message.force = physical.objectBody.velocity;
+				message.amount = 20f;
+				message.type = damageType.physical;
+				Toolbox.Instance.SendMessage(coll.gameObject, this, message);
+
 				physical.FlyMode();
 				GameObject speaker = Instantiate(Resources.Load("Speaker"), transform.position, Quaternion.identity) as GameObject;
 				speaker.GetComponent<AudioSource>().clip = Resources.Load("sounds/8bit_impact1", typeof(AudioClip)) as AudioClip;

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 // using System.Collections;
 
-public class Controllable : MonoBehaviour {
+public class Controllable : MonoBehaviour, IMessagable {
 
 //	[HideInInspector] 
 	public bool upFlag;
@@ -64,11 +64,18 @@ public class Controllable : MonoBehaviour {
 		}
 	}
 	
-	public void SetDirection(Vector2 d){
+	public virtual void SetDirection(Vector2 d){
 		direction = d;
-		// UpdateDirection();
 		if (directable != null)
 			directable.DirectionChange(d);
+	}
+
+	public virtual void ReceiveMessage(Message message){
+		if (message is MessageDamage){
+			MessageDamage dam = (MessageDamage)message;
+			SetDirection(-1f * dam.force);
+		}
+
 	}
 
 }
