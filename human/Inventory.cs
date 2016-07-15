@@ -274,15 +274,16 @@ public class Inventory : Interactive, IExcludable {
 		holding.GetComponent<Renderer>().sortingLayerName = "main";
 		holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder + 1;
 		slash.GetComponent<Animator>().SetBool(slashFlag, true);
-
-		// Collider2D slashCollider = slash.GetComponent<Collider2D>();
-		// Physics2D.IgnoreCollision(holding.GetComponent<Collider2D>(), slashCollider, true);
-
 		Slasher s = slash.GetComponent<Slasher>();
 		s.impactSounds = holding.GetComponent<MeleeWeapon>().impactSounds;
 		s.direction = controllable.direction;
 		s.owners.Add(gameObject);
 		s.owners.Add(holding.gameObject);
+
+		MeleeWeapon melee = holding.GetComponent<MeleeWeapon>();
+		if (melee){
+			s.damage = melee.damage;
+		}
 	}
 
 	public void DropMessage(GameObject obj){

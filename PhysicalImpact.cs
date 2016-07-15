@@ -24,18 +24,16 @@ public class PhysicalImpact : MonoBehaviour {
 		if (container){
 			container.Spill();
 		}
-
-		float damage = direction.magnitude * 20f;
-		MessageDamage message = new MessageDamage(damage, damageType.physical);
-		message.force = new Vector2(direction.x / 5f, direction.y / 5f);
+		MessageDamage message = new MessageDamage(magnitude, damageType.physical);
+		message.force = new Vector2(direction.x * magnitude / 100f, direction.y * magnitude / 100f);
 		message.impactor = this;
 		Toolbox.Instance.SendMessage(collider.gameObject, this, message);
 	}
 
 	public void PlayImpactSound(){
 		AudioSource source = GetComponent<AudioSource>();
-		if (source.isPlaying)
-			return;
+		// if (source.isPlaying)
+		// 	return;
 		if (impactSounds.Length > 0){
 			source.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
 		}
