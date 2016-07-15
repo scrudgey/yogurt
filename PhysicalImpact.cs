@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class PhysicalImpact : MonoBehaviour {
 	public Vector2 direction;
 	public AudioClip[] impactSounds;
-	public List<GameObject> impactedObjects = new List<GameObject>();
+	public List<Transform> impactedObjects = new List<Transform>();
 	public float magnitude = 20f;
 	public float size = 0.08f;
 
@@ -17,9 +17,9 @@ public class PhysicalImpact : MonoBehaviour {
 	}
 
 	void OnTriggerEnter2D(Collider2D collider){
-		if (impactedObjects.Contains(collider.gameObject))
+		if (impactedObjects.Contains(collider.transform.root))
 			return;
-		impactedObjects.Add(collider.gameObject);
+		impactedObjects.Add(collider.transform.root);
 		LiquidContainer container = collider.GetComponent<LiquidContainer>();
 		if (container){
 			container.Spill();
