@@ -40,6 +40,7 @@ public class HeadAnimation : MonoBehaviour, IMessagable {
 	private float eatingCountDown;
 	private float vomitCountDown;
 	private Head head;
+	private bool hitstun;
 
 	void LoadSprites(){
 		sprites = Resources.LoadAll<Sprite>("sprites/" + spriteSheet);
@@ -109,6 +110,11 @@ public class HeadAnimation : MonoBehaviour, IMessagable {
 				break;
 			}	
 		}
+
+		if (incoming is MessageHitstun){
+			MessageHitstun message = (MessageHitstun)incoming;
+			hitstun = message.value;
+		}
 	}
 
 	void Update () {
@@ -148,6 +154,10 @@ public class HeadAnimation : MonoBehaviour, IMessagable {
 		default:
 			baseFrame = 0;
 			break;
+		}
+
+		if (hitstun && !speaking && !eating){
+			baseFrame +=1 ;
 		}
 
 		spriteSheet = updateSheet;
