@@ -229,7 +229,13 @@ public class Toolbox : Singleton<Toolbox> {
 
 	public void SendMessage(GameObject host, Component messenger, Message message){
 		message.messenger = messenger;
-		IMessagable[] receivers = host.GetComponentsInChildren<IMessagable>();
+		IMessagable[] childReceivers = host.GetComponentsInChildren<IMessagable>();
+		List<IMessagable> receivers = new List<IMessagable>(childReceivers);
+		foreach(IMessagable parentReceiver in host.GetComponentsInParent<IMessagable>()){
+			if (!receivers.Contains(parentReceiver))
+				receivers.Add(parentReceiver);
+		}
+
 		foreach (IMessagable receiver in receivers){
 			receiver.ReceiveMessage(message);
 		}
