@@ -79,6 +79,8 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 			MessageHitstun hits = (MessageHitstun)message;
 			hitStun = hits.value;
 			doubledOver = hits.doubledOver;
+			LateUpdate();
+			SetFrame(0);
 		}
 	}
 	public void LoadSprites(){
