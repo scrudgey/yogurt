@@ -17,6 +17,8 @@ public class PhysicalImpact : MonoBehaviour {
 	}
 
 	void OnTriggerEnter2D(Collider2D collider){
+		if (collider.tag == "background")
+			return;
 		if (impactedObjects.Contains(collider.transform.root))
 			return;
 		impactedObjects.Add(collider.transform.root);
