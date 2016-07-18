@@ -62,7 +62,6 @@ public class Hurtable : MonoBehaviour, IMessagable {
 				dam.impactor.PlayImpactSound();
 			Rigidbody2D body = GetComponent<Rigidbody2D>();
 			if (body){
-				Debug.Log("adding force "+dam.force.ToString());
 				body.AddForce(dam.force * 100f);
 			}
 		}
