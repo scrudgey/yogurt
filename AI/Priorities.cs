@@ -30,12 +30,12 @@ namespace AI{
 			
 			// tell goal to update
 			if (goal != null){
-				Routine.status goalStatus = goal.Update();
-				if (goalStatus == Routine.status.success){
+				status goalStatus = goal.Update();
+				if (goalStatus == status.success){
 					goal = null;
 					Controller.ResetInput(control);
 				}
-				if (goalStatus == Routine.status.failure){
+				if (goalStatus == status.failure){
 					goal = null;
 					Controller.ResetInput(control);
 				}

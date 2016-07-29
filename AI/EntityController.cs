@@ -35,7 +35,6 @@ public class EntityController : MonoBehaviour {
 	private float slewTime;
 	
 	void Start () {
-
 		// init controllable 
 		control = GetComponent<Controllable>();	
 
@@ -43,21 +42,19 @@ public class EntityController : MonoBehaviour {
 		priority.Wander();
 
 		// init the thought bubble
-		thought = Instantiate( Resources.Load("UI/thoughtbubble"),gameObject.transform.position,Quaternion.identity ) as GameObject;
+		thought = Instantiate(Resources.Load("UI/thoughtbubble"), gameObject.transform.position, Quaternion.identity) as GameObject;
 		DistanceJoint2D dj = thought.GetComponent<DistanceJoint2D>();
 		dj.connectedBody = GetComponent<Rigidbody2D>();
 		dj.distance = 0.3f;
 		thoughtText = thought.GetComponentInChildren<Text>();
 		thoughtText.text = "";
-//		thought.transform.SetParent(transform);
-//		thought.transform.
 	}
 
 	public void CheckPriority(){
 		if (priority.goalStack.Count > 0){
 			goal = priority.goalStack[0];
 			priority.goalStack.RemoveAt(0);
-			goal.Init(gameObject,control);
+			goal.Init(gameObject, control);
 			slewTime = UnityEngine.Random.Range(0.5f,1.0f);
 		}
 	}
@@ -68,25 +65,23 @@ public class EntityController : MonoBehaviour {
 			if (goal == null && priority.goalStack.Count > 0){
 				goal = priority.goalStack[0];
 				priority.goalStack.RemoveAt(0);
-				goal.Init(gameObject,control);
-				slewTime = UnityEngine.Random.Range(0.5f,1.0f);
+				goal.Init(gameObject, control);
+				slewTime = UnityEngine.Random.Range(0.5f, 1.0f);
 			}
-
 			if (goal == null && priority.goalStack.Count == 0){
 				priority.Wander();
 			}
-
 			// tell goal to update
 			if (goal != null){
 				//			thoughtText.text = goal.goalThought+" "+goal.routines[goal.index].routineThought+" "+goal.successCondition.conditionThought;
 				thoughtText.text = goal.goalThought+" "+goal.routines[goal.index].routineThought;
-				Routine.status goalStatus = goal.Update();
-				if (goalStatus == Routine.status.success){
+				status goalStatus = goal.Update();
+				if (goalStatus == status.success){
 					//new goal
 					goal = null;
 					Controller.ResetInput(control);
 				}
-				if (goalStatus == Routine.status.failure){
+				if (goalStatus == status.failure){
 					goal = null;
 					Controller.ResetInput(control);
 					// run and tell that

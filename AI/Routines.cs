@@ -4,14 +4,15 @@ using System.Collections.Generic;
 using System;
 
 namespace AI{
+	public enum status{neutral, success, failure}
 
 	public class Routine {
 		public string routineThought = "I have no idea what I'm doing!";
 
 		protected GameObject gameObject;
 		protected Controllable control;
-		public enum status{neutral,success,failure}
-		public float timeLimit =-1;
+		
+		public float timeLimit = -1;
 		protected float runTime = 0;
 		
 		public virtual void Init(GameObject g, Controllable c){
@@ -52,7 +53,7 @@ namespace AI{
 
 		public RoutineWanderUntilFound(string t){
 			target = t;
-			routineThought = "I'm looking around for a "+t+".";
+			routineThought = "I'm looking around for a " + t + ".";
 			mode = 0;
 		}
 
@@ -91,7 +92,7 @@ namespace AI{
 		private RoutineWalkToGameobject walkToRoutine;
 
 		public RoutineGetNamedFromEnvironment(string t){
-			routineThought = "I'm going to pick up that "+t+".";
+			routineThought = "I'm going to pick up that " + t + ".";
 			targetName = t;
 		}
 
@@ -140,7 +141,7 @@ namespace AI{
 		}
 
 		public RoutineRetrieveNamedFromInv(string names){
-			routineThought = "I'm checking my pockets for a "+names+".";
+			routineThought = "I'm checking my pockets for a " + names + ".";
 			targetName = names;
 		}
 		protected override status DoUpdate(){
@@ -247,7 +248,7 @@ namespace AI{
 		public GameObject target;
 
 		public RoutineUseObjectOnTarget(GameObject g){
-			routineThought = "I'm using this object on "+g.name+".";
+			routineThought = "I'm using this object on " + g.name + ".";
 			target = g;
 		}
 
@@ -267,7 +268,7 @@ namespace AI{
 		public GameObject target;
 
 		public RoutineWalkToGameobject(GameObject g){
-			routineThought = "I'm walking over to the "+g.name+".";
+			routineThought = "I'm walking over to the " + g.name + ".";
 			target =g;
 		}
 

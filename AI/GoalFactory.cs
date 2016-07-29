@@ -31,38 +31,30 @@ namespace AI {
 			slewTime = Random.Range(0.3f,1.4f);
 		}
 		
-		public Routine.status Update(){
-			Routine.status returnStatus = Routine.status.neutral;
+		public status Update(){
+			status returnStatus = status.neutral;
 			if (slewTime > 0){
 				slewTime -= Time.deltaTime;
 			} else {
-				
-				Routine.status routineStatus =	routines[index].Update();
+				status routineStatus =	routines[index].Update();
 				returnStatus = successCondition.Evaluate();
-				
-//				if (routineStatus == Routine.status.success)
-//					Debug.Log("routine success");
-				if (routineStatus == Routine.status.failure){
+				if (routineStatus == status.failure){
 					Controller.ResetInput(control);
 					index ++;
 					// get next routine, or fail.
 					if (index < routines.Count){
-						slewTime = Random.Range(0.8f,1.4f);
-						routines[index].Init(gameObject,control);
+						slewTime = Random.Range(0.8f, 1.4f);
+						routines[index].Init(gameObject, control);
 					} else {
-						returnStatus = Routine.status.failure;
-						slewTime = Random.Range(0.3f,1.4f);
+						returnStatus = status.failure;
+						slewTime = Random.Range(0.3f, 1.4f);
 					}
 				}
 			}
-			
 			return returnStatus;
 		}
 		
 	}
-
-
-	// ideally there'd be some way to script this stuff
 
 	public class GoalFactory  {
 

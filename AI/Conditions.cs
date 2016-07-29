@@ -12,8 +12,8 @@ namespace AI{
 		public virtual void Init(GameObject g){
 			gameObject = g;
 		}
-		public virtual Routine.status Evaluate(){
-			return Routine.status.neutral;
+		public virtual status Evaluate(){
+			return status.neutral;
 		}
 	}
 
@@ -30,11 +30,11 @@ namespace AI{
 			target = t;
 		}
 		
-		public override Routine.status Evaluate(){
+		public override status Evaluate(){
 			if ( Vector2.Distance(gameObject.transform.position,target) < 0.25f){
-				return Routine.status.success;
+				return status.success;
 			} else {
-				return Routine.status.neutral;
+				return status.neutral;
 			}
 		}
 	}
@@ -54,11 +54,11 @@ namespace AI{
 			dist = 0.25f;
 		}
 		
-		public override Routine.status Evaluate(){
+		public override status Evaluate(){
 			if (Vector2.Distance(gameObject.transform.position, target.transform.position) < dist ){
-				return Routine.status.success;
+				return status.success;
 			} else {
-				return Routine.status.neutral;
+				return status.neutral;
 			}
 		}
 	}
@@ -80,19 +80,19 @@ namespace AI{
 			type = t;
 		}
 		
-		public override Routine.status Evaluate(){
+		public override status Evaluate(){
 			if (inv){
 				if (inv.holding){
 					if (inv.holding.GetComponent(type) ){
-						return Routine.status.success;
+						return status.success;
 					}else{
-						return Routine.status.neutral;
+						return status.neutral;
 					}
 				} else {
-					return Routine.status.neutral;
+					return status.neutral;
 				}
 			} else {
-				return Routine.status.failure;
+				return status.failure;
 			}
 		}
 	}
@@ -113,19 +113,19 @@ namespace AI{
 			name = t;
 		}
 		
-		public override Routine.status Evaluate(){
+		public override status Evaluate(){
 			if (inv ){
 				if (inv.holding){
 					if (inv.holding.name == name ){
-						return Routine.status.success;
+						return status.success;
 					}else{
-						return Routine.status.neutral;
+						return status.neutral;
 					}
 				} else {
-					return Routine.status.neutral;
+					return status.neutral;
 				}
 			} else {
-				return Routine.status.failure;
+				return status.failure;
 			}
 		}
 	}
