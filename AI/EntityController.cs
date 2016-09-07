@@ -20,10 +20,15 @@ public class Priority{
 		name = "wander";
 		goalStack.Add(GoalFactory.WanderGoal());
 	}
+
+	public void Stand(){
+		name = "stand";
+		goalStack = new List<Goal>();
+	}
 }
 
 public class EntityController : MonoBehaviour {
-	
+	public AIBootstrapper bootstrapper;
 	private Controllable control;
 	public Routine routine;
 	public Condition condition;
@@ -38,8 +43,8 @@ public class EntityController : MonoBehaviour {
 		// init controllable 
 		control = GetComponent<Controllable>();	
 
-		priority = new Priority();
-		priority.Wander();
+		if (priority == null)	
+			priority = new Priority();
 
 		// init the thought bubble
 		thought = Instantiate(Resources.Load("UI/thoughtbubble"), gameObject.transform.position, Quaternion.identity) as GameObject;
@@ -68,9 +73,13 @@ public class EntityController : MonoBehaviour {
 				goal.Init(gameObject, control);
 				slewTime = UnityEngine.Random.Range(0.5f, 1.0f);
 			}
+
+			// could this be where the decision maker comes in?
 			if (goal == null && priority.goalStack.Count == 0){
-				priority.Wander();
+				// priority.Wander();
+				bootstrapper.InitializeController();
 			}
+			
 			// tell goal to update
 			if (goal != null){
 				//			thoughtText.text = goal.goalThought+" "+goal.routines[goal.index].routineThought+" "+goal.successCondition.conditionThought;

@@ -40,7 +40,7 @@ public class Awareness : MonoBehaviour {
 	private bool viewed;
 	public Dictionary<GameObject,Knowledge> objects = new Dictionary<GameObject,Knowledge>();
 	public Dictionary<GameObject,PersonalAssessment> people = new Dictionary<GameObject, PersonalAssessment>();
-	private EntityController controller;
+	public EntityController controller;
 
 	void Start () {
 		control = gameObject.GetComponent<Controllable>();
