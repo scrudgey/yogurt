@@ -58,10 +58,10 @@ namespace AI{
 		}
 
 		public override void Init (GameObject g, Controllable c){
-			base.Init(g,c);
+			base.Init(g, c);
 			awareness = gameObject.GetComponent<Awareness>();
 			wander = new RoutineWander();
-			wander.Init(g,c);
+			wander.Init(g, c);
 		}
 
 		protected override status DoUpdate(){
