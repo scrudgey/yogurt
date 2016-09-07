@@ -120,7 +120,9 @@ public partial class GameManager : Singleton<GameManager> {
 	
 	
 
-	public void FocusIntrinsicsChanged(Intrinsic intrinsic){
+	public void FocusIntrinsicsChanged(){
+		Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(playerObject);
+		Intrinsic intrinsic = intrinsics.NetIntrinsic();
 		if (intrinsic.telepathy.boolValue){
 			playerObject.SendMessage("Say", "I can hear thoughts!", SendMessageOptions.DontRequireReceiver);
 			cam.cullingMask |= 1 << LayerMask.NameToLayer("thoughts");
@@ -140,6 +142,7 @@ public partial class GameManager : Singleton<GameManager> {
 		cameraControl = FindObjectOfType<CameraControl>();
 		if (cameraControl)
 			cameraControl.focus = target;
+		FocusIntrinsicsChanged();
 		// if (target.GetComponent<Inventory>()){
 		// 	UINew.Instance.ShowFightButton();
 		// } else {
@@ -164,15 +167,15 @@ public partial class GameManager : Singleton<GameManager> {
 		Debug.Log("on level was loaded");
 		// TODO: check if the loaded level is a cutscene.
         sceneTime = 0f;
+		// if level is title screen, don't worry about all the rest
 		if (level <= 1)
 			return;
+		// get player reference
         GameObject player = MySaver.LoadScene();
 		// initialize values re: player object focus
         cam = GameObject.FindObjectOfType<Camera>();
         if (player){
             SetFocus(player);
-            Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(player);
-            FocusIntrinsicsChanged(intrinsics.NetIntrinsic());
             PlayerEnter();
         }	
 
@@ -280,7 +283,6 @@ public partial class GameManager : Singleton<GameManager> {
 		
 		cam = GameObject.FindObjectOfType<Camera>();
 		SetFocus(playerObject);
-
 	}
 
 
