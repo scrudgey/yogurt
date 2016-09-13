@@ -1,5 +1,5 @@
 using UnityEngine;
-// using System.Collections;
+using System.Collections.Generic;
 
 public interface IMessagable
 {
@@ -58,6 +58,7 @@ public class MessageDamage : Message {
 	public Vector2 force;
 	public PhysicalImpact impactor;
 	public MessageDamage(){}
+	public List<GameObject> responsibleParty = new List<GameObject>();
 	public MessageDamage(float amount, damageType type){
 		this.amount = amount;
 		this.type = type;
