@@ -43,7 +43,8 @@ public class Flammable : MonoBehaviour {
 		fireRadius.isTrigger = true;
 		fireRadius.radius = 0.2f;
 		fireRadius.name = "fire";
-		quality = Toolbox.Instance.GetQuality(gameObject);
+		quality = Toolbox.Instance.GetOrCreateComponent<Qualities>(gameObject);
+		// quality = Toolbox.Instance.GetQuality(gameObject);
 		}
 
 	void Update () {
