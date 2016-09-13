@@ -24,15 +24,15 @@ public class Toolbox : Singleton<Toolbox> {
 	private CameraControl cameraControl;
 	private GameObject tom;
 
-	public Qualities GetQuality(GameObject g){
-		Qualities q = g.GetComponent<Qualities>();
-		if (q){
-			return q;
-		} else {
-			q = g.AddComponent<Qualities>();
-			return q;
-		}
-	}
+	// public Qualities GetQuality(GameObject g){
+	// 	Qualities q = g.GetComponent<Qualities>();
+	// 	if (q){
+	// 		return q;
+	// 	} else {
+	// 		q = g.AddComponent<Qualities>();
+	// 		return q;
+	// 	}
+	// }
 
 	public T GetOrCreateComponent<T>(GameObject g) where T: Component{
 		T component = g.GetComponent<T>();
