@@ -8,6 +8,7 @@ public class PhysicalImpact : MonoBehaviour {
 	public List<Transform> impactedObjects = new List<Transform>();
 	public float magnitude = 20f;
 	public float size = 0.08f;
+	public List<GameObject> responsibleParty = new List<GameObject>();
 
 	void Start(){
 		Destroy(gameObject, 0.5f);
@@ -29,6 +30,7 @@ public class PhysicalImpact : MonoBehaviour {
 		MessageDamage message = new MessageDamage(magnitude, damageType.physical);
 		message.force = new Vector2(direction.x * magnitude / 100f, direction.y * magnitude / 100f);
 		message.impactor = this;
+		message.responsibleParty = responsibleParty;
 		Toolbox.Instance.SendMessage(collider.gameObject, this, message);
 	}
 
