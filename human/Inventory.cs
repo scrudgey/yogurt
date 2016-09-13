@@ -320,6 +320,7 @@ public class Inventory : Interactive, IExcludable {
 	public void PunchImpact(){
 		GameObject slash = Instantiate(Resources.Load("PhysicalImpact"), holdpoint.position, holdpoint.rotation) as GameObject;
 		PhysicalImpact impact = slash.GetComponent<PhysicalImpact>();
+		impact.responsibleParty.Add(gameObject);
 		impact.direction = controllable.direction;
 		Collider2D slashCollider = slash.GetComponent<Collider2D>();
 		foreach (Collider2D tomCollider in GetComponentsInChildren<Collider2D>()){
