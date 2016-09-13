@@ -20,6 +20,7 @@ public class Slasher : MonoBehaviour {
 		impact.direction = direction;
 		impact.size = 0.11f;
 		impact.magnitude = damage;
+		impact.responsibleParty = owners;
 
 		CircleCollider2D impactCollider = impact.GetComponent<CircleCollider2D>();
 		foreach (GameObject owner in owners){
