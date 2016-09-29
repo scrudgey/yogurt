@@ -4,35 +4,31 @@ using System;
 
 namespace AI{
 	public enum status{neutral, success, failure}
-
 	public class Routine {
 		public string routineThought = "I have no idea what I'm doing!";
-
 		protected GameObject gameObject;
 		protected Controllable control;
-		
 		public float timeLimit = -1;
 		protected float runTime = 0;
-		
-		public virtual void Init(GameObject g, Controllable c){
+		public Routine(GameObject g, Controllable c){
+			Init(g, c);
+		}
+		protected void Init(GameObject g, Controllable c){
 			gameObject = g;
 			control = c;
 		}
 		protected virtual status DoUpdate(){
 			return status.neutral;
 		}
-
 		// update is the routine called each frame by goal.
 		// this bit first checks for a timeout, then calls a routine
-		// that a child class can modify.
+		// that is specific to the child class.
 		public status Update(){
 			runTime += Time.deltaTime;
 			if (timeLimit > 0 && runTime > timeLimit){
-//				Debug.Log("Routine timeout");
 				return status.failure;
 			} else
 				return DoUpdate();
-			
 		}
 		
 	}
@@ -49,20 +45,13 @@ namespace AI{
 		private RoutineWander wander;
 		private RoutineGetNamedFromEnvironment getIt;
 		private int mode;
-
-		public RoutineWanderUntilFound(string t){
+		public RoutineWanderUntilFound(GameObject g, Controllable c, string t) : base(g, c){
 			target = t;
 			routineThought = "I'm looking around for a " + t + ".";
 			mode = 0;
-		}
-
-		public override void Init (GameObject g, Controllable c){
-			base.Init(g, c);
 			awareness = gameObject.GetComponent<Awareness>();
-			wander = new RoutineWander();
-			wander.Init(g, c);
+			wander = new RoutineWander(gameObject, control);
 		}
-
 		protected override status DoUpdate(){
 			if (mode == 0){   // wander part
 				if (checkInterval > 1.5f){
@@ -70,11 +59,9 @@ namespace AI{
 					List<GameObject> objs = awareness.FindObjectWithName(target);
 					if (objs.Count > 0){
 						mode = 1;
-						getIt = new RoutineGetNamedFromEnvironment(target);
-						getIt.Init(gameObject,control);
+						getIt = new RoutineGetNamedFromEnvironment(gameObject, control, target);
 					}
 				}
-//				Debug.Log("wander update");
 				checkInterval += Time.deltaTime;
 				return wander.Update();
 			} else {
@@ -89,16 +76,9 @@ namespace AI{
 		private GameObject target;
 		private string targetName;
 		private RoutineWalkToGameobject walkToRoutine;
-
-		public RoutineGetNamedFromEnvironment(string t){
+		public RoutineGetNamedFromEnvironment(GameObject g, Controllable c, string t) : base(g, c){
 			routineThought = "I'm going to pick up that " + t + ".";
 			targetName = t;
-		}
-
-		public override void Init (GameObject g, Controllable c)
-		{
-			base.Init (g, c);
-			
 			inv = gameObject.GetComponent<Inventory>();
 			awareness = gameObject.GetComponent<Awareness>();
 			List<GameObject> objs = new List<GameObject>();
@@ -109,11 +89,9 @@ namespace AI{
 				target = objs[0];
 			}
 			if (target){
-				walkToRoutine = new RoutineWalkToGameobject(target);
-				walkToRoutine.Init(gameObject,control);
+				walkToRoutine = new RoutineWalkToGameobject(gameObject, control, target);
 			}
 		}
-
 		protected override status DoUpdate(){
 			if (target){
 				if (Vector2.Distance(gameObject.transform.position,target.transform.position) > 0.2f){
@@ -132,16 +110,10 @@ namespace AI{
 	public class RoutineRetrieveNamedFromInv : Routine {
 		private Inventory inv;
 		private string targetName;
-
-		public override void Init (GameObject g, Controllable c)
-		{
-			base.Init (g, c);
-			inv = gameObject.GetComponent<Inventory>();
-		}
-
-		public RoutineRetrieveNamedFromInv(string names){
+		public RoutineRetrieveNamedFromInv(GameObject g, Controllable c, string names): base(g, c){
 			routineThought = "I'm checking my pockets for a " + names + ".";
 			targetName = names;
+			inv = g.GetComponent<Inventory>();
 		}
 		protected override status DoUpdate(){
 			if (inv){
@@ -159,15 +131,12 @@ namespace AI{
 	}
 	
 	public class RoutineWander : Routine {
-		
 		private float wanderTime = 0;
 		public enum direction {left,right,up,down,none}
 		private direction dir;
-
-		public RoutineWander(){
+		public RoutineWander(GameObject g, Controllable c) : base(g, c) {
 			routineThought = "I'm wandering around.";
 		}
-		
 		protected override status DoUpdate ()
 		{
 			Controller.ResetInput(control);
@@ -187,36 +156,29 @@ namespace AI{
 					break;
 				}
 			}
-			
 			if (wanderTime < -1f){
 				wanderTime = UnityEngine.Random.Range(0,2);
 				dir = (direction)(UnityEngine.Random.Range(0,4));
 			} else {
 				wanderTime -= Time.deltaTime;
 			}
-			
 			return status.neutral;
 		}
 	}
 
 	public class RoutineWalkToPoint : Routine {
-		
 		public Vector2 target = new Vector2(0,0);
-
-		public RoutineWalkToPoint(Vector2 t){
+		public RoutineWalkToPoint(GameObject g, Controllable c, Vector2 t) : base(g, c){
 			routineThought = "I'm walking to a spot.";
 			target = t;
 		}
-		
 		protected override status DoUpdate () 
 		{
 			float distToTarget = Vector2.Distance(gameObject.transform.position,target);
 			Controller.ResetInput(control);
-			
 			if (distToTarget < 0.2f){
 				return status.success;
 			} else {
-				
 				if ( Math.Abs( gameObject.transform.position.x - target.x) > 0.1f ){
 					if (gameObject.transform.position.x < target.x){
 						control.rightFlag = true;
@@ -225,7 +187,6 @@ namespace AI{
 						control.leftFlag = true;
 					}
 				}
-				
 				if ( Math.Abs( gameObject.transform.position.y - target.y) > 0.1f ){
 					if (gameObject.transform.position.y < target.y){
 						control.upFlag = true;
@@ -234,7 +195,6 @@ namespace AI{
 						control.downFlag = true;
 					}
 				}
-				
 				return status.neutral;
 			}
 			
@@ -243,12 +203,10 @@ namespace AI{
 
 	public class RoutineUseObjectOnTarget : Routine {
 		public GameObject target;
-
-		public RoutineUseObjectOnTarget(GameObject g){
+		public RoutineUseObjectOnTarget(GameObject g, Controllable c, GameObject targetObject) : base(g, c){
 			routineThought = "I'm using this object on " + g.name + ".";
-			target = g;
+			target = targetObject;
 		}
-
 		protected override status DoUpdate(){
 			if (target){
 				control.SetDirection(Vector2.ClampMagnitude( target.transform.position - gameObject.transform.position, 1f ));
@@ -261,24 +219,19 @@ namespace AI{
 	}
 
 	public class RoutineWalkToGameobject : Routine {
-		
 		public GameObject target;
-
-		public RoutineWalkToGameobject(GameObject g){
+		public RoutineWalkToGameobject(GameObject g, Controllable c, GameObject targetObject) : base(g, c) {
 			routineThought = "I'm walking over to the " + g.name + ".";
-			target =g;
+			target = targetObject;
 		}
-
 		protected override status DoUpdate()
 		{
 			if (target){
 				float distToTarget = Vector2.Distance(gameObject.transform.position,target.transform.position);
 				control.leftFlag = control.rightFlag = control.upFlag = control.downFlag = false;
-				
 				if (distToTarget < 0.2f){
 					return status.success;
 				} else {
-					
 					if ( Math.Abs( gameObject.transform.position.x - target.transform.position.x) > 0.1f ){
 						if (gameObject.transform.position.x < target.transform.position.x){
 							control.rightFlag = true;
@@ -287,7 +240,6 @@ namespace AI{
 							control.leftFlag = true;
 						}
 					}
-					
 					if ( Math.Abs( gameObject.transform.position.y - target.transform.position.y) > 0.1f ){
 						if (gameObject.transform.position.y < target.transform.position.y){
 							control.upFlag = true;
@@ -296,7 +248,6 @@ namespace AI{
 							control.downFlag = true;
 						}
 					}
-					
 					return status.neutral;
 				}
 			} else {

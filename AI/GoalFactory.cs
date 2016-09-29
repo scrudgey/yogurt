@@ -26,7 +26,7 @@ namespace AI {
 			gameObject = g;
 			control = c;
 			successCondition.Init(g);
-			routines[0].Init(g,c);
+			// routines[0].Init(g,c);
 			slewTime = Random.Range(0.3f,1.4f);
 		}
 		
@@ -43,7 +43,7 @@ namespace AI {
 					// get next routine, or fail.
 					if (index < routines.Count){
 						slewTime = Random.Range(0.8f, 1.4f);
-						routines[index].Init(gameObject, control);
+						// routines[index].Init(gameObject, control);
 					} else {
 						returnStatus = status.failure;
 						slewTime = Random.Range(0.3f, 1.4f);
@@ -57,62 +57,62 @@ namespace AI {
 
 	public class GoalFactory  {
 
-		public static Goal testGoal(){
+		public static Goal testGoal(GameObject g, Controllable c){
 			GameObject tom = GameObject.Find("Tom");
 			// define a new test goal with three routines.
 			Goal newGoal = new Goal();
 			newGoal.goalThought = "I'm filled with ennui.";
 			newGoal.successCondition = new ConditionLocation(new Vector2(-0.5f,1f));
 			
-			RoutineWalkToGameobject w = new RoutineWalkToGameobject(tom);
+			RoutineWalkToGameobject w = new RoutineWalkToGameobject(g, c, tom);
 			w.timeLimit = 2f;
 			newGoal.routines.Add( w );
-			RoutineWalkToPoint w2 = new RoutineWalkToPoint(new Vector2(00.5f,1f));
+			RoutineWalkToPoint w2 = new RoutineWalkToPoint(g, c, new Vector2(00.5f,1f));
 			w2.timeLimit = 2f;
 			newGoal.routines.Add ( w2 );
-			RoutineWalkToGameobject	w3 = new RoutineWalkToGameobject(tom);
+			RoutineWalkToGameobject	w3 = new RoutineWalkToGameobject(g, c, tom);
 			newGoal.routines.Add(w3);
 			return newGoal;
 		}
 
-		public static Goal GetItemGoal(string target){
+		public static Goal GetItemGoal(GameObject g, Controllable c, string target){
 			Goal newGoal = new Goal();
 			newGoal.goalThought = "I need a "+target+".";
 			newGoal.successCondition = new ConditionHoldingObjectWithName(target);
 
-			RoutineRetrieveNamedFromInv w = new RoutineRetrieveNamedFromInv( target );
+			RoutineRetrieveNamedFromInv w = new RoutineRetrieveNamedFromInv(g, c, target);
 			newGoal.routines.Add(w);
-			RoutineGetNamedFromEnvironment w2 = new RoutineGetNamedFromEnvironment(target);
+			RoutineGetNamedFromEnvironment w2 = new RoutineGetNamedFromEnvironment(g, c, target);
 			newGoal.routines.Add(w2);
-			RoutineWanderUntilFound w3 = new RoutineWanderUntilFound(target);
+			RoutineWanderUntilFound w3 = new RoutineWanderUntilFound(g, c, target);
 			newGoal.routines.Add(w3);
 			return newGoal;
 		}
 
-		public static Goal WalkTo(GameObject target){
+		public static Goal WalkTo(GameObject g, Controllable c, GameObject target){
 			Goal newGoal = new Goal();
 			newGoal.goalThought = "I'm going to check out that "+target.name+".";
 			newGoal.successCondition = new ConditionCloseToObject(target,0.4f);
 
-			RoutineWalkToGameobject w = new RoutineWalkToGameobject(target);
+			RoutineWalkToGameobject w = new RoutineWalkToGameobject(g, c, target);
 			newGoal.routines.Add(w);
 
 			return newGoal;
 		}
 
-		public static Goal HoseDown(GameObject target){
+		public static Goal HoseDown(GameObject g, Controllable c, GameObject target){
 			Goal newgoal = new Goal();
 			newgoal.goalThought = "I've got to do something about that "+target.name+".";
 			newgoal.successCondition = new ConditionLocation(Vector2.zero);
 
-			RoutineUseObjectOnTarget w = new RoutineUseObjectOnTarget(target);
+			RoutineUseObjectOnTarget w = new RoutineUseObjectOnTarget(g, c, target);
 			w.timeLimit = 1.5f;
 			newgoal.routines.Add(w);
 
 			return newgoal;
 		}
 
-		public static Goal WanderGoal(){
+		public static Goal WanderGoal(GameObject g, Controllable c){
 			// initialize a new goal
 			Goal newGoal = new Goal();
 			newGoal.goalThought = "I'm doing nothing in particular.";
@@ -120,7 +120,7 @@ namespace AI {
 			newGoal.successCondition = new ConditionLocation(Vector2.zero);
 			 
 			// create routine
-			RoutineWander w = new RoutineWander();
+			RoutineWander w = new RoutineWander(g, c);
 
 			// set routine and return goal
 			newGoal.routines.Add(w);

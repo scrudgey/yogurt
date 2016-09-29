@@ -155,7 +155,6 @@ public class Awareness : MonoBehaviour, IMessagable {
 
 	PersonalAssessment FormPersonalAssessment(GameObject g){
 		if (!g.GetComponent<Controllable>()){
-			Debug.Log(g.name+" is not controllable");
 			return null;
 		}
 

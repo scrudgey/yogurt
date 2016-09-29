@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
-
 using AI;
 
 public class DecisionMaker : MonoBehaviour, IMessagable {
@@ -9,6 +8,7 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 	public Controllable control;
 	public GameObject thought;
 	public Text thoughtText;
+	public Priority activePriority;
 
 	public List<Priority> priorities;
 
@@ -27,6 +27,7 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 		priorities = new List<Priority>();
 		priorities.Add(new PriorityFightFire(gameObject, control));
 		priorities.Add(new PriorityWander(gameObject, control));
+		priorities.Add(new PriorityRunAway(gameObject, control));
 	}
 
 	public void ReceiveMessage(Message message){
@@ -44,6 +45,7 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 			if (activePriority.urgency < priority.urgency)
 				activePriority = priority;
 		}
+		// activePriorityType = typeof(activePriority);
 		if (activePriority != null)
 			activePriority.DoAct();
 	}
