@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-// using System.Collections;
 using System.Collections.Generic;
 
 namespace AI {
@@ -36,7 +35,7 @@ namespace AI {
 			if (slewTime > 0){
 				slewTime -= Time.deltaTime;
 			} else {
-				status routineStatus =	routines[index].Update();
+				status routineStatus = routines[index].Update();
 				returnStatus = successCondition.Evaluate();
 				if (routineStatus == status.failure){
 					Controller.ResetInput(control);

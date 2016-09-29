@@ -1,75 +1,65 @@
 ﻿using UnityEngine;
-// using System.Collections;
-using System.Collections.Generic;
-// using AI;
 
 namespace AI{
-
-	public class Priority{
-		private GameObject _gameObject;
-		public GameObject gameObject{
-			get{return _gameObject;}
-			set{_gameObject = value;
-				GameObjectInit();}
-		}
-		public Controllable control;
-		public List<Goal> goalStack = new List<Goal>();
-		public Goal goal;
+	[System.Serializable]
+	public class Priority : IMessagable {
+		public float urgency;
 		public string name;
-		public float priority;
-		public float slewTime;
+		public AIBootstrapper bootstrapper;
+		public Controllable control;
+		public GameObject gameObject;
+		public Goal goal;
+		
+		public Priority(GameObject g, Controllable c){
+			InitReferences(g, c);
+		}
+		public void InitReferences(GameObject g, Controllable c){
+			gameObject = g;
+			control = c;
+		}
+		public virtual void Update () {
 
-		public virtual void Update(){
-			// pop the next goal if we need one
-			if (goal == null && goalStack.Count > 0){
-				goal = goalStack[0];
-				goalStack.RemoveAt(0);
-				goal.Init(gameObject,control);
-				slewTime = UnityEngine.Random.Range(0.5f,1.0f);
-			}
-			
-			// tell goal to update
+		}
+
+		public virtual void GoalFinished(status goalStatus){
+
+		}
+
+		public void DoAct(){
+			// the code to actually enact the current goal
 			if (goal != null){
 				status goalStatus = goal.Update();
-				if (goalStatus == status.success){
-					goal = null;
-					Controller.ResetInput(control);
-				}
-				if (goalStatus == status.failure){
-					goal = null;
-					Controller.ResetInput(control);
-				}
 			}
 		}
 
-		protected virtual void GameObjectInit(){
-			// here we can init references to other components on the gameobject
-		}
+		public void ReceiveMessage(Message m){
 
-		public virtual void UpdatePriority(){
-			// this code is called intermittently to decide which priority takes priority
-			// this function call can also include culling behavior, if the priority drops too far
 		}
-
 	}
 
-
-
 	public class PriorityFightFire: Priority{
-
-		public PriorityFightFire(GameObject g){
+		public PriorityFightFire(GameObject g, Controllable c) : base(g, c) {
 			name = "extinguish";
-			goalStack.Add(GoalFactory.GetItemGoal("fire extinguisher"));
-			goalStack.Add(GoalFactory.WalkTo(g));
-			goalStack.Add(GoalFactory.HoseDown(g));
+			goal = GoalFactory.GetItemGoal("fire extinguisher");
 		}
+		public override void Update(){
+			// get a fire extinguisher if I don't have one
+			// walk to and hose down whatever flaming object I know about
+			// if I don't know of any flaming objects, search for one
 
+			// goalStack.Add(GoalFactory.WalkTo(g));
+			// goalStack.Add(GoalFactory.HoseDown(g));
+		}
 	}
 
 	public class PriorityWander: Priority{
-		public PriorityWander(){
+		public PriorityWander(GameObject g, Controllable c) : base(g, c) {
 			name = "wander";
-			goalStack.Add(GoalFactory.WanderGoal());
+			goal = GoalFactory.WanderGoal();
+			goal.Init(gameObject, control);
+		}
+		public override void Update(){
+			urgency = 1;
 		}
 	}
 

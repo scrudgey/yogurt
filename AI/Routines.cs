@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-// using System.Collections;
 using System.Collections.Generic;
 using System;
 
@@ -172,8 +171,6 @@ namespace AI{
 		protected override status DoUpdate ()
 		{
 			Controller.ResetInput(control);
-//			Debug.Log("wandering");
-			
 			if (wanderTime > 0){
 				switch(dir){
 				case direction.down:

@@ -39,15 +39,12 @@ public class Awareness : MonoBehaviour, IMessagable {
 	private bool viewed;
 	public Dictionary<GameObject, Knowledge> objects = new Dictionary<GameObject, Knowledge>();
 	public Dictionary<GameObject, PersonalAssessment> people = new Dictionary<GameObject, PersonalAssessment>();
-	public EntityController controller;
-	public DecisionMaker decisionMaker;
 
 	void Start () {
 		control = gameObject.GetComponent<Controllable>();
 		sightCone = Instantiate( Resources.Load("sightcone1"), gameObject.transform.position, Quaternion.identity ) as GameObject;
 		sightConeScale = sightCone.transform.localScale;
 		sightCone.transform.parent = transform;
-		controller = gameObject.GetComponent<EntityController>();
 	}
 
 	// not going to work right now
@@ -125,10 +122,10 @@ public class Awareness : MonoBehaviour, IMessagable {
 			// Qualities q = Toolbox.Instance.GetQuality(g);
 			Qualities q = Toolbox.Instance.GetOrCreateComponent<Qualities>(g);
 			Quality quality = q.quality;
-			if (quality.flaming && controller.priority.name != "extinguish"){
-				controller.priority.ExtinguishObject(g);
-				controller.CheckPriority();
-			}
+			// if (quality.flaming && controller.priority.name != "extinguish"){
+			// 	controller.priority.ExtinguishObject(g);
+			// 	controller.CheckPriority();
+			// }
 			PersonalAssessment assessment = FormPersonalAssessment(g);
 			if (assessment != null){
 				// check to see if person is enemy

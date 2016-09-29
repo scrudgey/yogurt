@@ -3,38 +3,14 @@
 
 public class AIBootstrapper : MonoBehaviour {
 	public Awareness awareness;
-	public EntityController controller;
 	public DecisionMaker decisionMaker;
-
-	public enum InitialState{stand, wander}
-	public InitialState initialState; 
+	public Controllable controllable;
 
 	void Start(){
+		controllable = GetComponent<Controllable>();
 		awareness = Toolbox.Instance.GetOrCreateComponent<Awareness>(gameObject);
-		controller = Toolbox.Instance.GetOrCreateComponent<EntityController>(gameObject);
 		decisionMaker = Toolbox.Instance.GetOrCreateComponent<DecisionMaker>(gameObject);
-
-		awareness.controller = controller;
-		awareness.decisionMaker = decisionMaker;
-		controller.bootstrapper = this;
-		decisionMaker.controller = controller;
-		decisionMaker.awareness = awareness;
-
-		InitializeController();
+		decisionMaker.control = controllable;
 	}
 
-	public void InitializeController(){
-		if (controller.priority == null)
-			controller.priority = new Priority();
-			
-		switch(initialState){
-			case InitialState.stand:
-			break;
-			case InitialState.wander:
-			controller.priority.Wander();
-			break;
-			default:
-			break;
-		}
-	}
 }
