@@ -1,10 +1,6 @@
 ﻿using UnityEngine;
-// using System.Collections;
-// using System.Collections.Generic;
-// using System;
 
 namespace AI{
-
 	public class Condition{
 		public string conditionThought = "I have no clear motivation!";
 		protected GameObject gameObject;
@@ -59,17 +55,11 @@ namespace AI{
 			}
 		}
 	}
-
 	// this success condition is going to be pretty update intensive, getting a component on each frame??
 	// find a better way to do this
 	public class ConditionHoldingObjectOfType : Condition{
 		string type;
-		Inventory inv;	
-		// public override void Init (GameObject g)
-		// {
-		// 	base.Init (g);
-		// 	inv = gameObject.GetComponent<Inventory>();
-		// }
+		Inventory inv;
 		public ConditionHoldingObjectOfType(GameObject g, string t) : base(g) {
 			conditionThought = "I need a "+t;
 			type = t;
@@ -91,22 +81,14 @@ namespace AI{
 			}
 		}
 	}
-
 	public class ConditionHoldingObjectWithName : Condition{
 		string name;
 		Inventory inv;
-		// public override void Init (GameObject g)
-		// {
-		// 	base.Init (g);
-			
-		// 	inv = gameObject.GetComponent<Inventory>();
-		// }
 		public ConditionHoldingObjectWithName(GameObject g, string t) : base(g) {
 			conditionThought = "I need a "+t;
 			name = t;
 			inv = gameObject.GetComponent<Inventory>();
 		}
-		
 		public override status Evaluate(){
 			if (inv ){
 				if (inv.holding){

@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
-// using System.Collections;
 using System.Collections.Generic;
-
 
 public class Perception{
 	public enum tag{none,saw_object,was_hurt,saw_person}
