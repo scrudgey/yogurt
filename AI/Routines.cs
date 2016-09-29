@@ -255,4 +255,37 @@ namespace AI{
 			}
 		}
 	}
+
+	public class RoutineAvoidGameObject : Routine {
+		public GameObject threat;
+		public RoutineAvoidGameObject(GameObject g, Controllable c, GameObject threatObject) : base(g, c) {
+			routineThought = "Get me away from that "+g.name+" !";
+			threat = threatObject;
+		}
+		protected override status DoUpdate()
+		{
+			if (threat){
+				float distToTarget = Vector2.Distance(gameObject.transform.position,threat.transform.position);
+				control.leftFlag = control.rightFlag = control.upFlag = control.downFlag = false;
+				if ( Math.Abs( gameObject.transform.position.x - threat.transform.position.x) > 0.1f ){
+					if (gameObject.transform.position.x < threat.transform.position.x){
+						control.leftFlag = true;
+					} 
+					if (gameObject.transform.position.x > threat.transform.position.x){
+						control.rightFlag = true;
+					}
+				}
+				if ( Math.Abs( gameObject.transform.position.y - threat.transform.position.y) > 0.1f ){
+					if (gameObject.transform.position.y < threat.transform.position.y){
+						control.downFlag = true;
+					}
+					if (gameObject.transform.position.y > threat.transform.position.y){
+						control.upFlag = true;
+					}
+				}
+			}
+			return status.neutral;
+		}
+
+	}
 }

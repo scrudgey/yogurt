@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 
 namespace AI {
-
 	public class Goal{
 		public List<Routine> routines = new List<Routine>();
 		public int index;
@@ -10,23 +9,18 @@ namespace AI {
 		public GameObject gameObject;
 		public Controllable control;
 		public float slewTime;
-		
 		public string goalThought = "I'm just doing my thing.";
-		
 		public Routine getRoutine(){
 			if (index <= routines.Count -1)
 				return routines[index];
 			else 
 				return null;
 		}
-		
 		public void Init(GameObject g, Controllable c){
 			// associate this goal with the relevant object. also associate 
 			// success conditions, and the first routine.
 			gameObject = g;
 			control = c;
-			successCondition.Init(g);
-			// routines[0].Init(g,c);
 			slewTime = Random.Range(0.3f,1.4f);
 		}
 		
@@ -59,76 +53,61 @@ namespace AI {
 
 		public static Goal testGoal(GameObject g, Controllable c){
 			GameObject tom = GameObject.Find("Tom");
-			// define a new test goal with three routines.
 			Goal newGoal = new Goal();
 			newGoal.goalThought = "I'm filled with ennui.";
-			newGoal.successCondition = new ConditionLocation(new Vector2(-0.5f,1f));
-			
+			newGoal.successCondition = new ConditionLocation(g, new Vector2(-0.5f,1f));
 			RoutineWalkToGameobject w = new RoutineWalkToGameobject(g, c, tom);
 			w.timeLimit = 2f;
 			newGoal.routines.Add( w );
 			RoutineWalkToPoint w2 = new RoutineWalkToPoint(g, c, new Vector2(00.5f,1f));
 			w2.timeLimit = 2f;
 			newGoal.routines.Add ( w2 );
-			RoutineWalkToGameobject	w3 = new RoutineWalkToGameobject(g, c, tom);
-			newGoal.routines.Add(w3);
+			newGoal.routines.Add(new RoutineWalkToGameobject(g, c, tom));
 			return newGoal;
 		}
 
 		public static Goal GetItemGoal(GameObject g, Controllable c, string target){
 			Goal newGoal = new Goal();
 			newGoal.goalThought = "I need a "+target+".";
-			newGoal.successCondition = new ConditionHoldingObjectWithName(target);
-
-			RoutineRetrieveNamedFromInv w = new RoutineRetrieveNamedFromInv(g, c, target);
-			newGoal.routines.Add(w);
-			RoutineGetNamedFromEnvironment w2 = new RoutineGetNamedFromEnvironment(g, c, target);
-			newGoal.routines.Add(w2);
-			RoutineWanderUntilFound w3 = new RoutineWanderUntilFound(g, c, target);
-			newGoal.routines.Add(w3);
+			newGoal.successCondition = new ConditionHoldingObjectWithName(g, target);
+			newGoal.routines.Add(new RoutineRetrieveNamedFromInv(g, c, target));
+			newGoal.routines.Add(new RoutineGetNamedFromEnvironment(g, c, target));
+			newGoal.routines.Add(new RoutineWanderUntilFound(g, c, target));
 			return newGoal;
 		}
 
 		public static Goal WalkTo(GameObject g, Controllable c, GameObject target){
 			Goal newGoal = new Goal();
 			newGoal.goalThought = "I'm going to check out that "+target.name+".";
-			newGoal.successCondition = new ConditionCloseToObject(target,0.4f);
-
-			RoutineWalkToGameobject w = new RoutineWalkToGameobject(g, c, target);
-			newGoal.routines.Add(w);
-
+			newGoal.successCondition = new ConditionCloseToObject(g, target, 0.4f);
+			newGoal.routines.Add(new RoutineWalkToGameobject(g, c, target));
 			return newGoal;
 		}
 
 		public static Goal HoseDown(GameObject g, Controllable c, GameObject target){
 			Goal newgoal = new Goal();
 			newgoal.goalThought = "I've got to do something about that "+target.name+".";
-			newgoal.successCondition = new ConditionLocation(Vector2.zero);
-
+			newgoal.successCondition = new ConditionLocation(g, Vector2.zero);
 			RoutineUseObjectOnTarget w = new RoutineUseObjectOnTarget(g, c, target);
 			w.timeLimit = 1.5f;
 			newgoal.routines.Add(w);
-
 			return newgoal;
 		}
 
 		public static Goal WanderGoal(GameObject g, Controllable c){
-			// initialize a new goal
 			Goal newGoal = new Goal();
 			newGoal.goalThought = "I'm doing nothing in particular.";
-			// set success condition
-			newGoal.successCondition = new ConditionLocation(Vector2.zero);
-			 
-			// create routine
-			RoutineWander w = new RoutineWander(g, c);
-
-			// set routine and return goal
-			newGoal.routines.Add(w);
+			newGoal.successCondition = new ConditionLocation(g, Vector2.zero);
+			newGoal.routines.Add(new RoutineWander(g, c));
 			return newGoal;
 		}
 
+		public static Goal RunFromObject(GameObject g, Controllable c, GameObject threat){
+			Goal newGoal = new Goal();
+			newGoal.goalThought = "I'm trying to avoid a bad thing.";
+			newGoal.successCondition = new ConditionLocation(g, Vector2.zero);
+			newGoal.routines.Add(new RoutineAvoidGameObject(g, c, threat));
+			return newGoal;
+		}
 	}
-
-
-
 }

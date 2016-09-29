@@ -7,9 +7,11 @@ namespace AI{
 
 	public class Condition{
 		public string conditionThought = "I have no clear motivation!";
-
 		protected GameObject gameObject;
-		public virtual void Init(GameObject g){
+		public Condition(GameObject g){
+			Init(g);
+		}
+		private void Init(GameObject g){
 			gameObject = g;
 		}
 		public virtual status Evaluate(){
@@ -24,14 +26,12 @@ namespace AI{
 
 	public class ConditionLocation : Condition{
 		Vector2 target;
-		
-		public ConditionLocation(Vector2 t){
+		public ConditionLocation(GameObject g, Vector2 t): base(g) {
 			conditionThought = "I need to be over there.";
 			target = t;
 		}
-		
 		public override status Evaluate(){
-			if ( Vector2.Distance(gameObject.transform.position,target) < 0.25f){
+			if (Vector2.Distance(gameObject.transform.position, target) < 0.25f){
 				return status.success;
 			} else {
 				return status.neutral;
@@ -42,18 +42,15 @@ namespace AI{
 	public class ConditionCloseToObject : Condition{
 		GameObject target;
 		float dist;
-
-		public ConditionCloseToObject(GameObject t, float d){
+		public ConditionCloseToObject(GameObject g, GameObject t, float d) : base(g) {
 			conditionThought = "I need to get close to that "+t.name;
 			target = t;
 			dist = d;
 		}
-
-		public ConditionCloseToObject(GameObject t){
+		public ConditionCloseToObject(GameObject g, GameObject t) : base(g) {
 			target = t;
 			dist = 0.25f;
 		}
-		
 		public override status Evaluate(){
 			if (Vector2.Distance(gameObject.transform.position, target.transform.position) < dist ){
 				return status.success;
@@ -67,19 +64,17 @@ namespace AI{
 	// find a better way to do this
 	public class ConditionHoldingObjectOfType : Condition{
 		string type;
-		Inventory inv;
-		
-		public override void Init (GameObject g)
-		{
-			base.Init (g);
-			inv = gameObject.GetComponent<Inventory>();
-		}
-		
-		public ConditionHoldingObjectOfType(string t){
+		Inventory inv;	
+		// public override void Init (GameObject g)
+		// {
+		// 	base.Init (g);
+		// 	inv = gameObject.GetComponent<Inventory>();
+		// }
+		public ConditionHoldingObjectOfType(GameObject g, string t) : base(g) {
 			conditionThought = "I need a "+t;
 			type = t;
+			inv = gameObject.GetComponent<Inventory>();
 		}
-		
 		public override status Evaluate(){
 			if (inv){
 				if (inv.holding){
@@ -100,17 +95,16 @@ namespace AI{
 	public class ConditionHoldingObjectWithName : Condition{
 		string name;
 		Inventory inv;
-		
-		public override void Init (GameObject g)
-		{
-			base.Init (g);
+		// public override void Init (GameObject g)
+		// {
+		// 	base.Init (g);
 			
-			inv = gameObject.GetComponent<Inventory>();
-		}
-		
-		public ConditionHoldingObjectWithName(string t){
+		// 	inv = gameObject.GetComponent<Inventory>();
+		// }
+		public ConditionHoldingObjectWithName(GameObject g, string t) : base(g) {
 			conditionThought = "I need a "+t;
 			name = t;
+			inv = gameObject.GetComponent<Inventory>();
 		}
 		
 		public override status Evaluate(){

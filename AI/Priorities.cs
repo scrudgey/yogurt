@@ -7,7 +7,6 @@ namespace AI{
 		public Controllable control;
 		public GameObject gameObject;
 		public Goal goal;
-		
 		public Priority(GameObject g, Controllable c){
 			InitReferences(g, c);
 		}
@@ -15,14 +14,12 @@ namespace AI{
 			gameObject = g;
 			control = c;
 		}
-		
 		public virtual void Update () {
 
 		}
 		public virtual void GoalFinished(status goalStatus){
 
 		}
-
 		public void DoAct(){
 			// the code to actually enact the current goal
 			if (goal != null){
@@ -31,7 +28,6 @@ namespace AI{
 					GoalFinished(goalStatus);
 			}
 		}
-
 		public virtual void ReceiveMessage(Message m){
 
 		}
@@ -66,18 +62,16 @@ namespace AI{
 	}
 
 	public class PriorityRunAway: Priority{
-
 		GameObject threat;
-
 		public PriorityRunAway(GameObject g, Controllable c): base(g, c){
-
+			goal = GoalFactory.WanderGoal(g, c);
 		}
-
 		public override void ReceiveMessage(Message incoming){
 			if (incoming is MessageDamage){
 				MessageDamage dam = (MessageDamage)incoming;
 				urgency += 1;
 				threat = dam.responsibleParty[0];
+				goal = GoalFactory.RunFromObject(gameObject, control, threat);
 			}
 		}
 
