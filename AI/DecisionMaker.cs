@@ -14,6 +14,9 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 
 
 	void Start() {
+		// make sure there's Awareness
+		Toolbox.Instance.GetOrCreateComponent<Awareness>(gameObject);
+
 		// initialize thought bubble
 		thought = Instantiate(Resources.Load("UI/thoughtbubble"), gameObject.transform.position, Quaternion.identity) as GameObject;
 		DistanceJoint2D dj = thought.GetComponent<DistanceJoint2D>();
@@ -28,6 +31,7 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 		priorities.Add(new PriorityFightFire(gameObject, control));
 		priorities.Add(new PriorityWander(gameObject, control));
 		priorities.Add(new PriorityRunAway(gameObject, control));
+		priorities.Add(new PriorityAttack(gameObject, control));
 	}
 
 	public void ReceiveMessage(Message message){
