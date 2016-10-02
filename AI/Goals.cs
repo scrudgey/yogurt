@@ -27,7 +27,7 @@ namespace AI {
 			slewTime = Random.Range(0.3f,1.4f);
 		}
 		
-		public status Update(){
+		public virtual status Update(){
 			status returnStatus = status.neutral;
 			if (slewTime > 0){
 				slewTime -= Time.deltaTime;
@@ -92,6 +92,16 @@ namespace AI {
 			goalThought = "I'm trying to avoid a bad thing.";
 			successCondition = new ConditionLocation(g, Vector2.zero);
 			routines.Add(new RoutineAvoidGameObject(g, c, threat));
+		}
+	}
+
+	public class GoalDukesUp : Goal {
+		private Inventory inv;
+		public GoalDukesUp(GameObject g, Controllable c, Inventory i) : base(g, c){
+			inv = i;
+			successCondition = new ConditionInFightMode(g, i);
+			routines.Add(new RoutineToggleFightMode(g, c, i));
+			routines.Add(new RoutineToggleFightMode(g, c, i));
 		}
 	}
 }

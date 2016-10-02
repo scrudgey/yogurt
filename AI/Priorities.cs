@@ -76,14 +76,26 @@ namespace AI{
 		public HashSet<GameObject> enemies = new HashSet<GameObject>();
 		public GameObject closestEnemy;
 		private float updateInterval;
+		private Inventory inventory;
 		public PriorityAttack(GameObject g, Controllable c): base(g, c){
 			goal = new GoalWander(g, c);
+			inventory = gameObject.GetComponent<Inventory>();
 		}
 		public override void ReceiveMessage(Message incoming){
 			if (incoming is MessageDamage){
 				MessageDamage dam = (MessageDamage)incoming;
 				urgency += 1;
 				enemies.Add(dam.responsibleParty[0]);
+				goal = new GoalDukesUp(gameObject, control, inventory);
+			}
+		}
+
+		public override void GoalFinished(status goalStatus){
+			if (!inventory.fightMode){
+
+			}
+			if (goal is GoalDukesUp){
+
 			}
 		}
 		public override void Update(){

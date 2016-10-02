@@ -286,6 +286,18 @@ namespace AI{
 			}
 			return status.neutral;
 		}
+	}
+	
+	public class RoutineToggleFightMode : Routine {
+		public Inventory inv;
 
+		public RoutineToggleFightMode(GameObject g, Controllable c, Inventory i) : base(g, c) {
+			routineThought = "I need to prepare for battle!";
+			inv = i;
+		}
+		protected override status DoUpdate(){
+			inv.ToggleFightMode();
+			return status.success;
+		}
 	}
 }

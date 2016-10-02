@@ -106,4 +106,22 @@ namespace AI{
 		}
 	}
 
+	public class ConditionInFightMode : Condition{
+		Inventory inv;
+		public ConditionInFightMode(GameObject g, Inventory i) : base(g) {
+			inv = i;
+		}
+		public override status Evaluate(){
+			if (inv){
+				if (inv.fightMode){
+					return status.success;
+				} else {
+					return status.neutral;
+				}
+			} else {
+				return status.failure;
+			}
+		}
+	}
+
 }
