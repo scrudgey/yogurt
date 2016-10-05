@@ -5,6 +5,7 @@ namespace AI {
 	public class Goal{
 		public List<Routine> routines = new List<Routine>();
 		public int index;
+		public List<Goal> requirements = new List<Goal>();
 		public Condition successCondition;
 		public GameObject gameObject;
 		public Controllable control;
@@ -13,42 +14,36 @@ namespace AI {
 		public Goal(GameObject g, Controllable c){
 			Init(g, c);
 		}
-		public Routine getRoutine(){
-			if (index <= routines.Count -1)
-				return routines[index];
-			else 
-				return null;
-		}
 		public void Init(GameObject g, Controllable c){
 			// associate this goal with the relevant object. also associate 
 			// success conditions, and the first routine.
 			gameObject = g;
 			control = c;
-			slewTime = Random.Range(0.3f,1.4f);
+			slewTime = Random.Range(0.3f, 1.4f);
 		}
-		
-		public virtual status Update(){
-			status returnStatus = status.neutral;
-			if (slewTime > 0){
-				slewTime -= Time.deltaTime;
-			} else {
-				status routineStatus = routines[index].Update();
-				returnStatus = successCondition.Evaluate();
-				if (routineStatus == status.failure){
-					Controller.ResetInput(control);
-					index ++;
-					// get next routine, or fail.
-					if (index < routines.Count){
-						slewTime = Random.Range(0.8f, 1.4f);
-					} else {
-						returnStatus = status.failure;
-						slewTime = Random.Range(0.3f, 1.4f);
-					}
+		public void Update(){
+			foreach (Goal requirement in requirements){
+				if (requirement.successCondition.Evaluate() != status.success){
+					requirement.Update();
+					return;
 				}
 			}
-			return returnStatus;
+			if (slewTime > 0){
+				slewTime -= Time.deltaTime;
+				return;
+			}
+			status routineStatus = routines[index].Update();
+			if (routineStatus == status.failure){
+				Controller.ResetInput(control);
+				index ++;
+				// get next routine, or fail.
+				if (index < routines.Count){
+					slewTime = Random.Range(0.8f, 1.4f);
+				} else {
+					// what do do? reset from the start maybe
+				}
+			}
 		}
-		
 	}
 
 	public class GoalGetItem : Goal {
@@ -61,8 +56,8 @@ namespace AI {
 		}
 	}
 
-	public class GoalWalkTo : Goal {
-		public GoalWalkTo(GameObject g, Controllable c, GameObject target) : base(g, c){
+	public class GoalWalkToObject : Goal {
+		public GoalWalkToObject(GameObject g, Controllable c, GameObject target) : base(g, c){
 			goalThought = "I'm going to check out that "+target.name+".";
 			successCondition = new ConditionCloseToObject(g, target, 0.4f);
 			routines.Add(new RoutineWalkToGameobject(g, c, target));

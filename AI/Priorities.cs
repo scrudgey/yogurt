@@ -18,18 +18,14 @@ namespace AI{
 		public virtual void Update(){}
 		public void DoAct(){
 			if (goal != null){
-				status goalStatus = goal.Update();
-				if (goalStatus != status.neutral)
-					GoalFinished(goalStatus);
+				goal.Update();
 			}
 		}
 		public virtual void ReceiveMessage(Message m){}
-		public virtual void GoalFinished(status goalStatus){}
 	}
 
 	public class PriorityFightFire: Priority{
 		public PriorityFightFire(GameObject g, Controllable c): base(g, c) {
-			// goal = GoalFactory.GetItemGoal(g, c, "fire extinguisher");
 			goal = new GoalGetItem(g, c, "fire extinguisher");
 		}
 		// get a fire extinguisher if I don't have one
@@ -38,10 +34,6 @@ namespace AI{
 
 		// goalStack.Add(GoalFactory.WalkTo(g));
 		// goalStack.Add(GoalFactory.HoseDown(g));
-		public override void Update(){
-		}
-		public override void GoalFinished(status goalStatus){
-		}
 	}
 
 	public class PriorityWander: Priority{
@@ -58,7 +50,6 @@ namespace AI{
 	public class PriorityRunAway: Priority{
 		GameObject threat;
 		public PriorityRunAway(GameObject g, Controllable c): base(g, c){
-			// goal = GoalFactory.WanderGoal(g, c);
 			goal = new GoalWander(g, c);
 		}
 		public override void ReceiveMessage(Message incoming){
@@ -66,7 +57,6 @@ namespace AI{
 				MessageDamage dam = (MessageDamage)incoming;
 				urgency += 1;
 				threat = dam.responsibleParty[0];
-				// goal = GoalFactory.RunFromObject(gameObject, control, threat);
 				goal = new GoalRunFromObject(gameObject, control, threat);
 			}
 		}
@@ -81,21 +71,18 @@ namespace AI{
 			goal = new GoalWander(g, c);
 			inventory = gameObject.GetComponent<Inventory>();
 		}
+		public Goal AttackEnemy(){
+			Goal fightGoal = new GoalWalkToObject(gameObject, control, closestEnemy);
+			Goal dukesUp = new GoalDukesUp(gameObject, control, inventory);
+			fightGoal.requirements.Add(dukesUp);
+			return fightGoal;
+		}
 		public override void ReceiveMessage(Message incoming){
 			if (incoming is MessageDamage){
 				MessageDamage dam = (MessageDamage)incoming;
-				urgency += 1;
+				urgency = 5;
 				enemies.Add(dam.responsibleParty[0]);
-				goal = new GoalDukesUp(gameObject, control, inventory);
-			}
-		}
-
-		public override void GoalFinished(status goalStatus){
-			if (!inventory.fightMode){
-
-			}
-			if (goal is GoalDukesUp){
-
+				goal = AttackEnemy();
 			}
 		}
 		public override void Update(){

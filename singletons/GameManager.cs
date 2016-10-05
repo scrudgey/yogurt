@@ -124,7 +124,7 @@ public partial class GameManager : Singleton<GameManager> {
 		Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(playerObject);
 		Intrinsic intrinsic = intrinsics.NetIntrinsic();
 		if (intrinsic.telepathy.boolValue){
-			playerObject.SendMessage("Say", "I can hear thoughts!", SendMessageOptions.DontRequireReceiver);
+			// playerObject.SendMessage("Say", "I can hear thoughts!", SendMessageOptions.DontRequireReceiver);
 			cam.cullingMask |= 1 << LayerMask.NameToLayer("thoughts");
 		} else {
 			try {
