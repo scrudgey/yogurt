@@ -23,22 +23,28 @@ namespace AI{
 		}
 		public virtual void ReceiveMessage(Message m){}
 	}
-
 	public class PriorityFightFire: Priority{
+		public GameObject flamingObject;
 		public PriorityFightFire(GameObject g, Controllable c): base(g, c) {
 			goal = new GoalGetItem(g, c, "fire extinguisher");
 		}
-		// get a fire extinguisher if I don't have one
-		// walk to and hose down whatever flaming object I know about
-		// if I don't know of any flaming objects, search for one
+		Goal Extinguish(){
+			Goal getExt = new GoalGetItem(gameObject, control, "fire extinguisher");
+			getExt.successCondition = new ConditionHoldingObjectWithName(gameObject, "fire extinguisher");
 
-		// goalStack.Add(GoalFactory.WalkTo(g));
-		// goalStack.Add(GoalFactory.HoseDown(g));
+			Goal approach = new GoalWalkToObject(gameObject, control, flamingObject);
+			// approach.successCondition = new ConditionCloseToObject(gameObject, ref flamingObject);
+			approach.requirements.Add(getExt);
+
+			Goal goal = new GoalHoseDown(gameObject, control, ref flamingObject);
+			goal.requirements.Add(approach);
+
+			return goal;
+		}
 	}
 
 	public class PriorityWander: Priority{
 		public PriorityWander(GameObject g, Controllable c): base(g, c) {
-			// goal = GoalFactory.WanderGoal(g, c);
 			goal = new GoalWander(g, c);
 			goal.Init(gameObject, control);
 		}
@@ -55,34 +61,48 @@ namespace AI{
 		public override void ReceiveMessage(Message incoming){
 			if (incoming is MessageDamage){
 				MessageDamage dam = (MessageDamage)incoming;
-				urgency += 1;
+				// urgency += 1;
 				threat = dam.responsibleParty[0];
 				goal = new GoalRunFromObject(gameObject, control, threat);
 			}
 		}
 	}
 
+	[System.Serializable]
 	public class PriorityAttack: Priority{
 		public HashSet<GameObject> enemies = new HashSet<GameObject>();
-		public GameObject closestEnemy;
+		public GameObject closestEnemy{
+			get {
+				return _closestEnemy;
+				}
+			set {
+				_closestEnemy = value;
+				fightGoal.ChangeTarget(value);
+			}
+		}
+		private GameObject _closestEnemy;
 		private float updateInterval;
 		private Inventory inventory;
+		public GoalWalkToObject fightGoal;
 		public PriorityAttack(GameObject g, Controllable c): base(g, c){
-			goal = new GoalWander(g, c);
+			// goal = new GoalWander(g, c);
 			inventory = gameObject.GetComponent<Inventory>();
-		}
-		public Goal AttackEnemy(){
-			Goal fightGoal = new GoalWalkToObject(gameObject, control, closestEnemy);
+
 			Goal dukesUp = new GoalDukesUp(gameObject, control, inventory);
+			dukesUp.successCondition = new ConditionInFightMode(g, inventory);
+
+			fightGoal = new GoalWalkToObject(gameObject, control, closestEnemy);
+			fightGoal.successCondition = new ConditionCloseToObject(gameObject, closestEnemy);
 			fightGoal.requirements.Add(dukesUp);
-			return fightGoal;
+
+			goal = fightGoal;
 		}
 		public override void ReceiveMessage(Message incoming){
 			if (incoming is MessageDamage){
 				MessageDamage dam = (MessageDamage)incoming;
 				urgency = 5;
 				enemies.Add(dam.responsibleParty[0]);
-				goal = AttackEnemy();
+				// goal = AttackEnemy();
 			}
 		}
 		public override void Update(){
@@ -102,6 +122,7 @@ namespace AI{
 					closestDist = dist;
 				}
 			}
+			Debug.Log(closestEnemy);
 		}
 	}
 }

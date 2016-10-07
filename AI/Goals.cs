@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace AI {
 	public class Goal{
 		public List<Routine> routines = new List<Routine>();
-		public int index;
+		public int index = 0;
 		public List<Goal> requirements = new List<Goal>();
 		public Condition successCondition;
 		public GameObject gameObject;
@@ -32,17 +32,28 @@ namespace AI {
 				slewTime -= Time.deltaTime;
 				return;
 			}
-			status routineStatus = routines[index].Update();
-			if (routineStatus == status.failure){
-				Controller.ResetInput(control);
-				index ++;
-				// get next routine, or fail.
-				if (index < routines.Count){
-					slewTime = Random.Range(0.8f, 1.4f);
-				} else {
-					// what do do? reset from the start maybe
+			try {
+				status routineStatus = routines[index].Update();
+				if (routineStatus == status.failure){
+					// Debug.Log(this);
+					// Debug.Log(routines[index]);
+
+					Controller.ResetInput(control);
+					Debug.Log(routines[index]);
+					index ++;
+					// get next routine, or fail.
+					if (index < routines.Count){
+						slewTime = Random.Range(0.8f, 1.4f);
+					} else {
+						// what do do? reset from the start maybe
+						index = routines.Count - 1;
+					}
 				}
+			} catch {
+				Debug.Log(this);
+				
 			}
+			
 		}
 	}
 
@@ -57,15 +68,20 @@ namespace AI {
 	}
 
 	public class GoalWalkToObject : Goal {
+		public RoutineWalkToGameobject walkToRoutine;
 		public GoalWalkToObject(GameObject g, Controllable c, GameObject target) : base(g, c){
-			goalThought = "I'm going to check out that "+target.name+".";
+			// goalThought = "I'm going to check out that "+target.name+".";
 			successCondition = new ConditionCloseToObject(g, target, 0.4f);
-			routines.Add(new RoutineWalkToGameobject(g, c, target));
+			walkToRoutine = new RoutineWalkToGameobject(g, c, target);
+			routines.Add(walkToRoutine);
+		}
+		public void ChangeTarget(GameObject target) {
+			walkToRoutine.target = target;
 		}
 	}
 
 	public class GoalHoseDown : Goal {
-		public GoalHoseDown(GameObject g, Controllable c, GameObject target) : base(g, c){
+		public GoalHoseDown(GameObject g, Controllable c, ref GameObject target) : base(g, c){
 			goalThought = "I've got to do something about that "+target.name+".";
 			successCondition = new ConditionLocation(g, Vector2.zero);
 			RoutineUseObjectOnTarget w = new RoutineUseObjectOnTarget(g, c, target);

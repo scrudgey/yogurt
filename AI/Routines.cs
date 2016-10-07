@@ -251,6 +251,7 @@ namespace AI{
 					return status.neutral;
 				}
 			} else {
+				Debug.Log(target);
 				return status.failure;
 			}
 		}

@@ -39,7 +39,7 @@ namespace AI{
 		GameObject target;
 		float dist;
 		public ConditionCloseToObject(GameObject g, GameObject t, float d) : base(g) {
-			conditionThought = "I need to get close to that "+t.name;
+			// conditionThought = "I need to get close to that "+t.name;
 			target = t;
 			dist = d;
 		}
