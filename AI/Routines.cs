@@ -89,7 +89,7 @@ namespace AI{
 				target = objs[0];
 			}
 			if (target){
-				walkToRoutine = new RoutineWalkToGameobject(gameObject, control, target);
+				walkToRoutine = new RoutineWalkToGameobject(gameObject, control, new Ref<GameObject>(target));
 			}
 		}
 		protected override status DoUpdate(){
@@ -202,14 +202,14 @@ namespace AI{
 	}
 
 	public class RoutineUseObjectOnTarget : Routine {
-		public GameObject target;
-		public RoutineUseObjectOnTarget(GameObject g, Controllable c, GameObject targetObject) : base(g, c){
+		public Ref<GameObject> target;
+		public RoutineUseObjectOnTarget(GameObject g, Controllable c, Ref<GameObject> targetObject) : base(g, c){
 			routineThought = "I'm using this object on " + g.name + ".";
 			target = targetObject;
 		}
 		protected override status DoUpdate(){
-			if (target){
-				control.SetDirection(Vector2.ClampMagnitude( target.transform.position - gameObject.transform.position, 1f ));
+			if (target.val){
+				control.SetDirection(Vector2.ClampMagnitude(target.val.transform.position - gameObject.transform.position, 1f ));
 				control.shootHeldFlag = true;
 				return status.neutral;
 			} else {
@@ -219,32 +219,32 @@ namespace AI{
 	}
 
 	public class RoutineWalkToGameobject : Routine {
-		public GameObject target;
-		public RoutineWalkToGameobject(GameObject g, Controllable c, GameObject targetObject) : base(g, c) {
+		public Ref<GameObject> target;
+		public RoutineWalkToGameobject(GameObject g, Controllable c, Ref<GameObject> targetObject) : base(g, c) {
 			routineThought = "I'm walking over to the " + g.name + ".";
 			target = targetObject;
 		}
 		protected override status DoUpdate()
 		{
-			if (target){
-				float distToTarget = Vector2.Distance(gameObject.transform.position,target.transform.position);
+			if (target.val){
+				float distToTarget = Vector2.Distance(gameObject.transform.position,target.val.transform.position);
 				control.leftFlag = control.rightFlag = control.upFlag = control.downFlag = false;
 				if (distToTarget < 0.2f){
 					return status.success;
 				} else {
-					if ( Math.Abs( gameObject.transform.position.x - target.transform.position.x) > 0.1f ){
-						if (gameObject.transform.position.x < target.transform.position.x){
+					if ( Math.Abs( gameObject.transform.position.x - target.val.transform.position.x) > 0.1f ){
+						if (gameObject.transform.position.x < target.val.transform.position.x){
 							control.rightFlag = true;
 						} 
-						if (gameObject.transform.position.x > target.transform.position.x){
+						if (gameObject.transform.position.x > target.val.transform.position.x){
 							control.leftFlag = true;
 						}
 					}
-					if ( Math.Abs( gameObject.transform.position.y - target.transform.position.y) > 0.1f ){
-						if (gameObject.transform.position.y < target.transform.position.y){
+					if ( Math.Abs( gameObject.transform.position.y - target.val.transform.position.y) > 0.1f ){
+						if (gameObject.transform.position.y < target.val.transform.position.y){
 							control.upFlag = true;
 						}
-						if (gameObject.transform.position.y > target.transform.position.y){
+						if (gameObject.transform.position.y > target.val.transform.position.y){
 							control.downFlag = true;
 						}
 					}
@@ -258,29 +258,29 @@ namespace AI{
 	}
 
 	public class RoutineAvoidGameObject : Routine {
-		public GameObject threat;
-		public RoutineAvoidGameObject(GameObject g, Controllable c, GameObject threatObject) : base(g, c) {
+		public Ref<GameObject> threat;
+		public RoutineAvoidGameObject(GameObject g, Controllable c, Ref<GameObject> threatObject) : base(g, c) {
 			routineThought = "Get me away from that "+g.name+" !";
 			threat = threatObject;
 		}
 		protected override status DoUpdate()
 		{
-			if (threat){
-				float distToTarget = Vector2.Distance(gameObject.transform.position,threat.transform.position);
+			if (threat.val){
+				float distToTarget = Vector2.Distance(gameObject.transform.position,threat.val.transform.position);
 				control.leftFlag = control.rightFlag = control.upFlag = control.downFlag = false;
-				if ( Math.Abs( gameObject.transform.position.x - threat.transform.position.x) > 0.1f ){
-					if (gameObject.transform.position.x < threat.transform.position.x){
+				if ( Math.Abs( gameObject.transform.position.x - threat.val.transform.position.x) > 0.1f ){
+					if (gameObject.transform.position.x < threat.val.transform.position.x){
 						control.leftFlag = true;
 					} 
-					if (gameObject.transform.position.x > threat.transform.position.x){
+					if (gameObject.transform.position.x > threat.val.transform.position.x){
 						control.rightFlag = true;
 					}
 				}
-				if ( Math.Abs( gameObject.transform.position.y - threat.transform.position.y) > 0.1f ){
-					if (gameObject.transform.position.y < threat.transform.position.y){
+				if ( Math.Abs( gameObject.transform.position.y - threat.val.transform.position.y) > 0.1f ){
+					if (gameObject.transform.position.y < threat.val.transform.position.y){
 						control.downFlag = true;
 					}
-					if (gameObject.transform.position.y > threat.transform.position.y){
+					if (gameObject.transform.position.y > threat.val.transform.position.y){
 						control.upFlag = true;
 					}
 				}
@@ -291,7 +291,6 @@ namespace AI{
 	
 	public class RoutineToggleFightMode : Routine {
 		public Inventory inv;
-
 		public RoutineToggleFightMode(GameObject g, Controllable c, Inventory i) : base(g, c) {
 			routineThought = "I need to prepare for battle!";
 			inv = i;

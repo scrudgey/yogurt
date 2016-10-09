@@ -2,6 +2,14 @@
 using System.Collections.Generic;
 
 namespace AI {
+
+	public class Ref<T> {
+		public T val;
+		public Ref(T t){
+			val = t;
+		}
+	}
+
 	public class Goal{
 		public List<Routine> routines = new List<Routine>();
 		public int index = 0;
@@ -12,15 +20,18 @@ namespace AI {
 		public float slewTime;
 		public string goalThought = "I'm just doing my thing.";
 		public Goal(GameObject g, Controllable c){
-			Init(g, c);
-		}
-		public void Init(GameObject g, Controllable c){
-			// associate this goal with the relevant object. also associate 
-			// success conditions, and the first routine.
+			// Init(g, c);
 			gameObject = g;
 			control = c;
 			slewTime = Random.Range(0.3f, 1.4f);
 		}
+		// public void Init(GameObject g, Controllable c){
+		// 	// associate this goal with the relevant object. also associate 
+		// 	// success conditions, and the first routine.
+		// 	gameObject = g;
+		// 	control = c;
+		// 	slewTime = Random.Range(0.3f, 1.4f);
+		// }
 		public void Update(){
 			foreach (Goal requirement in requirements){
 				if (requirement.successCondition.Evaluate() != status.success){
@@ -37,7 +48,6 @@ namespace AI {
 				if (routineStatus == status.failure){
 					// Debug.Log(this);
 					// Debug.Log(routines[index]);
-
 					Controller.ResetInput(control);
 					Debug.Log(routines[index]);
 					index ++;
@@ -51,9 +61,7 @@ namespace AI {
 				}
 			} catch {
 				Debug.Log(this);
-				
 			}
-			
 		}
 	}
 
@@ -68,23 +76,25 @@ namespace AI {
 	}
 
 	public class GoalWalkToObject : Goal {
-		public RoutineWalkToGameobject walkToRoutine;
-		public GoalWalkToObject(GameObject g, Controllable c, GameObject target) : base(g, c){
+		// public TargetChange(GameObject newTarget){
+
+		// }
+		public GoalWalkToObject(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c){
 			// goalThought = "I'm going to check out that "+target.name+".";
 			successCondition = new ConditionCloseToObject(g, target, 0.4f);
-			walkToRoutine = new RoutineWalkToGameobject(g, c, target);
-			routines.Add(walkToRoutine);
-		}
-		public void ChangeTarget(GameObject target) {
-			walkToRoutine.target = target;
+			routines.Add(new RoutineWalkToGameobject(g, c, target));
 		}
 	}
 
 	public class GoalHoseDown : Goal {
-		public GoalHoseDown(GameObject g, Controllable c, ref GameObject target) : base(g, c){
-			goalThought = "I've got to do something about that "+target.name+".";
-			successCondition = new ConditionLocation(g, Vector2.zero);
-			RoutineUseObjectOnTarget w = new RoutineUseObjectOnTarget(g, c, target);
+		public Ref<GameObject> target;
+		public new string goalThought{
+			get {return "I've got to do something about that "+target.val.name+".";}
+		}
+		public GoalHoseDown(GameObject g, Controllable c, Ref<GameObject> r) : base(g, c){
+			// goalThought = "I've got to do something about that "+target.val.name+".";
+			successCondition = new ConditionLocation(g, new Ref<Vector2>(Vector2.zero));
+			RoutineUseObjectOnTarget w = new RoutineUseObjectOnTarget(g, c, r);
 			w.timeLimit = 1.5f;
 			routines.Add(w);
 		}
@@ -93,15 +103,15 @@ namespace AI {
 	public class GoalWander : Goal {
 		public GoalWander(GameObject g, Controllable c) : base(g, c){
 			goalThought = "I'm doing nothing in particular.";
-			successCondition = new ConditionLocation(g, Vector2.zero);
+			successCondition = new ConditionLocation(g, new Ref<Vector2>(Vector2.zero));
 			routines.Add(new RoutineWander(g, c));
 		}
 	}
 
 	public class GoalRunFromObject : Goal {
-		public GoalRunFromObject(GameObject g, Controllable c, GameObject threat) : base(g, c){
+		public GoalRunFromObject(GameObject g, Controllable c, Ref<GameObject> threat) : base(g, c){
 			goalThought = "I'm trying to avoid a bad thing.";
-			successCondition = new ConditionLocation(g, Vector2.zero);
+			successCondition = new ConditionLocation(g, new Ref<Vector2>(Vector2.zero));
 			routines.Add(new RoutineAvoidGameObject(g, c, threat));
 		}
 	}

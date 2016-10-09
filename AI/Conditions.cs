@@ -21,13 +21,13 @@ namespace AI{
 	 * */
 
 	public class ConditionLocation : Condition{
-		Vector2 target;
-		public ConditionLocation(GameObject g, Vector2 t): base(g) {
+		Ref<Vector2> target = new Ref<Vector2>(Vector2.zero);
+		public ConditionLocation(GameObject g, Ref<Vector2> t): base(g) {
 			conditionThought = "I need to be over there.";
 			target = t;
 		}
 		public override status Evaluate(){
-			if (Vector2.Distance(gameObject.transform.position, target) < 0.25f){
+			if (Vector2.Distance(gameObject.transform.position, target.val) < 0.25f){
 				return status.success;
 			} else {
 				return status.neutral;
@@ -36,19 +36,19 @@ namespace AI{
 	}
 
 	public class ConditionCloseToObject : Condition{
-		GameObject target;
+		public Ref<GameObject> target;
 		float dist;
-		public ConditionCloseToObject(GameObject g, GameObject t, float d) : base(g) {
+		public ConditionCloseToObject(GameObject g, Ref<GameObject> t, float d) : base(g) {
 			// conditionThought = "I need to get close to that "+t.name;
 			target = t;
 			dist = d;
 		}
-		public ConditionCloseToObject(GameObject g, GameObject t) : base(g) {
+		public ConditionCloseToObject(GameObject g, Ref<GameObject> t) : base(g) {
 			target = t;
 			dist = 0.25f;
 		}
 		public override status Evaluate(){
-			if (Vector2.Distance(gameObject.transform.position, target.transform.position) < dist ){
+			if (Vector2.Distance(gameObject.transform.position, target.val.transform.position) < dist ){
 				return status.success;
 			} else {
 				return status.neutral;
