@@ -1,31 +1,48 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class Perception{
-	public enum tag{none,saw_object,was_hurt,saw_person}
-	public tag perceptType;
-	public GameObject target;
-}
-
+[System.Serializable]
 public class Knowledge{
-	public enum tag{edible,weapon};
 	public GameObject obj;
-	public Quality quality;
+	public Transform transform;
 	public Vector3 lastSeenPosition;
-	public Vector3 lastSeenTime;
+	public float lastSeenTime;
+
+	public Flammable flammable;
+	public MeleeWeapon meleeWeapon;
+
 	public Knowledge(GameObject o){
 		obj = o;
-		Qualities q = o.GetComponent<Qualities>();
-		if (q)
-			quality = q.quality;
-		lastSeenPosition = o.transform.position;
+		transform = o.transform;
+
+		lastSeenPosition = transform.position;
+		lastSeenTime = Time.time;
+		foreach(Component component in o.GetComponents<Component>()){
+			if (component is Flammable){
+				flammable = (Flammable)component;
+			}
+			if (component is MeleeWeapon){
+				meleeWeapon = (MeleeWeapon)component;
+			}
+		}
+	}
+	public void UpdateInfo(){
+		if (obj){
+			lastSeenPosition = transform.position;
+			lastSeenTime = Time.time;
+		}
 	}
 }
 
+[System.Serializable]
 public class PersonalAssessment{
 	public enum friendStatus{neutral, friend, enemy}
 	public friendStatus status;
 	public float harmDealt;
+	public Knowledge knowledge;
+	public PersonalAssessment(Knowledge k){
+		knowledge = k;
+	}
 }
 
 public class Awareness : MonoBehaviour, IMessagable {
@@ -35,9 +52,9 @@ public class Awareness : MonoBehaviour, IMessagable {
 	private float speciousPresent; 
 	private List<GameObject> fieldOfView = new List<GameObject>();
 	private bool viewed;
-	public Dictionary<GameObject, Knowledge> objects = new Dictionary<GameObject, Knowledge>();
-	public Dictionary<GameObject, PersonalAssessment> people = new Dictionary<GameObject, PersonalAssessment>();
-
+	public SerializableDictionary<GameObject, Knowledge> knowledgebase = new SerializableDictionary<GameObject, Knowledge>();
+	public SerializableDictionary<GameObject, PersonalAssessment> people = new SerializableDictionary<GameObject, PersonalAssessment>();
+	// public Transform transform;
 	void Start () {
 		control = gameObject.GetComponent<Controllable>();
 		sightCone = Instantiate( Resources.Load("sightcone1"), gameObject.transform.position, Quaternion.identity ) as GameObject;
@@ -45,20 +62,10 @@ public class Awareness : MonoBehaviour, IMessagable {
 		sightCone.transform.parent = transform;
 	}
 
-	// not going to work right now
-	public List<GameObject> FindObjectWithTag(Knowledge.tag  tag ){
-		List<GameObject> returnArray = new List<GameObject>();
-//		foreach (Knowledge k in objects.Values){
-////			if (k.attributes.Contains(tag))
-////				returnArray.Add(k.obj);
-//		}
-		return returnArray;
-	}
-
 	public List<GameObject> FindObjectWithName(string targetName){
 		List<GameObject> returnArray = new List<GameObject>();
 		List<GameObject> removeArray = new List<GameObject>();
-		foreach (Knowledge k in objects.Values){
+		foreach (Knowledge k in knowledgebase.Values){
 			if (k.obj){
 				if (k.obj.name == targetName)
 					returnArray.Add(k.obj);
@@ -67,7 +74,7 @@ public class Awareness : MonoBehaviour, IMessagable {
 			}
 		}
 		foreach(GameObject g in removeArray){
-			objects.Remove(g);
+			knowledgebase.Remove(g);
 		}
 		return returnArray;
 	}
@@ -84,14 +91,12 @@ public class Awareness : MonoBehaviour, IMessagable {
 		}
 		float rot_z = Mathf.Atan2(control.direction.y, control.direction.x) * Mathf.Rad2Deg;
 		sightCone.transform.rotation = Quaternion.Euler(0f, 0f, rot_z );
-
 		// work the timer for the discrete perception updates
 		speciousPresent -= Time.deltaTime;
 		if (speciousPresent <= 0 && fieldOfView.Count > 0 && viewed == true){
 			Perceive();
 		}
 	}
-
 	// if its time to run the perception, add all triggerstay colliders to the list.
 	// we don't know when this will be run or how many times, so i need a boolean to track
 	// whether it has run this cycle yet or not.
@@ -101,12 +106,12 @@ public class Awareness : MonoBehaviour, IMessagable {
 				fieldOfView = new List<GameObject>();
 				viewed = true;
 			}
-			if (fieldOfView.Contains(gameObject))
+			if (fieldOfView.Contains(other.gameObject))
 				return;
-			
+			// might be able to have better logic for how to add things to the field of view here. I need 
+			// "high level" objects of import.
 			if (other.tag == "Physical")
 				fieldOfView.Add(other.gameObject);
-
 			if (other.gameObject.GetComponent<Controllable>()){
 				fieldOfView.Add(other.gameObject);
 			}
@@ -117,66 +122,69 @@ public class Awareness : MonoBehaviour, IMessagable {
 		viewed = false;
 		speciousPresent = 1f;
 		foreach (GameObject g in fieldOfView){
-			// Qualities q = Toolbox.Instance.GetQuality(g);
-			Qualities q = Toolbox.Instance.GetOrCreateComponent<Qualities>(g);
-			Quality quality = q.quality;
-			// if (quality.flaming && controller.priority.name != "extinguish"){
-			// 	controller.priority.ExtinguishObject(g);
-			// 	controller.CheckPriority();
-			// }
-			PersonalAssessment assessment = FormPersonalAssessment(g);
-			if (assessment != null){
-				// check to see if person is enemy
-				if (assessment.status == PersonalAssessment.friendStatus.enemy){
-					Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("You are mine enemy!"));
-				}
+			Knowledge knowledge = null;
+			if (knowledgebase.TryGetValue(g, out knowledge)){
+				knowledge.UpdateInfo();
+			} else {
+				knowledge = new Knowledge(g);
+				knowledgebase.Add(g, knowledge);
 			}
+			FormPersonalAssessment(g);
+			React(g, knowledge);
 		}
 	}
-	void OnTriggerEnter2D(Collider2D col){
-		List<GameObject> keys = new List<GameObject>(objects.Keys);
-		if (! keys.Contains(col.gameObject) && col.tag == "Physical" ){
-			Knowledge newKnowledge = new Knowledge(col.gameObject);
-			objects.Add(col.gameObject,newKnowledge);
-			React(col.gameObject);
-		}
-		if (keys.Contains(col.gameObject)){
-			objects[col.gameObject].lastSeenPosition = col.gameObject.transform.position;
-		}
-	}
-	void React(GameObject g){
-		if (g.name == "pimp_hat"){
-			// SendMessage("Say", "That's a sweet hat!", SendMessageOptions.DontRequireReceiver);
-			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Sweet hat!"));
+	void React(GameObject g, Knowledge k){
+		if (k.flammable != null){
+			if (k.flammable.onFire){
+				// object is on fire, do something
+			}
 		}
 	}
 
 	PersonalAssessment FormPersonalAssessment(GameObject g){
-		if (!g.GetComponent<Controllable>()){
-			return null;
-		}
-
+		if (!knowledgebase.ContainsKey(g))
+			knowledgebase.Add(g, new Knowledge(g));
 		PersonalAssessment storedAssessment;
 		if (people.TryGetValue(g, out storedAssessment)){
 			return storedAssessment;
 		}
-		PersonalAssessment assessment = new PersonalAssessment();
+		if (!g.GetComponent<Controllable>()){
+			return null;
+		}
+		PersonalAssessment assessment = new PersonalAssessment(knowledgebase[g]);
 		people.Add(g, assessment);
 		return assessment;
 	}
-
-	void AttackedByPerson(GameObject g){
+	public GameObject nearestEnemy(){
+		GameObject threat = null;
+		foreach (PersonalAssessment assessment in people.Values){
+			// loop and find the closest one
+			if (assessment.status == PersonalAssessment.friendStatus.enemy)
+				return assessment.knowledge.obj;
+		}
+		return threat;
+	}
+	public GameObject nearestFire(){
+		foreach (Knowledge knowledge in knowledgebase.Values){
+			if (knowledge.flammable != null){
+				if (knowledge.flammable.onFire)
+					return knowledge.obj;
+			}
+		}
+		return null;
+	}
+	void AttackedByPerson(GameObject g, MessageDamage message){
 		PersonalAssessment assessment = FormPersonalAssessment(g);
 		if (assessment != null){
 			assessment.status = PersonalAssessment.friendStatus.enemy;
+			assessment.harmDealt = message.amount;
 		}
 	}
-
 	public void ReceiveMessage(Message incoming){
 		if (incoming is MessageDamage){
 			MessageDamage message = (MessageDamage)incoming;
 			foreach (GameObject responsible in message.responsibleParty){
-				AttackedByPerson(responsible);
+				AttackedByPerson(responsible, message);
 			}
 		}
 	}

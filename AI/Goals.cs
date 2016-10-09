@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 
 namespace AI {
-
 	public class Ref<T> {
 		public T val;
 		public Ref(T t){
@@ -25,13 +24,6 @@ namespace AI {
 			control = c;
 			slewTime = Random.Range(0.3f, 1.4f);
 		}
-		// public void Init(GameObject g, Controllable c){
-		// 	// associate this goal with the relevant object. also associate 
-		// 	// success conditions, and the first routine.
-		// 	gameObject = g;
-		// 	control = c;
-		// 	slewTime = Random.Range(0.3f, 1.4f);
-		// }
 		public void Update(){
 			foreach (Goal requirement in requirements){
 				if (requirement.successCondition.Evaluate() != status.success){
@@ -76,11 +68,12 @@ namespace AI {
 	}
 
 	public class GoalWalkToObject : Goal {
-		// public TargetChange(GameObject newTarget){
-
-		// }
-		public GoalWalkToObject(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c){
-			// goalThought = "I'm going to check out that "+target.name+".";
+		public Ref<GameObject> target;
+		public new string goalThought{
+			get {return "I'm going to check out that "+target.val.name+".";}
+		}
+		public GoalWalkToObject(GameObject g, Controllable c, Ref<GameObject> t) : base(g, c){
+			target = t;
 			successCondition = new ConditionCloseToObject(g, target, 0.4f);
 			routines.Add(new RoutineWalkToGameobject(g, c, target));
 		}
@@ -92,7 +85,6 @@ namespace AI {
 			get {return "I've got to do something about that "+target.val.name+".";}
 		}
 		public GoalHoseDown(GameObject g, Controllable c, Ref<GameObject> r) : base(g, c){
-			// goalThought = "I've got to do something about that "+target.val.name+".";
 			successCondition = new ConditionLocation(g, new Ref<Vector2>(Vector2.zero));
 			RoutineUseObjectOnTarget w = new RoutineUseObjectOnTarget(g, c, r);
 			w.timeLimit = 1.5f;
@@ -117,9 +109,9 @@ namespace AI {
 	}
 
 	public class GoalDukesUp : Goal {
-		private Inventory inv;
+		// private Inventory inv;
 		public GoalDukesUp(GameObject g, Controllable c, Inventory i) : base(g, c){
-			inv = i;
+			// inv = i;
 			successCondition = new ConditionInFightMode(g, i);
 			routines.Add(new RoutineToggleFightMode(g, c, i));
 			routines.Add(new RoutineToggleFightMode(g, c, i));

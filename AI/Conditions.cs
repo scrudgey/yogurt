@@ -90,7 +90,7 @@ namespace AI{
 			inv = gameObject.GetComponent<Inventory>();
 		}
 		public override status Evaluate(){
-			if (inv ){
+			if (inv){
 				if (inv.holding){
 					if (inv.holding.name == name ){
 						return status.success;
@@ -105,7 +105,6 @@ namespace AI{
 			}
 		}
 	}
-
 	public class ConditionInFightMode : Condition{
 		Inventory inv;
 		public ConditionInFightMode(GameObject g, Inventory i) : base(g) {
@@ -117,6 +116,23 @@ namespace AI{
 					return status.success;
 				} else {
 					return status.neutral;
+				}
+			} else {
+				return status.failure;
+			}
+		}
+	}
+	public class ConditionKnowAboutFire : Condition{
+		Awareness awareness;
+		public ConditionKnowAboutFire(GameObject g) : base(g){
+			awareness = g.GetComponent<Awareness>();
+		}
+		public override status Evaluate(){
+			if (awareness){
+				if (awareness.nearestFire() != null){
+					return status.success;
+				} else {
+					return status.failure;
 				}
 			} else {
 				return status.failure;

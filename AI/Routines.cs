@@ -10,6 +10,19 @@ namespace AI{
 		protected Controllable control;
 		public float timeLimit = -1;
 		protected float runTime = 0;
+		Transform cachedTransform;
+		public Transform transform
+		{
+			get
+			{
+				if( cachedTransform == null )
+				{
+					cachedTransform = gameObject.GetComponent<Transform>();
+				}
+				return cachedTransform;
+			}
+		}
+
 		public Routine(GameObject g, Controllable c){
 			Init(g, c);
 		}
@@ -94,7 +107,7 @@ namespace AI{
 		}
 		protected override status DoUpdate(){
 			if (target){
-				if (Vector2.Distance(gameObject.transform.position,target.transform.position) > 0.2f){
+				if (Vector2.Distance(transform.position, target.transform.position) > 0.2f){
 					return walkToRoutine.Update();
 				} else {
 					// this bit is shakey
@@ -132,7 +145,7 @@ namespace AI{
 	
 	public class RoutineWander : Routine {
 		private float wanderTime = 0;
-		public enum direction {left,right,up,down,none}
+		public enum direction {left, right, up, down, none}
 		private direction dir;
 		public RoutineWander(GameObject g, Controllable c) : base(g, c) {
 			routineThought = "I'm wandering around.";
@@ -197,7 +210,6 @@ namespace AI{
 				}
 				return status.neutral;
 			}
-			
 		}
 	}
 
@@ -220,6 +232,24 @@ namespace AI{
 
 	public class RoutineWalkToGameobject : Routine {
 		public Ref<GameObject> target;
+		private Transform cachedTransform;
+		private GameObject cachedGameObject;
+		public Transform targetTransform{
+			get {
+				if (cachedGameObject == target.val){
+					if (cachedTransform != null){
+						return cachedTransform;
+					} else {
+						cachedTransform = target.val.transform;
+						return cachedTransform;
+					}
+				} else {
+					cachedGameObject = target.val;
+					cachedTransform = target.val.transform;
+					return cachedTransform;
+				}
+			}
+		}
 		public RoutineWalkToGameobject(GameObject g, Controllable c, Ref<GameObject> targetObject) : base(g, c) {
 			routineThought = "I'm walking over to the " + g.name + ".";
 			target = targetObject;
@@ -227,24 +257,24 @@ namespace AI{
 		protected override status DoUpdate()
 		{
 			if (target.val){
-				float distToTarget = Vector2.Distance(gameObject.transform.position,target.val.transform.position);
+				float distToTarget = Vector2.Distance(transform.position, targetTransform.position);
 				control.leftFlag = control.rightFlag = control.upFlag = control.downFlag = false;
 				if (distToTarget < 0.2f){
 					return status.success;
 				} else {
-					if ( Math.Abs( gameObject.transform.position.x - target.val.transform.position.x) > 0.1f ){
-						if (gameObject.transform.position.x < target.val.transform.position.x){
+					if ( Math.Abs(transform.position.x - targetTransform.position.x) > 0.1f ){
+						if (transform.position.x < targetTransform.position.x){
 							control.rightFlag = true;
 						} 
-						if (gameObject.transform.position.x > target.val.transform.position.x){
+					if (transform.position.x > targetTransform.position.x){
 							control.leftFlag = true;
 						}
 					}
-					if ( Math.Abs( gameObject.transform.position.y - target.val.transform.position.y) > 0.1f ){
-						if (gameObject.transform.position.y < target.val.transform.position.y){
+					if ( Math.Abs(transform.position.y - targetTransform.position.y) > 0.1f ){
+						if (transform.position.y < targetTransform.position.y){
 							control.upFlag = true;
 						}
-						if (gameObject.transform.position.y > target.val.transform.position.y){
+						if (transform.position.y > targetTransform.position.y){
 							control.downFlag = true;
 						}
 					}
@@ -259,6 +289,24 @@ namespace AI{
 
 	public class RoutineAvoidGameObject : Routine {
 		public Ref<GameObject> threat;
+		private Transform cachedTransform;
+		private GameObject cachedGameObject;
+		public Transform threatTransform{
+			get {
+				if (cachedGameObject == threat.val){
+					if (cachedTransform != null){
+						return cachedTransform;
+					} else {
+						cachedTransform = threat.val.transform;
+						return cachedTransform;
+					}
+				} else {
+					cachedGameObject = threat.val;
+					cachedTransform = threat.val.transform;
+					return cachedTransform;
+				}
+			}
+		}
 		public RoutineAvoidGameObject(GameObject g, Controllable c, Ref<GameObject> threatObject) : base(g, c) {
 			routineThought = "Get me away from that "+g.name+" !";
 			threat = threatObject;
@@ -266,21 +314,20 @@ namespace AI{
 		protected override status DoUpdate()
 		{
 			if (threat.val){
-				float distToTarget = Vector2.Distance(gameObject.transform.position,threat.val.transform.position);
 				control.leftFlag = control.rightFlag = control.upFlag = control.downFlag = false;
-				if ( Math.Abs( gameObject.transform.position.x - threat.val.transform.position.x) > 0.1f ){
-					if (gameObject.transform.position.x < threat.val.transform.position.x){
+				if ( Math.Abs(transform.position.x - threatTransform.position.x) > 0.1f ){
+					if (transform.position.x < threatTransform.position.x){
 						control.leftFlag = true;
 					} 
-					if (gameObject.transform.position.x > threat.val.transform.position.x){
+					if (transform.position.x > threatTransform.position.x){
 						control.rightFlag = true;
 					}
 				}
-				if ( Math.Abs( gameObject.transform.position.y - threat.val.transform.position.y) > 0.1f ){
-					if (gameObject.transform.position.y < threat.val.transform.position.y){
+				if ( Math.Abs(transform.position.y - threatTransform.position.y) > 0.1f ){
+					if (transform.position.y < threatTransform.position.y){
 						control.downFlag = true;
 					}
-					if (gameObject.transform.position.y > threat.val.transform.position.y){
+					if (transform.position.y > threatTransform.position.y){
 						control.upFlag = true;
 					}
 				}
