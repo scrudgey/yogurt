@@ -44,11 +44,9 @@ public class Intrinsics : MonoBehaviour, IMessagable {
 
 	public void IntrinsicsChanged(){
 		Intrinsic net = NetIntrinsic();
-
 		MessageIntrinsic message = new MessageIntrinsic();
 		message.netIntrinsic = net;
 		Toolbox.Instance.SendMessage(gameObject, this, message);
-
 		if (GameManager.Instance.playerObject == gameObject)
 			GameManager.Instance.FocusIntrinsicsChanged();
 	}
