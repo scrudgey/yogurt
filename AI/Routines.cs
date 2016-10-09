@@ -220,11 +220,12 @@ namespace AI{
 			target = targetObject;
 		}
 		protected override status DoUpdate(){
-			if (target.val){
-				control.SetDirection(Vector2.ClampMagnitude(target.val.transform.position - gameObject.transform.position, 1f ));
+			if (target.val != null){
+				control.SetDirection(Vector2.ClampMagnitude(target.val.transform.position - gameObject.transform.position, 1f));
 				control.shootHeldFlag = true;
 				return status.neutral;
 			} else {
+				Debug.Log(target.val);
 				return status.failure;
 			}
 		}

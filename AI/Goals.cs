@@ -24,9 +24,17 @@ namespace AI {
 			control = c;
 			slewTime = Random.Range(0.3f, 1.4f);
 		}
+		public status Evaluate(){
+			foreach (Goal requirement in requirements){
+				if (requirement.Evaluate() != status.success){
+					return status.failure;
+				}
+			}
+			return successCondition.Evaluate();
+		}
 		public void Update(){
 			foreach (Goal requirement in requirements){
-				if (requirement.successCondition.Evaluate() != status.success){
+				if (requirement.Evaluate() != status.success){
 					requirement.Update();
 					return;
 				}
@@ -48,7 +56,8 @@ namespace AI {
 						slewTime = Random.Range(0.8f, 1.4f);
 					} else {
 						// what do do? reset from the start maybe
-						index = routines.Count - 1;
+						// index = routines.Count - 1;
+						index = 0;
 					}
 				}
 			} catch {
@@ -74,7 +83,7 @@ namespace AI {
 		}
 		public GoalWalkToObject(GameObject g, Controllable c, Ref<GameObject> t) : base(g, c){
 			target = t;
-			successCondition = new ConditionCloseToObject(g, target, 0.4f);
+			successCondition = new ConditionCloseToObject(g, target, 0.75f);
 			routines.Add(new RoutineWalkToGameobject(g, c, target));
 		}
 	}
@@ -85,10 +94,12 @@ namespace AI {
 			get {return "I've got to do something about that "+target.val.name+".";}
 		}
 		public GoalHoseDown(GameObject g, Controllable c, Ref<GameObject> r) : base(g, c){
-			successCondition = new ConditionLocation(g, new Ref<Vector2>(Vector2.zero));
-			RoutineUseObjectOnTarget w = new RoutineUseObjectOnTarget(g, c, r);
-			w.timeLimit = 1.5f;
-			routines.Add(w);
+			// successCondition = new ConditionLocation(g, new Ref<Vector2>(Vector2.zero));
+			successCondition = new ConditionFail(g);
+			// RoutineUseObjectOnTarget w = new RoutineUseObjectOnTarget(g, c, r);
+			// w.timeLimit = 1.5f;
+			// routines.Add(w);
+			routines.Add(new RoutineUseObjectOnTarget(g, c, r));
 		}
 	}
 

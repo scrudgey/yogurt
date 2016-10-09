@@ -54,7 +54,6 @@ public class Awareness : MonoBehaviour, IMessagable {
 	private bool viewed;
 	public SerializableDictionary<GameObject, Knowledge> knowledgebase = new SerializableDictionary<GameObject, Knowledge>();
 	public SerializableDictionary<GameObject, PersonalAssessment> people = new SerializableDictionary<GameObject, PersonalAssessment>();
-	// public Transform transform;
 	void Start () {
 		control = gameObject.GetComponent<Controllable>();
 		sightCone = Instantiate( Resources.Load("sightcone1"), gameObject.transform.position, Quaternion.identity ) as GameObject;
@@ -134,11 +133,11 @@ public class Awareness : MonoBehaviour, IMessagable {
 		}
 	}
 	void React(GameObject g, Knowledge k){
-		if (k.flammable != null){
-			if (k.flammable.onFire){
-				// object is on fire, do something
-			}
-		}
+		// if (k.flammable != null){
+		// 	if (k.flammable.onFire){
+		// 		// object is on fire, do something
+		// 	}
+		// }
 	}
 
 	PersonalAssessment FormPersonalAssessment(GameObject g){
@@ -158,7 +157,6 @@ public class Awareness : MonoBehaviour, IMessagable {
 	public GameObject nearestEnemy(){
 		GameObject threat = null;
 		foreach (PersonalAssessment assessment in people.Values){
-			// loop and find the closest one
 			if (assessment.status == PersonalAssessment.friendStatus.enemy)
 				return assessment.knowledge.obj;
 		}

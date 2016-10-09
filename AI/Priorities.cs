@@ -29,8 +29,8 @@ namespace AI{
 		public Ref<GameObject> flamingObject = new Ref<GameObject>(null);
 		public float updateInterval;
 		public PriorityFightFire(GameObject g, Controllable c): base(g, c) {
-			Goal getExt = new GoalGetItem(gameObject, control, "fire extinguisher");
-			getExt.successCondition = new ConditionHoldingObjectWithName(gameObject, "fire extinguisher");
+			Goal getExt = new GoalGetItem(gameObject, control, "fire_extinguisher");
+			// getExt.successCondition = new ConditionHoldingObjectWithName(gameObject, "fire extinguisher");
 
 			Goal wander = new GoalWander(gameObject, control);
 			wander.successCondition = new ConditionKnowAboutFire(gameObject);
@@ -40,6 +40,7 @@ namespace AI{
 			approach.requirements.Add(wander);
 
 			goal = new GoalHoseDown(gameObject, control, flamingObject);
+			// goal.successCondition = new ConditionFail();
 			goal.requirements.Add(approach);
 		}
 

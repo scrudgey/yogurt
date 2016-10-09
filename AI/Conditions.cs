@@ -35,6 +35,13 @@ namespace AI{
 		}
 	}
 
+	public class ConditionFail : Condition{
+		public ConditionFail(GameObject g): base(g){}
+		public override status Evaluate(){
+			return status.failure;
+		}
+	}
+
 	public class ConditionCloseToObject : Condition{
 		public Ref<GameObject> target;
 		float dist;
@@ -45,12 +52,14 @@ namespace AI{
 		}
 		public ConditionCloseToObject(GameObject g, Ref<GameObject> t) : base(g) {
 			target = t;
-			dist = 0.25f;
+			// dist = 0.25f;
+			dist = 0.75f;
 		}
 		public override status Evaluate(){
-			if (Vector2.Distance(gameObject.transform.position, target.val.transform.position) < dist ){
+			if (Vector2.Distance(gameObject.transform.position, target.val.transform.position) < dist){
 				return status.success;
 			} else {
+				Debug.Log(Vector2.Distance(gameObject.transform.position, target.val.transform.position));
 				return status.neutral;
 			}
 		}
@@ -92,7 +101,7 @@ namespace AI{
 		public override status Evaluate(){
 			if (inv){
 				if (inv.holding){
-					if (inv.holding.name == name ){
+					if (inv.holding.name == name){
 						return status.success;
 					}else{
 						return status.neutral;
