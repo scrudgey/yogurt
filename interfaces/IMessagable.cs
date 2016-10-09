@@ -38,11 +38,7 @@ public class MessageHead : Message {
 public class MessageSpeech : Message {
 	public string phrase;
 	public string swear = "";
-
-	// public Occurrence 
-
 	public MessageSpeech () {}
-
 	public MessageSpeech (string phrase){
 		this.phrase = phrase;
 	}
