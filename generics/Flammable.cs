@@ -12,7 +12,6 @@ public class Flammable : MonoBehaviour {
 	private CircleCollider2D fireRadius;
 	private AudioClip[] igniteSounds = new AudioClip[2];
 	private AudioClip burnSounds;
-	private Qualities quality;
 
 	void Start () {
 		//ensure that there is a speaker
@@ -43,8 +42,6 @@ public class Flammable : MonoBehaviour {
 		fireRadius.isTrigger = true;
 		fireRadius.radius = 0.2f;
 		fireRadius.name = "fire";
-		quality = Toolbox.Instance.GetOrCreateComponent<Qualities>(gameObject);
-		// quality = Toolbox.Instance.GetQuality(gameObject);
 		}
 
 	void Update () {
@@ -57,17 +54,14 @@ public class Flammable : MonoBehaviour {
 		if (!onFire && fireParticles.isPlaying){
 			fireParticles.Stop();
 			GetComponent<AudioSource>().Stop();
-			quality.quality.flaming = false;
 		}
 		if (heat <= -2 && smoke.isPlaying){
 			smoke.Stop();
-			quality.quality.flaming = false;
 		}
 		if (heat > 1 && smoke.isStopped){
 			smoke.Play();
 		}
 		if (heat > flashpoint && fireParticles.isStopped){
-			quality.quality.flaming = true;
 			fireParticles.Play();
 			onFire = true;
 			GetComponent<AudioSource>().PlayOneShot(igniteSounds[Random.Range(0, 1)]);
