@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
-// using System.Collections;
 using System.Collections.Generic;
 
-public class Inventory : Interactive, IExcludable {
+public class Inventory : Interactive, IExcludable, IMessagable {
 	public List<GameObject> items;
 	public float strength;
 	public Pickup holding{
@@ -11,8 +10,8 @@ public class Inventory : Interactive, IExcludable {
 			MessageAnimation anim = new MessageAnimation();
 			anim.type = MessageAnimation.AnimType.holding;
 			if (value != null){
-				if (fightMode)
-					ToggleFightMode();
+				if (controllable.fightMode)
+					controllable.ToggleFightMode();
 				MonoBehaviour[] list = value.gameObject.GetComponents<MonoBehaviour>();
 				foreach(MonoBehaviour mb in list)
 				{
@@ -31,7 +30,8 @@ public class Inventory : Interactive, IExcludable {
 				Toolbox.Instance.SendMessage(gameObject, this, anim);
 			}
 			_holding = value;
-			UINew.Instance.InventoryCallback(this);
+			// UINew.Instance.InventoryCallback(this);
+			controllable.DetermineInventoryActions();
 			if (value != null)
 				GameManager.Instance.CheckItemCollection(value.gameObject, gameObject);
 		}
@@ -40,19 +40,15 @@ public class Inventory : Interactive, IExcludable {
 	private Transform holdpoint;
 	public GameObject slasher;
 	private string slashFlag;
-	private Controllable controllable;
+	public Controllable controllable;
 	private List<Interaction> manualActionDictionary;
 	private bool LoadInitialized = false;
 	private GameObject throwObject;
 	private float dropHeight = 0.20f;
-
-	public bool fightMode;
-	
 	void Start(){
 		if (!LoadInitialized)
 			LoadInit();
 	}
-
 	public void LoadInit(){
 		controllable = GetComponent<Controllable>();
 		holdpoint = transform.Find("holdpoint");
@@ -229,8 +225,8 @@ public class Inventory : Interactive, IExcludable {
 	}
 
 	void Update(){
-		if (holding ){
-			if( controllable.directionAngle > 45 && controllable.directionAngle < 135){
+		if (holding){
+			if(controllable.directionAngle > 45 && controllable.directionAngle < 135){
 				holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
 			} else {
 				holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder + 2;
@@ -289,30 +285,11 @@ public class Inventory : Interactive, IExcludable {
 	public void DropMessage(GameObject obj){
 		SoftDropItem();
 	}
-
 	public void WasDestroyed(GameObject obj){
 		if (obj == holding.gameObject){
 			holding = null;
 		}
 	}
-
-	public void ToggleFightMode(){
-		fightMode = !fightMode;
-		if (fightMode){
-			if (holding){
-				DropItem();
-			}
-			MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.fighting, true);
-			Toolbox.Instance.SendMessage(gameObject, this, anim);
-			
-			UINew.Instance.ShowPunchButton();
-		} else {
-			MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.fighting, false);
-			Toolbox.Instance.SendMessage(gameObject, this, anim);
-			UINew.Instance.HidePunchButton();
-		}
-	}
-
 	public void StartPunch(){
 		MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.punching, true);
 		Toolbox.Instance.SendMessage(gameObject, this, anim);
@@ -330,6 +307,16 @@ public class Inventory : Interactive, IExcludable {
 	public void EndPunch(){
 		MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.punching, false);
 		Toolbox.Instance.SendMessage(gameObject, this, anim);
+	}
+
+	public void ReceiveMessage(Message m){
+		if (m is MessageAnimation){
+			MessageAnimation message = (MessageAnimation)m;
+			if (message.type == MessageAnimation.AnimType.fighting && message.value == true){
+				if (holding)
+					DropItem();
+			}
+		}
 	}
 
 }

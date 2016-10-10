@@ -22,14 +22,14 @@ namespace AI{
 				return cachedTransform;
 			}
 		}
-
 		public Routine(GameObject g, Controllable c){
-			Init(g, c);
-		}
-		protected void Init(GameObject g, Controllable c){
 			gameObject = g;
 			control = c;
 		}
+		// protected void Init(GameObject g, Controllable c){
+		// 	gameObject = g;
+		// 	control = c;
+		// }
 		protected virtual status DoUpdate(){
 			return status.neutral;
 		}
@@ -43,7 +43,6 @@ namespace AI{
 			} else
 				return DoUpdate();
 		}
-		
 	}
 
 	/* 
@@ -338,14 +337,16 @@ namespace AI{
 	}
 	
 	public class RoutineToggleFightMode : Routine {
-		public Inventory inv;
-		public RoutineToggleFightMode(GameObject g, Controllable c, Inventory i) : base(g, c) {
+		public RoutineToggleFightMode(GameObject g, Controllable c) : base(g, c) {
 			routineThought = "I need to prepare for battle!";
-			inv = i;
 		}
 		protected override status DoUpdate(){
-			inv.ToggleFightMode();
+			control.ToggleFightMode();
 			return status.success;
 		}
 	}
+
+	// public class RoutinePunchTarget : Routine {
+	// 	public Ref<GameObject> target;
+	// }
 }

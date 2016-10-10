@@ -1,21 +1,17 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 // using System.Collections;
 
 public class Controllable : MonoBehaviour, IMessagable {
 
-//	[HideInInspector] 
 	public bool upFlag;
-//	[HideInInspector] 
 	public bool downFlag;
-//	[HideInInspector] 
 	public bool rightFlag;
-//	[HideInInspector] 
 	public bool leftFlag;
 	[HideInInspector] 
 	public bool shootPressedFlag;
-	[HideInInspector] 
+	private bool shootPressedDone;
 	public bool shootHeldFlag;
-	// [HideInInspector] 
 	public string lastPressed = "right";
 	public Vector2 direction = Vector2.right;
 	public float directionAngle = 0;
@@ -25,6 +21,17 @@ public class Controllable : MonoBehaviour, IMessagable {
 	public event ClickAction OnLastLeftClickedChange;
 	public IDirectable directable;
 	private GameObject _lastLeftClicked;
+	Interaction defaultInteraction;
+	public bool fightMode;
+	private Inventory cachedInventory;
+	public Inventory inventory{
+		get{
+			if (cachedInventory == null){
+				cachedInventory = GetComponent<Inventory>();
+			}
+			return cachedInventory;
+		}
+	}
 	public GameObject lastLeftClicked{
 		get {return _lastLeftClicked;}
 		set{
@@ -42,7 +49,6 @@ public class Controllable : MonoBehaviour, IMessagable {
 				OnLastRightClickedChange();
 		}
 	}
-	
 	public void MouseUp(){
 		if (OnMouseUpEvent != null)
 			OnMouseUpEvent();
@@ -56,26 +62,79 @@ public class Controllable : MonoBehaviour, IMessagable {
 			lastPressed = "up";
 		// update direction vector if speed is above a certain value
 		if(GetComponent<Rigidbody2D>().velocity.normalized.magnitude > 0.1 && (upFlag || downFlag || leftFlag || rightFlag) ){
-			// directionAngle = Toolbox.Instance.ProperAngle(direction.x, direction.y);
 			direction = GetComponent<Rigidbody2D>().velocity.normalized;
 			directionAngle = Toolbox.Instance.ProperAngle(direction.x, direction.y);
 			if (directable != null)
 				directable.DirectionChange(direction);
 		}
+		if (!shootPressedFlag && shootPressedDone)
+			shootPressedDone = false;
+		if (shootPressedFlag){
+			ShootPressed();
+			shootPressedDone = true;
+		}
+		if (shootHeldFlag){
+			ShootHeld();
+		}
 	}
-	
 	public virtual void SetDirection(Vector2 d){
 		direction = d;
 		if (directable != null)
 			directable.DirectionChange(d);
 	}
-
 	public virtual void ReceiveMessage(Message message){
 		if (message is MessageDamage){
 			MessageDamage dam = (MessageDamage)message;
 			SetDirection(-1f * dam.force);
 		}
+	}
+	public void DetermineInventoryActions(){
+		if (inventory.holding){
+			List<Interaction> manualActions = Interactor.ReportManualActions(inventory.holding.gameObject, gameObject);
+			foreach (Interaction inter in Interactor.ReportRightClickActions(gameObject, inventory.holding.gameObject))
+				if (!manualActions.Contains(inter))   // inverse double-count diode
+					manualActions.Add(inter);
+			foreach (Interaction inter in Interactor.ReportFreeActions(inventory.holding.gameObject))
+				if (!manualActions.Contains(inter))
+					manualActions.Add(inter);
+			defaultInteraction = Interactor.GetDefaultAction(manualActions);
+			if (GameManager.Instance.playerObject == gameObject)
+				UINew.Instance.CreateActionButtons(manualActions, defaultInteraction);
+		} else {
+			defaultInteraction = null;
+			UINew.Instance.ClearActionButtons();
+		}
+	}
 
+	public void ShootPressed(){
+		if (fightMode){
+			if (inventory){
+				inventory.StartPunch();
+			}
+		}
+		if (defaultInteraction != null)
+			defaultInteraction.DoAction();
+	}
+	public void ShootHeld(){
+		if (defaultInteraction != null){
+			if (defaultInteraction.continuous)	
+				defaultInteraction.DoAction();
+		}
+	}
+
+	public void ToggleFightMode(){
+		fightMode = !fightMode;
+		if (fightMode){
+			MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.fighting, true);
+			Toolbox.Instance.SendMessage(gameObject, this, anim);
+			if (GameManager.Instance.playerObject == gameObject)	
+				UINew.Instance.ShowPunchButton();
+		} else {
+			MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.fighting, false);
+			Toolbox.Instance.SendMessage(gameObject, this, anim);
+			if (GameManager.Instance.playerObject == gameObject)
+				UINew.Instance.HidePunchButton();
+		}
 	}
 
 }

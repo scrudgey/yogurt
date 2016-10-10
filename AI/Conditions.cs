@@ -52,14 +52,12 @@ namespace AI{
 		}
 		public ConditionCloseToObject(GameObject g, Ref<GameObject> t) : base(g) {
 			target = t;
-			// dist = 0.25f;
-			dist = 0.75f;
+			dist = 0.25f;
 		}
 		public override status Evaluate(){
 			if (Vector2.Distance(gameObject.transform.position, target.val.transform.position) < dist){
 				return status.success;
 			} else {
-				Debug.Log(Vector2.Distance(gameObject.transform.position, target.val.transform.position));
 				return status.neutral;
 			}
 		}
@@ -115,19 +113,15 @@ namespace AI{
 		}
 	}
 	public class ConditionInFightMode : Condition{
-		Inventory inv;
-		public ConditionInFightMode(GameObject g, Inventory i) : base(g) {
-			inv = i;
+		Controllable control;
+		public ConditionInFightMode(GameObject g, Controllable c) : base(g) {
+			control = c;
 		}
 		public override status Evaluate(){
-			if (inv){
-				if (inv.fightMode){
-					return status.success;
-				} else {
-					return status.neutral;
-				}
+			if (control.fightMode){
+				return status.success;
 			} else {
-				return status.failure;
+				return status.neutral;
 			}
 		}
 	}

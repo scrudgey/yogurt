@@ -3,6 +3,18 @@
 // using System.IO;
 
 public class Humanoid : Controllable, IMessagable {
+	Transform cachedTransform;
+	public new Transform transform
+		{
+			get
+			{
+				if( cachedTransform == null )
+				{
+					cachedTransform = gameObject.GetComponent<Transform>();
+				}
+				return cachedTransform;
+			}
+	}
 	private float baseSpeed;
 	public float maxSpeed;
 	public float maxAcceleration;
@@ -66,15 +78,15 @@ public class Humanoid : Controllable, IMessagable {
 		// set horizontal force, or damp is neither left nor right held
 		if (leftFlag){
 			acceleration.x = -1 * maxAcceleration;
-			transform.rotation = Quaternion.Lerp (transform.rotation,leftTilt,0.1f);
+			transform.rotation = Quaternion.Lerp (transform.rotation, leftTilt, 0.1f);
 		}
 		if (rightFlag){
 			acceleration.x = maxAcceleration;
-			transform.rotation = Quaternion.Lerp (transform.rotation,rightTilt,0.1f);
+			transform.rotation = Quaternion.Lerp (transform.rotation, rightTilt, 0.1f);
 		}
 		if (!rightFlag && !leftFlag){
 			deceleration.x = -1 * friction * GetComponent<Rigidbody2D>().velocity.x;
-			transform.rotation = Quaternion.Lerp (transform.rotation,forward,0.1f);
+			transform.rotation = Quaternion.Lerp (transform.rotation, forward, 0.1f);
 		}
 		// apply force
 		GetComponent<Rigidbody2D>().AddForce(acceleration+deceleration);
@@ -97,7 +109,6 @@ public class Humanoid : Controllable, IMessagable {
 
 	public override void ReceiveMessage(Message message){
 		base.ReceiveMessage(message);
-
 		if (message is MessageIntrinsic){
 			MessageIntrinsic intrins = (MessageIntrinsic)message;
 			if (intrins.netIntrinsic != null){

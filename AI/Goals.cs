@@ -46,8 +46,6 @@ namespace AI {
 			try {
 				status routineStatus = routines[index].Update();
 				if (routineStatus == status.failure){
-					// Debug.Log(this);
-					// Debug.Log(routines[index]);
 					Controller.ResetInput(control);
 					Debug.Log(routines[index]);
 					index ++;
@@ -120,12 +118,10 @@ namespace AI {
 	}
 
 	public class GoalDukesUp : Goal {
-		// private Inventory inv;
 		public GoalDukesUp(GameObject g, Controllable c, Inventory i) : base(g, c){
-			// inv = i;
-			successCondition = new ConditionInFightMode(g, i);
-			routines.Add(new RoutineToggleFightMode(g, c, i));
-			routines.Add(new RoutineToggleFightMode(g, c, i));
+			successCondition = new ConditionInFightMode(g, control);
+			routines.Add(new RoutineToggleFightMode(g, c));
+			routines.Add(new RoutineToggleFightMode(g, c));
 		}
 	}
 }

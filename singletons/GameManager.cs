@@ -150,12 +150,6 @@ public partial class GameManager : Singleton<GameManager> {
 		// }
 	}
 
-	public void ToggleFightMode(){
-		Inventory inv = playerObject.GetComponent<Inventory>();
-		if (inv){
-			inv.ToggleFightMode();
-		}
-	}
 	public void LeaveScene(string toSceneName, int toEntryNumber){
 		// call mysaver, tell it to save scene and player separately
 		MySaver.Save();

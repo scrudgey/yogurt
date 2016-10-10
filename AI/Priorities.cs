@@ -88,7 +88,7 @@ namespace AI{
 			inventory = gameObject.GetComponent<Inventory>();
 
 			Goal dukesUp = new GoalDukesUp(gameObject, control, inventory);
-			dukesUp.successCondition = new ConditionInFightMode(g, inventory);
+			dukesUp.successCondition = new ConditionInFightMode(g, control);
 
 			Goal fightGoal = new GoalWalkToObject(gameObject, control, closestEnemy);
 			fightGoal.successCondition = new ConditionCloseToObject(gameObject, closestEnemy);

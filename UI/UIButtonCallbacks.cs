@@ -2,7 +2,7 @@
 
 public class UIButtonCallbacks : MonoBehaviour {
 	public void FightButtonClick(){
-		GameManager.Instance.ToggleFightMode();
+		Controller.Instance.focus.ToggleFightMode();
 	}
 	public void SpeakButtonClick(){
         GameObject test = GameObject.Find("DialogueMenu(Clone)");
@@ -12,11 +12,14 @@ public class UIButtonCallbacks : MonoBehaviour {
         }
     }
 	public void InventoryButtonClick(){
-		UINew.Instance.inventoryVisible = !UINew.Instance.inventoryVisible;
+		// UINew.Instance.inventoryVisible = !UINew.Instance.inventoryVisible;
 		if (UINew.Instance.inventoryVisible){
-			UINew.Instance.ShowInventoryMenu();
-		} else {
+			// UINew.Instance.ShowInventoryMenu();
 			UINew.Instance.CloseInventoryMenu();
+		} else {
+			Inventory inventory = GameManager.Instance.playerObject.GetComponent<Inventory>();
+			UINew.Instance.ShowInventoryMenu(inventory);
+			// UINew.Instance.CloseInventoryMenu();
 		}
 	}
 }

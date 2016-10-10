@@ -3,8 +3,6 @@
 using System.Collections.Generic;
 
 public class Interactor{
-	static public float interactionDistance = 0.4f;
-
 	// maybe the most important method, it tells all available actions
 	// from the perspective of a player or whatever
 	static public List<Interaction> GetInteractions(GameObject focus, GameObject target){

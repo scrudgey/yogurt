@@ -47,6 +47,19 @@ public class PersonalAssessment{
 
 public class Awareness : MonoBehaviour, IMessagable {
 	private GameObject sightCone;
+	Transform cachedTransform;
+	public new Transform transform
+		{
+			get
+			{
+				if( cachedTransform == null )
+				{
+					cachedTransform = gameObject.GetComponent<Transform>();
+				}
+				return cachedTransform;
+			}
+	}
+	public Transform sightConeTransform;
 	private Vector3 sightConeScale;
 	private Controllable control;
 	private float speciousPresent; 
@@ -58,9 +71,9 @@ public class Awareness : MonoBehaviour, IMessagable {
 		control = gameObject.GetComponent<Controllable>();
 		sightCone = Instantiate( Resources.Load("sightcone1"), gameObject.transform.position, Quaternion.identity ) as GameObject;
 		sightConeScale = sightCone.transform.localScale;
-		sightCone.transform.parent = transform;
+		sightConeTransform = sightCone.transform;
+		sightConeTransform.parent = transform;
 	}
-
 	public List<GameObject> FindObjectWithName(string targetName){
 		List<GameObject> returnArray = new List<GameObject>();
 		List<GameObject> removeArray = new List<GameObject>();
@@ -80,16 +93,16 @@ public class Awareness : MonoBehaviour, IMessagable {
 	
 	void Update () {
 		// update sight cone rotation and scale -- point it in the right direction.
-		if (transform.localScale.x < 0 && sightCone.transform.localScale.x > 0){
+		if (transform.localScale.x < 0 && sightConeTransform.localScale.x > 0){
 			Vector3 tempscale = sightConeScale;
 			tempscale.x = -1 * sightConeScale.x;
-			sightCone.transform.localScale = tempscale;
+			sightConeTransform.localScale = tempscale;
 		} 
-		if (transform.localScale.x > 0 && sightCone.transform.localScale.x < 0){
-			sightCone.transform.localScale = sightConeScale;
+		if (transform.localScale.x > 0 && sightConeTransform.localScale.x < 0){
+			sightConeTransform.localScale = sightConeScale;
 		}
 		float rot_z = Mathf.Atan2(control.direction.y, control.direction.x) * Mathf.Rad2Deg;
-		sightCone.transform.rotation = Quaternion.Euler(0f, 0f, rot_z );
+		sightConeTransform.rotation = Quaternion.Euler(0f, 0f, rot_z );
 		// work the timer for the discrete perception updates
 		speciousPresent -= Time.deltaTime;
 		if (speciousPresent <= 0 && fieldOfView.Count > 0 && viewed == true){

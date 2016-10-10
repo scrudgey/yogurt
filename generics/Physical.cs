@@ -312,9 +312,11 @@ public class Physical : MonoBehaviour, IMessagable {
 	public void ReceiveMessage(Message message){
 		if (message is MessageDamage){
 			MessageDamage dam = (MessageDamage)message;
-			Impact(dam.force);
-			if (dam.impactor)
-				dam.impactor.PlayImpactSound();
+			if (dam.type != damageType.fire){
+				Impact(dam.force);
+				if (dam.impactor)
+					dam.impactor.PlayImpactSound();
+			}
 		}
 	}
 
