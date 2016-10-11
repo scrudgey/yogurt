@@ -1,13 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class Inventory : Interactive, IExcludable, IMessagable {
+public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 	public List<GameObject> items;
 	public float strength;
 	public Pickup holding{
 		get {return _holding;}
 		set {
 			MessageAnimation anim = new MessageAnimation();
+			MessageInventoryChanged invMessage = new MessageInventoryChanged();
+
 			anim.type = MessageAnimation.AnimType.holding;
 			if (value != null){
 				anim.value = true;
@@ -15,28 +17,31 @@ public class Inventory : Interactive, IExcludable, IMessagable {
 			} else {
 				anim.value = false;
 				Toolbox.Instance.SendMessage(gameObject, this, anim);
+				invMessage.dropped = _holding.gameObject;
 			}
 			_holding = value;
+			Toolbox.Instance.SendMessage(gameObject, this, invMessage);
 			if (value != null)
 				GameManager.Instance.CheckItemCollection(value.gameObject, gameObject);
-			Toolbox.Instance.SendMessage(gameObject, this, new MessageInventoryChanged());
 		}
 	}
 	private Pickup _holding;
 	private Transform holdpoint;
 	public GameObject slasher;
 	private string slashFlag;
-	public Controllable controllable;
+	// public Controllable controllable;
 	private List<Interaction> manualActionDictionary;
 	private bool LoadInitialized = false;
 	private GameObject throwObject;
 	private float dropHeight = 0.20f;
+	private Vector2 direction;
+	private float directionAngle;
 	void Start(){
 		if (!LoadInitialized)
 			LoadInit();
 	}
 	public void LoadInit(){
-		controllable = GetComponent<Controllable>();
+		// controllable = GetComponent<Controllable>();
 		holdpoint = transform.Find("holdpoint");
 		Interaction getAction = new Interaction(this, "Get", "GetItem", true, false);
 		getAction.dontWipeInterface = false;
@@ -47,23 +52,11 @@ public class Inventory : Interactive, IExcludable, IMessagable {
 		interactions.Add(swingAction);
 		LoadInitialized = true;
 	}
-	// public void DetermineInventoryActions(){
-	// 	if (holding){
-	// 		List<Interaction> manualActions = Interactor.ReportManualActions(holding.gameObject, gameObject);
-	// 		foreach (Interaction inter in Interactor.ReportRightClickActions(gameObject, holding.gameObject))
-	// 			if (!manualActions.Contains(inter))   // inverse double-count diode
-	// 				manualActions.Add(inter);
-	// 		foreach (Interaction inter in Interactor.ReportFreeActions(holding.gameObject))
-	// 			if (!manualActions.Contains(inter))
-	// 				manualActions.Add(inter);
-	// 		controllable.defaultInteraction = Interactor.GetDefaultAction(manualActions);
-	// 		if (Controller.Instance.focus == this)
-	// 			UINew.Instance.CreateActionButtons(manualActions, controllable.defaultInteraction);
-	// 	} else {
-	// 		controllable.defaultInteraction = null;
-	// 		UINew.Instance.ClearActionButtons();
-	// 	}
-	// }
+	
+	public void DirectionChange(Vector2 dir){
+		direction = dir;
+		directionAngle = Toolbox.Instance.ProperAngle(direction.x, direction.y);
+	}
 
 	public void GetItem(Pickup pickup){
 		//first check to see if we're already holding it.
@@ -111,7 +104,7 @@ public class Inventory : Interactive, IExcludable, IMessagable {
 	}
 
 	public void SoftDropItem(){
-		Messenger.Instance.DisclaimObject(holding.gameObject,this);
+		Messenger.Instance.DisclaimObject(holding.gameObject, this);
 		PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
 		if (phys)	
 			phys.doInit = false;
@@ -129,7 +122,7 @@ public class Inventory : Interactive, IExcludable, IMessagable {
 		holding.GetComponent<Collider2D>().isTrigger = false;
 		PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
 		if (phys){
-			Vector2 initV = Vector2.ClampMagnitude(controllable.direction, 0.5f);
+			Vector2 initV = Vector2.ClampMagnitude(direction, 0.5f);
 			initV = initV + GetComponent<Rigidbody2D>().velocity;
 			float vx = initV.x;
 			float vy = initV.y / 2;
@@ -198,8 +191,8 @@ public class Inventory : Interactive, IExcludable, IMessagable {
 			throwObject.GetComponent<Rigidbody2D>().isKinematic = false;
 			throwObject.GetComponent<Collider2D>().isTrigger = false;
 			phys.physical.StartZipMode();
-			float vx = controllable.direction.x * 2.5f;
-			float vy = controllable.direction.y * 2.5f;
+			float vx = direction.x * 2.5f;
+			float vy = direction.y * 2.5f;
 			float vz = 0f;
 			if (myBody){
 				vx = vx + myBody.velocity.x;
@@ -229,7 +222,7 @@ public class Inventory : Interactive, IExcludable, IMessagable {
 
 	void Update(){
 		if (holding){
-			if(controllable.directionAngle > 45 && controllable.directionAngle < 135){
+			if(directionAngle > 45 && directionAngle < 135){
 				holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
 			} else {
 				holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder + 2;
@@ -246,10 +239,10 @@ public class Inventory : Interactive, IExcludable, IMessagable {
 			GetComponent<AudioSource>().PlayOneShot(weapon.swingSounds[Random.Range(0, weapon.swingSounds.Length)]);
 		}
 		slashFlag = "right";
-		if (controllable.directionAngle > 45 && controllable.directionAngle < 135){
+		if (directionAngle > 45 && directionAngle < 135){
 			slashFlag = "up";
 		}
-		if (controllable.directionAngle > 225 && controllable.directionAngle < 315){
+		if (directionAngle > 225 && directionAngle < 315){
 			slashFlag = "down";
 		}
 	}
@@ -275,7 +268,7 @@ public class Inventory : Interactive, IExcludable, IMessagable {
 		slash.GetComponent<Animator>().SetBool(slashFlag, true);
 		Slasher s = slash.GetComponent<Slasher>();
 		s.impactSounds = holding.GetComponent<MeleeWeapon>().impactSounds;
-		s.direction = controllable.direction;
+		s.direction = direction;
 		s.owners.Add(gameObject);
 		s.owners.Add(holding.gameObject);
 
@@ -301,7 +294,7 @@ public class Inventory : Interactive, IExcludable, IMessagable {
 		GameObject slash = Instantiate(Resources.Load("PhysicalImpact"), holdpoint.position, holdpoint.rotation) as GameObject;
 		PhysicalImpact impact = slash.GetComponent<PhysicalImpact>();
 		impact.responsibleParty.Add(gameObject);
-		impact.direction = controllable.direction;
+		impact.direction = direction;
 		Collider2D slashCollider = slash.GetComponent<Collider2D>();
 		foreach (Collider2D tomCollider in GetComponentsInChildren<Collider2D>()){
 			Physics2D.IgnoreCollision(tomCollider, slashCollider, true);

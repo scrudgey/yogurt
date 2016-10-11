@@ -18,8 +18,11 @@ public class Controllable : MonoBehaviour, IMessagable {
 		get {return _direction;}
 		set {
 			_direction = value;
-			if (directable != null)
-				directable.DirectionChange(direction);
+			// if (directable != null)
+			// 	directable.DirectionChange(direction);
+			foreach (IDirectable directable in directables){
+				directable.DirectionChange(value);
+			}
 		}
 	}
 	public float directionAngle = 0;
@@ -27,7 +30,7 @@ public class Controllable : MonoBehaviour, IMessagable {
 	public event ClickAction OnLastRightClickedChange;
 	public event ClickAction OnMouseUpEvent;
 	public event ClickAction OnLastLeftClickedChange;
-	public IDirectable directable;
+	public List<IDirectable> directables = new List<IDirectable>();
 	private GameObject _lastLeftClicked;
 	public Interaction defaultInteraction;
 	public bool fightMode;
@@ -51,6 +54,14 @@ public class Controllable : MonoBehaviour, IMessagable {
 	public void MouseUp(){
 		if (OnMouseUpEvent != null)
 			OnMouseUpEvent();
+	}
+	public void Start(){
+		foreach(Component component in gameObject.GetComponents<Component>())
+		{
+			if (component is IDirectable){
+				directables.Add((IDirectable)component);
+			}
+		}
 	}
 	void Update(){
 		if (rightFlag || leftFlag)
@@ -114,6 +125,7 @@ public class Controllable : MonoBehaviour, IMessagable {
 		}
 		if (incoming is MessageInventoryChanged){
 			Inventory inv = (Inventory)incoming.messenger;
+			MessageInventoryChanged invMessage = (MessageInventoryChanged)incoming;
 			if (inv.holding){
 				if (fightMode)
 					ToggleFightMode();
@@ -121,14 +133,20 @@ public class Controllable : MonoBehaviour, IMessagable {
 				foreach(MonoBehaviour mb in list)
 				{
 					if (mb is IDirectable){
-						IDirectable holdingDirectable = (IDirectable)mb;
-						if (inv.holding == null)
-							directable = null;
-						if (inv.holding != null)
-							directable = holdingDirectable;
+						directables.Add((IDirectable)mb);
 					}
 				}
 			}
+			if (invMessage.dropped){
+				MonoBehaviour[] list = invMessage.dropped.GetComponents<MonoBehaviour>();
+				foreach(MonoBehaviour mb in list)
+				{
+					if (mb is IDirectable){
+						directables.Remove((IDirectable)mb);
+					}
+				}
+			}
+			
 			UpdateActions(inv);
 		}
 	}

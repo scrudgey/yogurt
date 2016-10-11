@@ -28,6 +28,7 @@ public class Humanoid : Controllable, IMessagable {
 
 	private bool LoadInitialized = false;
 	void Start () {
+		base.Start();
 		if (!LoadInitialized)
 			LoadInit();
 		// this messy nonsense is just to fix the quaternions that indicate

@@ -67,5 +67,6 @@ public class MessageHitstun : Message {
 }
 
 public class MessageInventoryChanged : Message {
-	
+	// public bool dropped;
+	public GameObject dropped;
 }
