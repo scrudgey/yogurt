@@ -221,7 +221,6 @@ namespace AI{
 		protected override status DoUpdate(){
 			if (target.val != null){
 				control.SetDirection(Vector2.ClampMagnitude(target.val.transform.position - gameObject.transform.position, 1f));
-				// control.direction = Vector2.ClampMagnitude(target.val.transform.position - gameObject.transform.position, 1f);
 				control.shootHeldFlag = true;
 				return status.neutral;
 			} else {
@@ -336,7 +335,6 @@ namespace AI{
 			return status.neutral;
 		}
 	}
-	
 	public class RoutineToggleFightMode : Routine {
 		public RoutineToggleFightMode(GameObject g, Controllable c) : base(g, c) {
 			routineThought = "I need to prepare for battle!";
@@ -346,7 +344,6 @@ namespace AI{
 			return status.success;
 		}
 	}
-
 	// public class RoutinePunchTarget : Routine {
 	// 	public Ref<GameObject> target;
 	// }

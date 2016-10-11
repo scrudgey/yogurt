@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-// using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
@@ -14,7 +13,6 @@ public class UINew: Singleton<UINew> {
 	private GameObject UICanvas;
 	private List<GameObject> activeElements = new List<GameObject>();
 	private List<GameObject> bottomElements = new List<GameObject>();
-	// private Interaction defaultInteraction;
 	private GameObject inventoryButton;
 	private GameObject fightButton;
 	private GameObject punchButton;
@@ -172,8 +170,6 @@ public class UINew: Singleton<UINew> {
 		statusStyle = style;
 	}
 	void Update(){
-		// if (!inventory && GameManager.Instance.playerObject)
-		// 	inventory = GameManager.Instance.playerObject.GetComponent<Inventory>();
 		if (statusTempTime > 0){
 			statusTempTime -= Time.deltaTime;
 		}
@@ -253,8 +249,6 @@ public class UINew: Singleton<UINew> {
 		for (int i = 0; i < children; ++i)
 			Destroy(itemDrawer.GetChild(i).gameObject);
 		inventoryMenu.SetActive(false);
-		// if (inventory.items.Count == 0)
-		// 	inventoryButton.SetActive(false);
 	}
 
 	public void ShowInventoryMenu(Inventory inventory){

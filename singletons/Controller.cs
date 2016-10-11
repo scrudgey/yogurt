@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-// using System.Collections;
-// using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
 public class Controller : Singleton<Controller> {
@@ -19,7 +17,7 @@ public class Controller : Singleton<Controller> {
     }
 	private GameObject lastLeftClicked;
 	private List<string> forbiddenColliders = new List<string> {"fire", "sightcone", "table", "background"};
-	public string message ="smoke weed every day";
+	public string message = "smoke weed every day";
     public enum SelectType{
         none, swearAt
     }
@@ -115,8 +113,8 @@ public class Controller : Singleton<Controller> {
     }
 
     public void Clicked(GameObject clicked){
-		// if (lastLeftClicked == clicked && activeElements.Count > 0){
 		if (lastLeftClicked == clicked){
+			// TODO: fix this conditional!
 			UINew.Instance.ClearWorldButtons();
 			lastLeftClicked = null;
 		} else {
@@ -167,7 +165,6 @@ public class Controller : Singleton<Controller> {
         Speech speech = focus.GetComponent<Speech>();
         if (!speech)
             return;
-            
         ScriptDirector director = FindObjectOfType<ScriptDirector>();
         if (!director){
             speech.Say("What's my line?"); 

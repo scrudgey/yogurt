@@ -17,7 +17,6 @@ public class ActionButtonScript: MonoBehaviour {
 				if (!action.dontWipeInterface){
 					UINew.Instance.ClearWorldButtons();
 				}
-				// Controller.Instance.focus.DetermineInventoryActions(inventory.holding.gameObject);
 				UINew.Instance.UpdateActionButtons();
 			}
 			UINew.Instance.SetActionText("");

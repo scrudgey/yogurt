@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-// using System.Collections;
-// using System.IO;
 
 public class Humanoid : Controllable, IMessagable {
 	Transform cachedTransform;
@@ -27,7 +25,7 @@ public class Humanoid : Controllable, IMessagable {
 	public bool hitstun;
 
 	private bool LoadInitialized = false;
-	void Start () {
+	public override void Start () {
 		base.Start();
 		if (!LoadInitialized)
 			LoadInit();
@@ -142,5 +140,4 @@ public class Humanoid : Controllable, IMessagable {
 		base.SetDirection(d);
 		UpdateDirection();
 	}
-
 }

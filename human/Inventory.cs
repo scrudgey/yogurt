@@ -29,7 +29,6 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 	private Transform holdpoint;
 	public GameObject slasher;
 	private string slashFlag;
-	// public Controllable controllable;
 	private List<Interaction> manualActionDictionary;
 	private bool LoadInitialized = false;
 	private GameObject throwObject;

@@ -55,7 +55,7 @@ public class Controllable : MonoBehaviour, IMessagable {
 		if (OnMouseUpEvent != null)
 			OnMouseUpEvent();
 	}
-	public void Start(){
+	public virtual void Start(){
 		foreach(Component component in gameObject.GetComponents<Component>())
 		{
 			if (component is IDirectable){
@@ -169,24 +169,4 @@ public class Controllable : MonoBehaviour, IMessagable {
 				UINew.Instance.ClearActionButtons();
 		}
 	}
-	
-	// public void DetermineInventoryActions(GameObject holding){
-	// 	if (holding){
-	// 		List<Interaction> manualActions = Interactor.ReportManualActions(holding.gameObject, gameObject);
-	// 		foreach (Interaction inter in Interactor.ReportRightClickActions(gameObject, holding.gameObject))
-	// 			if (!manualActions.Contains(inter))   // inverse double-count diode
-	// 				manualActions.Add(inter);
-	// 		foreach (Interaction inter in Interactor.ReportFreeActions(holding.gameObject))
-	// 			if (!manualActions.Contains(inter))
-	// 				manualActions.Add(inter);
-	// 		defaultInteraction = Interactor.GetDefaultAction(manualActions);
-	// 		if (Controller.Instance.focus == this)
-	// 			UINew.Instance.CreateActionButtons(manualActions, defaultInteraction);
-	// 	} else {
-	// 		defaultInteraction = null;
-	// 		if (Controller.Instance.focus == this)
-	// 			UINew.Instance.ClearActionButtons();
-	// 	}
-	// }
-
 }
