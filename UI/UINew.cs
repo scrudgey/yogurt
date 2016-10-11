@@ -12,32 +12,27 @@ public class UINew: Singleton<UINew> {
 	}
 	public string MOTD = "smoke weed every day";
 	private GameObject UICanvas;
-	// private GameObject lastLeftClicked;
 	private List<GameObject> activeElements = new List<GameObject>();
 	private List<GameObject> bottomElements = new List<GameObject>();
-	private Interaction defaultInteraction;
+	// private Interaction defaultInteraction;
 	private GameObject inventoryButton;
 	private GameObject fightButton;
 	private GameObject punchButton;
 	private GameObject inventoryMenu;
 	private bool init = false;
 	public bool inventoryVisible = false;
-	
 	private string statusText;
 	private string statusTemp;
 	private float statusTempTime;
 	private TextFX statusFX;
 	private TextFX.FXstyle statusTempStyle;
 	public TextFX.FXstyle statusStyle;
-	
 	public Text status;
 	public Text actionTextObject;
 	public string actionTextString;
-
 	private Text recordText;
 	private GameObject recordStop;
 	private GameObject recordFinish;
-
 	private Stack<GameObject> collectedStack = new Stack<GameObject>();
 	private Stack<Achievement> achievementStack = new Stack<Achievement>();
 	public bool achievementPopupInProgress;
@@ -78,14 +73,6 @@ public class UINew: Singleton<UINew> {
 		inventoryButton.SetActive(false);
 		// fightButton.SetActive(false);
 		punchButton.SetActive(false);
-
-		// if (GameManager.Instance.playerObject)
-		// 	inventory = GameManager.Instance.playerObject.GetComponent<Inventory>();
-		// if (inventory){
-		// 	HandleInventoryButton(inventory);
-		// 	inventory.controllable.DetermineInventoryActions();
-			// InventoryCallback(inventory);
-		// }
 		CloseClosetMenu();
 	}
 
@@ -138,7 +125,10 @@ public class UINew: Singleton<UINew> {
 			achievementStack.Push(achieve);
 		}
 	}
-
+	public void UpdateActionButtons(){
+		Inventory inventory = Controller.Instance.focus.GetComponent<Inventory>();
+		Controller.Instance.focus.UpdateActions(inventory);
+	}
 	public void EnableRecordButtons(bool enable){
 		if (enable){
 			recordText.text = "RECORDING";
@@ -206,29 +196,12 @@ public class UINew: Singleton<UINew> {
 		}
 		actionTextObject.text = actionTextString;
 	}
-
-	// public void Clicked(GameObject clicked){
-	// 	if (lastLeftClicked == clicked && activeElements.Count > 0){
-	// 		ClearWorldButtons();
-	// 		lastLeftClicked = null;
-	// 	} else {
-	// 		lastLeftClicked = clicked;
-	// 		if (clicked.transform.IsChildOf(GameManager.Instance.playerObject.transform) || clicked == GameManager.Instance.playerObject){
-	// 			if (inventory)
-	// 				if (inventory.holding)
-	// 					DisplayHandActions();
-	// 		} else {
-	// 			SetClickedActions();
-	// 		}
-	// 	}
-	// }
-
 	public void DisplayHandActions(Inventory inventory){
 		ClearWorldButtons();
 		activeElements = new List<GameObject>();
 		List<actionButton> buttons = new List<actionButton>();
 		for (int i = 1; i <= 3; i ++){
-			actionButton newbutton = spawnButton(null);
+			actionButton newbutton = SpawnButton(null);
 			newbutton.buttonScript.manualAction = true;
 			newbutton.buttonScript.inventory = inventory;
 			if (i == 1){
@@ -249,57 +222,6 @@ public class UINew: Singleton<UINew> {
 		}
 		activeElements.Add(CircularizeButtons(buttons, GameManager.Instance.playerObject));
 	}
-
-	// public void HandActionCallback(ActionButtonScript.buttonType bType){
-	// 	switch (bType){
-	// 	case ActionButtonScript.buttonType.Drop:
-	// 	inventory.DropItem();
-	// 	ClearWorldButtons();
-	// 	break;
-
-	// 	case ActionButtonScript.buttonType.Throw:
-	// 	inventory.ThrowItem();
-	// 	ClearWorldButtons();
-	// 	break;
-
-	// 	case ActionButtonScript.buttonType.Stash:
-	// 	inventory.StashItem(inventory.holding.gameObject);
-	// 	ClearWorldButtons();
-	// 	HandleInventoryButton();
-	// 	if (inventoryVisible){
-	// 		CloseInventoryMenu();
-	// 		ShowInventoryMenu();
-	// 	}
-	// 	break;
-
-	// 	case ActionButtonScript.buttonType.Punch:
-	// 	if (inventory)
-	// 		inventory.StartPunch();
-	// 	break;
-
-	// 	default:
-	// 	break;
-	// 	}
-	// }
-
-	// public string HandActionDescription(ActionButtonScript aScript){
-	// 	ActionButtonScript.buttonType bType = aScript.bType;
-	// 	string itemname = "";
-	// 	switch (bType){
-	// 	case ActionButtonScript.buttonType.Drop:
-	// 		itemname = Toolbox.Instance.GetName(aScript.inventory.holding.gameObject);
-	// 		return "Drop "+itemname;
-	// 	case ActionButtonScript.buttonType.Throw:
-	// 		itemname = Toolbox.Instance.GetName(aScript.inventory.holding.gameObject);
-	// 		return "Throw "+itemname;
-	// 	case ActionButtonScript.buttonType.Stash:
-	// 		itemname = Toolbox.Instance.GetName(aScript.inventory.holding.gameObject);
-	// 		return "Put "+itemname+" in pocket";
-	// 	default:
-	// 		return "";
-	// 	}
-	// }
-
 	public void HandleInventoryButton(Inventory inventory){
 		if (inventory.items.Count > 0){
 			inventoryButton.SetActive(true);
@@ -355,12 +277,6 @@ public class UINew: Singleton<UINew> {
 		closetMenu.GetComponent<Canvas>().worldCamera = UICanvas.GetComponent<Canvas>().worldCamera;
 		return closetMenu.GetComponent<ClosetButtonHandler>();
 	}
-
-	// public void ItemButtonCallback(ItemButtonScript button){
-	// 	inventory.RetrieveItem(button.itemName);
-	// 	CloseInventoryMenu();
-	// }
-
 	public void SetClickedActions(GameObject clickedOn){
 		ClearWorldButtons();
 		activeElements = new List<GameObject>();
@@ -380,7 +296,7 @@ public class UINew: Singleton<UINew> {
 	private List<actionButton> CreateButtonsFromActions(List<Interaction> interactions, bool removeColliders=false){
 		List<actionButton> returnList = new List<actionButton>();
 		foreach (Interaction interaction in interactions){
-			actionButton newButton = spawnButton(interaction);
+			actionButton newButton = SpawnButton(interaction);
 			if (removeColliders){
 				Destroy(newButton.gameobject.GetComponent<CircleCollider2D>());
 				Destroy(newButton.gameobject.GetComponent<Rigidbody2D>());
@@ -390,7 +306,7 @@ public class UINew: Singleton<UINew> {
 		return returnList;
 	}
 
-	actionButton spawnButton(Interaction interaction){
+	actionButton SpawnButton(Interaction interaction){
 		GameObject newButton = Instantiate(Resources.Load("UI/NeoActionButton"), Vector2.zero, Quaternion.identity) as GameObject;
 		ActionButtonScript buttonScript = newButton.GetComponent<ActionButtonScript>();
 		Text buttonText = newButton.transform.FindChild("Text").GetComponent<Text>();
@@ -467,44 +383,8 @@ public class UINew: Singleton<UINew> {
 		Image image = button.gameobject.GetComponent<Image>();
 		image.sprite = Resources.Load<Sprite>("UI/BoxTexture5");
 	}
-
-	// public void InventoryButtonsCheck(){
-	// 	if (inventory)
-	// 		inventory.controllable.DetermineInventoryActions();
-	// }
-
-	// public void InventoryCallback(Inventory inv){
-	// 	if (inv.gameObject != GameManager.Instance.playerObject)
-	// 		return;
-	// 	inventory = inv;
-	// 	ClearBottomButtons();
-	// 	bottomElements = new List<GameObject>();
-	// 	defaultInteraction = null;
-
-	// 	if (!inv.holding)
-	// 		return;
-
-	// 	List<Interaction> manualActions = Interactor.ReportManualActions(inv.holding.gameObject, GameManager.Instance.playerObject);
-	// 	foreach (Interaction inter in Interactor.ReportRightClickActions(GameManager.Instance.playerObject, inv.holding.gameObject))
-	// 		if (!manualActions.Contains(inter))   // inverse double-count diode
-	// 			manualActions.Add(inter);
-	// 	foreach (Interaction inter in Interactor.ReportFreeActions(inv.holding.gameObject))
-	// 		if (!manualActions.Contains(inter))
-	// 			manualActions.Add(inter);
-	// 	defaultInteraction = Interactor.GetDefaultAction(manualActions);
-
-	// 	List<actionButton> manualButtons = CreateButtonsFromActions(manualActions, true);
-	// 	foreach (actionButton button in manualButtons){
-	// 		bottomElements.Add(button.gameobject);
-	// 		button.buttonScript.manualAction = true;
-	// 		if (button.buttonScript.action == defaultInteraction)
-	// 			MakeButtonDefault(button);
-	// 	}
-	// 	ArrangeButtonsOnScreenBottom(manualButtons);
-	// }
 	public void CreateActionButtons(List<Interaction> manualActions, Interaction defaultInteraction){
 		ClearActionButtons();
-		this.defaultInteraction = defaultInteraction;
 		List<actionButton> manualButtons = CreateButtonsFromActions(manualActions, true);
 		foreach (actionButton button in manualButtons){
 			bottomElements.Add(button.gameobject);
@@ -519,7 +399,6 @@ public class UINew: Singleton<UINew> {
 		foreach (GameObject element in bottomElements)
 			Destroy(element);
 		bottomElements = new List<GameObject>();
-		defaultInteraction = null;
 	}
 	public void PauseMenu(){
 		GameObject temp = GameObject.Find("PauseMenu");

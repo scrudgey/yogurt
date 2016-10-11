@@ -13,7 +13,15 @@ public class Controllable : MonoBehaviour, IMessagable {
 	private bool shootPressedDone;
 	public bool shootHeldFlag;
 	public string lastPressed = "right";
-	public Vector2 direction = Vector2.right;
+	private Vector2 _direction = Vector2.right;
+	public Vector2 direction{
+		get {return _direction;}
+		set {
+			_direction = value;
+			if (directable != null)
+				directable.DirectionChange(direction);
+		}
+	}
 	public float directionAngle = 0;
 	public delegate void ClickAction();
 	public event ClickAction OnLastRightClickedChange;
@@ -21,17 +29,8 @@ public class Controllable : MonoBehaviour, IMessagable {
 	public event ClickAction OnLastLeftClickedChange;
 	public IDirectable directable;
 	private GameObject _lastLeftClicked;
-	Interaction defaultInteraction;
+	public Interaction defaultInteraction;
 	public bool fightMode;
-	private Inventory cachedInventory;
-	public Inventory inventory{
-		get{
-			if (cachedInventory == null){
-				cachedInventory = GetComponent<Inventory>();
-			}
-			return cachedInventory;
-		}
-	}
 	public GameObject lastLeftClicked{
 		get {return _lastLeftClicked;}
 		set{
@@ -62,10 +61,8 @@ public class Controllable : MonoBehaviour, IMessagable {
 			lastPressed = "up";
 		// update direction vector if speed is above a certain value
 		if(GetComponent<Rigidbody2D>().velocity.normalized.magnitude > 0.1 && (upFlag || downFlag || leftFlag || rightFlag) ){
-			direction = GetComponent<Rigidbody2D>().velocity.normalized;
+			SetDirection(GetComponent<Rigidbody2D>().velocity.normalized);
 			directionAngle = Toolbox.Instance.ProperAngle(direction.x, direction.y);
-			if (directable != null)
-				directable.DirectionChange(direction);
 		}
 		if (!shootPressedFlag && shootPressedDone)
 			shootPressedDone = false;
@@ -79,38 +76,12 @@ public class Controllable : MonoBehaviour, IMessagable {
 	}
 	public virtual void SetDirection(Vector2 d){
 		direction = d;
-		if (directable != null)
-			directable.DirectionChange(d);
 	}
-	public virtual void ReceiveMessage(Message message){
-		if (message is MessageDamage){
-			MessageDamage dam = (MessageDamage)message;
-			SetDirection(-1f * dam.force);
-		}
-	}
-	public void DetermineInventoryActions(){
-		if (inventory.holding){
-			List<Interaction> manualActions = Interactor.ReportManualActions(inventory.holding.gameObject, gameObject);
-			foreach (Interaction inter in Interactor.ReportRightClickActions(gameObject, inventory.holding.gameObject))
-				if (!manualActions.Contains(inter))   // inverse double-count diode
-					manualActions.Add(inter);
-			foreach (Interaction inter in Interactor.ReportFreeActions(inventory.holding.gameObject))
-				if (!manualActions.Contains(inter))
-					manualActions.Add(inter);
-			defaultInteraction = Interactor.GetDefaultAction(manualActions);
-			if (GameManager.Instance.playerObject == gameObject)
-				UINew.Instance.CreateActionButtons(manualActions, defaultInteraction);
-		} else {
-			defaultInteraction = null;
-			UINew.Instance.ClearActionButtons();
-		}
-	}
-
 	public void ShootPressed(){
 		if (fightMode){
-			if (inventory){
-				inventory.StartPunch();
-			}
+			// if (inventory){
+			// 	inventory.StartPunch();
+			// }
 		}
 		if (defaultInteraction != null)
 			defaultInteraction.DoAction();
@@ -121,7 +92,6 @@ public class Controllable : MonoBehaviour, IMessagable {
 				defaultInteraction.DoAction();
 		}
 	}
-
 	public void ToggleFightMode(){
 		fightMode = !fightMode;
 		if (fightMode){
@@ -136,5 +106,69 @@ public class Controllable : MonoBehaviour, IMessagable {
 				UINew.Instance.HidePunchButton();
 		}
 	}
+	public virtual void ReceiveMessage(Message incoming){
+		if (incoming is MessageDamage){
+			MessageDamage message = (MessageDamage)incoming;
+			// SetDirection(-1f * dam.force);
+			direction = -1f * message.force;
+		}
+		if (incoming is MessageInventoryChanged){
+			Inventory inv = (Inventory)incoming.messenger;
+			if (inv.holding){
+				if (fightMode)
+					ToggleFightMode();
+				MonoBehaviour[] list = inv.holding.gameObject.GetComponents<MonoBehaviour>();
+				foreach(MonoBehaviour mb in list)
+				{
+					if (mb is IDirectable){
+						IDirectable holdingDirectable = (IDirectable)mb;
+						if (inv.holding == null)
+							directable = null;
+						if (inv.holding != null)
+							directable = holdingDirectable;
+					}
+				}
+			}
+			UpdateActions(inv);
+		}
+	}
+
+	public void UpdateActions(Inventory inv){
+		if (inv.holding){
+			List<Interaction> manualActions = Interactor.ReportManualActions(inv.holding.gameObject, gameObject);
+			foreach (Interaction inter in Interactor.ReportRightClickActions(gameObject, inv.holding.gameObject))
+				if (!manualActions.Contains(inter))   // inverse double-count diode
+					manualActions.Add(inter);
+			foreach (Interaction inter in Interactor.ReportFreeActions(inv.holding.gameObject))
+				if (!manualActions.Contains(inter))
+					manualActions.Add(inter);
+			defaultInteraction = Interactor.GetDefaultAction(manualActions);
+			if (Controller.Instance.focus == this)
+				UINew.Instance.CreateActionButtons(manualActions, defaultInteraction);
+		} else {
+			defaultInteraction = null;
+			if (Controller.Instance.focus == this)
+				UINew.Instance.ClearActionButtons();
+		}
+	}
+	
+	// public void DetermineInventoryActions(GameObject holding){
+	// 	if (holding){
+	// 		List<Interaction> manualActions = Interactor.ReportManualActions(holding.gameObject, gameObject);
+	// 		foreach (Interaction inter in Interactor.ReportRightClickActions(gameObject, holding.gameObject))
+	// 			if (!manualActions.Contains(inter))   // inverse double-count diode
+	// 				manualActions.Add(inter);
+	// 		foreach (Interaction inter in Interactor.ReportFreeActions(holding.gameObject))
+	// 			if (!manualActions.Contains(inter))
+	// 				manualActions.Add(inter);
+	// 		defaultInteraction = Interactor.GetDefaultAction(manualActions);
+	// 		if (Controller.Instance.focus == this)
+	// 			UINew.Instance.CreateActionButtons(manualActions, defaultInteraction);
+	// 	} else {
+	// 		defaultInteraction = null;
+	// 		if (Controller.Instance.focus == this)
+	// 			UINew.Instance.ClearActionButtons();
+	// 	}
+	// }
 
 }

@@ -6,7 +6,6 @@ public class DialogueMenu : MonoBehaviour {
         Controller.Instance.SayLine();
         Destroy(gameObject);
     }
-    
     public void SwearButton(){
         Controller.Instance.Swear();
         Destroy(gameObject);

@@ -49,12 +49,9 @@ public class Controller : Singleton<Controller> {
 			//Fire key 
 			if(Input.GetButtonDown("Fire1")){
 				focus.shootPressedFlag = true;
-				// UINew.Instance.ShootPressed();
 			}
 			if(Input.GetButton("Fire1")){
 				focus.shootHeldFlag = true;
-				// UINew.Instance.ShootHeld();
-
 			}
 		}
 		
@@ -103,8 +100,6 @@ public class Controller : Singleton<Controller> {
             foreach (RaycastHit2D hit in hits){
                 if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)){
                     focus.lastLeftClicked = hit.collider.gameObject;
-                    // lastLeftClicked = hit.collider.gameObject;
-                    // UINew.Instance.Clicked(lastLeftClicked);
                     Clicked(hit.collider.gameObject);
                 }
             }
@@ -120,16 +115,14 @@ public class Controller : Singleton<Controller> {
     }
 
     public void Clicked(GameObject clicked){
-        // List<Object> activeElements = new List<Object>();
 		// if (lastLeftClicked == clicked && activeElements.Count > 0){
-
 		if (lastLeftClicked == clicked){
 			UINew.Instance.ClearWorldButtons();
 			lastLeftClicked = null;
 		} else {
 			lastLeftClicked = clicked;
+			Inventory inventory = focus.GetComponent<Inventory>();
 			if (clicked.transform.IsChildOf(focus.transform) || clicked == focus.gameObject){
-                Inventory inventory = focus.GetComponent<Inventory>();
 				if (inventory)
 					if (inventory.holding)
 						UINew.Instance.DisplayHandActions(inventory);
@@ -137,7 +130,6 @@ public class Controller : Singleton<Controller> {
 				UINew.Instance.SetClickedActions(lastLeftClicked);
 			}
 		}
-        
 	}
 
 	public bool InteractionIsWithinRange(Interaction i){
@@ -156,7 +148,7 @@ public class Controller : Singleton<Controller> {
 			return false;
 		}
 	}
-    
+
     public void Swear(GameObject target=null){
         Speech speech = focus.GetComponent<Speech>();
         if (speech){

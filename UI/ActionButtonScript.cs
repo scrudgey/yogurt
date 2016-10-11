@@ -10,7 +10,6 @@ public class ActionButtonScript: MonoBehaviour {
 	public string buttonText;
 	private bool mouseHeld;
 	public Inventory inventory;
-
 	public void clicked(){
 		if (bType == buttonType.Action){
 			if (Controller.Instance.InteractionIsWithinRange(action) || manualAction){
@@ -18,12 +17,12 @@ public class ActionButtonScript: MonoBehaviour {
 				if (!action.dontWipeInterface){
 					UINew.Instance.ClearWorldButtons();
 				}
-				Controller.Instance.focus.DetermineInventoryActions();
+				// Controller.Instance.focus.DetermineInventoryActions(inventory.holding.gameObject);
+				UINew.Instance.UpdateActionButtons();
 			}
 			UINew.Instance.SetActionText("");
 		} else {
-			// UINew.Instance.HandActionCallback(bType);
-			HandActionCallback(bType);
+			HandAction();
 			UINew.Instance.SetActionText("");
 		}
 		GUI.FocusControl("none");
@@ -52,7 +51,7 @@ public class ActionButtonScript: MonoBehaviour {
 		UINew.Instance.SetActionText("");
 	}
 
-	public void HandActionCallback(ActionButtonScript.buttonType bType){
+	public void HandAction(){
 		switch (bType){
 		case ActionButtonScript.buttonType.Drop:
 		inventory.DropItem();
@@ -68,34 +67,26 @@ public class ActionButtonScript: MonoBehaviour {
 		inventory.StashItem(inventory.holding.gameObject);
 		UINew.Instance.ClearWorldButtons();
 		UINew.Instance.HandleInventoryButton(inventory);
-		// if (inventoryVisible){
-		// 	CloseInventoryMenu();
-		// 	ShowInventoryMenu();
-		// }
 		break;
 
 		case ActionButtonScript.buttonType.Punch:
-		if (inventory)
-			inventory.StartPunch();
+		Controller.Instance.focus.shootPressedFlag = true;
 		break;
 
 		default:
 		break;
 		}
 	}
-
 	public string HandActionDescription(){
-		// ActionButtonScript.buttonType bType = aScript.bType;
-		string itemname = "";
+		if (bType == buttonType.Punch)
+			return "Punch";
+		string itemname = Toolbox.Instance.GetName(inventory.holding.gameObject);
 		switch (bType){
 		case ActionButtonScript.buttonType.Drop:
-			itemname = Toolbox.Instance.GetName(inventory.holding.gameObject);
 			return "Drop "+itemname;
 		case ActionButtonScript.buttonType.Throw:
-			itemname = Toolbox.Instance.GetName(inventory.holding.gameObject);
 			return "Throw "+itemname;
 		case ActionButtonScript.buttonType.Stash:
-			itemname = Toolbox.Instance.GetName(inventory.holding.gameObject);
 			return "Put "+itemname+" in pocket";
 		default:
 			return "";

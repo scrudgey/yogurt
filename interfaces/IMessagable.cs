@@ -65,3 +65,7 @@ public class MessageHitstun : Message {
 	public bool value;
 	public bool doubledOver;
 }
+
+public class MessageInventoryChanged : Message {
+	
+}

@@ -10,19 +10,6 @@ public class Inventory : Interactive, IExcludable, IMessagable {
 			MessageAnimation anim = new MessageAnimation();
 			anim.type = MessageAnimation.AnimType.holding;
 			if (value != null){
-				if (controllable.fightMode)
-					controllable.ToggleFightMode();
-				MonoBehaviour[] list = value.gameObject.GetComponents<MonoBehaviour>();
-				foreach(MonoBehaviour mb in list)
-				{
-					if (mb is IDirectable){
-						IDirectable directable = (IDirectable)mb;
-						if (value == null)
-							controllable.directable = null;
-						if (value != null)
-							controllable.directable = directable;
-					}
-				}
 				anim.value = true;
 				Toolbox.Instance.SendMessage(gameObject, this, anim);
 			} else {
@@ -30,10 +17,9 @@ public class Inventory : Interactive, IExcludable, IMessagable {
 				Toolbox.Instance.SendMessage(gameObject, this, anim);
 			}
 			_holding = value;
-			// UINew.Instance.InventoryCallback(this);
-			controllable.DetermineInventoryActions();
 			if (value != null)
 				GameManager.Instance.CheckItemCollection(value.gameObject, gameObject);
+			Toolbox.Instance.SendMessage(gameObject, this, new MessageInventoryChanged());
 		}
 	}
 	private Pickup _holding;
@@ -61,6 +47,23 @@ public class Inventory : Interactive, IExcludable, IMessagable {
 		interactions.Add(swingAction);
 		LoadInitialized = true;
 	}
+	// public void DetermineInventoryActions(){
+	// 	if (holding){
+	// 		List<Interaction> manualActions = Interactor.ReportManualActions(holding.gameObject, gameObject);
+	// 		foreach (Interaction inter in Interactor.ReportRightClickActions(gameObject, holding.gameObject))
+	// 			if (!manualActions.Contains(inter))   // inverse double-count diode
+	// 				manualActions.Add(inter);
+	// 		foreach (Interaction inter in Interactor.ReportFreeActions(holding.gameObject))
+	// 			if (!manualActions.Contains(inter))
+	// 				manualActions.Add(inter);
+	// 		controllable.defaultInteraction = Interactor.GetDefaultAction(manualActions);
+	// 		if (Controller.Instance.focus == this)
+	// 			UINew.Instance.CreateActionButtons(manualActions, controllable.defaultInteraction);
+	// 	} else {
+	// 		controllable.defaultInteraction = null;
+	// 		UINew.Instance.ClearActionButtons();
+	// 	}
+	// }
 
 	public void GetItem(Pickup pickup){
 		//first check to see if we're already holding it.

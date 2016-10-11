@@ -12,14 +12,11 @@ public class UIButtonCallbacks : MonoBehaviour {
         }
     }
 	public void InventoryButtonClick(){
-		// UINew.Instance.inventoryVisible = !UINew.Instance.inventoryVisible;
 		if (UINew.Instance.inventoryVisible){
-			// UINew.Instance.ShowInventoryMenu();
 			UINew.Instance.CloseInventoryMenu();
 		} else {
 			Inventory inventory = GameManager.Instance.playerObject.GetComponent<Inventory>();
 			UINew.Instance.ShowInventoryMenu(inventory);
-			// UINew.Instance.CloseInventoryMenu();
 		}
 	}
 }

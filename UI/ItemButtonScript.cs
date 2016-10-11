@@ -1,12 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-// using System.Collections;
 
 public class ItemButtonScript : MonoBehaviour {
 	public string itemName;
-
 	public Inventory inventory;
-	
 	public void SetButtonAttributes(GameObject item, Inventory inv){
 		inventory = inv;
 		Text buttonText = transform.FindChild("Text").GetComponent<Text>();
@@ -26,16 +23,10 @@ public class ItemButtonScript : MonoBehaviour {
 		iconImage.rectTransform.anchorMin = newAnchor;
 		iconImage.rectTransform.anchorMax = newAnchor;
 		iconImage.rectTransform.position.Set(0f, 0f, 10f);
-		
 	}
 	public void Clicked(){
-		// UINew.Instance.ItemButtonCallback(this);
 		inventory.RetrieveItem(itemName);
 		UINew.Instance.CloseInventoryMenu();
 	}
 
-	// public void ItemButtonCallback(ItemButtonScript button){
-	// 	inventory.RetrieveItem(button.itemName);
-	// 	CloseInventoryMenu();
-	// }
 }
