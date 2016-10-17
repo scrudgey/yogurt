@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
-
 public class ScriptDirector : Interactive {
     public TextAsset script;
     public int index;
@@ -85,10 +84,6 @@ public class ScriptDirector : Interactive {
             string content = line.Substring(8, line.Length-8);
             message.coStarLine = content;
             message.watchForSpeech = "Costar: "+content;
-            // foreach (ScriptReader reader in readers){
-            //     reader.CoStarLine(content, this);
-            //     reader.WatchForSpeech("Costar: "+content);
-            // }
         }
         if (line.Substring(0, 5) == "TOM: "){
             UINew.Instance.SetStatus("PROMPT: SAY LINE");
@@ -96,18 +91,11 @@ public class ScriptDirector : Interactive {
             string content = line.Substring(4, line.Length-4);
             tomLineNext = true;
             message.watchForSpeech = "Tom: "+content;
-            // foreach (ScriptReader reader in readers){
-            //     reader.WatchForSpeech("Tom: "+content);
-            // }
         }
         if (line == "[yogurt++]"){
             UINew.Instance.SetStatus("PROMPT: EAT YOGURT");
             UINew.Instance.SetStatusStyle(TextFX.FXstyle.normal);
             message.tomAct = MessageScript.TomAction.yogurt;
-            // foreach (ScriptReader reader in readers){
-            //     reader.TomAct("yogurt");
-            //     tomLineNext = true;
-            // }
         }
         foreach (GameObject reader in readers){
             Toolbox.Instance.SendMessage(reader, this, message);
@@ -138,7 +126,6 @@ public class ScriptDirector : Interactive {
             }
         }
     }
-    
     void Update(){
         if (timeToNextLine > 0 && live){
             timeToNextLine -= Time.deltaTime;
@@ -147,7 +134,6 @@ public class ScriptDirector : Interactive {
             }
         }
     }
-    
     public string NextTomLine(){
         string tomLine = "What's my line?";
         for (int i = index; i < lines.Length; i++){
@@ -160,7 +146,6 @@ public class ScriptDirector : Interactive {
         }
         return tomLine;
     }
-    
     public void OccurrenceHappened(){
         TriggerNextLine();
     }

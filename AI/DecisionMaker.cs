@@ -15,11 +15,8 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 	public Controllable control;
 	public GameObject thought;
 	public Text thoughtText;
-	public Priority activePriority;
 	public List<Priority> priorities;
 	public Personality personality;
-
-
 	void Start() {
 		// make sure there's Awareness
 		Toolbox.Instance.GetOrCreateComponent<Awareness>(gameObject);
@@ -41,13 +38,11 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 		priorities.Add(new PriorityAttack(gameObject, control));
 		priorities.Add(new PriorityReadScript(gameObject, control));
 	}
-
 	public void ReceiveMessage(Message message){
 		foreach(Priority priority in priorities){
 			priority.ReceiveMessage(message);
 		}
 	}
-
 	public void Update(){
 		Priority activePriority = null;
 		foreach(Priority priority in priorities){
@@ -57,7 +52,9 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 			if (activePriority.Urgency(personality) < priority.Urgency(personality))
 				activePriority = priority;
 		}
-		if (activePriority != null)
+		if (activePriority != null){
 			activePriority.DoAct();
+			// Debug.Log(activePriority.GetType());
+		}
 	}
 }

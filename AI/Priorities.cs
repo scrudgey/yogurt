@@ -17,7 +17,7 @@ namespace AI{
 			awareness = g.GetComponent<Awareness>();
 		}
 		public virtual void Update(){}
-		public void DoAct(){
+		public virtual void DoAct(){
 			if (goal != null){
 				goal.Update();
 			}
@@ -59,8 +59,13 @@ namespace AI{
 		public PriorityWander(GameObject g, Controllable c): base(g, c) {
 			goal = new GoalWander(g, c);
 		}
-		public override void Update(){
-			urgency = 1;
+		public override float Urgency(Personality personality){
+			if (personality.actor == Personality.Actor.yes){
+				// Debug.Log("wander priority downgrade");
+				return -1;
+			} else {
+				return 1;
+			}
 		}
 	}
 
@@ -97,7 +102,6 @@ namespace AI{
 		}
 		public override void ReceiveMessage(Message incoming){
 			if (incoming is MessageDamage){
-				// MessageDamage dam = (MessageDamage)incoming;
 				urgency = 5;
 			}
 		}
@@ -112,13 +116,18 @@ namespace AI{
 	}
 
 	public class PriorityReadScript: Priority {
-		// ScriptDirector
+		string nextLine;
+		ScriptDirector director;
 		public PriorityReadScript(GameObject g, Controllable c): base(g, c){
 
 		}
 		public override float Urgency(Personality personality){
 			if (personality.actor == Personality.Actor.yes){
-				return -1;
+				if (nextLine != null){
+					return 10;
+				} else {
+					return 1;
+				}
 			} else {
 				return -1;
 			}
@@ -126,15 +135,19 @@ namespace AI{
 		public override void ReceiveMessage(Message incoming){
 			if (incoming is MessageScript){
 				MessageScript message = (MessageScript)incoming;
-				ScriptDirector director = (ScriptDirector)incoming.messenger;
-
+				director = (ScriptDirector)incoming.messenger;
+				nextLine = message.coStarLine;
+			}
+		}
+		public override void DoAct(){
+			if (nextLine != null){
 				Vector3 dif = director.transform.position - gameObject.transform.position;
 				Vector2 direction = (Vector2)dif;
 				control.direction = direction;
 				control.SetDirection(direction);
 
-				// say my line
-				Toolbox.Instance.SendMessage(gameObject, director, new MessageSpeech(message.coStarLine));
+				Toolbox.Instance.SendMessage(gameObject, control, new MessageSpeech(nextLine));
+				nextLine = null;
 			}
 		}
 	}

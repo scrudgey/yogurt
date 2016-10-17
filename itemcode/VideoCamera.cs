@@ -110,7 +110,6 @@ public class VideoCamera : MonoBehaviour, IMessagable {
         if (incoming is MessageScript){
             MessageScript message = (MessageScript)incoming;
             director = (ScriptDirector)message.messenger;
-
             if (message.watchForSpeech != ""){
                 OccurrenceSpeech data = new OccurrenceSpeech();
                 data.line = message.watchForSpeech;

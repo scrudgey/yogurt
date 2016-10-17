@@ -82,6 +82,4 @@ public class MessageScript : Message {
 	public string watchForSpeech;
 	public string coStarLine;
 	public TomAction tomAct;
-
-
 }
