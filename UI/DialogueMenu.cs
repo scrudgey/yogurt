@@ -1,13 +1,16 @@
 ﻿using UnityEngine;
-// using System.Collections;
 
 public class DialogueMenu : MonoBehaviour {
     public void LineButton(){
-        Controller.Instance.SayLine();
+        MessageSpeech message = new MessageSpeech();
+        message.sayLine = true;
+        Toolbox.Instance.SendMessage(GameManager.Instance.playerObject, this, message);
         Destroy(gameObject);
     }
     public void SwearButton(){
-        Controller.Instance.Swear();
+        MessageSpeech message = new MessageSpeech();
+        message.randomSwear = true;
+        Toolbox.Instance.SendMessage(GameManager.Instance.playerObject, this, message);
         Destroy(gameObject);
     }
     
@@ -17,7 +20,9 @@ public class DialogueMenu : MonoBehaviour {
     }
     
     public void RandomButton(){
-        Controller.Instance.SayRandom();
+        MessageSpeech message = new MessageSpeech();
+        message.randomSpeech = true;
+        Toolbox.Instance.SendMessage(GameManager.Instance.playerObject, this, message);
         Destroy(gameObject);
     }
     

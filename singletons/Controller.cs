@@ -106,7 +106,9 @@ public class Controller : Singleton<Controller> {
             currentSelect = SelectType.none;
             foreach (RaycastHit2D hit in hits){
                 if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)){
-                    Swear(hit.collider.gameObject);
+					MessageSpeech message = new MessageSpeech();
+					message.swearTarget = hit.collider.gameObject;
+					Toolbox.Instance.SendMessage(focus.gameObject, this, message);
                 }
             }
         }
@@ -134,43 +136,13 @@ public class Controller : Singleton<Controller> {
 		if (i == null || lastLeftClicked == null){
 			return false;
 		}
-
 		if (i.limitless)
 			return true;
-
 		float dist = Vector3.Distance(lastLeftClicked.transform.position, focus.transform.position);
-
 		if (dist < i.range){
 			return true;
 		} else {
 			return false;
 		}
 	}
-
-    public void Swear(GameObject target=null){
-        Speech speech = focus.GetComponent<Speech>();
-        if (speech){
-            speech.Swear(target);
-        }
-    }
-    
-    public void SayRandom(){
-        Speech speech = focus.GetComponent<Speech>();
-        if (speech){
-            speech.SayRandom();
-        }
-    }
-    
-    public void SayLine(){
-        Speech speech = focus.GetComponent<Speech>();
-        if (!speech)
-            return;
-        ScriptDirector director = FindObjectOfType<ScriptDirector>();
-        if (!director){
-            speech.Say("What's my line?"); 
-        } else {
-            speech.Say(director.NextTomLine());
-        }
-    }
-
 }
