@@ -38,6 +38,10 @@ public class MessageHead : Message {
 public class MessageSpeech : Message {
 	public string phrase;
 	public string swear = "";
+	public bool randomSwear;
+	public bool randomSpeech;
+	public bool sayLine;
+	public GameObject swearTarget;
 	public MessageSpeech () {}
 	public MessageSpeech (string phrase){
 		this.phrase = phrase;
@@ -68,4 +72,16 @@ public class MessageHitstun : Message {
 
 public class MessageInventoryChanged : Message {
 	public GameObject dropped;
+}
+
+public class MessagePunch : Message {
+}
+
+public class MessageScript : Message {
+	public enum TomAction {none, yogurt}
+	public string watchForSpeech;
+	public string coStarLine;
+	public TomAction tomAct;
+
+
 }
