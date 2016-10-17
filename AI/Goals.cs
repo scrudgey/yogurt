@@ -92,11 +92,7 @@ namespace AI {
 			get {return "I've got to do something about that "+target.val.name+".";}
 		}
 		public GoalHoseDown(GameObject g, Controllable c, Ref<GameObject> r) : base(g, c){
-			// successCondition = new ConditionLocation(g, new Ref<Vector2>(Vector2.zero));
 			successCondition = new ConditionFail(g);
-			// RoutineUseObjectOnTarget w = new RoutineUseObjectOnTarget(g, c, r);
-			// w.timeLimit = 1.5f;
-			// routines.Add(w);
 			routines.Add(new RoutineUseObjectOnTarget(g, c, r));
 		}
 	}
