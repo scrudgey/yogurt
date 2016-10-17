@@ -169,6 +169,27 @@ public class Speech : Interactive, IMessagable {
     public void ReceiveMessage(Message incoming){
         if (incoming is MessageSpeech){
             MessageSpeech message = (MessageSpeech)incoming;
+            if (message.swearTarget != null){
+                Swear(message.swearTarget);
+                return;
+            }
+            if (message.randomSwear){
+                Swear();
+                return;
+            }
+            if (message.randomSpeech){
+                SayRandom();
+                return;
+            }
+            if (message.sayLine){
+                ScriptDirector director = FindObjectOfType<ScriptDirector>();
+                if (!director){
+                    Say("What's my line?"); 
+                } else {
+                    Say(director.NextTomLine());
+                }
+                return;
+            }
             if (message.swear != ""){
                 Say(message.phrase, message.swear);
             } else {
