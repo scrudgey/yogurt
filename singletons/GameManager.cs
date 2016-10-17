@@ -120,9 +120,7 @@ public partial class GameManager : Singleton<GameManager> {
 	
 	
 
-	public void FocusIntrinsicsChanged(){
-		Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(playerObject);
-		Intrinsic intrinsic = intrinsics.NetIntrinsic();
+	public void FocusIntrinsicsChanged(Intrinsic intrinsic){
 		if (intrinsic.telepathy.boolValue){
 			Toolbox.Instance.SendMessage(playerObject, this, new MessageSpeech("I can hear thoughts!"));
 			cam.cullingMask |= 1 << LayerMask.NameToLayer("thoughts");
@@ -142,7 +140,8 @@ public partial class GameManager : Singleton<GameManager> {
 		cameraControl = FindObjectOfType<CameraControl>();
 		if (cameraControl)
 			cameraControl.focus = target;
-		FocusIntrinsicsChanged();
+		Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(target);
+		FocusIntrinsicsChanged(intrinsics.NetIntrinsic());
 		// if (target.GetComponent<Inventory>()){
 		// 	UINew.Instance.ShowFightButton();
 		// } else {
