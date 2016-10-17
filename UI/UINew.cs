@@ -365,14 +365,12 @@ public class UINew: Singleton<UINew> {
 		buttonAnchor.transform.SetParent(target.transform);
 		return buttonAnchor;
 	}
-
 	private void ArrangeButtonsOnScreenBottom(List<actionButton> buttons){
 		GameObject bottomBar = UICanvas.transform.Find("bottomdock/bottom").gameObject;
 		foreach (actionButton button in buttons){
 			button.gameobject.transform.SetParent(bottomBar.transform, false);
 		}
 	}
-
 	private void MakeButtonDefault(actionButton button){
 		Image image = button.gameobject.GetComponent<Image>();
 		image.sprite = Resources.Load<Sprite>("UI/BoxTexture5");
@@ -405,7 +403,6 @@ public class UINew: Singleton<UINew> {
 			menuCanvas.worldCamera = UICanvas.GetComponent<Canvas>().worldCamera;
 		}
 	}
-    
 	public void BounceText(string text, GameObject target){
 		GameObject bounce = Instantiate(Resources.Load("UI/BounceText")) as GameObject;
 		BounceText bounceScript = bounce.GetComponent<BounceText>();
