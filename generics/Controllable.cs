@@ -1,9 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-// using System.Collections;
 
 public class Controllable : MonoBehaviour, IMessagable {
-
 	public bool upFlag;
 	public bool downFlag;
 	public bool rightFlag;
@@ -18,8 +16,6 @@ public class Controllable : MonoBehaviour, IMessagable {
 		get {return _direction;}
 		set {
 			_direction = value;
-			// if (directable != null)
-			// 	directable.DirectionChange(direction);
 			foreach (IDirectable directable in directables){
 				directable.DirectionChange(value);
 			}
@@ -90,9 +86,7 @@ public class Controllable : MonoBehaviour, IMessagable {
 	}
 	public void ShootPressed(){
 		if (fightMode){
-			// if (inventory){
-			// 	inventory.StartPunch();
-			// }
+			Toolbox.Instance.SendMessage(gameObject, this, new MessagePunch());
 		}
 		if (defaultInteraction != null)
 			defaultInteraction.DoAction();
@@ -146,7 +140,6 @@ public class Controllable : MonoBehaviour, IMessagable {
 					}
 				}
 			}
-			
 			UpdateActions(inv);
 		}
 	}

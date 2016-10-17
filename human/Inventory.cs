@@ -312,6 +312,9 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 					DropItem();
 			}
 		}
+		if (m is MessagePunch){
+			StartPunch();
+		}
 	}
 
 }
