@@ -3,14 +3,21 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using AI;
 
-public class DecisionMaker : MonoBehaviour, IMessagable {
+[System.Serializable]
+public class Personality {
+	public enum Bravery {neutral, cowardly, brave};
+	public Bravery bravery;
+	public enum Actor {no, yes};
+	public Actor actor;
+}
 
+public class DecisionMaker : MonoBehaviour, IMessagable {
 	public Controllable control;
 	public GameObject thought;
 	public Text thoughtText;
 	public Priority activePriority;
-
 	public List<Priority> priorities;
+	public Personality personality;
 
 
 	void Start() {
@@ -32,6 +39,7 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 		priorities.Add(new PriorityWander(gameObject, control));
 		priorities.Add(new PriorityRunAway(gameObject, control));
 		priorities.Add(new PriorityAttack(gameObject, control));
+		priorities.Add(new PriorityReadScript(gameObject, control));
 	}
 
 	public void ReceiveMessage(Message message){
@@ -46,10 +54,9 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 			priority.Update();
 			if (activePriority == null)
 				activePriority = priority;
-			if (activePriority.urgency < priority.urgency)
+			if (activePriority.Urgency(personality) < priority.Urgency(personality))
 				activePriority = priority;
 		}
-		// activePriorityType = typeof(activePriority);
 		if (activePriority != null)
 			activePriority.DoAct();
 	}
