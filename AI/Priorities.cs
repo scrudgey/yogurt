@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-// using System.Collections.Generic;
 
 namespace AI{
 	[System.Serializable]
@@ -23,6 +22,9 @@ namespace AI{
 				goal.Update();
 			}
 		}
+		public virtual float Urgency(Personality personality){
+			return urgency;
+		}
 		public virtual void ReceiveMessage(Message m){}
 	}
 	public class PriorityFightFire: Priority{
@@ -30,7 +32,6 @@ namespace AI{
 		public float updateInterval;
 		public PriorityFightFire(GameObject g, Controllable c): base(g, c) {
 			Goal getExt = new GoalGetItem(gameObject, control, "fire_extinguisher");
-			// getExt.successCondition = new ConditionHoldingObjectWithName(gameObject, "fire extinguisher");
 
 			Goal wander = new GoalWander(gameObject, control);
 			wander.successCondition = new ConditionKnowAboutFire(gameObject);
@@ -40,10 +41,8 @@ namespace AI{
 			approach.requirements.Add(wander);
 
 			goal = new GoalHoseDown(gameObject, control, flamingObject);
-			// goal.successCondition = new ConditionFail();
 			goal.requirements.Add(approach);
 		}
-
 		public override void Update(){
 			if (updateInterval > 0){
 				updateInterval -= Time.deltaTime;
@@ -109,6 +108,34 @@ namespace AI{
 			}
 			updateInterval = 0.5f;
 			closestEnemy.val = awareness.nearestEnemy();
+		}
+	}
+
+	public class PriorityReadScript: Priority {
+		// ScriptDirector
+		public PriorityReadScript(GameObject g, Controllable c): base(g, c){
+
+		}
+		public override float Urgency(Personality personality){
+			if (personality.actor == Personality.Actor.yes){
+				return -1;
+			} else {
+				return -1;
+			}
+		}
+		public override void ReceiveMessage(Message incoming){
+			if (incoming is MessageScript){
+				MessageScript message = (MessageScript)incoming;
+				ScriptDirector director = (ScriptDirector)incoming.messenger;
+
+				Vector3 dif = director.transform.position - gameObject.transform.position;
+				Vector2 direction = (Vector2)dif;
+				control.direction = direction;
+				control.SetDirection(direction);
+
+				// say my line
+				Toolbox.Instance.SendMessage(gameObject, director, new MessageSpeech(message.coStarLine));
+			}
 		}
 	}
 }
