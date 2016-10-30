@@ -26,10 +26,6 @@ namespace AI{
 			gameObject = g;
 			control = c;
 		}
-		// protected void Init(GameObject g, Controllable c){
-		// 	gameObject = g;
-		// 	control = c;
-		// }
 		protected virtual status DoUpdate(){
 			return status.neutral;
 		}
@@ -224,7 +220,6 @@ namespace AI{
 				control.shootHeldFlag = true;
 				return status.neutral;
 			} else {
-				Debug.Log(target.val);
 				return status.failure;
 			}
 		}
@@ -281,7 +276,6 @@ namespace AI{
 					return status.neutral;
 				}
 			} else {
-				Debug.Log(target);
 				return status.failure;
 			}
 		}
@@ -344,7 +338,28 @@ namespace AI{
 			return status.success;
 		}
 	}
-	// public class RoutinePunchTarget : Routine {
-	// 	public Ref<GameObject> target;
-	// }
+
+	public class RoutinePunchAt : Routine {
+		Ref<GameObject> target;
+		float timer;
+		public RoutinePunchAt(GameObject g, Controllable c, Ref<GameObject> t) : base(g, c){
+			routineThought = "Fisticuffs!";
+			target = t;
+		}
+		protected override status DoUpdate(){
+			timer += Time.deltaTime;
+			if (target.val != null){
+				control.SetDirection(Vector2.ClampMagnitude(target.val.transform.position - gameObject.transform.position, 1f));
+				if (timer > 1){
+					timer = 0f;
+					control.shootPressedFlag = true;
+				} else {
+					Controller.ResetInput(control);
+				}
+				return status.neutral;
+			} else {
+				return status.failure;
+			}
+		}
+	}
 }
