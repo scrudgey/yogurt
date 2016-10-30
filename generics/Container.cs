@@ -46,7 +46,7 @@ public class Container : Interactive, IExcludable {
 				if (interaction.parameters.Count == 2)
 					if ((object)interaction.parameters[1] == pickup)
 						removeThis = interaction;
-				if (interaction.actionName == pickup.itemName)
+				if (interaction.actionName == ((Item)pickup).itemName)
 					    removeThis = interaction;
 			}
 		}
