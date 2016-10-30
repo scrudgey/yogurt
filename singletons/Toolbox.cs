@@ -225,8 +225,6 @@ public class Toolbox : Singleton<Toolbox> {
 		nameOut = ScrubText(nameOut);
 		return nameOut;
 	}
-
-
 	public void SendMessage(GameObject host, Component messenger, Message message){
 		message.messenger = messenger;
 		IMessagable[] childReceivers = host.GetComponentsInChildren<IMessagable>();
