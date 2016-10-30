@@ -94,11 +94,15 @@ namespace AI{
 			Goal dukesUp = new GoalDukesUp(gameObject, control, inventory);
 			dukesUp.successCondition = new ConditionInFightMode(g, control);
 
-			Goal fightGoal = new GoalWalkToObject(gameObject, control, closestEnemy);
-			fightGoal.successCondition = new ConditionCloseToObject(gameObject, closestEnemy);
-			fightGoal.requirements.Add(dukesUp);
+			Goal approachGoal = new GoalWalkToObject(gameObject, control, closestEnemy);
+			approachGoal.successCondition = new ConditionCloseToObject(gameObject, closestEnemy);
+			approachGoal.requirements.Add(dukesUp);
 
-			goal = fightGoal;
+			Goal punchGoal = new Goal(gameObject, control);
+			punchGoal.routines.Add(new RoutinePunchAt(gameObject, control, closestEnemy));
+			punchGoal.requirements.Add(approachGoal);
+
+			goal = punchGoal;
 		}
 		public override void ReceiveMessage(Message incoming){
 			if (incoming is MessageDamage){
