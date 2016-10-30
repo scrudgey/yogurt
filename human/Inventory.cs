@@ -40,7 +40,6 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 			LoadInit();
 	}
 	public void LoadInit(){
-		// controllable = GetComponent<Controllable>();
 		holdpoint = transform.Find("holdpoint");
 		Interaction getAction = new Interaction(this, "Get", "GetItem", true, false);
 		getAction.dontWipeInterface = false;
@@ -116,7 +115,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 	}
 
 	public void DropItem(){
-		Messenger.Instance.DisclaimObject(holding.gameObject,this);
+		Messenger.Instance.DisclaimObject(holding.gameObject, this);
 		holding.GetComponent<Rigidbody2D>().isKinematic = false;
 		holding.GetComponent<Collider2D>().isTrigger = false;
 		PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
@@ -254,7 +253,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.swinging, false);
 		Toolbox.Instance.SendMessage(gameObject, this, anim);
 
-		holding.GetComponent<Renderer>().sortingLayerName="main";
+		holding.GetComponent<Renderer>().sortingLayerName = "main";
 		holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
 	}
 
