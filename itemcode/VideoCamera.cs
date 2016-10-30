@@ -14,8 +14,6 @@ public class VideoCamera : MonoBehaviour, IMessagable {
     public OccurrenceData watchForOccurrence = null;
     public bool live;
     private ScriptDirector director;
-
-	
 	void Start () {
         live = false;
 	}
