@@ -3,14 +3,12 @@ using UnityEngine.UI;
 using Easings;
 
 public class CutsceneManager : MonoBehaviour {
-
     public enum CutsceneType {newDay}
     public CutsceneType type = CutsceneType.newDay;
     private float timer;
     Text tomText;
     Text dayText;
     GameObject canvas;
-
     private float stopTomFade = 1.5f;
     private float startDayFade = 1.5f;
     private float stopDayFade = 2.5f;
