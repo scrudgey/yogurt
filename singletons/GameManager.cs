@@ -33,7 +33,6 @@ public class GameData{
 }
 public partial class GameManager : Singleton<GameManager> {
 	protected GameManager(){}
-
 	public GameData data;
 	public string saveGameName = "test";
 	public string message = "smoke weed every day";	
@@ -45,9 +44,6 @@ public partial class GameManager : Singleton<GameManager> {
     private float sceneTime;
 	public float timeSinceLastSave = 0f;
 	private float intervalTimer;
-	
-    
-    // BASIC UNITY ROUTINES
     void Start(){
 		if (data == null){
 			data = new GameData();
@@ -55,8 +51,16 @@ public partial class GameManager : Singleton<GameManager> {
 		if (saveGameName == "test")
 			MySaver.CleanupSaves();
 		// Cursor.SetCursor((Texture2D)Resources.Load("UI/cursor1"), Vector2.zero, CursorMode.Auto);
-		if (SceneManager.GetActiveScene().buildIndex > 1){
+		if (! InCutscene()){
             NewGame(switchlevel: false);
+		}
+	}
+
+	public bool InCutscene(){
+		if (SceneManager.GetActiveScene().buildIndex > 1){
+            return false;
+		} else {
+			return true;
 		}
 	}
 
@@ -104,6 +108,8 @@ public partial class GameManager : Singleton<GameManager> {
 	}
     
     public void CheckAchievements(){
+		if (InCutscene())
+			return;
 		foreach (Achievement achieve in data.achievements){
 			if (!achieve.complete){
 				bool pass = achieve.Evaluate(data.achievementStats);
