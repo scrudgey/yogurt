@@ -73,7 +73,6 @@ public class Speech : Interactive, IMessagable {
 
 	void Update () {
 		if (speakTime > 0){
-
 			speakTime -= Time.deltaTime;
             if (!speaking){
                 MessageHead head = new MessageHead();
@@ -197,8 +196,6 @@ public class Speech : Interactive, IMessagable {
             }
         }
     }
-
-
     // double-exponential seat easing function
     public float DoubleSeat(float x, float a, float w, float max, float min){
         float result = 0f;
@@ -212,7 +209,6 @@ public class Speech : Interactive, IMessagable {
         }
         return result;
     }
-    
     public void Swear(GameObject target=null){
         if (!target){
             Say("shazbot!", "shazbot");
