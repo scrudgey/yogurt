@@ -37,11 +37,8 @@ public class AchievementPopup : MonoBehaviour {
 
         titleText.text = "Achievement Unlocked!";
         bodyText.text = achieve.title;
-        // bodyText.text = achieve.title + "\n\n" + achieve.description;
-        // SpriteRenderer renderer = obj.GetComponent<SpriteRenderer>();
-        // if (renderer){
-        image.sprite = achieve.icon;
-        // }
+        // image.sprite = achieve.icon;
+        image.sprite = Resources.Load<Sprite>("sprites/"+achieve.iconName);
         audioSource.PlayOneShot(collectedSound);
         StartCoroutine(Display());
     }
