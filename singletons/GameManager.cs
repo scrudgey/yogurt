@@ -4,6 +4,7 @@ using System.IO;
 using System.Xml.Serialization;
 using UnityEngine.SceneManagement;
 using System.Linq;
+using System;
 
 [XmlRoot("GameData")]
 [System.Serializable]
@@ -17,7 +18,7 @@ public class GameData{
 	public string lastSavedPlayerPath;
 	public string lastSavedScenePath;
 	public string lastPlayerName;
-	public System.DateTime saveDate;
+	public string saveDate;
 	public float secondsPlayed;
 	public string lastScene;
 	public int days;
@@ -28,7 +29,7 @@ public class GameData{
 	public AchievementStats achievementStats = new AchievementStats();
 	public GameData(){
 		days = 0;
-		saveDate = System.DateTime.Now;
+		saveDate = System.DateTime.Now.ToString();
 	}
 }
 public partial class GameManager : Singleton<GameManager> {
@@ -300,6 +301,7 @@ public partial class GameManager : Singleton<GameManager> {
 		path = Path.Combine(Application.persistentDataPath, saveGameName);
 		if (!Directory.Exists(path))
 		  Directory.CreateDirectory(path);
+		// if (GameManager.Instance.playerObject )
 		path = Path.Combine(path, "player_"+GameManager.Instance.playerObject.name+"_state.xml");
 		data.lastSavedPlayerPath = path;
 		data.lastPlayerName = GameManager.Instance.playerObject.name;
@@ -324,9 +326,17 @@ public partial class GameManager : Singleton<GameManager> {
 		string path = Path.Combine(Application.persistentDataPath, gameName);
 		path = Path.Combine(path, "game.xml");
 		if (File.Exists(path)){
-			var dataStream = new FileStream(path, FileMode.Open);
-			data = serializer.Deserialize(dataStream) as GameData;
-			dataStream.Close();
+			try {
+				var dataStream = new FileStream(path, FileMode.Open);
+				// if (dataStream == null)
+				// 	throw new System.ArgumentNullException("filestream could not open");
+				data = serializer.Deserialize(dataStream) as GameData;
+				dataStream.Close();
+			} catch (Exception e){
+				Debug.Log("Error loading game data: "+path);
+				Debug.Log(e.Message);
+				Debug.Log(e.TargetSite);
+			}
 		}
 		return data;
 	}
