@@ -12,7 +12,7 @@ public class Puddle : MonoBehaviour {
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		spriteRenderer.sortingLayerName = "background";
 		// set random small puddle sprite
-		Sprite[] sprites = Resources.LoadAll<Sprite>("smallpuddle");
+		Sprite[] sprites = Resources.LoadAll<Sprite>("sprites/smallpuddle");
 		spriteRenderer.sprite = sprites[Random.Range (0,4)];
 		MonoLiquid monoliquid = GetComponent<MonoLiquid>();
 		if (monoliquid){
@@ -36,8 +36,8 @@ public class Puddle : MonoBehaviour {
 					transform.position = position;
 				} else {
 					Destroy(coll.gameObject);
-					Sprite[] sprites = Resources.LoadAll<Sprite>("mediumpuddle");
-					spriteRenderer.sprite = sprites[Random.Range (0,4)];
+					Sprite[] sprites = Resources.LoadAll<Sprite>("sprites/mediumpuddle");
+					spriteRenderer.sprite = sprites[Random.Range (0, 4)];
 					amount += otherPuddle.amount;
 					state = moveState.set;
 				}

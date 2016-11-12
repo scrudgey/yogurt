@@ -84,7 +84,7 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 		}
 	}
 	public void LoadSprites(){
-		sprites = Resources.LoadAll<Sprite>("sprites/"+spriteSheet);
+		sprites = Resources.LoadAll<Sprite>("spritesheets/" + spriteSheet);
 	}
 	public void UpdateSequence(){
 		GetComponent<Animation>().Play(sequence);

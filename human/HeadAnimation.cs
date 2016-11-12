@@ -43,7 +43,7 @@ public class HeadAnimation : MonoBehaviour, IMessagable {
 	private bool hitstun;
 
 	void LoadSprites(){
-		sprites = Resources.LoadAll<Sprite>("sprites/" + spriteSheet);
+		sprites = Resources.LoadAll<Sprite>("spritesheets/" + spriteSheet);
 	}
 	
 	public void UpdateSequence(){
@@ -58,7 +58,6 @@ public class HeadAnimation : MonoBehaviour, IMessagable {
 				parentSprite = renderer;
 		}
 		controllable = GetComponentInParent<Controllable>();
-		// speech = GetComponentInParent<Speech>();
 
 		ParticleSystem[] ps = GetComponentsInChildren<ParticleSystem>();
 		foreach (ParticleSystem p in ps){
