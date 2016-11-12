@@ -8,9 +8,8 @@ using System.Text.RegularExpressions;
 
 
 public class MySaver {
-	public delegate void SaveAction();
-	// public static event SaveAction OnSave;
-	public delegate void LoadAction();
+	// public delegate void SaveAction();
+	// public delegate void LoadAction();
 	public enum SaverState{None, Saving, Loading}
 	public static SaverState saveState;
 	public static List<GameObject> disabledPersistents = new List<GameObject>();
@@ -62,7 +61,6 @@ public class MySaver {
 			List<GameObject> objectList = new List<GameObject>();
 			List<MyMarker> marks = new List<MyMarker>(GameObject.FindObjectsOfType<MyMarker>());
 			foreach (MyMarker mark in marks){
-                
 				objectList.Add(mark.gameObject);
 			}
 			// add those objects which are disabled and would therefore not be found by our first search
@@ -111,9 +109,6 @@ public class MySaver {
 			sceneStream.Close();
 			playerStream.Close();
 
-			// call the save event
-			// if (OnSave != null)
-			// 	OnSave();
 		} catch (System.Exception ex){
 			Debug.Log("Problem saving!");
 			Debug.Log(ex.Message);
