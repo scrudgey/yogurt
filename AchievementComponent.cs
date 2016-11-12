@@ -7,7 +7,7 @@ public class AchievementComponent : MonoBehaviour {
 
 [System.Serializable]
 public class Achievement {
-	public Sprite icon;
+	public string iconName;
 	public bool complete;
 	public string title;
 	public string description;
@@ -29,7 +29,8 @@ public class Achievement {
 	}
 
 	public Achievement(Achievement source){
-		icon = source.icon;
+		// icon = source.icon;
+		iconName = source.iconName;
 		complete = source.complete;
 		title = source.title;
 		description = source.description;
