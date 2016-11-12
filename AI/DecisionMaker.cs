@@ -54,6 +54,7 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 		}
 		if (activePriority != null){
 			activePriority.DoAct();
+			// thoughtText = activePriority.goal.
 			// Debug.Log(activePriority.GetType());
 		}
 	}
