@@ -16,6 +16,8 @@ public class UINew: Singleton<UINew> {
 	private GameObject inventoryButton;
 	private GameObject fightButton;
 	private GameObject punchButton;
+	private GameObject speakButton;	
+	private GameObject recordStopButton;
 	private GameObject inventoryMenu;
 	private bool init = false;
 	public bool inventoryVisible = false;
@@ -29,49 +31,170 @@ public class UINew: Singleton<UINew> {
 	public Text actionTextObject;
 	public string actionTextString;
 	private Text recordText;
-	private GameObject recordStop;
+
 	private GameObject recordFinish;
 	private Stack<GameObject> collectedStack = new Stack<GameObject>();
 	private Stack<Achievement> achievementStack = new Stack<Achievement>();
 	public bool achievementPopupInProgress;
 
 	void Start(){
-		if (!init)
-			PostLoadInit();
+		if (!init){
+			ConfigureUIElements();
+			init = true;
+		}
 	}
-	public void PostLoadInit() {
+	void Update(){
+		if (statusTempTime > 0){
+			statusTempTime -= Time.deltaTime;
+		}
+		if (statusTempTime > 0){
+			status.text = statusTemp;
+			if (statusFX.style != statusTempStyle){
+				statusFX.style = statusTempStyle;
+			}
+		} else {
+			status.text = statusText;
+			if (statusFX.style != statusStyle){
+				statusFX.style = statusStyle;
+			}
+		}
+		if (!achievementPopupInProgress && collectedStack.Count > 0){
+			PopupCollected(collectedStack.Pop());
+		}
+		if (!achievementPopupInProgress && achievementStack.Count > 0){
+			PopupAchievement(achievementStack.Pop());
+		}
+		actionTextObject.text = actionTextString;
+	}
+	public void ConfigureUIElements() {
 		init = true;
 		UICanvas = GameObject.Find("NeoUICanvas");
 		if (UICanvas == null){
 			UICanvas = GameObject.Instantiate(Resources.Load("required/NeoUICanvas")) as GameObject;
 		}
 		GameObject.DontDestroyOnLoad(UICanvas);
-
+		UICanvas.GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
+		inventoryMenu = GameObject.Find("InventoryScreen");
+		if (inventoryMenu == null){
+			inventoryMenu = GameObject.Instantiate(Resources.Load(@"required/InventoryScreen")) as GameObject;
+			inventoryMenu.name = Toolbox.Instance.ScrubText(inventoryMenu.name);
+		}
 		inventoryButton = UICanvas.transform.Find("topdock/InventoryButton").gameObject;
 		fightButton = UICanvas.transform.Find("topdock/FightButton").gameObject;
 		punchButton = UICanvas.transform.Find("bottomdock/PunchButton").gameObject;
-
-		inventoryMenu = GameObject.Find("InventoryScreen");
+		speakButton = UICanvas.transform.Find("topdock/SpeakButton").gameObject;
 		status = UICanvas.transform.Find("topdock/topBar/status").GetComponent<Text>();
+		statusFX = status.gameObject.GetComponent<TextFX>();
 		actionTextObject = UICanvas.transform.Find("bottomdock/ActionText").GetComponent<Text>();
-
 		recordText = UICanvas.transform.Find("topdock/topRight/recStatus").gameObject.GetComponent<Text>();
-		recordStop = UICanvas.transform.Find("topdock/topRight/StopButton").gameObject;
+		recordStopButton = UICanvas.transform.Find("topdock/topRight/StopButton").gameObject;
 		recordFinish = UICanvas.transform.Find("topdock/topRight/FinishButton").gameObject;
 
-		if (recordStop){
-			recordStop.SetActive(false);
-			recordFinish.SetActive(false);
-			recordText.text = "";
-		}
-
-		statusFX = status.gameObject.GetComponent<TextFX>();
+		// speak button?
 		status.gameObject.SetActive(false);
 		inventoryMenu.SetActive(false);
 		inventoryButton.SetActive(false);
-		// fightButton.SetActive(false);
+		fightButton.SetActive(false);
+		speakButton.SetActive(false);
 		punchButton.SetActive(false);
+		if (recordStopButton){
+			recordStopButton.SetActive(false);
+			recordFinish.SetActive(false);
+			recordText.text = "";
+		}
 		CloseClosetMenu();
+	}
+	public void DisableAllUI(){
+		List<GameObject> buttons = new List<GameObject>(){inventoryButton, fightButton, punchButton, speakButton};
+		foreach (GameObject button in buttons){
+			// Debug.Log(button);
+			if (button)
+				button.SetActive(false);
+		}
+		if (recordStopButton){
+			recordStopButton.SetActive(false);
+			recordFinish.SetActive(false);
+			recordText.text = "";
+		}
+		if (status){
+			status.gameObject.SetActive(false);
+		}
+
+		CloseClosetMenu();
+		CloseInventoryMenu();
+		ClearWorldButtons();
+		ClearActionButtons();
+	}
+	public void UpdateButtons(){
+		if (GameManager.Instance.playerObject.GetComponent<Speech>()){
+			speakButton.SetActive(true);
+		}
+		Inventory inv = GameManager.Instance.playerObject.GetComponent<Inventory>();
+		if (inv){
+			Controller.Instance.focus.UpdateActions(inv);
+			UpdateInventoryButton(inv);
+		}
+		if (Controller.Instance.focus.fightMode){
+			punchButton.SetActive(true);
+		} else {
+			punchButton.SetActive(false);
+		}
+		fightButton.SetActive(true);
+	}
+	
+	public void UpdateRecordButtons(Commercial commercial){
+		if (GameManager.Instance.activeCommercial == null){
+			return;
+		}
+		if (commercial.Evaluate(GameManager.Instance.activeCommercial)){
+			recordText.text = "COMPLETE";
+			recordStopButton.SetActive(false);
+			recordFinish.SetActive(true);
+			// StartCoroutine(WaitAndFinish(1.5f));
+		} else {
+			recordText.text = "RECORDING";
+			recordStopButton.SetActive(true);
+			recordFinish.SetActive(false);
+		}
+	}
+	public void UpdateInventoryButton(Inventory inventory){
+		if (inventory.items.Count > 0){
+			inventoryButton.SetActive(true);
+		} else {
+			inventoryButton.SetActive(false);
+		}
+		if (inventoryVisible){
+			CloseInventoryMenu();
+			ShowInventoryMenu(inventory);
+		}
+		if (Controller.Instance.focus.fightMode){
+
+		} else {
+
+		}
+	}
+	public void ShowFightButton(){
+		fightButton.SetActive(true);
+	}
+	public void HideFightButton(){
+		fightButton.SetActive(false);
+	}
+	public void ShowPunchButton(){
+		punchButton.SetActive(true);
+	}
+	public void HidePunchButton(){
+		punchButton.SetActive(false);
+	}
+	public void EnableRecordButtons(bool enable){
+		if (enable){
+			recordText.text = "RECORDING";
+			recordStopButton.SetActive(true);
+			recordFinish.SetActive(true);
+		} else {
+			recordText.text = "";
+			recordStopButton.SetActive(false);
+			recordFinish.SetActive(false);	
+		}
 	}
 
 	public void PopupCounter(string text, float initValue, float finalValue, VideoCamera video){
@@ -82,7 +205,6 @@ public class UINew: Singleton<UINew> {
 			popCanvas.worldCamera = GameManager.Instance.cam;
 			
 			Poptext poptext = pop.GetComponent<Poptext>();
-			// poptext.description = text;
 			poptext.description.Add(text);
 			poptext.initValueList.Add(initValue);
 			poptext.finalValueList.Add(finalValue);
@@ -94,6 +216,7 @@ public class UINew: Singleton<UINew> {
 			poptext.finalValueList.Add(finalValue);
 		}
     }
+
 	public void PopupCollected(GameObject obj){
 		GameObject existingPop = GameObject.Find("AchievementPopup(Clone)");
 		if (existingPop == null){
@@ -123,37 +246,7 @@ public class UINew: Singleton<UINew> {
 			achievementStack.Push(achieve);
 		}
 	}
-	public void UpdateActionButtons(){
-		Inventory inventory = Controller.Instance.focus.GetComponent<Inventory>();
-		Controller.Instance.focus.UpdateActions(inventory);
-	}
-	public void EnableRecordButtons(bool enable){
-		if (enable){
-			recordText.text = "RECORDING";
-			recordStop.SetActive(true);
-			recordFinish.SetActive(true);
-		} else {
-			recordText.text = "";
-			recordStop.SetActive(false);
-			recordFinish.SetActive(false);	
-		}
-	}
 
-	public void UpdateRecordButtons(Commercial commercial){
-		if (GameManager.Instance.activeCommercial == null){
-			return;
-		}
-		if (commercial.Evaluate(GameManager.Instance.activeCommercial)){
-			recordText.text = "COMPLETE";
-			recordStop.SetActive(false);
-			recordFinish.SetActive(true);
-			// StartCoroutine(WaitAndFinish(1.5f));
-		} else {
-			recordText.text = "RECORDING";
-			recordStop.SetActive(true);
-			recordFinish.SetActive(false);
-		}
-	}
 
 	public void SetActionText(string text){
 		actionTextString = text;
@@ -169,29 +262,7 @@ public class UINew: Singleton<UINew> {
 	public void SetStatusStyle(TextFX.FXstyle style){
 		statusStyle = style;
 	}
-	void Update(){
-		if (statusTempTime > 0){
-			statusTempTime -= Time.deltaTime;
-		}
-		if (statusTempTime > 0){
-			status.text = statusTemp;
-			if (statusFX.style != statusTempStyle){
-				statusFX.style = statusTempStyle;
-			}
-		} else {
-			status.text = statusText;
-			if (statusFX.style != statusStyle){
-				statusFX.style = statusStyle;
-			}
-		}
-		if (!achievementPopupInProgress && collectedStack.Count > 0){
-			PopupCollected(collectedStack.Pop());
-		}
-		if (!achievementPopupInProgress && achievementStack.Count > 0){
-			PopupAchievement(achievementStack.Pop());
-		}
-		actionTextObject.text = actionTextString;
-	}
+	
 	public void DisplayHandActions(Inventory inventory){
 		ClearWorldButtons();
 		activeElements = new List<GameObject>();
@@ -218,37 +289,17 @@ public class UINew: Singleton<UINew> {
 		}
 		activeElements.Add(CircularizeButtons(buttons, GameManager.Instance.playerObject));
 	}
-	public void HandleInventoryButton(Inventory inventory){
-		if (inventory.items.Count > 0){
-			inventoryButton.SetActive(true);
-		} else {
-			inventoryButton.SetActive(false);
-		}
-		if (inventoryVisible){
-			CloseInventoryMenu();
-			ShowInventoryMenu(inventory);
-		}
-	}
-	public void ShowFightButton(){
-		fightButton.SetActive(true);
-	}
-	public void HideFightButton(){
-		fightButton.SetActive(false);
-	}
-	public void ShowPunchButton(){
-		punchButton.SetActive(true);
-	}
-	public void HidePunchButton(){
-		punchButton.SetActive(false);
-	}
+	
 
 	public void CloseInventoryMenu(){
+		if (inventoryMenu){
+			Transform itemDrawer = inventoryMenu.transform.Find("menu/itemdrawer");
+			int children = itemDrawer.childCount;
+			for (int i = 0; i < children; ++i)
+				Destroy(itemDrawer.GetChild(i).gameObject);
+			inventoryMenu.SetActive(false);
+		}
 		inventoryVisible = false;
-		Transform itemDrawer = inventoryMenu.transform.Find("menu/itemdrawer");
-		int children = itemDrawer.childCount;
-		for (int i = 0; i < children; ++i)
-			Destroy(itemDrawer.GetChild(i).gameObject);
-		inventoryMenu.SetActive(false);
 	}
 
 	public void ShowInventoryMenu(Inventory inventory){

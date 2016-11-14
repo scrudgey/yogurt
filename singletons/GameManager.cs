@@ -46,26 +46,17 @@ public partial class GameManager : Singleton<GameManager> {
 	public float timeSinceLastSave = 0f;
 	private float intervalTimer;
     void Start(){
+		// Cursor.SetCursor((Texture2D)Resources.Load("UI/cursor1"), Vector2.zero, CursorMode.Auto);
 		if (data == null){
-			data = new GameData();
+			data = InitializedGameData();
 		}
 		if (saveGameName == "test")
 			MySaver.CleanupSaves();
-		// Cursor.SetCursor((Texture2D)Resources.Load("UI/cursor1"), Vector2.zero, CursorMode.Auto);
-		if (! InCutscene()){
+		if (!InCutscene()){
             NewGame(switchlevel: false);
 		}
 	}
-
-	public bool InCutscene(){
-		if (SceneManager.GetActiveScene().buildIndex > 1){
-            return false;
-		} else {
-			return true;
-		}
-	}
-
-    void Update(){
+	void Update(){
 		timeSinceLastSave += Time.deltaTime;
         sceneTime += Time.deltaTime;
 		intervalTimer += Time.deltaTime;
@@ -75,58 +66,13 @@ public partial class GameManager : Singleton<GameManager> {
 			intervalTimer = 0;
 		}
 	}
- 
-    // ITEM COLLECTIONS
-	public void CheckItemCollection(GameObject obj, GameObject owner){
-		if (owner != playerObject)
-			return;
-		string filename = Toolbox.Instance.CloneRemover(obj.name);
-		filename = Toolbox.Instance.ReplaceUnderscore(filename);
-		if (data.collectedObjects.Contains(filename))
-			return;
-		UnityEngine.Object testPrefab = Resources.Load("prefabs/"+filename);
-		if (testPrefab != null){
-			data.collectedObjects.Add(filename);
-			data.itemCheckedOut[filename] = false;
-			UINew.Instance.PopupCollected(obj);
-			if (obj.GetComponent<Uniform>()){
-				data.collectedClothes.Add(filename);
-			}
-			if (obj.GetComponent<Edible>()){
-				data.collectedFood.Add(filename);
-			}
-			if (obj.GetComponent<Pickup>()){
-				data.collectedItems.Add(filename);
-			}
+	public bool InCutscene(){
+		if (SceneManager.GetActiveScene().buildIndex > 1){
+            return false;
+		} else {
+			return true;
 		}
-	}
-
-	public void RetrieveCollectedItem(string name){
-		if (data.itemCheckedOut[name])
-		return;
-		Instantiate(Resources.Load("prefabs/"+name), playerObject.transform.position, Quaternion.identity);
-		data.itemCheckedOut[name] = true;
-	}
-    
-    public void CheckAchievements(){
-		if (InCutscene())
-			return;
-		foreach (Achievement achieve in data.achievements){
-			if (!achieve.complete){
-				bool pass = achieve.Evaluate(data.achievementStats);
-				if (pass){
-					achieve.complete = true;
-					UINew.Instance.PopupAchievement(achieve);
-				}
-			}
-		}
-	}
-    
-    
-    
-	
-	
-
+	} 
 	public void FocusIntrinsicsChanged(Intrinsic intrinsic){
 		if (intrinsic.telepathy.boolValue){
 			Toolbox.Instance.SendMessage(playerObject, this, new MessageSpeech("I can hear thoughts!"));
@@ -149,107 +95,125 @@ public partial class GameManager : Singleton<GameManager> {
 			cameraControl.focus = target;
 		Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(target);
 		FocusIntrinsicsChanged(intrinsics.NetIntrinsic());
-		// if (target.GetComponent<Inventory>()){
-		// 	UINew.Instance.ShowFightButton();
-		// } else {
-		// 	UINew.Instance.HideFightButton();
-		// }
+		// change UI buttons?
+		UINew.Instance.UpdateButtons();
 	}
 
 	public void LeaveScene(string toSceneName, int toEntryNumber){
-		// call mysaver, tell it to save scene and player separately
 		MySaver.Save();
-		// unity load saved editor scene file
 		data.entryID = toEntryNumber;
 		SceneManager.LoadScene(toSceneName);
 	}
 	void OnLevelWasLoaded(int level) {
 		Debug.Log("on level was loaded");
-		// TODO: check if the loaded level is a cutscene.
         sceneTime = 0f;
-		// if level is title screen, don't worry about all the rest
-		if (level <= 1)
-			return;
-		// get player reference
-        GameObject player = MySaver.LoadScene();
-		// initialize values re: player object focus
-        cam = GameObject.FindObjectOfType<Camera>();
-        if (player){
-            SetFocus(player);
-            PlayerEnter();
-        }	
-
-		// bed entry on new day
-		if (data.entryID == 99){
-			Bed bed = GameObject.FindObjectOfType<Bed>();
-			if (bed){
-				bed.SleepCutscene();
-				playerObject.SetActive(false);
-				Outfit outfit = playerObject.GetComponent<Outfit>();
-				AdvancedAnimation advancedAnimation = playerObject.GetComponent<AdvancedAnimation>();
-				if (outfit != null && advancedAnimation != null){
-					advancedAnimation.baseName = "pajamas";
-					outfit.wornUniformName = "pajamas";
-				}
+		if (InCutscene()){
+			InitializeNonPlayableLevel();
+		} else {
+			InitializePlayableLevel(loadLevel: true);
+		}
+	}
+	public void InitializePlayableLevel(bool loadLevel=false){
+		// make sure all required parts are in place
+		string[] requirements = new string[] {"Main Camera", "EventSystem", "NeoUICanvas"};
+		foreach(string requirement in requirements){
+			GameObject go = GameObject.Find(requirement);
+			if (!go){
+				string path = @"required/"+requirement;
+				GameObject newgo = GameObject.Instantiate(Resources.Load(path)) as GameObject;
+				newgo.name = Toolbox.Instance.ScrubText(newgo.name);
 			}
 		}
+		cam = GameObject.FindObjectOfType<Camera>();
+		if (cam){
+			Toolbox.Instance.GetOrCreateComponent<CameraControl>(cam.gameObject);
+		}
+		UINew.Instance.ConfigureUIElements();
+
+		if (loadLevel){
+			playerObject = MySaver.LoadScene();
+		} else {
+			data = InitializedGameData();
+			// find or spawn the player character 
+			playerObject = GameObject.Find("Tom");	
+			if (!playerObject){
+				playerObject = GameObject.Find("Tom(Clone)");
+			}
+			if (!playerObject){
+				playerObject = GameObject.Instantiate(Resources.Load("prefabs/Tom")) as GameObject;
+			}
+			data.entryID = 99;
+		}
+		SetFocus(playerObject);
+		PlayerEnter();
+	}
+	public void InitializeNonPlayableLevel(){
+		UINew.Instance.DisableAllUI();
 	}
 	void PlayerEnter(){
-		if (playerObject){
-			List<Doorway> doorways = new List<Doorway>( GameObject.FindObjectsOfType<Doorway>() );
-			// TODO: can probably make this nicer with LINQ
-			foreach (Doorway doorway in doorways){
-				if (doorway.entryID == data.entryID){
-					Vector3 tempPos = doorway.transform.position;
-					tempPos.y = tempPos.y - 0.05f;
-					playerObject.transform.position = tempPos;
+		if (playerObject == null)
+			return;
+		List<Doorway> doorways = new List<Doorway>(GameObject.FindObjectsOfType<Doorway>());
+		// TODO: can probably make this nicer with LINQ
+		foreach (Doorway doorway in doorways){
+			if ((doorway.entryID == data.entryID && !doorway.spawnPoint) || (doorway.spawnPoint && data.entryID == 99)){
+				Vector3 tempPos = doorway.transform.position;
+				tempPos.y = tempPos.y - 0.05f;
+				playerObject.transform.position = tempPos;
+				// if this is a bed entry, we've got a new day going on!
+				if (data.entryID == -99){
+					Bed bed = GameObject.FindObjectOfType<Bed>();
+					if (bed){
+						bed.SleepCutscene();
+						playerObject.SetActive(false);
+						Outfit outfit = playerObject.GetComponent<Outfit>();
+						AdvancedAnimation advancedAnimation = playerObject.GetComponent<AdvancedAnimation>();
+						if (outfit != null && advancedAnimation != null){
+							advancedAnimation.baseName = "pajamas";
+							outfit.wornUniformName = "pajamas";
+						}
+						// kind of weird to stick this here instead of in the logical place in NewDay()
+						// but we should save when the player is in bed, not during cutscene
+						MySaver.Save();
+					}
 				}
 			}
 		}
+
 	}
 
-	public void NewDayCutscene(){
-		data.days += 1;
-		SceneManager.LoadScene("morning_cutscene");
+	public void NewGame(bool switchlevel=true){
+		Debug.Log("New game");
+		data = InitializedGameData();
+        if (switchlevel){
+			NewDayCutscene();
+        } else {
+			InitializePlayableLevel();
+		}
         sceneTime = 0f;
-        data.entryID = 99;
+		timeSinceLastSave = 0f;
 	}
     public void NewDay(){
 		Debug.Log("New day");
         MySaver.CleanupSaves();
 		SceneManager.LoadScene("house");
         sceneTime = 0f;
-        data.entryID = 99;
-		MySaver.Save();
+        data.entryID = -99;
     }
 
-    public void NewGame(bool switchlevel=true){
-		Debug.Log("New game");
-        if (switchlevel){
-			NewDayCutscene();
-        }
+	public void NewDayCutscene(){
+		data.days += 1;
+		SceneManager.LoadScene("morning_cutscene");
         sceneTime = 0f;
+        data.entryID = -99;
+	}
+	public void TitleScreen(){
+		SceneManager.LoadScene("title");
+		// UINew.Instance.DisableAllUI();
+	}
+	public GameData InitializedGameData(){
+		GameData data = new GameData();
 		data.secondsPlayed = 0f;
-		timeSinceLastSave = 0f;
-        // TODO: add a default player condition here
-		playerObject = GameObject.Find("Tom");	
-        if (!playerObject){
-            playerObject = GameObject.Find("Tom(Clone)");
-        }
-		if (!playerObject){
-			playerObject = GameObject.Instantiate(Resources.Load("prefabs/Tom")) as GameObject;
-		}
-		if (playerObject){
-			foreach(Doorway door in GameObject.FindObjectsOfType<Doorway>()){
-				if (door.spawnPoint){
-					Vector3 tempPos = door.transform.position;
-					tempPos.y = tempPos.y - 0.05f;
-					playerObject.transform.position = tempPos;
-				}
-			}
-		}
-		
-		// initialize collections
 		data.collectedItems = new List<string>();
 		data.collectedObjects = new List<string>();
 		data.collectedFood = new List<string>();
@@ -280,9 +244,7 @@ public partial class GameManager : Singleton<GameManager> {
 				data.achievements.Add(cloneAchievement);
 			}
 		}
-		
-		cam = GameObject.FindObjectOfType<Camera>();
-		SetFocus(playerObject);
+		return data;
 	}
 
 
@@ -314,7 +276,6 @@ public partial class GameManager : Singleton<GameManager> {
 		var serializer = new XmlSerializer(typeof(GameData));
 		string path = Path.Combine(Application.persistentDataPath, saveGameName);
 		path = Path.Combine(path, "game.xml");
-		Debug.Log("saving to "+path);
 		FileStream sceneStream = File.Create(path);
 		serializer.Serialize(sceneStream, data);
 		sceneStream.Close();
@@ -344,10 +305,51 @@ public partial class GameManager : Singleton<GameManager> {
 		Debug.Log("Loadsavegame into memory");
 		data = LoadGameData(gameName);
 		if (data.lastScene != null){
-			// SceneManager.LoadScene("house");
 			SceneManager.LoadScene(data.lastScene);
 		} else {
 			SceneManager.LoadScene("house");
+		}
+	}
+	public void CheckItemCollection(GameObject obj, GameObject owner){
+		if (owner != playerObject)
+			return;
+		string filename = Toolbox.Instance.CloneRemover(obj.name);
+		filename = Toolbox.Instance.ReplaceUnderscore(filename);
+		if (data.collectedObjects.Contains(filename))
+			return;
+		UnityEngine.Object testPrefab = Resources.Load("prefabs/"+filename);
+		if (testPrefab != null){
+			data.collectedObjects.Add(filename);
+			data.itemCheckedOut[filename] = false;
+			UINew.Instance.PopupCollected(obj);
+			if (obj.GetComponent<Uniform>()){
+				data.collectedClothes.Add(filename);
+			}
+			if (obj.GetComponent<Edible>()){
+				data.collectedFood.Add(filename);
+			}
+			if (obj.GetComponent<Pickup>()){
+				data.collectedItems.Add(filename);
+			}
+		}
+	}
+	public void RetrieveCollectedItem(string name){
+		if (data.itemCheckedOut[name])
+		return;
+		Instantiate(Resources.Load("prefabs/"+name), playerObject.transform.position, Quaternion.identity);
+		data.itemCheckedOut[name] = true;
+	}
+	public void CheckAchievements(){
+		if (InCutscene())
+			return;
+		foreach (Achievement achieve in data.achievements){
+			if (!achieve.complete){
+				bool pass = achieve.Evaluate(data.achievementStats);
+				if (pass){
+					achieve.complete = true;
+					UINew.Instance.PopupAchievement(achieve);
+				}
+			}
 		}
 	}
 

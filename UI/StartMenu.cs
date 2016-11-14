@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using System.IO;
 using System;
+using System.Collections.Generic;
 
 public class StartMenu : MonoBehaviour {
 	public AudioClip music;
@@ -47,7 +48,7 @@ public class StartMenu : MonoBehaviour {
 		}
 	}
 	private void ConfigLoadMenu(){
-		GameObject saveGamePanel = loadGameMenu.transform.Find("GamePanel").gameObject;
+		GameObject saveGamePanel = loadGameMenu.transform.Find("Scroll View/Viewport/Content").gameObject;
 		int children = saveGamePanel.transform.childCount;
 		for (int i = 0; i < children; ++i)
 			Destroy(saveGamePanel.transform.GetChild(i).gameObject);
@@ -63,13 +64,14 @@ public class StartMenu : MonoBehaviour {
 			if (dir.Name != "test"){
 				GameData data = GameManager.Instance.LoadGameData(dir.Name);
                 TimeSpan t = TimeSpan.FromSeconds(0f);
-				t = TimeSpan.FromSeconds(data.secondsPlayed);
-				string answer = string.Format("{0:D2}:{1:D2}:{2:D2}s", 
+				if (data != null){
+					t = TimeSpan.FromSeconds(data.secondsPlayed);
+					script.dateText.text = data.saveDate;
+				}
+				script.timeText.text = string.Format("{0:D2}:{1:D2}:{2:D2}s", 
 											t.Hours, 
 											t.Minutes, 
-											t.Seconds);
-				script.timeText.text = answer.ToString();
-				script.dateText.text = data.saveDate.ToString();
+											t.Seconds).ToString();
 			}
 		}
 	}
@@ -126,20 +128,27 @@ public class StartMenu : MonoBehaviour {
 			ShowAlert("Bad name!!!");
 		} else {
 			GameManager.Instance.saveGameName = newName;
-			GameManager.Instance.data = new GameData();
-			// GameManager.Instance.data = GameManager.Instance.InitGameData();
 			GameManager.Instance.NewGame();
 		}
 	}
 	public void LoadGameSelect(SaveGameSelectorScript saveGame){
-		// Debug.Log("Loading the game");
 		GameManager.Instance.saveGameName = saveGame.saveName;
-		// GameManager.Instance.NewGame();
 		GameManager.Instance.LoadGameDataIntoMemory(saveGame.saveName);
 	}
 	public void ShowAlert(string text){
 		alert.SetActive(true);
 		Text alertText = alert.transform.Find("Text").GetComponent<Text>();
 		alertText.text = text;
+	}
+
+	public string SuggestANAme(){
+		List<string> names = new List<string>(){
+			"Shemp",
+			"Corona",
+			"Frog",
+			"Crogus",
+			"Smitty"
+		};
+		return names[UnityEngine.Random.Range( 0, names.Count )];
 	}
 }

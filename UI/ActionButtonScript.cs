@@ -17,7 +17,7 @@ public class ActionButtonScript: MonoBehaviour {
 				if (!action.dontWipeInterface){
 					UINew.Instance.ClearWorldButtons();
 				}
-				UINew.Instance.UpdateActionButtons();
+				Controller.Instance.focus.UpdateActions();
 			}
 			UINew.Instance.SetActionText("");
 		} else {
@@ -65,7 +65,7 @@ public class ActionButtonScript: MonoBehaviour {
 		case ActionButtonScript.buttonType.Stash:
 		inventory.StashItem(inventory.holding.gameObject);
 		UINew.Instance.ClearWorldButtons();
-		UINew.Instance.HandleInventoryButton(inventory);
+		UINew.Instance.UpdateInventoryButton(inventory);
 		break;
 
 		case ActionButtonScript.buttonType.Punch:
