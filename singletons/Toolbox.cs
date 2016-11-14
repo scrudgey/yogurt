@@ -102,8 +102,9 @@ public class Toolbox : Singleton<Toolbox> {
     public void SpawnDroplet(Liquid l, float severity, GameObject spiller, float initHeight){
         Vector3 initialVelocity = Vector2.zero;
         Vector3 randomVelocity = Vector2.zero;
-        randomVelocity = transform.right * Random.Range(-0.2f, 0.2f);
-        initialVelocity.x = transform.up.x * Random.Range(0.8f, 1.3f);
+        randomVelocity = spiller.transform.right * Random.Range(-0.2f, 0.2f);
+
+        initialVelocity.x = spiller.transform.up.x * Random.Range(0.8f, 1.3f);
         initialVelocity.z = Random.Range(severity, 0.2f + severity);
         initialVelocity.x += randomVelocity.x;
         initialVelocity.z += randomVelocity.y;
