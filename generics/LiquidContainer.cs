@@ -35,12 +35,15 @@ public class LiquidContainer : Interactive {
 	void Start () {
 		interactions.Add(new Interaction(this, "Fill", "FillFromReservoir"));
 		Interaction fillContainer = new Interaction(this, "Fill", "FillFromContainer");
+		Interaction drinker = new Interaction(this, "Drink", "Drink");
+		drinker.validationFunction = true;
+		interactions.Add(drinker);
 		fillContainer.validationFunction = true;
 		interactions.Add(fillContainer);
-		// interactions.Add(new Interaction(this, "Fill", "FillFromContainer"));
 		empty = true;
 		if (!LoadInitialized)
 			LoadInit();
+
 	}
 	public void LoadInit(){
 		Transform child = transform.FindChild("liquidSprite");
@@ -109,19 +112,11 @@ public class LiquidContainer : Interactive {
 		}
 		if (empty && amount > 0){
 			empty = false;
-			interactions.Add( new Interaction(this, "Drink", "Drink"));
-			SendMessageUpwards("UpdateActions", SendMessageOptions.DontRequireReceiver);
+			// TODO: only update actions if i'm being held : message
+			// UINew.Instance.UpdateActionButtons();
 		}
 		if (!empty && amount <= 0){
 			empty = true;
-			Interaction removeThis = null;
-			foreach (Interaction interaction in interactions)
-				if (interaction.actionName == "Drink")
-					removeThis = interaction;
-			if (removeThis != null){
-				interactions.Remove(removeThis);
-				SendMessageUpwards("UpdateActions", SendMessageOptions.DontRequireReceiver);
-			}
 		}
 	}
 
@@ -151,6 +146,9 @@ public class LiquidContainer : Interactive {
 			eater.Eat(sip.GetComponent<Edible>());
 			amount -= 1f;
 		}
+	}
+	public bool Drink_Validation(Eater eater){
+		return amount > 0;
 	}
 	public string Drink_desc(Eater eater){
 		string myname = Toolbox.Instance.GetName(gameObject);
