@@ -22,6 +22,7 @@ public class Edible : Interactive {
 		if (pb){
 			pb.DestroyPhysical();
 		}
+		Messenger.Instance.WasDestroyed(gameObject);
 		Destroy(gameObject);
 	}
 
