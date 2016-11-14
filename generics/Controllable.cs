@@ -143,8 +143,14 @@ public class Controllable : MonoBehaviour, IMessagable {
 			UpdateActions(inv);
 		}
 	}
-
+	public void UpdateActions(){
+		Inventory inv = GetComponent<Inventory>();
+		if (inv != null)
+			UpdateActions(inv);
+	}
 	public void UpdateActions(Inventory inv){
+		if (inv == null)
+			return;
 		if (inv.holding){
 			List<Interaction> manualActions = Interactor.ReportManualActions(inv.holding.gameObject, gameObject);
 			foreach (Interaction inter in Interactor.ReportRightClickActions(gameObject, inv.holding.gameObject))
