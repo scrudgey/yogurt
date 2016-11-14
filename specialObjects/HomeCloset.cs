@@ -15,6 +15,17 @@ public class HomeCloset : Interactive {
 		menu.PopulateItemList(type);
 	}
 	public string OpenCloset_desc(){
-		return "Browse closet";
+		switch (type){
+			case ClosetType.all:
+			return "Browse items";
+			case ClosetType.items:
+			return "Browse closet";
+			case ClosetType.food:
+			return "Browse refrigerator";
+			case ClosetType.clothing:
+			return "Browse dress";
+			default:
+			return "Browse closet";
+		}
 	}
 }
