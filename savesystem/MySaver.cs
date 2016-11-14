@@ -29,9 +29,7 @@ public class MySaver {
 		{typeof(Cabinet),							() => new CabinetHandler() },
 	};
 	public static void CleanupSaves(){
-		// string testPath = Path.Combine(Application.persistentDataPath, "test");
 		string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
-		// DirectoryInfo info = new DirectoryInfo(Application.persistentDataPath);
 		if (!System.IO.Directory.Exists(path))
 			return;
 		DirectoryInfo info = new DirectoryInfo(path);
