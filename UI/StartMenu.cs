@@ -9,9 +9,10 @@ public class StartMenu : MonoBehaviour {
 	private GameObject mainMenu;
 	private GameObject newGameMenu;
 	private GameObject loadGameMenu;
+	private GameObject prompt;
 	private GameObject alert;
 	
-	private enum menuState{main, startNew, load}
+	private enum menuState{anykey, main, startNew, load}
 	private menuState state;
 	
 	void Start(){
@@ -22,10 +23,20 @@ public class StartMenu : MonoBehaviour {
 		newGameMenu = transform.Find("NewGameMenu").gameObject;
 		loadGameMenu = transform.Find("LoadGameMenu").gameObject;
 		alert = transform.Find("Alert").gameObject;
+		prompt = transform.Find("prompt").gameObject;
 		newGameMenu.SetActive(false);
 		loadGameMenu.SetActive(false);
+		mainMenu.SetActive(false);
 		alert.SetActive(false);
-		state = menuState.main;
+		state = menuState.anykey;
+	}
+
+	void Update(){
+		if (Input.anyKey && state == menuState.anykey){
+			state = menuState.main;
+			mainMenu.SetActive(true);
+			prompt.SetActive(false);
+		}
 	}
 	private void SwitchMenu(menuState switchTo){
 		newGameMenu.SetActive(false);
@@ -35,7 +46,7 @@ public class StartMenu : MonoBehaviour {
 		switch (switchTo)
 		{
 			case menuState.startNew:
-			newGameMenu.SetActive(true);
+			OpenNewGameMenu();
 			break;
 			case menuState.load:
 			loadGameMenu.SetActive(true);
@@ -47,6 +58,15 @@ public class StartMenu : MonoBehaviour {
 			break;
 		}
 	}
+
+	private void OpenNewGameMenu(){
+		newGameMenu.SetActive(true);
+		InputField input = newGameMenu.transform.Find("InputField").GetComponent<InputField>();
+		// InputField inputField = someGameObject.GetComponent<InputField>();
+		input.ActivateInputField();
+		input.text = SuggestANAme();
+	}
+
 	private void ConfigLoadMenu(){
 		GameObject saveGamePanel = loadGameMenu.transform.Find("Scroll View/Viewport/Content").gameObject;
 		int children = saveGamePanel.transform.childCount;
@@ -147,7 +167,9 @@ public class StartMenu : MonoBehaviour {
 			"Corona",
 			"Frog",
 			"Crogus",
-			"Smitty"
+			"Smitty",
+			"Scrummy Bingus",
+			"Isis"
 		};
 		return names[UnityEngine.Random.Range( 0, names.Count )];
 	}
