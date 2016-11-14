@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-// using System.Collections;
 
 public class AchievementComponent : MonoBehaviour {
 	public Achievement achivement;
@@ -12,7 +11,6 @@ public class Achievement {
 	public string title;
 	public string description;
 	public AchievementStats stats = new AchievementStats();
-
 	public bool Evaluate(AchievementStats otherStats){
 		bool pass = true;
 		if (stats.secondsPlayed > 0)
@@ -23,13 +21,8 @@ public class Achievement {
 			pass = pass && otherStats.vomit >= stats.vomit;
 		return pass;
 	}
-
-	public Achievement(){
-
-	}
-
+	public Achievement(){ }
 	public Achievement(Achievement source){
-		// icon = source.icon;
 		iconName = source.iconName;
 		complete = source.complete;
 		title = source.title;
@@ -44,11 +37,7 @@ public class AchievementStats {
 	public float yogurtEaten;
 	public float vomit;
 	public float yogurtVomit;
-
-	public AchievementStats(){
-
-	}
-
+	public AchievementStats(){ }
 	public AchievementStats(AchievementStats source){
 		secondsPlayed = source.secondsPlayed;
 		yogurtEaten = source.yogurtEaten;
