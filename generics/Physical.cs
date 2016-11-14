@@ -56,8 +56,8 @@ public class Physical : MonoBehaviour, IMessagable {
 	public void InitValues(){
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		slider = GetComponent<SliderJoint2D>();
-		trueObject = transform.GetChild(0).transform.GetChild(0).gameObject;
 		hinge = transform.GetChild(0).gameObject;
+		trueObject = hinge.transform.GetChild(0).gameObject;
 		groundCollider = GetComponent<BoxCollider2D>();
 		objectCollider = trueObject.GetComponent<Collider2D>();
 		order = objectBody.GetComponent<OrderByY>();
