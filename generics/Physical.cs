@@ -283,10 +283,9 @@ public class Physical : MonoBehaviour, IMessagable {
 					Physics2D.IgnoreCollision(objectCollider, tableCollider, true);
 				}
 			}
-			// OrderByY order = objectBody.GetComponent<OrderByY>();
 			OrderByY orderTable = table.GetComponentInParent<OrderByY>();
 			if (order != null && orderTable != null){
-				order.offset = -1f * (objectBody.transform.position.y - table.transform.position.y - 0.01f);
+				order.offset = -1f * (objectBody.transform.position.y - table.transform.position.y - 0.008f);
 			}
 		}
 	}
