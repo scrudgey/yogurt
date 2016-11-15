@@ -21,10 +21,8 @@ public class Eater : Interactive {
 			}
 	}
     private bool poisonNausea;
-	// private Speech speech;
 	private GameObject eaten;
 	private bool LoadInitialized = false;
-	// private Intrinsics intrinsics;
 
 	private void CheckNausea(){
 		if ( nausea > 50 && lastNausea < 50){
@@ -178,6 +176,10 @@ public class Eater : Interactive {
 			}
         }
         flag.data.Add(eatData);
+
+		if (food.eatSound != null){
+			Toolbox.Instance.AudioSpeaker(food.eatSound, transform.position);
+		}
 
 		food.BeEaten();
 

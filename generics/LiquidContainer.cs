@@ -24,6 +24,7 @@ public class LiquidContainer : Interactive {
     private float spillSeverity;
 	public string initLiquid;
     public string containerName;
+	public AudioClip[] drinkSounds;
 	void Update(){
 		if (spillTimeout > 0){
 			spillTimeout -= Time.deltaTime;
@@ -145,6 +146,9 @@ public class LiquidContainer : Interactive {
 			LiquidCollection.MonoLiquidify(sip, liquid);
 			eater.Eat(sip.GetComponent<Edible>());
 			amount -= 1f;
+			if (drinkSounds.Length > 0){
+				Toolbox.Instance.AudioSpeaker(drinkSounds[Random.Range(0, drinkSounds.Length-1)], transform.position);
+			}
 		}
 	}
 	public bool Drink_Validation(Eater eater){

@@ -15,6 +15,7 @@ public class Edible : Interactive {
     public bool vomit;
 	public bool blendable;
 	public Color pureeColor;
+	public AudioClip eatSound;
 
 	virtual public void BeEaten(){
 
