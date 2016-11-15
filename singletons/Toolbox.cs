@@ -78,6 +78,11 @@ public class Toolbox : Singleton<Toolbox> {
 		source.maxDistance = 5.42f;
 		return source;
 	}
+	public void AudioSpeaker(AudioClip clip, Vector3 position){
+		GameObject speaker = Instantiate(Resources.Load("Speaker"), position, Quaternion.identity) as GameObject;
+		speaker.GetComponent<AudioSource>().clip = clip;
+		speaker.GetComponent<AudioSource>().Play();
+	}
 
 	///<summary>
 	///Spawn a droplet of liquid l at poisition pos.
