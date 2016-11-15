@@ -127,7 +127,9 @@ public class Controllable : MonoBehaviour, IMessagable {
 				foreach(MonoBehaviour mb in list)
 				{
 					if (mb is IDirectable){
-						directables.Add((IDirectable)mb);
+						IDirectable idir = (IDirectable)mb;
+						directables.Add(idir);
+						idir.DirectionChange(direction);
 					}
 				}
 			}
