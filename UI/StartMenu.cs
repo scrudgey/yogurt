@@ -169,7 +169,10 @@ public class StartMenu : MonoBehaviour {
 			"Crogus",
 			"Smitty",
 			"Scrummy Bingus",
-			"Isis"
+			"Isis",
+			"Fang",
+			"Jiggly",
+			"Ziplock McBaggins"
 		};
 		return names[UnityEngine.Random.Range( 0, names.Count )];
 	}
