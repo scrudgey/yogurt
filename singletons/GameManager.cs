@@ -105,7 +105,7 @@ public partial class GameManager : Singleton<GameManager> {
 		SceneManager.LoadScene(toSceneName);
 	}
 	void OnLevelWasLoaded(int level) {
-		Debug.Log("on level was loaded");
+		// Debug.Log("on level was loaded");
         sceneTime = 0f;
 		if (InCutscene()){
 			InitializeNonPlayableLevel();
@@ -302,7 +302,7 @@ public partial class GameManager : Singleton<GameManager> {
 		return data;
 	}
 	public void LoadGameDataIntoMemory(string gameName){
-		Debug.Log("Loadsavegame into memory");
+		// Debug.Log("Loadsavegame into memory");
 		data = LoadGameData(gameName);
 		if (data.lastScene != null){
 			SceneManager.LoadScene(data.lastScene);
