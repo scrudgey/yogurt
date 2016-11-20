@@ -1,18 +1,27 @@
-﻿// using UnityEngine;
-// using System.Collections;
-
+﻿using UnityEngine;
+using System.Collections.Generic;
 public class HomeCloset : Interactive {
-
 	public enum ClosetType {all, items, food, clothing}
 	public ClosetType type;
-	// Use this for initialization
-	void Start () {
+	GameObject newBubble;
+	public void Start () {
 		interactions.Add(new Interaction(this, "Open", "OpenCloset"));
+		newBubble = transform.Find("newBubble").gameObject;
+		CheckBubble();
 	}
-	
+	public void InitBubble(){
+		newBubble = transform.Find("newBubble").gameObject;
+	}
+	public void CheckBubble(){
+		bool activeBubble = false;
+		GameManager.Instance.closetHasNew.TryGetValue(type, out activeBubble);
+		newBubble.SetActive(activeBubble);
+	}
 	public void OpenCloset(){
 		ClosetButtonHandler menu = UINew.Instance.ShowClosetMenu();
 		menu.PopulateItemList(type);
+		GameManager.Instance.DetermineClosetNews();
+		CheckBubble();
 	}
 	public string OpenCloset_desc(){
 		switch (type){
