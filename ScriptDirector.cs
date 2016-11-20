@@ -12,6 +12,7 @@ public class ScriptDirector : Interactive {
     private AudioSource audioSource;
     public AudioClip successSound;
     public bool live;
+    private GameObject regionIndicator;
     
 	void Start () {
         live = false;
@@ -35,6 +36,9 @@ public class ScriptDirector : Interactive {
         enableAct.validationFunction = true;
         interactions.Add(enableAct);
         
+        regionIndicator = transform.Find("Graphic").gameObject;
+        regionIndicator.SetActive(false);
+
         // Interaction disableAct = new Interaction(this, "Stop", "Disable");
         // disableAct.validationFunction = true;
         // interactions.Add(disableAct);
@@ -52,11 +56,13 @@ public class ScriptDirector : Interactive {
         if (GameManager.Instance.activeCommercial != null){
             live = true;
             video.live = true;
+            regionIndicator.SetActive(true);
             UINew.Instance.EnableRecordButtons(true);
             UINew.Instance.UpdateRecordButtons(video.commercial);
             StartCoroutine(WaitAndStartScript(1f));
         } else {
             live = false;
+            regionIndicator.SetActive(false);
             UINew.Instance.EnableRecordButtons(false);
             GameManager.Instance.ScriptPrompt();
         }
@@ -68,6 +74,7 @@ public class ScriptDirector : Interactive {
     public void Disable(){
         live = false;
         video.live = false;
+        regionIndicator.SetActive(false);
     }
     public bool Disable_Validation(){
         return live == true;
