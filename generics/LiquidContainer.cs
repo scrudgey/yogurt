@@ -60,6 +60,9 @@ public class LiquidContainer : Interactive {
 	}
 	public void FillFromReservoir(LiquidResevoir l){
 		FillWithLiquid(l.liquid);
+		if (l.fillSound != null){
+			Toolbox.Instance.AudioSpeaker(l.fillSound, transform.position);
+		}
 	}
 	public string FillFromReservoir_desc(LiquidResevoir l){
 		string myname = Toolbox.Instance.GetName(gameObject);

@@ -1,7 +1,7 @@
-﻿
+﻿using UnityEngine;
 public class LiquidResevoir : Interactive {
 	public Liquid liquid;
-
+	public AudioClip fillSound;
 	public enum liquidType{
 		water,
 		test2
