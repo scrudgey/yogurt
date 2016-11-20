@@ -29,7 +29,6 @@ public class Bed : Doorway {
 		sleep.descString = "Go to bed";
 		interactions.Add(sleep);
 		interactions.Add(makeBed);
-
 		if (!sleeping){
 			head.gameObject.SetActive(false);
 			bubble.gameObject.SetActive(false);
@@ -40,8 +39,6 @@ public class Bed : Doorway {
 			head.gameObject.SetActive(true);
 			bubble.gameObject.SetActive(true);
 		}
-
-
 	}
 	public void MakeBed(){
 		unmade = false;
@@ -57,11 +54,9 @@ public class Bed : Doorway {
 		MySaver.Save();
 		GameManager.Instance.NewDayCutscene();
 	}
-
 	public void SleepCutscene(){
 		sleeping = true;
 	}
-
 	void Update(){
 		if (sleeping){
 			animationTimer += Time.deltaTime;
@@ -77,7 +72,7 @@ public class Bed : Doorway {
 				}
 			}
 
-			if (Input.anyKey){
+			if (Input.anyKey && GameObject.Find("NewDayReport(Clone)") == null){
 				sleeping = false;
 				unmade = true;	
 				spriteRenderer.sprite = bedSprites[1];
@@ -85,6 +80,9 @@ public class Bed : Doorway {
 				bubble.gameObject.SetActive(false);
 				GameManager.Instance.playerObject.SetActive(true);
 				audioSource.PlayOneShot(beddingSound);
+				if (GameManager.Instance.data.days == 1){
+					GameObject.Instantiate(Resources.Load("UI/Diary"));
+				}
 			}
 		}
 	}
