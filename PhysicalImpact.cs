@@ -18,7 +18,7 @@ public class PhysicalImpact : MonoBehaviour {
 	}
 
 	void OnTriggerEnter2D(Collider2D collider){
-		if (collider.tag == "background")
+		if (collider.tag == "background" || collider.tag == "Puddle")
 			return;
 		if (impactedObjects.Contains(collider.transform.root))
 			return;
