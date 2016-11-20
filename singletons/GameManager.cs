@@ -369,7 +369,7 @@ public partial class GameManager : Singleton<GameManager> {
 				data.collectedFood.Add(filename);
 				data.newCollectedFood.Add(filename);
 			}
-			if (obj.GetComponent<Uniform>()){
+			if (obj.GetComponent<Uniform>() || obj.GetComponent<Hat>()){
 				data.collectedClothes.Add(filename);
 				data.newCollectedClothes.Add(filename);
 			}
