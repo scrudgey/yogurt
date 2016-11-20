@@ -27,7 +27,9 @@ public class CommercialReportMenu : MonoBehaviour {
     }
     public void NewDayButton(){
         Controller.Instance.suspendInput = false;
+		MySaver.Save();
         GameManager.Instance.NewDayCutscene();
+        // GameManager.Instance.NewDay();
     }
     
     private void SetRefs(){
