@@ -12,8 +12,11 @@ public class GameData{
     public float money;
 	public List<string> collectedObjects;
 	public List<string> collectedItems;
+	public List<string> newCollectedItems;
 	public List<string> collectedFood;
+	public List<string> newCollectedFood;
 	public List<string> collectedClothes;
+	public List<string> newCollectedClothes;
 	public SerializableDictionary<string, bool> itemCheckedOut;
 	public string lastSavedPlayerPath;
 	public string lastSavedScenePath;
@@ -24,6 +27,7 @@ public class GameData{
 	public int days;
     public List<Commercial> unlockedCommercials;
     public List<Commercial> completeCommercials;
+	public List<Commercial> newUnlockedCommercials;
 	public int entryID;
 	public List<Achievement> achievements;
 	public AchievementStats achievementStats = new AchievementStats();
@@ -43,8 +47,10 @@ public partial class GameManager : Singleton<GameManager> {
 	public float gravity = 1.6f;
     public Commercial activeCommercial;
     private float sceneTime;
+	private bool awaitNewDayPrompt;
 	public float timeSinceLastSave = 0f;
 	private float intervalTimer;
+	public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     void Start(){
 		// Cursor.SetCursor((Texture2D)Resources.Load("UI/cursor1"), Vector2.zero, CursorMode.Auto);
 		if (data == null){
@@ -64,6 +70,10 @@ public partial class GameManager : Singleton<GameManager> {
 			data.achievementStats.secondsPlayed = timeSinceLastSave;
 			CheckAchievements();
 			intervalTimer = 0;
+		}
+		if (awaitNewDayPrompt && sceneTime > 2f){
+			awaitNewDayPrompt = false;
+			GameObject.Instantiate(Resources.Load("UI/NewDayReport"));
 		}
 	}
 	public bool InCutscene(){
@@ -172,14 +182,19 @@ public partial class GameManager : Singleton<GameManager> {
 							advancedAnimation.baseName = "pajamas";
 							outfit.wornUniformName = "pajamas";
 						}
-						// kind of weird to stick this here instead of in the logical place in NewDay()
-						// but we should save when the player is in bed, not during cutscene
 						MySaver.Save();
+						// if (data.days > 1)
+						awaitNewDayPrompt = CheckNewDayPrompt();
 					}
 				}
 			}
 		}
+	}
 
+	public bool CheckNewDayPrompt(){
+		if (data.days <= 1)
+			return false;
+		return data.newCollectedClothes.Count + data.newCollectedFood.Count + data.newCollectedItems.Count + data.newUnlockedCommercials.Count > 0;
 	}
 
 	public void NewGame(bool switchlevel=true){
@@ -196,10 +211,38 @@ public partial class GameManager : Singleton<GameManager> {
     public void NewDay(){
 		Debug.Log("New day");
         MySaver.CleanupSaves();
+		List<string> keys = new List<string>(data.itemCheckedOut.Keys);
+		foreach (string key in keys){
+			data.itemCheckedOut[key] = false;
+		}
+		DetermineClosetNews();
 		SceneManager.LoadScene("house");
         sceneTime = 0f;
         data.entryID = -99;
     }
+
+	public void DetermineClosetNews(){
+		closetHasNew[HomeCloset.ClosetType.items] = false;
+		closetHasNew[HomeCloset.ClosetType.all] = false;
+		closetHasNew[HomeCloset.ClosetType.food] = false;
+		closetHasNew[HomeCloset.ClosetType.clothing] = false;
+		foreach (string name in data.newCollectedItems){
+			if (!data.itemCheckedOut[name]){
+				closetHasNew[HomeCloset.ClosetType.items] = true;
+				closetHasNew[HomeCloset.ClosetType.all] = true;
+			} 
+		}
+		foreach (string name in data.newCollectedFood){
+			if (!data.itemCheckedOut[name]){
+				closetHasNew[HomeCloset.ClosetType.food] = true;
+			}
+		}
+		foreach (string name in data.newCollectedClothes){
+			if (!data.itemCheckedOut[name]){
+				closetHasNew[HomeCloset.ClosetType.clothing] = true;
+			}
+		}
+	}
 
 	public void NewDayCutscene(){
 		data.days += 1;
@@ -209,15 +252,17 @@ public partial class GameManager : Singleton<GameManager> {
 	}
 	public void TitleScreen(){
 		SceneManager.LoadScene("title");
-		// UINew.Instance.DisableAllUI();
 	}
 	public GameData InitializedGameData(){
 		GameData data = new GameData();
 		data.secondsPlayed = 0f;
 		data.collectedItems = new List<string>();
+		data.newCollectedItems = new List<string>();
 		data.collectedObjects = new List<string>();
 		data.collectedFood = new List<string>();
+		data.newCollectedFood = new List<string>();
 		data.collectedClothes = new List<string>();
+		data.newCollectedClothes = new List<string>();
 		data.itemCheckedOut = new SerializableDictionary<string, bool>();
 		data.collectedClothes.Add("blue_shirt");
 		data.collectedObjects.Add("blue_shirt");
@@ -229,6 +274,7 @@ public partial class GameManager : Singleton<GameManager> {
 		// initialize commercials
 		// TODO: change this temporary hack into something more correct.
         data.unlockedCommercials = new List<Commercial>();
+		data.newUnlockedCommercials = new List<Commercial>();
         data.unlockedCommercials.Add(LoadCommercialByName("eat1"));
         data.completeCommercials = new List<Commercial>();
 
@@ -263,7 +309,6 @@ public partial class GameManager : Singleton<GameManager> {
 		path = Path.Combine(Application.persistentDataPath, saveGameName);
 		if (!Directory.Exists(path))
 		  Directory.CreateDirectory(path);
-		// if (GameManager.Instance.playerObject )
 		path = Path.Combine(path, "player_"+GameManager.Instance.playerObject.name+"_state.xml");
 		data.lastSavedPlayerPath = path;
 		data.lastPlayerName = GameManager.Instance.playerObject.name;
@@ -289,8 +334,6 @@ public partial class GameManager : Singleton<GameManager> {
 		if (File.Exists(path)){
 			try {
 				var dataStream = new FileStream(path, FileMode.Open);
-				// if (dataStream == null)
-				// 	throw new System.ArgumentNullException("filestream could not open");
 				data = serializer.Deserialize(dataStream) as GameData;
 				dataStream.Close();
 			} catch (Exception e){
@@ -320,16 +363,19 @@ public partial class GameManager : Singleton<GameManager> {
 		UnityEngine.Object testPrefab = Resources.Load("prefabs/"+filename);
 		if (testPrefab != null){
 			data.collectedObjects.Add(filename);
-			data.itemCheckedOut[filename] = false;
+			data.itemCheckedOut[filename] = true;
 			UINew.Instance.PopupCollected(obj);
-			if (obj.GetComponent<Uniform>()){
-				data.collectedClothes.Add(filename);
-			}
 			if (obj.GetComponent<Edible>()){
 				data.collectedFood.Add(filename);
+				data.newCollectedFood.Add(filename);
+			}
+			if (obj.GetComponent<Uniform>()){
+				data.collectedClothes.Add(filename);
+				data.newCollectedClothes.Add(filename);
 			}
 			if (obj.GetComponent<Pickup>()){
 				data.collectedItems.Add(filename);
+				data.newCollectedItems.Add(filename);
 			}
 		}
 	}
@@ -352,6 +398,5 @@ public partial class GameManager : Singleton<GameManager> {
 			}
 		}
 	}
-
 }
 
