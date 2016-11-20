@@ -31,7 +31,6 @@ public class UINew: Singleton<UINew> {
 	public Text actionTextObject;
 	public string actionTextString;
 	private Text recordText;
-
 	private GameObject recordFinish;
 	private Stack<GameObject> collectedStack = new Stack<GameObject>();
 	private Stack<Achievement> achievementStack = new Stack<Achievement>();
@@ -417,14 +416,16 @@ public class UINew: Singleton<UINew> {
 		return buttonAnchor;
 	}
 	private void ArrangeButtonsOnScreenBottom(List<actionButton> buttons){
-		GameObject bottomBar = UICanvas.transform.Find("bottomdock/bottom").gameObject;
+		// GameObject bottomBar = UICanvas.transform.Find("bottomdock/bottom").gameObject;
+		GameObject bottomBar = UICanvas.transform.Find("topdock").gameObject;
 		foreach (actionButton button in buttons){
 			button.gameobject.transform.SetParent(bottomBar.transform, false);
+			button.gameobject.transform.SetSiblingIndex(3);
 		}
 	}
 	private void MakeButtonDefault(actionButton button){
 		Image image = button.gameobject.GetComponent<Image>();
-		image.sprite = Resources.Load<Sprite>("UI/BoxTexture5");
+		image.sprite = Resources.Load<Sprite>("sprites/UI/BoxTexture5");
 	}
 	public void CreateActionButtons(List<Interaction> manualActions, Interaction defaultInteraction){
 		ClearActionButtons();

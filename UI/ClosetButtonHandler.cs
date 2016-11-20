@@ -34,15 +34,42 @@ public class ClosetButtonHandler : MonoBehaviour {
 			itemList = GameManager.Instance.data.collectedItems;
 			titleText.text = "Collected Items";
 		}
-		// foreach (string name in GameManager.Instance.data.collectedItems){
 		foreach (string name in itemList){
-			GameObject newEntry = spawnEntry();
+			GameObject wrapper = spawnEntry();
+			Text newText = wrapper.transform.Find("newIndicator").GetComponent<Text>();
+			newText.text = "";
+
+			GameObject newEntry = wrapper.transform.Find("item").gameObject;
 			ItemEntryScript entryScript = newEntry.GetComponent<ItemEntryScript>();
 			entryScript.itemName = name;
 			entryScript.enableItem = !GameManager.Instance.data.itemCheckedOut[name];
 			Text entryText = newEntry.GetComponent<Text>();
 			entryText.text = Toolbox.Instance.ScrubText(name);
-			newEntry.transform.SetParent(listObject.transform, false);
+			if (type == HomeCloset.ClosetType.all || type == HomeCloset.ClosetType.items){
+				if (GameManager.Instance.data.newCollectedItems.Contains(name)){
+					if (!GameManager.Instance.data.itemCheckedOut[name]){
+						GameManager.Instance.data.newCollectedItems.Remove(name);
+						newText.text = "new!";
+					}
+				}
+			}
+			if (type == HomeCloset.ClosetType.food){
+				if (GameManager.Instance.data.newCollectedFood.Contains(name)){
+					if (!GameManager.Instance.data.itemCheckedOut[name]){
+						GameManager.Instance.data.newCollectedFood.Remove(name);
+						newText.text = "new!";
+					}
+				}
+			}
+			if (type == HomeCloset.ClosetType.clothing){
+				if (GameManager.Instance.data.newCollectedClothes.Contains(name)){
+					if (!GameManager.Instance.data.itemCheckedOut[name]){
+						GameManager.Instance.data.newCollectedClothes.Remove(name);
+						newText.text = "new!";
+					}
+				}
+			}
+			wrapper.transform.SetParent(listObject.transform, false);
 		}
 	}
 	public void CloseButtonClick(){

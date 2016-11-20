@@ -62,7 +62,6 @@ public class StartMenu : MonoBehaviour {
 	private void OpenNewGameMenu(){
 		newGameMenu.SetActive(true);
 		InputField input = newGameMenu.transform.Find("InputField").GetComponent<InputField>();
-		// InputField inputField = someGameObject.GetComponent<InputField>();
 		input.ActivateInputField();
 		input.text = SuggestANAme();
 	}
@@ -172,7 +171,8 @@ public class StartMenu : MonoBehaviour {
 			"Isis",
 			"Fang",
 			"Jiggly",
-			"Ziplock McBaggins"
+			"Ziplock McBaggins",
+			"Questor"
 		};
 		return names[UnityEngine.Random.Range( 0, names.Count )];
 	}

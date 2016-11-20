@@ -1,9 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-// using System.Collections;
 
 public class CommercialReportMenu : MonoBehaviour {
-    // Text titleText;
     Text descriptionText;
     Text rewardText;
     Text positiveScore, chaosScore, disgustingScore, disturbingScore, offensiveScore;

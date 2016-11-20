@@ -5,8 +5,10 @@ public class PauseMenu : MonoBehaviour {
 		MySaver.Save();
 		GameManager.Instance.TitleScreen();
 	}
-	
 	public void QuitClick(){
 		GameManager.Instance.TitleScreen();
+	}
+	public void ContinueClick(){
+		Destroy(gameObject);
 	}
 }
