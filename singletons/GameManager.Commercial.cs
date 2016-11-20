@@ -1,12 +1,13 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Xml.Serialization;
+using System;
 
 public partial class GameManager : Singleton<GameManager> {
     
     public List<Commercial> listAllCommercials(){
         List<Commercial> passList = new List<Commercial>();
-        Object[] XMLObjects = Resources.LoadAll("data/commercials");
+        UnityEngine.Object[] XMLObjects = Resources.LoadAll("data/commercials");
         List<TextAsset> xmlList = new List<TextAsset>();
         for (int i = 0; i < XMLObjects.Length; i++){
             xmlList.Add((TextAsset)XMLObjects[i]);
@@ -20,12 +21,17 @@ public partial class GameManager : Singleton<GameManager> {
         return passList;
     }
     public Commercial LoadCommercialByName(string filename){
-        Commercial commercial = null;
-        TextAsset xml = Resources.Load("data/commercials/"+filename) as TextAsset;
-        var serializer = new XmlSerializer(typeof(Commercial));
-        var reader = new System.IO.StringReader(xml.text);
-        commercial = serializer.Deserialize(reader) as Commercial;
-        return commercial;
+        try{
+            Commercial commercial = null;
+            TextAsset xml = Resources.Load("data/commercials/"+filename) as TextAsset;
+            var serializer = new XmlSerializer(typeof(Commercial));
+            var reader = new System.IO.StringReader(xml.text);
+            commercial = serializer.Deserialize(reader) as Commercial;
+            return commercial;
+        } catch(Exception e){
+            Debug.Log(e.Message);
+            return null;
+        }
     }
 
     public void ScriptPrompt(){
@@ -36,6 +42,7 @@ public partial class GameManager : Singleton<GameManager> {
     public void UnlockCommercial(string filename){
         Commercial unlocked = LoadCommercialByName(filename);
         data.unlockedCommercials.Add(unlocked);
+        data.newUnlockedCommercials.Add(unlocked);
     }
     public void EvaluateCommercial(Commercial commercial){
         bool success = false;
@@ -46,7 +53,7 @@ public partial class GameManager : Singleton<GameManager> {
             //process reward
             data.money += activeCommercial.reward;
             foreach (string unlock in activeCommercial.unlockUponCompletion){
-               UnlockCommercial(unlock);
+                UnlockCommercial(unlock);
             }
             GameObject report = Instantiate(Resources.Load("UI/CommercialReport")) as GameObject;
             report.GetComponent<CommercialReportMenu>().Report(activeCommercial, commercial);
