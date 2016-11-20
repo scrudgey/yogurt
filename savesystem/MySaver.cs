@@ -157,7 +157,6 @@ public class MySaver {
 		} catch {
 			Debug.Log("problem loading!");
 		}
-		// GameManager.Instance.SaveGameData();
 		saveState = SaverState.None;
 		return playerObject;
 	}
