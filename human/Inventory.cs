@@ -80,7 +80,8 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 				holding.transform.position = holdpoint.position;
 				holdpoint.localScale = Vector3.one;
 				transform.localScale = Vector3.one;
-				holding.transform.parent = holdpoint;
+				// holding.transform.parent = holdpoint;
+				holding.transform.SetParent(holdpoint);
 				holding.transform.rotation = Quaternion.identity;
 				holding.GetComponent<Rigidbody2D>().isKinematic = true;
 				holding.GetComponent<Collider2D>().isTrigger = true;
@@ -127,7 +128,8 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 			float vz = 0.5f;
 			phys.InitPhysical(dropHeight, new Vector3(vx, vy, vz));
 		} else {
-			holding.transform.parent = null;
+			// holding.transform.parent = null;
+			holding.transform.SetParent(null);
 		}
 		OrderByY yorder = holding.GetComponent<OrderByY>();
 		if (yorder)
@@ -148,7 +150,8 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 					yorder.enabled = false;
 				items[i].SetActive(true);
 				items[i].transform.position = holdpoint.position;
-				items[i].transform.parent = holdpoint;
+				// items[i].transform.parent = holdpoint;
+				items[i].transform.SetParent(holdpoint);
 				items[i].GetComponent<Rigidbody2D>().isKinematic = true;
 				items[i].GetComponent<Collider2D>().isTrigger = true;
 				Messenger.Instance.ClaimObject(items[i].gameObject, this);
@@ -259,7 +262,8 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 
 	void StartSwing(){
 		GameObject slash = Instantiate(Resources.Load("Slash2"), transform.position, transform.rotation) as GameObject;
-		slash.transform.parent = transform;
+		// slash.transform.parent = transform;
+		slash.transform.SetParent(transform);
 		slash.transform.localScale = Vector3.one;
 		holding.GetComponent<Renderer>().sortingLayerName = "main";
 		holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder + 1;

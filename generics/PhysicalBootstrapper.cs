@@ -41,7 +41,8 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	}
 
 	public void DestroyPhysical(){
-		transform.parent = null;
+		// transform.parent = null;
+		transform.SetParent(null);
 		Destroy(groundObject);
 		GetComponent<Rigidbody2D>().gravityScale = 0;
 		// Physics2D.IgnoreCollision(tomCollider, GetComponent<Collider2D>(), false);
@@ -57,7 +58,8 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		// Set up hinge
 		hingeObject = new GameObject("hinge");
 		hingeObject.transform.position = initPos;
-		transform.parent = hingeObject.transform;
+		// transform.parent = hingeObject.transform;
+		transform.SetParent(hingeObject.transform);
 
 		hingeBody = hingeObject.AddComponent<Rigidbody2D>();
 		hingeJoint2D = hingeObject.AddComponent<HingeJoint2D>();
@@ -73,7 +75,8 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		groundObject.transform.position = initPos;
 		Toolbox.Instance.SetUpAudioSource(groundObject);
 
-		hingeObject.transform.parent = groundObject.transform;
+		// hingeObject.transform.parent = groundObject.transform;
+		hingeObject.transform.SetParent(groundObject.transform);
 		Vector2 tempPos = Vector2.zero;
 //		Bounds spriteBounds = spriteRenderer.sprite.bounds;
 //		height += spriteBounds.extents.y;
