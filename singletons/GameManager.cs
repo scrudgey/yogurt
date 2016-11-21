@@ -53,6 +53,7 @@ public partial class GameManager : Singleton<GameManager> {
 	public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     void Start(){
 		// Cursor.SetCursor((Texture2D)Resources.Load("UI/cursor1"), Vector2.zero, CursorMode.Auto);
+		SceneManager.sceneLoaded += LevelWasLoaded;
 		if (data == null){
 			data = InitializedGameData();
 		}
@@ -114,7 +115,8 @@ public partial class GameManager : Singleton<GameManager> {
 		data.entryID = toEntryNumber;
 		SceneManager.LoadScene(toSceneName);
 	}
-	void OnLevelWasLoaded(int level) {
+	// void LevelWasLoaded(int level) {
+	void LevelWasLoaded(Scene scene, LoadSceneMode mode){
 		// Debug.Log("on level was loaded");
         sceneTime = 0f;
 		if (InCutscene()){
