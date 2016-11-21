@@ -373,15 +373,16 @@ public class UINew: Singleton<UINew> {
 		Rigidbody2D firstBody = null;
 		Rigidbody2D priorBody = null;
 		int n = 0;
-		Vector2 centerPosition = renderingCamera.WorldToScreenPoint(UICanvas.transform.position);
+		Vector2 centerPosition = RectTransformUtility.WorldToScreenPoint(renderingCamera, UICanvas.transform.position);
 		
 		foreach(actionButton button in buttons){
-			Vector2 initLocation = (Vector2)target.transform.position + Toolbox.Instance.RotateZ(Vector2.right, angle);
-			Vector2 initPosition = UICanvas.GetComponent<Canvas>().worldCamera.WorldToScreenPoint(initLocation);
+			Vector2 initLocation = (Vector2)target.transform.position + Toolbox.Instance.RotateZ(Vector2.right/4, angle);
+			Vector2 initPosition = RectTransformUtility.WorldToScreenPoint(renderingCamera, initLocation);
+
 			n++;
 			// instantiate button
 			button.gameobject.transform.SetParent(UICanvas.transform, false);
-			button.gameobject.transform.localPosition = initPosition - centerPosition;
+			button.gameobject.transform.localPosition = (initPosition - centerPosition)/2;
 			if (priorBody){
 				SpringJoint2D spring = button.gameobject.AddComponent<SpringJoint2D>();
 				spring.autoConfigureDistance = false;
@@ -413,6 +414,7 @@ public class UINew: Singleton<UINew> {
 		}
 		buttonAnchor.transform.position = target.transform.position;
 		buttonAnchor.transform.SetParent(target.transform);
+		// Debug.Break();
 		return buttonAnchor;
 	}
 	private void ArrangeButtonsOnScreenBottom(List<actionButton> buttons){
