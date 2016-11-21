@@ -52,7 +52,7 @@ public class Controllable : MonoBehaviour, IMessagable {
 			OnMouseUpEvent();
 	}
 	public virtual void Start(){
-		foreach(Component component in gameObject.GetComponents<Component>())
+		foreach(Component component in gameObject.GetComponentsInChildren<Component>())
 		{
 			if (component is IDirectable){
 				directables.Add((IDirectable)component);

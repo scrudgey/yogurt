@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 // using System.Collections;
 
-public class HeadAnimation : MonoBehaviour, IMessagable {
+public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
 
 	private Controllable controllable;
 	// private Speech speech;
@@ -172,5 +172,13 @@ public class HeadAnimation : MonoBehaviour, IMessagable {
 	public void SetFrame(int animationFrame){
 		frame = animationFrame + baseFrame;
 		spriteRenderer.sprite = sprites[frame];
+	}
+
+	public void DirectionChange(Vector2 newdir){
+		if (newdir.x >= 0){
+			spriteRenderer.flipX = false;
+		} else {
+			spriteRenderer.flipX = true;
+		}
 	}
 }
