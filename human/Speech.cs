@@ -10,7 +10,7 @@ public class Speech : Interactive, IMessagable {
 	private float speakTime;
     private float speakTimeTotal;
 	private GameObject bubbleParent;
-    private GameObject flipper;
+    // private GameObject flipper;
 	private Text bubbleText;
     private float speakSpeed;
     private char[] chars;
@@ -32,7 +32,7 @@ public class Speech : Interactive, IMessagable {
 		speak.limitless = true;
 		speak.dontWipeInterface = false;
 		interactions.Add(speak);
-        flipper = transform.FindChild("SpeechChild").gameObject;
+        // flipper = transform.FindChild("SpeechChild").gameObject;
 		bubbleParent = transform.FindChild("SpeechChild/Speechbubble").gameObject;
 		bubbleText = bubbleParent.transform.FindChild("Text").gameObject.GetComponent<Text>();
         audioSource = GetComponent<AudioSource>();
@@ -86,10 +86,10 @@ public class Speech : Interactive, IMessagable {
             float charIndex = (speakTimeTotal - speakTime) * speakSpeed;
             // if the parent scale is flipped, we need to flip the flipper back to keep
             // the text properly oriented.
-            if (flipper.transform.localScale != transform.localScale){
-                Vector3 tempscale = transform.localScale;
-                flipper.transform.localScale = tempscale; 
-			}
+            // if (flipper.transform.localScale != transform.localScale){
+            //     Vector3 tempscale = transform.localScale;
+            //     flipper.transform.localScale = tempscale; 
+			// }
             // if (!audioSource.isPlaying){
             if (charIndex < swearMask.Length){
                 if (swearMask[(int)charIndex] == 0){

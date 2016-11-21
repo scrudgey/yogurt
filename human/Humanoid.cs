@@ -23,6 +23,7 @@ public class Humanoid : Controllable, IMessagable {
 	private Quaternion forward;
 	private Vector3 scaleVector; 
 	public bool hitstun;
+	private SpriteRenderer spriteRenderer;
 
 	private bool LoadInitialized = false;
 	public override void Start () {
@@ -50,6 +51,7 @@ public class Humanoid : Controllable, IMessagable {
 	void LoadInit(){
 		baseSpeed = maxSpeed;
 		scaleVector = Vector3.one;
+		spriteRenderer = GetComponent<SpriteRenderer>();
 	}
 	
 
@@ -98,12 +100,11 @@ public class Humanoid : Controllable, IMessagable {
 		// use the scale x trick for left-facing animations
 		Vector2 vel = GetComponent<Rigidbody2D>().velocity;
 		if (vel.x < -0.1){
-			scaleVector.x = -1;
+			spriteRenderer.flipX = true;
 		}
 		if (vel.x > 0.1){
-			scaleVector.x = 1;
+			spriteRenderer.flipX = false;
 		}
-		transform.localScale = scaleVector;
 	}
 
 	public override void ReceiveMessage(Message message){
@@ -125,16 +126,15 @@ public class Humanoid : Controllable, IMessagable {
 		// change lastpressed because this is relevant to animation
 		if (angle > 315 || angle < 45){
 			lastPressed = "right";
-			scaleVector.x = 1;
+			spriteRenderer.flipX = false;
 		} else if (angle >= 45 && angle <= 135) {
 			lastPressed = "up";
 		} else if (angle >= 135 && angle < 225) {
 			lastPressed = "right";
-			scaleVector.x = -1;
+			spriteRenderer.flipX = true;
 		} else if (angle >= 225 && angle < 315) {
 			lastPressed = "down";
 		}
-		transform.localScale = scaleVector;
 	}
 	public override void SetDirection(Vector2 d){
 		base.SetDirection(d);
