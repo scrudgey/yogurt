@@ -18,6 +18,7 @@ public class ScriptSelectionMenu : MonoBehaviour
         // solid idea of the "new day" cycle.
         // GameManager.Instance.InitValues();
         Controller.Instance.suspendInput = true;
+        GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
 
         descriptionText = transform.Find("Panel/Body/sidebar/DescriptionPanel/DescriptionBox/Description").GetComponent<Text>();
         scrollContent = transform.Find("Panel/Body/Left/ScriptList/Viewport/Content").gameObject;
