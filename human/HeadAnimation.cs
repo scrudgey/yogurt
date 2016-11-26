@@ -4,7 +4,6 @@
 public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
 
 	private Controllable controllable;
-	// private Speech speech;
 	private bool speaking;
 	private string _spriteSheet;
 	private string spriteSheet{
@@ -175,10 +174,10 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
 	}
 
 	public void DirectionChange(Vector2 newdir){
-		if (newdir.x >= 0){
-			spriteRenderer.flipX = false;
-		} else {
-			spriteRenderer.flipX = true;
-		}
+		// if (newdir.x >= 0){
+		// 	spriteRenderer.flipX = false;
+		// } else {
+		// 	spriteRenderer.flipX = true;
+		// }
 	}
 }
