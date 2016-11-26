@@ -59,9 +59,7 @@ public class Controller : Singleton<Controller> {
 	}
 
 	void OnGUI(){
-		// the mousedown click events need to be a bit better- referencing fire in particular is clunky
-		Event e = Event.current;
-		if (e.isMouse){
+		if (Event.current.isMouse){
 			// right click
 			if (Input.GetMouseButtonDown(1)){
 				RightClick();
