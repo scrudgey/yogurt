@@ -31,6 +31,7 @@ public class GameData{
 	public int entryID;
 	public List<Achievement> achievements;
 	public AchievementStats achievementStats = new AchievementStats();
+	public List<Email> emails;
 	public GameData(){
 		days = 0;
 		saveDate = System.DateTime.Now.ToString();
@@ -265,6 +266,7 @@ public partial class GameManager : Singleton<GameManager> {
 		data.newCollectedFood = new List<string>();
 		data.collectedClothes = new List<string>();
 		data.newCollectedClothes = new List<string>();
+		data.emails = new List<Email>();
 		data.itemCheckedOut = new SerializableDictionary<string, bool>();
 		data.collectedClothes.Add("blue_shirt");
 		data.collectedObjects.Add("blue_shirt");
@@ -279,6 +281,8 @@ public partial class GameManager : Singleton<GameManager> {
 		data.newUnlockedCommercials = new List<Commercial>();
         data.unlockedCommercials.Add(LoadCommercialByName("eat1"));
         data.completeCommercials = new List<Commercial>();
+
+		data.emails.Add(Email.LoadEmail("test"));
 
 		// initialize achievements
 		data.achievements = new List<Achievement>();
@@ -399,6 +403,12 @@ public partial class GameManager : Singleton<GameManager> {
 				}
 			}
 		}
+	}
+
+	public void EmailReceived(string emailName){
+		Email newEmail = Email.LoadEmail(emailName);
+		newEmail.read = false;
+		data.emails.Add(newEmail);
 	}
 }
 
