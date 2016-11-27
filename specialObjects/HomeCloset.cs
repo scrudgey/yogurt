@@ -32,7 +32,7 @@ public class HomeCloset : Interactive {
 			case ClosetType.food:
 			return "Browse refrigerator";
 			case ClosetType.clothing:
-			return "Browse dress";
+			return "Browse dresser";
 			default:
 			return "Browse closet";
 		}
