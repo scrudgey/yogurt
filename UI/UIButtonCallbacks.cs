@@ -19,4 +19,20 @@ public class UIButtonCallbacks : MonoBehaviour {
 			UINew.Instance.ShowInventoryMenu(inventory);
 		}
 	}
+
+	public void FinishButtonClick(){
+		VideoCamera video = GameObject.FindObjectOfType<VideoCamera>();
+		video.live = false;
+		if (video){
+			GameManager.Instance.EvaluateCommercial(video.commercial);
+		}
+		// GameManager.Instance.EvaluateCommercial();
+	}
+
+	public void StopRecButtonClick(){
+		VideoCamera video = GameObject.FindObjectOfType<VideoCamera>();
+		video.live = false;
+		GameManager.Instance.activeCommercial = null;
+		UINew.Instance.EnableRecordButtons(false);
+	}
 }
