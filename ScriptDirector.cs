@@ -53,6 +53,7 @@ public class ScriptDirector : Interactive {
         return "Start recording a new commercial";
     }
     public void Enable(){
+        // improve logic to catch null
         if (GameManager.Instance.activeCommercial != null){
             live = true;
             video.live = true;
@@ -64,7 +65,7 @@ public class ScriptDirector : Interactive {
             live = false;
             regionIndicator.SetActive(false);
             UINew.Instance.EnableRecordButtons(false);
-            GameManager.Instance.ScriptPrompt();
+            Instantiate(Resources.Load("UI/ScriptSelector"));
         }
     }
     public bool Enable_Validation(){
