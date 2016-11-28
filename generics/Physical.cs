@@ -138,7 +138,7 @@ public class Physical : MonoBehaviour, IMessagable {
 		doZip = true;
 	}
 
-	public void StartGroundMode(){
+	public void StartGroundMode(bool suppressLandSound=false){
 		doGround = false;
 		ziptime = 0f;
 		// set tom collider. this is a temporary hack.
@@ -185,7 +185,7 @@ public class Physical : MonoBehaviour, IMessagable {
 				}
 			}
 		}
-		if (landSounds.Length > 0)
+		if (landSounds.Length > 0 && !suppressLandSound)
 			GetComponent<AudioSource>().PlayOneShot(landSounds[Random.Range(0, landSounds.Length)]);
 	}
 
