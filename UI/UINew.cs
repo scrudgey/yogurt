@@ -80,7 +80,7 @@ public class UINew: Singleton<UINew> {
 		}
 		inventoryButton = UICanvas.transform.Find("topdock/InventoryButton").gameObject;
 		fightButton = UICanvas.transform.Find("topdock/FightButton").gameObject;
-		punchButton = UICanvas.transform.Find("bottomdock/PunchButton").gameObject;
+		punchButton = UICanvas.transform.Find("topdock/PunchButton").gameObject;
 		speakButton = UICanvas.transform.Find("topdock/SpeakButton").gameObject;
 		status = UICanvas.transform.Find("topdock/topBar/status").GetComponent<Text>();
 		statusFX = status.gameObject.GetComponent<TextFX>();
