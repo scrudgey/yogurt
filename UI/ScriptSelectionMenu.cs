@@ -44,7 +44,7 @@ public class ScriptSelectionMenu : MonoBehaviour
             scriptEntries.Add(newEntry);
         }
         
-        CreateFreestyleEntry(); 
+        // CreateFreestyleEntry(); 
         EventSystem.current.SetSelectedGameObject(scriptEntries[0]);
         ClickedScript(scriptEntries[0].GetComponent<ScriptListEntry>());
         
