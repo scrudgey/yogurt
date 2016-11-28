@@ -10,7 +10,6 @@ public class EmailUI : MonoBehaviour {
 	public Text subjectText;
 	public List<emailEntryButton> emailButtons;
 	public Computer computer;
-	// private Canvas myCanvas;
 	void Start () {
 		GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
 
@@ -35,7 +34,6 @@ public class EmailUI : MonoBehaviour {
 			entryScript.Initialize(this, email);
 			entry.transform.SetParent(emailListObject.transform, false);
 			emailButtons.Add(entryScript);
-			// entry.GetComponent<RectTransform>().localScale = Vector3.one;
 		}
 	}
 	public void EmailEntryCallback(Email email){
