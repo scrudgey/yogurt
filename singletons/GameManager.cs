@@ -46,13 +46,22 @@ public partial class GameManager : Singleton<GameManager> {
 	public Camera cam;
 	public GameObject playerObject;
 	public float gravity = 1.6f;
-    public Commercial activeCommercial;
+	// public Commercial activeCommercial;
+	private Commercial _activeCommercial;
+    public Commercial activeCommercial{
+		get {return _activeCommercial;}
+		set {
+			_activeCommercial = value;
+		}
+	}
     private float sceneTime;
 	private bool awaitNewDayPrompt;
 	public float timeSinceLastSave = 0f;
 	private float intervalTimer;
 	public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
+	public AudioSource publicAudio;
     void Start(){
+		// Debug.Log(activeCommercial);
 		// Cursor.SetCursor((Texture2D)Resources.Load("UI/cursor1"), Vector2.zero, CursorMode.Auto);
 		SceneManager.sceneLoaded += LevelWasLoaded;
 		if (data == null){
@@ -63,6 +72,7 @@ public partial class GameManager : Singleton<GameManager> {
 		if (!InCutscene()){
             NewGame(switchlevel: false);
 		}
+		publicAudio = Toolbox.Instance.SetUpAudioSource(gameObject);
 	}
 	void Update(){
 		timeSinceLastSave += Time.deltaTime;
@@ -173,6 +183,7 @@ public partial class GameManager : Singleton<GameManager> {
 				Vector3 tempPos = doorway.transform.position;
 				tempPos.y = tempPos.y - 0.05f;
 				playerObject.transform.position = tempPos;
+				doorway.PlayEnterSound();
 				// if this is a bed entry, we've got a new day going on!
 				if (data.entryID == -99){
 					Bed bed = GameObject.FindObjectOfType<Bed>();
@@ -222,6 +233,7 @@ public partial class GameManager : Singleton<GameManager> {
 		SceneManager.LoadScene("house");
         sceneTime = 0f;
         data.entryID = -99;
+		activeCommercial = null;
     }
 
 	public void DetermineClosetNews(){
@@ -389,6 +401,8 @@ public partial class GameManager : Singleton<GameManager> {
 		if (data.itemCheckedOut[name])
 		return;
 		Instantiate(Resources.Load("prefabs/"+name), playerObject.transform.position, Quaternion.identity);
+		Instantiate(Resources.Load("particles/poof"), playerObject.transform.position, Quaternion.identity);
+		publicAudio.PlayOneShot(Resources.Load("sounds/pop", typeof(AudioClip)) as AudioClip);// Resources.Load("sounds/pop", typeof(AudioClip)) as AudioClip;
 		data.itemCheckedOut[name] = true;
 	}
 	public void CheckAchievements(){
