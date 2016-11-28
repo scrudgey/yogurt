@@ -34,11 +34,6 @@ public partial class GameManager : Singleton<GameManager> {
         }
     }
 
-    public void ScriptPrompt(){
-        GameObject menu = Instantiate(Resources.Load("UI/ScriptSelector")) as GameObject;
-        // menu.GetComponent<Canvas>().worldCamera = cam;
-    }
-
     public void UnlockCommercial(string filename){
         Commercial unlocked = LoadCommercialByName(filename);
         data.unlockedCommercials.Add(unlocked);
@@ -58,7 +53,7 @@ public partial class GameManager : Singleton<GameManager> {
             GameObject report = Instantiate(Resources.Load("UI/CommercialReport")) as GameObject;
             report.GetComponent<CommercialReportMenu>().Report(activeCommercial, commercial);
             // report.GetComponent<CommercialReportMenu>().Report(activeCommercial);
-            if (activeCommercial.name != "freestyle")
+            if (activeCommercial.name != "Freestyle")
                 data.completeCommercials.Add(activeCommercial);
         } else {
             // do something to display why the commercial is not done yet
