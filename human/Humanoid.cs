@@ -34,7 +34,7 @@ public class Humanoid : Controllable, IMessagable {
 	}
 	private Vector3 _scaleVector;
 	public bool hitstun;
-	private SpriteRenderer spriteRenderer;
+	// private SpriteRenderer spriteRenderer;
 
 	private bool LoadInitialized = false;
 	public override void Start () {
@@ -62,7 +62,7 @@ public class Humanoid : Controllable, IMessagable {
 	void LoadInit(){
 		baseSpeed = maxSpeed;
 		scaleVector = Vector3.one;
-		spriteRenderer = GetComponent<SpriteRenderer>();
+		// spriteRenderer = GetComponent<SpriteRenderer>();
 	}
 	
 
