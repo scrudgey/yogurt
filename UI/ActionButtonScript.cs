@@ -18,11 +18,13 @@ public class ActionButtonScript: MonoBehaviour {
 					UINew.Instance.ClearWorldButtons();
 				}
 				Controller.Instance.focus.UpdateActions();
+				Controller.Instance.ResetLastLeftClicked();
 			}
 			UINew.Instance.SetActionText("");
 		} else {
 			HandAction();
 			UINew.Instance.SetActionText("");
+			Controller.Instance.ResetLastLeftClicked();
 		}
 		GUI.FocusControl("none");
 	}
