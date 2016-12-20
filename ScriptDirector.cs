@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+// using System;
+// using System.Reflection;
 public class ScriptDirector : Interactive {
     public TextAsset script;
     public int index;
@@ -16,7 +18,7 @@ public class ScriptDirector : Interactive {
     
 	void Start () {
         live = false;
-        script = Resources.Load("data/scripts/script1") as TextAsset;
+        // script = Resources.Load("data/scripts/script1") as TextAsset;
         video = GetComponent<VideoCamera>();
         readers = new List<GameObject>();
         foreach (VideoCamera cam in GameObject.FindObjectsOfType<VideoCamera>()){
@@ -25,12 +27,12 @@ public class ScriptDirector : Interactive {
         foreach (DecisionMaker dm in GameObject.FindObjectsOfType<DecisionMaker>()){
             readers.Add(dm.gameObject);
         }
-        lines = script.text.Split('\n');
+        // lines = script.text.Split('\n');
         index = 0;
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         UINew.Instance.SetStatus("-WAIT-");
         UINew.Instance.SetStatusStyle(TextFX.FXstyle.blink);
-        ParseLine();
+        // ParseLine();
         
         Interaction enableAct = new Interaction(this, "Start", "Enable");
         enableAct.validationFunction = true;
@@ -43,7 +45,7 @@ public class ScriptDirector : Interactive {
         // disableAct.validationFunction = true;
         // interactions.Add(disableAct);
 	}
-    
+
     public IEnumerator WaitAndStartScript(float waitTime){
          yield return new WaitForSeconds(waitTime);
          ParseLine();
@@ -55,6 +57,10 @@ public class ScriptDirector : Interactive {
     public void Enable(){
         // improve logic to catch null
         if (GameManager.Instance.activeCommercial != null){
+            script = Resources.Load("data/scripts/script1") as TextAsset;
+            lines = script.text.Split('\n');
+            ParseLine();
+
             live = true;
             video.live = true;
             regionIndicator.SetActive(true);
@@ -71,15 +77,22 @@ public class ScriptDirector : Interactive {
     public bool Enable_Validation(){
         return live == false;
     }
-    
-    public void Disable(){
+    public void ResetScript(){
+        GameManager.Instance.activeCommercial = null;
+        UINew.Instance.EnableRecordButtons(false);
+        
         live = false;
         video.live = false;
+        tomLineNext = false;
+        timeToNextLine = 0;
+        script = null;
+        index = 0;
+        lines = new string[0];
         regionIndicator.SetActive(false);
     }
-    public bool Disable_Validation(){
-        return live == true;
-    }
+    // public bool Disable_Validation(){
+    //     return live == true;
+    // }
     void ParseLine(){
         string line = lines[index];
         if (!live)
@@ -109,6 +122,7 @@ public class ScriptDirector : Interactive {
             Toolbox.Instance.SendMessage(reader, this, message);
         }
     }
+
 
     void NextLine(){
         index += 1;
