@@ -26,13 +26,10 @@ public class UIButtonCallbacks : MonoBehaviour {
 		if (video){
 			GameManager.Instance.EvaluateCommercial(video.commercial);
 		}
-		// GameManager.Instance.EvaluateCommercial();
 	}
 
 	public void StopRecButtonClick(){
-		VideoCamera video = GameObject.FindObjectOfType<VideoCamera>();
-		video.live = false;
-		GameManager.Instance.activeCommercial = null;
-		UINew.Instance.EnableRecordButtons(false);
+		ScriptDirector director = GameObject.FindObjectOfType<ScriptDirector>();
+		director.ResetScript();
 	}
 }
