@@ -166,8 +166,10 @@ public class Controllable : MonoBehaviour, IMessagable {
 				UINew.Instance.CreateActionButtons(manualActions, defaultInteraction);
 		} else {
 			defaultInteraction = null;
-			if (Controller.Instance.focus == this)
+			if (Controller.Instance.focus == this){
 				UINew.Instance.ClearActionButtons();
+				UINew.Instance.ClearWorldButtons();
+			}
 		}
 	}
 }
