@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using System.Text;
 
 public class Speech : Interactive, IMessagable {
 	private string words;
@@ -110,6 +111,12 @@ public class Speech : Interactive, IMessagable {
                 head.type = MessageHead.HeadType.speaking;
                 head.value = false;
                 Toolbox.Instance.SendMessage(gameObject, this, head);
+
+                Occurrence flag = Toolbox.Instance.OccurenceFlag(gameObject);
+                OccurrenceSpeech data = new OccurrenceSpeech();
+                data.speaker = gameObject;
+                data.line = Toolbox.Instance.GetName(gameObject)+": "+words;
+                flag.data.Add(data);
             }
 			speaking = false;
 			bubbleParent.SetActive(false);
@@ -135,8 +142,23 @@ public class Speech : Interactive, IMessagable {
         if(speaking && phrase == words){
             return;
         }
+        if (speaking){
+            Occurrence flag = Toolbox.Instance.OccurenceFlag(gameObject);
+            OccurrenceSpeech data = new OccurrenceSpeech();
+            data.speaker = gameObject;
+            data.line = Toolbox.Instance.GetName(gameObject)+": "+words;
+            flag.data.Add(data);
+        }
         // string censor = "∎";
         string censoredPhrase = phrase;
+        if (swear != null){
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < swear.Length; i++)
+            {
+                builder.Append("*");
+            }
+            censoredPhrase = censoredPhrase.Replace(swear, builder.ToString());
+        }
         chars = phrase.ToCharArray();
         swearMask = new int[chars.Length];
         if (swear != null){
@@ -157,11 +179,11 @@ public class Speech : Interactive, IMessagable {
         speakTimeTotal = speakTime;
         speakSpeed = phrase.Length / speakTime;
 
-        Occurrence flag = Toolbox.Instance.OccurenceFlag(gameObject);
-        OccurrenceSpeech data = new OccurrenceSpeech();
-        data.speaker = gameObject;
-        data.line = Toolbox.Instance.GetName(gameObject)+": "+words;
-        flag.data.Add(data);
+        // Occurrence flag = Toolbox.Instance.OccurenceFlag(gameObject);
+        // OccurrenceSpeech data = new OccurrenceSpeech();
+        // data.speaker = gameObject;
+        // data.line = Toolbox.Instance.GetName(gameObject)+": "+words;
+        // flag.data.Add(data);
 	}
 
     public void ReceiveMessage(Message incoming){
