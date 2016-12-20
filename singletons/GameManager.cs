@@ -424,5 +424,11 @@ public partial class GameManager : Singleton<GameManager> {
 		newEmail.read = false;
 		data.emails.Add(newEmail);
 	}
+
+	public void ShowDiaryEntry(string diaryName){
+		GameObject diaryObject = GameObject.Instantiate(Resources.Load("UI/Diary")) as GameObject;
+		Diary diary = diaryObject.GetComponent<Diary>();
+		diary.loadDiaryName = diaryName;
+	}
 }
 
