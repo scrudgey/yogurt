@@ -128,7 +128,6 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	}
 
 	void OnCollisionEnter2D(Collision2D coll){
-		
 		if (coll.relativeVelocity.magnitude > 0.5){
 			if (impactSounds.Length > 0){
 				GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
