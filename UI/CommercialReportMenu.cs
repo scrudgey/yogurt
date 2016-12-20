@@ -17,24 +17,20 @@ public class CommercialReportMenu : MonoBehaviour {
 
     public void ContinueButton(){
         Controller.Instance.suspendInput = false;
-        GameManager.Instance.activeCommercial = null;
         Destroy(gameObject);
-        UINew.Instance.EnableRecordButtons(false);
         ScriptDirector director = GameObject.FindObjectOfType<ScriptDirector>();
         if (director){
-            director.Disable();
+            director.ResetScript();
         }
     }
     public void NewDayButton(){
         Controller.Instance.suspendInput = false;
 		MySaver.Save();
         GameManager.Instance.NewDayCutscene();
-        // GameManager.Instance.NewDay();
     }
     
     private void SetRefs(){
         if (!descriptionText){
-            // titleText = transform.Find("Image/titles/TitleText").GetComponent<Text>();
             descriptionText = transform.Find("Image/desc/WhatText").GetComponent<Text>();
             rewardText = transform.Find("Image/buttons/rew/RewardText").GetComponent<Text>();
             positiveScore = transform.Find("Image/Center/RightHalf/RatingsPanel/Positive/Amount").GetComponent<Text>();
