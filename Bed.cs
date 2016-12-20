@@ -6,6 +6,7 @@ public class Bed : Doorway {
 	public Sprite[] bedSprites;
 	public Sprite[] headSprites;
 	public Sprite[] bubbleSprites;
+	public AudioClip snoreSound;
 
 	private SpriteRenderer head;
 	private SpriteRenderer bubble;
@@ -69,6 +70,7 @@ public class Bed : Doorway {
 				} else {
 					head.sprite = headSprites[1];
 					bubble.sprite = bubbleSprites[1];
+					audioSource.PlayOneShot(snoreSound);
 				}
 			}
 
@@ -81,7 +83,8 @@ public class Bed : Doorway {
 				GameManager.Instance.playerObject.SetActive(true);
 				audioSource.PlayOneShot(beddingSound);
 				if (GameManager.Instance.data.days == 1){
-					GameObject.Instantiate(Resources.Load("UI/Diary"));
+					// GameObject.Instantiate(Resources.Load("UI/Diary"));
+					GameManager.Instance.ShowDiaryEntry("diaryNew");
 				}
 			}
 		}
