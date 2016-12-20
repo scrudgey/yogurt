@@ -11,12 +11,9 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 			MessageInventoryChanged invMessage = new MessageInventoryChanged();
 
 			anim.type = MessageAnimation.AnimType.holding;
-			if (value != null){
-				anim.value = true;
+			anim.value = value != null;
 				Toolbox.Instance.SendMessage(gameObject, this, anim);
-			} else {
-				anim.value = false;
-				Toolbox.Instance.SendMessage(gameObject, this, anim);
+			if (value == null){
 				invMessage.dropped = _holding.gameObject;
 			}
 			_holding = value;
@@ -78,10 +75,10 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 				if (yorder)
 					yorder.enabled = false;
 				holding.transform.position = holdpoint.position;
-				holdpoint.localScale = Vector3.one;
-				transform.localScale = Vector3.one;
+				// holdpoint.localScale = Vector3.one;
+				// transform.localScale = Vector3.one;
 				// holding.transform.parent = holdpoint;
-				holding.transform.SetParent(holdpoint);
+				holding.transform.SetParent(holdpoint, false);
 				holding.transform.rotation = Quaternion.identity;
 				holding.GetComponent<Rigidbody2D>().isKinematic = true;
 				holding.GetComponent<Collider2D>().isTrigger = true;
