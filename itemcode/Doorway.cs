@@ -10,6 +10,7 @@ public class Doorway : Interactive {
 	public AudioClip leaveSound;
 	public AudioClip enterSound;
 	protected AudioSource audioSource;
+	public string leaveDesc;
 
 	// Use this for initialization
 	void Start () {
@@ -32,7 +33,11 @@ public class Doorway : Interactive {
 	}
 
 	public string Leave_desc(){
-		return "Go to "+destination;
+		if (leaveDesc != ""){
+			return leaveDesc;
+		} else {
+			return "Go to "+destination;
+		}
 	}
 
 }
