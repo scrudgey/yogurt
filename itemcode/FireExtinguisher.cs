@@ -80,7 +80,8 @@ public class FireExtinguisher : Interactive, IDirectable {
 
 	public void SprayObject(Item item){
 		if (emissionTimeout <= 0f){
-			direction = Vector3.ClampMagnitude(item.transform.position - transform.position, 1f);
+			direction = (Vector2)(item.transform.position - transform.position).normalized;
+			// direction = Vector3.ClampMagnitude(item.transform.position - transform.position, 1f);
 			Spray();
 		}
 	}
