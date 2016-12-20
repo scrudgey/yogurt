@@ -5,10 +5,14 @@ using UnityEngine.UI;
 public class ClosetButtonHandler : MonoBehaviour {
 	private Image icon;
 	private Text titleText;
+	private Text descriptionText;
+	private Text nameText;
 	void Start(){
 		// GameObject iconObject = transform.Find("menu/body/InfoPanel/ImagePanel/Icon").gameObject;
 		// icon = iconObject.GetComponent<Image>();
 		icon = transform.Find("menu/body/InfoPanel/ImagePanel/Icon").GetComponent<Image>();
+		descriptionText = transform.Find("menu/body/InfoPanel/TextPanel/Description").GetComponent<Text>();
+		nameText = transform.Find("menu/body/InfoPanel/TextPanel/Title").GetComponent<Text>();
 		// titleText = transform.Find("menu/menubar/titlebar").GetComponent<Text>();
 		icon.sprite = null;
 		icon.color = new Color(1f, 1f, 1f, 0f);
@@ -83,8 +87,15 @@ public class ClosetButtonHandler : MonoBehaviour {
 	
 	public void ItemMouseover(ItemEntryScript itemScript){
 		GameObject tempObject = Instantiate(Resources.Load("prefabs/"+itemScript.itemName)) as GameObject;
+		Item tempItem = tempObject.GetComponent<Item>();
 		icon.sprite = tempObject.GetComponent<SpriteRenderer>().sprite;
 		icon.color = new Color(1f, 1f, 1f, 1f);
+		if (tempItem.longDescription != ""){
+			descriptionText.text = tempItem.longDescription;
+		} else {
+			descriptionText.text = tempItem.description;
+		}
+		nameText.text = tempItem.itemName;
 		Destroy(tempObject);
 	}
 }
