@@ -32,6 +32,7 @@ public class Physical : MonoBehaviour, IMessagable {
 	public float groundDrag;
 	private float ziptime;
 	private float defaultOrderOffset;
+	private bool suppressLandSound;
 
 	 void Start() {
 		InitValues();
@@ -138,7 +139,7 @@ public class Physical : MonoBehaviour, IMessagable {
 		doZip = true;
 	}
 
-	public void StartGroundMode(bool suppressLandSound=false){
+	public void StartGroundMode(){
 		doGround = false;
 		ziptime = 0f;
 		// set tom collider. this is a temporary hack.
@@ -187,6 +188,7 @@ public class Physical : MonoBehaviour, IMessagable {
 		}
 		if (landSounds.Length > 0 && !suppressLandSound)
 			GetComponent<AudioSource>().PlayOneShot(landSounds[Random.Range(0, landSounds.Length)]);
+		suppressLandSound = false;
 	}
 
 	public void StartFlyMode(){
@@ -245,7 +247,12 @@ public class Physical : MonoBehaviour, IMessagable {
 		}
 		// this part right here is pretty essential to whether the object can fall off the world, or what
 		if (coll.collider == objectCollider){
-			GroundMode();
+			if (coll.relativeVelocity.magnitude > 0.1){
+				GroundMode();
+			} else {
+				suppressLandSound = true;
+				GroundMode();
+			}
 			BroadcastMessage("OnGroundImpact", this, SendMessageOptions.DontRequireReceiver);
 		} else {
 			
