@@ -83,6 +83,7 @@ public class ScriptDirector : Interactive {
         
         live = false;
         video.live = false;
+        video.commercial = new Commercial();
         tomLineNext = false;
         timeToNextLine = 0;
         script = null;
@@ -144,7 +145,7 @@ public class ScriptDirector : Interactive {
             if (tomLineNext){
                 tomLineNext = false;
                 UINew.Instance.SetTempStatus("Success!", 1f, TextFX.FXstyle.bounce);
-                audioSource.PlayOneShot(successSound);
+                // audioSource.PlayOneShot(successSound);
             }
         }
     }
