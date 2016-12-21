@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 
 public class DialogueMenu : MonoBehaviour {
+    public void Start(){
+        GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
+    }
     public void LineButton(){
         MessageSpeech message = new MessageSpeech();
         message.sayLine = true;

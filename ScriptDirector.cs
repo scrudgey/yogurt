@@ -11,14 +11,13 @@ public class ScriptDirector : Interactive {
     private float timeToNextLine;
     private bool tomLineNext;
     public VideoCamera video;
-    private AudioSource audioSource;
+    // private AudioSource audioSource;
     public AudioClip successSound;
     public bool live;
     private GameObject regionIndicator;
     
 	void Start () {
         live = false;
-        // script = Resources.Load("data/scripts/script1") as TextAsset;
         video = GetComponent<VideoCamera>();
         readers = new List<GameObject>();
         foreach (VideoCamera cam in GameObject.FindObjectsOfType<VideoCamera>()){
@@ -27,12 +26,10 @@ public class ScriptDirector : Interactive {
         foreach (DecisionMaker dm in GameObject.FindObjectsOfType<DecisionMaker>()){
             readers.Add(dm.gameObject);
         }
-        // lines = script.text.Split('\n');
         index = 0;
-        audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
+        // audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         UINew.Instance.SetStatus("-WAIT-");
         UINew.Instance.SetStatusStyle(TextFX.FXstyle.blink);
-        // ParseLine();
         
         Interaction enableAct = new Interaction(this, "Start", "Enable");
         enableAct.validationFunction = true;
@@ -71,7 +68,7 @@ public class ScriptDirector : Interactive {
             live = false;
             regionIndicator.SetActive(false);
             UINew.Instance.EnableRecordButtons(false);
-            Instantiate(Resources.Load("UI/ScriptSelector"));
+            UINew.Instance.ShowMenu(UINew.MenuType.scriptSelect);
         }
     }
     public bool Enable_Validation(){

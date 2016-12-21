@@ -46,7 +46,6 @@ public partial class GameManager : Singleton<GameManager> {
 	public Camera cam;
 	public GameObject playerObject;
 	public float gravity = 1.6f;
-	// public Commercial activeCommercial;
 	private Commercial _activeCommercial;
     public Commercial activeCommercial{
 		get {return _activeCommercial;}
@@ -61,7 +60,6 @@ public partial class GameManager : Singleton<GameManager> {
 	public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
 	public AudioSource publicAudio;
     void Start(){
-		// Debug.Log(activeCommercial);
 		// Cursor.SetCursor((Texture2D)Resources.Load("UI/cursor1"), Vector2.zero, CursorMode.Auto);
 		SceneManager.sceneLoaded += LevelWasLoaded;
 		if (data == null){
@@ -85,7 +83,7 @@ public partial class GameManager : Singleton<GameManager> {
 		}
 		if (awaitNewDayPrompt && sceneTime > 2f){
 			awaitNewDayPrompt = false;
-			GameObject.Instantiate(Resources.Load("UI/NewDayReport"));
+			UINew.Instance.ShowMenu(UINew.MenuType.newDayReport);
 		}
 	}
 	public bool InCutscene(){
@@ -126,7 +124,6 @@ public partial class GameManager : Singleton<GameManager> {
 		data.entryID = toEntryNumber;
 		SceneManager.LoadScene(toSceneName);
 	}
-	// void LevelWasLoaded(int level) {
 	void LevelWasLoaded(Scene scene, LoadSceneMode mode){
 		// Debug.Log("on level was loaded");
         sceneTime = 0f;
@@ -426,7 +423,7 @@ public partial class GameManager : Singleton<GameManager> {
 	}
 
 	public void ShowDiaryEntry(string diaryName){
-		GameObject diaryObject = GameObject.Instantiate(Resources.Load("UI/Diary")) as GameObject;
+		GameObject diaryObject = UINew.Instance.ShowMenu(UINew.MenuType.diary);
 		Diary diary = diaryObject.GetComponent<Diary>();
 		diary.loadDiaryName = diaryName;
 	}

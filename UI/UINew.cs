@@ -3,7 +3,20 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 
 public class UINew: Singleton<UINew> {
-		
+	public enum MenuType{none, escape, inventory, speech, closet, scriptSelect, commercialReport, newDayReport, email, diary}
+	private Dictionary<MenuType, string> menuPrefabs = new Dictionary<MenuType, string>{
+		{MenuType.escape, 					"UI/PauseMenu"},
+		{MenuType.inventory, 				"UI/InventoryScreen"},
+		{MenuType.speech, 					"UI/DialogueMenu"},
+		{MenuType.closet, 					"UI/ClosetMenu"},
+		{MenuType.scriptSelect, 			"UI/ScriptSelector"},
+		{MenuType.commercialReport, 		"UI/commercialReport"},
+		{MenuType.newDayReport, 			"UI/NewDayReport"},
+		{MenuType.email, 					"UI/EmailUI"},
+		{MenuType.diary,					"UI/Diary"}
+	};
+	private GameObject activeMenu;
+	private MenuType activeMenuType;
 	private struct actionButton{
 		public GameObject gameobject;
 		public ActionButtonScript buttonScript;
@@ -18,7 +31,6 @@ public class UINew: Singleton<UINew> {
 	private GameObject punchButton;
 	private GameObject speakButton;	
 	private GameObject recordStopButton;
-	private GameObject inventoryMenu;
 	private bool init = false;
 	public bool inventoryVisible = false;
 	private string statusText;
@@ -73,11 +85,6 @@ public class UINew: Singleton<UINew> {
 		}
 		GameObject.DontDestroyOnLoad(UICanvas);
 		UICanvas.GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
-		inventoryMenu = GameObject.Find("InventoryScreen");
-		if (inventoryMenu == null){
-			inventoryMenu = GameObject.Instantiate(Resources.Load(@"required/InventoryScreen")) as GameObject;
-			inventoryMenu.name = Toolbox.Instance.ScrubText(inventoryMenu.name);
-		}
 		inventoryButton = UICanvas.transform.Find("topdock/InventoryButton").gameObject;
 		fightButton = UICanvas.transform.Find("topdock/FightButton").gameObject;
 		punchButton = UICanvas.transform.Find("topdock/PunchButton").gameObject;
@@ -89,9 +96,7 @@ public class UINew: Singleton<UINew> {
 		recordStopButton = UICanvas.transform.Find("topdock/topRight/StopButton").gameObject;
 		recordFinish = UICanvas.transform.Find("topdock/topRight/FinishButton").gameObject;
 
-		// speak button?
 		status.gameObject.SetActive(false);
-		inventoryMenu.SetActive(false);
 		inventoryButton.SetActive(false);
 		fightButton.SetActive(false);
 		speakButton.SetActive(false);
@@ -101,12 +106,30 @@ public class UINew: Singleton<UINew> {
 			recordFinish.SetActive(false);
 			recordText.text = "";
 		}
-		CloseClosetMenu();
+	}
+	public GameObject ShowMenu(MenuType typeMenu){
+		if (activeMenu == null){
+			activeMenuType = MenuType.none;
+		}
+		if (activeMenuType == typeMenu){
+			CloseActiveMenu();
+			return null;
+		}
+		CloseActiveMenu();
+		activeMenu = GameObject.Instantiate(Resources.Load(menuPrefabs[typeMenu])) as GameObject;
+		activeMenuType = typeMenu;
+		return activeMenu;
+	}
+	public void CloseActiveMenu(){
+		if (activeMenu){
+			Destroy(activeMenu);
+			activeMenuType = MenuType.none;
+			UpdateInventoryButton();
+		}
 	}
 	public void DisableAllUI(){
 		List<GameObject> buttons = new List<GameObject>(){inventoryButton, fightButton, punchButton, speakButton};
 		foreach (GameObject button in buttons){
-			// Debug.Log(button);
 			if (button)
 				button.SetActive(false);
 		}
@@ -118,9 +141,7 @@ public class UINew: Singleton<UINew> {
 		if (status){
 			status.gameObject.SetActive(false);
 		}
-
-		CloseClosetMenu();
-		CloseInventoryMenu();
+		CloseActiveMenu();
 		ClearWorldButtons();
 		ClearActionButtons();
 	}
@@ -140,7 +161,6 @@ public class UINew: Singleton<UINew> {
 		}
 		fightButton.SetActive(true);
 	}
-	
 	public void UpdateRecordButtons(Commercial commercial){
 		if (GameManager.Instance.activeCommercial == null){
 			return;
@@ -156,20 +176,18 @@ public class UINew: Singleton<UINew> {
 			recordFinish.SetActive(false);
 		}
 	}
+	public void UpdateInventoryButton(){
+		UpdateInventoryButton(GameManager.Instance.playerObject.GetComponent<Inventory>());
+	}
 	public void UpdateInventoryButton(Inventory inventory){
 		if (inventory.items.Count > 0){
 			inventoryButton.SetActive(true);
 		} else {
 			inventoryButton.SetActive(false);
 		}
-		if (inventoryVisible){
-			CloseInventoryMenu();
-			ShowInventoryMenu(inventory);
-		}
-		if (Controller.Instance.focus.fightMode){
-
-		} else {
-
+		if (activeMenuType == MenuType.inventory){
+			CloseActiveMenu();
+			ShowInventoryMenu();
 		}
 	}
 	public void ShowFightButton(){
@@ -288,39 +306,20 @@ public class UINew: Singleton<UINew> {
 		}
 		activeElements.Add(CircularizeButtons(buttons, GameManager.Instance.playerObject));
 	}
-	
 
-	public void CloseInventoryMenu(){
-		if (inventoryMenu){
+	public void ShowInventoryMenu(){
+		Inventory inventory = GameManager.Instance.playerObject.GetComponent<Inventory>();
+		GameObject inventoryMenu = ShowMenu(UINew.MenuType.inventory);
+		if (inventoryMenu != null){
 			Transform itemDrawer = inventoryMenu.transform.Find("menu/itemdrawer");
-			int children = itemDrawer.childCount;
-			for (int i = 0; i < children; ++i)
-				Destroy(itemDrawer.GetChild(i).gameObject);
-			inventoryMenu.SetActive(false);
-		}
-		inventoryVisible = false;
-	}
-
-	public void ShowInventoryMenu(Inventory inventory){
-		inventoryVisible = true;
-		inventoryMenu.SetActive(true);
-		Transform itemDrawer = inventoryMenu.transform.Find("menu/itemdrawer");
-		foreach (GameObject item in inventory.items){
-			GameObject button = Instantiate(Resources.Load("UI/ItemButton")) as GameObject;
-			button.transform.SetParent(itemDrawer.transform, false);
-			button.GetComponent<ItemButtonScript>().SetButtonAttributes(item, inventory);
+			foreach (GameObject item in inventory.items){
+				GameObject button = Instantiate(Resources.Load("UI/ItemButton")) as GameObject;
+				button.transform.SetParent(itemDrawer.transform, false);
+				button.GetComponent<ItemButtonScript>().SetButtonAttributes(item, inventory);
+			}
 		}
 	}
-	public void CloseClosetMenu(){
-		GameObject closetMenu = GameObject.Find("ClosetMenu");
-		Destroy(closetMenu);
-	}
-	public ClosetButtonHandler ShowClosetMenu(){
-		GameObject closetMenu = Instantiate(Resources.Load("UI/ClosetMenu")) as GameObject;
-		closetMenu.name = Toolbox.Instance.CloneRemover(closetMenu.name);
-		closetMenu.GetComponent<Canvas>().worldCamera = UICanvas.GetComponent<Canvas>().worldCamera;
-		return closetMenu.GetComponent<ClosetButtonHandler>();
-	}
+	
 	public void SetClickedActions(GameObject clickedOn){
 		ClearWorldButtons();
 		activeElements = new List<GameObject>();
@@ -414,11 +413,9 @@ public class UINew: Singleton<UINew> {
 		}
 		buttonAnchor.transform.position = target.transform.position;
 		buttonAnchor.transform.SetParent(target.transform);
-		// Debug.Break();
 		return buttonAnchor;
 	}
 	private void ArrangeButtonsOnScreenBottom(List<actionButton> buttons){
-		// GameObject bottomBar = UICanvas.transform.Find("bottomdock/bottom").gameObject;
 		GameObject bottomBar = UICanvas.transform.Find("topdock").gameObject;
 		foreach (actionButton button in buttons){
 			button.gameobject.transform.SetParent(bottomBar.transform, false);
@@ -445,17 +442,6 @@ public class UINew: Singleton<UINew> {
 		foreach (GameObject element in bottomElements)
 			Destroy(element);
 		bottomElements = new List<GameObject>();
-	}
-	public void PauseMenu(){
-		GameObject temp = GameObject.Find("PauseMenu");
-		if (temp){
-			Destroy(temp);
-		} else {
-			GameObject menu = Instantiate(Resources.Load("UI/PauseMenu")) as GameObject;
-			menu.gameObject.name = Toolbox.Instance.ScrubText(menu.gameObject.name);
-			Canvas menuCanvas = menu.GetComponent<Canvas>();
-			menuCanvas.worldCamera = UICanvas.GetComponent<Canvas>().worldCamera;
-		}
 	}
 	public void BounceText(string text, GameObject target){
 		GameObject bounce = Instantiate(Resources.Load("UI/BounceText")) as GameObject;

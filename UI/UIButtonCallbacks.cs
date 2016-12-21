@@ -5,21 +5,11 @@ public class UIButtonCallbacks : MonoBehaviour {
 		Controller.Instance.focus.ToggleFightMode();
 	}
 	public void SpeakButtonClick(){
-        GameObject test = GameObject.Find("DialogueMenu(Clone)");
-        if (!test){
-            GameObject obj = Instantiate(Resources.Load("UI/DialogueMenu")) as GameObject;
-            obj.GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
-        }
+		UINew.Instance.ShowMenu(UINew.MenuType.speech);
     }
 	public void InventoryButtonClick(){
-		if (UINew.Instance.inventoryVisible){
-			UINew.Instance.CloseInventoryMenu();
-		} else {
-			Inventory inventory = GameManager.Instance.playerObject.GetComponent<Inventory>();
-			UINew.Instance.ShowInventoryMenu(inventory);
-		}
+		UINew.Instance.ShowInventoryMenu();
 	}
-
 	public void FinishButtonClick(){
 		VideoCamera video = GameObject.FindObjectOfType<VideoCamera>();
 		video.live = false;
@@ -27,7 +17,6 @@ public class UIButtonCallbacks : MonoBehaviour {
 			GameManager.Instance.EvaluateCommercial(video.commercial);
 		}
 	}
-
 	public void StopRecButtonClick(){
 		ScriptDirector director = GameObject.FindObjectOfType<ScriptDirector>();
 		director.ResetScript();

@@ -17,7 +17,7 @@ public class Computer : Item {
 		newBubble.SetActive(activeBubble);
 	}
 	public void OpenEmail(){
-		GameObject menu = GameObject.Instantiate(Resources.Load("UI/EmailUI")) as GameObject;
+		GameObject menu = UINew.Instance.ShowMenu(UINew.MenuType.email);
 		menu.GetComponent<EmailUI>().computer = this;
 	}
 }

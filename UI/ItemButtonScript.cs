@@ -26,7 +26,7 @@ public class ItemButtonScript : MonoBehaviour {
 	}
 	public void Clicked(){
 		inventory.RetrieveItem(itemName);
-		UINew.Instance.CloseInventoryMenu();
+		UINew.Instance.CloseActiveMenu();
 	}
 
 }

@@ -8,15 +8,12 @@ public class ClosetButtonHandler : MonoBehaviour {
 	private Text descriptionText;
 	private Text nameText;
 	void Start(){
-		// GameObject iconObject = transform.Find("menu/body/InfoPanel/ImagePanel/Icon").gameObject;
-		// icon = iconObject.GetComponent<Image>();
+		GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
 		icon = transform.Find("menu/body/InfoPanel/ImagePanel/Icon").GetComponent<Image>();
 		descriptionText = transform.Find("menu/body/InfoPanel/TextPanel/Description").GetComponent<Text>();
 		nameText = transform.Find("menu/body/InfoPanel/TextPanel/Title").GetComponent<Text>();
-		// titleText = transform.Find("menu/menubar/titlebar").GetComponent<Text>();
 		icon.sprite = null;
 		icon.color = new Color(1f, 1f, 1f, 0f);
-		// PopulateItemList();
 	}
 	
 	private GameObject spawnEntry(){
@@ -77,12 +74,12 @@ public class ClosetButtonHandler : MonoBehaviour {
 		}
 	}
 	public void CloseButtonClick(){
-		UINew.Instance.CloseClosetMenu();
+		Destroy(gameObject);
 	}
 	
 	public void ItemClick(ItemEntryScript itemScript){
 		GameManager.Instance.RetrieveCollectedItem(itemScript.itemName);
-		UINew.Instance.CloseClosetMenu();
+		Destroy(gameObject);
 	}
 	
 	public void ItemMouseover(ItemEntryScript itemScript){

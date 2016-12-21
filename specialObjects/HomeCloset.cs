@@ -18,7 +18,8 @@ public class HomeCloset : Interactive {
 		newBubble.SetActive(activeBubble);
 	}
 	public void OpenCloset(){
-		ClosetButtonHandler menu = UINew.Instance.ShowClosetMenu();
+		GameObject menuObject = UINew.Instance.ShowMenu(UINew.MenuType.closet);
+		ClosetButtonHandler menu = menuObject.GetComponent<ClosetButtonHandler>();
 		menu.PopulateItemList(type);
 		GameManager.Instance.DetermineClosetNews();
 		CheckBubble();

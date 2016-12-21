@@ -32,8 +32,6 @@ public class Controller : Singleton<Controller> {
 		control.shootPressedFlag = false;
 		control.shootHeldFlag = false;
 	}
-
-	// Update is called once per frame
 	void Update () {
 		if (focus != null & !suspendInput){
 			ResetInput(focus);
@@ -53,9 +51,8 @@ public class Controller : Singleton<Controller> {
 				focus.shootHeldFlag = true;
 			}
 		}
-		
 		if (Input.GetButtonDown("Cancel")){
-			UINew.Instance.PauseMenu();
+			UINew.Instance.ShowMenu(UINew.MenuType.escape);
 		}
 	}
 
