@@ -192,4 +192,10 @@ public class Awareness : MonoBehaviour, IMessagable {
 			}
 		}
 	}
+
+	public void Insulted(GameObject insulter, DialogueMenu menu){
+		PersonalAssessment assessment = FormPersonalAssessment(insulter);
+		assessment.status = PersonalAssessment.friendStatus.enemy;
+		menu.Say(gameObject, "How dare you!");
+	}
 }
