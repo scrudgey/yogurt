@@ -3,20 +3,23 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 
 public class UINew: Singleton<UINew> {
-	public enum MenuType{none, escape, inventory, speech, closet, scriptSelect, commercialReport, newDayReport, email, diary}
+	public enum MenuType{none, escape, inventory, speech, closet, scriptSelect, commercialReport, newDayReport, email, diary, dialogue}
 	private Dictionary<MenuType, string> menuPrefabs = new Dictionary<MenuType, string>{
 		{MenuType.escape, 					"UI/PauseMenu"},
 		{MenuType.inventory, 				"UI/InventoryScreen"},
-		{MenuType.speech, 					"UI/DialogueMenu"},
+		{MenuType.speech, 					"UI/SpeechMenu"},
 		{MenuType.closet, 					"UI/ClosetMenu"},
 		{MenuType.scriptSelect, 			"UI/ScriptSelector"},
 		{MenuType.commercialReport, 		"UI/commercialReport"},
 		{MenuType.newDayReport, 			"UI/NewDayReport"},
 		{MenuType.email, 					"UI/EmailUI"},
-		{MenuType.diary,					"UI/Diary"}
+		{MenuType.diary,					"UI/Diary"},
+		{MenuType.dialogue,					"UI/DialogueMenu"}
 	};
+	private static List<MenuType> actionRequired = new List<MenuType>{MenuType.commercialReport, MenuType.diary};
 	private GameObject activeMenu;
 	private MenuType activeMenuType;
+	private bool menuRequiresAction;
 	private struct actionButton{
 		public GameObject gameobject;
 		public ActionButtonScript buttonScript;
@@ -109,22 +112,30 @@ public class UINew: Singleton<UINew> {
 	}
 	public GameObject ShowMenu(MenuType typeMenu){
 		if (activeMenu == null){
+			menuRequiresAction = false;
 			activeMenuType = MenuType.none;
 		}
 		if (activeMenuType == typeMenu){
 			CloseActiveMenu();
 			return null;
 		}
+		if (menuRequiresAction)
+			return null;
 		CloseActiveMenu();
 		activeMenu = GameObject.Instantiate(Resources.Load(menuPrefabs[typeMenu])) as GameObject;
 		activeMenuType = typeMenu;
+		if (actionRequired.Contains(typeMenu))
+			menuRequiresAction = true;
 		return activeMenu;
 	}
 	public void CloseActiveMenu(){
 		if (activeMenu){
+			menuRequiresAction = false;
 			Destroy(activeMenu);
 			activeMenuType = MenuType.none;
 			UpdateInventoryButton();
+			Controller.Instance.suspendInput = false;
+			Time.timeScale = 1f;
 		}
 	}
 	public void DisableAllUI(){
