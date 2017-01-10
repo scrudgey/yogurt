@@ -13,7 +13,6 @@ public class Interaction {
 	public Interactive parent;
 	public string action;
 	public List<Component> parameters;
-
 	public bool hideInManualActions;
 	public bool hideInRightClickMenu;
 	public bool staticInteraction;
@@ -22,8 +21,6 @@ public class Interaction {
 	public bool limitless = false;
 	public bool dontWipeInterface = false;
 	public string actionName;
-	// public string displayVerb;
-
 	private bool _validationFunction;
 	public bool validationFunction{
 		get {return _validationFunction;}

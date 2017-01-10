@@ -1,9 +1,5 @@
 ﻿using UnityEngine;
-// using System.Collections;
-// using System.Collections.Generic;
-
 public class Flammable : MonoBehaviour {
-
 	public float heat;
 	public float flashpoint;
 	public bool onFire;
