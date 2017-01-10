@@ -2,7 +2,6 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using System;
-
 public partial class GameManager : Singleton<GameManager> {
     
     public List<Commercial> listAllCommercials(){

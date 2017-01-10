@@ -46,7 +46,7 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 						
 						DontDestroyOnLoad(singleton);
 						
-						//Debug.Log("[Singleton] An instance of " + typeof(T) + 
+						// Debug.Log("[Singleton] An instance of " + typeof(T) + 
 						//          " is needed in the scene, so '" + singleton +
 						//          "' was created with DontDestroyOnLoad.");
 					} else {
