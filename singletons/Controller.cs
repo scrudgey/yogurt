@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
-
 public class Controller : Singleton<Controller> {
 
 	public Controllable focus;
@@ -84,7 +83,6 @@ public class Controller : Singleton<Controller> {
     }
     void LeftClick(){
         RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero).OrderBy(h=>h.collider.gameObject.name).ToArray();
-        // hits.
         // IsPointerOverGameObject is required here to exclude clicks if we are hovering over a UI element.
         // this may or may not cause problems down the road, but I'm unsure how else to do this.
         // TODO: currently unresolved. UI overlapping objects in world creates problem clicks.
@@ -94,7 +92,7 @@ public class Controller : Singleton<Controller> {
             foreach (RaycastHit2D hit in hits){
                 if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)){
                     focus.lastLeftClicked = hit.collider.gameObject;
-                    Clicked(hit.collider.gameObject);
+                    Clicked(hit.collider.transform.root.gameObject);
 					break;
                 }
             }
