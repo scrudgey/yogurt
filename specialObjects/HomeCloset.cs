@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-// using System.Collections.Generic;
 public class HomeCloset : Interactive {
 	public enum ClosetType {all, items, food, clothing}
 	public ClosetType type;
