@@ -142,18 +142,11 @@ public class Awareness : MonoBehaviour, IMessagable {
 				knowledgebase.Add(g, knowledge);
 			}
 			FormPersonalAssessment(g);
-			React(g, knowledge);
+			// React(g, knowledge);
 		}
 	}
-	void React(GameObject g, Knowledge k){
-		// if (k.flammable != null){
-		// 	if (k.flammable.onFire){
-		// 		// object is on fire, do something
-		// 	}
-		// }
-	}
 
-	PersonalAssessment FormPersonalAssessment(GameObject g){
+	public PersonalAssessment FormPersonalAssessment(GameObject g){
 		if (!knowledgebase.ContainsKey(g))
 			knowledgebase.Add(g, new Knowledge(g));
 		PersonalAssessment storedAssessment;
