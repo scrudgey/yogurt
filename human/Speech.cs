@@ -33,6 +33,9 @@ public class Speech : Interactive, IMessagable {
 		speak.limitless = true;
 		speak.dontWipeInterface = false;
 		interactions.Add(speak);
+        Interaction speakWith = new Interaction(this, "Talk...", "SpeakWith");
+        speakWith.limitless = true;
+        interactions.Add(speakWith);
         flipper = transform.FindChild("SpeechChild").gameObject;
 		bubbleParent = transform.FindChild("SpeechChild/Speechbubble").gameObject;
 		bubbleText = bubbleParent.transform.FindChild("Text").gameObject.GetComponent<Text>();
@@ -44,13 +47,18 @@ public class Speech : Interactive, IMessagable {
         if (bubbleParent){
             Canvas bubbleCanvas = bubbleParent.GetComponent<Canvas>();
             if (bubbleCanvas){
-                // bubbleCanvas.worldCamera = GameManager.Instance.cam;
-                bubbleCanvas.worldCamera = GameObject.FindObjectOfType<Camera>();
+                bubbleCanvas.worldCamera = GameManager.Instance.cam;
             }
         }    
     }
-    
-
+    public void SpeakWith(){
+        DialogueMenu menu = UINew.Instance.ShowMenu(UINew.MenuType.dialogue).GetComponent<DialogueMenu>();
+        menu.Configure(GameManager.Instance.playerObject, gameObject);
+    }
+    public string SpeakWith_desc(){
+		string otherName = Toolbox.Instance.GetName(gameObject);
+        return "Speak with "+otherName;
+    }
     // TODO: allow liquids and things to self-describe; add modifiers etc.
 	public void Describe(Item obj){
         LiquidContainer container = obj.GetComponent<LiquidContainer>();
@@ -155,7 +163,8 @@ public class Speech : Interactive, IMessagable {
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < swear.Length; i++)
             {
-                builder.Append("*");
+                // builder.Append("*");
+                builder.Append("∎");
             }
             censoredPhrase = censoredPhrase.Replace(swear, builder.ToString());
         }
