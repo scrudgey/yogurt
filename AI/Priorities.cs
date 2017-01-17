@@ -4,6 +4,7 @@ namespace AI{
 	[System.Serializable]
 	public class Priority : IMessagable {
 		public float urgency;
+		public float minimumUrgency = 0;
 		public Awareness awareness;
 		public Controllable control;
 		public GameObject gameObject;
@@ -28,7 +29,6 @@ namespace AI{
 		public virtual void ReceiveMessage(Message m){}
 	}
 	public class PriorityFightFire: Priority{
-		public Ref<GameObject> flamingObject = new Ref<GameObject>(null);
 		public float updateInterval;
 		public PriorityFightFire(GameObject g, Controllable c): base(g, c) {
 			Goal getExt = new GoalGetItem(gameObject, control, "fire_extinguisher");
@@ -37,20 +37,14 @@ namespace AI{
 			wander.successCondition = new ConditionKnowAboutFire(gameObject);
 			wander.requirements.Add(getExt);
 
-			Goal approach = new GoalWalkToObject(gameObject, control, flamingObject);
+			Goal approach = new GoalWalkToObject(gameObject, control, awareness.nearestFire);
 			approach.requirements.Add(wander);
 
-			goal = new GoalHoseDown(gameObject, control, flamingObject);
+			goal = new GoalHoseDown(gameObject, control, awareness.nearestFire);
 			goal.requirements.Add(approach);
 		}
 		public override void Update(){
-			if (updateInterval > 0){
-				updateInterval -= Time.deltaTime;
-				return;
-			}
-			updateInterval = 0.5f;
-			flamingObject.val = awareness.nearestFire();
-			if (flamingObject.val != null)
+			if (awareness.nearestFire.val != null)
 				urgency = 10;
 		}
 	}
@@ -61,7 +55,6 @@ namespace AI{
 		}
 		public override float Urgency(Personality personality){
 			if (personality.actor == Personality.Actor.yes){
-				// Debug.Log("wander priority downgrade");
 				return -1;
 			} else {
 				return 1;
@@ -70,52 +63,74 @@ namespace AI{
 	}
 
 	public class PriorityRunAway: Priority{
-		Ref<GameObject> threat = new Ref<GameObject>(null);
 		public PriorityRunAway(GameObject g, Controllable c): base(g, c){
-			goal = new GoalWander(g, c);
+			goal = new GoalRunFromObject(gameObject, control, awareness.nearestEnemy);
 		}
 		public override void ReceiveMessage(Message incoming){
 			if (incoming is MessageDamage){
 				MessageDamage dam = (MessageDamage)incoming;
 				urgency += 1;
-				threat.val = dam.responsibleParty[0];
-				goal = new GoalRunFromObject(gameObject, control, threat);
 			}
+			if (incoming is MessageInsult){
+				urgency += 1;
+			}
+			if (incoming is MessageThreaten){
+				urgency += 2;
+			}
+		}
+		public override float Urgency(Personality personality){
+			if (personality.bravery == Personality.Bravery.brave)
+				return urgency / 2f;
+			if (personality.bravery == Personality.Bravery.cowardly)
+				return urgency * 2f;
+			return urgency;
+		}
+		public override void Update(){
+			if (awareness.nearestEnemy.val == null)
+				urgency -= Time.deltaTime / 10f;
 		}
 	}
 
 	public class PriorityAttack: Priority{
-		public Ref<GameObject> closestEnemy = new Ref<GameObject>(null);
-		private float updateInterval;
 		private Inventory inventory;
+		private float updateInterval;
 		public PriorityAttack(GameObject g, Controllable c): base(g, c){
 			inventory = gameObject.GetComponent<Inventory>();
 
 			Goal dukesUp = new GoalDukesUp(gameObject, control, inventory);
 			dukesUp.successCondition = new ConditionInFightMode(g, control);
 
-			Goal approachGoal = new GoalWalkToObject(gameObject, control, closestEnemy);
-			approachGoal.successCondition = new ConditionCloseToObject(gameObject, closestEnemy);
+			Goal approachGoal = new GoalWalkToObject(gameObject, control, awareness.nearestEnemy);
+			approachGoal.successCondition = new ConditionCloseToObject(gameObject, awareness.nearestEnemy);
 			approachGoal.requirements.Add(dukesUp);
 
 			Goal punchGoal = new Goal(gameObject, control);
-			punchGoal.routines.Add(new RoutinePunchAt(gameObject, control, closestEnemy));
+			punchGoal.routines.Add(new RoutinePunchAt(gameObject, control, awareness.nearestEnemy));
 			punchGoal.requirements.Add(approachGoal);
 
 			goal = punchGoal;
 		}
 		public override void ReceiveMessage(Message incoming){
 			if (incoming is MessageDamage){
-				urgency = 5;
+				urgency += 5;
+			}
+			if (incoming is MessageInsult){
+				urgency += 2;
+			}
+			if (incoming is MessageThreaten){
+				urgency += 1;
 			}
 		}
 		public override void Update(){
-			if (updateInterval > 0){
-				updateInterval -= Time.deltaTime;
-				return;
-			}
-			updateInterval = 0.5f;
-			closestEnemy.val = awareness.nearestEnemy();
+			if (awareness.nearestEnemy.val == null)
+				urgency -= Time.deltaTime / 10f;
+		}
+		public override float Urgency(Personality personality){
+			if (personality.bravery == Personality.Bravery.brave)
+				return urgency * 2f;
+			if (personality.bravery == Personality.Bravery.cowardly)
+				return urgency / 2f;
+			return urgency;
 		}
 	}
 
@@ -123,14 +138,18 @@ namespace AI{
 		string nextLine;
 		ScriptDirector director;
 		public PriorityReadScript(GameObject g, Controllable c): base(g, c){
-
+			GameObject video = GameObject.FindObjectOfType<VideoCamera>().gameObject;
+			Goal goalWalkTo = new GoalWalkToPoint(g, c, new Ref<Vector2>(new Vector2(0.186f, 0.812f)));
+			Goal lookGoal = new GoalLookAtObject(g, c, new Ref<GameObject>(video));
+			lookGoal.requirements.Add(goalWalkTo);
+			goal = lookGoal;
 		}
 		public override float Urgency(Personality personality){
 			if (personality.actor == Personality.Actor.yes){
 				if (nextLine != null){
 					return 10;
 				} else {
-					return 1;
+					return 0.1f;
 				}
 			} else {
 				return -1;
@@ -144,6 +163,9 @@ namespace AI{
 			}
 		}
 		public override void DoAct(){
+			if (goal != null){
+				goal.Update();
+			}
 			if (nextLine != null){
 				Vector3 dif = director.transform.position - gameObject.transform.position;
 				Vector2 direction = (Vector2)dif;
