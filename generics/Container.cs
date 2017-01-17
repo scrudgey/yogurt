@@ -46,7 +46,7 @@ public class Container : Interactive, IExcludable {
 				if (interaction.parameters.Count == 2)
 					if ((object)interaction.parameters[1] == pickup)
 						removeThis = interaction;
-				if (interaction.actionName == ((Item)pickup).itemName)
+				if (interaction.actionName == pickup.itemName)
 					    removeThis = interaction;
 			}
 		}
@@ -202,7 +202,7 @@ public class Container : Interactive, IExcludable {
 
 	public void DropMessage(GameObject obj){
 		Pickup pickup = obj.GetComponent<Pickup>();
-		if (pickup)
+		if (pickup != null)
 			Dump(pickup);
 	}
 
@@ -213,7 +213,7 @@ public class Container : Interactive, IExcludable {
 		if (liquidContainer && myLiquidContainer){
 			myLiquidContainer.FillFromContainer(liquidContainer);
 		}
-		if (pickup){
+		if (pickup != null){
 			items.Remove(pickup);
 			RemoveRetrieveAction(pickup);
 		}
