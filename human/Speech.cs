@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine.UI;
 using System.Text;
+using Nimrod;
 
 public class Speech : Interactive, IMessagable {
 	private string words;
@@ -21,6 +22,7 @@ public class Speech : Interactive, IMessagable {
     public AudioClip bleepSound;
     private AudioSource audioSource;
 	private bool LoadInitialized = false;
+    public string flavor = "test";
 
 	void Start () {
         if (!LoadInitialized)
@@ -53,7 +55,7 @@ public class Speech : Interactive, IMessagable {
     }
     public void SpeakWith(){
         DialogueMenu menu = UINew.Instance.ShowMenu(UINew.MenuType.dialogue).GetComponent<DialogueMenu>();
-        menu.Configure(GameManager.Instance.playerObject, gameObject);
+        menu.Configure(GameManager.Instance.playerObject.GetComponent<Speech>(), this);
     }
     public string SpeakWith_desc(){
 		string otherName = Toolbox.Instance.GetName(gameObject);
@@ -79,7 +81,6 @@ public class Speech : Interactive, IMessagable {
         string itemname = Toolbox.Instance.GetName(obj.gameObject);
         return "Look at "+itemname;
     }
-
 	void Update () {
 		if (speakTime > 0){
 			speakTime -= Time.deltaTime;
@@ -145,7 +146,6 @@ public class Speech : Interactive, IMessagable {
 			Say (toSay);
 		}
 	}
-
     public void Say(string phrase, string swear=null){
         if(speaking && phrase == words){
             return;
@@ -157,7 +157,6 @@ public class Speech : Interactive, IMessagable {
             data.line = Toolbox.Instance.GetName(gameObject)+": "+words;
             flag.data.Add(data);
         }
-        // string censor = "∎";
         string censoredPhrase = phrase;
         if (swear != null){
             StringBuilder builder = new StringBuilder();
@@ -187,14 +186,7 @@ public class Speech : Interactive, IMessagable {
         speakTime = DoubleSeat(phrase.Length, 2f, 50f, 5f, 2f);
         speakTimeTotal = speakTime;
         speakSpeed = phrase.Length / speakTime;
-
-        // Occurrence flag = Toolbox.Instance.OccurenceFlag(gameObject);
-        // OccurrenceSpeech data = new OccurrenceSpeech();
-        // data.speaker = gameObject;
-        // data.line = Toolbox.Instance.GetName(gameObject)+": "+words;
-        // flag.data.Add(data);
 	}
-
     public void ReceiveMessage(Message incoming){
         if (incoming is MessageSpeech){
             MessageSpeech message = (MessageSpeech)incoming;
@@ -239,6 +231,7 @@ public class Speech : Interactive, IMessagable {
         }
         return result;
     }
+    // this function will change to incorporate Nimrod and flavor
     public void Swear(GameObject target=null){
         if (!target){
             Say("shazbot!", "shazbot");
@@ -246,6 +239,32 @@ public class Speech : Interactive, IMessagable {
         }
         string targetname = Toolbox.Instance.GetName(target);
         Say("that shazbotting "+targetname+"!", "shazbotting");
+    }
+    public Monologue Insult(GameObject target){
+        Grammar grammar = new Grammar();
+        grammar.Load("structure");
+        grammar.Load("flavor_"+flavor);
+        List<string> strings = new List<string>();
+        strings.Add(grammar.Parse("{insult}"));
+        Monologue mono = new Monologue(this, strings.ToArray());
+        return mono;
+    }
+    public Monologue MonologueFromNimrod(string symbol, GameObject target){
+        Grammar grammar = new Grammar();
+        grammar.Load("structure");
+        grammar.Load("flavor_"+flavor);
+        List<string> strings = new List<string>();
+        strings.Add(grammar.Parse("{" + symbol + "}"));
+        Monologue mono = new Monologue(this, strings.ToArray());
+        return mono;
+    }
+    public Monologue Riposte(){
+        Monologue mono = new Monologue(this, new string[]{"How dare you!"});
+        return mono;
+    }
+    public Monologue RespondToThreat(){
+        Monologue mono = new Monologue(this, new string[]{"Mercy!"});
+        return mono;
     }
 
 }
