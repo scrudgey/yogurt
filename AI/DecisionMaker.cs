@@ -17,6 +17,8 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 	public Text thoughtText;
 	public List<Priority> priorities;
 	public Personality personality;
+	public PriorityAttack priorityAttack;
+	public PriorityRunAway priorityRunAway;
 	void Start() {
 		// make sure there's Awareness
 		Toolbox.Instance.GetOrCreateComponent<Awareness>(gameObject);
@@ -32,10 +34,13 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 		control = GetComponent<Controllable>();
 
 		priorities = new List<Priority>();
+		priorityAttack = new PriorityAttack(gameObject, control);
+		priorityRunAway = new PriorityRunAway(gameObject, control);
+
 		priorities.Add(new PriorityFightFire(gameObject, control));
 		priorities.Add(new PriorityWander(gameObject, control));
-		priorities.Add(new PriorityRunAway(gameObject, control));
-		priorities.Add(new PriorityAttack(gameObject, control));
+		priorities.Add(priorityRunAway);
+		priorities.Add(priorityAttack);
 		priorities.Add(new PriorityReadScript(gameObject, control));
 	}
 	public void ReceiveMessage(Message message){
@@ -51,8 +56,13 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 				activePriority = priority;
 			if (activePriority.Urgency(personality) < priority.Urgency(personality))
 				activePriority = priority;
+			if (priority.urgency > priority.minimumUrgency)
+				priority.urgency -= Time.deltaTime / 10f;
+			if (priority.urgency < priority.minimumUrgency)
+				priority.urgency += Time.deltaTime / 10f;
 		}
 		if (activePriority != null){
+			Debug.Log(activePriority.ToString() + " " + activePriority.Urgency(personality).ToString());
 			activePriority.DoAct();
 			// thoughtText = activePriority.goal.
 			// Debug.Log(activePriority.GetType());
