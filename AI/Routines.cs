@@ -165,41 +165,52 @@ namespace AI{
 				}
 			}
 			if (wanderTime < -1f){
-				wanderTime = UnityEngine.Random.Range(0,2);
-				dir = (direction)(UnityEngine.Random.Range(0,4));
+				wanderTime = UnityEngine.Random.Range(0, 2);
+				dir = (direction)(UnityEngine.Random.Range(0, 4));
 			} else {
 				wanderTime -= Time.deltaTime;
 			}
 			return status.neutral;
 		}
 	}
-
+	public class RoutineLookAtObject : Routine {
+		public Ref<GameObject> target = new Ref<GameObject>(null);
+		public RoutineLookAtObject(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c){
+			this.target = target;
+		}
+		protected override status DoUpdate (){
+			Controller.ResetInput(control);
+			Vector2 dif = (Vector2)gameObject.transform.position - (Vector2)target.val.transform.position;
+			control.SetDirection(-1 * dif);
+			return status.neutral;
+		}
+	}
 	public class RoutineWalkToPoint : Routine {
-		public Vector2 target = new Vector2(0,0);
-		public RoutineWalkToPoint(GameObject g, Controllable c, Vector2 t) : base(g, c){
+		public Ref<Vector2> target = new Ref<Vector2>(Vector2.zero);
+		public RoutineWalkToPoint(GameObject g, Controllable c, Ref<Vector2> t) : base(g, c){
 			routineThought = "I'm walking to a spot.";
 			target = t;
 		}
 		protected override status DoUpdate () 
 		{
-			float distToTarget = Vector2.Distance(gameObject.transform.position,target);
+			float distToTarget = Vector2.Distance(gameObject.transform.position, target.val);
 			Controller.ResetInput(control);
 			if (distToTarget < 0.2f){
 				return status.success;
 			} else {
-				if ( Math.Abs( gameObject.transform.position.x - target.x) > 0.1f ){
-					if (gameObject.transform.position.x < target.x){
+				if ( Math.Abs( gameObject.transform.position.x - target.val.x) > 0.1f ){
+					if (gameObject.transform.position.x < target.val.x){
 						control.rightFlag = true;
 					} 
-					if (gameObject.transform.position.x > target.x){
+					if (gameObject.transform.position.x > target.val.x){
 						control.leftFlag = true;
 					}
 				}
-				if ( Math.Abs( gameObject.transform.position.y - target.y) > 0.1f ){
-					if (gameObject.transform.position.y < target.y){
+				if ( Math.Abs( gameObject.transform.position.y - target.val.y) > 0.1f ){
+					if (gameObject.transform.position.y < target.val.y){
 						control.upFlag = true;
 					}
-					if (gameObject.transform.position.y > target.y){
+					if (gameObject.transform.position.y > target.val.y){
 						control.downFlag = true;
 					}
 				}
