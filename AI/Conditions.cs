@@ -62,6 +62,23 @@ namespace AI{
 			}
 		}
 	}
+	public class ConditionLookingAtObject : Condition {
+		public Ref<GameObject> target;
+		private Controllable controllable;
+		public ConditionLookingAtObject(GameObject g, Controllable c, Ref<GameObject> target): base(g) {
+			this.target = target;
+			controllable = c;
+		}
+		public override status Evaluate(){
+			Vector2 dif = (Vector2)gameObject.transform.position - (Vector2)target.val.transform.position;
+			float angle = Toolbox.Instance.ProperAngle(dif.x, dif.y);
+			if (Mathf.Abs(angle - controllable.directionAngle) < 20){
+				return status.success;
+			} else {
+				return status.neutral;
+			}
+		}
+	}
 	// this success condition is going to be pretty update intensive, getting a component on each frame??
 	// find a better way to do this
 	public class ConditionHoldingObjectOfType : Condition{
@@ -132,7 +149,7 @@ namespace AI{
 		}
 		public override status Evaluate(){
 			if (awareness){
-				if (awareness.nearestFire() != null){
+				if (awareness.nearestFire.val != null){
 					return status.success;
 				} else {
 					return status.failure;
