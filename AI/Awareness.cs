@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using AI;
 
 [System.Serializable]
 public class Knowledge{
@@ -12,7 +13,7 @@ public class Knowledge{
 	public MeleeWeapon meleeWeapon;
 
 	public Knowledge(GameObject o){
-		obj = o;
+		this.obj = o;
 		transform = o.transform;
 
 		lastSeenPosition = transform.position;
@@ -65,6 +66,8 @@ public class Awareness : MonoBehaviour, IMessagable {
 	private float speciousPresent; 
 	private List<GameObject> fieldOfView = new List<GameObject>();
 	private bool viewed;
+	public Ref<GameObject> nearestEnemy = new Ref<GameObject>(null);
+	public Ref<GameObject> nearestFire = new Ref<GameObject>(null);
 	public SerializableDictionary<GameObject, Knowledge> knowledgebase = new SerializableDictionary<GameObject, Knowledge>();
 	public SerializableDictionary<GameObject, PersonalAssessment> people = new SerializableDictionary<GameObject, PersonalAssessment>();
 	void Start () {
@@ -105,8 +108,22 @@ public class Awareness : MonoBehaviour, IMessagable {
 		sightConeTransform.rotation = Quaternion.Euler(0f, 0f, rot_z );
 		// work the timer for the discrete perception updates
 		speciousPresent -= Time.deltaTime;
-		if (speciousPresent <= 0 && fieldOfView.Count > 0 && viewed == true){
-			Perceive();
+		if (speciousPresent <= 0){
+			if (fieldOfView.Count > 0 && viewed == true){
+				Perceive();
+			}
+			nearestEnemy.val = null;
+			foreach (PersonalAssessment assessment in people.Values){
+				if (assessment.status == PersonalAssessment.friendStatus.enemy)
+					nearestEnemy.val = assessment.knowledge.obj;
+			}
+			nearestFire.val = null;
+			foreach (Knowledge knowledge in knowledgebase.Values){
+				if (knowledge.flammable != null){
+					if (knowledge.flammable.onFire)
+						nearestFire.val = knowledge.obj;
+				}
+			}
 		}
 	}
 	// if its time to run the perception, add all triggerstay colliders to the list.
@@ -142,8 +159,8 @@ public class Awareness : MonoBehaviour, IMessagable {
 				knowledgebase.Add(g, knowledge);
 			}
 			FormPersonalAssessment(g);
-			// React(g, knowledge);
 		}
+
 	}
 
 	public PersonalAssessment FormPersonalAssessment(GameObject g){
@@ -160,23 +177,6 @@ public class Awareness : MonoBehaviour, IMessagable {
 		people.Add(g, assessment);
 		return assessment;
 	}
-	public GameObject nearestEnemy(){
-		GameObject threat = null;
-		foreach (PersonalAssessment assessment in people.Values){
-			if (assessment.status == PersonalAssessment.friendStatus.enemy)
-				return assessment.knowledge.obj;
-		}
-		return threat;
-	}
-	public GameObject nearestFire(){
-		foreach (Knowledge knowledge in knowledgebase.Values){
-			if (knowledge.flammable != null){
-				if (knowledge.flammable.onFire)
-					return knowledge.obj;
-			}
-		}
-		return null;
-	}
 	void AttackedByPerson(GameObject g, MessageDamage message){
 		PersonalAssessment assessment = FormPersonalAssessment(g);
 		if (assessment != null){
@@ -191,11 +191,13 @@ public class Awareness : MonoBehaviour, IMessagable {
 				AttackedByPerson(responsible, message);
 			}
 		}
-	}
-
-	public void Insulted(GameObject insulter, DialogueMenu menu){
-		PersonalAssessment assessment = FormPersonalAssessment(insulter);
-		assessment.status = PersonalAssessment.friendStatus.enemy;
-		menu.Say(gameObject, "How dare you!");
+		if (incoming is MessageInsult){
+			PersonalAssessment assessment = FormPersonalAssessment(incoming.messenger.gameObject);
+			assessment.status = PersonalAssessment.friendStatus.enemy;
+		}
+		if (incoming is MessageThreaten){
+			PersonalAssessment assessment = FormPersonalAssessment(incoming.messenger.gameObject);
+			assessment.status = PersonalAssessment.friendStatus.enemy;
+		}
 	}
 }
