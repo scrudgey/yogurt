@@ -85,6 +85,22 @@ namespace AI {
 			routines.Add(new RoutineWalkToGameobject(g, c, target));
 		}
 	}
+	public class GoalLookAtObject: Goal {
+		public Ref<GameObject> target;
+		public GoalLookAtObject(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c){
+			this.target = target;
+			successCondition = new ConditionLookingAtObject(g, c, target);
+			routines.Add(new RoutineLookAtObject(g, c, target));
+		}
+	}
+	public class GoalWalkToPoint : Goal {
+		public Ref<Vector2> target;
+		public GoalWalkToPoint(GameObject g, Controllable c, Ref<Vector2> target) : base(g, c){
+			this.target = target;
+			successCondition = new ConditionLocation(g, target);
+			routines.Add(new RoutineWalkToPoint(g, c, target));
+		}
+	}
 
 	public class GoalHoseDown : Goal {
 		public Ref<GameObject> target;
