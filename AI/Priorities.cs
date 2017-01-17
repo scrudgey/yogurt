@@ -3,6 +3,10 @@
 namespace AI{
 	[System.Serializable]
 	public class Priority : IMessagable {
+		public const float urgencyMinor = 1f;
+		public const float urgencySmall = 2.5f;
+		public const float urgencyLarge = 5f;
+		public const float urgencyPressing = 10f;
 		public float urgency;
 		public float minimumUrgency = 0;
 		public Awareness awareness;
@@ -45,7 +49,7 @@ namespace AI{
 		}
 		public override void Update(){
 			if (awareness.nearestFire.val != null)
-				urgency = 10;
+				urgency = Priority.urgencyPressing;
 		}
 	}
 
@@ -57,7 +61,7 @@ namespace AI{
 			if (personality.actor == Personality.Actor.yes){
 				return -1;
 			} else {
-				return 1;
+				return Priority.urgencyMinor;
 			}
 		}
 	}
@@ -68,14 +72,14 @@ namespace AI{
 		}
 		public override void ReceiveMessage(Message incoming){
 			if (incoming is MessageDamage){
-				MessageDamage dam = (MessageDamage)incoming;
-				urgency += 1;
+				// MessageDamage dam = (MessageDamage)incoming;
+				urgency += Priority.urgencyMinor;
 			}
 			if (incoming is MessageInsult){
-				urgency += 1;
+				urgency += Priority.urgencyMinor;
 			}
 			if (incoming is MessageThreaten){
-				urgency += 2;
+				urgency += Priority.urgencySmall;
 			}
 		}
 		public override float Urgency(Personality personality){
@@ -112,13 +116,13 @@ namespace AI{
 		}
 		public override void ReceiveMessage(Message incoming){
 			if (incoming is MessageDamage){
-				urgency += 5;
+				urgency += Priority.urgencyLarge;
 			}
 			if (incoming is MessageInsult){
-				urgency += 2;
+				urgency += Priority.urgencySmall;
 			}
 			if (incoming is MessageThreaten){
-				urgency += 1;
+				urgency += Priority.urgencyMinor;
 			}
 		}
 		public override void Update(){
@@ -147,7 +151,7 @@ namespace AI{
 		public override float Urgency(Personality personality){
 			if (personality.actor == Personality.Actor.yes){
 				if (nextLine != null){
-					return 10;
+					return Priority.urgencyPressing;
 				} else {
 					return 0.1f;
 				}
