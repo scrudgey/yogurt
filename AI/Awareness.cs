@@ -39,8 +39,8 @@ public class Knowledge{
 public class PersonalAssessment{
 	public enum friendStatus{neutral, friend, enemy}
 	public friendStatus status;
-	public float harmDealt;
 	public Knowledge knowledge;
+	public bool unconscious;
 	public PersonalAssessment(Knowledge k){
 		knowledge = k;
 	}
@@ -112,16 +112,43 @@ public class Awareness : MonoBehaviour, IMessagable {
 			if (fieldOfView.Count > 0 && viewed == true){
 				Perceive();
 			}
-			nearestEnemy.val = null;
-			foreach (PersonalAssessment assessment in people.Values){
-				if (assessment.status == PersonalAssessment.friendStatus.enemy)
-					nearestEnemy.val = assessment.knowledge.obj;
-			}
-			nearestFire.val = null;
-			foreach (Knowledge knowledge in knowledgebase.Values){
-				if (knowledge.flammable != null){
-					if (knowledge.flammable.onFire)
-						nearestFire.val = knowledge.obj;
+			SetNearestEnemy();
+			SetNearestFire();
+		}
+	}
+
+	void SetNearestEnemy(){
+		nearestEnemy.val = null;
+        float closestDistanceSqr = Mathf.Infinity;
+        Vector3 currentPosition = transform.position;
+		foreach (PersonalAssessment assessment in people.Values){
+			if (assessment.status != PersonalAssessment.friendStatus.enemy)
+				continue;
+			if (assessment.unconscious)
+				continue;
+			Vector3 directionToTarget = assessment.knowledge.lastSeenPosition - currentPosition;
+            float dSqrToTarget = directionToTarget.sqrMagnitude;
+            if (dSqrToTarget < closestDistanceSqr)
+            {
+                closestDistanceSqr = dSqrToTarget;
+                nearestEnemy.val = assessment.knowledge.obj;
+            }
+		}
+	}
+	void SetNearestFire(){
+		nearestFire.val = null;
+        float closestDistanceSqr = Mathf.Infinity;
+        Vector3 currentPosition = transform.position;
+		foreach (Knowledge knowledge in knowledgebase.Values){
+			if (knowledge.flammable == null)
+				continue;
+			if (knowledge.flammable.onFire){
+				Vector3 directionToTarget = knowledge.lastSeenPosition - currentPosition;
+				float dSqrToTarget = directionToTarget.sqrMagnitude;
+				if (dSqrToTarget < closestDistanceSqr)
+				{
+					closestDistanceSqr = dSqrToTarget;
+					nearestFire.val = knowledge.obj;
 				}
 			}
 		}
@@ -158,7 +185,11 @@ public class Awareness : MonoBehaviour, IMessagable {
 				knowledge = new Knowledge(g);
 				knowledgebase.Add(g, knowledge);
 			}
-			FormPersonalAssessment(g);
+			PersonalAssessment assessment = FormPersonalAssessment(g);
+			Humanoid human = g.GetComponent<Humanoid>();
+			if (human){
+				assessment.unconscious = human.hitstun;
+			}
 		}
 
 	}
@@ -181,7 +212,6 @@ public class Awareness : MonoBehaviour, IMessagable {
 		PersonalAssessment assessment = FormPersonalAssessment(g);
 		if (assessment != null){
 			assessment.status = PersonalAssessment.friendStatus.enemy;
-			assessment.harmDealt = message.amount;
 		}
 	}
 	public void ReceiveMessage(Message incoming){
