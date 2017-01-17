@@ -26,6 +26,14 @@ public class Monologue{
 	public void NextLine(){
 		index = 0;
 		text.Pop();
+		MakeOccurrenceFlag();
+	}
+	public void MakeOccurrenceFlag(){
+		Occurrence flag = Toolbox.Instance.OccurenceFlag(speaker.gameObject);
+		OccurrenceSpeech data = new OccurrenceSpeech();
+		data.speaker = speaker.gameObject;
+		data.line = Toolbox.Instance.GetName(speaker.gameObject)+": "+text.Peek();
+		flag.data.Add(data);
 	}
 }
 
@@ -114,6 +122,7 @@ public class DialogueMenu : MonoBehaviour {
 	public void Say(Monologue text){
 		if (monologue.text.Count == 0){
 			monologue = text;
+			monologue.MakeOccurrenceFlag();
 		} else {
 			dialogue.Push(text);
 		}
