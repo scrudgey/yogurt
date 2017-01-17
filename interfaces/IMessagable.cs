@@ -83,3 +83,10 @@ public class MessageScript : Message {
 	public string coStarLine;
 	public TomAction tomAct;
 }
+
+public class MessageInsult : Message {
+}
+
+public class MessageThreaten : Message {
+	
+}
