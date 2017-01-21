@@ -7,6 +7,7 @@ namespace AI{
 		public const float urgencySmall = 2.5f;
 		public const float urgencyLarge = 5f;
 		public const float urgencyPressing = 10f;
+		public const float urgencyMaximum = 10f;
 		public float urgency;
 		public float minimumUrgency = 0;
 		public Awareness awareness;
@@ -142,11 +143,13 @@ namespace AI{
 		string nextLine;
 		ScriptDirector director;
 		public PriorityReadScript(GameObject g, Controllable c): base(g, c){
-			GameObject video = GameObject.FindObjectOfType<VideoCamera>().gameObject;
+			VideoCamera video = GameObject.FindObjectOfType<VideoCamera>();
 			Goal goalWalkTo = new GoalWalkToPoint(g, c, new Ref<Vector2>(new Vector2(0.186f, 0.812f)));
-			Goal lookGoal = new GoalLookAtObject(g, c, new Ref<GameObject>(video));
-			lookGoal.requirements.Add(goalWalkTo);
-			goal = lookGoal;
+			if (video != null){
+				Goal lookGoal = new GoalLookAtObject(g, c, new Ref<GameObject>(video.gameObject));
+				lookGoal.requirements.Add(goalWalkTo);
+				goal = lookGoal;
+			}
 		}
 		public override float Urgency(Personality personality){
 			if (personality.actor == Personality.Actor.yes){
