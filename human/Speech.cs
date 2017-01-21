@@ -23,6 +23,7 @@ public class Speech : Interactive, IMessagable {
     private AudioSource audioSource;
 	private bool LoadInitialized = false;
     public string flavor = "test";
+    public bool hitstun;
 
 	void Start () {
         if (!LoadInitialized)
@@ -217,6 +218,10 @@ public class Speech : Interactive, IMessagable {
                 Say(message.phrase);
             }
         }
+        if (incoming is MessageHitstun){
+			MessageHitstun hits = (MessageHitstun)incoming;
+			hitstun = hits.value;
+		}
     }
     // double-exponential seat easing function
     public float DoubleSeat(float x, float a, float w, float max, float min){
@@ -241,20 +246,38 @@ public class Speech : Interactive, IMessagable {
         Say("that shazbotting "+targetname+"!", "shazbotting");
     }
     public Monologue Insult(GameObject target){
+        List<string> strings = new List<string>();
+
         Grammar grammar = new Grammar();
         grammar.Load("structure");
         grammar.Load("flavor_"+flavor);
-        List<string> strings = new List<string>();
         strings.Add(grammar.Parse("{insult}"));
+
+        Occurrence occurrence = Toolbox.Instance.OccurenceFlag(gameObject);
+        OccurrenceData data = new OccurrenceData();
+		data.chaos = 10;
+		data.offensive = 20;
+		data.positive = -20;
+		occurrence.data.Add(data);
+
         Monologue mono = new Monologue(this, strings.ToArray());
         return mono;
     }
-    public Monologue MonologueFromNimrod(string symbol, GameObject target){
+    public Monologue Threaten(GameObject target){
+        List<string> strings = new List<string>();
+        
         Grammar grammar = new Grammar();
         grammar.Load("structure");
         grammar.Load("flavor_"+flavor);
-        List<string> strings = new List<string>();
-        strings.Add(grammar.Parse("{" + symbol + "}"));
+        strings.Add(grammar.Parse("{threat}"));
+
+        Occurrence occurrence = Toolbox.Instance.OccurenceFlag(gameObject);
+        OccurrenceData data = new OccurrenceData();
+		data.chaos = 15;
+		data.offensive = 10;
+		data.positive = -20;
+		occurrence.data.Add(data);
+
         Monologue mono = new Monologue(this, strings.ToArray());
         return mono;
     }
