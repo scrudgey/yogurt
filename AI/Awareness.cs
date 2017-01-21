@@ -66,6 +66,7 @@ public class Awareness : MonoBehaviour, IMessagable {
 	private float speciousPresent; 
 	private List<GameObject> fieldOfView = new List<GameObject>();
 	private bool viewed;
+	public bool unconscious;
 	public Ref<GameObject> nearestEnemy = new Ref<GameObject>(null);
 	public Ref<GameObject> nearestFire = new Ref<GameObject>(null);
 	public SerializableDictionary<GameObject, Knowledge> knowledgebase = new SerializableDictionary<GameObject, Knowledge>();
@@ -215,6 +216,12 @@ public class Awareness : MonoBehaviour, IMessagable {
 		}
 	}
 	public void ReceiveMessage(Message incoming){
+		if (incoming is MessageHitstun){
+			MessageHitstun hits = (MessageHitstun)incoming;
+			unconscious = hits.value;
+		}
+		if (unconscious)
+			return;
 		if (incoming is MessageDamage){
 			MessageDamage message = (MessageDamage)incoming;
 			foreach (GameObject responsible in message.responsibleParty){
