@@ -6,11 +6,14 @@ public class Head : Interactive, IExcludable {
 	private GameObject hatPoint;
 	public Hat hat;
 	public SpriteRenderer hatRenderer;
+	public Hat initHat;
 	
 	private bool LoadInitialized = false;
 	void Start(){
 		if (!LoadInitialized)
 			LoadInit();
+		if (initHat)
+			DonHat(initHat);
 	}
 
 	void LoadInit(){
