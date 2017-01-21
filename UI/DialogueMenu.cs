@@ -26,14 +26,6 @@ public class Monologue{
 	public void NextLine(){
 		index = 0;
 		text.Pop();
-		MakeOccurrenceFlag();
-	}
-	public void MakeOccurrenceFlag(){
-		Occurrence flag = Toolbox.Instance.OccurenceFlag(speaker.gameObject);
-		OccurrenceSpeech data = new OccurrenceSpeech();
-		data.speaker = speaker.gameObject;
-		data.line = Toolbox.Instance.GetName(speaker.gameObject)+": "+text.Peek();
-		flag.data.Add(data);
 	}
 }
 
@@ -53,6 +45,14 @@ public class DialogueMenu : MonoBehaviour {
 	public Text choice3Text;
 	public Text promptText;
 	public GameObject choicePanel;
+	public Button giveButton;
+	public Button demandButton;
+	public Button insultButton;
+	public Button threatenButton;
+	public Button suggestButton;
+	public Button followButton;
+	public Button endButton;
+	private List<Button> buttons = new List<Button>();
 
 	public Monologue monologue = new Monologue();
 	public Stack<Monologue> dialogue = new Stack<Monologue>();
@@ -68,6 +68,17 @@ public class DialogueMenu : MonoBehaviour {
 		choice2Text = transform.Find("base/choicePanel/choice2/Text").GetComponent<Text>();
 		choice3Text = transform.Find("base/choicePanel/choice3/Text").GetComponent<Text>();
 		choicePanel = transform.Find("base/choicePanel").gameObject;
+		
+		giveButton = transform.Find("base/buttons/Give").GetComponent<Button>();
+		demandButton = transform.Find("base/buttons/Demand").GetComponent<Button>();
+		insultButton = transform.Find("base/buttons/Insult").GetComponent<Button>();
+		threatenButton = transform.Find("base/buttons/Threaten").GetComponent<Button>();
+		suggestButton = transform.Find("base/buttons/Suggest").GetComponent<Button>();
+		followButton = transform.Find("base/buttons/Follow").GetComponent<Button>();
+		endButton = transform.Find("base/buttons/End").GetComponent<Button>();
+		buttons.AddRange(new Button[]{giveButton, demandButton, insultButton, threatenButton, suggestButton, followButton, endButton});
+
+
 		Controller.Instance.suspendInput = true;
 		promptText.text = "";
 		choicePanel.SetActive(false);
@@ -105,7 +116,7 @@ public class DialogueMenu : MonoBehaviour {
 			Say(target.Riposte());
 			break;
 			case "threat":
-			Say(instigator.MonologueFromNimrod("threat", target.gameObject));
+			Say(instigator.Threaten(target.gameObject));
 			MessageThreaten threat = new MessageThreaten();
 			Toolbox.Instance.SendMessage(target.gameObject, instigator, threat);
 			Say(target.RespondToThreat());
@@ -122,10 +133,17 @@ public class DialogueMenu : MonoBehaviour {
 	public void Say(Monologue text){
 		if (monologue.text.Count == 0){
 			monologue = text;
-			monologue.MakeOccurrenceFlag();
 		} else {
 			dialogue.Push(text);
 		}
+	}
+	public void EnableButtons(){
+		foreach(Button button in buttons)
+			button.interactable = true;
+	}
+	public void DisableButtons(){
+		foreach(Button button in buttons)
+			button.interactable = false;
 	}
 
 	public void Update(){
@@ -151,11 +169,13 @@ public class DialogueMenu : MonoBehaviour {
 			if (dialogue.Count > 0 && !waitForKeyPress){
 				waitForKeyPress = true;
 				promptText.text = "[MORE...]";
+				// EnableButtons();
 			}
 			return;
 		}
 		blitTimer = 0;
 		if (monologue.MoreToSay()){
+			DisableButtons();
 			speechText.text = monologue.GetString();
 			if (monologue.speaker != null){
 				if (monologue.speaker.speakSound)
@@ -165,8 +185,11 @@ public class DialogueMenu : MonoBehaviour {
 			if (monologue.text.Count > 1){
 				waitForKeyPress = true;
 				promptText.text = "[MORE...]";
+				// EnableButtons();
 			} else {
 				monologue.text.Pop();
+				if (dialogue.Count == 0)
+					EnableButtons();
 			}
 		}
 	}
