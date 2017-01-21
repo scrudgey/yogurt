@@ -118,7 +118,6 @@ public partial class GameManager : Singleton<GameManager> {
 		// change UI buttons?
 		UINew.Instance.UpdateButtons();
 	}
-
 	public void LeaveScene(string toSceneName, int toEntryNumber){
 		MySaver.Save();
 		data.entryID = toEntryNumber;
