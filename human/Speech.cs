@@ -23,7 +23,7 @@ public class Speech : Interactive, IMessagable {
     private AudioSource audioSource;
 	private bool LoadInitialized = false;
     public string flavor = "test";
-    public bool hitstun;
+    public bool unconscious;
 
 	void Start () {
         if (!LoadInitialized)
@@ -54,9 +54,10 @@ public class Speech : Interactive, IMessagable {
             }
         }    
     }
-    public void SpeakWith(){
+    public DialogueMenu SpeakWith(){
         DialogueMenu menu = UINew.Instance.ShowMenu(UINew.MenuType.dialogue).GetComponent<DialogueMenu>();
         menu.Configure(GameManager.Instance.playerObject.GetComponent<Speech>(), this);
+        return menu;
     }
     public string SpeakWith_desc(){
 		string otherName = Toolbox.Instance.GetName(gameObject);
@@ -220,7 +221,7 @@ public class Speech : Interactive, IMessagable {
         }
         if (incoming is MessageHitstun){
 			MessageHitstun hits = (MessageHitstun)incoming;
-			hitstun = hits.value;
+			unconscious = hits.unconscious;
 		}
     }
     // double-exponential seat easing function
@@ -246,6 +247,8 @@ public class Speech : Interactive, IMessagable {
         Say("that shazbotting "+targetname+"!", "shazbotting");
     }
     public Monologue Insult(GameObject target){
+        if (unconscious)
+            return Ellipsis();
         List<string> strings = new List<string>();
 
         Grammar grammar = new Grammar();
@@ -264,8 +267,10 @@ public class Speech : Interactive, IMessagable {
         return mono;
     }
     public Monologue Threaten(GameObject target){
+        if (unconscious)
+            return Ellipsis();
         List<string> strings = new List<string>();
-        
+
         Grammar grammar = new Grammar();
         grammar.Load("structure");
         grammar.Load("flavor_"+flavor);
@@ -281,11 +286,19 @@ public class Speech : Interactive, IMessagable {
         Monologue mono = new Monologue(this, strings.ToArray());
         return mono;
     }
+
+    public Monologue Ellipsis(){
+        return new Monologue(this, new string[]{"..."});
+    }
     public Monologue Riposte(){
+        if (unconscious)
+            return Ellipsis();
         Monologue mono = new Monologue(this, new string[]{"How dare you!"});
         return mono;
     }
     public Monologue RespondToThreat(){
+        if (unconscious)
+            return Ellipsis();
         Monologue mono = new Monologue(this, new string[]{"Mercy!"});
         return mono;
     }

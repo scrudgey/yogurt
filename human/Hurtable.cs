@@ -121,6 +121,7 @@ public class Hurtable : MonoBehaviour, IMessagable {
 		MessageHitstun message = new MessageHitstun();
 		message.value = true;
 		message.doubledOver = false;
+		message.unconscious = true;
 		Toolbox.Instance.SendMessage(gameObject, this, message);
 	}
 
@@ -133,6 +134,7 @@ public class Hurtable : MonoBehaviour, IMessagable {
 		transform.RotateAround(pivot, new Vector3(0, 0, 1), 90);
 		MessageHitstun message = new MessageHitstun();
 		message.value = false;
+		message.unconscious = false;
 		Toolbox.Instance.SendMessage(gameObject, this, message);
 	}
 	public void DoubleOver(bool val){
