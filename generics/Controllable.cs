@@ -2,12 +2,31 @@
 using System.Collections.Generic;
 
 public class Controllable : MonoBehaviour, IMessagable {
-	public bool upFlag;
-	public bool downFlag;
-	public bool rightFlag;
-	public bool leftFlag;
-	[HideInInspector] 
-	public bool shootPressedFlag;
+	private bool _upFlag;
+	private bool _downFlag;
+	private bool _leftFlag;
+	private bool _rightFlag;
+	private bool _shootPressedFlag;
+	public bool upFlag{
+		get {if (disabled) return false; else return _upFlag;}
+		set {_upFlag = value;}
+	}
+	public bool downFlag{
+		get {if (disabled) return false; else return _downFlag;}
+		set {_downFlag = value;}
+	}
+	public bool leftFlag{
+		get {if (disabled) return false; else return _leftFlag;}
+		set {_leftFlag = value;}
+	}
+	public bool rightFlag{
+		get {if (disabled) return false; else return _rightFlag;}
+		set {_rightFlag = value;}
+	}
+	public bool shootPressedFlag{
+		get {if (disabled) return false; else return _shootPressedFlag;}
+		set {_shootPressedFlag = value;}
+	}
 	private bool shootPressedDone;
 	public bool shootHeldFlag;
 	public string lastPressed = "right";
@@ -22,35 +41,44 @@ public class Controllable : MonoBehaviour, IMessagable {
 		}
 	}
 	public float directionAngle = 0;
-	public delegate void ClickAction();
-	public event ClickAction OnLastRightClickedChange;
-	public event ClickAction OnMouseUpEvent;
-	public event ClickAction OnLastLeftClickedChange;
+	// public delegate void ClickAction();
+	// public event ClickAction OnLastRightClickedChange;
+	// public event ClickAction OnMouseUpEvent;
+	// public event ClickAction OnLastLeftClickedChange;
 	public List<IDirectable> directables = new List<IDirectable>();
-	private GameObject _lastLeftClicked;
+	public GameObject lastLeftClicked;
 	public Interaction defaultInteraction;
 	public bool fightMode;
-	public GameObject lastLeftClicked{
-		get {return _lastLeftClicked;}
-		set{
-			_lastLeftClicked = value;
-			if (OnLastLeftClickedChange != null)
-				OnLastLeftClickedChange();
-		}
+	public bool disabled = false;
+	public void ResetInput(){
+		upFlag = false;
+		downFlag = false;
+		leftFlag = false;
+		rightFlag = false;
+		shootPressedFlag = false;
+		shootHeldFlag = false;
 	}
-	private GameObject _lastRightClicked;
-	public GameObject lastRightClicked{
-		get{return _lastRightClicked;}
-		set{
-			_lastRightClicked = value;
-			if (OnLastRightClickedChange != null)
-				OnLastRightClickedChange();
-		}
-	}
-	public void MouseUp(){
-		if (OnMouseUpEvent != null)
-			OnMouseUpEvent();
-	}
+	// public GameObject lastLeftClicked{
+	// 	get {return _lastLeftClicked;}
+	// 	set{
+	// 		_lastLeftClicked = value;
+	// 		// if (OnLastLeftClickedChange != null)
+	// 		// 	OnLastLeftClickedChange();
+	// 	}
+	// }
+	public GameObject lastRightClicked;
+	// public GameObject lastRightClicked{
+	// 	get{return _lastRightClicked;}
+	// 	set{
+	// 		_lastRightClicked = value;
+	// 		// if (OnLastRightClickedChange != null)
+	// 		// 	OnLastRightClickedChange();
+	// 	}
+	// }
+	// public void MouseUp(){
+	// 	// if (OnMouseUpEvent != null)
+	// 	// 	OnMouseUpEvent();
+	// }
 	public virtual void Start(){
 		foreach(Component component in gameObject.GetComponentsInChildren<Component>())
 		{

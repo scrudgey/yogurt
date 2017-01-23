@@ -12,7 +12,7 @@ public class Controller : Singleton<Controller> {
         set{ 
             _suspendInput = value;
             if (focus)
-                ResetInput(focus);
+				focus.ResetInput();
         }
     }
 	private GameObject lastLeftClicked;
@@ -22,18 +22,9 @@ public class Controller : Singleton<Controller> {
         none, swearAt
     }
     public SelectType currentSelect = SelectType.none;
-    
-	static public void ResetInput(Controllable control){
-		control.upFlag = false;
-		control.downFlag = false;
-		control.leftFlag = false;
-		control.rightFlag = false;
-		control.shootPressedFlag = false;
-		control.shootHeldFlag = false;
-	}
 	void Update () {
 		if (focus != null & !suspendInput){
-			ResetInput(focus);
+			focus.ResetInput();
 			if( Input.GetAxis("Vertical") > 0 )
 				focus.upFlag = true;
 			if(Input.GetAxis("Vertical") < 0)
@@ -66,9 +57,9 @@ public class Controller : Singleton<Controller> {
 				LeftClick();
 			}
 			// mouse up event
-			if (Input.GetMouseButtonUp(1)){
-				focus.MouseUp();
-			}
+			// if (Input.GetMouseButtonUp(1)){
+			// 	focus.MouseUp();
+			// }
 		}
 	}
     

@@ -46,7 +46,7 @@ namespace AI {
 			try {
 				status routineStatus = routines[index].Update();
 				if (routineStatus == status.failure){
-					Controller.ResetInput(control);
+					control.ResetInput();
 					Debug.Log(routines[index]);
 					index ++;
 					// get next routine, or fail.

@@ -147,7 +147,7 @@ namespace AI{
 		}
 		protected override status DoUpdate ()
 		{
-			Controller.ResetInput(control);
+			control.ResetInput();
 			if (wanderTime > 0){
 				switch(dir){
 				case direction.down:
@@ -179,7 +179,7 @@ namespace AI{
 			this.target = target;
 		}
 		protected override status DoUpdate (){
-			Controller.ResetInput(control);
+			control.ResetInput();
 			Vector2 dif = (Vector2)gameObject.transform.position - (Vector2)target.val.transform.position;
 			control.SetDirection(-1 * dif);
 			return status.neutral;
@@ -194,7 +194,7 @@ namespace AI{
 		protected override status DoUpdate () 
 		{
 			float distToTarget = Vector2.Distance(gameObject.transform.position, target.val);
-			Controller.ResetInput(control);
+			control.ResetInput();
 			if (distToTarget < 0.2f){
 				return status.success;
 			} else {
@@ -365,7 +365,7 @@ namespace AI{
 					timer = 0f;
 					control.shootPressedFlag = true;
 				} else {
-					Controller.ResetInput(control);
+					control.ResetInput();
 				}
 				return status.neutral;
 			} else {
