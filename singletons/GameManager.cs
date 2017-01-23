@@ -32,6 +32,7 @@ public class GameData{
 	public List<Achievement> achievements;
 	public AchievementStats achievementStats = new AchievementStats();
 	public List<Email> emails;
+	public bool mayorCutsceneHappened;
 	public GameData(){
 		days = 0;
 		saveDate = System.DateTime.Now.ToString();
@@ -59,11 +60,14 @@ public partial class GameManager : Singleton<GameManager> {
 	private float intervalTimer;
 	public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
 	public AudioSource publicAudio;
+	public const bool debug = false;
     void Start(){
 		// Cursor.SetCursor((Texture2D)Resources.Load("UI/cursor1"), Vector2.zero, CursorMode.Auto);
-		SceneManager.sceneLoaded += LevelWasLoaded;
 		if (data == null){
 			data = InitializedGameData();
+			Debug.Log("setting cutscene debug true");
+			if (debug)
+				data.mayorCutsceneHappened = true;
 		}
 		if (saveGameName == "test")
 			MySaver.CleanupSaves();
@@ -71,6 +75,7 @@ public partial class GameManager : Singleton<GameManager> {
             NewGame(switchlevel: false);
 		}
 		publicAudio = Toolbox.Instance.SetUpAudioSource(gameObject);
+		SceneManager.sceneLoaded += LevelWasLoaded;
 	}
 	void Update(){
 		timeSinceLastSave += Time.deltaTime;
@@ -152,7 +157,8 @@ public partial class GameManager : Singleton<GameManager> {
 		if (loadLevel){
 			playerObject = MySaver.LoadScene();
 		} else {
-			data = InitializedGameData();
+			if (data == null)
+				data = InitializedGameData();
 			// find or spawn the player character 
 			playerObject = GameObject.Find("Tom");	
 			if (!playerObject){
@@ -164,7 +170,15 @@ public partial class GameManager : Singleton<GameManager> {
 			data.entryID = 99;
 		}
 		SetFocus(playerObject);
+		if (SceneManager.GetActiveScene().name == "krazy1"){
+			if (!data.mayorCutsceneHappened){
+				CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.mayorTalk);
+				data.mayorCutsceneHappened = true;
+				data.entryID = 0;
+			}
+		}
 		PlayerEnter();
+
 	}
 	public void InitializeNonPlayableLevel(){
 		UINew.Instance.DisableAllUI();
@@ -209,7 +223,8 @@ public partial class GameManager : Singleton<GameManager> {
 
 	public void NewGame(bool switchlevel=true){
 		Debug.Log("New game");
-		data = InitializedGameData();
+		if (data == null)
+			data = InitializedGameData();
         if (switchlevel){
 			NewDayCutscene();
         } else {
@@ -260,6 +275,7 @@ public partial class GameManager : Singleton<GameManager> {
 		SceneManager.LoadScene("morning_cutscene");
         sceneTime = 0f;
         data.entryID = -99;
+		CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.newDay);
 	}
 	public void TitleScreen(){
 		SceneManager.LoadScene("title");
