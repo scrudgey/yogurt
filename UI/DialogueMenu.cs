@@ -37,6 +37,8 @@ public class DialogueMenu : MonoBehaviour {
 	public Inventory instigatorInv;
 	public Inventory targetInv;
 	public Awareness targetAwareness;
+	private Controllable instigatorControl;
+	private Controllable targetControl;
 
 	public Image portrait;
 	public Text speechText;
@@ -59,6 +61,9 @@ public class DialogueMenu : MonoBehaviour {
 	public bool waitForKeyPress;
 	public float blitInterval = 0.01f;
 	public float blitTimer;
+
+	public delegate void MyDelegate();
+	public MyDelegate menuClosed;
 	void Start () {
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 		portrait = transform.Find("base/main/portrait").GetComponent<Image>();
@@ -79,25 +84,31 @@ public class DialogueMenu : MonoBehaviour {
 		buttons.AddRange(new Button[]{giveButton, demandButton, insultButton, threatenButton, suggestButton, followButton, endButton});
 
 
-		Controller.Instance.suspendInput = true;
+		// Controller.Instance.suspendInput = true;
 		promptText.text = "";
 		choicePanel.SetActive(false);
 	}
 
 	public void Configure(Speech instigator, Speech target){
 		Start();
-		GameObject giveButton = transform.Find("base/buttons/Give").gameObject;
-		GameObject demandButton = transform.Find("base/buttons/Demand").gameObject;
+		// GameObject giveButton = transform.Find("base/buttons/Give").gameObject;
+		// GameObject demandButton = transform.Find("base/buttons/Demand").gameObject;
 		this.instigator = instigator;
 		this.target = target;
 		instigatorInv = instigator.GetComponent<Inventory>();
 		targetInv = target.GetComponent<Inventory>();
 		targetAwareness = target.GetComponent<Awareness>();
 		if (instigatorInv == null || targetInv == null){
-			giveButton.SetActive(false);
-			demandButton.SetActive(false);
+			giveButton.gameObject.SetActive(false);
+			demandButton.gameObject.SetActive(false);
 		}
 		speechText.text = instigator.name + " " + target.name;
+		targetControl = target.GetComponent<Controllable>();
+		instigatorControl = instigator.GetComponent<Controllable>();
+		if (targetControl)
+			targetControl.disabled = true;
+		if (instigatorControl)
+			instigatorControl.disabled = true;
 	}
 
 	public void ChoiceCallback(int choiceNumber){
@@ -107,7 +118,11 @@ public class DialogueMenu : MonoBehaviour {
 		switch (callType){
 			case "end":
 			Destroy(gameObject);
-			Controller.Instance.suspendInput = false;
+			// Controller.Instance.suspendInput = false;
+			if (targetControl)
+				targetControl.disabled = false;
+			if (instigatorControl)
+				instigatorControl.disabled = false;
 			break;
 			case "insult":
 			Say(instigator.Insult(target.gameObject));
@@ -124,6 +139,13 @@ public class DialogueMenu : MonoBehaviour {
 			default:
 			break;
 		}
+	}
+	void OnDestroy(){
+		if (targetControl)
+			targetControl.disabled = false;
+		if (instigatorControl)
+			instigatorControl.disabled = false;
+		menuClosed();
 	}
 
 	public void Say(Speech speaker, string text){
@@ -169,7 +191,6 @@ public class DialogueMenu : MonoBehaviour {
 			if (dialogue.Count > 0 && !waitForKeyPress){
 				waitForKeyPress = true;
 				promptText.text = "[MORE...]";
-				// EnableButtons();
 			}
 			return;
 		}
@@ -193,6 +214,4 @@ public class DialogueMenu : MonoBehaviour {
 			}
 		}
 	}
-
-
 }
