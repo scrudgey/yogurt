@@ -1,6 +1,13 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+
+public class DialogueNode{
+	public List<string> text = new List<string>();
+	public List<string> responses = new List<string>();
+	public List<int> responseLinks = new List<int>();
+}
 
 public class Monologue{
 	public Stack<string> text = new Stack<string>();
@@ -11,8 +18,9 @@ public class Monologue{
 	public Monologue(Speech speaker, string[] texts){
 		index = 0;
 		this.speaker = speaker;
-		foreach(string entry in texts){
-			text.Push(entry);
+		for (int i = texts.Length - 1; i >= 0; i--)
+		{
+			text.Push(texts[i]);
 		}
 	}
 	public string GetString(){
@@ -26,6 +34,14 @@ public class Monologue{
 	public void NextLine(){
 		index = 0;
 		text.Pop();
+	}
+	public void PlaySpeakSound(AudioSource audioSource){
+		if (audioSource == null)
+			return;
+		if (speaker == null)
+			return;
+		if (speaker.speakSound)
+			audioSource.PlayOneShot(speaker.speakSound);
 	}
 }
 
@@ -58,13 +74,20 @@ public class DialogueMenu : MonoBehaviour {
 
 	public Monologue monologue = new Monologue();
 	public Stack<Monologue> dialogue = new Stack<Monologue>();
+	public List<DialogueNode> dialogueTree = new List<DialogueNode>();
+	public DialogueNode node;
+	public int nextNode = -1;
 	public bool waitForKeyPress;
 	public float blitInterval = 0.01f;
 	public float blitTimer;
 
 	public delegate void MyDelegate();
 	public MyDelegate menuClosed;
+	public bool configured;
 	void Start () {
+		if (configured)
+			return;
+		configured = true;
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 		portrait = transform.Find("base/main/portrait").GetComponent<Image>();
 		speechText = transform.Find("base/main/speechPanel/speechText").GetComponent<Text>();
@@ -83,16 +106,12 @@ public class DialogueMenu : MonoBehaviour {
 		endButton = transform.Find("base/buttons/End").GetComponent<Button>();
 		buttons.AddRange(new Button[]{giveButton, demandButton, insultButton, threatenButton, suggestButton, followButton, endButton});
 
-
-		// Controller.Instance.suspendInput = true;
 		promptText.text = "";
 		choicePanel.SetActive(false);
 	}
 
 	public void Configure(Speech instigator, Speech target){
 		Start();
-		// GameObject giveButton = transform.Find("base/buttons/Give").gameObject;
-		// GameObject demandButton = transform.Find("base/buttons/Demand").gameObject;
 		this.instigator = instigator;
 		this.target = target;
 		instigatorInv = instigator.GetComponent<Inventory>();
@@ -110,15 +129,63 @@ public class DialogueMenu : MonoBehaviour {
 		if (instigatorControl)
 			instigatorControl.disabled = true;
 	}
+	public void LoadDialogueTree(string filename){
+		Regex node_hook = new Regex(@"^(\d)>(.+)", RegexOptions.Multiline);
+		Regex response_hook = new Regex(@"^(\d)\)(.+)");
+		TextAsset textData = Resources.Load("data/dialogue/"+filename) as TextAsset;
+		DialogueNode newNode = null;
+		foreach (string line in textData.text.Split('\n')){
+			if (node_hook.IsMatch(line)){
+				newNode = new DialogueNode();
+				dialogueTree.Add(newNode);
+				Match match = node_hook.Match(line);
+				newNode.text.Add(match.Groups[2].Value);
+				continue;
+			}
+			if (response_hook.IsMatch(line)){
+				Match match = response_hook.Match(line);
+				newNode.responses.Add(match.Groups[2].Value);
+				newNode.responseLinks.Add(int.Parse(match.Groups[1].Value));
+				continue;
+			}
+			if (line != ""){
+				newNode.text.Add(line);
+			}
+		}
+		ParseNode(dialogueTree[0]);
+	}
+	public void ParseNode(DialogueNode node){
+		// TODO: add END capability
+		// TODO: don't show options until dialogue is done
+		this.node = node;
+		choicePanel.SetActive(false);
+		choice1Text.gameObject.SetActive(false);
+		choice2Text.gameObject.SetActive(false);
+		choice3Text.gameObject.SetActive(false);
+		if (node.responses.Count > 0){
+			choicePanel.SetActive(false);
+			choice1Text.gameObject.SetActive(true);
+			choice1Text.text = node.responses[0];
+		}
+		if (node.responses.Count > 1){
+			choice2Text.gameObject.SetActive(true);
+			choice2Text.text = node.responses[1];
+		}
+		if (node.responses.Count > 2){
+			choice3Text.gameObject.SetActive(true);
+			choice3Text.text = node.responses[2];
+		}
+		Say(new Monologue(target, node.text.ToArray()));
+	}
 
 	public void ChoiceCallback(int choiceNumber){
-		Say(instigator, "choice number "+choiceNumber.ToString());
+		Say(instigator, node.responses[choiceNumber - 1]);
+		ParseNode(dialogueTree[node.responseLinks[choiceNumber - 1]]);
 	}
 	public void ActionCallback(string callType){
 		switch (callType){
 			case "end":
 			Destroy(gameObject);
-			// Controller.Instance.suspendInput = false;
 			if (targetControl)
 				targetControl.disabled = false;
 			if (instigatorControl)
@@ -145,7 +212,8 @@ public class DialogueMenu : MonoBehaviour {
 			targetControl.disabled = false;
 		if (instigatorControl)
 			instigatorControl.disabled = false;
-		menuClosed();
+		if (menuClosed != null)
+			menuClosed();
 	}
 
 	public void Say(Speech speaker, string text){
@@ -155,6 +223,7 @@ public class DialogueMenu : MonoBehaviour {
 	public void Say(Monologue text){
 		if (monologue.text.Count == 0){
 			monologue = text;
+			portrait.sprite = monologue.speaker.portrait;
 		} else {
 			dialogue.Push(text);
 		}
@@ -162,10 +231,15 @@ public class DialogueMenu : MonoBehaviour {
 	public void EnableButtons(){
 		foreach(Button button in buttons)
 			button.interactable = true;
+		if (choice1Text.gameObject.activeSelf){
+			choicePanel.SetActive(true);
+		}
+		
 	}
 	public void DisableButtons(){
 		foreach(Button button in buttons)
 			button.interactable = false;
+		choicePanel.SetActive(false);
 	}
 
 	public void Update(){
@@ -177,6 +251,7 @@ public class DialogueMenu : MonoBehaviour {
 					monologue.NextLine();
 				} else if (dialogue.Count > 0){
 					monologue = dialogue.Pop();
+					portrait.sprite = monologue.speaker.portrait;
 				}
 				promptText.text = "";
 			}
@@ -198,10 +273,7 @@ public class DialogueMenu : MonoBehaviour {
 		if (monologue.MoreToSay()){
 			DisableButtons();
 			speechText.text = monologue.GetString();
-			if (monologue.speaker != null){
-				if (monologue.speaker.speakSound)
-					audioSource.PlayOneShot(monologue.speaker.speakSound);
-			}
+			monologue.PlaySpeakSound(audioSource);
 		} else {
 			if (monologue.text.Count > 1){
 				waitForKeyPress = true;
