@@ -34,6 +34,7 @@ public class CutsceneMayor : Cutscene {
             mayorControl.ResetInput();
             DialogueMenu menu = mayorSpeech.SpeakWith();
             menu.menuClosed += MenuWasClosed;
+            menu.LoadDialogueTree("mayor");
         }
         if (walkingAway){
             mayorControl.leftFlag = true;
