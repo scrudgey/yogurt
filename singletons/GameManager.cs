@@ -60,12 +60,11 @@ public partial class GameManager : Singleton<GameManager> {
 	private float intervalTimer;
 	public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
 	public AudioSource publicAudio;
-	public const bool debug = false;
+	public bool debug = false;
     void Start(){
 		// Cursor.SetCursor((Texture2D)Resources.Load("UI/cursor1"), Vector2.zero, CursorMode.Auto);
 		if (data == null){
 			data = InitializedGameData();
-			Debug.Log("setting cutscene debug true");
 			if (debug)
 				data.mayorCutsceneHappened = true;
 		}
