@@ -24,6 +24,7 @@ public class Speech : Interactive, IMessagable {
 	private bool LoadInitialized = false;
     public string flavor = "test";
     public bool unconscious;
+    public Sprite portrait;
 
 	void Start () {
         if (!LoadInitialized)
