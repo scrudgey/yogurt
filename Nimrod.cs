@@ -37,7 +37,9 @@ namespace Nimrod{
                 if (matches.Count > 0){
                     foreach (Match match in matches){
                         StringBuilder builder = new StringBuilder(parseText);
-                        builder.Replace(match.Groups[1].Value, Interpret(match.Groups[2].Value));
+
+                        int firstOccurrence = builder.ToString().IndexOf(match.Groups[1].Value);
+                        builder.Replace(match.Groups[1].Value, Interpret(match.Groups[2].Value), firstOccurrence, match.Groups[1].Value.Length);
                         parseText = builder.ToString();
                     }
 		        }
