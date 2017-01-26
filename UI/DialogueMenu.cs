@@ -108,6 +108,9 @@ public class DialogueMenu : MonoBehaviour {
 
 		promptText.text = "";
 		choicePanel.SetActive(false);
+		choice1Text.gameObject.SetActive(false);
+		choice2Text.gameObject.SetActive(false);
+		choice3Text.gameObject.SetActive(false);
 	}
 
 	public void Configure(Speech instigator, Speech target){
@@ -155,8 +158,6 @@ public class DialogueMenu : MonoBehaviour {
 		ParseNode(dialogueTree[0]);
 	}
 	public void ParseNode(DialogueNode node){
-		// TODO: add END capability
-		// TODO: don't show options until dialogue is done
 		this.node = node;
 		choicePanel.SetActive(false);
 		choice1Text.gameObject.SetActive(false);
@@ -182,26 +183,29 @@ public class DialogueMenu : MonoBehaviour {
 		Say(instigator, node.responses[choiceNumber - 1]);
 		ParseNode(dialogueTree[node.responseLinks[choiceNumber - 1]]);
 	}
+	public void DisableResponses(){
+		choice1Text.gameObject.SetActive(false);
+		choice2Text.gameObject.SetActive(false);
+		choice3Text.gameObject.SetActive(false);
+	}
 	public void ActionCallback(string callType){
 		switch (callType){
 			case "end":
 			Destroy(gameObject);
-			if (targetControl)
-				targetControl.disabled = false;
-			if (instigatorControl)
-				instigatorControl.disabled = false;
 			break;
 			case "insult":
 			Say(instigator.Insult(target.gameObject));
 			MessageInsult insult = new MessageInsult();
 			Toolbox.Instance.SendMessage(target.gameObject, instigator, insult);
 			Say(target.Riposte());
+			DisableResponses();
 			break;
 			case "threat":
 			Say(instigator.Threaten(target.gameObject));
 			MessageThreaten threat = new MessageThreaten();
 			Toolbox.Instance.SendMessage(target.gameObject, instigator, threat);
 			Say(target.RespondToThreat());
+			DisableResponses();
 			break;
 			default:
 			break;
@@ -222,11 +226,16 @@ public class DialogueMenu : MonoBehaviour {
 	}
 	public void Say(Monologue text){
 		if (monologue.text.Count == 0){
-			monologue = text;
-			portrait.sprite = monologue.speaker.portrait;
+			SetMonologue(text);
 		} else {
 			dialogue.Push(text);
 		}
+	}
+	public void SetMonologue(Monologue newMonologue){
+		monologue = newMonologue;
+		portrait.sprite = monologue.speaker.portrait;
+		if (monologue.text.Peek() == "END")
+			Destroy(gameObject);
 	}
 	public void EnableButtons(){
 		foreach(Button button in buttons)
@@ -250,8 +259,7 @@ public class DialogueMenu : MonoBehaviour {
 				if (monologue.text.Count > 0){
 					monologue.NextLine();
 				} else if (dialogue.Count > 0){
-					monologue = dialogue.Pop();
-					portrait.sprite = monologue.speaker.portrait;
+					SetMonologue(dialogue.Pop());
 				}
 				promptText.text = "";
 			}
