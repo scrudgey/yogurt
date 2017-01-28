@@ -78,6 +78,7 @@ public class DialogueMenu : MonoBehaviour {
 	public DialogueNode node;
 	public int nextNode = -1;
 	public bool waitForKeyPress;
+	public bool advancedKeyPressed;
 	public float blitInterval = 0.01f;
 	public float blitTimer;
 
@@ -256,6 +257,7 @@ public class DialogueMenu : MonoBehaviour {
 		if (Input.GetKeyDown("a")){
 			if (waitForKeyPress){
 				waitForKeyPress = false;
+				advancedKeyPressed = true;
 				if (monologue.text.Count > 0){
 					monologue.NextLine();
 				} else if (dialogue.Count > 0){
@@ -265,7 +267,10 @@ public class DialogueMenu : MonoBehaviour {
 			}
 		}
 		if (Input.GetKey("a")){
-			blitTimer = blitInterval;
+			if (!advancedKeyPressed)
+				blitTimer = blitInterval;
+		} else {
+			advancedKeyPressed = false;
 		}
 		if (blitTimer < blitInterval){
 			return;
