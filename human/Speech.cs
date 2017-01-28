@@ -39,6 +39,7 @@ public class Speech : Interactive, IMessagable {
 		interactions.Add(speak);
         Interaction speakWith = new Interaction(this, "Talk...", "SpeakWith");
         speakWith.limitless = true;
+        speakWith.validationFunction = true;
         interactions.Add(speakWith);
         flipper = transform.FindChild("SpeechChild").gameObject;
 		bubbleParent = transform.FindChild("SpeechChild/Speechbubble").gameObject;
@@ -63,6 +64,9 @@ public class Speech : Interactive, IMessagable {
     public string SpeakWith_desc(){
 		string otherName = Toolbox.Instance.GetName(gameObject);
         return "Speak with "+otherName;
+    }
+    public bool SpeakWith_Validation(){
+        return GameManager.Instance.playerObject != gameObject;
     }
     // TODO: allow liquids and things to self-describe; add modifiers etc.
 	public void Describe(Item obj){
