@@ -24,6 +24,8 @@ public class CutsceneMayor : Cutscene {
 
         mayorAI.enabled = false;
         Controller.Instance.suspendInput = true;
+
+        UINew.Instance.SetActiveUI();
     }
     public override void Update(){
         if (!inPosition){
@@ -42,6 +44,7 @@ public class CutsceneMayor : Cutscene {
                 Object.Destroy(mayor);
                 Controller.Instance.suspendInput = false;
                 complete = true;
+                UINew.Instance.SetActiveUI(active:true);
             }
         }
     }
