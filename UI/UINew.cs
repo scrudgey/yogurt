@@ -50,12 +50,16 @@ public class UINew: Singleton<UINew> {
 	private Stack<GameObject> collectedStack = new Stack<GameObject>();
 	private Stack<Achievement> achievementStack = new Stack<Achievement>();
 	public bool achievementPopupInProgress;
+	public Texture2D cursorDefault;
+	public Texture2D cursorHighlight;
 
 	void Start(){
 		if (!init){
 			ConfigureUIElements();
 			init = true;
 		}
+		cursorDefault = (Texture2D)Resources.Load("UI/cursor3_64_2");
+		cursorHighlight = (Texture2D)Resources.Load("UI/cursor3_64_1");
 	}
 	void Update(){
 		if (statusTempTime > 0){
@@ -79,6 +83,28 @@ public class UINew: Singleton<UINew> {
 			PopupAchievement(achievementStack.Pop());
 		}
 		actionTextObject.text = actionTextString;
+		bool highlight = false;
+		RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+        foreach (RaycastHit2D hit in hits){
+            if (hit.collider != null && !Controller.Instance.forbiddenColliders.Contains(hit.collider.tag)){
+                highlight = true;
+            }
+        }
+		if (highlight){
+			Cursor.SetCursor(cursorHighlight, new Vector2(28, 16), CursorMode.Auto);
+		} else {
+			Cursor.SetCursor(cursorDefault, new Vector2(28, 16), CursorMode.Auto);
+		}
+		// RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+        // if (hit){
+        //     if (hit.collider != null && !Controller.Instance.forbiddenColliders.Contains(hit.collider.tag)){
+		// 		Cursor.SetCursor(cursorHighlight, new Vector2(14, 8), CursorMode.Auto);
+        //     } else {
+		// 		Cursor.SetCursor(cursorDefault, new Vector2(14, 8), CursorMode.Auto);
+		// 	}
+        // } else {
+		// 	Cursor.SetCursor(cursorDefault, new Vector2(14, 8), CursorMode.Auto);
+		// }
 	}
 	public void ConfigureUIElements() {
 		init = true;
@@ -138,23 +164,25 @@ public class UINew: Singleton<UINew> {
 			Time.timeScale = 1f;
 		}
 	}
-	public void DisableAllUI(){
+	public void SetActiveUI(bool active=false){
 		List<GameObject> buttons = new List<GameObject>(){inventoryButton, fightButton, punchButton, speakButton};
 		foreach (GameObject button in buttons){
 			if (button)
-				button.SetActive(false);
+				button.SetActive(active);
 		}
-		if (recordStopButton){
-			recordStopButton.SetActive(false);
-			recordFinish.SetActive(false);
+		if (recordStopButton && !active){
+			recordStopButton.SetActive(active);
+			recordFinish.SetActive(active);
 			recordText.text = "";
 		}
 		if (status){
-			status.gameObject.SetActive(false);
+			status.gameObject.SetActive(active);
 		}
 		CloseActiveMenu();
 		ClearWorldButtons();
 		ClearActionButtons();
+		if (active)
+			UpdateButtons();
 	}
 	public void UpdateButtons(){
 		if (GameManager.Instance.playerObject.GetComponent<Speech>()){
@@ -450,6 +478,7 @@ public class UINew: Singleton<UINew> {
 	}
 
 	public void ClearActionButtons(){
+		// Debug.Log("clear action buttons");
 		foreach (GameObject element in bottomElements)
 			Destroy(element);
 		bottomElements = new List<GameObject>();
