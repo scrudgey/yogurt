@@ -19,7 +19,8 @@ public class Bed : Doorway {
 	public AudioClip beddingSound;
 	// private AudioSource audioSource;
 	void Start(){
-		// audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
+		// base.Start();
+		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		head = transform.Find("head").GetComponent<SpriteRenderer>();
 		bubble = transform.Find("bubble").GetComponent<SpriteRenderer>();
