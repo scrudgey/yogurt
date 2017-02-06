@@ -34,6 +34,10 @@ public class LiquidContainer : Interactive {
 		}
 	}
 	void Start () {
+		if (!LoadInitialized)
+			LoadInit();
+	}
+	public void LoadInit(){
 		interactions.Add(new Interaction(this, "Fill", "FillFromReservoir"));
 		Interaction fillContainer = new Interaction(this, "Fill", "FillFromContainer");
 		Interaction drinker = new Interaction(this, "Drink", "Drink");
@@ -42,11 +46,7 @@ public class LiquidContainer : Interactive {
 		fillContainer.validationFunction = true;
 		interactions.Add(fillContainer);
 		empty = true;
-		if (!LoadInitialized)
-			LoadInit();
-
-	}
-	public void LoadInit(){
+		
 		Transform child = transform.FindChild("liquidSprite");
 		if (child){
 			liquidSprite = child.GetComponent<SpriteRenderer>();

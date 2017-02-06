@@ -13,8 +13,13 @@ public class FireExtinguisher : Interactive, IDirectable {
 	private SpriteRenderer spriteRenderer;
 	private Vector2 direction = Vector2.right;
 	private bool doSpray;
+	private bool LoadInitialized = false;
 
 	void Start () {
+		if (!LoadInitialized)
+			LoadInit();
+	}
+	public void LoadInit(){
 		Interaction spray = new Interaction(this,"Spray", "Spray", false, true);
 		spray.defaultPriority = 1;
 		spray.continuous = true;
