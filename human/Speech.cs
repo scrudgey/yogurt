@@ -262,10 +262,11 @@ public class Speech : Interactive, IMessagable {
         strings.Add(grammar.Parse("{insult}"));
 
         Occurrence occurrence = Toolbox.Instance.OccurenceFlag(gameObject);
-        OccurrenceData data = new OccurrenceData();
+        OccurrenceSpeech data = new OccurrenceSpeech();
 		data.chaos = 10;
 		data.offensive = 20;
 		data.positive = -20;
+        data.line = strings[0];
 		occurrence.data.Add(data);
 
         Monologue mono = new Monologue(this, strings.ToArray());
@@ -282,10 +283,11 @@ public class Speech : Interactive, IMessagable {
         strings.Add(grammar.Parse("{threat}"));
 
         Occurrence occurrence = Toolbox.Instance.OccurenceFlag(gameObject);
-        OccurrenceData data = new OccurrenceData();
+        OccurrenceSpeech data = new OccurrenceSpeech();
 		data.chaos = 15;
 		data.offensive = 10;
 		data.positive = -20;
+        data.line = strings[0];
 		occurrence.data.Add(data);
 
         Monologue mono = new Monologue(this, strings.ToArray());
