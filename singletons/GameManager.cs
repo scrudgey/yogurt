@@ -60,7 +60,7 @@ public partial class GameManager : Singleton<GameManager> {
 	private float intervalTimer;
 	public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
 	public AudioSource publicAudio;
-	public bool debug = false;
+	public bool debug = true;
     void Start(){
 		// Cursor.SetCursor((Texture2D)Resources.Load("UI/cursor1"), Vector2.zero, CursorMode.Auto);
 		if (data == null){
@@ -177,10 +177,9 @@ public partial class GameManager : Singleton<GameManager> {
 			}
 		}
 		PlayerEnter();
-
 	}
 	public void InitializeNonPlayableLevel(){
-		UINew.Instance.DisableAllUI();
+		UINew.Instance.SetActiveUI();
 	}
 	void PlayerEnter(){
 		if (playerObject == null)
