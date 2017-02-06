@@ -51,13 +51,13 @@ public class Interactor{
 	}
 
 	static public List<Interaction> ReportManualActions(GameObject targ, GameObject source){
-		List<Interaction> returnDictionary = new List<Interaction > ();
+		List<Interaction> returnDictionary = new List<Interaction> ();
 		List<Interactive> interactives = new List<Interactive> (source.GetComponentsInChildren<Interactive>() );
 		
-		foreach ( Interactive interactive in interactives)
+		foreach (Interactive interactive in interactives)
 			interactive.target = targ;
 
-		foreach (Interactive interactive in interactives ){
+		foreach (Interactive interactive in interactives){
 			List<Interaction> actions = interactive.GetManualActions();
 			foreach (Interaction action in actions)
 				returnDictionary.Add(action);
