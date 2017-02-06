@@ -128,6 +128,8 @@ public class DialogueMenu : MonoBehaviour {
 		speechText.text = instigator.name + " " + target.name;
 		targetControl = target.GetComponent<Controllable>();
 		instigatorControl = instigator.GetComponent<Controllable>();
+		instigatorControl.SetDirection(target.transform.position - instigator.transform.position);
+		targetControl.SetDirection(instigator.transform.position - target.transform.position);
 		if (targetControl)
 			targetControl.disabled = true;
 		if (instigatorControl)
