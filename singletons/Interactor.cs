@@ -67,7 +67,7 @@ public class Interactor{
 
 	static public List<Interaction> ReportRightClickActions(GameObject targ, GameObject source){
 		
-		List<Interactive>interactives = new List<Interactive>(source.GetComponentsInChildren<Interactive>() );
+		List<Interactive>interactives = new List<Interactive>(source.GetComponentsInChildren<Interactive>());
 		List<Interaction>returnDictionary = new List<Interaction> ();
 		
 		foreach (Interactive interactive in interactives)
