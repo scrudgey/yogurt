@@ -2,10 +2,88 @@
 using UnityEngine.UI;
 using Easings;
 using UnityEngine.SceneManagement;
+using System.Text.RegularExpressions;
+using System.Collections.Generic;
 public class Cutscene {
     public virtual void Update(){}
     public virtual void Configure(){}
     public bool complete;
+}
+
+public class CutsceneBoardroom : Cutscene {
+    private float timer;
+    private float stopTextFade = 1.5f;
+    private float startDialogue = 4.5f;
+    private bool inDialogue;
+    Text settingText;
+    GameObject longShot;
+    Speech moe;
+    Speech larry;
+    Speech curly;
+    List<string> lines = new List<string>();
+    int index = 0;
+    float scriptTimeSpace = 1f;
+    public override void Configure(){
+        longShot = GameObject.Find("long_shot");
+        GameObject canvas = GameObject.Find("Canvas");
+        settingText = canvas.transform.Find("text").GetComponent<Text>();
+        Color blank = new Color(255, 255, 255, 0);
+        settingText.color = blank;
+        GameObject moeObj = GameObject.Find("moe");
+        GameObject larryObj = GameObject.Find("larry");
+        GameObject curlyObj = GameObject.Find("curly");
+        moeObj.GetComponent<Humanoid>().SetDirection(Vector2.down);
+        larryObj.GetComponent<Humanoid>().SetDirection(Vector2.right);
+        curlyObj.GetComponent<Humanoid>().SetDirection(Vector2.left);
+        moe = moeObj.GetComponent<Speech>();
+        larry = larryObj.GetComponent<Speech>();
+        curly = curlyObj.GetComponent<Speech>();
+    }
+    public override void Update(){
+        timer += Time.deltaTime;
+        if (!inDialogue){
+            if (timer < stopTextFade){
+                Color col = settingText.color;
+                col.a = (float)PennerDoubleAnimation.ExpoEaseIn(timer, 0, 1, stopTextFade);
+                settingText.color = col;
+            }
+            if (timer >= startDialogue){
+                inDialogue = true;
+                longShot.SetActive(false);
+                settingText.gameObject.SetActive(false);
+                timer = 0;
+                LoadScript("test");
+            }
+        } else {
+            // dialogue scene
+            if (moe.speaking || larry.speaking || curly.speaking){
+                timer = 0;
+                return;
+            }
+            if (timer > scriptTimeSpace){
+                timer = 0;
+                if (lines[index].Substring(0, 4) == "MOE:"){
+                    moe.Say(lines[index].Substring(4));
+                }
+                if (lines[index].Substring(0, 6) == "LARRY:"){
+                    larry.Say(lines[index].Substring(6));
+                }
+                if (lines[index].Substring(0, 6) == "CURLY:"){
+                    curly.Say(lines[index].Substring(6));
+                }
+                if (lines[index].Substring(0, 3) == "END"){
+                    complete = true;
+                }
+                index += 1;
+            }
+        }
+    }
+    void LoadScript(string filename){
+        Regex node_hook = new Regex(@"^(\d)>(.+)", RegexOptions.Multiline);
+		Regex response_hook = new Regex(@"^(\d)\)(.+)");
+		TextAsset textData = Resources.Load("data/boardroom/"+filename) as TextAsset;
+        lines = new List<string>(textData.text.Split('\n'));
+    }
 }
 public class CutsceneMayor : Cutscene {
     private GameObject spawnPoint;
@@ -93,7 +171,7 @@ public class CutsceneNewDay : Cutscene {
 }
 
 public class CutsceneManager : Singleton<CutsceneManager> {
-    public enum CutsceneType {newDay, mayorTalk}
+    public enum CutsceneType {newDay, mayorTalk, boardRoom}
     public Cutscene cutscene;
     void Start (){
         SceneManager.sceneLoaded += LevelWasLoaded;
@@ -106,6 +184,10 @@ public class CutsceneManager : Singleton<CutsceneManager> {
             break;
             case CutsceneType.mayorTalk:
             cutscene = new CutsceneMayor();
+            cutscene.Configure();
+            break;
+            case CutsceneType.boardRoom:
+            cutscene = new CutsceneBoardroom();
             cutscene.Configure();
             break;
             default:
