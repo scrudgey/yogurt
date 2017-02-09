@@ -75,6 +75,9 @@ public partial class GameManager : Singleton<GameManager> {
 		}
 		publicAudio = Toolbox.Instance.SetUpAudioSource(gameObject);
 		SceneManager.sceneLoaded += LevelWasLoaded;
+		if (SceneManager.GetActiveScene().name == "boardroom_cutscene"){
+			CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.boardRoom);
+		}
 	}
 	void Update(){
 		timeSinceLastSave += Time.deltaTime;
@@ -91,7 +94,8 @@ public partial class GameManager : Singleton<GameManager> {
 		}
 	}
 	public bool InCutscene(){
-		if (SceneManager.GetActiveScene().buildIndex > 1){
+		if (SceneManager.GetActiveScene().buildIndex > 2){
+		// if (CutsceneManager.Instance.cutscene == null){
             return false;
 		} else {
 			return true;
@@ -274,6 +278,13 @@ public partial class GameManager : Singleton<GameManager> {
         sceneTime = 0f;
         data.entryID = -99;
 		CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.newDay);
+	}
+	public void BoardRoomCutscene(){
+		data.days += 1;
+		SceneManager.LoadScene("boardroom_cutscene");
+        sceneTime = 0f;
+        data.entryID = -99;
+		CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.boardRoom);
 	}
 	public void TitleScreen(){
 		SceneManager.LoadScene("title");
