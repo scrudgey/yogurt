@@ -16,7 +16,6 @@ public class Parallax : MonoBehaviour {
 	public List<ParallaxLayer> layers = new List<ParallaxLayer>();
 	void Start(){
 		Transform cameraTransform = GameObject.FindObjectOfType<Camera>().transform;
-		Debug.Log(cameraTransform.position);
 		originalPosition = cameraTransform.position;
 		for (int i = 0; i < layers.Count; i++){
 			ParallaxLayer layer = layers[i];
