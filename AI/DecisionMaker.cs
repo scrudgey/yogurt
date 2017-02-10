@@ -72,7 +72,7 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 		if (unconscious)
 			return;
 		if (activePriority != null){
-			Debug.Log(activePriority.ToString() + " " + activePriority.Urgency(personality).ToString());
+			// Debug.Log(activePriority.ToString() + " " + activePriority.Urgency(personality).ToString());
 			activePriority.DoAct();
 			// thoughtText = activePriority.goal.
 			// Debug.Log(activePriority.GetType());
