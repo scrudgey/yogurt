@@ -45,6 +45,10 @@ public class Speech : Interactive, IMessagable {
 		bubbleParent = transform.FindChild("SpeechChild/Speechbubble").gameObject;
 		bubbleText = bubbleParent.transform.FindChild("Text").gameObject.GetComponent<Text>();
         audioSource = GetComponent<AudioSource>();
+        if (flipper.transform.localScale != transform.localScale){
+                Vector3 tempscale = transform.localScale;
+                flipper.transform.localScale = tempscale; 
+        }
         if (audioSource == null){
             audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         }
@@ -54,7 +58,7 @@ public class Speech : Interactive, IMessagable {
             if (bubbleCanvas){
                 bubbleCanvas.worldCamera = GameManager.Instance.cam;
             }
-        }    
+        }
     }
     public DialogueMenu SpeakWith(){
         DialogueMenu menu = UINew.Instance.ShowMenu(UINew.MenuType.dialogue).GetComponent<DialogueMenu>();
