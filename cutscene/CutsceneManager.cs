@@ -11,6 +11,10 @@ public class Cutscene {
 }
 
 public class CutsceneBoardroom : Cutscene {
+    Regex ampersandHook = new Regex(@"\&\r?$");
+    Regex numberHook = new Regex(@"^([\d.]+)");
+    Regex lineHook = new Regex(@"^(.*):(.+)");
+    Regex endHook = new Regex(@"END");
     private float timer;
     private float stopTextFade = 1.5f;
     private float startDialogue = 4.5f;
@@ -62,24 +66,44 @@ public class CutsceneBoardroom : Cutscene {
             }
             if (timer > scriptTimeSpace){
                 timer = 0;
-                if (lines[index].Substring(0, 4) == "MOE:"){
-                    moe.Say(lines[index].Substring(4));
-                }
-                if (lines[index].Substring(0, 6) == "LARRY:"){
-                    larry.Say(lines[index].Substring(6));
-                }
-                if (lines[index].Substring(0, 6) == "CURLY:"){
-                    curly.Say(lines[index].Substring(6));
-                }
-                if (lines[index].Substring(0, 3) == "END"){
-                    complete = true;
-                }
-                index += 1;
+                ProcessLine();
             }
         }
     }
+    void ProcessLine(){
+        bool amp = false;
+        string line = lines[index];
+        if (ampersandHook.IsMatch(line)){
+            amp = true;
+            line = line.Substring(0, line.Length-1);
+        }
+        if (lineHook.IsMatch(line)){
+            Match match = lineHook.Match(line);
+            if (match.Groups[1].Value == "MOE"){
+                moe.Say(match.Groups[2].Value);
+            } else if (match.Groups[1].Value == "LARRY"){
+                larry.Say(match.Groups[2].Value);
+            } else if (match.Groups[1].Value == "CURLY"){
+                curly.Say(match.Groups[2].Value);
+            }
+        }
+        if (endHook.IsMatch(line)){
+            complete = true;
+            // Debug.Log("end scene");
+            GameManager.Instance.NewDayCutscene();
+        }
+        if (index + 1 < lines.Count-1){
+            if (numberHook.IsMatch(lines[index + 1])){
+                Match match = numberHook.Match(lines[index + 1]);
+                scriptTimeSpace = float.Parse(match.Groups[1].Value);
+                index += 1;
+            }
+        }
+        index += 1;
+        if (amp)
+            ProcessLine();
+    }
     void LoadScript(string filename){
-        Regex node_hook = new Regex(@"^(\d)>(.+)", RegexOptions.Multiline);
 		Regex response_hook = new Regex(@"^(\d)\)(.+)");
 		TextAsset textData = Resources.Load("data/boardroom/"+filename) as TextAsset;
         lines = new List<string>(textData.text.Split('\n'));
@@ -188,7 +212,6 @@ public class CutsceneManager : Singleton<CutsceneManager> {
             break;
             case CutsceneType.boardRoom:
             cutscene = new CutsceneBoardroom();
-            cutscene.Configure();
             break;
             default:
             break;
@@ -201,7 +224,7 @@ public class CutsceneManager : Singleton<CutsceneManager> {
             cutscene = null;
             return;
         }
-        if (cutscene is CutsceneNewDay)
+        if (cutscene is CutsceneNewDay || cutscene is CutsceneBoardroom)
             cutscene.Configure();
     }
 
