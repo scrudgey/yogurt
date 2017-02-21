@@ -13,15 +13,21 @@ public class Doorway : Interactive {
 	public string leaveDesc;
 
 	// Use this for initialization
-	void Start () {
+	public virtual void Start () {
 		Interaction leaveaction = new Interaction(this, "Exit", "Leave");
 		interactions.Add(leaveaction);
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 	}
+	public virtual void Enter(GameObject player){
+		Vector3 tempPos = transform.position;
+		tempPos.y = tempPos.y - 0.05f;
+		player.transform.position = tempPos;
+		PlayEnterSound();
+	}	
 	public void Leave(){
 		// audioSource.PlayOneShot(leaveSound);
 		GameManager.Instance.publicAudio.PlayOneShot(leaveSound);
-		GameManager.Instance.LeaveScene(destination,destinationEntry);
+		GameManager.Instance.LeaveScene(destination, destinationEntry);
 	}
 	public void PlayEnterSound(){
 		if (audioSource == null){

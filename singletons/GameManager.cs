@@ -77,6 +77,7 @@ public partial class GameManager : Singleton<GameManager> {
 		SceneManager.sceneLoaded += LevelWasLoaded;
 		if (SceneManager.GetActiveScene().name == "boardroom_cutscene"){
 			CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.boardRoom);
+			CutsceneManager.Instance.cutscene.Configure();
 		}
 	}
 	void Update(){
@@ -192,10 +193,7 @@ public partial class GameManager : Singleton<GameManager> {
 		// TODO: can probably make this nicer with LINQ
 		foreach (Doorway doorway in doorways){
 			if ((doorway.entryID == data.entryID && !doorway.spawnPoint) || (doorway.spawnPoint && data.entryID == 99)){
-				Vector3 tempPos = doorway.transform.position;
-				tempPos.y = tempPos.y - 0.05f;
-				playerObject.transform.position = tempPos;
-				doorway.PlayEnterSound();
+				doorway.Enter(playerObject);
 				// if this is a bed entry, we've got a new day going on!
 				if (data.entryID == -99){
 					Bed bed = GameObject.FindObjectOfType<Bed>();
@@ -280,7 +278,6 @@ public partial class GameManager : Singleton<GameManager> {
 		CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.newDay);
 	}
 	public void BoardRoomCutscene(){
-		data.days += 1;
 		SceneManager.LoadScene("boardroom_cutscene");
         sceneTime = 0f;
         data.entryID = -99;
@@ -440,7 +437,7 @@ public partial class GameManager : Singleton<GameManager> {
 		}
 	}
 
-	public void EmailReceived(string emailName){
+	public void ReceiveEmail(string emailName){
 		Email newEmail = Email.LoadEmail(emailName);
 		newEmail.read = false;
 		data.emails.Add(newEmail);
