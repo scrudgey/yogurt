@@ -3,6 +3,7 @@ public class Flammable : MonoBehaviour {
 	public float heat;
 	public float flashpoint;
 	public bool onFire;
+	public bool fireSource;
 	public ParticleSystem smoke;
 	public ParticleSystem fireParticles;
 	private CircleCollider2D fireRadius;
@@ -41,6 +42,10 @@ public class Flammable : MonoBehaviour {
 		}
 
 	void Update () {
+		if (fireSource){
+			onFire = true;
+			heat = 100;
+		}
 		if (heat > -2 && !onFire){
 			heat -= Time.deltaTime;
 		}
