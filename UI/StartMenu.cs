@@ -168,11 +168,27 @@ public class StartMenu : MonoBehaviour {
 			"Crogus",
 			"Smitty",
 			"Scrummy Bingus",
-			"Isis",
+			"Uranus",
 			"Fang",
 			"Jiggly",
 			"Ziplock McBaggins",
-			"Questor"
+			"Questor",
+			"Asa Phelps",
+			"Bigfoot",
+			"Quangle Cringleberry",
+			"Mr. Origami",
+			"Shasta Fay Hepworth",
+			"Teddy Bloat",
+			"Mike Fallopian",
+			"Meatball Mulligan",
+			"Reverend Wicks Cherrycoke",
+			"Pig Bodine",
+			"Sauncho Smilax",
+			"Rojer Ramjet",
+			"Moe",
+			"Tyrone Slothrop",
+			"Voorwerp",
+			"Stellar Harbinger"
 		};
 		return names[UnityEngine.Random.Range( 0, names.Count )];
 	}
