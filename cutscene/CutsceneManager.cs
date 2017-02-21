@@ -89,7 +89,6 @@ public class CutsceneBoardroom : Cutscene {
         }
         if (endHook.IsMatch(line)){
             complete = true;
-            // Debug.Log("end scene");
             GameManager.Instance.NewDayCutscene();
         }
         if (index + 1 < lines.Count-1){
