@@ -41,18 +41,15 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		Interaction getAction = new Interaction(this, "Get", "GetItem", true, false);
 		getAction.dontWipeInterface = false;
 		interactions.Add(getAction);
-
-		Interaction swingAction = new Interaction(this, "Swing", "SwingItem", false,true);
+		Interaction swingAction = new Interaction(this, "Swing", "SwingItem", false, true);
 		swingAction.defaultPriority = 5;
 		interactions.Add(swingAction);
 		LoadInitialized = true;
 	}
-	
 	public void DirectionChange(Vector2 dir){
 		direction = dir;
 		directionAngle = Toolbox.Instance.ProperAngle(direction.x, direction.y);
 	}
-
 	public void GetItem(Pickup pickup){
 		//first check to see if we're already holding it.
 		if (holding == pickup){
@@ -91,14 +88,12 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		string itemname = Toolbox.Instance.GetName(pickup.gameObject);
 		return "Pick up "+itemname;
 	}
-	
 	public void StashItem(GameObject item){
 		items.Add(item);
 		if (item == holding.gameObject)
 			SoftDropItem();
 		item.SetActive(false);
 	}
-
 	public void SoftDropItem(){
 		Messenger.Instance.DisclaimObject(holding.gameObject, this);
 		PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
@@ -111,7 +106,6 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		holding.GetComponent<Collider2D>().isTrigger = false;
 		holding = null;
 	}
-
 	public void DropItem(){
 		Messenger.Instance.DisclaimObject(holding.gameObject, this);
 		holding.GetComponent<Rigidbody2D>().isKinematic = false;
