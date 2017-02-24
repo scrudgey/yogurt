@@ -1,9 +1,6 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
-// using System.Collections;
-
-
 public class Parallax : MonoBehaviour {
 	[Serializable]
 	public struct ParallaxLayer {
