@@ -43,7 +43,6 @@ public class Interaction {
 	public Interaction (Interactive o, string name, string action) : this(o,name,action,false,false){ }
 	
 	public Interaction (Interactive o, string name, string action, bool manualHide, bool rightHide){
-		
 		this.action = action;
 		actionName = name;
 		enabled = false;
@@ -52,7 +51,6 @@ public class Interaction {
 		parameterTypes = new List<System.Type> ();
 		hideInManualActions = manualHide;
 		hideInRightClickMenu = rightHide;
-		
 		if (methodInfo != null){
 			System.Reflection.ParameterInfo[] pars = methodInfo.GetParameters();
 			foreach( System.Reflection.ParameterInfo p in pars){
@@ -63,14 +61,12 @@ public class Interaction {
 		}
 		descMethodInfo = parent.GetType().GetMethod(action+"_desc");	
 	}
-	
 	public Interaction (Interactive o, string name, Action<Component> initAction){
 		actionName = name;
 		enabled = false;
 		parent = o;
 		actionDelegate = initAction;
 	}
-	
 	// if the code has specified to use a validator function, we need to look up that
 	// method and store the reference.
 	public void ConfigureValidator(){
@@ -80,10 +76,8 @@ public class Interaction {
 				Debug.Log("interaction validation function was not located.");
 		}
 	}
-	
-	
 	public void CheckDependency(){
-		parameters = new List<Component> ();
+		parameters = new List<Component>();
 		int parameterMatches = 0;
 		int parameterMisses = 0;
 		
@@ -101,7 +95,7 @@ public class Interaction {
 			foreach (Component component in targetComponents){
 				if (debug)
 					Debug.Log("Comparing against target component "+component.GetType().ToString());
-				if ( (component.GetType() == requiredType || component.GetType().IsSubclassOf(requiredType)) &&
+				if ((component.GetType() == requiredType || component.GetType().IsSubclassOf(requiredType)) &&
 				    component != this.parent){
 						if (debug)
 							Debug.Log("***** MATCH *****");
@@ -117,7 +111,6 @@ public class Interaction {
 		
 		if (parameterMatches == parameterTypes.Count){
 			enabled = true;
-			
 			// if a validation function is specified, we have to also check to see whether it 
 			// is okay with being enabled.
 			if (validationFunction){
@@ -278,14 +271,12 @@ public class Interactive : MonoBehaviour{
 	public Interaction ReportHighestPriority(){
 		Interaction returnInteraction = null;
 		int highestP = 0;
-
 		foreach (Interaction interaction in interactions){
 			if (interaction.defaultPriority > highestP && interaction.enabled){
 				returnInteraction = interaction;
 				highestP = interaction.defaultPriority;
 			}
 		}
-
 		return returnInteraction;
 	}
 
