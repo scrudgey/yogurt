@@ -1,27 +1,18 @@
 ﻿using UnityEngine;
-// using System.Collections;
-
-
+using System.Collections.Generic;
 public class Physical : MonoBehaviour, IMessagable {
 	public enum mode{none, fly, ground, zip}
 	public AudioClip[] impactSounds;
 	public AudioClip[] landSounds;
-	
 	public PhysicalBootstrapper bootstrapper;
-	
 	private GameObject trueObject;
 	public Rigidbody2D objectBody;
 	public Collider2D objectCollider;
 	private OrderByY order;
-	
 	public Rigidbody2D hingeBody;
 	public GameObject hinge;
-	
 	public SliderJoint2D slider;
-	
 	public BoxCollider2D groundCollider;
-	
-	private Collider2D tomCollider;
 	public mode currentMode;
 	public float height;
 	public bool ignoreCollisions;
@@ -33,7 +24,7 @@ public class Physical : MonoBehaviour, IMessagable {
 	private float ziptime;
 	private float defaultOrderOffset;
 	private bool suppressLandSound;
-
+	public List<Collider2D> temporaryDisabledColliders = new List<Collider2D>();
 	 void Start() {
 		InitValues();
 		// ignore collisions between ground and all other objects
@@ -43,8 +34,6 @@ public class Physical : MonoBehaviour, IMessagable {
 			// special types of object ignore all collisions with other objects
 			// this is true for e.g. liquid droplets 
 			if (ignoreCollisions){
-				Physics2D.IgnoreCollision(objectCollider, tomCollider, true);
-				Physics2D.IgnoreCollision(groundCollider, tomCollider, true);
 				foreach (Collider2D col in phys.GetComponentsInParent<Collider2D>())
 					Physics2D.IgnoreCollision(objectCollider, col, true);
 			}
@@ -53,7 +42,6 @@ public class Physical : MonoBehaviour, IMessagable {
 		if (currentMode == mode.none)
 			FlyMode();
 	}
-	
 	public void InitValues(){
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		slider = GetComponent<SliderJoint2D>();
@@ -65,7 +53,6 @@ public class Physical : MonoBehaviour, IMessagable {
 		if (order)
 			defaultOrderOffset = order.offset;
 	}
-
 	public void Impact(Vector2 f){
 		Vector2 force = f / (objectBody.mass / 25f);
 		if (currentMode != mode.fly)
@@ -74,7 +61,6 @@ public class Physical : MonoBehaviour, IMessagable {
 			GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
 		bootstrapper.Set3Motion(new Vector3(force.x, force.y, force.y + 0.5f));
 	}
-
 	void FixedUpdate() {
 		height = groundCollider.size.y / 2f - groundCollider.offset.y + hinge.transform.localPosition.y;
 		if (currentMode == mode.fly){
@@ -94,24 +80,16 @@ public class Physical : MonoBehaviour, IMessagable {
 		if (ziptime > 0){
 			ziptime -= Time.fixedDeltaTime;
 			if (ziptime <= 0){
-				// Debug.Log("zip to fly timeout");
 				doFly = true;
 			}
 		}
-
 		if (currentMode == mode.fly || currentMode == mode.zip){
-			trueObject.layer = 13;
-		} else {
-			trueObject.layer = 8;
-		}
-		if(hinge.transform.localPosition.y > 0.3 && hinge.transform.localPosition.y < 0.5){
-			trueObject.layer = 10;
-		}
-		if(hinge.transform.localPosition.y > 0.5 && hinge.transform.localPosition.y < 0.7){
+			// projectiles should be on their own layer: if i placed them on main, they would 
+			// not collide with their footprint. if i placed them on feet, they would not collide with 
+			// extended objects.
 			trueObject.layer = 11;
-		}
-		if(hinge.transform.localPosition.y > 0.7 ){
-			trueObject.layer = 12;
+		} else {
+			trueObject.layer = 10;
 		}
 		if (doGround){
 			doGround = false;
@@ -126,29 +104,20 @@ public class Physical : MonoBehaviour, IMessagable {
 			StartZipMode();
 		}
 	}
-
 	public void GroundMode (){
 		doGround = true;
 	}
-
 	public void FlyMode(){
 		doFly = true;
 	}
-	
 	public void ZipMode(){
 		doZip = true;
 	}
-
 	public void StartGroundMode(){
 		doGround = false;
 		ziptime = 0f;
-		// set tom collider. this is a temporary hack.
-		if (GameManager.Instance.playerObject)
-			tomCollider = GameManager.Instance.playerObject.GetComponent<EdgeCollider2D>();
-		// enable ground-feet
-		Physics2D.IgnoreCollision(objectCollider, tomCollider, true);
-		Physics2D.IgnoreCollision(groundCollider, tomCollider, false);
-
+		ClearTempColliders();
+		
 		// set object gravity 0
 		objectBody.gravityScale = 0;
 		// fix slider
@@ -177,7 +146,6 @@ public class Physical : MonoBehaviour, IMessagable {
 				}
 			}
 		}
-
 		foreach(GameObject table in GameObject.FindGameObjectsWithTag("table")){
 			foreach(Collider2D tableCollider in table.GetComponentsInChildren<Collider2D>()){
 				if (tableCollider.isTrigger == false){
@@ -190,17 +158,17 @@ public class Physical : MonoBehaviour, IMessagable {
 			GetComponent<AudioSource>().PlayOneShot(landSounds[Random.Range(0, landSounds.Length)]);
 		suppressLandSound = false;
 	}
-
+	public void ClearTempColliders(){
+		foreach (Collider2D temporaryCollider in temporaryDisabledColliders){
+			Physics2D.IgnoreCollision(temporaryCollider, objectCollider, false);
+			Physics2D.IgnoreCollision(temporaryCollider, groundCollider, false);
+		}
+		temporaryDisabledColliders = new List<Collider2D>();
+	}
 	public void StartFlyMode(){
 		doFly = false;
 		ziptime = 0f;
-		// set tom collider. this is a temporary hack.
-		if (GameManager.Instance.playerObject){
-			tomCollider = GameManager.Instance.playerObject.GetComponent<EdgeCollider2D>();
-		}
-		// disable player - ground collision
-		Physics2D.IgnoreCollision(groundCollider, tomCollider, true);
-		Physics2D.IgnoreCollision(objectCollider, tomCollider, true);
+		ClearTempColliders();
 		// set object gravity on
 		objectBody.gravityScale = GameManager.Instance.gravity;
 		slider = GetComponent<SliderJoint2D>();
@@ -236,8 +204,6 @@ public class Physical : MonoBehaviour, IMessagable {
 		ziptime = 0.5f;
 		currentMode = mode.zip;
 	}
-	
-
 	void OnCollisionEnter2D(Collision2D coll){
 		// Debug.Log("ground collision between "+gameObject.name+" "+coll.gameObject.name);
 		if (coll.relativeVelocity.magnitude > 0.5){
@@ -258,27 +224,23 @@ public class Physical : MonoBehaviour, IMessagable {
 			
 		}
 	}
-
 	void OnCollisionStay2D(Collision2D coll){
 		if(coll.collider == objectCollider && coll.relativeVelocity.magnitude < 0.01 && currentMode != mode.ground){
 			GroundMode();
 		}
 	}
-
 	void OnTriggerEnter2D(Collider2D coll){
 		if (coll.tag == "table" && coll.gameObject != gameObject && currentMode != mode.zip){
 			Table table = coll.GetComponent<Table>();
 			ActivateTableCollider(table);
 		}
 	}
-	
 	void OnTriggerExit2D(Collider2D coll){
 		if (coll.tag == "table" && coll.gameObject != gameObject && currentMode != mode.zip){
 			Table table = coll.GetComponent<Table>();
 			DeactivateTableCollider(table);
 		}
 	}
-
 	void ActivateTableCollider(Table table){
 		if (groundCollider){
 			spriteRenderer.enabled = false;
@@ -296,7 +258,6 @@ public class Physical : MonoBehaviour, IMessagable {
 			}
 		}
 	}
-	
 	void DeactivateTableCollider(Table table){
 		if (groundCollider){
 			spriteRenderer.enabled = true;
@@ -314,7 +275,6 @@ public class Physical : MonoBehaviour, IMessagable {
 			}
 		}
 	}
-
 	public void ReceiveMessage(Message message){
 		if (message is MessageDamage){
 			MessageDamage dam = (MessageDamage)message;
@@ -325,5 +285,4 @@ public class Physical : MonoBehaviour, IMessagable {
 			}
 		}
 	}
-
 }

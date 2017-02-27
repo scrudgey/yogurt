@@ -4,28 +4,20 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	public AudioClip[] impactSounds;
 	public AudioClip[] landSounds;
 	public AudioClip[] scrapeSounds;
-	
-	
 	private GameObject hingeObject;
 	private Rigidbody2D hingeBody;
 	private HingeJoint2D hingeJoint2D;
-	
-	
 	private GameObject groundObject;
 	private Rigidbody2D groundBody;
 	private BoxCollider2D groundCollider;
-	
-	
 	private SliderJoint2D sliderJoint2D;
 	public Physical physical;
-	// private Collider2D tomCollider;
 	public float initHeight = 0.1f;
 	public float groundDrag = 10f;
 	public Vector2 initVelocity;
 	public bool ignoreCollisions;
 	public bool doInit = true;
 	private Vector3 setV;
-
 	public void Start () {
 		tag = "Physical";
 		GetComponent<Renderer>().sortingLayerName="main";
@@ -35,21 +27,17 @@ public class PhysicalBootstrapper : MonoBehaviour {
 			Toolbox.Instance.SetUpAudioSource(gameObject);
 		}
 	}
-
 	void LoadInit(){
 		Start();
 	}
-
 	public void DestroyPhysical(){
 		// transform.parent = null;
 		transform.SetParent(null);
 		Destroy(groundObject);
 		GetComponent<Rigidbody2D>().gravityScale = 0;
-		// Physics2D.IgnoreCollision(tomCollider, GetComponent<Collider2D>(), false);
 		physical = null;
 		doInit = false;
 	}
-
 	public void InitPhysical(float height, Vector3 initialVelocity){
 		doInit = false;
 		Vector2 initPos = transform.position;
@@ -71,7 +59,8 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		
 		// Set up ground object
 		groundObject = new GameObject(name + " Ground");
-		groundObject.layer = 8;
+		groundObject.tag = "footprint";
+		groundObject.layer = 9;
 		groundObject.transform.position = initPos;
 		Toolbox.Instance.SetUpAudioSource(groundObject);
 
@@ -125,8 +114,8 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		physical.InitValues();
 		groundPhysical.bootstrapper = this;
 		Set3Motion(new Vector3(initialVelocity.x, initialVelocity.y, initialVelocity.z));
+		// Debug.Break();
 	}
-
 	void OnCollisionEnter2D(Collision2D coll){
 		if (coll.relativeVelocity.magnitude > 0.5){
 			if (impactSounds.Length > 0){
@@ -155,27 +144,24 @@ public class PhysicalBootstrapper : MonoBehaviour {
 			}
 		}
 	}
-
 	public void Set3Motion(Vector3 velocity){
 		setV = velocity;
 	}
-	
 	public void Set3MotionImmediate(Vector3 velocity){
 		Vector2 groundVelocity = new Vector2(velocity.x, velocity.y);
 		Vector2 objectVelocity = new Vector2(velocity.x, velocity.z + velocity.y);
 		physical.objectBody.velocity = objectVelocity;
 		groundBody.velocity = groundVelocity;
 	}
-
 	public void Rebound(){
 		Vector2 objectVelocity = physical.objectBody.velocity;
 		objectVelocity.y = Random.Range(0.5f, 0.8f);
 		physical.objectBody.velocity = objectVelocity;
 		physical.objectBody.angularVelocity = Random.Range(360, 800);
+		physical.ClearTempColliders();
 		// Debug.Log("angular vel:" + physical.objectBody.angularVelocity.ToString());
 		// Debug.Log("y vel:" + objectVelocity.y.ToString());
 	}
-
 	void FixedUpdate(){
 		if (setV != Vector3.zero){
 			Vector2 groundVelocity = new Vector2(setV.x, setV.y);
@@ -185,10 +171,8 @@ public class PhysicalBootstrapper : MonoBehaviour {
 			setV = Vector3.zero;
 		}
 	}
-
 	void OnDestroy(){
 		if (physical)
 			Destroy(physical.gameObject);
 	}
-
 }
