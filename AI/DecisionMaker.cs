@@ -47,7 +47,8 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 	public void ReceiveMessage(Message message){
 		if (message is MessageHitstun){
 			MessageHitstun hits = (MessageHitstun)message;
-			unconscious = hits.unconscious;
+			if (hits.updateUnconscious)
+				unconscious = hits.unconscious;
 		}
 		if (unconscious)
 			return;
