@@ -68,7 +68,15 @@ public class MessageDamage : Message {
 public class MessageHitstun : Message {
 	public bool value;
 	public bool doubledOver;
-	public bool unconscious;
+	private bool _unconscious;
+	public bool unconscious{
+		get{ return _unconscious; }
+		set{ 
+			_unconscious = value;
+			updateUnconscious = true;
+		}
+	}
+	public bool updateUnconscious;
 }
 
 public class MessageInventoryChanged : Message {
