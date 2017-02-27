@@ -72,9 +72,6 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 				if (yorder)
 					yorder.enabled = false;
 				holding.transform.position = holdpoint.position;
-				// holdpoint.localScale = Vector3.one;
-				// transform.localScale = Vector3.one;
-				// holding.transform.parent = holdpoint;
 				holding.transform.SetParent(holdpoint, false);
 				holding.transform.rotation = Quaternion.identity;
 				holding.GetComponent<Rigidbody2D>().isKinematic = true;
@@ -129,7 +126,6 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		sprite.sortingLayerName = "main";
 		holding = null;
 	}
-
 	public void RetrieveItem(string itemName){
 		for(int i=0; i < items.Count; i++){
 			//retrieve the item from the items
@@ -151,13 +147,11 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 			}
 		}
 	}
-
 	public void ThrowItem(){
 		// set up the held object to be thrown on the next fixed update
 		MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.throwing, true);
 		Toolbox.Instance.SendMessage(gameObject, this, anim);
 	}
-	
 	public void ActivateThrow(){
 		if (holding){
 			throwObject = holding.gameObject;
@@ -167,7 +161,6 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 			holding = null;
 		}
 	}
-
 	private void DoThrow(){
 		Messenger.Instance.DisclaimObject(throwObject, this);
 		PhysicalBootstrapper phys = throwObject.GetComponent<PhysicalBootstrapper>();
@@ -195,6 +188,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 				if (!collider.isTrigger){
 					Physics2D.IgnoreCollision(collider, phys.physical.objectCollider);
 					Physics2D.IgnoreCollision(collider, phys.physical.groundCollider);
+					phys.physical.temporaryDisabledColliders.Add(collider);
 				}
 			}
 		}
@@ -204,14 +198,12 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		GetComponent<AudioSource>().PlayOneShot(Resources.Load("sounds/8bit_throw", typeof(AudioClip)) as AudioClip);
 		Toolbox.Instance.DataFlag(gameObject, 50, 0, 0, 0, 0);
 	}
-
 	void FixedUpdate(){
 		// do the throwing action in fixed update if we have gotten the command to throw
 		if (throwObject){
 			DoThrow();
 		}
 	}
-
 	void Update(){
 		if (holding){
 			if(directionAngle > 45 && directionAngle < 135){
@@ -222,7 +214,6 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 			holding.transform.position = holdpoint.transform.position;
 		}
 	}
-
 	public void SwingItem(MeleeWeapon weapon){
 		MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.swinging, true);
 		Toolbox.Instance.SendMessage(gameObject, this, anim);
@@ -242,7 +233,6 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		string weaponname = Toolbox.Instance.GetName(weapon.gameObject);
 		return "Swing "+weaponname;
 	}
-
 	void EndSwing(){
 		MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.swinging, false);
 		Toolbox.Instance.SendMessage(gameObject, this, anim);
@@ -250,7 +240,6 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		holding.GetComponent<Renderer>().sortingLayerName = "main";
 		holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
 	}
-
 	void StartSwing(){
 		GameObject slash = Instantiate(Resources.Load("Slash2"), transform.position, transform.rotation) as GameObject;
 		// slash.transform.parent = transform;
@@ -270,7 +259,6 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 			s.damage = melee.damage;
 		}
 	}
-
 	public void DropMessage(GameObject obj){
 		SoftDropItem();
 	}
@@ -297,7 +285,6 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.punching, false);
 		Toolbox.Instance.SendMessage(gameObject, this, anim);
 	}
-
 	public void ReceiveMessage(Message m){
 		if (m is MessageAnimation){
 			MessageAnimation message = (MessageAnimation)m;
@@ -310,5 +297,4 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 			StartPunch();
 		}
 	}
-
 }
