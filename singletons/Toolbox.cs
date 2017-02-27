@@ -17,23 +17,10 @@ public static class IDictionaryExtensions
 }
 
 public class Toolbox : Singleton<Toolbox> {
-
 	protected Toolbox () {} // guarantee this will be always a singleton only - can't use the constructor!
-
 	public string message ="smoke weed every day";
 	private CameraControl cameraControl;
 	private GameObject tom;
-
-	// public Qualities GetQuality(GameObject g){
-	// 	Qualities q = g.GetComponent<Qualities>();
-	// 	if (q){
-	// 		return q;
-	// 	} else {
-	// 		q = g.AddComponent<Qualities>();
-	// 		return q;
-	// 	}
-	// }
-
 	public T GetOrCreateComponent<T>(GameObject g) where T: Component{
 		T component = g.GetComponent<T>();
 		if (component){
@@ -43,15 +30,11 @@ public class Toolbox : Singleton<Toolbox> {
 			return component;
 		}
 	}
-	
-
-    
     public Occurrence OccurenceFlag(GameObject spawner){
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
         return occurrence;
     }
-
 	public Occurrence DataFlag(GameObject spawner, float chaos, float disgusting, float disturbing, float offensive, float positive){
 		GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
@@ -67,7 +50,6 @@ public class Toolbox : Singleton<Toolbox> {
 
         return occurrence;
 	}
-
 	public AudioSource SetUpAudioSource(GameObject g){
 		AudioSource source = g.GetComponent<AudioSource>();
 		if (!source){
@@ -83,7 +65,6 @@ public class Toolbox : Singleton<Toolbox> {
 		speaker.GetComponent<AudioSource>().clip = clip;
 		speaker.GetComponent<AudioSource>().Play();
 	}
-
 	///<summary>
 	///Spawn a droplet of liquid l at poisition pos.
 	///</summary>
@@ -100,7 +81,6 @@ public class Toolbox : Singleton<Toolbox> {
 		phys.ignoreCollisions = true;
 		LiquidCollection.MonoLiquidify(droplet, l);
 	}
-    
     public void SpawnDroplet(Liquid l, float severity, GameObject spiller){
         SpawnDroplet(l, severity, spiller, 0.01f);
     }
@@ -137,7 +117,6 @@ public class Toolbox : Singleton<Toolbox> {
 		}
         LiquidCollection.MonoLiquidify(droplet, l);
     }
-
 	public Component CopyComponent(Component original, GameObject destination)
 	{
 		System.Type type = original.GetType();
@@ -150,7 +129,6 @@ public class Toolbox : Singleton<Toolbox> {
 		}
 		return copy;
 	}
-
 	public Vector2 RotateZ(Vector2 v, float angle )
 		
 	{
@@ -165,14 +143,12 @@ public class Toolbox : Singleton<Toolbox> {
 
 		return v;
 	}
-
 	public float ProperAngle(float x,float y){
 		float angle = Mathf.Atan2(y,x)* Mathf.Rad2Deg;
 		if (angle < 0)
 			angle += 360;
 		return angle ;
 	}
-
 	public string ScrubText(string input){
 		string output = "";
 		if (input != null){
@@ -189,7 +165,6 @@ public class Toolbox : Singleton<Toolbox> {
 		}
 		return output;
 	}
-
 	public string ReplaceUnderscore(string input){
 		string output = "";
 		if (input != null){
@@ -198,7 +173,6 @@ public class Toolbox : Singleton<Toolbox> {
 		}
 		return output;
 	}
-
 	public string CloneRemover(string input){
 		string output = input;
 		if (input != null){
@@ -212,7 +186,6 @@ public class Toolbox : Singleton<Toolbox> {
 		}
 		return output;
 	}
-
 	public string GetName(GameObject obj){
 		// TODO: include extra description, like "vomited up"
 		// possibly also use intrinsics
@@ -231,18 +204,18 @@ public class Toolbox : Singleton<Toolbox> {
 		nameOut = ScrubText(nameOut);
 		return nameOut;
 	}
-	public void SendMessage(GameObject host, Component messenger, Message message){
+	public void SendMessage(GameObject host, Component messenger, Message message, bool sendUpwards = true){
 		message.messenger = messenger;
 		IMessagable[] childReceivers = host.GetComponentsInChildren<IMessagable>();
 		List<IMessagable> receivers = new List<IMessagable>(childReceivers);
-		foreach(IMessagable parentReceiver in host.GetComponentsInParent<IMessagable>()){
-			if (!receivers.Contains(parentReceiver))
-				receivers.Add(parentReceiver);
+		if (sendUpwards){
+			foreach(IMessagable parentReceiver in host.GetComponentsInParent<IMessagable>()){
+				if (!receivers.Contains(parentReceiver))
+					receivers.Add(parentReceiver);
+			}
 		}
-
 		foreach (IMessagable receiver in receivers){
 			receiver.ReceiveMessage(message);
 		}
 	}
-
 }
