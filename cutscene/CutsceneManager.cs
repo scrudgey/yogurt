@@ -103,7 +103,7 @@ public class CutsceneBoardroom : Cutscene {
             ProcessLine();
     }
     void LoadScript(string filename){
-		Regex response_hook = new Regex(@"^(\d)\)(.+)");
+		// Regex response_hook = new Regex(@"^(\d)\)(.+)");
 		TextAsset textData = Resources.Load("data/boardroom/"+filename) as TextAsset;
         lines = new List<string>(textData.text.Split('\n'));
     }
