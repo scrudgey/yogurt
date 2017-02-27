@@ -39,6 +39,7 @@ public class Flammable : MonoBehaviour {
 		fireRadius.isTrigger = true;
 		fireRadius.radius = 0.2f;
 		fireRadius.name = "fire";
+		fire.gameObject.layer = 13;
 		}
 
 	void Update () {
@@ -71,7 +72,7 @@ public class Flammable : MonoBehaviour {
 		}
 		if (onFire){
 			MessageDamage message = new MessageDamage(Time.deltaTime, damageType.fire);
-			Toolbox.Instance.SendMessage(gameObject, this, message);
+			Toolbox.Instance.SendMessage(gameObject, this, message, sendUpwards: false);
 		}
 	}
 
