@@ -33,7 +33,7 @@ public class MonoLiquid : MonoBehaviour {
 		Toolbox.Instance.DataFlag(gameObject, 1f, 1f, 0f, 0f, 0f);
 		// Debug.Break();
 		GameObject puddle = Instantiate(Resources.Load("Puddle"), transform.position, Quaternion.identity) as GameObject;
-		puddle.layer = 8;
+		puddle.layer = 9;
 		PhysicalBootstrapper pb = GetComponent<PhysicalBootstrapper>();
 		pb.DestroyPhysical();
 		LiquidCollection.MonoLiquidify(puddle, liquid);
