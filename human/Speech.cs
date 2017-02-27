@@ -230,7 +230,8 @@ public class Speech : Interactive, IMessagable {
         }
         if (incoming is MessageHitstun){
 			MessageHitstun hits = (MessageHitstun)incoming;
-			unconscious = hits.unconscious;
+            if (hits.updateUnconscious)
+    			unconscious = hits.unconscious;
 		}
     }
     // double-exponential seat easing function
