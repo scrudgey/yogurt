@@ -218,7 +218,8 @@ public class Awareness : MonoBehaviour, IMessagable {
 	public void ReceiveMessage(Message incoming){
 		if (incoming is MessageHitstun){
 			MessageHitstun hits = (MessageHitstun)incoming;
-			unconscious = hits.unconscious;
+			if (hits.updateUnconscious)	
+				unconscious = hits.unconscious;
 		}
 		if (unconscious)
 			return;
