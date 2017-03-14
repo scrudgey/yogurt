@@ -7,12 +7,15 @@ public class AnimateFrames : MonoBehaviour {
 	private float animationTimer;
 	public float frameTime = 1f;
 	private int frameIndex = 0;
+	AudioSource audioSource;
+	public AudioClip flipSound;
 	void Start () {
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		if (spriteRenderer == null){
 			Destroy(this);
 		}
 		spriteRenderer.sprite = frames[0];
+		audioSource = GetComponent<AudioSource>();
 	}
 	
 	// Update is called once per frame
@@ -22,6 +25,8 @@ public class AnimateFrames : MonoBehaviour {
 			frameIndex += 1;
 			if (frameIndex == frames.Count){
 				frameIndex = 0;
+				if (audioSource != null && flipSound != null)
+					audioSource.PlayOneShot(flipSound);
 			}
 			animationTimer = 0f;
 			spriteRenderer.sprite = frames[frameIndex];
