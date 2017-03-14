@@ -42,7 +42,8 @@ public class Controller : Singleton<Controller> {
 			}
 		}
 		if (Input.GetButtonDown("Cancel")){
-			UINew.Instance.ShowMenu(UINew.MenuType.escape);
+			if (!GameManager.Instance.InCutscene())
+				UINew.Instance.ShowMenu(UINew.MenuType.escape);
 		}
 	}
 
