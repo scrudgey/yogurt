@@ -66,7 +66,8 @@ public class Awareness : MonoBehaviour, IMessagable {
 	private float speciousPresent; 
 	private List<GameObject> fieldOfView = new List<GameObject>();
 	private bool viewed;
-	public bool unconscious;
+	// public bool unconscious;
+	public Controllable.HitState hitState;
 	public Ref<GameObject> nearestEnemy = new Ref<GameObject>(null);
 	public Ref<GameObject> nearestFire = new Ref<GameObject>(null);
 	public SerializableDictionary<GameObject, Knowledge> knowledgebase = new SerializableDictionary<GameObject, Knowledge>();
@@ -189,10 +190,10 @@ public class Awareness : MonoBehaviour, IMessagable {
 			PersonalAssessment assessment = FormPersonalAssessment(g);
 			Humanoid human = g.GetComponent<Humanoid>();
 			if (human){
-				assessment.unconscious = human.hitstun;
+				// assessment.unconscious = human.hitstun;
+				assessment.unconscious = human.hitState >= Controllable.HitState.stun;
 			}
 		}
-
 	}
 
 	public PersonalAssessment FormPersonalAssessment(GameObject g){
@@ -218,10 +219,11 @@ public class Awareness : MonoBehaviour, IMessagable {
 	public void ReceiveMessage(Message incoming){
 		if (incoming is MessageHitstun){
 			MessageHitstun hits = (MessageHitstun)incoming;
-			if (hits.updateUnconscious)	
-				unconscious = hits.unconscious;
+			hitState = hits.hitState;
+			// if (hits.updateUnconscious)	
+			// 	unconscious = hits.unconscious;
 		}
-		if (unconscious)
+		if (hitState >= Controllable.HitState.unconscious)
 			return;
 		if (incoming is MessageDamage){
 			MessageDamage message = (MessageDamage)incoming;

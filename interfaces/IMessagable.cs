@@ -42,6 +42,7 @@ public class MessageSpeech : Message {
 	public bool randomSpeech;
 	public bool sayLine;
 	public GameObject swearTarget;
+	public bool nimrodKey;
 	public MessageSpeech () {}
 	public MessageSpeech (string phrase){
 		this.phrase = phrase;
@@ -66,17 +67,11 @@ public class MessageDamage : Message {
 }
 
 public class MessageHitstun : Message {
-	public bool value;
+	public Controllable.HitState hitState;
 	public bool doubledOver;
-	private bool _unconscious;
-	public bool unconscious{
-		get{ return _unconscious; }
-		set{ 
-			_unconscious = value;
-			updateUnconscious = true;
-		}
-	}
-	public bool updateUnconscious;
+}
+public class MessageDeath : Message {
+	public bool dead;
 }
 
 public class MessageInventoryChanged : Message {

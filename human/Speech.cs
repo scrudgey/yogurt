@@ -23,7 +23,8 @@ public class Speech : Interactive, IMessagable {
     private AudioSource audioSource;
 	private bool LoadInitialized = false;
     public string flavor = "test";
-    public bool unconscious;
+    // public bool unconscious;
+    public Controllable.HitState hitState;
     public Sprite portrait;
 
 	void Start () {
@@ -132,11 +133,10 @@ public class Speech : Interactive, IMessagable {
                 head.value = false;
                 Toolbox.Instance.SendMessage(gameObject, this, head);
 
-                Occurrence flag = Toolbox.Instance.OccurenceFlag(gameObject);
                 OccurrenceSpeech data = new OccurrenceSpeech();
                 data.speaker = gameObject;
                 data.line = Toolbox.Instance.GetName(gameObject)+": "+words;
-                flag.data.Add(data);
+                Toolbox.Instance.OccurenceFlag(gameObject, data);
             }
 			speaking = false;
 			bubbleParent.SetActive(false);
@@ -162,11 +162,10 @@ public class Speech : Interactive, IMessagable {
             return;
         }
         if (speaking){
-            Occurrence flag = Toolbox.Instance.OccurenceFlag(gameObject);
             OccurrenceSpeech data = new OccurrenceSpeech();
             data.speaker = gameObject;
             data.line = Toolbox.Instance.GetName(gameObject)+": "+words;
-            flag.data.Add(data);
+            Toolbox.Instance.OccurenceFlag(gameObject, data);
         }
         string censoredPhrase = phrase;
         if (swear != null){
@@ -222,6 +221,10 @@ public class Speech : Interactive, IMessagable {
                 }
                 return;
             }
+            if (message.nimrodKey){
+                SayFromNimrod(message.phrase);
+                return;
+            }
             if (message.swear != ""){
                 Say(message.phrase, message.swear);
             } else {
@@ -230,8 +233,7 @@ public class Speech : Interactive, IMessagable {
         }
         if (incoming is MessageHitstun){
 			MessageHitstun hits = (MessageHitstun)incoming;
-            if (hits.updateUnconscious)
-    			unconscious = hits.unconscious;
+            hitState = hits.hitState;
 		}
     }
     // double-exponential seat easing function
@@ -257,7 +259,7 @@ public class Speech : Interactive, IMessagable {
         Say("that shazbotting "+targetname+"!", "shazbotting");
     }
     public Monologue Insult(GameObject target){
-        if (unconscious)
+        if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
         List<string> strings = new List<string>();
 
@@ -266,19 +268,18 @@ public class Speech : Interactive, IMessagable {
         grammar.Load("flavor_"+flavor);
         strings.Add(grammar.Parse("{insult}"));
 
-        Occurrence occurrence = Toolbox.Instance.OccurenceFlag(gameObject);
         OccurrenceSpeech data = new OccurrenceSpeech();
 		data.chaos = 10;
 		data.offensive = 20;
 		data.positive = -20;
         data.line = strings[0];
-		occurrence.data.Add(data);
+        Toolbox.Instance.OccurenceFlag(gameObject, data);
 
         Monologue mono = new Monologue(this, strings.ToArray());
         return mono;
     }
     public Monologue Threaten(GameObject target){
-        if (unconscious)
+        if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
         List<string> strings = new List<string>();
 
@@ -287,13 +288,12 @@ public class Speech : Interactive, IMessagable {
         grammar.Load("flavor_"+flavor);
         strings.Add(grammar.Parse("{threat}"));
 
-        Occurrence occurrence = Toolbox.Instance.OccurenceFlag(gameObject);
         OccurrenceSpeech data = new OccurrenceSpeech();
 		data.chaos = 15;
 		data.offensive = 10;
 		data.positive = -20;
         data.line = strings[0];
-		occurrence.data.Add(data);
+        Toolbox.Instance.OccurenceFlag(gameObject, data);
 
         Monologue mono = new Monologue(this, strings.ToArray());
         return mono;
@@ -303,16 +303,22 @@ public class Speech : Interactive, IMessagable {
         return new Monologue(this, new string[]{"..."});
     }
     public Monologue Riposte(){
-        if (unconscious)
+        if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
         Monologue mono = new Monologue(this, new string[]{"How dare you!"});
         return mono;
     }
     public Monologue RespondToThreat(){
-        if (unconscious)
+        if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
         Monologue mono = new Monologue(this, new string[]{"Mercy!"});
         return mono;
+    }
+    public void SayFromNimrod(string key){
+        Grammar grammar = new Grammar();
+        grammar.Load("structure");
+        grammar.Load("flavor_"+flavor);
+        Say(grammar.Parse("{"+key+"}"));
     }
 
 }

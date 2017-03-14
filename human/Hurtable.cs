@@ -1,20 +1,27 @@
 ﻿using UnityEngine;
-// using System.Collections;
-
 public class Hurtable : MonoBehaviour, IMessagable {
-
+	private Controllable.HitState _hitState;
+	public Controllable.HitState hitState{
+		get {return _hitState;}
+		set {
+			// if value has changed, send a message:
+			if (value != _hitState){
+				_hitState = value;
+				MessageHitstun message = new MessageHitstun();
+				message.hitState = value;
+				Toolbox.Instance.SendMessage(gameObject, this, message);
+			}
+		}
+	}
 	public float health;
 	public float maxHealth;
 	public float bonusHealth;
 	private Intrinsic myIntrinsic = new Intrinsic();
-	public bool unconscious;
 	private float hitStunCounter;
-	private bool hitstun;
 	private bool doubledOver;
 	public float impulse;
-	private bool knockDown;
 	private float downedTimer;
-
+	private float ouchFrequency = 0.1f;
 	public void TakeDamage(damageType type, float amount){
 		if (!myIntrinsic.invulnerable.boolValue){
 			switch (type){
@@ -22,7 +29,6 @@ public class Hurtable : MonoBehaviour, IMessagable {
 				if (!myIntrinsic.no_physical_damage.boolValue){
 					health -= amount;
 					impulse += amount;
-					
 				}
 				break;
 			case damageType.fire:
@@ -34,21 +40,41 @@ public class Hurtable : MonoBehaviour, IMessagable {
 				break;
 			}
 		}
-
-		if (!hitstun){
-			hitstun = true;
+		if (health <= -0.5 * maxHealth){
+			Die(type);
+		}
+		if (type != damageType.fire){
+			hitState = Controllable.AddHitState(hitState, Controllable.HitState.stun);
 			hitStunCounter = 0.25f;
-			MessageHitstun message = new MessageHitstun();
-			message.value = true;
-			Toolbox.Instance.SendMessage(gameObject, this, message);
+		}
+
+		if (Random.Range(0.0f, 1.0f) < ouchFrequency){
+			MessageSpeech speechMessage = new MessageSpeech();
+			speechMessage.nimrodKey = true;
+			switch(type){
+				case damageType.physical:
+				speechMessage.phrase = "pain-physical";
+				break;
+				case damageType.fire:
+				speechMessage.phrase = "pain-fire";
+				break;
+				default:
+				speechMessage.phrase = "pain-physical";
+				break;
+			}
+			Toolbox.Instance.SendMessage(gameObject, this, speechMessage);
 		}
 	}
-
+	public void Die(damageType type){
+		KnockDown();
+		hitState = Controllable.AddHitState(hitState, Controllable.HitState.dead);
+	}
 	public void ReceiveMessage(Message incoming){
 		if (incoming is MessageIntrinsic){
 			MessageIntrinsic intrins = (MessageIntrinsic)incoming;
 			if (intrins.netIntrinsic != null){
-				myIntrinsic.armor.floatValue = intrins.netIntrinsic.armor.floatValue;
+				// myIntrinsic.armor.floatValue = intrins.netIntrinsic.armor.floatValue;
+				myIntrinsic.armor = intrins.netIntrinsic.armor;
 				if (intrins.netIntrinsic.bonusHealth.floatValue > bonusHealth){
 					health += intrins.netIntrinsic.bonusHealth.floatValue;
 				}
@@ -66,7 +92,6 @@ public class Hurtable : MonoBehaviour, IMessagable {
 			}
 		}
 	}
-
 	public void Update(){
 		if (impulse > 0){
 			impulse -= Time.deltaTime * 25f;
@@ -76,83 +101,64 @@ public class Hurtable : MonoBehaviour, IMessagable {
 		}
 		if (hitStunCounter > 0){
 			hitStunCounter -= Time.deltaTime;
-			if (hitStunCounter <= 0 && !doubledOver && !knockDown){
-				hitstun = false;
-				MessageHitstun message = new MessageHitstun();
-				message.value = false;
-				Toolbox.Instance.SendMessage(gameObject, this, message);
+			if (hitStunCounter <= 0 && !doubledOver){
+				hitState = Controllable.RemoveHitState(hitState, Controllable.HitState.stun);
 			}
 		}
 		if (health < 0.5 * maxHealth){
 			health += Time.deltaTime;
 		}
-		if (health <= 0 && !unconscious){
-			unconscious = true;
-			if (!knockDown)
-				KnockDown();
-		}
-
-		if (unconscious && health > 0){
-			unconscious = false;
-		}
-
-
-		if (impulse > 50f && !knockDown){
+		if (health <= 0 && hitState < Controllable.HitState.unconscious){
 			KnockDown();
 		}
-		if (downedTimer <= 0 && knockDown && health > 0){
+		if (impulse > 50f && hitState < Controllable.HitState.unconscious){
+			KnockDown();
+		}
+		if (downedTimer <= 0 && hitState == Controllable.HitState.unconscious && health > 0){
 			GetUp();
 		}
-		if (impulse > 35f && !doubledOver && !knockDown){
+		if (impulse > 35f && !doubledOver && hitState < Controllable.HitState.unconscious){
 			DoubleOver(true);
 		}
-		if (impulse <= 0f && doubledOver &&!knockDown){
+		if (impulse <= 0f && doubledOver && hitState < Controllable.HitState.unconscious){
 			DoubleOver(false);
 		}
 	}
-
+	// TODO: knockdown message!
 	public void KnockDown(){
-		knockDown = true;
+		hitState = Controllable.AddHitState(hitState, Controllable.HitState.unconscious);
 		doubledOver = false;
 		downedTimer = 2f;
 		Vector3 pivot = transform.position;
 		pivot.y -= 0.15f;
 		transform.RotateAround(pivot, new Vector3(0, 0, 1), -90);
 		MessageHitstun message = new MessageHitstun();
-		message.value = true;
 		message.doubledOver = false;
-		message.unconscious = true;
+		message.hitState = hitState;
 		Toolbox.Instance.SendMessage(gameObject, this, message);
 	}
-
 	public void GetUp(){
-		knockDown = false;
-		hitstun = false;
+		hitState = Controllable.RemoveHitState(hitState, Controllable.HitState.unconscious);
 		doubledOver = false;
 		Vector3 pivot = transform.position;
 		pivot.x -= 0.15f;
 		transform.RotateAround(pivot, new Vector3(0, 0, 1), 90);
-		MessageHitstun message = new MessageHitstun();
-		message.value = false;
-		message.unconscious = false;
-		Toolbox.Instance.SendMessage(gameObject, this, message);
 	}
 	public void DoubleOver(bool val){
 		if (val){
+			hitState = Controllable.AddHitState(hitState, Controllable.HitState.stun);
 			doubledOver = true;
 			MessageHitstun message = new MessageHitstun();
-			message.value = true;
 			message.doubledOver = true;
+			message.hitState = hitState;
 			Toolbox.Instance.SendMessage(gameObject, this, message);
 		} else {
+			hitState = Controllable.RemoveHitState(hitState, Controllable.HitState.stun);
 			doubledOver = false;
-			hitstun = false;
 			MessageHitstun message = new MessageHitstun();
-			message.value = false;
 			message.doubledOver = false;
+			message.hitState = hitState;
 			Toolbox.Instance.SendMessage(gameObject, this, message);
 		}
 	}
-	
-
 }

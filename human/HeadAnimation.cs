@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
-// using System.Collections;
 
 public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
-
 	private Controllable controllable;
 	private bool speaking;
 	private string _spriteSheet;
@@ -39,7 +37,7 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
 	private float eatingCountDown;
 	private float vomitCountDown;
 	private Head head;
-	private bool hitstun;
+	private Controllable.HitState hitState;
 
 	void LoadSprites(){
 		sprites = Resources.LoadAll<Sprite>("spritesheets/" + spriteSheet);
@@ -111,7 +109,7 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
 
 		if (incoming is MessageHitstun){
 			MessageHitstun message = (MessageHitstun)incoming;
-			hitstun = message.value;
+			hitState = message.hitState;
 		}
 	}
 
@@ -154,7 +152,7 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
 			break;
 		}
 
-		if (hitstun && !speaking && !eating){
+		if (hitState > Controllable.HitState.none && !speaking && !eating){
 			baseFrame +=1 ;
 		}
 

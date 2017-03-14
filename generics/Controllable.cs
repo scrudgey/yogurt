@@ -2,6 +2,19 @@
 using System.Collections.Generic;
 
 public class Controllable : MonoBehaviour, IMessagable {
+	public enum HitState{none, stun, unconscious, dead};
+	static public HitState AddHitState(HitState orig, HitState argument){
+		if (argument > orig){
+			return argument;
+		}
+		return orig;
+	}
+	static public HitState RemoveHitState(HitState orig, HitState argument){
+		if (argument >= orig){
+			return HitState.none;
+		}
+		return orig;
+	}
 	private bool _upFlag;
 	private bool _downFlag;
 	private bool _leftFlag;
@@ -35,21 +48,19 @@ public class Controllable : MonoBehaviour, IMessagable {
 		get {return _direction;}
 		set {
 			_direction = value;
+			directionAngle = Toolbox.Instance.ProperAngle(_direction.x, _direction.y);
 			foreach (IDirectable directable in directables){
 				directable.DirectionChange(value);
 			}
 		}
 	}
 	public float directionAngle = 0;
-	// public delegate void ClickAction();
-	// public event ClickAction OnLastRightClickedChange;
-	// public event ClickAction OnMouseUpEvent;
-	// public event ClickAction OnLastLeftClickedChange;
 	public List<IDirectable> directables = new List<IDirectable>();
 	public GameObject lastLeftClicked;
 	public Interaction defaultInteraction;
 	public bool fightMode;
 	public bool disabled = false;
+	public HitState hitState;
 	public void ResetInput(){
 		upFlag = false;
 		downFlag = false;
@@ -58,27 +69,7 @@ public class Controllable : MonoBehaviour, IMessagable {
 		shootPressedFlag = false;
 		shootHeldFlag = false;
 	}
-	// public GameObject lastLeftClicked{
-	// 	get {return _lastLeftClicked;}
-	// 	set{
-	// 		_lastLeftClicked = value;
-	// 		// if (OnLastLeftClickedChange != null)
-	// 		// 	OnLastLeftClickedChange();
-	// 	}
-	// }
 	public GameObject lastRightClicked;
-	// public GameObject lastRightClicked{
-	// 	get{return _lastRightClicked;}
-	// 	set{
-	// 		_lastRightClicked = value;
-	// 		// if (OnLastRightClickedChange != null)
-	// 		// 	OnLastRightClickedChange();
-	// 	}
-	// }
-	// public void MouseUp(){
-	// 	// if (OnMouseUpEvent != null)
-	// 	// 	OnMouseUpEvent();
-	// }
 	public virtual void Start(){
 		foreach(Component component in gameObject.GetComponentsInChildren<Component>())
 		{
@@ -88,6 +79,13 @@ public class Controllable : MonoBehaviour, IMessagable {
 		}
 	}
 	void Update(){
+		if (hitState > 0){
+			ResetInput();
+		}
+		if (hitState > Controllable.HitState.none){
+			ResetInput();
+			// return;
+		}
 		if (rightFlag || leftFlag)
 			lastPressed = "right";
 		if (downFlag)
@@ -142,8 +140,11 @@ public class Controllable : MonoBehaviour, IMessagable {
 	public virtual void ReceiveMessage(Message incoming){
 		if (incoming is MessageDamage){
 			MessageDamage message = (MessageDamage)incoming;
-			// SetDirection(-1f * dam.force);
 			direction = -1f * message.force;
+		}
+		if (incoming is MessageHitstun){
+			MessageHitstun hits = (MessageHitstun)incoming;
+			hitState = hits.hitState;
 		}
 		if (incoming is MessageInventoryChanged){
 			Inventory inv = (Inventory)incoming.messenger;

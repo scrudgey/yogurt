@@ -33,8 +33,6 @@ public class Humanoid : Controllable, IMessagable {
 		}
 	}
 	private Vector3 _scaleVector;
-	public bool hitstun;
-
 	private bool LoadInitialized = false;
 	public override void Start () {
 		base.Start();
@@ -57,23 +55,13 @@ public class Humanoid : Controllable, IMessagable {
 		leftTilt = Quaternion.LookRotation(Vector3.forward, leftTiltVector);
 		forward = Quaternion.LookRotation(Vector3.forward, -1 * Vector3.forward);
 	}
-
 	void LoadInit(){
 		baseSpeed = maxSpeed;
-		scaleVector = Vector3.one;
 	}
-	
-
 	void FixedUpdate(){
 		Vector2 acceleration = Vector2.zero;
 		Vector2 deceleration = Vector2.zero;
-		if (hitstun){
-			upFlag = false;
-			downFlag = false;
-			rightFlag = false;
-			leftFlag = false;
-			shootPressedFlag = false;
-			shootHeldFlag = false;
+		if (hitState >= Controllable.HitState.unconscious){
 			return;
 		}
 		// Do the normal controls stuff
@@ -96,7 +84,7 @@ public class Humanoid : Controllable, IMessagable {
 		}
 		if (!rightFlag && !leftFlag){
 			deceleration.x = -1 * friction * GetComponent<Rigidbody2D>().velocity.x;
-			transform.rotation = Quaternion.Lerp (transform.rotation, forward, 0.1f);
+			transform.rotation = Quaternion.Lerp(transform.rotation, forward, 0.1f);
 		}
 		// apply force
 		GetComponent<Rigidbody2D>().AddForce(acceleration+deceleration);
@@ -109,23 +97,16 @@ public class Humanoid : Controllable, IMessagable {
 		// use the scale x trick for left-facing animations
 		Vector2 vel = GetComponent<Rigidbody2D>().velocity;
 		if (vel.x < -0.1){
-			// Vector3 tempVector = scaleVector;
 			Vector3 tempVector = Vector3.one;
 			tempVector.x = -1;
 			scaleVector = tempVector;
-			// scaleVector.x = -1;
-			// spriteRenderer.flipX = true;
 		}
 		if (vel.x > 0.1){
-			// Vector3 tempVector = scaleVector;
 			Vector3 tempVector = Vector3.one;
 			tempVector.x = 1;
 			scaleVector = tempVector;
-			// scaleVector.x = 1f;
-			// spriteRenderer.flipX = false;
 		}
 	}
-
 	public override void ReceiveMessage(Message message){
 		base.ReceiveMessage(message);
 		if (message is MessageIntrinsic){
@@ -134,12 +115,7 @@ public class Humanoid : Controllable, IMessagable {
 				maxSpeed = baseSpeed + intrins.netIntrinsic.speed.floatValue;
 			}
 		}
-		if (message is MessageHitstun){
-			MessageHitstun hits = (MessageHitstun)message;
-			hitstun = hits.value;
-		}
 	}
-
 	public void UpdateDirection(){
 		float angle = Toolbox.Instance.ProperAngle(direction.x, direction.y);
 		// change lastpressed because this is relevant to animation

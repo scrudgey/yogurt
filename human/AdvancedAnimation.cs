@@ -34,7 +34,8 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 	public string baseName;
 	private int baseFrame;
 	private int frame;
-	private bool hitStun;
+	// private bool hitStun;
+	private Controllable.HitState hitState;
 	private bool doubledOver;
 
 
@@ -77,7 +78,8 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 
 		if (message is MessageHitstun){
 			MessageHitstun hits = (MessageHitstun)message;
-			hitStun = hits.value;
+			// hitStun = hits.value;
+			hitState = hits.hitState;
 			doubledOver = hits.doubledOver;
 			LateUpdate();
 			SetFrame(0);
@@ -110,7 +112,7 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 				SetFrame(0);
 		}
 
-		if (hitStun){
+		if (hitState > Controllable.HitState.none){
 			updateSequence = GetHitStunState("generic3");
 			GetComponent<Animation>().Play(sequence);
 		}

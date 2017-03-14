@@ -19,7 +19,7 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 	public Personality personality;
 	public PriorityAttack priorityAttack;
 	public PriorityRunAway priorityRunAway;
-	public bool unconscious;
+	public Controllable.HitState hitState;
 	void Start() {
 		// make sure there's Awareness
 		Toolbox.Instance.GetOrCreateComponent<Awareness>(gameObject);
@@ -47,10 +47,9 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 	public void ReceiveMessage(Message message){
 		if (message is MessageHitstun){
 			MessageHitstun hits = (MessageHitstun)message;
-			if (hits.updateUnconscious)
-				unconscious = hits.unconscious;
+			hitState = hits.hitState;
 		}
-		if (unconscious)
+		if (hitState >= Controllable.HitState.unconscious)
 			return;
 		foreach(Priority priority in priorities){
 			priority.ReceiveMessage(message);
@@ -70,7 +69,7 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 				priority.urgency += Time.deltaTime / 10f;
 			priority.urgency = Mathf.Min(priority.urgency, Priority.urgencyMaximum);
 		}
-		if (unconscious)
+		if (hitState >= Controllable.HitState.unconscious)
 			return;
 		if (activePriority != null){
 			// Debug.Log(activePriority.ToString() + " " + activePriority.Urgency(personality).ToString());
