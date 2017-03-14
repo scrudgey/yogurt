@@ -9,7 +9,6 @@ public class Flammable : MonoBehaviour {
 	private CircleCollider2D fireRadius;
 	private AudioClip[] igniteSounds = new AudioClip[2];
 	private AudioClip burnSounds;
-
 	void Start () {
 		//ensure that there is a speaker
 		Toolbox.Instance.SetUpAudioSource(gameObject);
@@ -40,7 +39,7 @@ public class Flammable : MonoBehaviour {
 		fireRadius.radius = 0.2f;
 		fireRadius.name = "fire";
 		fire.gameObject.layer = 13;
-		}
+	}
 
 	void Update () {
 		if (fireSource){
@@ -69,6 +68,12 @@ public class Flammable : MonoBehaviour {
 			GetComponent<AudioSource>().PlayOneShot(igniteSounds[Random.Range(0, 1)]);
 			GetComponent<AudioSource>().loop=true;
 			GetComponent<AudioSource>().PlayOneShot(burnSounds);
+
+			OccurrenceFire fireData = new OccurrenceFire();
+			fireData.objectName = Toolbox.Instance.CloneRemover(name);
+			fireData.chaos = 100;
+			Toolbox.Instance.OccurenceFlag(gameObject, fireData);
+        	
 		}
 		if (onFire){
 			MessageDamage message = new MessageDamage(Time.deltaTime, damageType.fire);

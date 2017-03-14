@@ -83,7 +83,6 @@ public class Bed : Doorway {
 				GameManager.Instance.playerObject.SetActive(true);
 				audioSource.PlayOneShot(beddingSound);
 				if (GameManager.Instance.data.days == 1){
-					// GameObject.Instantiate(Resources.Load("UI/Diary"));
 					GameManager.Instance.ShowDiaryEntry("diaryNew");
 				}
 			}

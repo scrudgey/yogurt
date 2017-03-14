@@ -223,8 +223,9 @@ public class CutsceneManager : Singleton<CutsceneManager> {
             cutscene = null;
             return;
         }
-        if (cutscene is CutsceneNewDay || cutscene is CutsceneBoardroom)
+        if (cutscene is CutsceneNewDay || cutscene is CutsceneBoardroom){
             cutscene.Configure();
+        }
     }
 
     void Update(){
