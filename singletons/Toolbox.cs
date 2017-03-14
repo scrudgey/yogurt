@@ -30,6 +30,19 @@ public class Toolbox : Singleton<Toolbox> {
 			return component;
 		}
 	}
+	public Occurrence OccurenceFlag(GameObject spawner, List<OccurrenceData> datas){
+        GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
+        Occurrence occurrence = flag.GetComponent<Occurrence>();
+		foreach (OccurrenceData datum in datas)
+			occurrence.data.Add(datum);
+        return occurrence;
+    }
+	public Occurrence OccurenceFlag(GameObject spawner, OccurrenceData data){
+        GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
+        Occurrence occurrence = flag.GetComponent<Occurrence>();
+		occurrence.data.Add(data);
+        return occurrence;
+    }
     public Occurrence OccurenceFlag(GameObject spawner){
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
@@ -58,6 +71,7 @@ public class Toolbox : Singleton<Toolbox> {
 		source.rolloffMode = AudioRolloffMode.Logarithmic;
 		source.minDistance = 0.4f;
 		source.maxDistance = 5.42f;
+		source.spatialBlend = 1;
 		return source;
 	}
 	public void AudioSpeaker(AudioClip clip, Vector3 position){
