@@ -253,7 +253,7 @@ public class UINew: Singleton<UINew> {
 		}
 	}
 
-	public void PopupCounter(string text, float initValue, float finalValue, VideoCamera video){
+	public void PopupCounter(string text, float initValue, float finalValue, Commercial commercial){
 		GameObject existingPop = GameObject.Find("Poptext(Clone)");
 		if (existingPop == null){
 			GameObject pop = Instantiate(Resources.Load("UI/Poptext")) as GameObject;
@@ -264,7 +264,7 @@ public class UINew: Singleton<UINew> {
 			poptext.description.Add(text);
 			poptext.initValueList.Add(initValue);
 			poptext.finalValueList.Add(finalValue);
-			poptext.video = video;
+			poptext.commercial = commercial;
 		} else {
 			Poptext poptext = existingPop.GetComponent<Poptext>();
 			poptext.description.Add(text);

@@ -16,7 +16,7 @@ public class Poptext : MonoBehaviour {
     public bool colorFX = false;
     private AudioSource audioSource;
     public AudioClip incrementSound;
-    public VideoCamera video;
+    public Commercial commercial;
 	public void Start () {
         descriptionText = transform.Find("dock/Text").GetComponent<Text>();
         valueText = transform.Find("dock/value").GetComponent<Text>();
@@ -69,9 +69,10 @@ public class Poptext : MonoBehaviour {
                 valueText.color = Color.red;
                 hueShifter.enabled = true;
             }
-            if (video){
+            if (commercial != null){
                 // UI check if commercial is complete
-                video.CheckForFinishState();
+                // video.CheckForFinishState();         
+                UINew.Instance.UpdateRecordButtons(commercial);
             }
             
             yield return new WaitForSeconds(hangtime);

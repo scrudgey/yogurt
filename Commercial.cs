@@ -19,7 +19,26 @@ public class Commercial {
         data = new OccurrenceData();
 	}
 	public List<string> transcript = new List<string>();
-	
+	public void IncrementValue(string valname, float increment){
+        CommercialProperty property = null;
+        properties.TryGetValue(valname, out property);
+        if (property == null){
+            properties[valname] = new CommercialProperty();
+        }
+        
+        float initvalue = properties[valname].val;
+        float finalvalue = initvalue + increment;
+        
+        string poptext = "default";
+        Occurrence.KeyDescriptions.TryGetValue(valname, out poptext);
+        if (poptext != "default"){
+            UINew.Instance.PopupCounter(poptext, initvalue, finalvalue, this);
+        } else {
+            // UI check if commercial is complete
+            UINew.Instance.UpdateRecordButtons(this);
+        }
+        properties[valname].val = finalvalue;
+    }
 	public bool Evaluate(Commercial other){
 		bool requirementsMet = true;
 		foreach(string key in other.properties.Keys){
