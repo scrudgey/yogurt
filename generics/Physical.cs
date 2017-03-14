@@ -22,7 +22,7 @@ public class Physical : MonoBehaviour, IMessagable {
 	private SpriteRenderer spriteRenderer;
 	public float groundDrag;
 	private float ziptime;
-	private float defaultOrderOffset;
+	// private float defaultOrderOffset;
 	private bool suppressLandSound;
 	public List<Collider2D> temporaryDisabledColliders = new List<Collider2D>();
 	 void Start() {
@@ -50,8 +50,8 @@ public class Physical : MonoBehaviour, IMessagable {
 		groundCollider = GetComponent<BoxCollider2D>();
 		objectCollider = trueObject.GetComponent<Collider2D>();
 		order = objectBody.GetComponent<OrderByY>();
-		if (order)
-			defaultOrderOffset = order.offset;
+		// if (order)
+		// 	defaultOrderOffset = order.offset;
 	}
 	public void Impact(Vector2 f){
 		Vector2 force = f / (objectBody.mass / 25f);
@@ -252,10 +252,12 @@ public class Physical : MonoBehaviour, IMessagable {
 					Physics2D.IgnoreCollision(objectCollider, tableCollider, true);
 				}
 			}
-			OrderByY orderTable = table.GetComponentInParent<OrderByY>();
-			if (order != null && orderTable != null){
-				order.offset = -1f * (objectBody.transform.position.y - table.transform.position.y - 0.008f);
-			}
+			// OrderByY orderTable = table.GetComponentInParent<OrderByY>();
+			if (order)
+				order.AddFollower(table.gameObject, 1);
+			// if (order != null && orderTable != null){
+			// 	order.offset = -1f * (objectBody.transform.position.y - table.transform.position.y - 0.008f);
+			// }
 		}
 	}
 	void DeactivateTableCollider(Table table){
@@ -270,9 +272,11 @@ public class Physical : MonoBehaviour, IMessagable {
 				}
 			}
 			// OrderByY order = objectBody.GetComponent<OrderByY>();
-			if (order){
-				order.offset = defaultOrderOffset;
-			}
+			// if (order){
+			// 	order.offset = defaultOrderOffset;
+			// }
+			if (order)
+				order.RemoveFollower(table.gameObject);
 		}
 	}
 	public void ReceiveMessage(Message message){

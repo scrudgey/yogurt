@@ -1,13 +1,9 @@
 ﻿using UnityEngine;
-// using System.Collections;
-
 public class Head : Interactive, IExcludable {
-	
 	private GameObject hatPoint;
 	public Hat hat;
 	public SpriteRenderer hatRenderer;
 	public Hat initHat;
-	
 	private bool LoadInitialized = false;
 	void Start(){
 		if (!LoadInitialized)
@@ -15,7 +11,6 @@ public class Head : Interactive, IExcludable {
 		if (initHat)
 			DonHat(initHat);
 	}
-
 	void LoadInit(){
 		Interaction wearAct = new Interaction(this, "Wear", "DonHat");
 		wearAct.dontWipeInterface = false;
@@ -37,7 +32,9 @@ public class Head : Interactive, IExcludable {
 
 		OrderByY yorder = hat.GetComponent<OrderByY>();
 		if (yorder)
-			yorder.enabled = false;
+			yorder.AddFollower(gameObject, 1);
+		// if (yorder)
+		// 	yorder.enabled = false;
 		
 		hatRenderer = hat.GetComponent<SpriteRenderer>();
 		hat.transform.position = hatPoint.transform.position;
@@ -54,9 +51,9 @@ public class Head : Interactive, IExcludable {
 		if (hatAnimator){
 			hatAnimator.CheckDependencies();
 		}
-		Intrinsics hatIntrinsic = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(hat.gameObject);
+		Intrinsics hatIntrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(hat.gameObject);
 		MessageIntrinsic message = new MessageIntrinsic();
-		message.addIntrinsic = hatIntrinsic;
+		message.addIntrinsic = hatIntrinsics;
 		Toolbox.Instance.SendMessage(transform.parent.gameObject, this, message);
 
 		GameManager.Instance.CheckItemCollection(h.gameObject, transform.parent.gameObject);
@@ -86,7 +83,9 @@ public class Head : Interactive, IExcludable {
 		}
 		OrderByY yorder = hat.GetComponent<OrderByY>();
 		if (yorder)
-			yorder.enabled = true;
+			yorder.RemoveFollower(gameObject);
+		// if (yorder)
+		// 	yorder.enabled = true;
 		HatAnimation hatAnimator = hat.GetComponent<HatAnimation>();
 		if (hatAnimator){
 			hatAnimator.CheckDependencies();
@@ -95,11 +94,9 @@ public class Head : Interactive, IExcludable {
 		hatRenderer = null;
 
 	}
-
 	public void DropMessage(GameObject obj){
 		RemoveHat();
 	}
-
 	public void WasDestroyed(GameObject obj){
 		if (obj == hat.gameObject){
 			hat = null;

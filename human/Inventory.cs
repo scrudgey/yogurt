@@ -70,7 +70,8 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 					phys.DestroyPhysical();
 				OrderByY yorder = holding.GetComponent<OrderByY>();
 				if (yorder)
-					yorder.enabled = false;
+					yorder.AddFollower(gameObject, 1);
+				// 	yorder.enabled = false;
 				holding.transform.position = holdpoint.position;
 				holding.transform.SetParent(holdpoint, false);
 				holding.transform.rotation = Quaternion.identity;
@@ -98,7 +99,8 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 			phys.doInit = false;
 		OrderByY yorder = holding.GetComponent<OrderByY>();
 		if (yorder)
-			yorder.enabled = true;
+			yorder.RemoveFollower(gameObject);
+		// 	yorder.enabled = true;
 		holding.GetComponent<Rigidbody2D>().isKinematic = false;
 		holding.GetComponent<Collider2D>().isTrigger = false;
 		holding = null;
@@ -120,8 +122,9 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 			holding.transform.SetParent(null);
 		}
 		OrderByY yorder = holding.GetComponent<OrderByY>();
+		Debug.Log(yorder);
 		if (yorder)
-			yorder.enabled = true;
+			yorder.RemoveFollower(gameObject);
 		SpriteRenderer sprite = holding.GetComponent<SpriteRenderer>();
 		sprite.sortingLayerName = "main";
 		holding = null;
@@ -134,7 +137,8 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 					DropItem();
 				OrderByY yorder = items[i].GetComponent<OrderByY>();
 				if (yorder)
-					yorder.enabled = false;
+					yorder.AddFollower(gameObject, 1);
+					// yorder.enabled = false;
 				items[i].SetActive(true);
 				items[i].transform.position = holdpoint.position;
 				// items[i].transform.parent = holdpoint;
@@ -157,7 +161,8 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 			throwObject = holding.gameObject;
 			OrderByY yorder = holding.GetComponent<OrderByY>();
 			if (yorder)
-				yorder.enabled = false;
+				yorder.RemoveFollower(gameObject);
+				// yorder.enabled = false;
 			holding = null;
 		}
 	}
