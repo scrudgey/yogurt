@@ -1,14 +1,16 @@
 ﻿using UnityEngine;
-// using System;
 using System.Collections.Generic;
 
 public class Occurrence : MonoBehaviour {
     public List<OccurrenceData> data = new List<OccurrenceData>();
+    public static Dictionary<string, string> KeyDescriptions = new Dictionary<string, string>{
+        {"yogurt", "yogurts eaten"},
+        {"vomit", "vomit events"},
+        {"yogurt_vomit", "yogurt emesis event"},
+        {"yogurt_vomit_eat", "eating yogurt vomit"},
+        {"yogurt_floor", "yogurt eaten off the floor"},
+	};
 }
-public enum occurrenceType{
-        empty, eat, vomit, speech
-}
-
 /*
         NOTE: IMPORTANT
         If i ever need to serialize child data classes, unity will store them only 
@@ -16,17 +18,29 @@ public enum occurrenceType{
         to do some extra work with ScriptableObject.
 */
 [System.Serializable]
-public class OccurrenceData {
-    public occurrenceType myType;
+public class OccurrenceData
+{
     public float disturbing;
     public float disgusting;
     public float chaos;
     public float offensive;
     public float positive;
-    
-    public OccurrenceData(){}
-    public OccurrenceData(occurrenceType thisType){
-        myType = thisType;
+    public virtual void UpdateCommercialOccurrences(Commercial commercial){ }
+    public bool Matches(OccurrenceData otherData){
+        if (this.GetType() == otherData.GetType()){
+            return MatchSpecific(otherData);
+        } else {
+            return false;
+        }
+    }
+    protected virtual bool MatchSpecific(OccurrenceData otherData){
+        bool match = false;
+        match &= disturbing == otherData.disturbing;
+        match &= disgusting == otherData.disgusting;
+        match &= chaos == otherData.chaos;
+        match &= offensive == otherData.offensive;
+        match &= positive == otherData.positive;
+        return match;
     }
     public void AddData(OccurrenceData otherData){
         disturbing += otherData.disturbing;
@@ -35,76 +49,67 @@ public class OccurrenceData {
         offensive += otherData.offensive;
         positive += otherData.positive;
     }
-    
-    public virtual bool Matches(OccurrenceData otherData){
-        bool match = false;
-        match = myType == otherData.myType;
-        match &= disturbing == otherData.disturbing;
-        match &= disgusting == otherData.disgusting;
-        match &= chaos == otherData.chaos;
-        match &= offensive == otherData.offensive;
-        match &= positive == otherData.positive;
-        
-        return match;
+}
+[System.Serializable]
+public class OccurrenceFire : OccurrenceData {
+    public string objectName;
+    protected override bool MatchSpecific(OccurrenceData data){
+        OccurrenceFire otherData = (OccurrenceFire)data;
+        return objectName == otherData.objectName;
     }
 }
-
 [System.Serializable]
 public class OccurrenceEat : OccurrenceData {
     public float amount;
     public string food;
     public Liquid liquid;
-    public OccurrenceEat(){
-        myType = occurrenceType.eat;
+    public override void UpdateCommercialOccurrences(Commercial commercial){
+        if (liquid.name == "yogurt"){
+            commercial.IncrementValue("yogurt", 1f);
+            if (liquid.vomit)
+                commercial.IncrementValue("yogurt_vomit_eat", 1f);
+            if (food == "Puddle(Clone)")
+                commercial.IncrementValue("yogurt_floor", 1f);
+        }
     }
-    public override bool Matches(OccurrenceData otherData){
+    protected override bool MatchSpecific(OccurrenceData data){
+        OccurrenceEat otherData = (OccurrenceEat)data;
         bool match = false;
-        // try {
-        if (otherData is OccurrenceEat){
-            OccurrenceEat other = (OccurrenceEat)otherData;
-            if (other == null)
+        if (liquid != null){
+            if (otherData.liquid == null)
                 return false;
-            
-            if (liquid != null){
-                if (other.liquid == null)
-                    return false;
-                match = liquid.name == other.liquid.name;
-            } else {
-                match = food == other.food;
-            }
+            match = liquid.name == otherData.liquid.name;
+        } else {
+            match = food == otherData.food;
         }
         return match;
     }
 }
-
 [System.Serializable]
 public class OccurrenceVomit : OccurrenceData {
     public string vomit;
     public Liquid liquid;
-    public OccurrenceVomit(){
-        myType = occurrenceType.vomit;
+    public override void UpdateCommercialOccurrences(Commercial commercial){
+        commercial.IncrementValue("vomit", 1f);
+        if (liquid.name == "yogurt"){
+            commercial.IncrementValue("yogurt_vomit", 1f);
+        }
     }
 }
-
 [System.Serializable]
 public class OccurrenceSpeech : OccurrenceData {
     public string line;
     public GameObject speaker;
-    public OccurrenceSpeech(){
-        myType = occurrenceType.speech;
+    public override void UpdateCommercialOccurrences(Commercial commercial){
+        commercial.transcript.Add(line);
     }
-    
-    public override bool Matches(OccurrenceData otherData){
-        bool match = false;
-        if (otherData is OccurrenceSpeech){
-            OccurrenceSpeech other = (OccurrenceSpeech)otherData;
-            match = line == other.line;
-            return match;
-        } else {
-            return false;
-        }
+    protected override bool MatchSpecific(OccurrenceData data){
+        OccurrenceSpeech otherData = (OccurrenceSpeech)data;
+        return line == otherData.line;
     }
 }
+
+
 
 
 

@@ -150,7 +150,6 @@ public class Eater : Interactive {
 		Toolbox.Instance.SendMessage(gameObject, this, message);
 		
         // set up an occurrence flag for this eating!
-        Occurrence flag = Toolbox.Instance.OccurenceFlag(gameObject);
         OccurrenceEat eatData = new OccurrenceEat();
         eatData.food = food.name;
         eatData.amount = food.nutrition;
@@ -175,7 +174,7 @@ public class Eater : Interactive {
 				GameManager.Instance.CheckAchievements();
 			}
         }
-        flag.data.Add(eatData);
+		Toolbox.Instance.OccurenceFlag(gameObject, eatData);
 
 		if (food.eatSound != null){
 			Toolbox.Instance.AudioSpeaker(food.eatSound, transform.position);
@@ -192,10 +191,8 @@ public class Eater : Interactive {
 		nausea = 0;
 		nutrition = 0;
                 
-        Occurrence flag = Toolbox.Instance.OccurenceFlag(gameObject);
         OccurrenceVomit data = new OccurrenceVomit();
         data.disgusting = 100f;
-        
 		if (eaten){
             data.vomit = eaten.name;
 			eaten.SetActive(true);
@@ -216,12 +213,12 @@ public class Eater : Interactive {
                 edible.vomit = true;
             }
 		}
+		Toolbox.Instance.OccurenceFlag(gameObject, data);
 
 		MessageHead head = new MessageHead();
 		head.type = MessageHead.HeadType.vomiting;
 		head.value = true;
 		Toolbox.Instance.SendMessage(gameObject, this, head);
 		Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Blaaaaargh!"));
-        flag.data.Add(data);
 	}
 }

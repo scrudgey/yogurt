@@ -64,7 +64,7 @@ public class CommercialReportMenu : MonoBehaviour {
         eventText.text = "";
         foreach (string key in commercial.properties.Keys){
             CommercialProperty prop = commercial.properties[key];
-            string elaboration = VideoCamera.KeyDescriptions[key];
+            string elaboration = Occurrence.KeyDescriptions[key];
             string line = elaboration + ": " + prop.val.ToString() + "\n";
             eventText.text = eventText.text + line;
         }
