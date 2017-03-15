@@ -90,6 +90,7 @@ public class DialogueMenu : MonoBehaviour {
 			return;
 		configured = true;
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
+		audioSource.spatialBlend = 0;
 		portrait = transform.Find("base/main/portrait").GetComponent<Image>();
 		speechText = transform.Find("base/main/speechPanel/speechText").GetComponent<Text>();
 		promptText = transform.Find("base/main/speechPanel/textPrompt").GetComponent<Text>();
