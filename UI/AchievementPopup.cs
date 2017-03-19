@@ -16,6 +16,7 @@ public class AchievementPopup : MonoBehaviour {
 		image = transform.Find("Panel/icon").GetComponent<Image>();
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         audioSource.volume = 0.25f;
+        audioSource.spatialBlend = 0;
 
 		titleText.text = "Collected";
 		bodyText.text = Toolbox.Instance.GetName(obj);
@@ -34,6 +35,7 @@ public class AchievementPopup : MonoBehaviour {
         image = transform.Find("Panel/icon").GetComponent<Image>();
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         audioSource.volume = 0.25f;
+        audioSource.spatialBlend = 0;
 
         titleText.text = "Achievement Unlocked!";
         bodyText.text = achieve.title;
