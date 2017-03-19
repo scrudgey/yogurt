@@ -454,7 +454,7 @@ public class UINew: Singleton<UINew> {
 		buttonAnchor.transform.SetParent(target.transform);
 		return buttonAnchor;
 	}
-	private void ArrangeButtonsOnScreenBottom(List<actionButton> buttons){
+	private void ArrangeButtonsOnScreenTop(List<actionButton> buttons){
 		GameObject bottomBar = UICanvas.transform.Find("topdock").gameObject;
 		foreach (actionButton button in buttons){
 			button.gameobject.transform.SetParent(bottomBar.transform, false);
@@ -474,7 +474,7 @@ public class UINew: Singleton<UINew> {
 			if (button.buttonScript.action == defaultInteraction)
 				MakeButtonDefault(button);
 		}
-		ArrangeButtonsOnScreenBottom(manualButtons);
+		ArrangeButtonsOnScreenTop(manualButtons);
 	}
 
 	public void ClearActionButtons(){
