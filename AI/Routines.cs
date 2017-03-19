@@ -361,7 +361,7 @@ namespace AI{
 			timer += Time.deltaTime;
 			if (target.val != null){
 				control.SetDirection(Vector2.ClampMagnitude(target.val.transform.position - gameObject.transform.position, 1f));
-				if (timer > 1){
+				if (timer > 0.5){
 					timer = 0f;
 					control.shootPressedFlag = true;
 				} else {
