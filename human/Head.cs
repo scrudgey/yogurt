@@ -44,27 +44,17 @@ public class Head : Interactive, IExcludable {
 		hat.transform.parent = hatPoint.transform;
 		hat.transform.rotation = Quaternion.identity;
 		hat.GetComponent<Rigidbody2D>().isKinematic = true;
-
 		hat.GetComponent<Collider2D>().isTrigger = true;
-
 		HatAnimation hatAnimator = hat.GetComponent<HatAnimation>();
 		if (hatAnimator){
 			hatAnimator.CheckDependencies();
 		}
-		Intrinsics hatIntrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(hat.gameObject);
-		MessageIntrinsic message = new MessageIntrinsic();
-		message.addIntrinsic = hatIntrinsics;
-		Toolbox.Instance.SendMessage(transform.parent.gameObject, this, message);
-
-		GameManager.Instance.CheckItemCollection(h.gameObject, transform.parent.gameObject);
+		Toolbox.Instance.AddIntrinsic(transform.parent.gameObject, hat.gameObject);
+		GameManager.Instance.CheckItemCollection(transform.parent.gameObject, h.gameObject);
 	}
 	
 	void RemoveHat(){
-		Intrinsics hatIntrinsic = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(hat.gameObject);
-		MessageIntrinsic message = new MessageIntrinsic();
-		message.removeIntrinsic = hatIntrinsic;
-		Toolbox.Instance.SendMessage(gameObject, this, message);
-		
+		Toolbox.Instance.RemoveIntrinsic(transform.parent.gameObject, hat.gameObject);
 		Messenger.Instance.DisclaimObject(hat.gameObject,this);
 		
 		hat.GetComponent<Rigidbody2D>().isKinematic = false;
@@ -79,13 +69,10 @@ public class Head : Interactive, IExcludable {
 		SpriteRenderer hatRenderer = hat.GetComponent<SpriteRenderer>();
 		if (hatRenderer){
 			hatRenderer.sortingLayerName = "main";
-//			hatRenderer.sortingOrder = spriteRenderer.sortingOrder - 1;
 		}
 		OrderByY yorder = hat.GetComponent<OrderByY>();
 		if (yorder)
 			yorder.RemoveFollower(gameObject);
-		// if (yorder)
-		// 	yorder.enabled = true;
 		HatAnimation hatAnimator = hat.GetComponent<HatAnimation>();
 		if (hatAnimator){
 			hatAnimator.CheckDependencies();

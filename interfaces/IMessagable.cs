@@ -22,10 +22,13 @@ public class MessageAnimation : Message {
 	}
 }
 
-public class MessageIntrinsic : Message {
-	public Intrinsic netIntrinsic;	
-	public Intrinsics addIntrinsic;
-	public Intrinsics removeIntrinsic;
+// public class MessageIntrinsic : Message {
+// 	public Intrinsic netIntrinsic;	
+// 	public Intrinsics addIntrinsic;
+// 	public Intrinsics removeIntrinsic;
+// }
+public class MessageNetIntrinsic: Message {
+	public Intrinsic netIntrinsic;
 }
 
 public class MessageHead : Message {

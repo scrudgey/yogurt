@@ -26,9 +26,10 @@ public class Hurtable : MonoBehaviour, IMessagable {
 		if (!myIntrinsic.invulnerable.boolValue){
 			switch (type){
 			case damageType.physical:
-				if (!myIntrinsic.no_physical_damage.boolValue){
-					health -= amount;
-					impulse += amount;
+				if (!myIntrinsic.noPhysicalDamage.boolValue){
+					float netDam = Mathf.Max(amount - myIntrinsic.armor.floatValue, 0);
+					health -= netDam;
+					impulse += netDam;
 				}
 				break;
 			case damageType.fire:
@@ -70,16 +71,13 @@ public class Hurtable : MonoBehaviour, IMessagable {
 		hitState = Controllable.AddHitState(hitState, Controllable.HitState.dead);
 	}
 	public void ReceiveMessage(Message incoming){
-		if (incoming is MessageIntrinsic){
-			MessageIntrinsic intrins = (MessageIntrinsic)incoming;
-			if (intrins.netIntrinsic != null){
-				// myIntrinsic.armor.floatValue = intrins.netIntrinsic.armor.floatValue;
-				myIntrinsic.armor = intrins.netIntrinsic.armor;
-				if (intrins.netIntrinsic.bonusHealth.floatValue > bonusHealth){
-					health += intrins.netIntrinsic.bonusHealth.floatValue;
-				}
-				bonusHealth = intrins.netIntrinsic.bonusHealth.floatValue;
+		if (incoming is MessageNetIntrinsic){
+			MessageNetIntrinsic intrins = (MessageNetIntrinsic)incoming;
+			myIntrinsic = intrins.netIntrinsic;
+			if (intrins.netIntrinsic.bonusHealth.floatValue > bonusHealth){
+				health += intrins.netIntrinsic.bonusHealth.floatValue;
 			}
+			bonusHealth = intrins.netIntrinsic.bonusHealth.floatValue;
 		}
 		if (incoming is MessageDamage){
 			MessageDamage dam = (MessageDamage)incoming;
@@ -126,6 +124,8 @@ public class Hurtable : MonoBehaviour, IMessagable {
 	}
 	// TODO: knockdown message!
 	public void KnockDown(){
+		if (hitState >= Controllable.HitState.unconscious)
+			return;
 		hitState = Controllable.AddHitState(hitState, Controllable.HitState.unconscious);
 		doubledOver = false;
 		downedTimer = 2f;

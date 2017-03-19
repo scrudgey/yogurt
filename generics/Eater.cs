@@ -144,10 +144,11 @@ public class Eater : Interactive {
 			// speech.Say("I can't eat another bite!");
 			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I can't eat another bite!"));
 		}
-		Intrinsics foodIntrinsic = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(food.gameObject);
-		MessageIntrinsic message = new MessageIntrinsic();
-		message.addIntrinsic = foodIntrinsic;
-		Toolbox.Instance.SendMessage(gameObject, this, message);
+		Toolbox.Instance.AddIntrinsic(gameObject, food.gameObject);
+		// Intrinsics foodIntrinsic = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(food.gameObject);
+		// MessageIntrinsic message = new MessageIntrinsic();
+		// message.addIntrinsic = foodIntrinsic;
+		// Toolbox.Instance.SendMessage(gameObject, this, message);
 		
         // set up an occurrence flag for this eating!
         OccurrenceEat eatData = new OccurrenceEat();

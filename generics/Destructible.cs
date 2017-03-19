@@ -3,7 +3,6 @@
 public enum damageType{physical, fire, any}
 
 public class Destructible : MonoBehaviour, IMessagable {
-
 	public float health;
 	public float maxHealth;
 	public float bonusHealth;
@@ -94,15 +93,15 @@ public class Destructible : MonoBehaviour, IMessagable {
 	}
 
 	public void ReceiveMessage(Message message){
-		if (message is MessageIntrinsic){
-			MessageIntrinsic intrins = (MessageIntrinsic)message;
-			if (intrins.netIntrinsic != null){
-				armor = intrins.netIntrinsic.armor.floatValue;
-				if (intrins.netIntrinsic.bonusHealth.floatValue > bonusHealth){
-					health += intrins.netIntrinsic.bonusHealth.floatValue;
-				}
-				bonusHealth = intrins.netIntrinsic.bonusHealth.floatValue;
+		if (message is MessageNetIntrinsic){
+			MessageNetIntrinsic intrins = (MessageNetIntrinsic)message;
+			// if (intrins.netIntrinsic != null){
+			armor = intrins.netIntrinsic.armor.floatValue;
+			if (intrins.netIntrinsic.bonusHealth.floatValue > bonusHealth){
+				health += intrins.netIntrinsic.bonusHealth.floatValue;
 			}
+			bonusHealth = intrins.netIntrinsic.bonusHealth.floatValue;
+			// }
 		}
 		if (message is MessageDamage){
 			MessageDamage dam = (MessageDamage)message;
