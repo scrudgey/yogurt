@@ -158,6 +158,8 @@ public class Speech : Interactive, IMessagable {
 		}
 	}
     public void Say(string phrase, string swear=null){
+        if (hitState >= Controllable.HitState.unconscious)
+            return;
         if(speaking && phrase == words){
             return;
         }
