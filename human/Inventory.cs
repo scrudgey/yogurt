@@ -111,18 +111,18 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		holding.GetComponent<Collider2D>().isTrigger = false;
 		PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
 		if (phys){
-			Vector2 initV = Vector2.ClampMagnitude(direction, 0.5f);
+			Vector2 initV = Vector2.ClampMagnitude(direction, 0.1f);
 			initV = initV + GetComponent<Rigidbody2D>().velocity;
 			float vx = initV.x;
+			// float vy = initV.y / 2;
 			float vy = initV.y / 2;
-			float vz = 0.5f;
+			float vz = 0.1f;
 			phys.InitPhysical(dropHeight, new Vector3(vx, vy, vz));
 		} else {
 			// holding.transform.parent = null;
 			holding.transform.SetParent(null);
 		}
 		OrderByY yorder = holding.GetComponent<OrderByY>();
-		Debug.Log(yorder);
 		if (yorder)
 			yorder.RemoveFollower(gameObject);
 		SpriteRenderer sprite = holding.GetComponent<SpriteRenderer>();
@@ -170,6 +170,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		Messenger.Instance.DisclaimObject(throwObject, this);
 		PhysicalBootstrapper phys = throwObject.GetComponent<PhysicalBootstrapper>();
 		if (phys){
+			phys.thrownBy = gameObject;
 			Rigidbody2D myBody = GetComponent<Rigidbody2D>();
 			phys.doInit = false;
 			phys.initHeight = 0f;
