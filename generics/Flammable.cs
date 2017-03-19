@@ -9,9 +9,10 @@ public class Flammable : MonoBehaviour {
 	private CircleCollider2D fireRadius;
 	private AudioClip[] igniteSounds = new AudioClip[2];
 	private AudioClip burnSounds;
+	private AudioSource audioSource;
 	void Start () {
 		//ensure that there is a speaker
-		Toolbox.Instance.SetUpAudioSource(gameObject);
+		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 		burnSounds = Resources.Load("sounds/Crackling Fire", typeof(AudioClip)) as AudioClip;
 		igniteSounds[0] = Resources.Load("sounds/Flash Fire Ignite 01", typeof(AudioClip)) as AudioClip;
 		igniteSounds[1] = Resources.Load("sounds/Flash Fire Ignite 02", typeof(AudioClip)) as AudioClip;
@@ -65,9 +66,10 @@ public class Flammable : MonoBehaviour {
 		if (heat > flashpoint && fireParticles.isStopped){
 			fireParticles.Play();
 			onFire = true;
-			GetComponent<AudioSource>().PlayOneShot(igniteSounds[Random.Range(0, 1)]);
-			GetComponent<AudioSource>().loop=true;
-			GetComponent<AudioSource>().PlayOneShot(burnSounds);
+			audioSource.PlayOneShot(igniteSounds[Random.Range(0, 1)]);
+			audioSource.loop=true;
+			audioSource.clip = burnSounds;
+			audioSource.Play();
 
 			OccurrenceFire fireData = new OccurrenceFire();
 			fireData.objectName = Toolbox.Instance.CloneRemover(name);
@@ -78,6 +80,11 @@ public class Flammable : MonoBehaviour {
 		if (onFire){
 			MessageDamage message = new MessageDamage(Time.deltaTime, damageType.fire);
 			Toolbox.Instance.SendMessage(gameObject, this, message, sendUpwards: false);
+			if (Random.Range(0, 100f) < 1){
+				MessageSpeech speechMessage = new MessageSpeech();
+				speechMessage.phrase = "hot!";
+				Toolbox.Instance.SendMessage(gameObject, this, speechMessage, sendUpwards: true);
+			}
 		}
 	}
 
