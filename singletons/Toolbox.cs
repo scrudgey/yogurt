@@ -232,4 +232,14 @@ public class Toolbox : Singleton<Toolbox> {
 			receiver.ReceiveMessage(message);
 		}
 	}
+	public void AddIntrinsic(GameObject host, GameObject donor){
+		Intrinsics intrinsics = GetOrCreateComponent<Intrinsics>(host);
+		Intrinsics donorIntrinsics = GetOrCreateComponent<Intrinsics>(donor);
+		intrinsics.AddIntrinsic(donorIntrinsics);
+	}
+	public void RemoveIntrinsic(GameObject host, GameObject donor){
+		Intrinsics intrinsics = GetOrCreateComponent<Intrinsics>(host);
+		Intrinsics donorIntrinsics = GetOrCreateComponent<Intrinsics>(donor);
+		intrinsics.RemoveIntrinsic(donorIntrinsics);
+	}
 }
