@@ -55,6 +55,8 @@ namespace AI{
 			dist = 0.25f;
 		}
 		public override status Evaluate(){
+			if (target.val == null)
+				return status.neutral;
 			if (Vector2.Distance(gameObject.transform.position, target.val.transform.position) < dist){
 				return status.success;
 			} else {
