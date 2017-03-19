@@ -210,7 +210,7 @@ public class Awareness : MonoBehaviour, IMessagable {
 		people.Add(g, assessment);
 		return assessment;
 	}
-	void AttackedByPerson(GameObject g, MessageDamage message){
+	void AttackedByPerson(GameObject g){
 		PersonalAssessment assessment = FormPersonalAssessment(g);
 		if (assessment != null){
 			assessment.status = PersonalAssessment.friendStatus.enemy;
@@ -228,7 +228,7 @@ public class Awareness : MonoBehaviour, IMessagable {
 		if (incoming is MessageDamage){
 			MessageDamage message = (MessageDamage)incoming;
 			foreach (GameObject responsible in message.responsibleParty){
-				AttackedByPerson(responsible, message);
+				AttackedByPerson(responsible);
 			}
 		}
 		if (incoming is MessageInsult){
