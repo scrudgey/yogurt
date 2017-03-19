@@ -22,7 +22,7 @@ namespace AI {
 			// Init(g, c);
 			gameObject = g;
 			control = c;
-			slewTime = Random.Range(0.3f, 1.4f);
+			slewTime = Random.Range(0.1f, 0.5f);
 		}
 		public status Evaluate(){
 			foreach (Goal requirement in requirements){
@@ -50,7 +50,7 @@ namespace AI {
 					index ++;
 					// get next routine, or fail.
 					if (index < routines.Count){
-						slewTime = Random.Range(0.8f, 1.4f);
+						slewTime = Random.Range(0.1f, 0.5f);
 					} else {
 						// what do do? reset from the start maybe
 						// index = routines.Count - 1;
