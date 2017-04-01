@@ -16,6 +16,7 @@ public class Poptext : MonoBehaviour {
     public bool colorFX = false;
     private AudioSource audioSource;
     public AudioClip incrementSound;
+    public AudioClip decrementSound;
     public Commercial commercial;
 	public void Start () {
         descriptionText = transform.Find("dock/Text").GetComponent<Text>();
@@ -24,6 +25,7 @@ public class Poptext : MonoBehaviour {
         dock = transform.Find("dock").gameObject;
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         audioSource.volume = 0.25f;
+        audioSource.spatialBlend = 0;
         hueShifter.enabled = false;
         hueShifter.speedConst = 0.3f;
 
@@ -58,13 +60,19 @@ public class Poptext : MonoBehaviour {
             description.Remove(description[0]);
 
             float finalValue = finalValueList[0];
+            float initValue = initValueList[0];
             finalValueList.RemoveAt(0);
+            initValueList.RemoveAt(0);
             if (description.Count > 0){
                 hangtime = 1.2f;
             }
 
             valueText.text = finalValue.ToString();
-            audioSource.PlayOneShot(incrementSound);
+            if (finalValue > initValue){
+                audioSource.PlayOneShot(incrementSound);
+            } else {
+                audioSource.PlayOneShot(decrementSound);
+            }
             if (colorFX){
                 valueText.color = Color.red;
                 hueShifter.enabled = true;
