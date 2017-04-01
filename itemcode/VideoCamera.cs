@@ -30,9 +30,7 @@ public class VideoCamera : MonoBehaviour, IMessagable {
     void ProcessOccurrence(Occurrence oc){
         foreach (OccurrenceData data in oc.data){
             data.UpdateCommercialOccurrences(commercial);
-            // handle qualities
             commercial.data.AddData(data);
-            //check vs. watchForOccurrence
             if (watchForOccurrence != null){
                  if (watchForOccurrence.Matches(data)){
                     director.OccurrenceHappened();
