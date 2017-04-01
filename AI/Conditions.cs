@@ -118,7 +118,8 @@ namespace AI{
 		public override status Evaluate(){
 			if (inv){
 				if (inv.holding){
-					if (inv.holding.name == name){
+					string holdingName = Toolbox.Instance.CloneRemover(inv.holding.name);
+					if (holdingName == name){
 						return status.success;
 					}else{
 						return status.neutral;
