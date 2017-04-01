@@ -11,24 +11,20 @@ public abstract class SaveHandler<T> : SaveHandler where T : Component
 	public sealed override void SaveData(Component instance, PersistentComponent data, ReferenceResolver resolver){
 		SaveData(instance as T, data, resolver);
 	}
-
 	public sealed override void LoadData(Component instance, PersistentComponent data){
 		LoadData(instance as T, data);
 	}
-
 	public abstract void SaveData(T instance, PersistentComponent data, ReferenceResolver resolver);
 	public abstract void LoadData(T instance, PersistentComponent data);
 }
 
 public class InventoryHandler : SaveHandler<Inventory> {
-
 	public override void SaveData(Inventory instance, PersistentComponent data, ReferenceResolver resolver){
 		if (instance.holding != null){
 			data.ints["holdingID"] = resolver.ResolveReference(instance.holding.gameObject, data.persistent);
 		} else {
 			data.ints["holdingID"] = -1;
 		}
-		
 		data.ints["itemCount"] = instance.items.Count;
 		if (instance.items.Count > 0){
 			for (int i = 0; i < instance.items.Count; i++){
@@ -36,7 +32,6 @@ public class InventoryHandler : SaveHandler<Inventory> {
 			}
 		} 
 	}
-
 	public override void LoadData(Inventory instance, PersistentComponent data){
 
 		if (data.ints["holdingID"] != -1){
@@ -46,10 +41,8 @@ public class InventoryHandler : SaveHandler<Inventory> {
 				Debug.Log("tried to get loadedobject " + data.ints["holdingID"].ToString() + " but was not found!");
 			}
 		}
-
 		// note: trying to reference a key in data.ints that didn't exist here caused a hard crash at runtime
 		// so PROTECT YA NECK!!!
-
 		if (data.ints["itemCount"] > 0){
 			for (int i = 0; i < data.ints["itemCount"]; i++){
 				GameObject theItem = MySaver.loadedObjects[data.ints["item"+i.ToString()]];
@@ -76,7 +69,6 @@ public class ContainerHandler: SaveHandler<Container> {
 			}
 		}
 	}
-	
 	public override void LoadData(Container instance, PersistentComponent data){
 		instance.maxNumber = 							data.ints["maxItems"];
 		instance.disableContents = 						data.bools["disableContents"];
@@ -123,7 +115,6 @@ public class PhysicalBootStrapperHandler: SaveHandler<PhysicalBootstrapper> {
 	public override void SaveData(PhysicalBootstrapper instance, PersistentComponent data, ReferenceResolver resolver){
 		data.bools["doInit"] = instance.doInit;
 	}
-
 	public override void LoadData(PhysicalBootstrapper instance, PersistentComponent data){
 		instance.doInit = data.bools["doInit"];
 	}
@@ -134,7 +125,6 @@ public class EaterHandler: SaveHandler<Eater> {
 	public override void SaveData(Eater instance, PersistentComponent data, ReferenceResolver resolver){
 		data.floats["nutrition"] = instance.nutrition;
 	}
-	
 	public override void LoadData(Eater instance, PersistentComponent data){
 		instance.nutrition = data.floats["nutrition"];
 	}
@@ -144,7 +134,6 @@ public class AdvancedAnimationHandler: SaveHandler<AdvancedAnimation> {
 	public override void SaveData(AdvancedAnimation instance, PersistentComponent data, ReferenceResolver resolver){
 		data.strings["baseName"] = instance.baseName;
 	}
-	
 	public override void LoadData(AdvancedAnimation instance, PersistentComponent data){
 		instance.baseName = data.strings["baseName"];
 		instance.LoadSprites();
@@ -157,7 +146,6 @@ public class FlammableHandler: SaveHandler<Flammable> {
 		data.floats["flashpoint"] = 		instance.flashpoint;
 		data.bools["onFire"] = 				instance.onFire;
 	}
-	
 	public override void LoadData(Flammable instance, PersistentComponent data){
 		instance.heat =						data.floats["heat"];
 		instance.flashpoint = 				data.floats["flashpoint"];
@@ -173,7 +161,6 @@ public class DestructibleHandler: SaveHandler<Destructible> {
 		data.bools["noPhysDam"] = 			instance.no_physical_damage;
 		data.ints["lastDamage"] =			(int)instance.lastDamage;
 	}
-	
 	public override void LoadData(Destructible instance, PersistentComponent data){
 		instance.health = 					data.floats["health"];
 		instance.invulnerable = 			data.bools["invulnerable"];
@@ -187,9 +174,8 @@ public class OutfitHandler: SaveHandler<Outfit> {
 	public override void SaveData(Outfit instance, PersistentComponent data, ReferenceResolver resolver){
 		data.strings["worn"] = 			instance.wornUniformName;
 	}
-	
 	public override void LoadData(Outfit instance, PersistentComponent data){
-		instance.wornUniformName = 					data.strings["worn"];
+		instance.wornUniformName = 		data.strings["worn"];
 	}
 }
 
@@ -217,7 +203,6 @@ public class LiquidContainerHandler: SaveHandler<LiquidContainer>{
 			data.strings["liquid"] = "null";
 		}
 	}
-
 	// if i had some nicer methods to handle loading an amount of liquid 
 	// i think this would be a little better.
 	public override void LoadData(LiquidContainer instance, PersistentComponent data){
@@ -232,12 +217,19 @@ public class LiquidContainerHandler: SaveHandler<LiquidContainer>{
 	}
 }
 
-//public class PhysicalBootStrapperHandler: SaveHandler<PhysicalBootstrapper> {
-//	public override void SaveData(PhysicalBootstrapper instance, PersistentComponent data){
-//		
-//	}
-//	
-//	public override void LoadData(PhysicalBootstrapper instance, PersistentComponent data){
-//		
-//	}
-//}
+public class IntrinsicsHandler: SaveHandler<Intrinsics>{
+	public override void SaveData(Intrinsics instance, PersistentComponent data, ReferenceResolver resolver){
+		data.intrinsics = new List<Intrinsic>();
+		foreach(Intrinsic intrinsic in instance.intrinsics){
+			if (intrinsic.persistent)
+				data.intrinsics.Add(intrinsic);
+		}
+	}
+	public override void LoadData(Intrinsics instance, PersistentComponent data){
+		foreach(Intrinsic intrinsic in data.intrinsics){
+			instance.intrinsics.Add(intrinsic);
+		}
+		if (data.intrinsics.Count > 0)
+			instance.IntrinsicsChanged();
+	}
+}
