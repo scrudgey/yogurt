@@ -20,6 +20,7 @@ public class Bed : Doorway {
 	// private AudioSource audioSource;
 	public override void Start(){
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
+		audioSource.spatialBlend = 0;
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		head = transform.Find("head").GetComponent<SpriteRenderer>();
 		bubble = transform.Find("bubble").GetComponent<SpriteRenderer>();
