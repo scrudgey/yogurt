@@ -11,7 +11,6 @@ public class Knowledge{
 
 	public Flammable flammable;
 	public MeleeWeapon meleeWeapon;
-
 	public Knowledge(GameObject o){
 		this.obj = o;
 		transform = o.transform;
@@ -47,6 +46,7 @@ public class PersonalAssessment{
 }
 
 public class Awareness : MonoBehaviour, IMessagable {
+	public List<GameObject> initialAwareness;
 	private GameObject sightCone;
 	Transform cachedTransform;
 	public new Transform transform
@@ -60,13 +60,13 @@ public class Awareness : MonoBehaviour, IMessagable {
 				return cachedTransform;
 			}
 	}
+	// public 
 	public Transform sightConeTransform;
 	private Vector3 sightConeScale;
 	private Controllable control;
 	private float speciousPresent; 
 	private List<GameObject> fieldOfView = new List<GameObject>();
 	private bool viewed;
-	// public bool unconscious;
 	public Controllable.HitState hitState;
 	public Ref<GameObject> nearestEnemy = new Ref<GameObject>(null);
 	public Ref<GameObject> nearestFire = new Ref<GameObject>(null);
@@ -78,6 +78,10 @@ public class Awareness : MonoBehaviour, IMessagable {
 		sightConeScale = sightCone.transform.localScale;
 		sightConeTransform = sightCone.transform;
 		sightConeTransform.parent = transform;
+		if (initialAwareness.Count > 0){
+			fieldOfView = initialAwareness;
+			Perceive();
+		}
 	}
 	public List<GameObject> FindObjectWithName(string targetName){
 		List<GameObject> returnArray = new List<GameObject>();
@@ -238,6 +242,13 @@ public class Awareness : MonoBehaviour, IMessagable {
 		if (incoming is MessageThreaten){
 			PersonalAssessment assessment = FormPersonalAssessment(incoming.messenger.gameObject);
 			assessment.status = PersonalAssessment.friendStatus.enemy;
+		}
+		if (incoming is MessageInventoryChanged){
+			MessageInventoryChanged message = (MessageInventoryChanged)incoming;
+			if (message.holding != null){
+				fieldOfView.Add(message.holding);
+				// Perceive();
+			}
 		}
 	}
 }
