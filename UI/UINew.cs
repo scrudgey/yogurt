@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 
 public class UINew: Singleton<UINew> {
-	public enum MenuType{none, escape, inventory, speech, closet, scriptSelect, commercialReport, newDayReport, email, diary, dialogue}
+	public enum MenuType{none, escape, inventory, speech, closet, scriptSelect, commercialReport, newDayReport, email, diary, dialogue, phone}
 	private Dictionary<MenuType, string> menuPrefabs = new Dictionary<MenuType, string>{
 		{MenuType.escape, 					"UI/PauseMenu"},
 		{MenuType.inventory, 				"UI/InventoryScreen"},
@@ -14,7 +14,8 @@ public class UINew: Singleton<UINew> {
 		{MenuType.newDayReport, 			"UI/NewDayReport"},
 		{MenuType.email, 					"UI/EmailUI"},
 		{MenuType.diary,					"UI/Diary"},
-		{MenuType.dialogue,					"UI/DialogueMenu"}
+		{MenuType.dialogue,					"UI/DialogueMenu"},
+		{MenuType.phone,					"UI/PhoneMenu"}
 	};
 	private static List<MenuType> actionRequired = new List<MenuType>{MenuType.commercialReport, MenuType.diary};
 	private GameObject activeMenu;
@@ -47,7 +48,7 @@ public class UINew: Singleton<UINew> {
 	public string actionTextString;
 	private Text recordText;
 	private GameObject recordFinish;
-	private Stack<GameObject> collectedStack = new Stack<GameObject>();
+	private Stack<AchievementPopup.CollectedInfo> collectedStack = new Stack<AchievementPopup.CollectedInfo>();
 	private Stack<Achievement> achievementStack = new Stack<Achievement>();
 	public bool achievementPopupInProgress;
 	public Texture2D cursorDefault;
@@ -95,16 +96,6 @@ public class UINew: Singleton<UINew> {
 		} else {
 			Cursor.SetCursor(cursorDefault, new Vector2(28, 16), CursorMode.Auto);
 		}
-		// RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-        // if (hit){
-        //     if (hit.collider != null && !Controller.Instance.forbiddenColliders.Contains(hit.collider.tag)){
-		// 		Cursor.SetCursor(cursorHighlight, new Vector2(14, 8), CursorMode.Auto);
-        //     } else {
-		// 		Cursor.SetCursor(cursorDefault, new Vector2(14, 8), CursorMode.Auto);
-		// 	}
-        // } else {
-		// 	Cursor.SetCursor(cursorDefault, new Vector2(14, 8), CursorMode.Auto);
-		// }
 	}
 	public void ConfigureUIElements() {
 		init = true;
@@ -252,7 +243,6 @@ public class UINew: Singleton<UINew> {
 			recordFinish.SetActive(false);	
 		}
 	}
-
 	public void PopupCounter(string text, float initValue, float finalValue, Commercial commercial){
 		GameObject existingPop = GameObject.Find("Poptext(Clone)");
 		if (existingPop == null){
@@ -272,8 +262,10 @@ public class UINew: Singleton<UINew> {
 			poptext.finalValueList.Add(finalValue);
 		}
     }
-
 	public void PopupCollected(GameObject obj){
+		PopupCollected(new AchievementPopup.CollectedInfo(obj));
+	}
+	public void PopupCollected(AchievementPopup.CollectedInfo info){
 		GameObject existingPop = GameObject.Find("AchievementPopup(Clone)");
 		if (existingPop == null){
 			GameObject pop = Instantiate(Resources.Load("UI/AchievementPopup")) as GameObject;
@@ -281,10 +273,10 @@ public class UINew: Singleton<UINew> {
 			popCanvas.worldCamera = GameManager.Instance.cam;
 			AchievementPopup achievement = pop.GetComponent<AchievementPopup>();
 
-			achievement.CollectionPopup(obj);
+			achievement.CollectionPopup(info);
 			achievementPopupInProgress = true;
 		} else {
-			collectedStack.Push(obj);
+			collectedStack.Push(info);
 		}
 	}
 
@@ -416,11 +408,11 @@ public class UINew: Singleton<UINew> {
 		foreach(actionButton button in buttons){
 			Vector2 initLocation = (Vector2)target.transform.position + Toolbox.Instance.RotateZ(Vector2.right/4, angle);
 			Vector2 initPosition = RectTransformUtility.WorldToScreenPoint(renderingCamera, initLocation);
-
+			// UICanvas.GetComponent<CanvasScaler>()
 			n++;
 			// instantiate button
 			button.gameobject.transform.SetParent(UICanvas.transform, false);
-			button.gameobject.transform.localPosition = (initPosition - centerPosition)/2;
+			button.gameobject.transform.localPosition = (initPosition - centerPosition);
 			if (priorBody){
 				SpringJoint2D spring = button.gameobject.AddComponent<SpringJoint2D>();
 				spring.autoConfigureDistance = false;
@@ -450,6 +442,7 @@ public class UINew: Singleton<UINew> {
 			priorBody = button.gameobject.GetComponent<Rigidbody2D>();
 			angle += incrementAngle;
 		}
+		// Debug.Break();
 		buttonAnchor.transform.position = target.transform.position;
 		buttonAnchor.transform.SetParent(target.transform);
 		return buttonAnchor;
