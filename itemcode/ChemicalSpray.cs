@@ -1,12 +1,7 @@
 ﻿using UnityEngine;
-// using System.Collections;
-
 public class ChemicalSpray: MonoBehaviour {
-
 	public GameObject collisionPlume;
 	private float height;
-//	private float vy = 0;
-
 	void OnCollisionEnter2D(Collision2D coll){
 		Instantiate(collisionPlume,transform.position,Quaternion.identity);
 		Destroy(gameObject);
@@ -14,20 +9,13 @@ public class ChemicalSpray: MonoBehaviour {
 		if (flam){
 			if (flam.onFire){
 				flam.onFire = false;
-	//			flam.heat -= 5* Time.deltaTime;
-				flam.heat = -200f;
+				flam.heat = -10f;
+
+				OccurrenceFire fireData = new OccurrenceFire();
+				fireData.objectName = Toolbox.Instance.CloneRemover(coll.gameObject.name);
+				fireData.extinguished = true;
+				Toolbox.Instance.OccurenceFlag(gameObject, fireData);
 			}
 		}
 	}
-
-//	void Update(){
-//		vy += Time.deltaTime * 0.1f;
-//		height -= vy;
-//		Vector3 temppos = transform.position;
-//		temppos.y -= vy * Time.deltaTime;
-//		transform.position = temppos;
-//		if (height < 1f)
-//			Destroy(gameObject);
-//	}
-
 }
