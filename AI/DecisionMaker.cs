@@ -19,10 +19,12 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 	public Personality personality;
 	public PriorityAttack priorityAttack;
 	public PriorityRunAway priorityRunAway;
+	public List<GameObject> initialAwareness;
 	public Controllable.HitState hitState;
 	void Start() {
 		// make sure there's Awareness
-		Toolbox.Instance.GetOrCreateComponent<Awareness>(gameObject);
+		Awareness awarenes = Toolbox.Instance.GetOrCreateComponent<Awareness>(gameObject);
+		awarenes.initialAwareness = initialAwareness;
 
 		// initialize thought bubble
 		thought = Instantiate(Resources.Load("UI/thoughtbubble"), gameObject.transform.position, Quaternion.identity) as GameObject;
@@ -75,7 +77,7 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 			// Debug.Log(activePriority.ToString() + " " + activePriority.Urgency(personality).ToString());
 			activePriority.DoAct();
 			// thoughtText = activePriority.goal.
-			// Debug.Log(activePriority.GetType());
+			// Debug.Log(gameObject.name + " " + activePriority.GetType().ToString());
 		}
 	}
 }
