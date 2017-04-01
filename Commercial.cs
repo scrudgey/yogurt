@@ -9,7 +9,8 @@ public enum CommercialComparison{
 [XmlRoot("Commercial")]
 public class Commercial {
     public string name = "default";
-    public string description = "default";
+    public string description = "default";	
+	public string cutscene = "default";
     public float reward = 0;
 	public SerializableDictionary<string, CommercialProperty> properties = new SerializableDictionary<string, CommercialProperty>(); 
     public List<string> unlockUponCompletion;
@@ -25,10 +26,8 @@ public class Commercial {
         if (property == null){
             properties[valname] = new CommercialProperty();
         }
-        
         float initvalue = properties[valname].val;
         float finalvalue = initvalue + increment;
-        
         string poptext = "default";
         Occurrence.KeyDescriptions.TryGetValue(valname, out poptext);
         if (poptext != "default"){
@@ -46,7 +45,6 @@ public class Commercial {
 			CommercialProperty otherProperty = null;
 			other.properties.TryGetValue(key, out otherProperty);
             properties.TryGetValue(key, out myProperty);
-            
 			if (myProperty == null){
 				requirementsMet = false;
 				break;
@@ -77,7 +75,6 @@ public class Commercial {
 			if (!requirementsMet)
 			break;
 		}
-		
 		return requirementsMet;
 	}
 }
