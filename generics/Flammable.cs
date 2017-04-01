@@ -67,7 +67,7 @@ public class Flammable : MonoBehaviour {
 			fireParticles.Play();
 			onFire = true;
 			audioSource.PlayOneShot(igniteSounds[Random.Range(0, 1)]);
-			audioSource.loop=true;
+			audioSource.loop = true;
 			audioSource.clip = burnSounds;
 			audioSource.Play();
 
