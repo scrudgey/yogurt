@@ -27,6 +27,7 @@ public class MySaver {
 		{typeof(Head),								() => new HeadHandler() },
 		{typeof(Outfit),							() => new OutfitHandler() },
 		{typeof(Cabinet),							() => new CabinetHandler() },
+		{typeof(Intrinsics),						() => new IntrinsicsHandler() },
 	};
 	public static void CleanupSaves(){
 		string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
@@ -215,7 +216,7 @@ public class MySaver {
 						try{
 							var handler = get();
 							PersistentComponent data = new PersistentComponent();
-							if ( persistent.persistentChildComponents.TryGetValue( childComponent.GetType().ToString() , out data ) )
+							if (persistent.persistentChildComponents.TryGetValue(childComponent.GetType().ToString(), out data ))
 								handler.LoadData(childComponent, data);
 						} catch {
 							Debug.Log("Problem configuring child component "+lastChildComponent);
