@@ -9,6 +9,7 @@ public class Occurrence : MonoBehaviour {
         {"yogurt_vomit", "yogurt emesis event"},
         {"yogurt_vomit_eat", "eating yogurt vomit"},
         {"yogurt_floor", "yogurt eaten off the floor"},
+        {"table_fire", "table set on fire"}
 	};
 }
 /*
@@ -34,7 +35,7 @@ public class OccurrenceData
         }
     }
     protected virtual bool MatchSpecific(OccurrenceData otherData){
-        bool match = false;
+        bool match = true;
         match &= disturbing == otherData.disturbing;
         match &= disgusting == otherData.disgusting;
         match &= chaos == otherData.chaos;
@@ -53,9 +54,20 @@ public class OccurrenceData
 [System.Serializable]
 public class OccurrenceFire : OccurrenceData {
     public string objectName;
+    public bool extinguished;
     protected override bool MatchSpecific(OccurrenceData data){
         OccurrenceFire otherData = (OccurrenceFire)data;
         return objectName == otherData.objectName;
+    }
+    public override void UpdateCommercialOccurrences(Commercial commercial){
+        // I can eventually modify this to only allow values 0, 1 if necessary
+        if (objectName == "table"){
+            if (extinguished == false){
+                commercial.IncrementValue("table_fire", 1f);
+            } else {
+                commercial.IncrementValue("table_fire", -1f);
+            }
+        }
     }
 }
 [System.Serializable]
@@ -108,8 +120,3 @@ public class OccurrenceSpeech : OccurrenceData {
         return line == otherData.line;
     }
 }
-
-
-
-
-
