@@ -16,13 +16,14 @@ public class Hurtable : MonoBehaviour, IMessagable {
 	public float health;
 	public float maxHealth;
 	public float bonusHealth;
-	private Intrinsic myIntrinsic = new Intrinsic();
+	public Intrinsic myIntrinsic = new Intrinsic();
 	private float hitStunCounter;
 	private bool doubledOver;
 	public float impulse;
 	private float downedTimer;
 	private float ouchFrequency = 0.1f;
 	public void TakeDamage(damageType type, float amount){
+		bool tookDamage = false;
 		if (!myIntrinsic.invulnerable.boolValue){
 			switch (type){
 			case damageType.physical:
@@ -30,11 +31,13 @@ public class Hurtable : MonoBehaviour, IMessagable {
 					float netDam = Mathf.Max(amount - myIntrinsic.armor.floatValue, 0);
 					health -= netDam;
 					impulse += netDam;
+					tookDamage = true;
 				}
 				break;
 			case damageType.fire:
 				if (!myIntrinsic.fireproof.boolValue){
 					health -= amount;
+					tookDamage = true;
 				}
 				break;
 			default:
@@ -49,7 +52,7 @@ public class Hurtable : MonoBehaviour, IMessagable {
 			hitStunCounter = 0.25f;
 		}
 
-		if (Random.Range(0.0f, 1.0f) < ouchFrequency){
+		if (tookDamage && Random.Range(0.0f, 1.0f) < ouchFrequency){
 			MessageSpeech speechMessage = new MessageSpeech();
 			speechMessage.nimrodKey = true;
 			switch(type){
@@ -72,6 +75,7 @@ public class Hurtable : MonoBehaviour, IMessagable {
 	}
 	public void ReceiveMessage(Message incoming){
 		if (incoming is MessageNetIntrinsic){
+			// Debug.Log("net intrinsic message arrive");
 			MessageNetIntrinsic intrins = (MessageNetIntrinsic)incoming;
 			myIntrinsic = intrins.netIntrinsic;
 			if (intrins.netIntrinsic.bonusHealth.floatValue > bonusHealth){
