@@ -232,14 +232,29 @@ public class Toolbox : Singleton<Toolbox> {
 			receiver.ReceiveMessage(message);
 		}
 	}
-	public void AddIntrinsic(GameObject host, GameObject donor){
+	public List<Intrinsic> AddIntrinsic(GameObject host, GameObject donor){
 		Intrinsics intrinsics = GetOrCreateComponent<Intrinsics>(host);
 		Intrinsics donorIntrinsics = GetOrCreateComponent<Intrinsics>(donor);
-		intrinsics.AddIntrinsic(donorIntrinsics);
+		return intrinsics.AddIntrinsic(donorIntrinsics);
 	}
 	public void RemoveIntrinsic(GameObject host, GameObject donor){
 		Intrinsics intrinsics = GetOrCreateComponent<Intrinsics>(host);
 		Intrinsics donorIntrinsics = GetOrCreateComponent<Intrinsics>(donor);
 		intrinsics.RemoveIntrinsic(donorIntrinsics);
+	}
+	public string DirectionToString(Vector2 direction){
+		float angle = Toolbox.Instance.ProperAngle(direction.x, direction.y);
+		string lastPressed = "right";
+		// change lastpressed because this is relevant to animation
+		if (angle > 315 || angle < 45){
+			lastPressed = "right";
+		} else if (angle >= 45 && angle <= 135) {
+			lastPressed = "up";
+		} else if (angle >= 135 && angle < 225) {
+			lastPressed = "left";
+		} else if (angle >= 225 && angle < 315) {
+			lastPressed = "down";
+		}
+		return lastPressed;
 	}
 }
