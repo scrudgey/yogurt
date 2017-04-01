@@ -3,15 +3,21 @@ using System.Collections.Generic;
 // using System.Reflection;
 public class Intrinsics : MonoBehaviour {
 	public List<Intrinsic> intrinsics = new List<Intrinsic>();
-	public void AddIntrinsic(Intrinsics i){
+	public List<Intrinsic> AddIntrinsic(Intrinsics i){
 		foreach(Intrinsic intrinsic in i.intrinsics){
 			intrinsics.Add(intrinsic);
 		}
 		IntrinsicsChanged();
+		return i.intrinsics;
 	}
 	public void RemoveIntrinsic(Intrinsics i){
-		foreach(Intrinsic intrinsic in i.intrinsics){
-			intrinsics.Remove(intrinsic);
+		foreach(Intrinsic removeThis in i.intrinsics){
+			foreach(Intrinsic intrinsic in intrinsics){
+				if (intrinsic.Equals(removeThis)){
+					intrinsics.Remove(intrinsic);
+					break;
+				}
+			}
 		}
 		IntrinsicsChanged();
 	}
@@ -19,6 +25,8 @@ public class Intrinsics : MonoBehaviour {
 		Intrinsic netIntrinsic = new Intrinsic();
 		foreach(Intrinsic i in intrinsics){
 			netIntrinsic.telepathy.boolValue = netIntrinsic.telepathy.boolValue || i.telepathy.boolValue;
+			netIntrinsic.fireproof.boolValue = netIntrinsic.fireproof.boolValue || i.fireproof.boolValue;
+			netIntrinsic.noPhysicalDamage.boolValue = netIntrinsic.noPhysicalDamage.boolValue || i.noPhysicalDamage.boolValue;
 			netIntrinsic.armor.floatValue += i.armor.floatValue;
 			netIntrinsic.speed.floatValue += i.speed.floatValue;
 			netIntrinsic.bonusHealth.floatValue += i.bonusHealth.floatValue;
@@ -29,8 +37,6 @@ public class Intrinsics : MonoBehaviour {
 		Intrinsic net = NetIntrinsic();
 		MessageNetIntrinsic message = new MessageNetIntrinsic();
 		message.netIntrinsic = net;
-		// MessageIntrinsic message = new MessageIntrinsic();
-		// message.netIntrinsic = net;
 		Toolbox.Instance.SendMessage(gameObject, this, message);
 		if (GameManager.Instance.playerObject == gameObject)
 			GameManager.Instance.FocusIntrinsicsChanged(net);
@@ -46,6 +52,7 @@ public class Intrinsics : MonoBehaviour {
 }
 [System.Serializable]
 public class Intrinsic {
+	public bool persistent;
 	public Buff telepathy = new Buff();
 	public Buff speed = new Buff();
 	public Buff bonusHealth = new Buff();
@@ -61,6 +68,18 @@ public class Intrinsic {
 		fireproof.Update();
 		noPhysicalDamage.Update();
 		invulnerable.Update();
+	}
+	public bool Equals(Intrinsic other){
+		bool match = true;
+        match &= telepathy.boolValue == other.telepathy.boolValue;
+		match &= fireproof.boolValue == other.fireproof.boolValue;
+		match &= invulnerable.boolValue == other.invulnerable.boolValue;
+		match &= noPhysicalDamage.boolValue == other.noPhysicalDamage.boolValue;
+		
+		match &= speed.floatValue == other.speed.floatValue;
+		match &= bonusHealth.floatValue == other.bonusHealth.floatValue;
+		match &= armor.floatValue == other.armor.floatValue;
+        return match;
 	}
 }
 
