@@ -108,6 +108,8 @@ public class Humanoid : Controllable, IMessagable {
 		}
 	}
 	public override void ReceiveMessage(Message message){
+		if (!LoadInitialized)
+			LoadInit();
 		base.ReceiveMessage(message);
 		if (message is MessageNetIntrinsic){
 			MessageNetIntrinsic intrins = (MessageNetIntrinsic)message;
