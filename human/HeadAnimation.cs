@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 
 public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
-	private Controllable controllable;
 	private bool speaking;
 	private string _spriteSheet;
 	private string spriteSheet{
@@ -25,7 +24,6 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
 	}
 	private Sprite[] sprites;
 	private SpriteRenderer spriteRenderer;
-	private SpriteRenderer parentSprite;
 	public string baseName;
 	private int baseFrame;
 	private int frame;
@@ -36,25 +34,21 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
 	public Color crumbColor = Color.white;
 	private float eatingCountDown;
 	private float vomitCountDown;
-	private Head head;
+	// private Head head;
 	private Controllable.HitState hitState;
-
+	private string lastPressed;
 	void LoadSprites(){
 		sprites = Resources.LoadAll<Sprite>("spritesheets/" + spriteSheet);
 	}
-	
 	public void UpdateSequence(){
 		GetComponent<Animation>().Play(sequence);
 	}
-
 	void Start () {
 		spriteRenderer = GetComponent<SpriteRenderer>();
-		head = GetComponent<Head>();
-		foreach (SpriteRenderer renderer in GetComponentsInParent<SpriteRenderer>()){
-			if (renderer != spriteRenderer)
-				parentSprite = renderer;
-		}
-		controllable = GetComponentInParent<Controllable>();
+		// head = GetComponent<Head>();
+		MessageDirectable directableMessage = new MessageDirectable();
+		directableMessage.addDirectable = (IDirectable)this;
+		Toolbox.Instance.SendMessage(gameObject, this, directableMessage);
 
 		ParticleSystem[] ps = GetComponentsInChildren<ParticleSystem>();
 		foreach (ParticleSystem p in ps){
@@ -72,7 +66,6 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
 		}
 		crumbs = GetComponentInChildren<ParticleSystem>();
 	}
-
 	public void ReceiveMessage(Message incoming){
 		if (incoming is MessageHead){
 			MessageHead message = (MessageHead)incoming;
@@ -80,7 +73,9 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
 				case MessageHead.HeadType.eating:
 				crumbColor = message.crumbColor;
 				eating = message.value;
-				crumbs.startColor = crumbColor;
+				var mainModule = crumbs.main;
+				mainModule.startColor = crumbColor;
+
 				if (eating){
 					eatingCountDown = 2f;
 					if (!crumbs.isPlaying)
@@ -90,7 +85,8 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
 
 				case MessageHead.HeadType.vomiting:
 				vomiting = message.value;
-				vomit.startColor = crumbColor;
+				mainModule = crumbs.main;
+				mainModule.startColor = crumbColor;
 				if (vomiting){
 					vomitCountDown = 1.5f;
 					if (!vomit.isPlaying)
@@ -106,13 +102,11 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
 				break;
 			}	
 		}
-
 		if (incoming is MessageHitstun){
 			MessageHitstun message = (MessageHitstun)incoming;
 			hitState = message.hitState;
 		}
 	}
-
 	void Update () {
 		string updateSheet = baseName;
 		string updateSequence = "generic";
@@ -122,7 +116,6 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
 		}else{
 			updateSequence = updateSequence + "_idle";
 		}
-
 		if (eatingCountDown > 0){
 			eatingCountDown -= Time.deltaTime;
 			if (eatingCountDown < 0){
@@ -137,10 +130,8 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
 				vomit.Stop();
 			}
 		}
-
 		updateSheet = updateSheet + "_head";
-
-		switch (controllable.lastPressed){
+		switch (lastPressed){
 		case "down":
 			baseFrame = 2;
 			break;
@@ -151,31 +142,17 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
 			baseFrame = 0;
 			break;
 		}
-
 		if (hitState > Controllable.HitState.none && !speaking && !eating){
 			baseFrame +=1 ;
 		}
-
 		spriteSheet = updateSheet;
 		sequence = updateSequence;
-
-		if (parentSprite)
-			spriteRenderer.sortingOrder = parentSprite.sortingOrder;
-		if (head.hatRenderer)
-			head.hatRenderer.sortingOrder = parentSprite.sortingOrder + 1;
-
 	}
-
 	public void SetFrame(int animationFrame){
 		frame = animationFrame + baseFrame;
 		spriteRenderer.sprite = sprites[frame];
 	}
-
 	public void DirectionChange(Vector2 newdir){
-		// if (newdir.x >= 0){
-		// 	spriteRenderer.flipX = false;
-		// } else {
-		// 	spriteRenderer.flipX = true;
-		// }
+		lastPressed = Toolbox.Instance.DirectionToString(newdir);
 	}
 }
