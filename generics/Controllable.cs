@@ -173,6 +173,13 @@ public class Controllable : MonoBehaviour, IMessagable {
 			}
 			UpdateActions(inv);
 		}
+		if (incoming is MessageDirectable){
+			MessageDirectable message = (MessageDirectable)incoming;
+			if (message.addDirectable != null)
+				directables.Add(message.addDirectable);
+			if (message.removeDirectable != null)
+				directables.Remove(message.removeDirectable);
+		}
 	}
 	public void UpdateActions(){
 		Inventory inv = GetComponent<Inventory>();
