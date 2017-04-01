@@ -60,7 +60,7 @@ public partial class GameManager : Singleton<GameManager> {
 	private float intervalTimer;
 	public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
 	public AudioSource publicAudio;
-	public bool debug = true;
+	public bool debug = false;
     void Start(){
 		// Cursor.SetCursor((Texture2D)Resources.Load("UI/cursor1"), Vector2.zero, CursorMode.Auto);
 		if (data == null){
@@ -96,7 +96,6 @@ public partial class GameManager : Singleton<GameManager> {
 	}
 	public bool InCutscene(){
 		if (SceneManager.GetActiveScene().buildIndex > 2){
-		// if (CutsceneManager.Instance.cutscene == null){
             return false;
 		} else {
 			return true;
@@ -104,7 +103,6 @@ public partial class GameManager : Singleton<GameManager> {
 	} 
 	public void FocusIntrinsicsChanged(Intrinsic intrinsic){
 		if (intrinsic.telepathy.boolValue){
-			Toolbox.Instance.SendMessage(playerObject, this, new MessageSpeech("I can hear thoughts!"));
 			cam.cullingMask |= 1 << LayerMask.NameToLayer("thoughts");
 		} else {
 			try {
@@ -165,6 +163,7 @@ public partial class GameManager : Singleton<GameManager> {
 				data = InitializedGameData();
 			// find or spawn the player character 
 			playerObject = GameObject.Find("Tom");	
+			// playerObject = GameObject.Find("Fireman");	
 			if (!playerObject){
 				playerObject = GameObject.Find("Tom(Clone)");
 			}
@@ -206,8 +205,12 @@ public partial class GameManager : Singleton<GameManager> {
 							advancedAnimation.baseName = "pajamas";
 							outfit.wornUniformName = "pajamas";
 						}
+						Inventory focusInv = playerObject.GetComponent<Inventory>();
+						if (focusInv){
+							focusInv.ClearInventory();
+							UINew.Instance.UpdateInventoryButton(focusInv);
+						}
 						MySaver.Save();
-						// if (data.days > 1)
 						awaitNewDayPrompt = CheckNewDayPrompt();
 					}
 				}
@@ -310,6 +313,9 @@ public partial class GameManager : Singleton<GameManager> {
         data.unlockedCommercials = new List<Commercial>();
 		data.newUnlockedCommercials = new List<Commercial>();
         data.unlockedCommercials.Add(LoadCommercialByName("eat1"));
+		if (debug){
+       		data.unlockedCommercials.Add(LoadCommercialByName("eat2"));
+		}
         data.completeCommercials = new List<Commercial>();
 
 		data.emails.Add(Email.LoadEmail("test"));
@@ -420,7 +426,7 @@ public partial class GameManager : Singleton<GameManager> {
 		return;
 		Instantiate(Resources.Load("prefabs/"+name), playerObject.transform.position, Quaternion.identity);
 		Instantiate(Resources.Load("particles/poof"), playerObject.transform.position, Quaternion.identity);
-		publicAudio.PlayOneShot(Resources.Load("sounds/pop", typeof(AudioClip)) as AudioClip);// Resources.Load("sounds/pop", typeof(AudioClip)) as AudioClip;
+		publicAudio.PlayOneShot(Resources.Load("sounds/pop", typeof(AudioClip)) as AudioClip);
 		data.itemCheckedOut[name] = true;
 	}
 	public void CheckAchievements(){
