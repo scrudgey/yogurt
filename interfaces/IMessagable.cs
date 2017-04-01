@@ -5,11 +5,9 @@ public interface IMessagable
 {
 	void ReceiveMessage(Message message);
 }
-
 public class Message {
 	public Component messenger;
 }
-
 public class MessageAnimation : Message {
 	public enum AnimType {none, holding, throwing, swinging, fighting, punching, outfit};
 	public AnimType type;
@@ -21,23 +19,19 @@ public class MessageAnimation : Message {
 		value = initVal;
 	}
 }
-
-// public class MessageIntrinsic : Message {
-// 	public Intrinsic netIntrinsic;	
-// 	public Intrinsics addIntrinsic;
-// 	public Intrinsics removeIntrinsic;
-// }
+public class MessageDirectable: Message{
+	public IDirectable addDirectable;
+	public IDirectable removeDirectable;
+}
 public class MessageNetIntrinsic: Message {
 	public Intrinsic netIntrinsic;
 }
-
 public class MessageHead : Message {
 	public enum HeadType {none, eating, vomiting, speaking};
 	public HeadType type;
 	public bool value;
 	public Color crumbColor;
 }
-
 public class MessageSpeech : Message {
 	public string phrase;
 	public string swear = "";
@@ -55,7 +49,6 @@ public class MessageSpeech : Message {
 		this.swear = swear;
 	}
 }
-
 public class MessageDamage : Message {
 	public float amount;
 	public damageType type;
@@ -68,32 +61,23 @@ public class MessageDamage : Message {
 		this.type = type;
 	}
 }
-
 public class MessageHitstun : Message {
 	public Controllable.HitState hitState;
 	public bool doubledOver;
 }
-public class MessageDeath : Message {
-	public bool dead;
-}
-
 public class MessageInventoryChanged : Message {
 	public GameObject dropped;
+	public GameObject holding;
 }
-
 public class MessagePunch : Message {
 }
-
 public class MessageScript : Message {
 	public enum TomAction {none, yogurt}
 	public string watchForSpeech;
 	public string coStarLine;
 	public TomAction tomAct;
 }
-
 public class MessageInsult : Message {
 }
-
-public class MessageThreaten : Message {
-	
+public class MessageThreaten : Message {	
 }
