@@ -39,20 +39,16 @@ public class OrderByY : MonoBehaviour {
 			targetRenderer = target.GetComponentInChildren<SpriteRenderer>();
 		}
 		if (targetRenderer == null){
-			Debug.Log("could not locate spriterenderer component for yorder follower");
 			return;
 		}
 		followers.Add(new Follower(targetRenderer, offset));
 	}
 	public void RemoveFollower(GameObject target){
-		// Debug.Log(target);
 		List<Follower> tempFollowers = new List<Follower>();
 		foreach(Follower follower in followers)
 			tempFollowers.Add(follower);
 		foreach(Follower follower in followers){
-			Debug.Log(follower.renderer.gameObject);
 			if (follower.renderer.gameObject == target){
-				// Debug.Log("removing follower");
 				tempFollowers.Remove(follower);
 			}
 		}
