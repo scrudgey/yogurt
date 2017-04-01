@@ -1,36 +1,27 @@
 ﻿using UnityEngine;
-// using System.Collections;
-
-public class HatAnimation : MonoBehaviour {
-
-	private Controllable controllable;
+public class HatAnimation : MonoBehaviour, IDirectable {
 	public Sprite rightSprite;
 	public Sprite downSprite;
 	public Sprite upSprite;
 	private SpriteRenderer spriteRenderer;
-	private string _direction;
-	public string direction{
-		get{ return _direction;}
-		set{
-			if (_direction != value){
-				_direction = value;
-				UpdateSprite();
-			}
-		}
-	}
-
-	public void CheckDependencies(){
-		controllable = GetComponentInParent<Controllable>();
-	}
-
+	public string lastPressed;
 	void Start () {
 		spriteRenderer = GetComponent<SpriteRenderer>();
-		controllable = GetComponentInParent<Controllable>();
 	}
-
-
+	public void RegisterDirectable(){
+		MessageDirectable directableMessage = new MessageDirectable();
+		directableMessage.addDirectable = (IDirectable)this;
+		Toolbox.Instance.SendMessage(gameObject, this, directableMessage);
+	}
+	public void RemoveDirectable(){
+		MessageDirectable directableMessage = new MessageDirectable();
+		directableMessage.removeDirectable = (IDirectable)this;
+		Toolbox.Instance.SendMessage(gameObject, this, directableMessage);
+	}
 	public void UpdateSprite(){
-		switch (controllable.lastPressed){
+		if (spriteRenderer == null)
+			return;
+		switch (lastPressed){
 		case "down":
 			spriteRenderer.sprite = downSprite;
 			break;
@@ -41,5 +32,13 @@ public class HatAnimation : MonoBehaviour {
 			spriteRenderer.sprite = rightSprite;
 			break;
 		}
+	}
+	public void DirectionChange(Vector2 newdir){
+		lastPressed = Toolbox.Instance.DirectionToString(newdir);
+		UpdateSprite();
+	}
+	public void OnDestroy(){
+		// Debug.Log("hatanimation on OnDestroy");
+		// RemoveDirectable();
 	}
 }
