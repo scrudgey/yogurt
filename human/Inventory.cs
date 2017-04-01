@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 	public List<GameObject> items;
+	public GameObject initHolding;
 	public float strength;
 	public Pickup holding{
 		get {return _holding;}
@@ -17,6 +18,8 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 				invMessage.dropped = _holding.gameObject;
 			}
 			_holding = value;
+			if (value != null)
+				invMessage.holding = value.gameObject;
 			Toolbox.Instance.SendMessage(gameObject, this, invMessage);
 			if (value != null)
 				GameManager.Instance.CheckItemCollection(value.gameObject, gameObject);
@@ -35,6 +38,18 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 	void Start(){
 		if (!LoadInitialized)
 			LoadInit();
+		if (initHolding){
+			if (initHolding.activeInHierarchy){
+				initHolding.BroadcastMessage("LoadInit", SendMessageOptions.DontRequireReceiver);
+				Pickup pickup = initHolding.GetComponent<Pickup>();
+				GetItem(pickup);
+			} else {
+				GameObject instance = Instantiate(initHolding) as GameObject;
+				instance.BroadcastMessage("LoadInit", SendMessageOptions.DontRequireReceiver);
+				Pickup pickup = instance.GetComponent<Pickup>();
+				GetItem(pickup);
+			}
+		}
 	}
 	public void LoadInit(){
 		holdpoint = transform.Find("holdpoint");
@@ -290,6 +305,9 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 	public void EndPunch(){
 		MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.punching, false);
 		Toolbox.Instance.SendMessage(gameObject, this, anim);
+	}
+	public void ClearInventory(){
+		items = new List<GameObject>();
 	}
 	public void ReceiveMessage(Message m){
 		if (m is MessageAnimation){
