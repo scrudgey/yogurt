@@ -17,9 +17,9 @@ namespace AI {
 		public GameObject gameObject;
 		public Controllable control;
 		public float slewTime;
+		private bool fulfillingRequirements = true;
 		public string goalThought = "I'm just doing my thing.";
 		public Goal(GameObject g, Controllable c){
-			// Init(g, c);
 			gameObject = g;
 			control = c;
 			slewTime = Random.Range(0.1f, 0.5f);
@@ -33,12 +33,19 @@ namespace AI {
 			return successCondition.Evaluate();
 		}
 		public void Update(){
+			// if i have any unmet requirements, my update goes to the first unmet one.
 			foreach (Goal requirement in requirements){
 				if (requirement.Evaluate() != status.success){
+					fulfillingRequirements = true;
 					requirement.Update();
 					return;
 				}
 			}
+			if (fulfillingRequirements){
+				// Debug.Log(control.gameObject.name + " " + this.ToString() + " requirements met");;
+				control.ResetInput();
+			}
+			fulfillingRequirements= false;
 			if (slewTime > 0){
 				slewTime -= Time.deltaTime;
 				return;
@@ -80,7 +87,7 @@ namespace AI {
 		}
 		public GoalWalkToObject(GameObject g, Controllable c, Ref<GameObject> t) : base(g, c){
 			target = t;
-			successCondition = new ConditionCloseToObject(g, target, 0.75f);
+			successCondition = new ConditionCloseToObject(g, target, 0.55f);
 			routines.Add(new RoutineWalkToGameobject(g, c, target));
 		}
 	}
