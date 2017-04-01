@@ -7,6 +7,7 @@ using System.Collections.Generic;
 public class Cutscene {
     public virtual void Update(){}
     public virtual void Configure(){}
+    public virtual void EscapePressed(){}
     public bool complete;
 }
 
@@ -16,10 +17,12 @@ public class CutsceneBoardroom : Cutscene {
     Regex lineHook = new Regex(@"^(.*):(.+)");
     Regex endHook = new Regex(@"END");
     private float timer;
+    private float globalTimer;
     private float stopTextFade = 1.5f;
     private float startDialogue = 4.5f;
     private bool inDialogue;
     Text settingText;
+    Text escPrompt;
     GameObject longShot;
     Speech moe;
     Speech larry;
@@ -31,6 +34,8 @@ public class CutsceneBoardroom : Cutscene {
         longShot = GameObject.Find("long_shot");
         GameObject canvas = GameObject.Find("Canvas");
         settingText = canvas.transform.Find("text").GetComponent<Text>();
+        escPrompt = canvas.transform.Find("escPrompt").GetComponent<Text>();
+        escPrompt.gameObject.SetActive(false);
         Color blank = new Color(255, 255, 255, 0);
         settingText.color = blank;
         GameObject moeObj = GameObject.Find("moe");
@@ -45,6 +50,7 @@ public class CutsceneBoardroom : Cutscene {
     }
     public override void Update(){
         timer += Time.deltaTime;
+        globalTimer += Time.deltaTime;
         if (!inDialogue){
             if (timer < stopTextFade){
                 Color col = settingText.color;
@@ -56,9 +62,22 @@ public class CutsceneBoardroom : Cutscene {
                 longShot.SetActive(false);
                 settingText.gameObject.SetActive(false);
                 timer = 0;
-                LoadScript("test");
+                globalTimer = 0;
+                if (GameManager.Instance.activeCommercial == null){
+                    // LoadScript("test");
+                    LoadScript("eat2");
+                } else {
+                    if (!LoadScript(GameManager.Instance.activeCommercial.cutscene))
+                        LoadScript("test");
+                }
             }
         } else {
+            if (globalTimer < stopTextFade){
+                escPrompt.gameObject.SetActive(true);
+                Color col = escPrompt.color;
+                col.a = (float)PennerDoubleAnimation.ExpoEaseIn(globalTimer, 0, 1, stopTextFade);
+                escPrompt.color = col;
+            }
             // dialogue scene
             if (moe.speaking || larry.speaking || curly.speaking){
                 timer = 0;
@@ -102,10 +121,18 @@ public class CutsceneBoardroom : Cutscene {
         if (amp)
             ProcessLine();
     }
-    void LoadScript(string filename){
-		// Regex response_hook = new Regex(@"^(\d)\)(.+)");
+    bool LoadScript(string filename){
 		TextAsset textData = Resources.Load("data/boardroom/"+filename) as TextAsset;
-        lines = new List<string>(textData.text.Split('\n'));
+        if (textData == null){
+            return false;
+        } else {
+            lines = new List<string>(textData.text.Split('\n'));
+            return true;
+        }
+    }
+    public override void EscapePressed(){
+        complete = true;
+        GameManager.Instance.NewDayCutscene();
     }
 }
 public class CutsceneMayor : Cutscene {
@@ -227,7 +254,6 @@ public class CutsceneManager : Singleton<CutsceneManager> {
             cutscene.Configure();
         }
     }
-
     void Update(){
         if (cutscene == null)
             return;
@@ -236,5 +262,10 @@ public class CutsceneManager : Singleton<CutsceneManager> {
         } else {
             cutscene.Update();
         }
+    }
+    public void EscapePressed(){
+        Debug.Log("escape pressed");    
+        if (cutscene != null)
+            cutscene.EscapePressed();
     }
 }
