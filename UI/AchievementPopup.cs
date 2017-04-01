@@ -1,16 +1,32 @@
 ﻿using UnityEngine;
 using System.Collections;
+// using System.Collections.Generic;
 using UnityEngine.UI;
 using Easings;
 public class AchievementPopup : MonoBehaviour {
-
+    public class CollectedInfo {
+        public string name;
+        public Sprite sprite;
+        public CollectedInfo(){}
+        public CollectedInfo(GameObject obj){
+            name= Toolbox.Instance.GetName(obj);
+            SpriteRenderer renderer = obj.GetComponent<SpriteRenderer>();
+            if (renderer){
+                sprite = renderer.sprite;
+            }
+        } 
+    }
 	public Text titleText;
 	public Text bodyText;
 	public Image image;
     public AudioClip collectedSound;
     private AudioSource audioSource;
 
-	public void CollectionPopup(GameObject obj){
+    public void CollectionPopup(GameObject obj){
+        CollectedInfo info = new CollectedInfo(obj);
+        CollectionPopup(info);
+    }
+	public void CollectionPopup(CollectedInfo info){
         titleText = transform.Find("Panel/TextPanel/Title").GetComponent<Text>();
 		bodyText = transform.Find("Panel/TextPanel/Body").GetComponent<Text>();
 		image = transform.Find("Panel/icon").GetComponent<Image>();
@@ -19,12 +35,8 @@ public class AchievementPopup : MonoBehaviour {
         audioSource.spatialBlend = 0;
 
 		titleText.text = "Collected";
-		bodyText.text = Toolbox.Instance.GetName(obj);
-		SpriteRenderer renderer = obj.GetComponent<SpriteRenderer>();
-		if (renderer){
-			image.sprite = renderer.sprite;
-		}
-
+        bodyText.text = info.name;
+        image.sprite = info.sprite;
         audioSource.PlayOneShot(collectedSound);
         StartCoroutine(Display());
 	}
@@ -39,7 +51,6 @@ public class AchievementPopup : MonoBehaviour {
 
         titleText.text = "Achievement Unlocked!";
         bodyText.text = achieve.title;
-        // image.sprite = achieve.icon;
         image.sprite = Resources.Load<Sprite>("sprites/"+achieve.iconName);
         audioSource.PlayOneShot(collectedSound);
         StartCoroutine(Display());
