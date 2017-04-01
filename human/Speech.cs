@@ -23,7 +23,7 @@ public class Speech : Interactive, IMessagable {
     private AudioSource audioSource;
 	private bool LoadInitialized = false;
     public string flavor = "test";
-    // public bool unconscious;
+    private Intrinsic lastNetIntrinsic;
     public Controllable.HitState hitState;
     public Sprite portrait;
 
@@ -237,6 +237,23 @@ public class Speech : Interactive, IMessagable {
 			MessageHitstun hits = (MessageHitstun)incoming;
             hitState = hits.hitState;
 		}
+        if (incoming is MessageNetIntrinsic){
+            MessageNetIntrinsic message = (MessageNetIntrinsic)incoming;
+            CompareLastNetIntrinsic(message.netIntrinsic);
+            lastNetIntrinsic = message.netIntrinsic;
+        }
+    }
+    public void CompareLastNetIntrinsic(Intrinsic net){
+        if (lastNetIntrinsic == null)
+            return;
+        if (lastNetIntrinsic.fireproof.boolValue != net.fireproof.boolValue){
+            if (net.fireproof.boolValue)
+                Say("I feel fireproof!");
+        }
+        if (lastNetIntrinsic.telepathy.boolValue != net.telepathy.boolValue){
+            if (net.telepathy.boolValue)
+                Say("I can hear thoughts!");
+        }
     }
     // double-exponential seat easing function
     public float DoubleSeat(float x, float a, float w, float max, float min){
