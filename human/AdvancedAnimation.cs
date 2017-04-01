@@ -34,17 +34,13 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 	public string baseName;
 	private int baseFrame;
 	private int frame;
-	// private bool hitStun;
 	private Controllable.HitState hitState;
 	private bool doubledOver;
-
-
 	void Start () {
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		controllable = GetComponent<Controllable>();
 		LoadSprites();
 	}
-
 	public void ReceiveMessage(Message message){
 		if (message is MessageAnimation){
 			MessageAnimation anim = (MessageAnimation)message;
