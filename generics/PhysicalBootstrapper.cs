@@ -13,7 +13,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	private BoxCollider2D groundCollider;
 	private SliderJoint2D sliderJoint2D;
 	public Physical physical;
-	public float initHeight = 0.1f;
+	public float initHeight = 0.01f;
 	public float groundDrag = 10f;
 	public Vector2 initVelocity;
 	public bool ignoreCollisions;
@@ -33,10 +33,11 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		Start();
 	}
 	public void DestroyPhysical(){
-		// transform.parent = null;
 		transform.SetParent(null);
 		Destroy(groundObject);
-		GetComponent<Rigidbody2D>().gravityScale = 0;
+		Rigidbody2D body = GetComponent<Rigidbody2D>();
+		body.gravityScale = 0;
+		body.velocity = Vector2.zero;
 		physical = null;
 		doInit = false;
 	}
@@ -116,6 +117,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		physical.InitValues();
 		groundPhysical.bootstrapper = this;
 		Set3Motion(new Vector3(initialVelocity.x, initialVelocity.y, initialVelocity.z));
+		// Debug.Log(gameObject);
 		// Debug.Break();
 	}
 	void OnCollisionEnter2D(Collision2D coll){
@@ -146,6 +148,22 @@ public class PhysicalBootstrapper : MonoBehaviour {
 				speaker.GetComponent<AudioSource>().Play();
 				Rebound();
 			}
+		}
+	}
+	void OnTriggerEnter2D(Collider2D coll){
+		if (coll.tag == "table" && coll.gameObject != gameObject && physical != null && !ignoreCollisions){
+			Table table = coll.GetComponentInParent<Table>();
+			physical.ActivateTableCollider(table);
+			// DestroyPhysical();
+			// transform.SetParent(coll.transform, true);
+		}
+	}
+	void OnTriggerExit2D(Collider2D coll){
+		if (coll.tag == "table" && coll.gameObject != gameObject && physical != null && !ignoreCollisions){
+			Table table = coll.GetComponentInParent<Table>();
+			physical.DeactivateTableCollider(table);
+			// transform.SetParent(null, true);
+			// InitPhysical(0.2f, Vector3.zero);
 		}
 	}
 	public void Set3Motion(Vector3 velocity){

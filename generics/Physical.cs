@@ -115,11 +115,19 @@ public class Physical : MonoBehaviour, IMessagable {
 	}
 	public void StartGroundMode(){
 		doGround = false;
+		doFly = false;
+		doZip = false;
 		ziptime = 0f;
 		ClearTempColliders();
-		
 		// set object gravity 0
 		objectBody.gravityScale = 0;
+		slider.useLimits = false;
+		Vector3 objPosition = objectBody.transform.position;
+		Vector3 newPos = objectBody.transform.position;
+		newPos.y -= objectCollider.bounds.extents.y - objectCollider.offset.y + groundCollider.bounds.extents.y;
+		// objectCollider.bou
+		transform.position = newPos;
+		objectBody.transform.position = objPosition;
 		// fix slider
 		JointTranslationLimits2D tempLimits = slider.limits;
 		tempLimits.min = 0;
@@ -166,7 +174,9 @@ public class Physical : MonoBehaviour, IMessagable {
 		temporaryDisabledColliders = new List<Collider2D>();
 	}
 	public void StartFlyMode(){
+		doGround = false;
 		doFly = false;
+		doZip = false;
 		ziptime = 0f;
 		ClearTempColliders();
 		// set object gravity on
@@ -229,20 +239,23 @@ public class Physical : MonoBehaviour, IMessagable {
 			GroundMode();
 		}
 	}
-	void OnTriggerEnter2D(Collider2D coll){
-		if (coll.tag == "table" && coll.gameObject != gameObject && currentMode != mode.zip){
-			Table table = coll.GetComponent<Table>();
-			ActivateTableCollider(table);
-		}
-	}
-	void OnTriggerExit2D(Collider2D coll){
-		if (coll.tag == "table" && coll.gameObject != gameObject && currentMode != mode.zip){
-			Table table = coll.GetComponent<Table>();
-			DeactivateTableCollider(table);
-		}
-	}
-	void ActivateTableCollider(Table table){
+	// void OnTriggerEnter2D(Collider2D coll){
+	// 	if (coll.tag == "table" && coll.gameObject != gameObject && currentMode != mode.zip){
+	// 		Table table = coll.GetComponent<Table>();
+	// 		ActivateTableCollider(table);
+	// 	}
+	// }
+	// void OnTriggerExit2D(Collider2D coll){
+	// 	if (coll.tag == "table" && coll.gameObject != gameObject && currentMode != mode.zip){
+	// 		Table table = coll.GetComponent<Table>();
+	// 		DeactivateTableCollider(table);
+	// 	}
+	// }
+	public void ActivateTableCollider(Table table){
+		if (currentMode == mode.zip)
+			return;
 		if (groundCollider){
+			StartGroundMode();
 			spriteRenderer.enabled = false;
 			groundCollider.size = new Vector2(0.07f, 0.02f + table.height);
 			Collider2D[] tableColliders = table.gameObject.GetComponentsInParent<Collider2D>();
@@ -252,15 +265,11 @@ public class Physical : MonoBehaviour, IMessagable {
 					Physics2D.IgnoreCollision(objectCollider, tableCollider, true);
 				}
 			}
-			// OrderByY orderTable = table.GetComponentInParent<OrderByY>();
 			if (order)
 				order.AddFollower(table.gameObject, 1);
-			// if (order != null && orderTable != null){
-			// 	order.offset = -1f * (objectBody.transform.position.y - table.transform.position.y - 0.008f);
-			// }
 		}
 	}
-	void DeactivateTableCollider(Table table){
+	public void DeactivateTableCollider(Table table){
 		if (groundCollider){
 			spriteRenderer.enabled = true;
 			groundCollider.size = new Vector2(0.07f, 0.02f);
