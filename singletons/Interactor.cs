@@ -19,14 +19,14 @@ public class Interactor{
 				actionDictionary.Add(inter);
 		return actionDictionary;
 	}
-	static public Interaction GetDefaultAction( List<Interaction> actionList){
+	static public Interaction GetDefaultAction(List<Interaction> actionList){
 		int highestP = 0;
 		Interaction returnInteraction = null;
-		foreach ( Interaction action in actionList){
-				if(action.defaultPriority > highestP && action.enabled){
-					returnInteraction = action;
-					highestP = action.defaultPriority;
-				}
+		foreach (Interaction action in actionList){
+			if(action.defaultPriority > highestP && action.enabled){
+				returnInteraction = action;
+				highestP = action.defaultPriority;
+			}
 		}
 		return returnInteraction;
 	}
