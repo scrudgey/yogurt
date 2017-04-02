@@ -184,6 +184,8 @@ public class Awareness : MonoBehaviour, IMessagable {
 		viewed = false;
 		speciousPresent = 1f;
 		foreach (GameObject g in fieldOfView){
+			if (g == null)
+				continue;
 			Knowledge knowledge = null;
 			if (knowledgebase.TryGetValue(g, out knowledge)){
 				knowledge.UpdateInfo();
