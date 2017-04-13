@@ -4,11 +4,16 @@ using Easings;
 using UnityEngine.SceneManagement;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+// using UnityEngine.SceneManagement;
 public class Cutscene {
     public virtual void Update(){}
     public virtual void Configure(){}
     public virtual void EscapePressed(){}
+    public virtual void CleanUp(){
+
+    }
     public bool complete;
+    public bool configured;
 }
 
 public class CutsceneBoardroom : Cutscene {
@@ -31,6 +36,7 @@ public class CutsceneBoardroom : Cutscene {
     int index = 0;
     float scriptTimeSpace = 1f;
     public override void Configure(){
+        configured = true;
         longShot = GameObject.Find("long_shot");
         GameObject canvas = GameObject.Find("Canvas");
         settingText = canvas.transform.Find("text").GetComponent<Text>();
@@ -144,6 +150,7 @@ public class CutsceneMayor : Cutscene {
     private bool inPosition;
     private bool walkingAway;
     public override void Configure(){
+        configured = true;
         spawnPoint = GameObject.Find("mayorSpawnpoint");
         mayor = GameObject.Instantiate(Resources.Load("prefabs/Mayor"), spawnPoint.transform.position, Quaternion.identity) as GameObject;
         mayorControl = mayor.GetComponent<Humanoid>();
@@ -176,7 +183,9 @@ public class CutsceneMayor : Cutscene {
             }
         }
     }
-
+    public override void CleanUp(){
+        Controller.Instance.suspendInput = false;
+    }
     public void MenuWasClosed(){
         walkingAway = true;
     }
@@ -191,6 +200,7 @@ public class CutsceneNewDay : Cutscene {
     private float stopDayFade = 2.5f;
     private float stopTime = 12f;
     public override void Configure(){
+        configured = true;
         canvas = GameObject.Find("Canvas");
         tomText = canvas.transform.Find("tomText").GetComponent<Text>();
         dayText = canvas.transform.Find("dayText").GetComponent<Text>();
@@ -247,17 +257,25 @@ public class CutsceneManager : Singleton<CutsceneManager> {
         if (cutscene == null)
             return;
         if (cutscene.complete){
+            cutscene.CleanUp();
             cutscene = null;
             return;
         }
-        if (cutscene is CutsceneNewDay || cutscene is CutsceneBoardroom){
-            cutscene.Configure();
+        if (cutscene.configured == false){
+            if (cutscene is CutsceneNewDay || cutscene is CutsceneBoardroom){
+                cutscene.Configure();
+            }
+        } else {
+            cutscene.CleanUp();
+            cutscene = null;
         }
+        
     }
     void Update(){
         if (cutscene == null)
             return;
         if (cutscene.complete){
+            cutscene.CleanUp();
             cutscene = null;
         } else {
             cutscene.Update();
