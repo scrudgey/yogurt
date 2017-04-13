@@ -43,7 +43,7 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
 	public void UpdateSequence(){
 		GetComponent<Animation>().Play(sequence);
 	}
-	void Start () {
+	void Awake () {
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		// head = GetComponent<Head>();
 		MessageDirectable directableMessage = new MessageDirectable();
