@@ -61,6 +61,9 @@ public class DialogueMenu : MonoBehaviour {
 	public Text choice1Text;
 	public Text choice2Text;
 	public Text choice3Text;
+	public GameObject choice1Object;
+	public GameObject choice2Object;
+	public GameObject choice3Object;
 	public Text promptText;
 	public GameObject choicePanel;
 	public Button giveButton;
@@ -97,6 +100,9 @@ public class DialogueMenu : MonoBehaviour {
 		choice1Text = transform.Find("base/choicePanel/choice1/Text").GetComponent<Text>();
 		choice2Text = transform.Find("base/choicePanel/choice2/Text").GetComponent<Text>();
 		choice3Text = transform.Find("base/choicePanel/choice3/Text").GetComponent<Text>();
+		choice1Object = transform.Find("base/choicePanel/choice1/").gameObject;
+		choice2Object = transform.Find("base/choicePanel/choice2/").gameObject;
+		choice3Object = transform.Find("base/choicePanel/choice3/").gameObject;
 		choicePanel = transform.Find("base/choicePanel").gameObject;
 		
 		giveButton = transform.Find("base/buttons/Give").GetComponent<Button>();
@@ -110,9 +116,9 @@ public class DialogueMenu : MonoBehaviour {
 
 		promptText.text = "";
 		choicePanel.SetActive(false);
-		choice1Text.gameObject.SetActive(false);
-		choice2Text.gameObject.SetActive(false);
-		choice3Text.gameObject.SetActive(false);
+		choice1Object.SetActive(false);
+		choice2Object.SetActive(false);
+		choice3Object.SetActive(false);
 	}
 
 	public void Configure(Speech instigator, Speech target){
@@ -164,20 +170,20 @@ public class DialogueMenu : MonoBehaviour {
 	public void ParseNode(DialogueNode node){
 		this.node = node;
 		choicePanel.SetActive(false);
-		choice1Text.gameObject.SetActive(false);
-		choice2Text.gameObject.SetActive(false);
-		choice3Text.gameObject.SetActive(false);
+		choice1Object.SetActive(false);
+		choice2Object.SetActive(false);
+		choice3Object.SetActive(false);
 		if (node.responses.Count > 0){
-			choicePanel.SetActive(false);
-			choice1Text.gameObject.SetActive(true);
+			// choicePanel.SetActive(true);
+			choice1Object.SetActive(true);
 			choice1Text.text = node.responses[0];
 		}
 		if (node.responses.Count > 1){
-			choice2Text.gameObject.SetActive(true);
+			choice2Object.SetActive(true);
 			choice2Text.text = node.responses[1];
 		}
 		if (node.responses.Count > 2){
-			choice3Text.gameObject.SetActive(true);
+			choice3Object.SetActive(true);
 			choice3Text.text = node.responses[2];
 		}
 		Say(new Monologue(target, node.text.ToArray()));
@@ -188,9 +194,9 @@ public class DialogueMenu : MonoBehaviour {
 		ParseNode(dialogueTree[node.responseLinks[choiceNumber - 1]]);
 	}
 	public void DisableResponses(){
-		choice1Text.gameObject.SetActive(false);
-		choice2Text.gameObject.SetActive(false);
-		choice3Text.gameObject.SetActive(false);
+		choice1Object.SetActive(false);
+		choice2Object.SetActive(false);
+		choice3Object.SetActive(false);
 	}
 	public void ActionCallback(string callType){
 		switch (callType){
@@ -247,7 +253,6 @@ public class DialogueMenu : MonoBehaviour {
 		if (choice1Text.gameObject.activeSelf){
 			choicePanel.SetActive(true);
 		}
-		
 	}
 	public void DisableButtons(){
 		foreach(Button button in buttons)
@@ -294,7 +299,6 @@ public class DialogueMenu : MonoBehaviour {
 			if (monologue.text.Count > 1){
 				waitForKeyPress = true;
 				promptText.text = "[MORE...]";
-				// EnableButtons();
 			} else {
 				monologue.text.Pop();
 				if (dialogue.Count == 0)
