@@ -63,9 +63,9 @@ public class OccurrenceFire : OccurrenceData {
         // I can eventually modify this to only allow values 0, 1 if necessary
         if (objectName == "table"){
             if (extinguished == false){
-                commercial.IncrementValue("table_fire", 1f);
+                commercial.SetValue("table_fire", 1);
             } else {
-                commercial.IncrementValue("table_fire", -1f);
+                commercial.SetValue("table_fire", 0);
             }
         }
     }
