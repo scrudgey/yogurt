@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
 
 namespace AI {
@@ -22,7 +23,7 @@ namespace AI {
 		public Goal(GameObject g, Controllable c){
 			gameObject = g;
 			control = c;
-			slewTime = Random.Range(0.1f, 0.5f);
+			slewTime = UnityEngine.Random.Range(0.1f, 0.5f);
 		}
 		public status Evaluate(){
 			foreach (Goal requirement in requirements){
@@ -32,7 +33,7 @@ namespace AI {
 			}
 			return successCondition.Evaluate();
 		}
-		public void Update(){
+		public virtual void Update(){
 			// if i have any unmet requirements, my update goes to the first unmet one.
 			foreach (Goal requirement in requirements){
 				if (requirement.Evaluate() != status.success){
@@ -45,7 +46,7 @@ namespace AI {
 				// Debug.Log(control.gameObject.name + " " + this.ToString() + " requirements met");;
 				control.ResetInput();
 			}
-			fulfillingRequirements= false;
+			fulfillingRequirements = false;
 			if (slewTime > 0){
 				slewTime -= Time.deltaTime;
 				return;
@@ -55,9 +56,10 @@ namespace AI {
 				if (routineStatus == status.failure){
 					control.ResetInput();
 					index ++;
+					routines[index].Configure();
 					// get next routine, or fail.
 					if (index < routines.Count){
-						slewTime = Random.Range(0.1f, 0.5f);
+						slewTime = UnityEngine.Random.Range(0.1f, 0.5f);
 					} else {
 						// what do do? reset from the start maybe
 						// index = routines.Count - 1;
@@ -69,8 +71,24 @@ namespace AI {
 			}
 		}
 	}
-
+	public class GoalUsePhone : Goal {
+		public bool phoneCalled;
+		private RoutineUseTelephone telRoutine;
+		public GoalUsePhone(GameObject g, Controllable c): base(g, c){
+			Ref<GameObject> phoneRef = new Ref<GameObject>(GameObject.FindObjectOfType<Telephone>().gameObject);
+			successCondition = new ConditionBoolSwitch(g);
+			telRoutine = new RoutineUseTelephone(g, c, phoneRef, (ConditionBoolSwitch)successCondition);
+			routines.Add(telRoutine);
+		}
+		public override void Update(){
+			base.Update();
+			if (successCondition.Evaluate() == status.success && !phoneCalled){
+				phoneCalled = true;
+			}
+		}
+	}
 	public class GoalGetItem : Goal {
+		public bool findingFail;
 		public GoalGetItem (GameObject g, Controllable c, string target) : base(g, c){
 				goalThought = "I need a "+target+".";
 				successCondition = new ConditionHoldingObjectWithName(g, target);
@@ -78,8 +96,14 @@ namespace AI {
 				routines.Add(new RoutineGetNamedFromEnvironment(g, c, target));
 				routines.Add(new RoutineWanderUntilFound(g, c, target));
 		}
+		public override void Update(){
+			base.Update();
+			if (index == 2 && !findingFail){
+				findingFail = true;
+				Debug.Log("finding fail");
+			}
+		}
 	}
-
 	public class GoalWalkToObject : Goal {
 		public Ref<GameObject> target;
 		public new string goalThought{
@@ -89,6 +113,15 @@ namespace AI {
 			target = t;
 			successCondition = new ConditionCloseToObject(g, target, 0.55f);
 			routines.Add(new RoutineWalkToGameobject(g, c, target));
+		}
+		public GoalWalkToObject(GameObject g, Controllable c, Type objType) : base(g, c){
+			// GameObject targetObject = GameObject.FindObjectOfType<typeof(objType)>();
+			UnityEngine.Object obj = GameObject.FindObjectOfType(objType);
+			Component targetComponent = (Component)obj;
+			GameObject targetObject = targetComponent.gameObject;
+			target = new Ref<GameObject>(targetObject);
+			routines.Add(new RoutineWalkToGameobject(g, c, target));
+			successCondition = new ConditionCloseToObject(g, target, 0.25f);
 		}
 	}
 	public class GoalLookAtObject: Goal {
