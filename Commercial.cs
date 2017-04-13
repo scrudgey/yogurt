@@ -20,7 +20,18 @@ public class Commercial {
         data = new OccurrenceData();
 	}
 	public List<string> transcript = new List<string>();
+	public void SetValue(string valname, float val){
+		CommercialProperty property = null;
+        properties.TryGetValue(valname, out property);
+		float incrementval = val;
+        if (property != null){
+            incrementval = val - property.val;
+        }
+		IncrementValue(valname, incrementval);
+	}
 	public void IncrementValue(string valname, float increment){
+		if (increment == 0)
+			return;
         CommercialProperty property = null;
         properties.TryGetValue(valname, out property);
         if (property == null){
