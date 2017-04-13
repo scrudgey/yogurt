@@ -166,9 +166,9 @@ public class UINew: Singleton<UINew> {
 			recordFinish.SetActive(active);
 			recordText.text = "";
 		}
-		if (status){
-			status.gameObject.SetActive(active);
-		}
+		// if (status){
+		// 	status.gameObject.SetActive(active);
+		// }
 		CloseActiveMenu();
 		ClearWorldButtons();
 		ClearActionButtons();
@@ -404,7 +404,8 @@ public class UINew: Singleton<UINew> {
 		Rigidbody2D priorBody = null;
 		int n = 0;
 		Vector2 centerPosition = RectTransformUtility.WorldToScreenPoint(renderingCamera, UICanvas.transform.position);
-		
+		CanvasScaler scaler = UICanvas.GetComponent<CanvasScaler>();
+		Debug.Log(scaler.scaleFactor);
 		foreach(actionButton button in buttons){
 			Vector2 initLocation = (Vector2)target.transform.position + Toolbox.Instance.RotateZ(Vector2.right/4, angle);
 			Vector2 initPosition = RectTransformUtility.WorldToScreenPoint(renderingCamera, initLocation);
