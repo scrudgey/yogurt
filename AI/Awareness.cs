@@ -60,7 +60,6 @@ public class Awareness : MonoBehaviour, IMessagable {
 				return cachedTransform;
 			}
 	}
-	// public 
 	public Transform sightConeTransform;
 	private Vector3 sightConeScale;
 	private Controllable control;
@@ -88,6 +87,8 @@ public class Awareness : MonoBehaviour, IMessagable {
 		List<GameObject> removeArray = new List<GameObject>();
 		foreach (Knowledge k in knowledgebase.Values){
 			if (k.obj){
+				if (k.obj.activeInHierarchy == false)
+					continue;
 				if (k.obj.name == targetName)
 					returnArray.Add(k.obj);
 			} else {
