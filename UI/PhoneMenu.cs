@@ -14,9 +14,12 @@ public class PhoneMenu : MonoBehaviour {
 	public Color disabledButtonColor;
 	private PhoneNumberButton selectedButton;
 	private Image callButtonImage;
+	private Button callButton;
 	void Start(){
 		numbersList = transform.Find("main/Numbers");
 		callButtonImage = transform.Find("main/ButtonBar/Call").GetComponent<Image>();
+		callButton = transform.Find("main/ButtonBar/Call").GetComponent<Button>();
+		callButton.interactable = false;
 		callButtonImage.color = disabledButtonColor;
 		source = Toolbox.Instance.SetUpAudioSource(gameObject);
 		source.spatialBlend = 0;
@@ -42,6 +45,7 @@ public class PhoneMenu : MonoBehaviour {
 		}
 		selectedButton = button;
 		callButtonImage.color = highlightButtonColor;
+		callButton.interactable = true;
 		Image newImage = selectedButton.GetComponent<Image>();
 		newImage.color = highlightButtonColor;
 	}
@@ -51,5 +55,13 @@ public class PhoneMenu : MonoBehaviour {
 			return;
 		} 
 		Debug.Log(selectedButton.number);
+		switch (selectedButton.number){
+			case PhoneNumberButton.phoneNumber.fire:
+			telephone.FireButtonCallback();
+			break;
+			default:
+			break;
+		}
+		CloseButton();
 	}
 }
