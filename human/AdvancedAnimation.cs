@@ -89,6 +89,8 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 	}
 
 	void LateUpdate(){
+		if (controllable == null)
+			Start();
 		spriteSheet = baseName+"_spritesheet";
 		string updateSequence = "generic3";
 		
