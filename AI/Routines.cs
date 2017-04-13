@@ -29,6 +29,9 @@ namespace AI{
 		protected virtual status DoUpdate(){
 			return status.neutral;
 		}
+		public virtual void Configure(){
+
+		}
 		// update is the routine called each frame by goal.
 		// this bit first checks for a timeout, then calls a routine
 		// that is specific to the child class.
@@ -45,7 +48,6 @@ namespace AI{
 	 * Routines
 	 * 
 	 * */
-
 	public class RoutineWanderUntilFound: Routine {
 		private string target;
 		private Awareness awareness;
@@ -77,6 +79,25 @@ namespace AI{
 			}
 		}
 	}
+	public class RoutineUseTelephone: Routine {
+		public Ref<GameObject> telRef;
+		private Telephone telephone;
+		private ConditionBoolSwitch condition;
+		public RoutineUseTelephone(GameObject g, Controllable c, Ref<GameObject> telRef, ConditionBoolSwitch condition) : base(g, c){
+			this.telRef = telRef;
+			this.condition = condition;
+			telephone = telRef.val.GetComponent<Telephone>();
+		}
+		protected override status DoUpdate(){
+			if (telephone){
+				telephone.FireButtonCallback();
+				condition.conditionMet = true;
+				return status.success;
+			} else {
+				return status.failure;
+			}
+		}
+	}
 
 	public class RoutineGetNamedFromEnvironment: Routine {
 		private Inventory inv;
@@ -89,6 +110,9 @@ namespace AI{
 			targetName = t;
 			inv = gameObject.GetComponent<Inventory>();
 			awareness = gameObject.GetComponent<Awareness>();
+			Configure();
+		}
+		public override void Configure(){
 			List<GameObject> objs = new List<GameObject>();
 			if (awareness){
 				objs = awareness.FindObjectWithName(targetName);
@@ -96,12 +120,12 @@ namespace AI{
 			if (objs.Count > 0){
 				target = objs[0];
 			}
-			if (target){
+			if (target && target.activeInHierarchy){
 				walkToRoutine = new RoutineWalkToGameobject(gameObject, control, new Ref<GameObject>(target));
 			}
 		}
 		protected override status DoUpdate(){
-			if (target){
+			if (target && target.activeInHierarchy){
 				if (Vector2.Distance(transform.position, target.transform.position) > 0.2f){
 					return walkToRoutine.Update();
 				} else {
