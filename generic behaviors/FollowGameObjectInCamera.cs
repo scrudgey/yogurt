@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-// using System.Collections;
-
 public class FollowGameObjectInCamera : MonoBehaviour {
     
     public GameObject target;
@@ -10,8 +8,7 @@ public class FollowGameObjectInCamera : MonoBehaviour {
        rect = (RectTransform)transform;
        canvasRect = transform.parent.GetComponent<RectTransform>();
 	}
-	
-    void Update () {
+    public void Update () {
         if (target){
             Vector2 pos = Camera.main.WorldToViewportPoint(target.transform.position + new Vector3(0f, 0.25f, 0f));
             Vector2 screenPos = new Vector2(
@@ -20,6 +17,13 @@ public class FollowGameObjectInCamera : MonoBehaviour {
                 );
             rect.localPosition = screenPos;
         }
-        
+    }
+
+    public void PreemptiveUpdate(){
+        if (rect == null){
+            rect = (RectTransform)transform;
+            canvasRect = transform.parent.GetComponent<RectTransform>();
+            Update();
+        }
     }
 }

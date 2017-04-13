@@ -12,6 +12,7 @@ public class Speech : Interactive, IMessagable {
 	private float speakTime;
     private float speakTimeTotal;
 	private GameObject bubbleParent;
+    private FollowGameObjectInCamera follower;
     private GameObject flipper;
 	private Text bubbleText;
     private float speakSpeed;
@@ -26,7 +27,7 @@ public class Speech : Interactive, IMessagable {
     private Intrinsic lastNetIntrinsic;
     public Controllable.HitState hitState;
     public Sprite portrait;
-
+    public bool disableSpeakWith;
 	void Start () {
         if (!LoadInitialized)
 			LoadInit();
@@ -38,13 +39,16 @@ public class Speech : Interactive, IMessagable {
 		speak.limitless = true;
 		speak.dontWipeInterface = false;
 		interactions.Add(speak);
-        Interaction speakWith = new Interaction(this, "Talk...", "SpeakWith");
-        speakWith.limitless = true;
-        speakWith.validationFunction = true;
-        interactions.Add(speakWith);
+        if (!disableSpeakWith){
+            Interaction speakWith = new Interaction(this, "Talk...", "SpeakWith");
+            speakWith.limitless = true;
+            speakWith.validationFunction = true;
+            interactions.Add(speakWith);
+        }
         flipper = transform.FindChild("SpeechChild").gameObject;
 		bubbleParent = transform.FindChild("SpeechChild/Speechbubble").gameObject;
 		bubbleText = bubbleParent.transform.FindChild("Text").gameObject.GetComponent<Text>();
+        follower = bubbleParent.GetComponentInChildren<FollowGameObjectInCamera>();
         audioSource = GetComponent<AudioSource>();
         if (flipper.transform.localScale != transform.localScale){
                 Vector3 tempscale = transform.localScale;
@@ -104,6 +108,7 @@ public class Speech : Interactive, IMessagable {
             }
 			speaking = true;
 			bubbleParent.SetActive(true);
+            follower.PreemptiveUpdate();
 			bubbleText.text = words;
             float charIndex = (speakTimeTotal - speakTime) * speakSpeed;
             // if the parent scale is flipped, we need to flip the flipper back to keep
