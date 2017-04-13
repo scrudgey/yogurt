@@ -54,6 +54,7 @@ public class InventoryHandler : SaveHandler<Inventory> {
 				}
 			}
 		}
+		instance.initHolding = null;
 
 	}
 }
@@ -99,14 +100,15 @@ public class BlenderHandler: SaveHandler<Blender> {
 public class HeadHandler: SaveHandler<Head> {
 	public override void SaveData(Head instance,PersistentComponent data, ReferenceResolver resolver){
 		if (instance.hat != null){
-			data.ints["hat"] = resolver.ResolveReference(instance.hat.gameObject,data.persistent);
+			data.ints["hat"] = resolver.ResolveReference(instance.hat.gameObject, data.persistent);
 		} else {
 			data.ints["hat"] = -1;
 		}
 	}
 	public override void LoadData(Head instance,PersistentComponent data){
+		instance.initHat = null;
 		if (data.ints["hat"] != -1){
-			instance.DonHat( MySaver.loadedObjects[ data.ints["hat"]].GetComponent<Hat>() );
+			instance.DonHat(MySaver.loadedObjects[ data.ints["hat"]].GetComponent<Hat>());
 		}
 	}
 }
@@ -176,6 +178,7 @@ public class OutfitHandler: SaveHandler<Outfit> {
 	}
 	public override void LoadData(Outfit instance, PersistentComponent data){
 		instance.wornUniformName = 		data.strings["worn"];
+		instance.initUniform = null;
 	}
 }
 
