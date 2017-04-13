@@ -4,15 +4,16 @@ using System.Collections;
 using UnityEngine.UI;
 using Easings;
 public class AchievementPopup : MonoBehaviour {
-    public class CollectedInfo {
+    public struct CollectedInfo{
         public string name;
         public Sprite sprite;
-        public CollectedInfo(){}
         public CollectedInfo(GameObject obj){
             name= Toolbox.Instance.GetName(obj);
             SpriteRenderer renderer = obj.GetComponent<SpriteRenderer>();
             if (renderer){
                 sprite = renderer.sprite;
+            } else {
+                sprite = null;
             }
         } 
     }
