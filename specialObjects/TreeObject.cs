@@ -5,9 +5,12 @@ public class TreeObject : MonoBehaviour, IMessagable {
 	public float timer;
 	JointMotor2D motor;
 	private bool doShake;
+	public GameObject leaf;
+	private Transform leafSpawnPoint;
 	void Start () {
 		hinge = GetComponent<HingeJoint2D>();
 		motor = hinge.motor;
+		leafSpawnPoint = transform.Find("leafSpawnPoint");
 	}
 	public void ReceiveMessage(Message incoming){
 		if (incoming is MessageDamage){
@@ -34,10 +37,9 @@ public class TreeObject : MonoBehaviour, IMessagable {
 		hinge.useMotor = true;
 		timer = 0;
 		doShake = true;
-		// HingeJoint2D.
-		// JointMotor2D newMotor = hinge.motor;
-		// motor.motorSpeed = 1;
-		// hinge.motor = newMotor;
-		// hinge.motor.motorSpeed = 1;
+		Vector3 randomBump = new Vector3(Random.Range(-0.05f, 0.05f), Random.Range(-0.05f, 0.05f), 0);
+		GameObject newLeaf = Instantiate(leaf, leafSpawnPoint.position + randomBump, Quaternion.identity) as GameObject;
+		FallingLeaf newLeafScript = newLeaf.GetComponent<FallingLeaf>();
+		newLeafScript.height = 0.9f;
 	}
 }
