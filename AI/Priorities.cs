@@ -35,8 +35,11 @@ namespace AI{
 	}
 	public class PriorityFightFire: Priority{
 		public float updateInterval;
+		GoalGetItem getExt;
+		GoalUsePhone callFD;
+		Goal useFireExtinguisher;
 		public PriorityFightFire(GameObject g, Controllable c): base(g, c) {
-			Goal getExt = new GoalGetItem(gameObject, control, "fire_extinguisher");
+			getExt = new GoalGetItem(gameObject, control, "fire_extinguisher");
 
 			Goal wander = new GoalWander(gameObject, control);
 			wander.successCondition = new ConditionKnowAboutFire(gameObject);
@@ -45,12 +48,26 @@ namespace AI{
 			Goal approach = new GoalWalkToObject(gameObject, control, awareness.nearestFire);
 			approach.requirements.Add(wander);
 
-			goal = new GoalHoseDown(gameObject, control, awareness.nearestFire);
-			goal.requirements.Add(approach);
+			useFireExtinguisher = new GoalHoseDown(gameObject, control, awareness.nearestFire);
+			useFireExtinguisher.requirements.Add(approach);
+
+			goal = useFireExtinguisher;
+
+			callFD = new GoalUsePhone(gameObject, control);
+			Goal walkToPhone = new GoalWalkToObject(gameObject, control, typeof(Telephone));
+			callFD.requirements.Add(walkToPhone);
+			// callFD.successCondition = new ConditionFail(gameObject);
 		}
 		public override void Update(){
 			if (awareness.nearestFire.val != null)
 				urgency = Priority.urgencyPressing;
+			if (getExt.findingFail && goal != callFD && !callFD.phoneCalled){
+				goal = callFD;
+			}
+			if (goal == callFD && callFD.phoneCalled){
+				goal = useFireExtinguisher;
+				Debug.Log("switching back");
+			}
 		}
 	}
 
