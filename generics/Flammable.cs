@@ -10,6 +10,7 @@ public class Flammable : MonoBehaviour {
 	private AudioClip[] igniteSounds = new AudioClip[2];
 	private AudioClip burnSounds;
 	private AudioSource audioSource;
+	private float flagTimer;
 	void Start () {
 		//ensure that there is a speaker
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
@@ -75,9 +76,16 @@ public class Flammable : MonoBehaviour {
 			fireData.objectName = Toolbox.Instance.CloneRemover(name);
 			fireData.chaos = 100;
 			Toolbox.Instance.OccurenceFlag(gameObject, fireData);
-        	
 		}
 		if (onFire){
+			flagTimer += Time.deltaTime;
+			if (flagTimer > 0.5f){
+				flagTimer = 0;
+				OccurrenceFire fireData = new OccurrenceFire();
+				fireData.objectName = Toolbox.Instance.CloneRemover(name);
+				fireData.chaos = 100;
+				Toolbox.Instance.OccurenceFlag(gameObject, fireData);
+			}
 			MessageDamage message = new MessageDamage(Time.deltaTime, damageType.fire);
 			Toolbox.Instance.SendMessage(gameObject, this, message, sendUpwards: false);
 			if (Random.Range(0, 100f) < 1){
