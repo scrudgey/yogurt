@@ -56,7 +56,6 @@ namespace AI {
 				if (routineStatus == status.failure){
 					control.ResetInput();
 					index ++;
-					routines[index].Configure();
 					// get next routine, or fail.
 					if (index < routines.Count){
 						slewTime = UnityEngine.Random.Range(0.1f, 0.5f);
@@ -65,9 +64,10 @@ namespace AI {
 						// index = routines.Count - 1;
 						index = 0;
 					}
+					routines[index].Configure();
 				}
-			} catch {
-				Debug.Log(this);
+			} catch (Exception e) {
+				Debug.Log(this.ToString() + " fail: " + e.Message);
 			}
 		}
 	}
