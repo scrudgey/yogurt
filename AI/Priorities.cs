@@ -56,7 +56,6 @@ namespace AI{
 			callFD = new GoalUsePhone(gameObject, control);
 			Goal walkToPhone = new GoalWalkToObject(gameObject, control, typeof(Telephone));
 			callFD.requirements.Add(walkToPhone);
-			// callFD.successCondition = new ConditionFail(gameObject);
 		}
 		public override void Update(){
 			if (awareness.nearestFire.val != null)
@@ -66,7 +65,6 @@ namespace AI{
 			}
 			if (goal == callFD && callFD.phoneCalled){
 				goal = useFireExtinguisher;
-				Debug.Log("switching back");
 			}
 		}
 	}
