@@ -1,23 +1,29 @@
 ﻿using UnityEngine;
-// using System.Collections;
-// using System.Xml.Serialization;
-// using System.IO;
-
 public class MonoLiquid : MonoBehaviour {
-
 	public Liquid liquid;
 	public Edible edible;
-
+	public PhysicalBootstrapper physB;
 	void Awake(){
 		edible = GetComponent<Edible>();
 		if (!edible)
 			edible = gameObject.AddComponent<Edible>();
+		physB = GetComponent<PhysicalBootstrapper>();
 	}
 
 	 void Start () {
 		SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
 		if (spriteRenderer && liquid != null){
 			spriteRenderer.color = liquid.color;
+		}
+	}
+	void OnCollisionEnter2D(Collision2D coll){
+		if (physB.physical.currentMode == Physical.mode.fly){
+			GameObject splash = Instantiate(Resources.Load("prefabs/splash"), transform.position, Quaternion.identity) as GameObject;
+			SpriteRenderer splashSprite = splash.GetComponent<SpriteRenderer>();
+			splashSprite.color = liquid.color;
+			Transform rectTransform = splash.GetComponent<Transform>();
+ 			rectTransform.Rotate(new Vector3(0, 0, Random.Range(0f, 360f)));
+			Destroy(gameObject);
 		}
 	}
 
