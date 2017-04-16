@@ -9,6 +9,7 @@ public class AnimateFrames : MonoBehaviour {
 	private int frameIndex = 0;
 	AudioSource audioSource;
 	public AudioClip flipSound;
+	public bool destroyOnFinished;
 	void Start () {
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		if (spriteRenderer == null){
@@ -25,8 +26,12 @@ public class AnimateFrames : MonoBehaviour {
 			frameIndex += 1;
 			if (frameIndex == frames.Count){
 				frameIndex = 0;
-				if (audioSource != null && flipSound != null)
-					audioSource.PlayOneShot(flipSound);
+				if (destroyOnFinished){
+					Destroy(gameObject);
+				} else {
+					if (audioSource != null && flipSound != null)
+						audioSource.PlayOneShot(flipSound);
+				}
 			}
 			animationTimer = 0f;
 			spriteRenderer.sprite = frames[frameIndex];
