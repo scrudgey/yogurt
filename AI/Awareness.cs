@@ -198,7 +198,7 @@ public class Awareness : MonoBehaviour, IMessagable {
 			Humanoid human = g.GetComponent<Humanoid>();
 			if (human){
 				// assessment.unconscious = human.hitstun;
-				assessment.unconscious = human.hitState > Controllable.HitState.stun;
+				assessment.unconscious = human.hitState >= Controllable.HitState.stun;
 			}
 		}
 	}
