@@ -75,9 +75,12 @@ namespace AI {
 		public bool phoneCalled;
 		private RoutineUseTelephone telRoutine;
 		public GoalUsePhone(GameObject g, Controllable c): base(g, c){
-			Ref<GameObject> phoneRef = new Ref<GameObject>(GameObject.FindObjectOfType<Telephone>().gameObject);
+			Telephone phoneObject = GameObject.FindObjectOfType<Telephone>();
+			if (phoneObject){
+				Ref<GameObject> phoneRef = new Ref<GameObject>(GameObject.FindObjectOfType<Telephone>().gameObject);
+				telRoutine = new RoutineUseTelephone(g, c, phoneRef, (ConditionBoolSwitch)successCondition);
+			}
 			successCondition = new ConditionBoolSwitch(g);
-			telRoutine = new RoutineUseTelephone(g, c, phoneRef, (ConditionBoolSwitch)successCondition);
 			routines.Add(telRoutine);
 		}
 		public override void Update(){
