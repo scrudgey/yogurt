@@ -23,9 +23,9 @@ public class Head : Interactive, IExcludable {
 		hatPoint = transform.Find("hatPoint").gameObject;
 		LoadInitialized = true;
 		OrderByY order = GetComponent<OrderByY>();
-		if (order != null){
-			order.AddFollower(transform.parent.gameObject, 1);
-		}
+		// if (order != null){
+		// 	order.AddFollower(transform.parent.gameObject, 1);
+		// }
 	}
 	
 	public void DonHat(Hat h){
@@ -37,9 +37,9 @@ public class Head : Interactive, IExcludable {
 		PhysicalBootstrapper phys = hat.GetComponent<PhysicalBootstrapper>();
 		if (phys)
 			phys.DestroyPhysical();
-		OrderByY yorder = hat.GetComponent<OrderByY>();
-		if (yorder)
-			yorder.AddFollower(gameObject, 1);
+		// OrderByY yorder = hat.GetComponent<OrderByY>();
+		// if (yorder)
+		// 	yorder.AddFollower(gameObject, 1);
 		hat.transform.position = hatPoint.transform.position;
 		hatPoint.transform.localScale = Vector3.one;
 		transform.localScale = Vector3.one;
@@ -76,9 +76,9 @@ public class Head : Interactive, IExcludable {
 		if (hatRenderer){
 			hatRenderer.sortingLayerName = "main";
 		}
-		OrderByY yorder = hat.GetComponent<OrderByY>();
-		if (yorder)
-			yorder.RemoveFollower(gameObject);
+		// OrderByY yorder = hat.GetComponent<OrderByY>();
+		// if (yorder)
+		// 	yorder.RemoveFollower(gameObject);
 		hat = null;
 	}
 	public void DropMessage(GameObject obj){

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Rendering;
 using System.Collections.Generic;
 
 public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
@@ -35,6 +36,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 	private float dropHeight = 0.20f;
 	private Vector2 direction;
 	private float directionAngle;
+	private SortingGroup holdSortGroup;
 	void Start(){
 		if (!LoadInitialized)
 			LoadInit();
@@ -53,6 +55,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 	}
 	public void LoadInit(){
 		holdpoint = transform.Find("holdpoint");
+		holdSortGroup = holdpoint.GetComponent<SortingGroup>();
 		Interaction getAction = new Interaction(this, "Get", "GetItem", true, false);
 		getAction.dontWipeInterface = false;
 		interactions.Add(getAction);
@@ -64,6 +67,11 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 	public void DirectionChange(Vector2 dir){
 		direction = dir;
 		directionAngle = Toolbox.Instance.ProperAngle(direction.x, direction.y);
+		if (Toolbox.Instance.DirectionToString(dir) == "up"){
+			holdSortGroup.sortingOrder = -1000;
+		} else {
+			holdSortGroup.sortingOrder = 1000;
+		}
 	}
 	public void GetItem(Pickup pickup){
 		//first check to see if we're already holding it.
@@ -83,9 +91,9 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 				PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
 				if (phys)
 					phys.DestroyPhysical();
-				OrderByY yorder = holding.GetComponent<OrderByY>();
-				if (yorder)
-					yorder.AddFollower(gameObject, 1);
+				// OrderByY yorder = holding.GetComponent<OrderByY>();
+				// if (yorder)
+				// 	yorder.AddFollower(gameObject, 1);
 				// 	yorder.enabled = false;
 				holding.transform.position = holdpoint.position;
 				holding.transform.SetParent(holdpoint, false);
@@ -112,9 +120,9 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
 		if (phys)	
 			phys.doInit = false;
-		OrderByY yorder = holding.GetComponent<OrderByY>();
-		if (yorder)
-			yorder.RemoveFollower(gameObject);
+		// OrderByY yorder = holding.GetComponent<OrderByY>();
+		// if (yorder)
+		// 	yorder.RemoveFollower(gameObject);
 		// 	yorder.enabled = true;
 		holding.GetComponent<Rigidbody2D>().isKinematic = false;
 		holding.GetComponent<Collider2D>().isTrigger = false;
@@ -137,9 +145,9 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 			// holding.transform.parent = null;
 			holding.transform.SetParent(null);
 		}
-		OrderByY yorder = holding.GetComponent<OrderByY>();
-		if (yorder)
-			yorder.RemoveFollower(gameObject);
+		// OrderByY yorder = holding.GetComponent<OrderByY>();
+		// if (yorder)
+		// 	yorder.RemoveFollower(gameObject);
 		SpriteRenderer sprite = holding.GetComponent<SpriteRenderer>();
 		sprite.sortingLayerName = "main";
 		holding = null;
@@ -150,9 +158,9 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 			if(items[i].GetComponent<Item>().itemName == itemName){
 				if (holding)
 					DropItem();
-				OrderByY yorder = items[i].GetComponent<OrderByY>();
-				if (yorder)
-					yorder.AddFollower(gameObject, 1);
+				// OrderByY yorder = items[i].GetComponent<OrderByY>();
+				// if (yorder)
+				// 	yorder.AddFollower(gameObject, 1);
 					// yorder.enabled = false;
 				items[i].SetActive(true);
 				items[i].transform.position = holdpoint.position;
@@ -174,9 +182,9 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 	public void ActivateThrow(){
 		if (holding){
 			throwObject = holding.gameObject;
-			OrderByY yorder = holding.GetComponent<OrderByY>();
-			if (yorder)
-				yorder.RemoveFollower(gameObject);
+			// OrderByY yorder = holding.GetComponent<OrderByY>();
+			// if (yorder)
+			// 	yorder.RemoveFollower(gameObject);
 				// yorder.enabled = false;
 			holding = null;
 		}

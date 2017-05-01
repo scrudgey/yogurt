@@ -101,9 +101,9 @@ public class Container : Interactive, IExcludable {
 		Messenger.Instance.ClaimObject(pickup.gameObject,this);
 		
 		// place it behind me
-		OrderByY yorder = pickup.GetComponent<OrderByY>();
-		if (yorder)
-			yorder.AddFollower(gameObject, -1);
+		// OrderByY yorder = pickup.GetComponent<OrderByY>();
+		// if (yorder)
+		// 	yorder.AddFollower(gameObject, -1);
 		// if (yorder)
 		// 	yorder.enabled = false;
 		// SpriteRenderer rend = pickup.GetComponent<SpriteRenderer>();
@@ -157,9 +157,9 @@ public class Container : Interactive, IExcludable {
 		if (disableContents)
 			pickup.gameObject.SetActive(true);
 
-		OrderByY yorder = pickup.GetComponent<OrderByY>();
-		if (yorder)
-			yorder.RemoveFollower(gameObject);
+		// OrderByY yorder = pickup.GetComponent<OrderByY>();
+		// if (yorder)
+		// 	yorder.RemoveFollower(gameObject);
 		// if (yorder)
 		// 	yorder.enabled = true;
 
@@ -195,9 +195,9 @@ public class Container : Interactive, IExcludable {
 		if(physical && physical.doInit)
 			physical.InitPhysical(0.05f,Vector2.zero);
 
-		OrderByY yorder = pickup.GetComponent<OrderByY>();
-		if (yorder)
-			yorder.RemoveFollower(gameObject);
+		// OrderByY yorder = pickup.GetComponent<OrderByY>();
+		// if (yorder)
+		// 	yorder.RemoveFollower(gameObject);
 		// if (yorder)
 		// 	yorder.enabled = true;
 
