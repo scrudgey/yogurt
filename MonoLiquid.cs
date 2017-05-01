@@ -17,6 +17,10 @@ public class MonoLiquid : MonoBehaviour {
 		}
 	}
 	void OnCollisionEnter2D(Collision2D coll){
+		if (physB == null)
+			return;
+		if (physB.physical == null)
+			return;
 		if (physB.physical.currentMode == Physical.mode.fly){
 			GameObject splash = Instantiate(Resources.Load("prefabs/splash"), transform.position, Quaternion.identity) as GameObject;
 			SpriteRenderer splashSprite = splash.GetComponent<SpriteRenderer>();
