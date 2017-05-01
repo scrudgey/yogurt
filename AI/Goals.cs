@@ -68,6 +68,7 @@ namespace AI {
 				}
 			} catch (Exception e) {
 				Debug.Log(this.ToString() + " fail: " + e.Message);
+				Debug.Log(e.TargetSite);
 			}
 		}
 	}
@@ -76,12 +77,14 @@ namespace AI {
 		private RoutineUseTelephone telRoutine;
 		public GoalUsePhone(GameObject g, Controllable c): base(g, c){
 			Telephone phoneObject = GameObject.FindObjectOfType<Telephone>();
+			Debug.Log(phoneObject);
 			if (phoneObject){
-				Ref<GameObject> phoneRef = new Ref<GameObject>(GameObject.FindObjectOfType<Telephone>().gameObject);
+				Ref<GameObject> phoneRef = new Ref<GameObject>(phoneObject.gameObject);
+				successCondition = new ConditionBoolSwitch(g);
 				telRoutine = new RoutineUseTelephone(g, c, phoneRef, (ConditionBoolSwitch)successCondition);
+				routines.Add(telRoutine);
+				Debug.Log(telRoutine);
 			}
-			successCondition = new ConditionBoolSwitch(g);
-			routines.Add(telRoutine);
 		}
 		public override void Update(){
 			base.Update();
@@ -121,10 +124,12 @@ namespace AI {
 			// GameObject targetObject = GameObject.FindObjectOfType<typeof(objType)>();
 			UnityEngine.Object obj = GameObject.FindObjectOfType(objType);
 			Component targetComponent = (Component)obj;
-			GameObject targetObject = targetComponent.gameObject;
-			target = new Ref<GameObject>(targetObject);
-			routines.Add(new RoutineWalkToGameobject(g, c, target));
-			successCondition = new ConditionCloseToObject(g, target, 0.25f);
+			if (targetComponent != null){
+				GameObject targetObject = targetComponent.gameObject;
+				target = new Ref<GameObject>(targetObject);
+				routines.Add(new RoutineWalkToGameobject(g, c, target));
+				successCondition = new ConditionCloseToObject(g, target, 0.25f);
+			}
 		}
 	}
 	public class GoalLookAtObject: Goal {
