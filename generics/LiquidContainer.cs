@@ -33,7 +33,7 @@ public class LiquidContainer : Interactive {
 			Spill();
 		}
 	}
-	void Start () {
+	void Awake () {
 		if (!LoadInitialized)
 			LoadInit();
 	}
