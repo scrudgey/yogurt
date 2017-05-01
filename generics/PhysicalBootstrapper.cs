@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+// using UnityEngine.Rendering;
 
 public class PhysicalBootstrapper : MonoBehaviour {
 	public AudioClip[] impactSounds;
@@ -49,7 +50,6 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		// Set up hinge
 		hingeObject = new GameObject("hinge");
 		hingeObject.transform.position = initPos;
-		// transform.parent = hingeObject.transform;
 		transform.SetParent(hingeObject.transform);
 
 		hingeBody = hingeObject.AddComponent<Rigidbody2D>();
@@ -87,8 +87,8 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		
 		//box collider
 		groundCollider = groundObject.AddComponent<BoxCollider2D>();
-		groundCollider.size = new Vector2(0.07f, 0.02f);
-		// groundCollider.offset = new Vector2(0.0f, -0.025f);
+		groundCollider.size = new Vector2(0.07f, 0.05f);
+		groundCollider.offset = new Vector2(0.0f, -0.02f);
 		groundCollider.sharedMaterial = Resources.Load<PhysicsMaterial2D>("ground"); 
 
 		//sprite renderer
@@ -117,8 +117,6 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		physical.InitValues();
 		groundPhysical.bootstrapper = this;
 		Set3Motion(new Vector3(initialVelocity.x, initialVelocity.y, initialVelocity.z));
-		// Debug.Log(gameObject);
-		// Debug.Break();
 	}
 	void OnCollisionEnter2D(Collision2D coll){
 		if (coll.relativeVelocity.magnitude > 0.5){
