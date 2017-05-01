@@ -24,14 +24,6 @@ public class Liquid {
         
     }
     public Liquid(float r, float g, float b){
-        
-        // <colorR>50</colorR>
-		// 	<colorG>100</colorG>
-		// 	<colorB>100</colorB>
-		// 	<colorA>0</colorA>
-		// 	<poison>0</poison>
-		// 	<nutrition>10</nutrition>
-		// 	<vegetable>1</vegetable>
         color = new Color(r/255.0F, g/255.0F, b/255.0F);
         vegetable = true;
         nutrition = 10;
@@ -59,6 +51,8 @@ public class Liquid {
 		return returnLiquid;
 	}
     
-    public static Liquid water = new Liquid(50, 100, 100);
+    // public static Liquid water = new Liquid(50, 100, 100);
+	// public static Liquid water = LiquidCollection.LoadLiquid("water");
+	// public static Liquid toiletWater = LiquidCollection.LoadLiquid("toilet water");
 
 }
