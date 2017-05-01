@@ -244,7 +244,8 @@ public class Speech : Interactive, IMessagable {
 		}
         if (incoming is MessageNetIntrinsic){
             MessageNetIntrinsic message = (MessageNetIntrinsic)incoming;
-            CompareLastNetIntrinsic(message.netIntrinsic);
+            if (GameManager.Instance.playerObject == gameObject)
+                CompareLastNetIntrinsic(message.netIntrinsic);
             lastNetIntrinsic = message.netIntrinsic;
         }
     }
