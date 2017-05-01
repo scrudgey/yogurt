@@ -87,10 +87,15 @@ namespace AI{
 			this.telRef = telRef;
 			this.condition = condition;
 			telephone = telRef.val.GetComponent<Telephone>();
+			Debug.Log(telephone);
 		}
 		protected override status DoUpdate(){
-			if (telephone){
+			Debug.Log(telephone);
+			Debug.Log(condition);
+			if (telephone && !condition.conditionMet){
 				telephone.FireButtonCallback();
+				Debug.Log("called FD");
+				Debug.Log(condition);
 				condition.conditionMet = true;
 				return status.success;
 			} else {
