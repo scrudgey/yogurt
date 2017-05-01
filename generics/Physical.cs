@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+// using UnityEngine.Rendering;
 public class Physical : MonoBehaviour, IMessagable {
 	public enum mode{none, fly, ground, zip}
 	public AudioClip[] impactSounds;
@@ -8,7 +9,7 @@ public class Physical : MonoBehaviour, IMessagable {
 	private GameObject trueObject;
 	public Rigidbody2D objectBody;
 	public Collider2D objectCollider;
-	private OrderByY order;
+	// private OrderByY order;
 	public Rigidbody2D hingeBody;
 	public GameObject hinge;
 	public SliderJoint2D slider;
@@ -49,7 +50,7 @@ public class Physical : MonoBehaviour, IMessagable {
 		trueObject = hinge.transform.GetChild(0).gameObject;
 		groundCollider = GetComponent<BoxCollider2D>();
 		objectCollider = trueObject.GetComponent<Collider2D>();
-		order = objectBody.GetComponent<OrderByY>();
+		// order = objectBody.GetComponent<OrderByY>();
 		// if (order)
 		// 	defaultOrderOffset = order.offset;
 	}
@@ -124,7 +125,7 @@ public class Physical : MonoBehaviour, IMessagable {
 		slider.useLimits = false;
 		Vector3 objPosition = objectBody.transform.position;
 		Vector3 newPos = objectBody.transform.position;
-		newPos.y -= objectCollider.bounds.extents.y - objectCollider.offset.y + groundCollider.bounds.extents.y;
+		newPos.y -= objectCollider.bounds.extents.y - objectCollider.offset.y + groundCollider.bounds.extents.y-0.02f;
 		// objectCollider.bou
 		transform.position = newPos;
 		objectBody.transform.position = objPosition;
@@ -257,7 +258,7 @@ public class Physical : MonoBehaviour, IMessagable {
 		if (groundCollider){
 			StartGroundMode();
 			spriteRenderer.enabled = false;
-			groundCollider.size = new Vector2(0.07f, 0.02f + table.height);
+			groundCollider.size = new Vector2(0.07f, 0.05f + table.height);
 			Collider2D[] tableColliders = table.gameObject.GetComponentsInParent<Collider2D>();
 			foreach (Collider2D tableCollider in tableColliders){
 				if (tableCollider.isTrigger == false){
@@ -265,14 +266,14 @@ public class Physical : MonoBehaviour, IMessagable {
 					Physics2D.IgnoreCollision(objectCollider, tableCollider, true);
 				}
 			}
-			if (order)
-				order.AddFollower(table.gameObject, 1);
 		}
+		groundCollider.transform.SetParent(table.transform, true);
+		// Debug.Break();
 	}
 	public void DeactivateTableCollider(Table table){
 		if (groundCollider){
 			spriteRenderer.enabled = true;
-			groundCollider.size = new Vector2(0.07f, 0.02f);
+			groundCollider.size = new Vector2(0.07f, 0.05f);
 			FlyMode();
 			Collider2D[] tableColliders = table.gameObject.GetComponentsInParent<Collider2D>();
 			foreach (Collider2D tableCollider in tableColliders){
@@ -284,9 +285,10 @@ public class Physical : MonoBehaviour, IMessagable {
 			// if (order){
 			// 	order.offset = defaultOrderOffset;
 			// }
-			if (order)
-				order.RemoveFollower(table.gameObject);
+			// if (order)
+			// 	order.RemoveFollower(table.gameObject);
 		}
+		groundCollider.transform.SetParent(null, true);
 	}
 	public void ReceiveMessage(Message message){
 		if (message is MessageDamage){
