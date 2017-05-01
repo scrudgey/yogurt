@@ -25,6 +25,7 @@ public class CutsceneBoardroom : Cutscene {
     private float globalTimer;
     private float stopTextFade = 1.5f;
     private float startDialogue = 4.5f;
+    private float escPromptDelay = 14.5f;
     private bool inDialogue;
     Text settingText;
     Text escPrompt;
@@ -78,10 +79,10 @@ public class CutsceneBoardroom : Cutscene {
                 }
             }
         } else {
-            if (globalTimer < stopTextFade){
+            if (globalTimer > escPromptDelay && globalTimer - escPromptDelay < stopTextFade){
                 escPrompt.gameObject.SetActive(true);
                 Color col = escPrompt.color;
-                col.a = (float)PennerDoubleAnimation.ExpoEaseIn(globalTimer, 0, 1, stopTextFade);
+                col.a = (float)PennerDoubleAnimation.ExpoEaseIn(globalTimer - escPromptDelay, 0, 1, stopTextFade);
                 escPrompt.color = col;
             }
             // dialogue scene
@@ -265,7 +266,7 @@ public class CutsceneManager : Singleton<CutsceneManager> {
             if (cutscene is CutsceneNewDay || cutscene is CutsceneBoardroom){
                 cutscene.Configure();
             }
-        } else {
+        } else if (cutscene is CutsceneNewDay || cutscene is CutsceneBoardroom) {
             cutscene.CleanUp();
             cutscene = null;
         }
@@ -278,7 +279,8 @@ public class CutsceneManager : Singleton<CutsceneManager> {
             cutscene.CleanUp();
             cutscene = null;
         } else {
-            cutscene.Update();
+            if (cutscene.configured)
+                cutscene.Update();
         }
     }
     public void EscapePressed(){
