@@ -102,6 +102,7 @@ public class UINew: Singleton<UINew> {
 		UICanvas = GameObject.Find("NeoUICanvas");
 		if (UICanvas == null){
 			UICanvas = GameObject.Instantiate(Resources.Load("required/NeoUICanvas")) as GameObject;
+			UICanvas.name = Toolbox.Instance.CloneRemover(UICanvas.name);
 		}
 		GameObject.DontDestroyOnLoad(UICanvas);
 		UICanvas.GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
@@ -397,6 +398,7 @@ public class UINew: Singleton<UINew> {
 	private GameObject CircularizeButtons(List<actionButton> buttons, GameObject target){
 		float incrementAngle = (Mathf.PI * 2f) / buttons.Count; 
 		float angle = 0f;
+		RectTransform canvasRect = UICanvas.GetComponent<RectTransform>();
 		Camera renderingCamera = UICanvas.GetComponent<Canvas>().worldCamera;
 
 		GameObject buttonAnchor = Instantiate(Resources.Load("UI/ButtonAnchor"), UICanvas.transform.position, Quaternion.identity) as GameObject;
@@ -404,15 +406,28 @@ public class UINew: Singleton<UINew> {
 		Rigidbody2D priorBody = null;
 		int n = 0;
 		Vector2 centerPosition = new Vector2(renderingCamera.pixelWidth/2f, renderingCamera.pixelHeight/2f);
-		Debug.Log("center position: "+centerPosition.ToString());
+		// Debug.Log("center position: "+centerPosition.ToString());
 		foreach(actionButton button in buttons){
 			Vector2 initLocation = (Vector2)target.transform.position + Toolbox.Instance.RotateZ(Vector2.right/4, angle);
 			Vector2 initPosition = renderingCamera.WorldToScreenPoint(initLocation);
-			Debug.Log("initial position screenpoint: "+initPosition.ToString());
 			n++;
 			button.gameobject.transform.SetParent(UICanvas.transform, false);
-			button.gameobject.transform.localPosition = (initPosition - centerPosition) / (renderingCamera.pixelWidth / 800f);
-			Debug.Log("local canvas position: "+button.gameobject.transform.localPosition.ToString());
+			initPosition = (initPosition - centerPosition) / (renderingCamera.pixelWidth / 800f);
+			// Debug.Log("initial position screenpoint: "+initPosition.ToString());
+			if (initPosition.y > canvasRect.rect.height / 2f){
+				initPosition.y = canvasRect.rect.height / 2f - 50f;
+			}
+			if (initPosition.y < canvasRect.rect.height / -2f){
+				initPosition.y = canvasRect.rect.height / -2f + 50f;
+			}
+			if (initPosition.x > canvasRect.rect.width / 2f){
+				initPosition.x = canvasRect.rect.width / 2f - 50f;
+			}
+			if (initPosition.x < canvasRect.rect.width / -2f){
+				initPosition.x = canvasRect.rect.width / -2f + 50f;
+			}
+			button.gameobject.transform.localPosition = initPosition;
+			// Debug.Log("local canvas position: "+button.gameobject.transform.localPosition.ToString());
 			if (priorBody){
 				SpringJoint2D spring = button.gameobject.AddComponent<SpringJoint2D>();
 				spring.autoConfigureDistance = false;
@@ -442,10 +457,9 @@ public class UINew: Singleton<UINew> {
 			priorBody = button.gameobject.GetComponent<Rigidbody2D>();
 			angle += incrementAngle;
 		}
-		// Debug.Break();
 		buttonAnchor.transform.position = target.transform.position;
 		buttonAnchor.transform.SetParent(target.transform);
-		Debug.Log("anchor screen point: "+renderingCamera.WorldToScreenPoint(target.transform.position).ToString());
+		// Debug.Log("anchor screen point: "+renderingCamera.WorldToScreenPoint(target.transform.position).ToString());
 		return buttonAnchor;
 	}
 	private void ArrangeButtonsOnScreenTop(List<actionButton> buttons){
