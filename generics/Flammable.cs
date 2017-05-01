@@ -19,10 +19,15 @@ public class Flammable : MonoBehaviour {
 		igniteSounds[1] = Resources.Load("sounds/Flash Fire Ignite 02", typeof(AudioClip)) as AudioClip;
 
 		//add the particle effect and set its position
-		GameObject thing = Instantiate(Resources.Load("particles/smoke"), transform.position, Quaternion.identity) as GameObject;
+		Vector3 flamePosition = transform.position;
+		Transform flamepoint = transform.Find("flamepoint");
+		if (flamepoint != null){
+			flamePosition = flamepoint.position;
+		}
+		GameObject thing = Instantiate(Resources.Load("particles/smoke"), flamePosition, Quaternion.identity) as GameObject;
 		smoke = thing.GetComponent<ParticleSystem>();
 		smoke.transform.parent = transform;
-		thing = Instantiate(Resources.Load("particles/fire"), transform.position, Quaternion.identity) as GameObject;
+		thing = Instantiate(Resources.Load("particles/fire"), flamePosition, Quaternion.identity) as GameObject;
 		fireParticles = thing.GetComponent<ParticleSystem>();
 		fireParticles.transform.parent = transform;
 
