@@ -71,14 +71,11 @@ public class LiquidCollection{
 		StringReader stringReader = new StringReader(textAsset.text);
 		XmlTextReader xmlReader = new XmlTextReader(stringReader);
 		LiquidCollection lc = (LiquidCollection)serializer.Deserialize(xmlReader);
-		
 		returnLiquid = lc.Liquids[0];
 		foreach (Liquid l in lc.Liquids ){
 			if (l.name == type){returnLiquid = l;}
 		}
-		
 		returnLiquid.color = new Color(returnLiquid.colorR/255.0F,returnLiquid.colorG/255.0F,returnLiquid.colorB/255.0F);
-		
 		return returnLiquid;
 	}
 
