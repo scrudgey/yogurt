@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class CommercialReportMenu : MonoBehaviour {
     Text descriptionText;
-    Text rewardText;
+    // Text rewardText;
     Text positiveScore, chaosScore, disgustingScore, disturbingScore, offensiveScore;
     Text transcript;
     Text eventText;
@@ -34,7 +34,7 @@ public class CommercialReportMenu : MonoBehaviour {
     private void SetRefs(){
         if (!descriptionText){
             descriptionText = transform.Find("Image/desc/WhatText").GetComponent<Text>();
-            rewardText = transform.Find("Image/buttons/rew/RewardText").GetComponent<Text>();
+            // rewardText = transform.Find("Image/buttons/rew/RewardText").GetComponent<Text>();
             positiveScore = transform.Find("Image/Center/RightHalf/RatingsPanel/Positive/Amount").GetComponent<Text>();
             chaosScore = transform.Find("Image/Center/RightHalf/RatingsPanel/Chaos/Amount").GetComponent<Text>();
             disgustingScore = transform.Find("Image/Center/RightHalf/RatingsPanel/Disgusting/Amount").GetComponent<Text>();
@@ -49,7 +49,7 @@ public class CommercialReportMenu : MonoBehaviour {
         SetRefs();
         // titleText.text = commercial.name;
         descriptionText.text = activeCommercial.description;
-        rewardText.text = activeCommercial.reward.ToString();
+        // rewardText.text = activeCommercial.reward.ToString();
 
         positiveScore.text = commercial.data.positive.ToString();
         chaosScore.text = commercial.data.chaos.ToString();
