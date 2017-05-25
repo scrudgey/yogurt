@@ -37,13 +37,13 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 		control = GetComponent<Controllable>();
 
 		priorities = new List<Priority>();
-		priorityAttack = new PriorityAttack(gameObject, control);
-		priorityRunAway = new PriorityRunAway(gameObject, control);
+		// priorityAttack = new PriorityAttack(gameObject, control);
+		// priorityRunAway = new PriorityRunAway(gameObject, control);
 
 		priorities.Add(new PriorityFightFire(gameObject, control));
 		priorities.Add(new PriorityWander(gameObject, control));
-		priorities.Add(priorityRunAway);
-		priorities.Add(priorityAttack);
+		priorities.Add(new PriorityRunAway(gameObject, control));
+		priorities.Add(new PriorityAttack(gameObject, control));
 		priorities.Add(new PriorityReadScript(gameObject, control));
 	}
 	public void ReceiveMessage(Message message){
