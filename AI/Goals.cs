@@ -77,13 +77,11 @@ namespace AI {
 		private RoutineUseTelephone telRoutine;
 		public GoalUsePhone(GameObject g, Controllable c): base(g, c){
 			Telephone phoneObject = GameObject.FindObjectOfType<Telephone>();
-			Debug.Log(phoneObject);
 			if (phoneObject){
 				Ref<GameObject> phoneRef = new Ref<GameObject>(phoneObject.gameObject);
 				successCondition = new ConditionBoolSwitch(g);
 				telRoutine = new RoutineUseTelephone(g, c, phoneRef, (ConditionBoolSwitch)successCondition);
 				routines.Add(telRoutine);
-				Debug.Log(telRoutine);
 			}
 		}
 		public override void Update(){
@@ -91,6 +89,11 @@ namespace AI {
 			if (successCondition.Evaluate() == status.success && !phoneCalled){
 				phoneCalled = true;
 			}
+		}
+	}
+	public class GoalReturnObject : Goal {
+		public GoalReturnObject(GameObject g, Controllable c, GameObject target) : base(g,c ){
+			
 		}
 	}
 	public class GoalGetItem : Goal {
@@ -101,6 +104,13 @@ namespace AI {
 				routines.Add(new RoutineRetrieveNamedFromInv(g, c, target));
 				routines.Add(new RoutineGetNamedFromEnvironment(g, c, target));
 				routines.Add(new RoutineWanderUntilFound(g, c, target));
+		}
+		public GoalGetItem (GameObject g, Controllable c, GameObject target) : base(g, c){
+				goalThought = "I need a "+target+".";
+				successCondition = new ConditionHoldingObjectWithName(g, target.name);
+				routines.Add(new RoutineRetrieveNamedFromInv(g, c, target.name));
+				routines.Add(new RoutineGetNamedFromEnvironment(g, c, target.name));
+				routines.Add(new RoutineWanderUntilFound(g, c, target.name));
 		}
 		public override void Update(){
 			base.Update();
