@@ -87,7 +87,8 @@ public class Controller : Singleton<Controller> {
             foreach (RaycastHit2D hit in hits){
                 if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)){
                     focus.lastLeftClicked = hit.collider.gameObject;
-                    Clicked(hit.collider.transform.root.gameObject);
+					// we need to check the object from the root for interactions, but place buttons at the child clicked on
+                    Clicked(hit.collider.transform.root.gameObject, hit.collider.transform.gameObject);
 					break;
                 }
             }
@@ -104,7 +105,7 @@ public class Controller : Singleton<Controller> {
         }
     }
 
-    public void Clicked(GameObject clicked){
+    public void Clicked(GameObject clicked, GameObject clickSite){
 		if (lastLeftClicked == clicked){
 			// TODO: fix this conditional!
 			UINew.Instance.ClearWorldButtons();
@@ -117,7 +118,7 @@ public class Controller : Singleton<Controller> {
 					if (inventory.holding)
 						UINew.Instance.DisplayHandActions(inventory);
 			} else {
-				UINew.Instance.SetClickedActions(lastLeftClicked);
+				UINew.Instance.SetClickedActions(lastLeftClicked, clickSite);
 			}
 		}
 	}
