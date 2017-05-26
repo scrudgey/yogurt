@@ -132,6 +132,7 @@ public class DialogueMenu : MonoBehaviour {
 			giveButton.gameObject.SetActive(false);
 			demandButton.gameObject.SetActive(false);
 		}
+		portrait.sprite = target.portrait;
 		speechText.text = instigator.name + " " + target.name;
 		targetControl = target.GetComponent<Controllable>();
 		instigatorControl = instigator.GetComponent<Controllable>();
@@ -141,6 +142,9 @@ public class DialogueMenu : MonoBehaviour {
 			targetControl.disabled = true;
 		if (instigatorControl)
 			instigatorControl.disabled = true;
+		if (target.defaultMonologue != ""){
+			LoadDialogueTree(target.defaultMonologue);
+		}
 	}
 	public void LoadDialogueTree(string filename){
 		Regex node_hook = new Regex(@"^(\d)>(.+)", RegexOptions.Multiline);
