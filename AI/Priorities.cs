@@ -8,8 +8,8 @@ namespace AI{
 		public const float urgencyLarge = 5f;
 		public const float urgencyPressing = 10f;
 		public const float urgencyMaximum = 10f;
-		public float urgency;
 		public float minimumUrgency = 0;
+		public float urgency;
 		public Awareness awareness;
 		public Controllable control;
 		public GameObject gameObject;
@@ -65,6 +65,18 @@ namespace AI{
 			}
 			if (goal == callFD && callFD.phoneCalled){
 				goal = useFireExtinguisher;
+			}
+		}
+	}
+	public class PriorityProtectPossessions : Priority {
+		public PriorityProtectPossessions(GameObject g, Controllable c): base(g, c){
+			Goal gainPossession = new GoalGetItem(gameObject, control, awareness.possession);
+			Goal returnObject = new Goal(gameObject, control);
+			returnObject.requirements.Add(gainPossession);
+		}
+		public override void Update(){
+			if (awareness.possession == null){
+				urgency = 0;
 			}
 		}
 	}
