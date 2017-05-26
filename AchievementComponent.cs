@@ -37,6 +37,7 @@ public class AchievementStats {
 	public float yogurtEaten;
 	public float vomit;
 	public float yogurtVomit;
+	public float dollarsFlushed;
 	public AchievementStats(){ }
 	public AchievementStats(AchievementStats source){
 		secondsPlayed = source.secondsPlayed;
