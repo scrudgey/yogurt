@@ -27,6 +27,7 @@ public class Speech : Interactive, IMessagable {
     private Intrinsic lastNetIntrinsic;
     public Controllable.HitState hitState;
     public Sprite portrait;
+    public string defaultMonologue;
     public bool disableSpeakWith;
 	void Start () {
         if (!LoadInitialized)
