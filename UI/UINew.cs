@@ -352,14 +352,14 @@ public class UINew: Singleton<UINew> {
 		}
 	}
 	
-	public void SetClickedActions(GameObject clickedOn){
+	public void SetClickedActions(GameObject clickedOn, GameObject clickSite){
 		ClearWorldButtons();
 		activeElements = new List<GameObject>();
 		List<Interaction> clickedActions = Interactor.GetInteractions(GameManager.Instance.playerObject, clickedOn);
 		List<actionButton> actionButtons = CreateButtonsFromActions(clickedActions);;
 		foreach (actionButton button in actionButtons)
 			activeElements.Add(button.gameobject);
-		activeElements.Add(CircularizeButtons(actionButtons, clickedOn));
+		activeElements.Add(CircularizeButtons(actionButtons, clickSite));
 	}
 
 	public void ClearWorldButtons(){
@@ -392,6 +392,7 @@ public class UINew: Singleton<UINew> {
 		returnbut.buttonScript.action = interaction;
 		if (interaction != null)
 			returnbut.buttonText.text = interaction.actionName;
+		// Debug.Log(interaction.actionName);
 		return returnbut;
 	}
 
@@ -465,17 +466,26 @@ public class UINew: Singleton<UINew> {
 	private void ArrangeButtonsOnScreenTop(List<actionButton> buttons){
 		GameObject bottomBar = UICanvas.transform.Find("topdock").gameObject;
 		foreach (actionButton button in buttons){
+			ContentSizeFitter buttonSizeFitter = button.gameobject.GetComponent<ContentSizeFitter>();
+			if (buttonSizeFitter){
+				buttonSizeFitter.enabled = false;
+			}
 			button.gameobject.transform.SetParent(bottomBar.transform, false);
 			button.gameobject.transform.SetSiblingIndex(3);
+			RectTransform buttonRect = button.gameobject.GetComponent<RectTransform>();
+			buttonRect.sizeDelta = new Vector2(100, 40);
 		}
 	}
 	private void MakeButtonDefault(actionButton button){
-		Image image = button.gameobject.GetComponent<Image>();
-		image.sprite = Resources.Load<Sprite>("sprites/UI/BoxTexture5");
+		// Image image = button.gameobject.GetComponent<Image>();
+		// image.sprite = Resources.Load<Sprite>("sprites/UI/BoxTexture5");
 	}
 	public void CreateActionButtons(List<Interaction> manualActions, Interaction defaultInteraction){
+		// Debug.Log("create action buttons");
 		ClearActionButtons();
+		// Debug.Break();
 		List<actionButton> manualButtons = CreateButtonsFromActions(manualActions, true);
+		// Debug.Break();
 		foreach (actionButton button in manualButtons){
 			bottomElements.Add(button.gameobject);
 			button.buttonScript.manualAction = true;
