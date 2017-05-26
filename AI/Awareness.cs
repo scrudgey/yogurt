@@ -47,6 +47,7 @@ public class PersonalAssessment{
 
 public class Awareness : MonoBehaviour, IMessagable {
 	public List<GameObject> initialAwareness;
+	public GameObject possession;
 	private GameObject sightCone;
 	Transform cachedTransform;
 	public new Transform transform
