@@ -21,7 +21,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	public bool doInit = true;
 	private Vector3 setV;
 	public GameObject thrownBy;
-	public void Start () {
+	public void Awake () {
 		tag = "Physical";
 		GetComponent<Renderer>().sortingLayerName="main";
 		if (doInit)
@@ -31,7 +31,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		}
 	}
 	void LoadInit(){
-		Start();
+		Awake();
 	}
 	public void DestroyPhysical(){
 		transform.SetParent(null);
