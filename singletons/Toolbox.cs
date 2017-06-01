@@ -82,7 +82,7 @@ public class Toolbox : Singleton<Toolbox> {
 	///<summary>
 	///Spawn a droplet of liquid l at poisition pos.
 	///</summary>
-	public void SpawnDroplet(Vector3 pos, Liquid l){
+	public GameObject SpawnDroplet(Vector3 pos, Liquid l){
 		/// this is a test
 		Vector2 initialVelocity = Vector2.zero;
 		initialVelocity = Random.insideUnitCircle;
@@ -94,6 +94,7 @@ public class Toolbox : Singleton<Toolbox> {
 		phys.initVelocity = initialVelocity;
 		phys.ignoreCollisions = true;
 		LiquidCollection.MonoLiquidify(droplet, l);
+		return droplet;
 	}
     public void SpawnDroplet(Liquid l, float severity, GameObject spiller){
         SpawnDroplet(l, severity, spiller, 0.01f);
