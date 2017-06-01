@@ -128,7 +128,7 @@ public class Toolbox : Singleton<Toolbox> {
 		Collider2D[] spillerColliders = spiller.transform.root.GetComponentsInChildren<Collider2D>();
 		foreach(Collider2D collider in spillerColliders){
 			Physics2D.IgnoreCollision(collider, phys.physical.objectCollider, true);
-			Physics2D.IgnoreCollision(collider, phys.physical.groundCollider, true);
+			Physics2D.IgnoreCollision(collider, phys.physical.horizonCollider, true);
 		}
         LiquidCollection.MonoLiquidify(droplet, l);
     }

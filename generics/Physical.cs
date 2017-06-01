@@ -5,6 +5,7 @@ public class Physical : MonoBehaviour, IMessagable {
 	public enum mode{none, fly, ground, zip}
 	public AudioClip[] impactSounds;
 	public AudioClip[] landSounds;
+	public AudioSource audioSource;
 	public PhysicalBootstrapper bootstrapper;
 	private GameObject trueObject;
 	public Rigidbody2D objectBody;
@@ -12,24 +13,29 @@ public class Physical : MonoBehaviour, IMessagable {
 	public Rigidbody2D hingeBody;
 	public GameObject hinge;
 	public SliderJoint2D slider;
-	public BoxCollider2D groundCollider;
+	public EdgeCollider2D horizonCollider;
 	public mode currentMode;
 	public float height;
 	public bool ignoreCollisions;
 	public bool doFly;
 	private bool doGround;
 	private bool doZip;
+	private bool doStartTable;
+	private bool doStopTable;
 	private SpriteRenderer spriteRenderer;
 	public float groundDrag;
 	private float ziptime;
-	private bool suppressLandSound;
+	public bool suppressLandSound;
+	private Table table;
 	public List<Collider2D> temporaryDisabledColliders = new List<Collider2D>();
 	 void Start() {
 		InitValues();
 		// ignore collisions between ground and all other objects
 		GameObject[] physicals = GameObject.FindGameObjectsWithTag("Physical");
 		foreach(GameObject phys in physicals){
-			Physics2D.IgnoreCollision(groundCollider, phys.GetComponent<Collider2D>(), true);
+			if (phys == gameObject)
+				continue;
+			Physics2D.IgnoreCollision(horizonCollider, phys.GetComponent<Collider2D>(), true);
 			// special types of object ignore all collisions with other objects
 			// this is true for e.g. liquid droplets 
 			if (ignoreCollisions){
@@ -37,32 +43,39 @@ public class Physical : MonoBehaviour, IMessagable {
 					Physics2D.IgnoreCollision(objectCollider, col, true);
 			}
 		}
-		Physics2D.IgnoreCollision(groundCollider, objectCollider, false);
+		Physics2D.IgnoreCollision(horizonCollider, objectCollider, false);
 		if (currentMode == mode.none)
 			FlyMode();
 	}
 	public void InitValues(){
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		slider = GetComponent<SliderJoint2D>();
-		hinge = transform.GetChild(0).gameObject;
+		hinge = transform.Find("hinge").gameObject;
 		trueObject = hinge.transform.GetChild(0).gameObject;
-		groundCollider = GetComponent<BoxCollider2D>();
 		objectCollider = trueObject.GetComponent<Collider2D>();
+		horizonCollider = transform.Find("horizon").GetComponent<EdgeCollider2D>();
+		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 	}
 	public void Impact(Vector2 f){
 		Vector2 force = f / (objectBody.mass / 25f);
 		if (currentMode != mode.fly)
 			FlyMode();
 		if (impactSounds.Length > 0)
-			GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
+			audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
 		bootstrapper.Set3Motion(new Vector3(force.x, force.y, force.y + 0.5f));
 	}
 	void FixedUpdate() {
-		height = groundCollider.size.y / 2f - groundCollider.offset.y + hinge.transform.localPosition.y;
+		if (trueObject == null){
+			Destroy(this);
+			return;
+		}
+		// height = groundCollider.size.y / 2f - groundCollider.offset.y + hinge.transform.localPosition.y;
+		height = horizonCollider.offset.y + hinge.transform.localPosition.y;
 		if (currentMode == mode.fly){
 			if (height < 0){
 				Vector2 hingePosition = hinge.transform.localPosition;
-				hingePosition.y = 0.1f + groundCollider.size.y / 2f - groundCollider.offset.y;
+				// hingePosition.y = 0.1f + groundCollider.size.y / 2f - groundCollider.offset.y;
+				hingePosition.y = 0.1f - horizonCollider.offset.y;
 				hinge.transform.localPosition = hingePosition;
 			}
 			if (height < 0.1){
@@ -99,6 +112,14 @@ public class Physical : MonoBehaviour, IMessagable {
 			doZip = false;
 			StartZipMode();
 		}
+		if (doStartTable){
+			doStartTable = false;
+			StartTable();
+		}
+		if (doStopTable){
+			doStopTable = false;
+			StopTable();
+		}
 	}
 	public void GroundMode (){
 		doGround = true;
@@ -115,16 +136,13 @@ public class Physical : MonoBehaviour, IMessagable {
 		doZip = false;
 		ziptime = 0f;
 		ClearTempColliders();
-		// set object gravity 0
-		objectBody.gravityScale = 0;
-		slider.useLimits = false;
-		Vector3 objPosition = objectBody.transform.position;
-		Vector3 newPos = objectBody.transform.position;
-		newPos.y -= objectCollider.bounds.extents.y - objectCollider.offset.y + groundCollider.bounds.extents.y-0.02f;
-		// objectCollider.bou
-		transform.position = newPos;
-		objectBody.transform.position = objPosition;
-		// fix slider
+
+		// objectBody.gravityScale = 0;
+		// slider.useLimits = false;
+		// Vector3 objPosition = objectBody.transform.position;
+		// Vector3 newPos = objectBody.transform.position;
+		// newPos.y -= objectCollider.bounds.extents.y - objectCollider.offset.y + groundCollider.bounds.extents.y-0.02f;
+
 		JointTranslationLimits2D tempLimits = slider.limits;
 		tempLimits.min = 0;
 		tempLimits.max = hinge.transform.localPosition.y;
@@ -135,37 +153,28 @@ public class Physical : MonoBehaviour, IMessagable {
 		GetComponent<Rigidbody2D>().mass = objectBody.mass;
 		// update mode
 		currentMode = mode.ground;
-		// remove vertical velocities
-		Vector3 tempVelocity = GetComponent<Rigidbody2D>().velocity;
-		tempVelocity.y = 0;
-		GetComponent<Rigidbody2D>().velocity = tempVelocity;
-		objectBody.velocity = tempVelocity;
-		hingeBody.velocity = tempVelocity;
+		// Vector3 tempVelocity = GetComponent<Rigidbody2D>().velocity;
+		// tempVelocity.y = 0;
+		// GetComponent<Rigidbody2D>().velocity = tempVelocity;
+		// objectBody.velocity = tempVelocity;
+		// hingeBody.velocity = tempVelocity;
 		foreach(Physical phys in FindObjectsOfType<Physical>()){
+			if (phys == this)
+				continue;
 			if (phys.currentMode == mode.ground){
-				if (ignoreCollisions){
-					Physics2D.IgnoreCollision(objectCollider, phys.groundCollider, true);
-				} else {
-					Physics2D.IgnoreCollision(groundCollider, phys.groundCollider, false);
-				}
-			}
-		}
-		foreach(GameObject table in GameObject.FindGameObjectsWithTag("table")){
-			foreach(Collider2D tableCollider in table.GetComponentsInChildren<Collider2D>()){
-				if (tableCollider.isTrigger == false){
-					Physics2D.IgnoreCollision(groundCollider, tableCollider, true);
-					Physics2D.IgnoreCollision(objectCollider, tableCollider, true);
-				}
+				Physics2D.IgnoreCollision(objectCollider, phys.horizonCollider, true);
+				Physics2D.IgnoreCollision(horizonCollider, phys.objectCollider, true);
+				// Physics2D.IgnoreCollision(groundCollider, phys.groundCollider, true);
 			}
 		}
 		if (landSounds.Length > 0 && !suppressLandSound)
-			GetComponent<AudioSource>().PlayOneShot(landSounds[Random.Range(0, landSounds.Length)]);
+			audioSource.PlayOneShot(landSounds[Random.Range(0, landSounds.Length)]);
 		suppressLandSound = false;
 	}
 	public void ClearTempColliders(){
 		foreach (Collider2D temporaryCollider in temporaryDisabledColliders){
 			Physics2D.IgnoreCollision(temporaryCollider, objectCollider, false);
-			Physics2D.IgnoreCollision(temporaryCollider, groundCollider, false);
+			Physics2D.IgnoreCollision(temporaryCollider, horizonCollider, false);
 		}
 		temporaryDisabledColliders = new List<Collider2D>();
 	}
@@ -184,23 +193,15 @@ public class Physical : MonoBehaviour, IMessagable {
 		// set ground friction
 		GetComponent<Rigidbody2D>().drag = 0;
 		GetComponent<Rigidbody2D>().mass = 1;
-		foreach(Physical phys in FindObjectsOfType<Physical>()){
-			if (phys.gameObject != gameObject){
-				Physics2D.IgnoreCollision(groundCollider, phys.groundCollider, true);
-				Physics2D.IgnoreCollision(groundCollider, phys.objectCollider, true);
-				if (ignoreCollisions){
-					Physics2D.IgnoreCollision(objectCollider, phys.objectCollider, true);
-				}
-			}
-		}
-		foreach(GameObject table in GameObject.FindGameObjectsWithTag("table")){
-			foreach(Collider2D tableCollider in table.GetComponentsInParent<Collider2D>()){
-				if (tableCollider.isTrigger == false){
-					Physics2D.IgnoreCollision(groundCollider, tableCollider, true);
-					Physics2D.IgnoreCollision(objectCollider, tableCollider, true);
-				}
-			}
-		}
+		// foreach(Physical phys in FindObjectsOfType<Physical>()){
+		// 	if (phys.gameObject != gameObject){
+		// 		Physics2D.IgnoreCollision(groundCollider, phys.groundCollider, true);
+		// 		Physics2D.IgnoreCollision(groundCollider, phys.objectCollider, true);
+		// 		// if (ignoreCollisions){
+		// 		// 	Physics2D.IgnoreCollision(objectCollider, phys.objectCollider, true);
+		// 		// }
+		// 	}
+		// }
 	}
 	public void StartZipMode(){
 		doZip = false;
@@ -214,59 +215,57 @@ public class Physical : MonoBehaviour, IMessagable {
 		// Debug.Log("ground collision between "+gameObject.name+" "+coll.gameObject.name);
 		if (coll.relativeVelocity.magnitude > 0.5){
 			if (impactSounds.Length > 0){
-				GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
+				audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
 			}
 		}
-		// this part right here is pretty essential to whether the object can fall off the world, or what
-		// TODO: this part isn't working right
-		if (coll.collider == objectCollider){
-			if (coll.relativeVelocity.magnitude > 0.1){
-				GroundMode();
-			} else {
-				suppressLandSound = true;
-				GroundMode();
-			}
-			BroadcastMessage("OnGroundImpact", this, SendMessageOptions.DontRequireReceiver);
+	}
+	void OnTriggerEnter2D(Collider2D coll){
+		if (coll.tag == "table" && coll.gameObject != gameObject && !ignoreCollisions){
+			table = coll.GetComponentInParent<Table>();
+			doStartTable = true;
+		}
+	}
+	void OnTriggerExit2D(Collider2D coll){
+		if (coll.tag == "table" && coll.gameObject != gameObject && !ignoreCollisions){
+			table = coll.GetComponentInParent<Table>();
+			doStopTable = true;
+		}
+	}
+	void StartTable(){
+		// Vector2 newOffset = new Vector2(0f, 0.1f);
+		Vector2 newOffset = new Vector2(0f, table.height);
+		horizonCollider.offset = newOffset;
+		Vector3 objectPosition = hinge.transform.localPosition;
+		if (objectPosition.y > table.height){
+			// objectPosition.y -= table.height;
 		} else {
-			
+			objectPosition.y += table.height + 0.02f;
 		}
+		hinge.transform.localPosition = objectPosition;
+		// trueObject.transform.localPosition = objectPosition;
+
+		JointTranslationLimits2D tempLimits = slider.limits;
+		tempLimits.min = 0;
+		tempLimits.max = hinge.transform.localPosition.y;
+		slider.limits = tempLimits;
+
+		transform.SetParent(table.transform);
 	}
-	void OnCollisionStay2D(Collision2D coll){
-		if(coll.collider == objectCollider && coll.relativeVelocity.magnitude < 0.01 && currentMode != mode.ground){
-			GroundMode();
-		}
+	void StopTable(){
+		Vector3 objectPosition = hinge.transform.localPosition;
+		// objectPosition.y += horizonCollider.offset.y;
+
+		Vector2 newOffset = new Vector2(0f, 0.0f);
+		horizonCollider.offset = newOffset;
+		hinge.transform.localPosition = objectPosition;
+
+		JointTranslationLimits2D tempLimits = slider.limits;
+		tempLimits.min = 0;
+		tempLimits.max = hinge.transform.localPosition.y;
+		slider.limits = tempLimits;
+		transform.SetParent(null);
 	}
-	public void ActivateTableCollider(Table table){
-		if (currentMode == mode.zip)
-			return;
-		if (groundCollider){
-			StartGroundMode();
-			spriteRenderer.enabled = false;
-			groundCollider.size = new Vector2(0.07f, 0.05f + table.height);
-			Collider2D[] tableColliders = table.gameObject.GetComponentsInParent<Collider2D>();
-			foreach (Collider2D tableCollider in tableColliders){
-				if (tableCollider.isTrigger == false){
-					Physics2D.IgnoreCollision(groundCollider, tableCollider, true);
-					Physics2D.IgnoreCollision(objectCollider, tableCollider, true);
-				}
-			}
-		}
-		groundCollider.transform.SetParent(table.transform, true);
-	}
-	public void DeactivateTableCollider(Table table){
-		if (groundCollider){
-			spriteRenderer.enabled = true;
-			groundCollider.size = new Vector2(0.07f, 0.05f);
-			FlyMode();
-			Collider2D[] tableColliders = table.gameObject.GetComponentsInParent<Collider2D>();
-			foreach (Collider2D tableCollider in tableColliders){
-				if (tableCollider.isTrigger == false){
-					Physics2D.IgnoreCollision(groundCollider, tableCollider, false);
-				}
-			}
-		}
-		groundCollider.transform.SetParent(null, true);
-	}
+	
 	public void ReceiveMessage(Message message){
 		if (message is MessageDamage){
 			MessageDamage dam = (MessageDamage)message;

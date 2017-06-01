@@ -12,6 +12,8 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	private GameObject groundObject;
 	private Rigidbody2D groundBody;
 	private BoxCollider2D groundCollider;
+	// private EdgeCollider2D horizonCollider;
+	private GameObject horizon;
 	private SliderJoint2D sliderJoint2D;
 	public Physical physical;
 	public float initHeight = 0.01f;
@@ -21,7 +23,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	public bool doInit = true;
 	private Vector3 setV;
 	public GameObject thrownBy;
-	public void Awake () {
+	public void Start () {
 		tag = "Physical";
 		GetComponent<Renderer>().sortingLayerName="main";
 		if (doInit)
@@ -31,7 +33,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		}
 	}
 	void LoadInit(){
-		Awake();
+		Start();
 	}
 	public void DestroyPhysical(){
 		transform.SetParent(null);
@@ -63,9 +65,34 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		// Set up ground object
 		groundObject = new GameObject(name + " Ground");
 		groundObject.tag = "footprint";
-		groundObject.layer = 9;
+		groundObject.layer = 8;
 		groundObject.transform.position = initPos;
 		Toolbox.Instance.SetUpAudioSource(groundObject);
+		//rigidbody 2D
+		groundBody = groundObject.AddComponent<Rigidbody2D>();
+		groundBody.mass = 1f;
+		groundBody.drag = groundDrag;
+		groundBody.angularDrag = 0.05f;
+		groundBody.gravityScale = 0;
+		groundBody.freezeRotation = true;
+		// groundCollider = groundObject.AddComponent<EdgeCollider2D>();
+		//box collider
+		groundCollider = groundObject.AddComponent<BoxCollider2D>();
+		groundCollider.size = new Vector2(0.07f, 0.05f);
+		groundCollider.offset = new Vector2(0.0f, -0.02f);
+		groundCollider.sharedMaterial = Resources.Load<PhysicsMaterial2D>("ground"); 
+
+		horizon = new GameObject("horizon");
+		horizon.layer = 9;
+		Rigidbody2D shadowBody = horizon.AddComponent<Rigidbody2D>();
+		shadowBody.bodyType = RigidbodyType2D.Kinematic;
+		horizon.AddComponent<EdgeCollider2D>();
+		// BoxCollider2D shadowCollider = shadowObject.AddComponent<BoxCollider2D>();
+		// shadowCollider.size = new Vector2(0.07f, 0.05f);
+		// shadowCollider.offset = new Vector2(0.0f, -0.02f);
+		// shadowCollider.sharedMaterial = Resources.Load<PhysicsMaterial2D>("ground"); 
+		horizon.transform.position = initPos;
+		horizon.transform.SetParent(groundObject.transform);
 
 		// hingeObject.transform.parent = groundObject.transform;
 		hingeObject.transform.SetParent(groundObject.transform);
@@ -77,20 +104,6 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		hingeObject.transform.localPosition = tempPos;
 		groundObject.transform.position = groundPos;
 		
-		//rigidbody 2D
-		groundBody = groundObject.AddComponent<Rigidbody2D>();
-		groundBody.mass = 1f;
-		groundBody.drag = groundDrag;
-		groundBody.angularDrag = 0.05f;
-		groundBody.gravityScale = 0;
-		groundBody.freezeRotation = true;
-		
-		//box collider
-		groundCollider = groundObject.AddComponent<BoxCollider2D>();
-		groundCollider.size = new Vector2(0.07f, 0.05f);
-		groundCollider.offset = new Vector2(0.0f, -0.02f);
-		groundCollider.sharedMaterial = Resources.Load<PhysicsMaterial2D>("ground"); 
-
 		//sprite renderer
 		SpriteRenderer groundSprite = groundObject.AddComponent<SpriteRenderer>();
 		groundSprite.sprite = Resources.Load<Sprite>("shadow");
@@ -129,6 +142,14 @@ public class PhysicalBootstrapper : MonoBehaviour {
 			return;
 		if (coll.gameObject == groundObject){
 			// Debug.Log("I collided with the ground.");
+		} else if (coll.gameObject == horizon){
+			if (coll.relativeVelocity.magnitude > 0.1){
+				physical.GroundMode();
+			} else {
+				physical.suppressLandSound = true;
+				physical.GroundMode();
+			}
+			physical.BroadcastMessage("OnGroundImpact", physical, SendMessageOptions.DontRequireReceiver);
 		} else {
 			if (physical.currentMode == Physical.mode.zip){
 				// Debug.Log("physical bootstrapper collision: "+gameObject.name+" + "+coll.gameObject.name);
@@ -148,22 +169,22 @@ public class PhysicalBootstrapper : MonoBehaviour {
 			}
 		}
 	}
-	void OnTriggerEnter2D(Collider2D coll){
-		if (coll.tag == "table" && coll.gameObject != gameObject && physical != null && !ignoreCollisions){
-			Table table = coll.GetComponentInParent<Table>();
-			physical.ActivateTableCollider(table);
-			// DestroyPhysical();
-			// transform.SetParent(coll.transform, true);
-		}
-	}
-	void OnTriggerExit2D(Collider2D coll){
-		if (coll.tag == "table" && coll.gameObject != gameObject && physical != null && !ignoreCollisions){
-			Table table = coll.GetComponentInParent<Table>();
-			physical.DeactivateTableCollider(table);
-			// transform.SetParent(null, true);
-			// InitPhysical(0.2f, Vector3.zero);
-		}
-	}
+	// void OnTriggerEnter2D(Collider2D coll){
+	// 	if (coll.tag == "table" && coll.gameObject != gameObject && physical != null && !ignoreCollisions){
+	// 		Table table = coll.GetComponentInParent<Table>();
+	// 		// physical.ActivateTableCollider(table);
+	// 		// DestroyPhysical();
+	// 		// transform.SetParent(coll.transform, true);
+	// 	}
+	// }
+	// void OnTriggerExit2D(Collider2D coll){
+	// 	if (coll.tag == "table" && coll.gameObject != gameObject && physical != null && !ignoreCollisions){
+	// 		Table table = coll.GetComponentInParent<Table>();
+	// 		// physical.DeactivateTableCollider(table);
+	// 		// transform.SetParent(null, true);
+	// 		// InitPhysical(0.2f, Vector3.zero);
+	// 	}
+	// }
 	public void Set3Motion(Vector3 velocity){
 		setV = velocity;
 	}

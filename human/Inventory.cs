@@ -216,7 +216,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 			foreach(Collider2D collider in GetComponentsInChildren<Collider2D>()){
 				if (!collider.isTrigger){
 					Physics2D.IgnoreCollision(collider, phys.physical.objectCollider);
-					Physics2D.IgnoreCollision(collider, phys.physical.groundCollider);
+					Physics2D.IgnoreCollision(collider, phys.physical.horizonCollider);
 					phys.physical.temporaryDisabledColliders.Add(collider);
 				}
 			}
