@@ -57,7 +57,7 @@ public class LiquidCollection{
 
 		if (liquid.flammable){
 			Flammable flam = target.AddComponent<Flammable>();
-			flam.flashpoint = 1;
+			flam.flashpoint = 0.1f;
 		}
 
 	}
