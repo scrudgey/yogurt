@@ -9,7 +9,6 @@ public class Physical : MonoBehaviour, IMessagable {
 	private GameObject trueObject;
 	public Rigidbody2D objectBody;
 	public Collider2D objectCollider;
-	// private OrderByY order;
 	public Rigidbody2D hingeBody;
 	public GameObject hinge;
 	public SliderJoint2D slider;
@@ -23,7 +22,6 @@ public class Physical : MonoBehaviour, IMessagable {
 	private SpriteRenderer spriteRenderer;
 	public float groundDrag;
 	private float ziptime;
-	// private float defaultOrderOffset;
 	private bool suppressLandSound;
 	public List<Collider2D> temporaryDisabledColliders = new List<Collider2D>();
 	 void Start() {
@@ -50,9 +48,6 @@ public class Physical : MonoBehaviour, IMessagable {
 		trueObject = hinge.transform.GetChild(0).gameObject;
 		groundCollider = GetComponent<BoxCollider2D>();
 		objectCollider = trueObject.GetComponent<Collider2D>();
-		// order = objectBody.GetComponent<OrderByY>();
-		// if (order)
-		// 	defaultOrderOffset = order.offset;
 	}
 	public void Impact(Vector2 f){
 		Vector2 force = f / (objectBody.mass / 25f);
@@ -223,6 +218,7 @@ public class Physical : MonoBehaviour, IMessagable {
 			}
 		}
 		// this part right here is pretty essential to whether the object can fall off the world, or what
+		// TODO: this part isn't working right
 		if (coll.collider == objectCollider){
 			if (coll.relativeVelocity.magnitude > 0.1){
 				GroundMode();
@@ -240,18 +236,6 @@ public class Physical : MonoBehaviour, IMessagable {
 			GroundMode();
 		}
 	}
-	// void OnTriggerEnter2D(Collider2D coll){
-	// 	if (coll.tag == "table" && coll.gameObject != gameObject && currentMode != mode.zip){
-	// 		Table table = coll.GetComponent<Table>();
-	// 		ActivateTableCollider(table);
-	// 	}
-	// }
-	// void OnTriggerExit2D(Collider2D coll){
-	// 	if (coll.tag == "table" && coll.gameObject != gameObject && currentMode != mode.zip){
-	// 		Table table = coll.GetComponent<Table>();
-	// 		DeactivateTableCollider(table);
-	// 	}
-	// }
 	public void ActivateTableCollider(Table table){
 		if (currentMode == mode.zip)
 			return;
@@ -268,7 +252,6 @@ public class Physical : MonoBehaviour, IMessagable {
 			}
 		}
 		groundCollider.transform.SetParent(table.transform, true);
-		// Debug.Break();
 	}
 	public void DeactivateTableCollider(Table table){
 		if (groundCollider){
@@ -281,12 +264,6 @@ public class Physical : MonoBehaviour, IMessagable {
 					Physics2D.IgnoreCollision(groundCollider, tableCollider, false);
 				}
 			}
-			// OrderByY order = objectBody.GetComponent<OrderByY>();
-			// if (order){
-			// 	order.offset = defaultOrderOffset;
-			// }
-			// if (order)
-			// 	order.RemoveFollower(table.gameObject);
 		}
 		groundCollider.transform.SetParent(null, true);
 	}
