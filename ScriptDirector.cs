@@ -61,13 +61,13 @@ public class ScriptDirector : Interactive {
             live = true;
             video.live = true;
             regionIndicator.SetActive(true);
-            UINew.Instance.EnableRecordButtons(true);
+            // UINew.Instance.EnableRecordButtons(true);
             UINew.Instance.UpdateRecordButtons(video.commercial);
             StartCoroutine(WaitAndStartScript(1f));
         } else {
             live = false;
             regionIndicator.SetActive(false);
-            UINew.Instance.EnableRecordButtons(false);
+            // UINew.Instance.EnableRecordButtons(false);
             UINew.Instance.ShowMenu(UINew.MenuType.scriptSelect);
         }
     }
@@ -76,7 +76,7 @@ public class ScriptDirector : Interactive {
     }
     public void ResetScript(){
         GameManager.Instance.activeCommercial = null;
-        UINew.Instance.EnableRecordButtons(false);
+        // UINew.Instance.EnableRecordButtons(false);
         
         live = false;
         video.live = false;

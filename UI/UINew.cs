@@ -34,7 +34,7 @@ public class UINew: Singleton<UINew> {
 	private GameObject fightButton;
 	private GameObject punchButton;
 	private GameObject speakButton;	
-	private GameObject recordStopButton;
+	// private GameObject recordStopButton;
 	private bool init = false;
 	public bool inventoryVisible = false;
 	private string statusText;
@@ -46,8 +46,8 @@ public class UINew: Singleton<UINew> {
 	public Text status;
 	public Text actionTextObject;
 	public string actionTextString;
-	private Text recordText;
-	private GameObject recordFinish;
+	// private Text recordText;
+	// private GameObject recordFinish;
 	private Stack<AchievementPopup.CollectedInfo> collectedStack = new Stack<AchievementPopup.CollectedInfo>();
 	private Stack<Achievement> achievementStack = new Stack<Achievement>();
 	public bool achievementPopupInProgress;
@@ -113,20 +113,20 @@ public class UINew: Singleton<UINew> {
 		status = UICanvas.transform.Find("topdock/topBar/status").GetComponent<Text>();
 		statusFX = status.gameObject.GetComponent<TextFX>();
 		actionTextObject = UICanvas.transform.Find("bottomdock/ActionText").GetComponent<Text>();
-		recordText = UICanvas.transform.Find("topdock/topRight/recStatus").gameObject.GetComponent<Text>();
-		recordStopButton = UICanvas.transform.Find("topdock/topRight/StopButton").gameObject;
-		recordFinish = UICanvas.transform.Find("topdock/topRight/FinishButton").gameObject;
+		// recordText = UICanvas.transform.Find("topdock/topRight/recStatus").gameObject.GetComponent<Text>();
+		// recordStopButton = UICanvas.transform.Find("topdock/topRight/StopButton").gameObject;
+		// recordFinish = UICanvas.transform.Find("topdock/topRight/FinishButton").gameObject;
 
 		status.gameObject.SetActive(false);
 		inventoryButton.SetActive(false);
 		fightButton.SetActive(false);
 		speakButton.SetActive(false);
 		punchButton.SetActive(false);
-		if (recordStopButton){
-			recordStopButton.SetActive(false);
-			recordFinish.SetActive(false);
-			recordText.text = "";
-		}
+		// if (recordStopButton){
+		// 	recordStopButton.SetActive(false);
+		// 	recordFinish.SetActive(false);
+		// 	recordText.text = "";
+		// }
 	}
 	public GameObject ShowMenu(MenuType typeMenu){
 		if (activeMenu == null){
@@ -162,11 +162,11 @@ public class UINew: Singleton<UINew> {
 			if (button)
 				button.SetActive(active);
 		}
-		if (recordStopButton && !active){
-			recordStopButton.SetActive(active);
-			recordFinish.SetActive(active);
-			recordText.text = "";
-		}
+		// if (recordStopButton && !active){
+		// 	recordStopButton.SetActive(active);
+		// 	recordFinish.SetActive(active);
+		// 	recordText.text = "";
+		// }
 		// if (status){
 		// 	status.gameObject.SetActive(active);
 		// }
@@ -196,17 +196,31 @@ public class UINew: Singleton<UINew> {
 		if (GameManager.Instance.activeCommercial == null){
 			return;
 		}
+		VideoCamera videoCam = GameObject.FindObjectOfType<VideoCamera>();
 		if (commercial.Evaluate(GameManager.Instance.activeCommercial)){
-			recordText.text = "COMPLETE";
-			recordStopButton.SetActive(false);
-			recordFinish.SetActive(true);
+			videoCam.EnableBubble();
+			// recordText.text = "COMPLETE";
+			// recordStopButton.SetActive(false);
+			// recordFinish.SetActive(true);
 			// StartCoroutine(WaitAndFinish(1.5f));
 		} else {
-			recordText.text = "RECORDING";
-			recordStopButton.SetActive(true);
-			recordFinish.SetActive(false);
+			videoCam.DisableBubble();
+			// recordText.text = "RECORDING";
+			// recordStopButton.SetActive(true);
+			// recordFinish.SetActive(false);
 		}
 	}
+	// public void EnableRecordButtons(bool enable){
+	// 	if (enable){
+	// 		recordText.text = "RECORDING";
+	// 		recordStopButton.SetActive(true);
+	// 		recordFinish.SetActive(true);
+	// 	} else {
+	// 		recordText.text = "";
+	// 		recordStopButton.SetActive(false);
+	// 		recordFinish.SetActive(false);	
+	// 	}
+	// }
 	public void UpdateInventoryButton(){
 		UpdateInventoryButton(GameManager.Instance.playerObject.GetComponent<Inventory>());
 	}
@@ -233,17 +247,7 @@ public class UINew: Singleton<UINew> {
 	public void HidePunchButton(){
 		punchButton.SetActive(false);
 	}
-	public void EnableRecordButtons(bool enable){
-		if (enable){
-			recordText.text = "RECORDING";
-			recordStopButton.SetActive(true);
-			recordFinish.SetActive(true);
-		} else {
-			recordText.text = "";
-			recordStopButton.SetActive(false);
-			recordFinish.SetActive(false);	
-		}
-	}
+
 	public void PopupCounter(string text, float initValue, float finalValue, Commercial commercial){
 		GameObject existingPop = GameObject.Find("Poptext(Clone)");
 		if (existingPop == null){

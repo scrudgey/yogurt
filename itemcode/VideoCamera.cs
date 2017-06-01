@@ -1,13 +1,45 @@
 ﻿using UnityEngine;
 using System.Xml.Serialization;
 using System.IO;
-public class VideoCamera : MonoBehaviour, IMessagable {
+public class VideoCamera : Interactive, IMessagable {
 	public Commercial commercial = new Commercial();
     public OccurrenceData watchForOccurrence = null;
     public bool live;
     private ScriptDirector director;
-	void Start () {
+    public GameObject doneBubble;
+	void Awake () {
         live = false;
+        doneBubble = transform.Find("doneBubble").gameObject;
+        doneBubble.SetActive(false);
+	}
+    void Start(){
+        Interaction stasher = new Interaction(this, "Finish", "FinishButtonClick");
+		// stasher.displayVerb = "Stash in";
+		stasher.validationFunction = true;
+		interactions.Add(stasher);
+    }
+    public void EnableBubble(){
+        doneBubble.SetActive(true);
+    }
+    public void DisableBubble(){
+        doneBubble.SetActive(false);
+    }
+    public void FinishButtonClick(){
+		// VideoCamera video = GameObject.FindObjectOfType<VideoCamera>();
+		live = false;
+		// if (video){
+        GameManager.Instance.EvaluateCommercial(commercial);
+		// }
+	}
+    public bool FinishButtonClick_Validation(){
+        if (commercial == null)
+            return false;
+        if (GameManager.Instance.activeCommercial == null)
+            return false;
+        return commercial.Evaluate(GameManager.Instance.activeCommercial);
+    }
+    public string FinishButtonClick_desc(){
+        return "Finish commercial";
 	}
 	void SaveCommercial(){
 		var serializer = new XmlSerializer(typeof(Commercial));
