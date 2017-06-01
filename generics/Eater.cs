@@ -200,13 +200,17 @@ public class Eater : Interactive {
 			eaten.transform.position = transform.position;
             MonoLiquid mono = eaten.GetComponent<MonoLiquid>();
             if (mono){
-                Toolbox.Instance.SpawnDroplet(transform.position, mono.liquid);
+                GameObject droplet = Toolbox.Instance.SpawnDroplet(transform.position, mono.liquid);
                 mono.liquid.vomit = true;
                 mono.edible.vomit = true;
                 data.liquid = mono.liquid;
 				if (data.liquid.name == "yogurt"){
 			        GameManager.Instance.data.achievementStats.yogurtVomit += 1;
 					GameManager.Instance.CheckAchievements();
+				}
+				CircleCollider2D dropCollider = droplet.GetComponent<CircleCollider2D>();
+				foreach(Collider2D collider in GetComponentsInChildren<Collider2D>()){
+					Physics2D.IgnoreCollision(dropCollider, collider, true);
 				}
             }
             Edible edible = eaten.GetComponent<Edible>();
