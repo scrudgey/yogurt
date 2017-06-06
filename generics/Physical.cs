@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-// using UnityEngine.Rendering;
 public class Physical : MonoBehaviour, IMessagable {
 	public enum mode{none, fly, ground, zip}
 	public AudioClip[] impactSounds;
@@ -22,7 +21,7 @@ public class Physical : MonoBehaviour, IMessagable {
 	private bool doZip;
 	private bool doStartTable;
 	private bool doStopTable;
-	private SpriteRenderer spriteRenderer;
+	// private SpriteRenderer spriteRenderer;
 	public float groundDrag;
 	private float ziptime;
 	public bool suppressLandSound;
@@ -48,7 +47,6 @@ public class Physical : MonoBehaviour, IMessagable {
 			FlyMode();
 	}
 	public void InitValues(){
-		spriteRenderer = GetComponent<SpriteRenderer>();
 		slider = GetComponent<SliderJoint2D>();
 		hinge = transform.Find("hinge").gameObject;
 		trueObject = hinge.transform.GetChild(0).gameObject;
@@ -137,34 +135,20 @@ public class Physical : MonoBehaviour, IMessagable {
 		ziptime = 0f;
 		ClearTempColliders();
 
-		// objectBody.gravityScale = 0;
-		// slider.useLimits = false;
-		// Vector3 objPosition = objectBody.transform.position;
-		// Vector3 newPos = objectBody.transform.position;
-		// newPos.y -= objectCollider.bounds.extents.y - objectCollider.offset.y + groundCollider.bounds.extents.y-0.02f;
-
 		JointTranslationLimits2D tempLimits = slider.limits;
 		tempLimits.min = 0;
 		tempLimits.max = hinge.transform.localPosition.y;
 		slider.limits = tempLimits;
 		slider.useLimits = true;
-		// set ground friction
 		GetComponent<Rigidbody2D>().drag = groundDrag;
 		GetComponent<Rigidbody2D>().mass = objectBody.mass;
-		// update mode
 		currentMode = mode.ground;
-		// Vector3 tempVelocity = GetComponent<Rigidbody2D>().velocity;
-		// tempVelocity.y = 0;
-		// GetComponent<Rigidbody2D>().velocity = tempVelocity;
-		// objectBody.velocity = tempVelocity;
-		// hingeBody.velocity = tempVelocity;
 		foreach(Physical phys in FindObjectsOfType<Physical>()){
 			if (phys == this)
 				continue;
 			if (phys.currentMode == mode.ground){
 				Physics2D.IgnoreCollision(objectCollider, phys.horizonCollider, true);
 				Physics2D.IgnoreCollision(horizonCollider, phys.objectCollider, true);
-				// Physics2D.IgnoreCollision(groundCollider, phys.groundCollider, true);
 			}
 		}
 		if (landSounds.Length > 0 && !suppressLandSound)
@@ -232,7 +216,6 @@ public class Physical : MonoBehaviour, IMessagable {
 		}
 	}
 	void StartTable(){
-		// Vector2 newOffset = new Vector2(0f, 0.1f);
 		Vector2 newOffset = new Vector2(0f, table.height);
 		horizonCollider.offset = newOffset;
 		Vector3 objectPosition = hinge.transform.localPosition;
@@ -242,8 +225,6 @@ public class Physical : MonoBehaviour, IMessagable {
 			objectPosition.y += table.height + 0.02f;
 		}
 		hinge.transform.localPosition = objectPosition;
-		// trueObject.transform.localPosition = objectPosition;
-
 		JointTranslationLimits2D tempLimits = slider.limits;
 		tempLimits.min = 0;
 		tempLimits.max = hinge.transform.localPosition.y;
@@ -253,7 +234,6 @@ public class Physical : MonoBehaviour, IMessagable {
 	}
 	void StopTable(){
 		Vector3 objectPosition = hinge.transform.localPosition;
-		// objectPosition.y += horizonCollider.offset.y;
 
 		Vector2 newOffset = new Vector2(0f, 0.0f);
 		horizonCollider.offset = newOffset;

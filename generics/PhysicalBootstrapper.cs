@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-// using UnityEngine.Rendering;
-
 public class PhysicalBootstrapper : MonoBehaviour {
 	public AudioClip[] impactSounds;
 	public AudioClip[] landSounds;
@@ -12,7 +10,6 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	private GameObject groundObject;
 	private Rigidbody2D groundBody;
 	private BoxCollider2D groundCollider;
-	// private EdgeCollider2D horizonCollider;
 	private GameObject horizon;
 	private SliderJoint2D sliderJoint2D;
 	public Physical physical;
@@ -23,6 +20,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	public bool doInit = true;
 	private Vector3 setV;
 	public GameObject thrownBy;
+	public Collider2D objectCollider;
 	public void Start () {
 		tag = "Physical";
 		GetComponent<Renderer>().sortingLayerName="main";
@@ -75,11 +73,9 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		groundBody.angularDrag = 0.05f;
 		groundBody.gravityScale = 0;
 		groundBody.freezeRotation = true;
-		// groundCollider = groundObject.AddComponent<EdgeCollider2D>();
 		//box collider
 		groundCollider = groundObject.AddComponent<BoxCollider2D>();
 		groundCollider.size = new Vector2(0.07f, 0.05f);
-		groundCollider.offset = new Vector2(0.0f, -0.02f);
 		groundCollider.sharedMaterial = Resources.Load<PhysicsMaterial2D>("ground"); 
 
 		horizon = new GameObject("horizon");
@@ -87,18 +83,14 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		Rigidbody2D shadowBody = horizon.AddComponent<Rigidbody2D>();
 		shadowBody.bodyType = RigidbodyType2D.Kinematic;
 		horizon.AddComponent<EdgeCollider2D>();
-		// BoxCollider2D shadowCollider = shadowObject.AddComponent<BoxCollider2D>();
-		// shadowCollider.size = new Vector2(0.07f, 0.05f);
-		// shadowCollider.offset = new Vector2(0.0f, -0.02f);
-		// shadowCollider.sharedMaterial = Resources.Load<PhysicsMaterial2D>("ground"); 
 		horizon.transform.position = initPos;
 		horizon.transform.SetParent(groundObject.transform);
+		objectCollider = GetComponent<Collider2D>();
 
-		// hingeObject.transform.parent = groundObject.transform;
 		hingeObject.transform.SetParent(groundObject.transform);
 		Vector2 tempPos = Vector2.zero;
-//		Bounds spriteBounds = spriteRenderer.sprite.bounds;
-//		height += spriteBounds.extents.y;
+		if (objectCollider.bounds.extents.y > height)
+			height = objectCollider.bounds.extents.y;
 		tempPos.y = height;
 		groundPos.y -= height;
 		hingeObject.transform.localPosition = tempPos;
@@ -111,7 +103,6 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		
 		//Physical
 		Physical groundPhysical = groundObject.AddComponent<Physical>();
-
 		groundPhysical.ignoreCollisions = ignoreCollisions;
 		groundPhysical.objectBody = GetComponent<Rigidbody2D>();
 		groundPhysical.hingeBody = hingeBody;
@@ -169,22 +160,6 @@ public class PhysicalBootstrapper : MonoBehaviour {
 			}
 		}
 	}
-	// void OnTriggerEnter2D(Collider2D coll){
-	// 	if (coll.tag == "table" && coll.gameObject != gameObject && physical != null && !ignoreCollisions){
-	// 		Table table = coll.GetComponentInParent<Table>();
-	// 		// physical.ActivateTableCollider(table);
-	// 		// DestroyPhysical();
-	// 		// transform.SetParent(coll.transform, true);
-	// 	}
-	// }
-	// void OnTriggerExit2D(Collider2D coll){
-	// 	if (coll.tag == "table" && coll.gameObject != gameObject && physical != null && !ignoreCollisions){
-	// 		Table table = coll.GetComponentInParent<Table>();
-	// 		// physical.DeactivateTableCollider(table);
-	// 		// transform.SetParent(null, true);
-	// 		// InitPhysical(0.2f, Vector3.zero);
-	// 	}
-	// }
 	public void Set3Motion(Vector3 velocity){
 		setV = velocity;
 	}
