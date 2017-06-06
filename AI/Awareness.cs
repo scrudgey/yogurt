@@ -47,6 +47,7 @@ public class PersonalAssessment{
 
 public class Awareness : MonoBehaviour, IMessagable {
 	public List<GameObject> initialAwareness;
+	// public List<GameObject> possessions = new List<GameObject>();
 	public GameObject possession;
 	private GameObject sightCone;
 	Transform cachedTransform;
@@ -122,9 +123,16 @@ public class Awareness : MonoBehaviour, IMessagable {
 			}
 			SetNearestEnemy();
 			SetNearestFire();
+			CheckPossession();
 		}
 	}
-
+	void CheckPossession(){
+		if (!knowledgebase.ContainsKey(possession))
+			return;
+		if (Time.time - knowledgebase[possession].lastSeenTime > 1)
+			return;
+			// knowledgebase.Add(g, new Knowledge(g));
+	}
 	void SetNearestEnemy(){
 		nearestEnemy.val = null;
         float closestDistanceSqr = Mathf.Infinity;

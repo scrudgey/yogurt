@@ -37,8 +37,6 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 		control = GetComponent<Controllable>();
 
 		priorities = new List<Priority>();
-		// priorityAttack = new PriorityAttack(gameObject, control);
-		// priorityRunAway = new PriorityRunAway(gameObject, control);
 
 		priorities.Add(new PriorityFightFire(gameObject, control));
 		priorities.Add(new PriorityWander(gameObject, control));

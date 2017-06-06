@@ -75,9 +75,9 @@ namespace AI{
 			returnObject.requirements.Add(gainPossession);
 		}
 		public override void Update(){
-			if (awareness.possession == null){
-				urgency = 0;
-			}
+			// if (awareness.possession == null){
+			// 	urgency = 0;
+			// }
 		}
 	}
 
