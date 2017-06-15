@@ -74,6 +74,46 @@ namespace AI{
 			}
 		}
 	}
+	public class ConditionSawObjectRecently : Condition {
+		public Ref<GameObject> target;
+		private Awareness awareness;
+		public ConditionSawObjectRecently(GameObject g, Controllable c, Ref<GameObject> target): base(g){
+			this.target = target;
+			awareness = g.GetComponent<Awareness>();
+		}
+		public override status Evaluate(){
+			if (target.val == null)
+				return status.failure;
+			if (awareness){
+				if (awareness.knowledgebase.ContainsKey(target.val)){
+					if (Time.time - awareness.knowledgebase[target.val].lastSeenTime < 5){
+						return status.success;
+					} else {
+						return status.failure;
+					}
+				} else {
+					return status.failure;
+				}
+			}
+			return status.failure;
+		}
+	}
+	public class ConditionObjectInPlace : Condition {
+		public Ref<GameObject> target;
+		private Ref<Vector2> place;
+		public ConditionObjectInPlace(GameObject g, Controllable c, Ref<GameObject> target,  Ref<Vector2> place): base(g){
+			this.target = target;
+			this.place = place;
+		}
+		public override status Evaluate(){
+			if (target.val){
+				if (Vector2.Distance(target.val.transform.position, place.val) < 0.1)
+					return status.success;
+				return status.failure;
+			}
+			return status.failure;
+		}
+	}
 	public class ConditionLookingAtObject : Condition {
 		public Ref<GameObject> target;
 		private Controllable controllable;
@@ -136,6 +176,36 @@ namespace AI{
 					}
 				} else {
 					return status.neutral;
+				}
+			} else {
+				return status.failure;
+			}
+		}
+	}
+	public class ConditionHoldingSpecificObject : Condition{
+		// string name;
+		Ref<GameObject> target;
+		Inventory inv;
+		public ConditionHoldingSpecificObject(GameObject g, Ref<GameObject> target) : base(g) {
+			// conditionThought = "I need a "+t;
+			// name = t;
+			this.target = target;
+			inv = gameObject.GetComponent<Inventory>();
+		}
+		public override status Evaluate(){
+			if (target.val == null)
+				return status.failure;
+			if (inv){
+				if (inv.holding){
+					// Debug.Log(inv.holding);
+					// Debug.Log(target.val);
+					if (inv.holding.gameObject == target.val){
+						return status.success;
+					}else{
+						return status.failure;
+					}
+				} else {
+					return status.failure;
 				}
 			} else {
 				return status.failure;
