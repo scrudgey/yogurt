@@ -28,6 +28,7 @@ public class Knowledge{
 	}
 	public void UpdateInfo(){
 		if (obj){
+			// Debug.Log(obj.name + " updating");
 			lastSeenPosition = transform.position;
 			lastSeenTime = Time.time;
 		}
@@ -47,8 +48,9 @@ public class PersonalAssessment{
 
 public class Awareness : MonoBehaviour, IMessagable {
 	public List<GameObject> initialAwareness;
-	// public List<GameObject> possessions = new List<GameObject>();
 	public GameObject possession;
+	public Knowledge possessionDefaultState;
+	public GameObject wayWardPossession;
 	private GameObject sightCone;
 	Transform cachedTransform;
 	public new Transform transform
@@ -81,6 +83,8 @@ public class Awareness : MonoBehaviour, IMessagable {
 		sightConeTransform.parent = transform;
 		if (initialAwareness.Count > 0){
 			fieldOfView = initialAwareness;
+			if (possession != null)
+				initialAwareness.Add(possession);
 			Perceive();
 		}
 	}
@@ -123,16 +127,9 @@ public class Awareness : MonoBehaviour, IMessagable {
 			}
 			SetNearestEnemy();
 			SetNearestFire();
-			CheckPossession();
 		}
 	}
-	void CheckPossession(){
-		if (!knowledgebase.ContainsKey(possession))
-			return;
-		if (Time.time - knowledgebase[possession].lastSeenTime > 1)
-			return;
-			// knowledgebase.Add(g, new Knowledge(g));
-	}
+
 	void SetNearestEnemy(){
 		nearestEnemy.val = null;
         float closestDistanceSqr = Mathf.Infinity;
@@ -197,6 +194,15 @@ public class Awareness : MonoBehaviour, IMessagable {
 			if (g == null)
 				continue;
 			Knowledge knowledge = null;
+			if (g == possession){
+				if (!knowledgebase.ContainsKey(g)){
+					// Debug
+					possessionDefaultState = new Knowledge(g);
+					knowledge = new Knowledge(g);
+					knowledgebase.Add(g, knowledge);
+					// knowledgebase.Add(g, possessionDefaultState);
+				}
+			}
 			if (knowledgebase.TryGetValue(g, out knowledge)){
 				knowledge.UpdateInfo();
 			} else {
@@ -209,6 +215,27 @@ public class Awareness : MonoBehaviour, IMessagable {
 				// assessment.unconscious = human.hitstun;
 				assessment.unconscious = human.hitState >= Controllable.HitState.stun;
 			}
+		}
+	}
+	public bool PossessionsAreOkay(){
+		if (possession == null)
+			return true;
+		Knowledge knowledge = null;
+		if (!knowledgebase.TryGetValue(possession, out knowledge)){
+			return true;
+		}
+		if (possessionDefaultState == null)
+			return true;
+
+		if (Time.time - knowledge.lastSeenTime > 2){
+			// Debug.Log("possession not okay: timeout");
+			return false;
+		}
+		if (Vector2.Distance(knowledge.lastSeenPosition, possessionDefaultState.lastSeenPosition) > 0.1){
+			// Debug.Log("possession not okay: location");			
+			return false;
+		} else {
+			return true;
 		}
 	}
 
@@ -258,8 +285,24 @@ public class Awareness : MonoBehaviour, IMessagable {
 		if (incoming is MessageInventoryChanged){
 			MessageInventoryChanged message = (MessageInventoryChanged)incoming;
 			if (message.holding != null){
-				fieldOfView.Add(message.holding);
+				// fieldOfView.Add(message.holding);
 				// Perceive();
+				Knowledge knowledge = null;
+				if (knowledgebase.TryGetValue(message.holding, out knowledge)){
+					knowledge.UpdateInfo();
+				} else {
+					knowledge = new Knowledge(message.holding);
+					knowledgebase.Add(message.holding, knowledge);
+				}
+			}
+			if (message.dropped != null){
+				Knowledge knowledge = null;
+				if (knowledgebase.TryGetValue(message.dropped, out knowledge)){
+					knowledge.UpdateInfo();
+				} else {
+					knowledge = new Knowledge(message.dropped);
+					knowledgebase.Add(message.dropped, knowledge);
+				}
 			}
 		}
 	}
