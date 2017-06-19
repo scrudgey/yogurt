@@ -96,10 +96,10 @@ public class Toolbox : Singleton<Toolbox> {
 		LiquidCollection.MonoLiquidify(droplet, l);
 		return droplet;
 	}
-    public void SpawnDroplet(Liquid l, float severity, GameObject spiller){
-        SpawnDroplet(l, severity, spiller, 0.01f);
+    public GameObject SpawnDroplet(Liquid l, float severity, GameObject spiller){
+        return SpawnDroplet(l, severity, spiller, 0.01f);
     }
-    public void SpawnDroplet(Liquid l, float severity, GameObject spiller, float initHeight){
+    public GameObject SpawnDroplet(Liquid l, float severity, GameObject spiller, float initHeight){
         Vector3 initialVelocity = Vector2.zero;
         Vector3 randomVelocity = Vector2.zero;
         randomVelocity = spiller.transform.right * Random.Range(-0.2f, 0.2f);
@@ -114,7 +114,7 @@ public class Toolbox : Singleton<Toolbox> {
         
         Vector2 initpos = spiller.transform.position;
         // float initHeight = 0.01f;
-        phys.ignoreCollisions = true;
+        // phys.ignoreCollisions = true;
         Physical pb = spiller.GetComponentInParent<Physical>();
         if (pb != null){ 
             initHeight = pb.height; 
@@ -131,6 +131,7 @@ public class Toolbox : Singleton<Toolbox> {
 			Physics2D.IgnoreCollision(collider, phys.physical.horizonCollider, true);
 		}
         LiquidCollection.MonoLiquidify(droplet, l);
+		return droplet;
     }
 	public Component CopyComponent(Component original, GameObject destination)
 	{
