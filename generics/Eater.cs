@@ -1,9 +1,7 @@
 ﻿using UnityEngine;
 
 public class Eater : Interactive {
-	
 	public float nutrition;
-
 	public enum preference{neutral, likes, dislikes}
 	public preference vegetablePreference;
 	public preference meatPreference;
