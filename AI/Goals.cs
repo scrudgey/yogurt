@@ -91,26 +91,33 @@ namespace AI {
 			}
 		}
 	}
-	public class GoalReturnObject : Goal {
-		public GoalReturnObject(GameObject g, Controllable c, GameObject target) : base(g,c ){
+	// public class GoalReturnObject : Goal {
+	// 	public GoalReturnObject(GameObject g, Controllable c, GameObject target) : base(g,c ){
 			
-		}
-	}
+	// 	}
+	// }
 	public class GoalGetItem : Goal {
 		public bool findingFail;
+		public GoalGetItem(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c){
+			// TODO: fill this in
+			// successCondition = new ConditionHoldingObjectWithName(g, target);
+			successCondition = new ConditionHoldingSpecificObject(g, target);
+			routines.Add(new RoutineRetrieveRefFromInv(g, c, target));
+			routines.Add(new RoutineGetRefFromEnvironment(g, c, target));
+		}
 		public GoalGetItem (GameObject g, Controllable c, string target) : base(g, c){
-				goalThought = "I need a "+target+".";
-				successCondition = new ConditionHoldingObjectWithName(g, target);
-				routines.Add(new RoutineRetrieveNamedFromInv(g, c, target));
-				routines.Add(new RoutineGetNamedFromEnvironment(g, c, target));
-				routines.Add(new RoutineWanderUntilFound(g, c, target));
+			goalThought = "I need a "+target+".";
+			successCondition = new ConditionHoldingObjectWithName(g, target);
+			routines.Add(new RoutineRetrieveNamedFromInv(g, c, target));
+			routines.Add(new RoutineGetNamedFromEnvironment(g, c, target));
+			routines.Add(new RoutineWanderUntilNamedFound(g, c, target));
 		}
 		public GoalGetItem (GameObject g, Controllable c, GameObject target) : base(g, c){
-				goalThought = "I need a "+target+".";
-				successCondition = new ConditionHoldingObjectWithName(g, target.name);
-				routines.Add(new RoutineRetrieveNamedFromInv(g, c, target.name));
-				routines.Add(new RoutineGetNamedFromEnvironment(g, c, target.name));
-				routines.Add(new RoutineWanderUntilFound(g, c, target.name));
+			goalThought = "I need a "+target+".";
+			successCondition = new ConditionHoldingObjectWithName(g, target.name);
+			routines.Add(new RoutineRetrieveNamedFromInv(g, c, target.name));
+			routines.Add(new RoutineGetNamedFromEnvironment(g, c, target.name));
+			routines.Add(new RoutineWanderUntilNamedFound(g, c, target.name));
 		}
 		public override void Update(){
 			base.Update();
