@@ -45,7 +45,6 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
 	}
 	void Awake () {
 		spriteRenderer = GetComponent<SpriteRenderer>();
-		// head = GetComponent<Head>();
 		MessageDirectable directableMessage = new MessageDirectable();
 		directableMessage.addDirectable = (IDirectable)this;
 		Toolbox.Instance.SendMessage(gameObject, this, directableMessage);
