@@ -15,32 +15,40 @@ public class Physical : MonoBehaviour, IMessagable {
 	public EdgeCollider2D horizonCollider;
 	public mode currentMode;
 	public float height;
-	public bool ignoreCollisions;
+	// public bool ignoreCollisions;
 	public bool doFly;
 	private bool doGround;
 	private bool doZip;
 	private bool doStartTable;
 	private bool doStopTable;
-	// private SpriteRenderer spriteRenderer;
+	private SpriteRenderer spriteRenderer;
 	public float groundDrag;
 	private float ziptime;
 	public bool suppressLandSound;
 	private Table table;
 	public List<Collider2D> temporaryDisabledColliders = new List<Collider2D>();
-	 void Start() {
+
+	void Awake(){
 		InitValues();
+	}
+	void Start() {
+		// InitValues();
 		// ignore collisions between ground and all other objects
-		GameObject[] physicals = GameObject.FindGameObjectsWithTag("Physical");
-		foreach(GameObject phys in physicals){
-			if (phys == gameObject)
+		// GameObject[] physicals = GameObject.FindGameObjectsWithTag("Physical");
+		Physical[] physicals = GameObject.FindObjectsOfType<Physical>();
+		foreach(Physical phys in physicals){
+			if (phys == this)
 				continue;
 			Physics2D.IgnoreCollision(horizonCollider, phys.GetComponent<Collider2D>(), true);
-			// special types of object ignore all collisions with other objects
-			// this is true for e.g. liquid droplets 
-			if (ignoreCollisions){
-				foreach (Collider2D col in phys.GetComponentsInParent<Collider2D>())
+			foreach (Collider2D col in phys.GetComponentsInChildren<Collider2D>()){
 					Physics2D.IgnoreCollision(objectCollider, col, true);
 			}
+			// special types of object ignore all collisions with other objects
+			// this is true for e.g. liquid droplets 
+			// if (ignoreCollisions){
+			// 	foreach (Collider2D col in phys.GetComponentsInParent<Collider2D>())
+			// 		Physics2D.IgnoreCollision(objectCollider, col, true);
+			// }
 		}
 		Physics2D.IgnoreCollision(horizonCollider, objectCollider, false);
 		if (currentMode == mode.none)
@@ -53,6 +61,7 @@ public class Physical : MonoBehaviour, IMessagable {
 		objectCollider = trueObject.GetComponent<Collider2D>();
 		horizonCollider = transform.Find("horizon").GetComponent<EdgeCollider2D>();
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
+		spriteRenderer = GetComponent<SpriteRenderer>();
 	}
 	public void Impact(Vector2 f){
 		Vector2 force = f / (objectBody.mass / 25f);
@@ -204,13 +213,13 @@ public class Physical : MonoBehaviour, IMessagable {
 		}
 	}
 	void OnTriggerEnter2D(Collider2D coll){
-		if (coll.tag == "table" && coll.gameObject != gameObject && !ignoreCollisions){
+		if (coll.tag == "table" && coll.gameObject != gameObject){// && !ignoreCollisions){
 			table = coll.GetComponentInParent<Table>();
 			doStartTable = true;
 		}
 	}
 	void OnTriggerExit2D(Collider2D coll){
-		if (coll.tag == "table" && coll.gameObject != gameObject && !ignoreCollisions){
+		if (coll.tag == "table" && coll.gameObject != gameObject){// && !ignoreCollisions){
 			table = coll.GetComponentInParent<Table>();
 			doStopTable = true;
 		}
@@ -231,6 +240,8 @@ public class Physical : MonoBehaviour, IMessagable {
 		slider.limits = tempLimits;
 
 		transform.SetParent(table.transform);
+		if (spriteRenderer)
+			spriteRenderer.enabled = false;
 	}
 	void StopTable(){
 		Vector3 objectPosition = hinge.transform.localPosition;
@@ -244,6 +255,8 @@ public class Physical : MonoBehaviour, IMessagable {
 		tempLimits.max = hinge.transform.localPosition.y;
 		slider.limits = tempLimits;
 		transform.SetParent(null);
+		if (spriteRenderer)
+			spriteRenderer.enabled = true;
 	}
 	
 	public void ReceiveMessage(Message message){
