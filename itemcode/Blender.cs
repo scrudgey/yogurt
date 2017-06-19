@@ -10,6 +10,8 @@ public class Blender : Container {
 	public AudioClip blendStart;
 	public AudioClip blendNoise;
 	public AudioClip blendStop;
+	public AudioClip lidOn;
+	public AudioClip lidOff;
 	private LiquidContainer liquidContainer;
 	private bool LoadInitialized = false;
 	private AudioSource audioSource;
@@ -83,8 +85,10 @@ public class Blender : Container {
 		liquidContainer.lid = !liquidContainer.lid;
 		if(liquidContainer.lid){
 			spriteRenderer.sprite = spriteSheet[0];
+			audioSource.PlayOneShot(lidOn);
 		}else{
 			spriteRenderer.sprite = spriteSheet[1];
+			audioSource.PlayOneShot(lidOff);
 		}
 	}
 	public string Lid_desc(){
