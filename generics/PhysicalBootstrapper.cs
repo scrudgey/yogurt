@@ -43,7 +43,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		doInit = false;
 	}
 	public void InitPhysical(float height, Vector3 initialVelocity){
-		doInit = false;
+		doInit = false; 
 		Vector2 initPos = transform.position;
 		Vector2 groundPos = transform.position;
 
@@ -77,6 +77,10 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		groundCollider = groundObject.AddComponent<BoxCollider2D>();
 		groundCollider.size = new Vector2(0.07f, 0.05f);
 		groundCollider.sharedMaterial = Resources.Load<PhysicsMaterial2D>("ground"); 
+		foreach (Table table in Object.FindObjectsOfType<Table>()){
+			Collider2D tableCollider = table.transform.parent.GetComponent<Collider2D>();
+			Physics2D.IgnoreCollision(groundCollider, tableCollider, true);
+		}
 
 		horizon = new GameObject("horizon");
 		horizon.layer = 9;
@@ -103,7 +107,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		
 		//Physical
 		Physical groundPhysical = groundObject.AddComponent<Physical>();
-		groundPhysical.ignoreCollisions = ignoreCollisions;
+		// groundPhysical.ignoreCollisions = ignoreCollisions;
 		groundPhysical.objectBody = GetComponent<Rigidbody2D>();
 		groundPhysical.hingeBody = hingeBody;
 		groundPhysical.groundDrag = groundDrag;
