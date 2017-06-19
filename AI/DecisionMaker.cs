@@ -20,11 +20,13 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 	public PriorityAttack priorityAttack;
 	public PriorityRunAway priorityRunAway;
 	public List<GameObject> initialAwareness;
+	public GameObject possession;
 	public Controllable.HitState hitState;
 	void Start() {
 		// make sure there's Awareness
 		Awareness awareness = Toolbox.Instance.GetOrCreateComponent<Awareness>(gameObject);
 		awareness.initialAwareness = initialAwareness;
+		awareness.possession = possession;
 
 		// initialize thought bubble
 		thought = Instantiate(Resources.Load("UI/thoughtbubble"), gameObject.transform.position, Quaternion.identity) as GameObject;
@@ -43,6 +45,7 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 		priorities.Add(new PriorityRunAway(gameObject, control));
 		priorities.Add(new PriorityAttack(gameObject, control));
 		priorities.Add(new PriorityReadScript(gameObject, control));
+		priorities.Add(new PriorityProtectPossessions(gameObject, control));
 	}
 	public void ReceiveMessage(Message message){
 		if (message is MessageHitstun){
