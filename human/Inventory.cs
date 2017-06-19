@@ -115,15 +115,31 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 			SoftDropItem();
 		item.SetActive(false);
 	}
+	public bool PlaceItem(Vector2 place){
+		// if (Vector2.Distance(place, transform.position) > 0.2){
+		// 	Debug.Log("place failed");
+		// 	return false;
+		// } else {
+		Messenger.Instance.DisclaimObject(holding.gameObject, this);
+		holding.GetComponent<Rigidbody2D>().isKinematic = false;
+		holding.GetComponent<Collider2D>().isTrigger = false;
+		holding.transform.SetParent(null);
+		holding.transform.position = place;
+		PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
+		if (phys){
+			phys.InitPhysical(0, Vector3.zero);
+		}
+		SpriteRenderer sprite = holding.GetComponent<SpriteRenderer>();
+		sprite.sortingLayerName = "main";
+		holding = null;
+		return true;
+		// }
+	}
 	public void SoftDropItem(){
 		Messenger.Instance.DisclaimObject(holding.gameObject, this);
 		PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
 		if (phys)	
 			phys.doInit = false;
-		// OrderByY yorder = holding.GetComponent<OrderByY>();
-		// if (yorder)
-		// 	yorder.RemoveFollower(gameObject);
-		// 	yorder.enabled = true;
 		holding.GetComponent<Rigidbody2D>().isKinematic = false;
 		holding.GetComponent<Collider2D>().isTrigger = false;
 		holding = null;
@@ -158,13 +174,8 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 			if(items[i].GetComponent<Item>().itemName == itemName){
 				if (holding)
 					DropItem();
-				// OrderByY yorder = items[i].GetComponent<OrderByY>();
-				// if (yorder)
-				// 	yorder.AddFollower(gameObject, 1);
-					// yorder.enabled = false;
 				items[i].SetActive(true);
 				items[i].transform.position = holdpoint.position;
-				// items[i].transform.parent = holdpoint;
 				items[i].transform.SetParent(holdpoint);
 				items[i].GetComponent<Rigidbody2D>().isKinematic = true;
 				items[i].GetComponent<Collider2D>().isTrigger = true;
@@ -182,10 +193,6 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 	public void ActivateThrow(){
 		if (holding){
 			throwObject = holding.gameObject;
-			// OrderByY yorder = holding.GetComponent<OrderByY>();
-			// if (yorder)
-			// 	yorder.RemoveFollower(gameObject);
-				// yorder.enabled = false;
 			holding = null;
 		}
 	}
@@ -271,7 +278,6 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 	}
 	void StartSwing(){
 		GameObject slash = Instantiate(Resources.Load("Slash2"), transform.position, transform.rotation) as GameObject;
-		// slash.transform.parent = transform;
 		slash.transform.SetParent(transform);
 		slash.transform.localScale = Vector3.one;
 		holding.GetComponent<Renderer>().sortingLayerName = "main";
@@ -321,6 +327,13 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		if (m is MessageAnimation){
 			MessageAnimation message = (MessageAnimation)m;
 			if (message.type == MessageAnimation.AnimType.fighting && message.value == true){
+				if (holding)
+					DropItem();
+			}
+		}
+		if (m is MessageHitstun){
+			MessageHitstun message = (MessageHitstun)m;
+			if (message.doubledOver){
 				if (holding)
 					DropItem();
 			}
