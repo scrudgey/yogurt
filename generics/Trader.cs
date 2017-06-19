@@ -11,10 +11,10 @@ public class Trader : Interactive {
 		interactions.Add(tradeAct);
 	}
 	// TODO: adjust responses, incorporate nimrod
-	public void Trade(Inventory other, bool speak=true){
+	public void Trade(Inventory other){
 		// item is sold, or missing
 		if (itemForSale == null){
-			if (speak)
+			// if (speak)
 				Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I have nothing to sell!")); 
 			return;
 		}
@@ -23,25 +23,25 @@ public class Trader : Interactive {
 			// success
 			if (Toolbox.Instance.CloneRemover(other.holding.name) == Toolbox.Instance.CloneRemover(itemToBuy.name)){
 				Exchange(other, other.holding);
-				if (speak)
+				// if (speak)
 					Toolbox.Instance.SendMessage(other.gameObject, this, new MessageSpeech("I bought it!")); 
 				return;
 			}
 			// holding the wrong item
-			if (speak)
+			// if (speak)
 				Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I don't want that!")); 
 			return;
 		}
 		foreach (GameObject item in other.items){
 			// player has the item, but it is stashed
 			if (Toolbox.Instance.CloneRemover(item.name) == Toolbox.Instance.CloneRemover(itemToBuy.name)){
-				if (speak)
+				// if (speak)
 					Toolbox.Instance.SendMessage(other.gameObject, this, new MessageSpeech("Hold on, let me find it...")); 
 				return;
 			}
 		}
 		// player does not have the correct item at all
-		if (speak)
+		// if (speak)
 			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Give me one "+itemToBuy.name)); 
 	}
 	public enum TradeStatus {none, pass, noItemForTrade, noItemOffered, wrongItemOffered}
