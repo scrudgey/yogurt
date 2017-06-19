@@ -48,14 +48,15 @@ namespace AI{
 	 * Routines
 	 * 
 	 * */
-	public class RoutineWanderUntilFound: Routine {
+	public class RoutineWanderUntilNamedFound: Routine {
+		// TODO: routine's update mimics goal's requirements structure. replace this with a goal
 		private string target;
 		private Awareness awareness;
 		private float checkInterval;
 		private RoutineWander wander;
 		private RoutineGetNamedFromEnvironment getIt;
 		private int mode;
-		public RoutineWanderUntilFound(GameObject g, Controllable c, string t) : base(g, c){
+		public RoutineWanderUntilNamedFound(GameObject g, Controllable c, string t) : base(g, c){
 			target = t;
 			routineThought = "I'm looking around for a " + t + ".";
 			mode = 0;
@@ -79,6 +80,7 @@ namespace AI{
 			}
 		}
 	}
+	
 	public class RoutineUseTelephone: Routine {
 		public Ref<GameObject> telRef;
 		private Telephone telephone;
@@ -139,6 +141,38 @@ namespace AI{
 			}
 		}
 	}
+	public class RoutineGetRefFromEnvironment: Routine {
+		private Inventory inv;
+		private Awareness awareness;
+		private Ref<GameObject> target;
+		private RoutineWalkToGameobject walkToRoutine;
+		public RoutineGetRefFromEnvironment(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c){
+			// routineThought = "I'm going to pick up that " + t + ".";
+			this.target = target;
+			inv = gameObject.GetComponent<Inventory>();
+			awareness = gameObject.GetComponent<Awareness>();
+			Configure();
+		}
+		public override void Configure(){
+			// List<GameObject> objs = new List<GameObject>();
+			if (target.val && target.val.activeInHierarchy){
+				walkToRoutine = new RoutineWalkToGameobject(gameObject, control, target);
+			}
+		}
+		protected override status DoUpdate(){
+			if (target.val && target.val.activeInHierarchy){
+				if (Vector2.Distance(transform.position, target.val.transform.position) > 0.2f){
+					return walkToRoutine.Update();
+				} else {
+					// this bit is shakey
+					inv.GetItem(target.val.GetComponent<Pickup>());
+					return status.success;
+				}
+			} else {
+				return status.failure;
+			}
+		}
+	}
 
 	public class RoutineRetrieveNamedFromInv : Routine {
 		private Inventory inv;
@@ -152,6 +186,50 @@ namespace AI{
 			if (inv){
 				foreach (GameObject g in inv.items){
 					if (targetName == g.name){
+						inv.RetrieveItem(g.name);
+						return status.success;
+					}
+				}
+				return status.failure;
+			}else {
+				return status.failure;
+			}
+		}
+	}
+	public class RoutinePlaceObject : Routine {
+		private Inventory inv;
+		private Ref<Vector2> position;
+		public RoutinePlaceObject(GameObject g, Controllable c, Ref<Vector2> position): base(g, c){
+			this.position = position;
+			inv = g.GetComponent<Inventory>();
+		}
+		protected override status DoUpdate(){
+			if (inv){
+				if (inv.holding){
+					if (inv.PlaceItem(position.val)){
+						return status.success;
+					} else {
+						return status.failure;
+					}
+				} 
+				return status.failure;
+			}else {
+				return status.failure;
+			}
+		}
+	}
+	public class RoutineRetrieveRefFromInv : Routine {
+		private Inventory inv;
+		private Ref<GameObject> target;
+		public RoutineRetrieveRefFromInv(GameObject g, Controllable c, Ref<GameObject> target): base(g, c){
+			// routineThought = "I'm checking my pockets for a " + names + ".";
+			this.target = target;
+			inv = g.GetComponent<Inventory>();
+		}
+		protected override status DoUpdate(){
+			if (inv){
+				foreach (GameObject g in inv.items){
+					if (target.val == g){
 						inv.RetrieveItem(g.name);
 						return status.success;
 					}
