@@ -53,6 +53,7 @@ public class DialogueMenu : MonoBehaviour {
 	public Inventory instigatorInv;
 	public Inventory targetInv;
 	public Awareness targetAwareness;
+	public Trader targetTrade;
 	private Controllable instigatorControl;
 	private Controllable targetControl;
 
@@ -73,6 +74,7 @@ public class DialogueMenu : MonoBehaviour {
 	public Button suggestButton;
 	public Button followButton;
 	public Button endButton;
+	public Button buyButton;
 	private List<Button> buttons = new List<Button>();
 
 	public Monologue monologue = new Monologue();
@@ -97,13 +99,13 @@ public class DialogueMenu : MonoBehaviour {
 		portrait = transform.Find("base/main/portrait").GetComponent<Image>();
 		speechText = transform.Find("base/main/speechPanel/speechText").GetComponent<Text>();
 		promptText = transform.Find("base/main/speechPanel/textPrompt").GetComponent<Text>();
-		choice1Text = transform.Find("base/choicePanel/choice1/Text").GetComponent<Text>();
-		choice2Text = transform.Find("base/choicePanel/choice2/Text").GetComponent<Text>();
-		choice3Text = transform.Find("base/choicePanel/choice3/Text").GetComponent<Text>();
-		choice1Object = transform.Find("base/choicePanel/choice1/").gameObject;
-		choice2Object = transform.Find("base/choicePanel/choice2/").gameObject;
-		choice3Object = transform.Find("base/choicePanel/choice3/").gameObject;
-		choicePanel = transform.Find("base/choicePanel").gameObject;
+		choice1Text = transform.Find("base/choiceBase/choicePanel/choice1/Text").GetComponent<Text>();
+		choice2Text = transform.Find("base/choiceBase/choicePanel/choice2/Text").GetComponent<Text>();
+		choice3Text = transform.Find("base/choiceBase/choicePanel/choice3/Text").GetComponent<Text>();
+		choice1Object = transform.Find("base/choiceBase/choicePanel/choice1/").gameObject;
+		choice2Object = transform.Find("base/choiceBase/choicePanel/choice2/").gameObject;
+		choice3Object = transform.Find("base/choiceBase/choicePanel/choice3/").gameObject;
+		choicePanel = transform.Find("base/choiceBase/choicePanel").gameObject;
 		
 		giveButton = transform.Find("base/buttons/Give").GetComponent<Button>();
 		demandButton = transform.Find("base/buttons/Demand").GetComponent<Button>();
@@ -112,7 +114,8 @@ public class DialogueMenu : MonoBehaviour {
 		suggestButton = transform.Find("base/buttons/Suggest").GetComponent<Button>();
 		followButton = transform.Find("base/buttons/Follow").GetComponent<Button>();
 		endButton = transform.Find("base/buttons/End").GetComponent<Button>();
-		buttons.AddRange(new Button[]{giveButton, demandButton, insultButton, threatenButton, suggestButton, followButton, endButton});
+		buyButton = transform.Find("base/buttons/Buy").GetComponent<Button>();
+		buttons.AddRange(new Button[]{giveButton, demandButton, insultButton, threatenButton, suggestButton, followButton, endButton, buyButton});
 
 		promptText.text = "";
 		choicePanel.SetActive(false);
@@ -128,9 +131,15 @@ public class DialogueMenu : MonoBehaviour {
 		instigatorInv = instigator.GetComponent<Inventory>();
 		targetInv = target.GetComponent<Inventory>();
 		targetAwareness = target.GetComponent<Awareness>();
+		targetTrade = target.GetComponent<Trader>();
 		if (instigatorInv == null || targetInv == null){
-			giveButton.gameObject.SetActive(false);
-			demandButton.gameObject.SetActive(false);
+			// giveButton.gameObject.SetActive(false);
+			// demandButton.gameObject.SetActive(false);
+			giveButton.interactable = false;
+			demandButton.interactable = false;
+		}
+		if (targetTrade == null){
+			buyButton.interactable = false;
 		}
 		portrait.sprite = target.portrait;
 		speechText.text = instigator.name + " " + target.name;
@@ -221,6 +230,33 @@ public class DialogueMenu : MonoBehaviour {
 			Say(target.RespondToThreat());
 			DisableResponses();
 			break;
+			case "buy":
+			// Debug.Log("buying");
+			AttemptTrade();
+			break;
+			default:
+			break;
+		}
+	}
+	public void AttemptTrade(){
+		switch (targetTrade.CheckTradeStatus(instigatorInv))
+		{
+			// TODO: use nimrod for these responses
+			case Trader.TradeStatus.noItemForTrade:
+			Say(target, "I'm sorry, I'm fresh out.");
+			break;
+			case Trader.TradeStatus.wrongItemOffered:
+			Say(target, "That's not what I want.");
+			Say(target, "Give me one "+targetTrade.itemToBuy.name);
+			break;
+			case Trader.TradeStatus.noItemOffered:
+			
+			Say(target, "If you want this, give me one "+targetTrade.itemToBuy.name);
+			break;
+			case Trader.TradeStatus.pass:
+			Say(target, "Pleasure doing business with you.");
+			targetTrade.Exchange(instigatorInv);
+			break;
 			default:
 			break;
 		}
@@ -254,6 +290,13 @@ public class DialogueMenu : MonoBehaviour {
 	public void EnableButtons(){
 		foreach(Button button in buttons)
 			button.interactable = true;
+		if (instigatorInv == null || targetInv == null){
+			giveButton.gameObject.SetActive(false);
+			demandButton.gameObject.SetActive(false);
+		}
+		if (targetTrade == null){
+			buyButton.interactable = false;
+		}
 		if (choice1Text.gameObject.activeSelf){
 			choicePanel.SetActive(true);
 		}
@@ -290,7 +333,11 @@ public class DialogueMenu : MonoBehaviour {
 		if (monologue.text.Count == 0){
 			if (dialogue.Count > 0 && !waitForKeyPress){
 				waitForKeyPress = true;
-				promptText.text = "[MORE...]";
+				if (dialogue.Peek().text.Peek() == "END"){
+					promptText.text = "[END]";
+				} else {
+					promptText.text = "[MORE...]";
+				}
 			}
 			return;
 		}
@@ -303,6 +350,7 @@ public class DialogueMenu : MonoBehaviour {
 			if (monologue.text.Count > 1){
 				waitForKeyPress = true;
 				promptText.text = "[MORE...]";
+				Debug.Log("no more to say");
 			} else {
 				monologue.text.Pop();
 				if (dialogue.Count == 0)
