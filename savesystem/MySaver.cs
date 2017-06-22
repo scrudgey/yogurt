@@ -5,11 +5,7 @@ using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.Linq;
 using System.Text.RegularExpressions;
-
-
 public class MySaver {
-	// public delegate void SaveAction();
-	// public delegate void LoadAction();
 	public enum SaverState{None, Saving, Loading}
 	public static SaverState saveState;
 	public static List<GameObject> disabledPersistents = new List<GameObject>();
@@ -54,7 +50,6 @@ public class MySaver {
 			string playerPath = GameManager.Instance.PlayerSavePath();
 			FileStream sceneStream = File.Create(scenePath);
 			FileStream playerStream = File.Create(playerPath);
-			
 			// retrieve all persistent objects
 			// TODO: theres probably a nice way to do this with linq but what the hell
 			List<GameObject> objectList = new List<GameObject>();
@@ -64,7 +59,6 @@ public class MySaver {
 			}
 			// add those objects which are disabled and would therefore not be found by our first search
 			objectList.AddRange(disabledPersistents);
-
 			ReferenceResolver resolver = new ReferenceResolver();
 			List<Persistent> persistentObjects = new List<Persistent>();
 			int idIndex = 0;
@@ -77,15 +71,12 @@ public class MySaver {
 				resolver.persistentObjects.Add(persistent, gameObject);
 				idIndex++;
 			}
-
 			// invoke the data handling here - this will populate all the component data, and assign a unique id to everything.
 			foreach (Persistent persistent in persistentObjects){
 					persistent.HandleSave(resolver);
 			}
-
 			List<Persistent> playerTree = resolver.RetrieveReferenceTree(GameManager.Instance.playerObject);
 			List<Persistent> sceneTree = persistentObjects.Except(playerTree).ToList();
-
 			// lastly we need to clean up any references the scene objects have to the player objects
 			ReferenceResolver sceneResolver = new ReferenceResolver();
 			Dictionary<GameObject, int> sceneIDs = new Dictionary<GameObject, int>();
@@ -96,29 +87,23 @@ public class MySaver {
 			sceneResolver.objectIDs = sceneIDs;
 			foreach (Persistent persistenet in sceneTree)
 				persistenet.HandleSave(sceneResolver);
-
 			PersistentContainer sceneContainer = new PersistentContainer(sceneTree);
 			PersistentContainer playerContainer = new PersistentContainer(playerTree);
-
 			// save the persistent object container
 			serializer.Serialize(sceneStream, sceneContainer);
 			serializer.Serialize(playerStream, playerContainer);
-			
 			// close the XML serialization stream
 			sceneStream.Close();
 			playerStream.Close();
-
 		} catch (System.Exception ex){
 			Debug.Log("Problem saving!");
 			Debug.Log(ex.Message);
 			Debug.Log(ex.TargetSite);
             // Debug.Log(ex.Source);
 		}
-		
 		GameManager.Instance.SaveGameData();
 		saveState = SaverState.None;
 	}
-
 	public static GameObject LoadScene(){
 		GameObject playerObject = null;
 		try {
@@ -161,9 +146,7 @@ public class MySaver {
 		saveState = SaverState.None;
 		return playerObject;
 	}
-
 	public static GameObject LoadPersistentContainer(PersistentContainer container){
-		
 		string lastName = "first";
 		string lastComponent = "first";
 		GameObject rootObject = null;
@@ -227,19 +210,14 @@ public class MySaver {
 					Debug.Log(childComponent.GetType().ToString() + " " + persistentChild.parentObject);
 				}
 			}
-
 		}
 		return rootObject;
 	}
 }
-
-
-
 public class ReferenceResolver{
 	public  Dictionary<Persistent, GameObject> persistentObjects = new Dictionary<Persistent, GameObject>();
 	public  Dictionary<GameObject, int> objectIDs = new Dictionary<GameObject ,int>();
 	private Dictionary<Persistent, List<Persistent> > referenceTree = new Dictionary<Persistent, List<Persistent>>();
-	
 	public int ResolveReference(GameObject referent, Persistent requester){
 		int returnID = -1;
 		if (objectIDs.ContainsKey(referent))
@@ -249,42 +227,30 @@ public class ReferenceResolver{
 		referenceTree[requester].Add(persistentObjects.FindKeyByValue(referent));
 		return returnID;
 	}
-	
-
 	public List<Persistent> RetrieveReferenceTree(GameObject target){
 		Persistent targetPersistent = null;
 		List<Persistent> tree = new List<Persistent>();
 		if ( persistentObjects.ContainsValue(target) )
 			targetPersistent = persistentObjects.FindKeyByValue( target );
-
 		tree.Add(targetPersistent);
-
-		if ( referenceTree.ContainsKey(targetPersistent) ){
-
+		if (referenceTree.ContainsKey(targetPersistent)){
 			bool refCheck = true;
 			int checkIterations = 0;
-
 			while( refCheck && checkIterations < 7){
 				refCheck = false;
-				
 				List<Persistent> nextTree = new List<Persistent>(tree);
 				foreach (Persistent persistent in tree){
 					if (referenceTree.ContainsKey(persistent))
 						nextTree.AddRange(referenceTree[persistent]);
 				}
 				nextTree= nextTree.Distinct().ToList();
-
 				if (nextTree != tree)
 					refCheck = true;
-
 				tree = nextTree;
 				checkIterations++;
 			}
 
 		}
-
 		return tree;
 	}
-
-
 }
