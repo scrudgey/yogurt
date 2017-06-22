@@ -112,6 +112,14 @@ public class HeadHandler: SaveHandler<Head> {
 		}
 	}
 }
+// public class TraderHandler: SaveHandler<Trader>{
+// 	public override void SaveData(Trader instance, PersistentComponent data, ReferenceResolver resolver){
+// 		data.ints["itemForTrade"] = resolver.ResolveReference(instance.hat.gameObject, data.persistent);
+// 	}
+// 	public override void LoadData(Trader instance, PersistentComponent data){
+
+// 	}
+// }
 
 public class PhysicalBootStrapperHandler: SaveHandler<PhysicalBootstrapper> {
 	public override void SaveData(PhysicalBootstrapper instance, PersistentComponent data, ReferenceResolver resolver){
