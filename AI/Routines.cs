@@ -143,14 +143,14 @@ namespace AI{
 	}
 	public class RoutineGetRefFromEnvironment: Routine {
 		private Inventory inv;
-		private Awareness awareness;
+		// private Awareness awareness;
 		private Ref<GameObject> target;
 		private RoutineWalkToGameobject walkToRoutine;
 		public RoutineGetRefFromEnvironment(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c){
 			// routineThought = "I'm going to pick up that " + t + ".";
 			this.target = target;
 			inv = gameObject.GetComponent<Inventory>();
-			awareness = gameObject.GetComponent<Awareness>();
+			// awareness = gameObject.GetComponent<Awareness>();
 			Configure();
 		}
 		public override void Configure(){
