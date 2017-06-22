@@ -76,6 +76,20 @@ public class Controller : Singleton<Controller> {
             }
         }
     }
+	GameObject GetBaseInteractive(Transform target){
+		Transform currentChild = target;
+		while (true){
+			if (currentChild.name.Substring(Mathf.Max(0, currentChild.name.Length-6)) == "Ground"){
+				// Debug.Log("found ground, returning "+currentChild.gameObject.name);
+				return currentChild.gameObject;
+			}
+			if (currentChild.parent == null){
+				// Debug.Log("no parent, returning "+currentChild.gameObject.name);
+				return currentChild.gameObject;
+			}
+			currentChild = currentChild.parent;
+		}
+	}
     void LeftClick(){
         RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero).OrderBy(h=>h.collider.gameObject.name).ToArray();
         // IsPointerOverGameObject is required here to exclude clicks if we are hovering over a UI element.
@@ -88,7 +102,7 @@ public class Controller : Singleton<Controller> {
                 if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)){
                     focus.lastLeftClicked = hit.collider.gameObject;
 					// we need to check the object from the root for interactions, but place buttons at the child clicked on
-                    Clicked(hit.collider.transform.root.gameObject, hit.collider.transform.gameObject);
+					Clicked(GetBaseInteractive(hit.collider.transform), hit.collider.transform.gameObject);
 					break;
                 }
             }
