@@ -15,7 +15,6 @@ public class Physical : MonoBehaviour, IMessagable {
 	public EdgeCollider2D horizonCollider;
 	public mode currentMode;
 	public float height;
-	// public bool ignoreCollisions;
 	public bool doFly;
 	private bool doGround;
 	private bool doZip;
@@ -32,23 +31,14 @@ public class Physical : MonoBehaviour, IMessagable {
 		InitValues();
 	}
 	void Start() {
-		// InitValues();
 		// ignore collisions between ground and all other objects
-		// GameObject[] physicals = GameObject.FindGameObjectsWithTag("Physical");
-		Physical[] physicals = GameObject.FindObjectsOfType<Physical>();
-		foreach(Physical phys in physicals){
+		foreach(Physical phys in GameObject.FindObjectsOfType<Physical>()){
 			if (phys == this)
 				continue;
 			Physics2D.IgnoreCollision(horizonCollider, phys.GetComponent<Collider2D>(), true);
 			foreach (Collider2D col in phys.GetComponentsInChildren<Collider2D>()){
 					Physics2D.IgnoreCollision(objectCollider, col, true);
 			}
-			// special types of object ignore all collisions with other objects
-			// this is true for e.g. liquid droplets 
-			// if (ignoreCollisions){
-			// 	foreach (Collider2D col in phys.GetComponentsInParent<Collider2D>())
-			// 		Physics2D.IgnoreCollision(objectCollider, col, true);
-			// }
 		}
 		Physics2D.IgnoreCollision(horizonCollider, objectCollider, false);
 		if (currentMode == mode.none)
@@ -76,7 +66,6 @@ public class Physical : MonoBehaviour, IMessagable {
 			Destroy(this);
 			return;
 		}
-		// height = groundCollider.size.y / 2f - groundCollider.offset.y + hinge.transform.localPosition.y;
 		height = horizonCollider.offset.y + hinge.transform.localPosition.y;
 		if (currentMode == mode.fly){
 			if (height < 0){
@@ -146,7 +135,7 @@ public class Physical : MonoBehaviour, IMessagable {
 
 		JointTranslationLimits2D tempLimits = slider.limits;
 		tempLimits.min = 0;
-		tempLimits.max = hinge.transform.localPosition.y;
+		tempLimits.max = hinge.transform.localPosition.y + 0.005f;
 		slider.limits = tempLimits;
 		slider.useLimits = true;
 		GetComponent<Rigidbody2D>().drag = groundDrag;
@@ -186,15 +175,12 @@ public class Physical : MonoBehaviour, IMessagable {
 		// set ground friction
 		GetComponent<Rigidbody2D>().drag = 0;
 		GetComponent<Rigidbody2D>().mass = 1;
-		// foreach(Physical phys in FindObjectsOfType<Physical>()){
-		// 	if (phys.gameObject != gameObject){
-		// 		Physics2D.IgnoreCollision(groundCollider, phys.groundCollider, true);
-		// 		Physics2D.IgnoreCollision(groundCollider, phys.objectCollider, true);
-		// 		// if (ignoreCollisions){
-		// 		// 	Physics2D.IgnoreCollision(objectCollider, phys.objectCollider, true);
-		// 		// }
-		// 	}
-		// }
+		foreach(Physical phys in FindObjectsOfType<Physical>()){
+			if (phys.gameObject != gameObject){
+				Physics2D.IgnoreCollision(horizonCollider, phys.objectCollider, true);
+				Physics2D.IgnoreCollision(objectCollider, phys.horizonCollider, true);
+			}
+		}
 	}
 	public void StartZipMode(){
 		doZip = false;
@@ -213,13 +199,13 @@ public class Physical : MonoBehaviour, IMessagable {
 		}
 	}
 	void OnTriggerEnter2D(Collider2D coll){
-		if (coll.tag == "table" && coll.gameObject != gameObject){// && !ignoreCollisions){
+		if (coll.tag == "table" && coll.gameObject != gameObject){
 			table = coll.GetComponentInParent<Table>();
 			doStartTable = true;
 		}
 	}
 	void OnTriggerExit2D(Collider2D coll){
-		if (coll.tag == "table" && coll.gameObject != gameObject){// && !ignoreCollisions){
+		if (coll.tag == "table" && coll.gameObject != gameObject){
 			table = coll.GetComponentInParent<Table>();
 			doStopTable = true;
 		}
