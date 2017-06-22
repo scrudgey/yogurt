@@ -93,8 +93,11 @@ public class PhysicalBootstrapper : MonoBehaviour {
 
 		hingeObject.transform.SetParent(groundObject.transform);
 		Vector2 tempPos = Vector2.zero;
-		if (objectCollider.bounds.extents.y > height)
-			height = objectCollider.bounds.extents.y;
+		float theta = Vector3.Angle(transform.up, Vector2.up) * (6.28f / 360.0f);
+		float offset = objectCollider.bounds.extents.y - objectCollider.offset.x * Mathf.Sin(theta) + objectCollider.offset.y * Mathf.Cos(theta);
+		height = Mathf.Max(height, offset);
+		// if (objectCollider.offset.y > height)
+		// 	height += objectCollider.offset.y;
 		tempPos.y = height;
 		groundPos.y -= height;
 		hingeObject.transform.localPosition = tempPos;
@@ -107,14 +110,13 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		
 		//Physical
 		Physical groundPhysical = groundObject.AddComponent<Physical>();
-		// groundPhysical.ignoreCollisions = ignoreCollisions;
 		groundPhysical.objectBody = GetComponent<Rigidbody2D>();
 		groundPhysical.hingeBody = hingeBody;
 		groundPhysical.groundDrag = groundDrag;
 
 		//Slider joint
 		sliderJoint2D = groundObject.AddComponent<SliderJoint2D>();
-		sliderJoint2D.enableCollision = true;
+		sliderJoint2D.enableCollision = false;
 		sliderJoint2D.angle = 90f;
 		sliderJoint2D.connectedBody = hingeBody;
 		
