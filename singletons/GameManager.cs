@@ -314,6 +314,10 @@ public partial class GameManager : Singleton<GameManager> {
         data.unlockedCommercials.Add(LoadCommercialByName("eat1"));
 		if (debug){
        		data.unlockedCommercials.Add(LoadCommercialByName("eat2"));
+       		data.unlockedCommercials.Add(LoadCommercialByName("eggplant1"));
+       		data.unlockedCommercials.Add(LoadCommercialByName("eggplant10"));
+       		data.unlockedCommercials.Add(LoadCommercialByName("fireman"));
+       		data.unlockedCommercials.Add(LoadCommercialByName("freestyle"));
 		}
         data.completeCommercials = new List<Commercial>();
 
