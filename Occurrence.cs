@@ -9,7 +9,8 @@ public class Occurrence : MonoBehaviour {
         {"yogurt_vomit", "yogurt emesis event"},
         {"yogurt_vomit_eat", "eating yogurt vomit"},
         {"yogurt_floor", "yogurt eaten off the floor"},
-        {"table_fire", "table set on fire"}
+        {"table_fire", "table set on fire"},
+        {"eggplant", "eggplants eaten"}
 	};
 }
 /*
@@ -76,13 +77,19 @@ public class OccurrenceEat : OccurrenceData {
     public string food;
     public Liquid liquid;
     public override void UpdateCommercialOccurrences(Commercial commercial){
-        if (liquid.name == "yogurt"){
-            commercial.IncrementValue("yogurt", 1f);
-            if (liquid.vomit)
-                commercial.IncrementValue("yogurt_vomit_eat", 1f);
-            if (food == "Puddle(Clone)")
-                commercial.IncrementValue("yogurt_floor", 1f);
+        if (liquid != null){
+            if (liquid.name == "yogurt"){
+                commercial.IncrementValue("yogurt", 1f);
+                if (liquid.vomit)
+                    commercial.IncrementValue("yogurt_vomit_eat", 1f);
+                if (food == "Puddle(Clone)")
+                    commercial.IncrementValue("yogurt_floor", 1f);
+            }
         }
+        if (Toolbox.Instance.CloneRemover(food) == "eggplant"){
+            commercial.IncrementValue("eggplant", 1f);
+        }
+
     }
     protected override bool MatchSpecific(OccurrenceData data){
         OccurrenceEat otherData = (OccurrenceEat)data;
