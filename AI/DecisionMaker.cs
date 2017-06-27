@@ -17,6 +17,7 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 	public Text thoughtText;
 	public List<Priority> priorities;
 	public Personality personality;
+	private Priority activePriority = null;
 	public PriorityAttack priorityAttack;
 	public PriorityRunAway priorityRunAway;
 	public List<GameObject> initialAwareness;
@@ -59,7 +60,8 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 		}
 	}
 	public void Update(){
-		Priority activePriority = null;
+		Priority oldActivePriority = activePriority;
+		activePriority = null;
 		foreach(Priority priority in priorities){
 			priority.Update();
 			if (activePriority == null)
@@ -74,6 +76,8 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 		}
 		if (hitState >= Controllable.HitState.unconscious)
 			return;
+		if (activePriority != oldActivePriority)
+			control.ResetInput();
 		if (activePriority != null){
 			// Debug.Log(activePriority.ToString() + " " + activePriority.Urgency(personality).ToString());
 			activePriority.DoAct();
