@@ -13,6 +13,8 @@ public class Destructible : MonoBehaviour, IMessagable {
 	public bool fireproof;
 	public bool no_physical_damage;
 	public float armor;
+	public float physicalMultiplier = 1f;
+	public float fireMultiplier = 1f;
 
 	void Update () {
 		if (health < 0){
@@ -29,13 +31,13 @@ public class Destructible : MonoBehaviour, IMessagable {
 			{
 			case damageType.physical:
 				if (!no_physical_damage){
-					health -= damage;
+					health -= damage * physicalMultiplier;
 					lastDamage = type;
 				}
 				break;
 			case damageType.fire:
 				if (!fireproof){
-					health -= damage;
+					health -= damage * fireMultiplier;
 					lastDamage = type;
 				}
 				break;
@@ -46,7 +48,7 @@ public class Destructible : MonoBehaviour, IMessagable {
 	}
 
 	//TODO: make destruction chaos somehow proportional to object
-	private void Die(){
+	public void Die(){
 		foreach (Gibs gib in GetComponents<Gibs>())
 			if(gib.damageCondition == lastDamage || gib.damageCondition == damageType.any){
 				gib.Emit();
@@ -69,6 +71,12 @@ public class Destructible : MonoBehaviour, IMessagable {
 		BroadcastMessage("OnDestruction", SendMessageOptions.DontRequireReceiver);
 		Messenger.Instance.WasDestroyed(gameObject);
 		Toolbox.Instance.DataFlag(gameObject, 175f, 0f, 0f, 0f, 0f);
+		if (lastDamage == damageType.fire){
+			if (Toolbox.Instance.CloneRemover(name) == "dollar"){
+				GameManager.Instance.data.achievementStats.dollarsBurned += 1;
+				GameManager.Instance.CheckAchievements();
+			}
+		}
 	}
 
 	void OnCollisionEnter2D(Collision2D col){
