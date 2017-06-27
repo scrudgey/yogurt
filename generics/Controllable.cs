@@ -93,7 +93,7 @@ public class Controllable : MonoBehaviour, IMessagable {
 		if (upFlag)
 			lastPressed = "up";
 		// update direction vector if speed is above a certain value
-		if(GetComponent<Rigidbody2D>().velocity.normalized.magnitude > 0.1 && (upFlag || downFlag || leftFlag || rightFlag) ){
+		if(GetComponent<Rigidbody2D>().velocity.normalized.magnitude > 0.1){// && (upFlag || downFlag || leftFlag || rightFlag) ){
 			SetDirection(GetComponent<Rigidbody2D>().velocity.normalized);
 			directionAngle = Toolbox.Instance.ProperAngle(direction.x, direction.y);
 		}
