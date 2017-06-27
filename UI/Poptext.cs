@@ -28,16 +28,12 @@ public class Poptext : MonoBehaviour {
         audioSource.spatialBlend = 0;
         hueShifter.enabled = false;
         hueShifter.speedConst = 0.3f;
-
         if (description.Count > 0){
             descriptionText.text = description[0] + ":";
             valueText.text = initValueList[0].ToString();
         }
-       
-       
        StartCoroutine(Display());
 	}
-    
     IEnumerator Display (){
         RectTransform rectTransform = dock.GetComponent<RectTransform>();
         Vector3 tempPos = rectTransform.anchoredPosition;
@@ -78,8 +74,7 @@ public class Poptext : MonoBehaviour {
                 hueShifter.enabled = true;
             }
             if (commercial != null){
-                // UI check if commercial is complete
-                // video.CheckForFinishState();         
+                // UI check if commercial is complete      
                 UINew.Instance.UpdateRecordButtons(commercial);
             }
             
@@ -97,9 +92,12 @@ public class Poptext : MonoBehaviour {
             rectTransform.anchoredPosition = tempPos;
             yield return null;
         } 
-        
-        Destroy(gameObject);
-        yield return null;
+        if (finalValueList.Count > 0){
+            yield return StartCoroutine(Display());
+        } else {
+            Destroy(gameObject);
+            yield return null;
+        }
     }
     float easing(float t, float b, float c, float d){
         t /= d/2;
