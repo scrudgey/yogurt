@@ -37,17 +37,15 @@ public class UINew: Singleton<UINew> {
 	// private GameObject recordStopButton;
 	private bool init = false;
 	public bool inventoryVisible = false;
-	private string statusText;
-	private string statusTemp;
-	private float statusTempTime;
-	private TextFX statusFX;
-	private TextFX.FXstyle statusTempStyle;
-	public TextFX.FXstyle statusStyle;
+	// private string statusText;
+	// private string statusTemp;
+	// private float statusTempTime;
+	// private TextFX statusFX;
+	// private TextFX.FXstyle statusTempStyle;
+	// public TextFX.FXstyle statusStyle;
 	public Text status;
 	public Text actionTextObject;
 	public string actionTextString;
-	// private Text recordText;
-	// private GameObject recordFinish;
 	private Stack<AchievementPopup.CollectedInfo> collectedStack = new Stack<AchievementPopup.CollectedInfo>();
 	private Stack<Achievement> achievementStack = new Stack<Achievement>();
 	public bool achievementPopupInProgress;
@@ -63,20 +61,20 @@ public class UINew: Singleton<UINew> {
 		cursorHighlight = (Texture2D)Resources.Load("UI/cursor3_64_1");
 	}
 	void Update(){
-		if (statusTempTime > 0){
-			statusTempTime -= Time.deltaTime;
-		}
-		if (statusTempTime > 0){
-			status.text = statusTemp;
-			if (statusFX.style != statusTempStyle){
-				statusFX.style = statusTempStyle;
-			}
-		} else {
-			status.text = statusText;
-			if (statusFX.style != statusStyle){
-				statusFX.style = statusStyle;
-			}
-		}
+		// if (statusTempTime > 0){
+		// 	statusTempTime -= Time.deltaTime;
+		// }
+		// if (statusTempTime > 0){
+		// 	status.text = statusTemp;
+		// 	if (statusFX.style != statusTempStyle){
+		// 		statusFX.style = statusTempStyle;
+		// 	}
+		// } else {
+		// 	status.text = statusText;
+		// 	if (statusFX.style != statusStyle){
+		// 		statusFX.style = statusStyle;
+		// 	}
+		// }
 		if (!achievementPopupInProgress && collectedStack.Count > 0){
 			PopupCollected(collectedStack.Pop());
 		}
@@ -111,22 +109,15 @@ public class UINew: Singleton<UINew> {
 		punchButton = UICanvas.transform.Find("topdock/PunchButton").gameObject;
 		speakButton = UICanvas.transform.Find("topdock/SpeakButton").gameObject;
 		status = UICanvas.transform.Find("topdock/topBar/status").GetComponent<Text>();
-		statusFX = status.gameObject.GetComponent<TextFX>();
+		// statusFX = status.gameObject.GetComponent<TextFX>();
 		actionTextObject = UICanvas.transform.Find("bottomdock/ActionText").GetComponent<Text>();
-		// recordText = UICanvas.transform.Find("topdock/topRight/recStatus").gameObject.GetComponent<Text>();
-		// recordStopButton = UICanvas.transform.Find("topdock/topRight/StopButton").gameObject;
-		// recordFinish = UICanvas.transform.Find("topdock/topRight/FinishButton").gameObject;
 
 		status.gameObject.SetActive(false);
 		inventoryButton.SetActive(false);
 		fightButton.SetActive(false);
 		speakButton.SetActive(false);
-		punchButton.SetActive(false);
-		// if (recordStopButton){
-		// 	recordStopButton.SetActive(false);
-		// 	recordFinish.SetActive(false);
-		// 	recordText.text = "";
-		// }
+		// punchButton.SetActive(false);
+		HidePunchButton();
 	}
 	public GameObject ShowMenu(MenuType typeMenu){
 		if (activeMenu == null){
@@ -162,14 +153,6 @@ public class UINew: Singleton<UINew> {
 			if (button)
 				button.SetActive(active);
 		}
-		// if (recordStopButton && !active){
-		// 	recordStopButton.SetActive(active);
-		// 	recordFinish.SetActive(active);
-		// 	recordText.text = "";
-		// }
-		// if (status){
-		// 	status.gameObject.SetActive(active);
-		// }
 		CloseActiveMenu();
 		ClearWorldButtons();
 		ClearActionButtons();
@@ -186,9 +169,11 @@ public class UINew: Singleton<UINew> {
 			UpdateInventoryButton(inv);
 		}
 		if (Controller.Instance.focus.fightMode){
-			punchButton.SetActive(true);
+			// punchButton.SetActive(true);
+			ShowPunchButton();
 		} else {
-			punchButton.SetActive(false);
+			// punchButton.SetActive(false);
+			HidePunchButton();
 		}
 		fightButton.SetActive(true);
 	}
@@ -199,28 +184,10 @@ public class UINew: Singleton<UINew> {
 		VideoCamera videoCam = GameObject.FindObjectOfType<VideoCamera>();
 		if (commercial.Evaluate(GameManager.Instance.activeCommercial)){
 			videoCam.EnableBubble();
-			// recordText.text = "COMPLETE";
-			// recordStopButton.SetActive(false);
-			// recordFinish.SetActive(true);
-			// StartCoroutine(WaitAndFinish(1.5f));
 		} else {
 			videoCam.DisableBubble();
-			// recordText.text = "RECORDING";
-			// recordStopButton.SetActive(true);
-			// recordFinish.SetActive(false);
 		}
 	}
-	// public void EnableRecordButtons(bool enable){
-	// 	if (enable){
-	// 		recordText.text = "RECORDING";
-	// 		recordStopButton.SetActive(true);
-	// 		recordFinish.SetActive(true);
-	// 	} else {
-	// 		recordText.text = "";
-	// 		recordStopButton.SetActive(false);
-	// 		recordFinish.SetActive(false);	
-	// 	}
-	// }
 	public void UpdateInventoryButton(){
 		UpdateInventoryButton(GameManager.Instance.playerObject.GetComponent<Inventory>());
 	}
@@ -304,17 +271,17 @@ public class UINew: Singleton<UINew> {
 	public void SetActionText(string text){
 		actionTextString = text;
 	}
-	public void SetStatus(string text){
-		statusText = text;
-	}
-	public void SetTempStatus(string text, float time, TextFX.FXstyle style){
-		statusTemp = text;
-		statusTempTime = time;
-		statusTempStyle = style;
-	}
-	public void SetStatusStyle(TextFX.FXstyle style){
-		statusStyle = style;
-	}
+	// public void SetStatus(string text){
+	// 	statusText = text;
+	// }
+	// public void SetTempStatus(string text, float time, TextFX.FXstyle style){
+	// 	statusTemp = text;
+	// 	statusTempTime = time;
+	// 	statusTempStyle = style;
+	// }
+	// public void SetStatusStyle(TextFX.FXstyle style){
+	// 	statusStyle = style;
+	// }
 	
 	public void DisplayHandActions(Inventory inventory){
 		ClearWorldButtons();
@@ -396,7 +363,6 @@ public class UINew: Singleton<UINew> {
 		returnbut.buttonScript.action = interaction;
 		if (interaction != null)
 			returnbut.buttonText.text = interaction.actionName;
-		// Debug.Log(interaction.actionName);
 		return returnbut;
 	}
 
@@ -481,6 +447,9 @@ public class UINew: Singleton<UINew> {
 		}
 	}
 	private void MakeButtonDefault(actionButton button){
+		GameObject indicator = Instantiate(Resources.Load("UI/defaultButtonIndicator")) as GameObject;
+		indicator.transform.SetParent(button.gameobject.transform, false);
+		indicator.transform.SetAsLastSibling();
 		// Image image = button.gameobject.GetComponent<Image>();
 		// image.sprite = Resources.Load<Sprite>("sprites/UI/BoxTexture5");
 	}
