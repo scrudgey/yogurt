@@ -3,6 +3,7 @@
 namespace AI{
 	[System.Serializable]
 	public class Priority : IMessagable {
+		public string priorityName = "priority";
 		public const float urgencyMinor = 1f;
 		public const float urgencySmall = 2.5f;
 		public const float urgencyLarge = 5f;
@@ -39,6 +40,7 @@ namespace AI{
 		GoalUsePhone callFD;
 		Goal useFireExtinguisher;
 		public PriorityFightFire(GameObject g, Controllable c): base(g, c) {
+			priorityName = "fight fire";
 			getExt = new GoalGetItem(gameObject, control, "fire_extinguisher");
 
 			Goal wander = new GoalWander(gameObject, control);
@@ -72,6 +74,7 @@ namespace AI{
 		Ref<Vector2> returnPosition = new Ref<Vector2>(Vector2.zero);
 		Ref<GameObject> possession = new Ref<GameObject>(null);
 		public PriorityProtectPossessions(GameObject g, Controllable c): base(g, c){
+			priorityName = "possessions";
 			Goal findPossession = new GoalWander(gameObject, control);
 			findPossession.successCondition = new ConditionSawObjectRecently(gameObject, control, possession);
 			
@@ -100,6 +103,7 @@ namespace AI{
 
 	public class PriorityWander: Priority{
 		public PriorityWander(GameObject g, Controllable c): base(g, c) {
+			priorityName = "wander";
 			goal = new GoalWander(g, c);
 		}
 		public override float Urgency(Personality personality){
@@ -113,6 +117,7 @@ namespace AI{
 
 	public class PriorityRunAway: Priority{
 		public PriorityRunAway(GameObject g, Controllable c): base(g, c){
+			priorityName = "run away";
 			goal = new GoalRunFromObject(gameObject, control, awareness.nearestEnemy);
 		}
 		public override void ReceiveMessage(Message incoming){
@@ -144,6 +149,7 @@ namespace AI{
 		private Inventory inventory;
 		private float updateInterval;
 		public PriorityAttack(GameObject g, Controllable c): base(g, c){
+			priorityName = "attack";
 			inventory = gameObject.GetComponent<Inventory>();
 
 			Goal dukesUp = new GoalDukesUp(gameObject, control, inventory);
@@ -187,6 +193,7 @@ namespace AI{
 		string nextLine;
 		ScriptDirector director;
 		public PriorityReadScript(GameObject g, Controllable c): base(g, c){
+			priorityName = "readscript";
 			VideoCamera video = GameObject.FindObjectOfType<VideoCamera>();
 			Goal goalWalkTo = new GoalWalkToPoint(g, c, new Ref<Vector2>(new Vector2(0.186f, 0.812f)));
 			if (video != null){
