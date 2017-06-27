@@ -34,7 +34,15 @@ public partial class GameManager : Singleton<GameManager> {
     }
 
     public void UnlockCommercial(string filename){
+        //TODO: do not unlock same commercial twice
+        // Debug.Log("unlocking "+filename);
         Commercial unlocked = LoadCommercialByName(filename);
+        foreach(Commercial commercial in data.unlockedCommercials){
+            if (commercial.name == unlocked.name){
+                // Debug.Log("already unlocked. skipping...");
+                return;
+            }
+        }
         data.unlockedCommercials.Add(unlocked);
         data.newUnlockedCommercials.Add(unlocked);
     }
@@ -45,14 +53,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
         if (success){
             //process reward
-            data.money += activeCommercial.reward;
-            foreach (string unlock in activeCommercial.unlockUponCompletion){
-                UnlockCommercial(unlock);
-            }
-            GameObject report = UINew.Instance.ShowMenu(UINew.MenuType.commercialReport);
-            report.GetComponent<CommercialReportMenu>().Report(activeCommercial, commercial);
-            if (activeCommercial.name != "Freestyle")
-                data.completeCommercials.Add(activeCommercial);
+           CommercialCompleted(commercial);
         } else {
             // do something to display why the commercial is not done yet
             Debug.Log("commercial did not pass.");
@@ -60,6 +61,20 @@ public partial class GameManager : Singleton<GameManager> {
             Debug.Log(activeCommercial);
         }
     }
-
+    public void CommercialCompleted(Commercial commercial){
+        // data.money += activeCommercial.reward;
+        foreach (string unlock in activeCommercial.unlockUponCompletion){
+            UnlockCommercial(unlock);
+        }
+        GameObject report = UINew.Instance.ShowMenu(UINew.MenuType.commercialReport);
+        report.GetComponent<CommercialReportMenu>().Report(activeCommercial, commercial);
+        if (activeCommercial.name != "Freestyle")
+            data.completeCommercials.Add(activeCommercial);
+        if (activeCommercial.name == "Healthy Eggplant Commercial"){
+            // send the duplicator email, and deliver duplicator package
+            ReceiveEmail("duplicator");
+            ReceivePackage("duplicator");
+        }
+    }
 }
 
