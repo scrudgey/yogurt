@@ -22,8 +22,8 @@ public class Gibs : MonoBehaviour {
 				bitPhys.AddForce(force);
 			}
 
-			SpriteRenderer sprite = bit.GetComponent<SpriteRenderer>();
-			sprite.sortingLayerName = "background";
+			// SpriteRenderer sprite = bit.GetComponent<SpriteRenderer>();
+			// sprite.sortingLayerName = "background";
 
 		}
 	}
