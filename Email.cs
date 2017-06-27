@@ -5,6 +5,7 @@ using System.IO;
 
 [System.Serializable]
 public class Email {
+	public string filename;
 	public string fromString;
 	public string toString;
 	public string subject;
@@ -18,6 +19,7 @@ public class Email {
             var serializer = new XmlSerializer(typeof(Email));
             var reader = new System.IO.StringReader(xml.text);
             newEmail = serializer.Deserialize(reader) as Email;
+			newEmail.filename = filename;
             return newEmail;
         } catch(Exception e){
             Debug.Log(e.Message);
