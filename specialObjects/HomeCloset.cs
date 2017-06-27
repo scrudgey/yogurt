@@ -2,16 +2,13 @@
 public class HomeCloset : Interactive {
 	public enum ClosetType {all, items, food, clothing}
 	public ClosetType type;
-	// GameObject newBubble;
 	AnimateUIBubble newBubbleAnimation;
 	public void Start () {
 		interactions.Add(new Interaction(this, "Open", "OpenCloset"));
-		// newBubble = transform.Find("newBubble").gameObject;
 		newBubbleAnimation = GetComponent<AnimateUIBubble>();
 		CheckBubble();
 	}
 	public void InitBubble(){
-		// newBubble = transform.Find("newBubble").gameObject;
 		newBubbleAnimation = GetComponent<AnimateUIBubble>();
 	}
 	public void CheckBubble(){
@@ -19,8 +16,6 @@ public class HomeCloset : Interactive {
 		GameManager.Instance.closetHasNew.TryGetValue(type, out activeBubble);
 		if (!activeBubble)
 			newBubbleAnimation.DisableFrames();
-		// newBubble.SetActive(activeBubble);
-		// newBubbleAnimation = GetComponent<AnimateUIBubble>();
 	}
 	public void OpenCloset(){
 		GameObject menuObject = UINew.Instance.ShowMenu(UINew.MenuType.closet);
