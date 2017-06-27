@@ -18,6 +18,7 @@ public class Physical : MonoBehaviour, IMessagable {
 	public bool doFly;
 	private bool doGround;
 	private bool doZip;
+	// private bool doFixSlider;
 	private bool doStartTable;
 	private bool doStopTable;
 	private SpriteRenderer spriteRenderer;
@@ -37,7 +38,9 @@ public class Physical : MonoBehaviour, IMessagable {
 				continue;
 			Physics2D.IgnoreCollision(horizonCollider, phys.GetComponent<Collider2D>(), true);
 			foreach (Collider2D col in phys.GetComponentsInChildren<Collider2D>()){
-					Physics2D.IgnoreCollision(objectCollider, col, true);
+				if (col.tag == "fire")
+					continue;
+				Physics2D.IgnoreCollision(objectCollider, col, true);
 			}
 		}
 		Physics2D.IgnoreCollision(horizonCollider, objectCollider, false);
@@ -66,6 +69,8 @@ public class Physical : MonoBehaviour, IMessagable {
 			Destroy(this);
 			return;
 		}
+		// if (doFixSlider)
+		// 	FixSliderLimits();
 		height = horizonCollider.offset.y + hinge.transform.localPosition.y;
 		if (currentMode == mode.fly){
 			if (height < 0){
@@ -126,18 +131,26 @@ public class Physical : MonoBehaviour, IMessagable {
 	public void ZipMode(){
 		doZip = true;
 	}
+	public void SetSliderLimit(float offset){
+		JointTranslationLimits2D tempLimits = slider.limits;
+		tempLimits.min = 0;
+		tempLimits.max = hinge.transform.localPosition.y + offset;
+		// tempLimits.max = hinge.transform.localPosition.y + 0.005f;
+		slider.limits = tempLimits;
+		slider.useLimits = true;
+	}
 	public void StartGroundMode(){
 		doGround = false;
 		doFly = false;
 		doZip = false;
 		ziptime = 0f;
 		ClearTempColliders();
-
-		JointTranslationLimits2D tempLimits = slider.limits;
-		tempLimits.min = 0;
-		tempLimits.max = hinge.transform.localPosition.y + 0.005f;
-		slider.limits = tempLimits;
-		slider.useLimits = true;
+		// SetSliderLimit(0);
+		// JointTranslationLimits2D tempLimits = slider.limits;
+		// tempLimits.min = 0;
+		// tempLimits.max = hinge.transform.localPosition.y + 0.005f;
+		// slider.limits = tempLimits;
+		// slider.useLimits = true;
 		GetComponent<Rigidbody2D>().drag = groundDrag;
 		GetComponent<Rigidbody2D>().mass = objectBody.mass;
 		currentMode = mode.ground;

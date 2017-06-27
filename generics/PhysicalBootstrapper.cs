@@ -89,13 +89,16 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		horizon.AddComponent<EdgeCollider2D>();
 		horizon.transform.position = initPos;
 		horizon.transform.SetParent(groundObject.transform);
+		shadowBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 		objectCollider = GetComponent<Collider2D>();
+		// GetComponent<Rigidbody2D>().collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
 		hingeObject.transform.SetParent(groundObject.transform);
 		Vector2 tempPos = Vector2.zero;
 		float theta = Vector3.Angle(transform.up, Vector2.up) * (6.28f / 360.0f);
 		float offset = objectCollider.bounds.extents.y - objectCollider.offset.x * Mathf.Sin(theta) + objectCollider.offset.y * Mathf.Cos(theta);
 		height = Mathf.Max(height, offset);
+		// height += 0.005f;
 		// if (objectCollider.offset.y > height)
 		// 	height += objectCollider.offset.y;
 		tempPos.y = height;
@@ -128,6 +131,19 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		groundPhysical.bootstrapper = this;
 		Set3Motion(new Vector3(initialVelocity.x, initialVelocity.y, initialVelocity.z));
 	}
+	void OnCollisionStay2D(Collision2D coll){
+		if (coll.gameObject != horizon)
+			return;
+		if (physical.slider.useLimits == false){
+			Debug.Log(name);
+			float dist = coll.collider.Distance(objectCollider).distance;
+			physical.SetSliderLimit(-2 * dist);
+		}
+		// Debug.Log(coll.collider.Distance(objectCollider).distance);
+		// Vector3 newPos = hingeObject.transform.position;
+		// newPos.y -= dist;
+		// hingeObject.transform.position = newPos;
+	}
 	void OnCollisionEnter2D(Collision2D coll){
 		if (coll.relativeVelocity.magnitude > 0.5){
 			if (impactSounds.Length > 0){
@@ -148,6 +164,8 @@ public class PhysicalBootstrapper : MonoBehaviour {
 			}
 			physical.BroadcastMessage("OnGroundImpact", physical, SendMessageOptions.DontRequireReceiver);
 		} else {
+			if (physical == null)
+				return;
 			if (physical.currentMode == Physical.mode.zip){
 				// Debug.Log("physical bootstrapper collision: "+gameObject.name+" + "+coll.gameObject.name);
 				MessageDamage message = new MessageDamage();
