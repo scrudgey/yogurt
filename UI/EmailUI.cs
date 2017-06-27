@@ -35,6 +35,9 @@ public class EmailUI : MonoBehaviour {
 			entry.transform.SetParent(emailListObject.transform, false);
 			emailButtons.Add(entryScript);
 		}
+		if (emailButtons.Count > 0){
+			EmailEntryCallback(emailButtons[0].email);
+		}
 	}
 	public void EmailEntryCallback(Email email){
 		// populate the text entries with the information from the email
