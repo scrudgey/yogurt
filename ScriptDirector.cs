@@ -28,8 +28,8 @@ public class ScriptDirector : Interactive {
         }
         index = 0;
         // audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
-        UINew.Instance.SetStatus("-WAIT-");
-        UINew.Instance.SetStatusStyle(TextFX.FXstyle.blink);
+        // UINew.Instance.SetStatus("-WAIT-");
+        // UINew.Instance.SetStatusStyle(TextFX.FXstyle.blink);
         
         Interaction enableAct = new Interaction(this, "Start", "Enable");
         enableAct.validationFunction = true;
@@ -37,10 +37,6 @@ public class ScriptDirector : Interactive {
         
         regionIndicator = transform.Find("Graphic").gameObject;
         regionIndicator.SetActive(false);
-
-        // Interaction disableAct = new Interaction(this, "Stop", "Disable");
-        // disableAct.validationFunction = true;
-        // interactions.Add(disableAct);
 	}
 
     public IEnumerator WaitAndStartScript(float waitTime){
@@ -61,13 +57,11 @@ public class ScriptDirector : Interactive {
             live = true;
             video.live = true;
             regionIndicator.SetActive(true);
-            // UINew.Instance.EnableRecordButtons(true);
             UINew.Instance.UpdateRecordButtons(video.commercial);
             StartCoroutine(WaitAndStartScript(1f));
         } else {
             live = false;
             regionIndicator.SetActive(false);
-            // UINew.Instance.EnableRecordButtons(false);
             UINew.Instance.ShowMenu(UINew.MenuType.scriptSelect);
         }
     }
@@ -98,22 +92,22 @@ public class ScriptDirector : Interactive {
         MessageScript message = new MessageScript();
 
         if (line.Substring(0, 8) == "COSTAR: "){
-            UINew.Instance.SetStatus("-WAIT-");
-            UINew.Instance.SetStatusStyle(TextFX.FXstyle.blink);
+            // UINew.Instance.SetStatus("-WAIT-");
+            // UINew.Instance.SetStatusStyle(TextFX.FXstyle.blink);
             string content = line.Substring(8, line.Length-8);
             message.coStarLine = content;
             message.watchForSpeech = "Costar: "+content;
         }
         if (line.Substring(0, 5) == "TOM: "){
-            UINew.Instance.SetStatus("PROMPT: SAY LINE");
-            UINew.Instance.SetStatusStyle(TextFX.FXstyle.normal);
+            // UINew.Instance.SetStatus("PROMPT: SAY LINE");
+            // UINew.Instance.SetStatusStyle(TextFX.FXstyle.normal);
             string content = line.Substring(4, line.Length-4);
             tomLineNext = true;
             message.watchForSpeech = "Tom: "+content;
         }
         if (line == "[yogurt++]"){
-            UINew.Instance.SetStatus("PROMPT: EAT YOGURT");
-            UINew.Instance.SetStatusStyle(TextFX.FXstyle.normal);
+            // UINew.Instance.SetStatus("PROMPT: EAT YOGURT");
+            // UINew.Instance.SetStatusStyle(TextFX.FXstyle.normal);
             message.tomAct = MessageScript.TomAction.yogurt;
         }
         foreach (GameObject reader in readers){
@@ -141,7 +135,7 @@ public class ScriptDirector : Interactive {
             timeToNextLine = 1f;
             if (tomLineNext){
                 tomLineNext = false;
-                UINew.Instance.SetTempStatus("Success!", 1f, TextFX.FXstyle.bounce);
+                // UINew.Instance.SetTempStatus("Success!", 1f, TextFX.FXstyle.bounce);
                 // audioSource.PlayOneShot(successSound);
             }
         }
