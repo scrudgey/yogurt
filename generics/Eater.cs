@@ -99,13 +99,11 @@ public class Eater : Interactive {
 		nutrition += food.nutrition;
         if (food.poison)
             poisonNausea = true;
-
 		MessageHead head = new MessageHead();
 		head.type = MessageHead.HeadType.eating;
 		head.value = true;
 		head.crumbColor = food.pureeColor;
 		Toolbox.Instance.SendMessage(gameObject, this, head);
-
 		//randomly store a clone of the object for later vomiting
         if (!food.poison){
             if (eaten){
@@ -114,7 +112,6 @@ public class Eater : Interactive {
             eaten = Instantiate(food.gameObject) as GameObject;
             eaten.SetActive(false);
         }
-
 		//update our status based on our reaction to the food
 		reaction = CheckReaction(food);
 		if(reaction > 0){
@@ -126,18 +123,15 @@ public class Eater : Interactive {
 			nausea += 30;
 			Toolbox.Instance.DataFlag(gameObject, 0f, 0f, 0f, 0f, -25f);
 		}
-
 		// if we can speak, say the thing
 		if (phrase != ""){
 			// speech.Say(phrase);
 			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech(phrase));
 		}
-
 		if (nutrition > 50){
 			// speech.Say("I'm full!");
 			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I'm full!"));
 		}
-
 		if (nutrition > 75){
 			// speech.Say("I can't eat another bite!");
 			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I can't eat another bite!"));
@@ -174,13 +168,10 @@ public class Eater : Interactive {
 			}
         }
 		Toolbox.Instance.OccurenceFlag(gameObject, eatData);
-
 		if (food.eatSound != null){
 			Toolbox.Instance.AudioSpeaker(food.eatSound, transform.position);
 		}
-
 		food.BeEaten();
-
 	}
 
 	void Vomit(){
