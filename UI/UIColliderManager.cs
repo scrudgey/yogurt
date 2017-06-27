@@ -6,6 +6,7 @@ public class UIColliderManager : MonoBehaviour {
 	public BoxCollider2D topBox;
 	public BoxCollider2D bottomBox;
 	public RectTransform rt;
+	private float updateTimer;
 	void Start (){
 		rt = GetComponent<RectTransform>();
 		Vector2 leftSize = new Vector2(25, rt.rect.height);
@@ -28,6 +29,13 @@ public class UIColliderManager : MonoBehaviour {
 		bottomBox.size = bottomSize;
 		topBox.size = topSize;
 		topBox.offset = topOffset;
+	}
+	void Update(){
+		updateTimer += Time.deltaTime;
+		if (updateTimer > 1){
+			updateTimer = 0;
+			Start();
+		}
 	}
 	// void Update () {
 	// 	Vector2 leftSize = new Vector2(10, rt.rect.height);
