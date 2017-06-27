@@ -19,6 +19,12 @@ public class Achievement {
 			pass = pass && otherStats.yogurtEaten >= stats.yogurtEaten;
 		if (stats.vomit > 0)
 			pass = pass && otherStats.vomit >= stats.vomit;
+		if (stats.dollarsBurned > 0)
+			pass = pass && otherStats.dollarsBurned >= stats.dollarsBurned;
+		if (stats.dollarsDuplicated > 0)
+			pass = pass && otherStats.dollarsDuplicated >= stats.dollarsDuplicated;
+		if (stats.dollarsFlushed > 0)
+			pass = pass && otherStats.dollarsFlushed >= stats.dollarsFlushed;
 		return pass;
 	}
 	public Achievement(){ }
@@ -38,12 +44,17 @@ public class AchievementStats {
 	public float vomit;
 	public float yogurtVomit;
 	public float dollarsFlushed;
+	public float dollarsDuplicated;
+	public float dollarsBurned;
 	public AchievementStats(){ }
 	public AchievementStats(AchievementStats source){
 		secondsPlayed = source.secondsPlayed;
 		yogurtEaten = source.yogurtEaten;
 		vomit = source.vomit;
 		yogurtVomit = source.yogurtVomit;
+		dollarsBurned = source.dollarsBurned;
+		dollarsDuplicated = source.dollarsDuplicated;
+		dollarsFlushed = source.dollarsFlushed;
 	}
 
 }
