@@ -1,11 +1,10 @@
 ﻿using UnityEngine;
 public class Computer : Item {
-	// GameObject newBubble;
 	AnimateUIBubble newBubble;
-	void Start () {
+	void Awake () {
 		interactions.Add(new Interaction(this, "Email", "OpenEmail"));
-		// newBubble = transform.Find("newBubble").gameObject;
 		newBubble = GetComponent<AnimateUIBubble>();
+		newBubble.DisableFrames();
 		CheckBubble();
 	}
 	public void CheckBubble(){
@@ -16,8 +15,9 @@ public class Computer : Item {
 			if (email.read == false)
 				activeBubble = true;
 		}
-		// newBubble.SetActive(activeBubble);
-		if (!activeBubble){
+		if (activeBubble){
+			newBubble.EnableFrames();
+		} else {
 			newBubble.DisableFrames();
 		}
 	}
