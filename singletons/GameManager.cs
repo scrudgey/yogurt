@@ -32,6 +32,8 @@ public class GameData{
 	public List<Achievement> achievements;
 	public AchievementStats achievementStats = new AchievementStats();
 	public List<Email> emails;
+	public List<string> packages;
+	public bool firstTimeLeavingHouse;
 	public bool mayorCutsceneHappened;
 	public GameData(){
 		days = 0;
@@ -64,6 +66,8 @@ public partial class GameManager : Singleton<GameManager> {
     void Start(){
 		if (data == null){
 			data = InitializedGameData();
+			// ReceiveEmail("duplicator");
+			// ReceivePackage("duplicator");
 			if (debug)
 				data.mayorCutsceneHappened = true;
 		}
@@ -102,6 +106,7 @@ public partial class GameManager : Singleton<GameManager> {
 	} 
 	public void FocusIntrinsicsChanged(Intrinsic intrinsic){
 		if (intrinsic.telepathy.boolValue){
+			Debug.Log("focus telepathic");
 			cam.cullingMask |= 1 << LayerMask.NameToLayer("thoughts");
 		} else {
 			try {
@@ -161,8 +166,7 @@ public partial class GameManager : Singleton<GameManager> {
 			if (data == null)
 				data = InitializedGameData();
 			// find or spawn the player character 
-			playerObject = GameObject.Find("Tom");	
-			// playerObject = GameObject.Find("Fireman");	
+			playerObject = GameObject.Find("Tom");
 			if (!playerObject){
 				playerObject = GameObject.Find("Tom(Clone)");
 			}
@@ -173,11 +177,22 @@ public partial class GameManager : Singleton<GameManager> {
 		}
 		SetFocus(playerObject);
 		if (SceneManager.GetActiveScene().name == "krazy1"){
+			GameObject packageSpawnPoint = GameObject.Find("packageSpawnPoint");
+			if (data.firstTimeLeavingHouse){
+				foreach(string package in data.packages){
+					if (!data.collectedItems.Contains(package)){
+						GameObject packageObject = Instantiate(Resources.Load("prefabs/package"), packageSpawnPoint.transform.position, Quaternion.identity) as GameObject;
+						Package pack = packageObject.GetComponent<Package>();
+						pack.contents = package;
+					}
+				}
+			}
 			if (!data.mayorCutsceneHappened){
 				CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.mayorTalk);
 				data.mayorCutsceneHappened = true;
 				data.entryID = 0;
 			}
+			data.firstTimeLeavingHouse = false;
 		}
 		PlayerEnter();
 	}
@@ -211,6 +226,7 @@ public partial class GameManager : Singleton<GameManager> {
 						}
 						MySaver.Save();
 						awaitNewDayPrompt = CheckNewDayPrompt();
+						// TODO: check events related to having completed the last completed commercial
 					}
 				}
 			}
@@ -246,6 +262,7 @@ public partial class GameManager : Singleton<GameManager> {
 		SceneManager.LoadScene("house");
         sceneTime = 0f;
         data.entryID = -99;
+		data.firstTimeLeavingHouse = true;
 		activeCommercial = null;
     }
 
@@ -298,6 +315,7 @@ public partial class GameManager : Singleton<GameManager> {
 		data.newCollectedFood = new List<string>();
 		data.collectedClothes = new List<string>();
 		data.newCollectedClothes = new List<string>();
+		data.packages = new List<string>();
 		data.emails = new List<Email>();
 		data.itemCheckedOut = new SerializableDictionary<string, bool>();
 		data.collectedClothes.Add("blue_shirt");
@@ -306,7 +324,7 @@ public partial class GameManager : Singleton<GameManager> {
 		data.collectedClothes.Add("pajamas");
 		data.collectedObjects.Add("pajamas");
 		data.itemCheckedOut["pajamas"] = false;
-
+		data.firstTimeLeavingHouse = true;
 		// initialize commercials
 		// TODO: change this temporary hack into something more correct.
         data.unlockedCommercials = new List<Commercial>();
@@ -320,9 +338,6 @@ public partial class GameManager : Singleton<GameManager> {
        		data.unlockedCommercials.Add(LoadCommercialByName("freestyle"));
 		}
         data.completeCommercials = new List<Commercial>();
-
-		data.emails.Add(Email.LoadEmail("test"));
-
 		// initialize achievements
 		data.achievements = new List<Achievement>();
 		GameObject[] achievementPrefabs = Resources.LoadAll("achievements/", typeof(GameObject))
@@ -337,7 +352,6 @@ public partial class GameManager : Singleton<GameManager> {
 		}
 		return data;
 	}
-
 
 // SAVING AND LOADING
     public string LevelSavePath(){
@@ -447,11 +461,29 @@ public partial class GameManager : Singleton<GameManager> {
 	}
 
 	public void ReceiveEmail(string emailName){
+		// Debug.Log("receiving email "+emailName);
+		foreach(Email email in data.emails){
+			Debug.Log(email.filename);
+			if (email.filename == emailName){
+				// Debug.Log("already received email. aborting...");
+				return;
+			}
+		}
 		Email newEmail = Email.LoadEmail(emailName);
 		newEmail.read = false;
 		data.emails.Add(newEmail);
+		Computer computer = GameObject.FindObjectOfType<Computer>();
+		if (computer != null){
+			computer.CheckBubble();
+		}
 	}
-
+	public void ReceivePackage(string packageName){
+		Debug.Log("receiving package "+packageName);
+		if (data.packages.Contains(packageName)){
+			Debug.Log("already recieved package. aborting...");
+		}
+		data.packages.Add(packageName);
+	}
 	public void ShowDiaryEntry(string diaryName){
 		GameObject diaryObject = UINew.Instance.ShowMenu(UINew.MenuType.diary);
 		Diary diary = diaryObject.GetComponent<Diary>();
