@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
+using System.Collections;
 using System.Xml.Serialization;
 using System.IO;
+using Easings;
 public class VideoCamera : Interactive, IMessagable {
 	public Commercial commercial = new Commercial();
     public OccurrenceData watchForOccurrence = null;
@@ -14,22 +16,31 @@ public class VideoCamera : Interactive, IMessagable {
 	}
     void Start(){
         Interaction stasher = new Interaction(this, "Finish", "FinishButtonClick");
-		// stasher.displayVerb = "Stash in";
 		stasher.validationFunction = true;
 		interactions.Add(stasher);
     }
     public void EnableBubble(){
         doneBubble.SetActive(true);
+        Transform bubbleImage = doneBubble.transform.Find("bubbleFrame1/Image");
+        StartCoroutine(EaseIn(bubbleImage));
+    }
+    IEnumerator EaseIn(Transform target) {
+        float t = 0;
+        while (t < 1){
+            t += Time.deltaTime;
+            Vector3 newScale = target.localScale;
+            newScale.x = (float)PennerDoubleAnimation.ElasticEaseOut(t, 0.5, 0.5, 1);
+            newScale.y = (float)PennerDoubleAnimation.ElasticEaseOut(t, 0.5, 0.5, 1);
+            target.localScale = newScale;
+            yield return new WaitForEndOfFrame();
+        }
     }
     public void DisableBubble(){
         doneBubble.SetActive(false);
     }
     public void FinishButtonClick(){
-		// VideoCamera video = GameObject.FindObjectOfType<VideoCamera>();
 		live = false;
-		// if (video){
         GameManager.Instance.EvaluateCommercial(commercial);
-		// }
 	}
     public bool FinishButtonClick_Validation(){
         if (commercial == null)
