@@ -284,7 +284,7 @@ public class CutsceneManager : Singleton<CutsceneManager> {
         }
     }
     public void EscapePressed(){
-        Debug.Log("escape pressed");    
+        // Debug.Log("escape pressed");    
         if (cutscene != null)
             cutscene.EscapePressed();
     }
