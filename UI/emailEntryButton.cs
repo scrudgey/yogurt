@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class emailEntryButton : MonoBehaviour {
 	private EmailUI emailUI;
-	private Email email;
+	public Email email;
 	public Text newText;
 	public Text nameText;
 
