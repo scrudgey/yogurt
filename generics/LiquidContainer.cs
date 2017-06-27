@@ -38,6 +38,8 @@ public class LiquidContainer : Interactive {
 			LoadInit();
 	}
 	public void LoadInit(){
+		if (LoadInitialized)	
+			return;
 		interactions.Add(new Interaction(this, "Fill", "FillFromReservoir"));
 		Interaction fillContainer = new Interaction(this, "Fill", "FillFromContainer");
 		Interaction drinker = new Interaction(this, "Drink", "Drink");
