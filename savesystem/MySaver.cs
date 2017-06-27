@@ -24,6 +24,7 @@ public class MySaver {
 		{typeof(Outfit),							() => new OutfitHandler() },
 		{typeof(Cabinet),							() => new CabinetHandler() },
 		{typeof(Intrinsics),						() => new IntrinsicsHandler() },
+		{typeof(Package),							() => new PackageHandler() },
 	};
 	public static void CleanupSaves(){
 		string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
@@ -98,8 +99,8 @@ public class MySaver {
 		} catch (System.Exception ex){
 			Debug.Log("Problem saving!");
 			Debug.Log(ex.Message);
+			Debug.Log(ex.Data);
 			Debug.Log(ex.TargetSite);
-            // Debug.Log(ex.Source);
 		}
 		GameManager.Instance.SaveGameData();
 		saveState = SaverState.None;
