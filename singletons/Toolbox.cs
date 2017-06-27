@@ -69,7 +69,8 @@ public class Toolbox : Singleton<Toolbox> {
 			source = g.AddComponent<AudioSource>();
 		}
 		source.rolloffMode = AudioRolloffMode.Logarithmic;
-		source.minDistance = 0.4f;
+		// source.minDistance = 0.4f;
+		source.minDistance = 1f;
 		source.maxDistance = 5.42f;
 		source.spatialBlend = 1;
 		return source;
