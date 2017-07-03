@@ -48,7 +48,6 @@ public class LiquidContainer : Interactive {
 		fillContainer.validationFunction = true;
 		interactions.Add(fillContainer);
 		empty = true;
-		
 		Transform child = transform.FindChild("liquidSprite");
 		if (child){
 			liquidSprite = child.GetComponent<SpriteRenderer>();
@@ -162,6 +161,7 @@ public class LiquidContainer : Interactive {
 			if (drinkSounds.Length > 0){
 				Toolbox.Instance.AudioSpeaker(drinkSounds[Random.Range(0, drinkSounds.Length-1)], transform.position);
 			}
+			GameManager.Instance.CheckItemCollection(gameObject, eater.gameObject);
 		}
 	}
 	public bool Drink_Validation(Eater eater){
