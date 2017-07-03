@@ -122,6 +122,8 @@ public class DialogueMenu : MonoBehaviour {
 		choice1Object.SetActive(false);
 		choice2Object.SetActive(false);
 		choice3Object.SetActive(false);
+
+		promptText.text = "[A]";
 	}
 
 	public void Configure(Speech instigator, Speech target){
@@ -187,7 +189,6 @@ public class DialogueMenu : MonoBehaviour {
 		choice2Object.SetActive(false);
 		choice3Object.SetActive(false);
 		if (node.responses.Count > 0){
-			// choicePanel.SetActive(true);
 			choice1Object.SetActive(true);
 			choice1Text.text = node.responses[0];
 		}
@@ -247,11 +248,11 @@ public class DialogueMenu : MonoBehaviour {
 			break;
 			case Trader.TradeStatus.wrongItemOffered:
 			Say(target, "That's not what I want.");
-			Say(target, "Give me one "+targetTrade.itemToBuy.name);
+			Say(target, "Give me one "+targetTrade.receive);
 			break;
 			case Trader.TradeStatus.noItemOffered:
 			
-			Say(target, "If you want this, give me one "+targetTrade.itemToBuy.name);
+			Say(target, "If you want this, give me one "+targetTrade.receive);
 			break;
 			case Trader.TradeStatus.pass:
 			Say(target, "Pleasure doing business with you.");
@@ -317,8 +318,8 @@ public class DialogueMenu : MonoBehaviour {
 					monologue.NextLine();
 				} else if (dialogue.Count > 0){
 					SetMonologue(dialogue.Pop());
+					// promptText.text = "";
 				}
-				promptText.text = "";
 			}
 		}
 		if (Input.GetKey("a")){
@@ -346,15 +347,16 @@ public class DialogueMenu : MonoBehaviour {
 			DisableButtons();
 			speechText.text = monologue.GetString();
 			monologue.PlaySpeakSound(audioSource);
+			promptText.text = "[A]";
 		} else {
 			if (monologue.text.Count > 1){
 				waitForKeyPress = true;
 				promptText.text = "[MORE...]";
-				Debug.Log("no more to say");
 			} else {
 				monologue.text.Pop();
 				if (dialogue.Count == 0)
 					EnableButtons();
+				promptText.text = "";
 			}
 		}
 	}
