@@ -86,6 +86,10 @@ public class Bed : Doorway {
 				if (GameManager.Instance.data.days == 1){
 					GameManager.Instance.ShowDiaryEntry("diaryNew");
 				}
+				if (GameManager.Instance.data.deaths == 1 && GameManager.Instance.data.deathCutscenesPlayed == 0){
+					GameManager.Instance.data.deathCutscenesPlayed = 1;
+					GameManager.Instance.ShowDiaryEntry("death1");
+				}
 			}
 		}
 	}
