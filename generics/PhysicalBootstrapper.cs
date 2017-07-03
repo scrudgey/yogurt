@@ -135,14 +135,9 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		if (coll.gameObject != horizon)
 			return;
 		if (physical.slider.useLimits == false){
-			Debug.Log(name);
 			float dist = coll.collider.Distance(objectCollider).distance;
 			physical.SetSliderLimit(-2 * dist);
 		}
-		// Debug.Log(coll.collider.Distance(objectCollider).distance);
-		// Vector3 newPos = hingeObject.transform.position;
-		// newPos.y -= dist;
-		// hingeObject.transform.position = newPos;
 	}
 	void OnCollisionEnter2D(Collision2D coll){
 		if (coll.relativeVelocity.magnitude > 0.5){
