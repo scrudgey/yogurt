@@ -4,14 +4,11 @@ using Easings;
 using UnityEngine.SceneManagement;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
-// using UnityEngine.SceneManagement;
 public class Cutscene {
     public virtual void Update(){}
     public virtual void Configure(){}
     public virtual void EscapePressed(){}
-    public virtual void CleanUp(){
-
-    }
+    public virtual void CleanUp(){}
     public bool complete;
     public bool configured;
 }
@@ -71,8 +68,7 @@ public class CutsceneBoardroom : Cutscene {
                 timer = 0;
                 globalTimer = 0;
                 if (GameManager.Instance.activeCommercial == null){
-                    // LoadScript("test");
-                    LoadScript("eat2");
+                    LoadScript("eggplant1");
                 } else {
                     if (!LoadScript(GameManager.Instance.activeCommercial.cutscene))
                         LoadScript("test");
