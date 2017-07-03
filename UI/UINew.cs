@@ -27,7 +27,7 @@ public class UINew: Singleton<UINew> {
 		public Text buttonText;
 	}
 	public string MOTD = "smoke weed every day";
-	private GameObject UICanvas;
+	public GameObject UICanvas;
 	private List<GameObject> activeElements = new List<GameObject>();
 	private List<GameObject> bottomElements = new List<GameObject>();
 	private GameObject inventoryButton;
@@ -52,7 +52,7 @@ public class UINew: Singleton<UINew> {
 	public Texture2D cursorDefault;
 	public Texture2D cursorHighlight;
 
-	void Start(){
+	public void Start(){
 		if (!init){
 			ConfigureUIElements();
 			init = true;
