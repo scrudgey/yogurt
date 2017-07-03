@@ -17,10 +17,11 @@ public class Interaction {
 	public bool hideInRightClickMenu;
 	public bool staticInteraction;
 	public int defaultPriority;
-	public float range = 0.5f;
+	public float range = 0.35f;
 	public bool limitless = false;
 	public bool dontWipeInterface = false;
 	public string actionName;
+	public bool reversible = true;
 	private bool _validationFunction;
 	public bool validationFunction{
 		get {return _validationFunction;}
@@ -214,6 +215,7 @@ public class Interactive : MonoBehaviour{
 	}
 
 	public List<Interaction> GetFreeActions(){
+		// Free interactions have no required input, and therefore 
 		List<Interaction> returnList = new List<Interaction> ();
 		foreach (Interaction interaction in interactions){
 			if (interaction.parameterTypes.Count == 0 && interaction.IsValid()){
