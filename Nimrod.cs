@@ -48,7 +48,7 @@ namespace Nimrod{
                 matches = prob_hook.Matches(parseText);
                 if (matches.Count > 0){
                     foreach (Match match in matches){
-                        if (Random.Range(0, 1) < float.Parse(match.Groups[2].Value)){
+                        if (Random.Range(0.0f, 1.0f) < float.Parse(match.Groups[2].Value)){
                             StringBuilder builder = new StringBuilder(parseText);
                             builder.Replace(match.Groups[1].Value, Interpret(match.Groups[3].Value));
                             parseText = builder.ToString();
