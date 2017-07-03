@@ -1,62 +1,50 @@
 ﻿using UnityEngine;
 
 public class UIColliderManager : MonoBehaviour {
-	public BoxCollider2D leftBox;
-	public BoxCollider2D rightBox;
-	public BoxCollider2D topBox;
-	public BoxCollider2D bottomBox;
+	public EdgeCollider2D leftEdge;
+	public EdgeCollider2D rightEdge;
+	public EdgeCollider2D topEdge;
+	public EdgeCollider2D bottomEdge;
 	public RectTransform rt;
 	private float updateTimer;
-	void Start (){
+	public void Start (){
 		rt = GetComponent<RectTransform>();
-		Vector2 leftSize = new Vector2(25, rt.rect.height);
-		Vector2 leftOffset = new Vector2(-1f * rt.rect.width / 2f, 0);
+		// Debug.Log(rt.localScale.x);
+		AdjustColliders();
+		// TODO: make these edge colliders.
+	}
+	public void AdjustColliders(){
+		Vector2 topLeft = new Vector2(rt.rect.width / -2f, rt.rect.height / 2f);
+		Vector2 topRight = new Vector2(rt.rect.width / 2f, rt.rect.height / 2f);
+		Vector2 bottomLeft = new Vector2(rt.rect.width / -2f, rt.rect.height / -2f);
+		Vector2 bottomRight = new Vector2(rt.rect.width / 2f, rt.rect.height / -2f);
 
-		Vector2 rightSize = new Vector2(25, rt.rect.height);
-		Vector2 rightOffset = new Vector2(rt.rect.width / 2f, 0);
+		Vector2[] tempPoints = topEdge.points;
+		tempPoints[0] = topLeft;
+		tempPoints[1] = topRight;
 
-		Vector2 topSize = new Vector2(rt.rect.width, 25);
-		Vector2 topOffset = new Vector2(0, rt.rect.height / 2f);
+		topEdge.points = tempPoints;
 
-		Vector2 bottomSize = new Vector2(rt.rect.width, 25);
-		Vector2 bottomOffset = new Vector2(0, -1f * rt.rect.height / 2f);
+		tempPoints[0] = topLeft;
+		tempPoints[1] = bottomLeft;
 
-		leftBox.size = leftSize;
-		leftBox.offset = leftOffset;
-		rightBox.size = rightSize;
-		rightBox.offset = rightOffset;
-		bottomBox.offset = bottomOffset;
-		bottomBox.size = bottomSize;
-		topBox.size = topSize;
-		topBox.offset = topOffset;
+		leftEdge.points = tempPoints;
+
+		tempPoints[0] = topRight;
+		tempPoints[1] = bottomRight;
+
+		rightEdge.points = tempPoints;
+
+		tempPoints[0] = bottomLeft;
+		tempPoints[1] = bottomRight;
+
+		bottomEdge.points = tempPoints;
 	}
 	void Update(){
 		updateTimer += Time.deltaTime;
 		if (updateTimer > 1){
 			updateTimer = 0;
-			Start();
+			AdjustColliders();
 		}
 	}
-	// void Update () {
-	// 	Vector2 leftSize = new Vector2(10, rt.rect.height);
-	// 	Vector2 leftOffset = new Vector2(-1f * rt.rect.width / 2f, 0);
-
-	// 	Vector2 rightSize = new Vector2(10, rt.rect.height);
-	// 	Vector2 rightOffset = new Vector2(rt.rect.width / 2f, 0);
-
-	// 	Vector2 topSize = new Vector2(rt.rect.width, 10);
-	// 	Vector2 topOffset = new Vector2(0, rt.rect.height / 2f);
-
-	// 	Vector2 bottomSize = new Vector2(rt.rect.width, 10);
-	// 	Vector2 bottomOffset = new Vector2(0, -1f * rt.rect.height / 2f);
-
-	// 	leftBox.size = leftSize;
-	// 	leftBox.offset = leftOffset;
-	// 	rightBox.size = rightSize;
-	// 	rightBox.offset = rightOffset;
-	// 	bottomBox.offset = bottomOffset;
-	// 	bottomBox.size = bottomSize;
-	// 	topBox.size = topSize;
-	// 	topBox.offset = topOffset;
-	// }
 }
