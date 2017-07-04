@@ -58,6 +58,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		holdSortGroup = holdpoint.GetComponent<SortingGroup>();
 		Interaction getAction = new Interaction(this, "Get", "GetItem", true, false);
 		getAction.dontWipeInterface = false;
+		getAction.reversible = false;
 		interactions.Add(getAction);
 		Interaction swingAction = new Interaction(this, "Swing", "SwingItem", false, true);
 		swingAction.defaultPriority = 5;
@@ -91,10 +92,6 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 				PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
 				if (phys)
 					phys.DestroyPhysical();
-				// OrderByY yorder = holding.GetComponent<OrderByY>();
-				// if (yorder)
-				// 	yorder.AddFollower(gameObject, 1);
-				// 	yorder.enabled = false;
 				holding.transform.position = holdpoint.position;
 				holding.transform.SetParent(holdpoint, false);
 				holding.transform.rotation = Quaternion.identity;
