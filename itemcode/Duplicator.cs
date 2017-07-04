@@ -5,11 +5,8 @@ public class Duplicator : Interactive, IDirectable {
 	public AudioClip failSound;
 	private AudioSource audioSource;
 	public ParticleSystem particles;
-	// private Vector2 direction = Vector2.right;
 	public void DirectionChange(Vector2 d){
-		// direction = d;
 		if (particles){
-			// particles.transform.Rotate(new Vector3(0,0,1), Toolbox.Instance.ProperAngle(d.x, d.y) * 6.28f/360f);
 			particles.transform.rotation = Quaternion.AngleAxis(Toolbox.Instance.ProperAngle(d.x, d.y)-20f, new Vector3(0, 0, 1));
 		}
 	}
@@ -26,6 +23,7 @@ public class Duplicator : Interactive, IDirectable {
 		if (dup == null){
 			audioSource.PlayOneShot(failSound);
 		} else {
+			dup.name = Toolbox.Instance.CloneRemover(dup.name);
 			audioSource.PlayOneShot(dupSound);
 			Instantiate(Resources.Load("particles/poof"), dup.transform.position, Quaternion.identity);
 			if (prefabName == "dollar"){
