@@ -22,6 +22,7 @@ public class Hurtable : MonoBehaviour, IMessagable {
 	public float impulse;
 	private float downedTimer;
 	private float ouchFrequency = 0.1f;
+	public GameObject dizzyEffect;
 	public void TakeDamage(damageType type, float amount){
 		bool tookDamage = false;
 		if (!myIntrinsic.invulnerable.boolValue){
@@ -44,7 +45,7 @@ public class Hurtable : MonoBehaviour, IMessagable {
 				break;
 			}
 		}
-		if (health <= -0.5 * maxHealth){
+		if (health <= -0.5 * maxHealth && hitState != Controllable.HitState.dead){
 			Die(type);
 		}
 		if (type != damageType.fire){
@@ -71,7 +72,11 @@ public class Hurtable : MonoBehaviour, IMessagable {
 	}
 	public void Die(damageType type){
 		KnockDown();
+		if (GameManager.Instance.playerObject == gameObject){
+			GameManager.Instance.PlayerDeath();
+		}
 		hitState = Controllable.AddHitState(hitState, Controllable.HitState.dead);
+
 	}
 	public void ReceiveMessage(Message incoming){
 		if (incoming is MessageNetIntrinsic){
@@ -132,7 +137,7 @@ public class Hurtable : MonoBehaviour, IMessagable {
 			return;
 		hitState = Controllable.AddHitState(hitState, Controllable.HitState.unconscious);
 		doubledOver = false;
-		downedTimer = 2f;
+		downedTimer = 10f;
 		Vector3 pivot = transform.position;
 		pivot.y -= 0.15f;
 		transform.RotateAround(pivot, new Vector3(0, 0, 1), -90);
@@ -140,6 +145,10 @@ public class Hurtable : MonoBehaviour, IMessagable {
 		message.doubledOver = false;
 		message.hitState = hitState;
 		Toolbox.Instance.SendMessage(gameObject, this, message);
+
+		dizzyEffect = Instantiate(Resources.Load("prefabs/fx/dizzy"), transform.position + transform.up * 0.15f + new Vector3(0, 0.15f, 0), Quaternion.identity) as GameObject;
+		dizzyEffect.transform.rotation = Quaternion.identity;
+		dizzyEffect.transform.SetParent(transform, true);
 	}
 	public void GetUp(){
 		hitState = Controllable.RemoveHitState(hitState, Controllable.HitState.unconscious);
@@ -147,6 +156,8 @@ public class Hurtable : MonoBehaviour, IMessagable {
 		Vector3 pivot = transform.position;
 		pivot.x -= 0.15f;
 		transform.RotateAround(pivot, new Vector3(0, 0, 1), 90);
+		if (dizzyEffect != null)
+			Destroy(dizzyEffect);
 	}
 	public void DoubleOver(bool val){
 		if (val){
