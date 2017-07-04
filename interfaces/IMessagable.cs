@@ -16,7 +16,7 @@ public class MessageAnimation : Message {
 	public MessageAnimation(){}
 	public MessageAnimation(AnimType initType, bool initVal){
 		type = initType;
-		value = initVal;
+		this.value = initVal;
 	}
 }
 public class MessageDirectable: Message{
