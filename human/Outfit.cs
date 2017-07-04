@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class Outfit : Interactive {
+public class Outfit : Interactive, IMessagable {
 	private bool LoadInitialized = false;
 	public string wornUniformName;
 	public GameObject initUniform;
+    public Controllable.HitState hitState;
 	void Start(){
 		if (!LoadInitialized)
 			LoadInit();
@@ -16,10 +17,40 @@ public class Outfit : Interactive {
 		}
 	}
 	public void LoadInit(){
+		if (LoadInitialized)	
+			return;
 		Interaction wearInteraction = new Interaction(this, "Wear", "DonUniform");
 		wearInteraction.dontWipeInterface = false;
 		interactions.Add(wearInteraction);
+
+		Interaction stealInteraction = new Interaction(this, "Take Outfit", "StealUniform");
+		stealInteraction.validationFunction = true;
+		interactions.Add(stealInteraction);
+
 		LoadInitialized = true;
+	}
+	public void StealUniform(Outfit otherOutfit){
+		// TODO: add naked outfit
+		GameObject uniObject = RemoveUniform();
+		Uniform uniform = uniObject.GetComponent<Uniform>();
+		otherOutfit.DonUniform(uniform);
+		GoNude();
+	}
+	public void GoNude(){
+		MessageAnimation anim = new MessageAnimation();
+		anim.outfitName = "nude";
+		Toolbox.Instance.SendMessage(gameObject, this, anim);
+		wornUniformName = "nude";
+	}
+	public bool StealUniform_Validation(Outfit otherOutfit){
+		if (otherOutfit == this)
+			return false;
+		if (hitState >= Controllable.HitState.unconscious)
+            return true;
+		return false;
+	}
+	public string StealUniform_desc(Outfit otherOutfit){
+		return "Take "+wornUniformName;
 	}
 	public GameObject DonUniform(Uniform uniform){
 		GameObject removedUniform = RemoveUniform();
@@ -39,6 +70,7 @@ public class Outfit : Interactive {
 		Destroy(uniform.gameObject);
 		return removedUniform;
 	}
+
 	public string DonUniform_desc(Uniform uniform){
 		string uniformName = Toolbox.Instance.GetName(uniform.gameObject);
 		return "Wear "+uniformName;
@@ -53,5 +85,11 @@ public class Outfit : Interactive {
 		sprite.sortingLayerName = "ground";
 		return uniform;
 	}
+	public void ReceiveMessage(Message incoming){
+        if (incoming is MessageHitstun){
+			MessageHitstun hits = (MessageHitstun)incoming;
+            hitState = hits.hitState;
+		}
+    }
 
 }
