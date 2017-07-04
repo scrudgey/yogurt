@@ -25,6 +25,8 @@ public class MySaver {
 		{typeof(Cabinet),							() => new CabinetHandler() },
 		{typeof(Intrinsics),						() => new IntrinsicsHandler() },
 		{typeof(Package),							() => new PackageHandler() },
+		{typeof(Trader),							() => new TraderHandler() },
+		{typeof(DecisionMaker),						() => new DecisionMakerHandler() },
 	};
 	public static void CleanupSaves(){
 		string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
