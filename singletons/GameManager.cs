@@ -25,6 +25,8 @@ public class GameData{
 	public float secondsPlayed;
 	public string lastScene;
 	public int days;
+	public int deaths;
+	public int deathCutscenesPlayed;
     public List<Commercial> unlockedCommercials;
     public List<Commercial> completeCommercials;
 	public List<Commercial> newUnlockedCommercials;
@@ -224,6 +226,11 @@ public partial class GameManager : Singleton<GameManager> {
 							focusInv.ClearInventory();
 							UINew.Instance.UpdateInventoryButton(focusInv);
 						}
+						Eater focusEater = playerObject.GetComponent<Eater>();
+						if (focusEater){
+							focusEater.nutrition = 0;
+							focusEater.nausea = 0;
+						}
 						MySaver.Save();
 						awaitNewDayPrompt = CheckNewDayPrompt();
 						// TODO: check events related to having completed the last completed commercial
@@ -331,6 +338,7 @@ public partial class GameManager : Singleton<GameManager> {
 		data.newUnlockedCommercials = new List<Commercial>();
         data.unlockedCommercials.Add(LoadCommercialByName("eat1"));
 		if (debug){
+			data.days = 1;
        		data.unlockedCommercials.Add(LoadCommercialByName("eat2"));
        		data.unlockedCommercials.Add(LoadCommercialByName("eggplant1"));
        		data.unlockedCommercials.Add(LoadCommercialByName("eggplant10"));
@@ -478,7 +486,6 @@ public partial class GameManager : Singleton<GameManager> {
 		}
 	}
 	public void ReceivePackage(string packageName){
-		Debug.Log("receiving package "+packageName);
 		if (data.packages.Contains(packageName)){
 			Debug.Log("already recieved package. aborting...");
 		}
@@ -488,6 +495,10 @@ public partial class GameManager : Singleton<GameManager> {
 		GameObject diaryObject = UINew.Instance.ShowMenu(UINew.MenuType.diary);
 		Diary diary = diaryObject.GetComponent<Diary>();
 		diary.loadDiaryName = diaryName;
+	}
+	public void PlayerDeath(){
+		data.deaths += 1;
+		Instantiate(Resources.Load("UI/deathMenu"));
 	}
 }
 
