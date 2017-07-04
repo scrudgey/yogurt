@@ -38,6 +38,7 @@ public class Speech : Interactive, IMessagable {
         LoadInitialized = true;
         Interaction speak = new Interaction(this, "Look", "Describe", true, false);
 		speak.limitless = true;
+        speak.reversible = false;
 		speak.dontWipeInterface = false;
 		interactions.Add(speak);
         if (!disableSpeakWith){
@@ -79,6 +80,7 @@ public class Speech : Interactive, IMessagable {
         return GameManager.Instance.playerObject != gameObject;
     }
     // TODO: allow liquids and things to self-describe; add modifiers etc.
+    // maybe this functionality should be in the base object class?
 	public void Describe(Item obj){
         LiquidContainer container = obj.GetComponent<LiquidContainer>();
         MonoLiquid mono = obj.GetComponent<MonoLiquid>();
@@ -164,6 +166,8 @@ public class Speech : Interactive, IMessagable {
 		}
 	}
     public void Say(string phrase, string swear=null){
+        if (phrase == "")
+            return;
         if (hitState >= Controllable.HitState.unconscious)
             return;
         if(speaking && phrase == words){
@@ -248,6 +252,14 @@ public class Speech : Interactive, IMessagable {
             if (GameManager.Instance.playerObject == gameObject)
                 CompareLastNetIntrinsic(message.netIntrinsic);
             lastNetIntrinsic = message.netIntrinsic;
+        }
+        if (incoming is MessageAnimation){
+            MessageAnimation message = (MessageAnimation)incoming;
+            // if (message.value == false)
+            //     return;
+            if (message.type == MessageAnimation.AnimType.punching && message.value == true){
+                SayFromNimrod("punchsay");
+            }
         }
     }
     public void CompareLastNetIntrinsic(Intrinsic net){
