@@ -24,9 +24,11 @@ public class FireExtinguisher : Interactive, IDirectable {
 		spray.defaultPriority = 1;
 		spray.continuous = true;
 		spray.dontWipeInterface = true;
+		spray.reversible = false;
 		interactions.Add(spray);
 
 		Interaction spray2 = new Interaction(this, "Spray", "SprayObject", true, false);
+		spray2.reversible = false;
 		spray2.continuous = true;
 		spray2.limitless = true;
 		spray2.dontWipeInterface = true;
