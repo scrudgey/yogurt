@@ -19,6 +19,7 @@ public class Head : Interactive, IExcludable {
 	void LoadInit(){
 		Interaction wearAct = new Interaction(this, "Wear", "DonHat");
 		wearAct.dontWipeInterface = false;
+		wearAct.reversible = false;
 		interactions.Add(wearAct);
 		hatPoint = transform.Find("hatPoint").gameObject;
 		LoadInitialized = true;
@@ -48,7 +49,11 @@ public class Head : Interactive, IExcludable {
 		Toolbox.Instance.AddIntrinsic(transform.parent.gameObject, hat.gameObject);
 		GameManager.Instance.CheckItemCollection(transform.parent.gameObject, h.gameObject);
 	}
-	
+	public string DonHat_desc(Hat h){
+		return "Wear "+Toolbox.Instance.GetName(h.gameObject);
+	}
+
+
 	void RemoveHat(){
 		Toolbox.Instance.RemoveIntrinsic(transform.parent.gameObject, hat.gameObject);
 		Messenger.Instance.DisclaimObject(hat.gameObject,this);
