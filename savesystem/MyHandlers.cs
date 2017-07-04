@@ -120,14 +120,26 @@ public class PackageHandler: SaveHandler<Package> {
 		instance.contents = data.strings["contents"];
 	}
 }
-// public class TraderHandler: SaveHandler<Trader>{
-// 	public override void SaveData(Trader instance, PersistentComponent data, ReferenceResolver resolver){
-// 		data.ints["itemForTrade"] = resolver.ResolveReference(instance.hat.gameObject, data.persistent);
-// 	}
-// 	public override void LoadData(Trader instance, PersistentComponent data){
-
-// 	}
-// }
+public class TraderHandler: SaveHandler<Trader>{
+	public override void SaveData(Trader instance, PersistentComponent data, ReferenceResolver resolver){
+		if (instance.give != null)
+			data.ints["give"] = resolver.ResolveReference(instance.give, data.persistent);
+		data.strings["receive"] = instance.receive;
+	}
+	public override void LoadData(Trader instance, PersistentComponent data){
+		if (data.ints.ContainsKey("give"))
+			instance.give = MySaver.loadedObjects[data.ints["give"]];
+		instance.receive = data.strings["receive"];
+	}
+}
+public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
+	public override void SaveData(DecisionMaker instance, PersistentComponent data, ReferenceResolver resolver){
+		data.ints["possession"] = resolver.ResolveReference(instance.possession, data.persistent);
+	}
+	public override void LoadData(DecisionMaker instance, PersistentComponent data){
+		instance.possession = MySaver.loadedObjects[data.ints["possession"]];
+	}
+}
 
 public class PhysicalBootStrapperHandler: SaveHandler<PhysicalBootstrapper> {
 	public override void SaveData(PhysicalBootstrapper instance, PersistentComponent data, ReferenceResolver resolver){
