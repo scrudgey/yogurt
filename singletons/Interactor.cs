@@ -13,7 +13,7 @@ public class Interactor{
 		List<Interaction> freeActions = ReportFreeActions(target);
 		actionDictionary.AddRange(freeActions);
 		// what actions can the target do on *me* and my junk?
-		List<Interaction> inverseActions = ReportRightClickActions(focus, target);
+		List<Interaction> inverseActions = ReportRightClickActions(focus, target, inverse:true);
 		foreach (Interaction inter in inverseActions)
 			if (!actionDictionary.Contains(inter))   // inverse double-count diode
 				actionDictionary.Add(inter);
@@ -52,28 +52,32 @@ public class Interactor{
 		}
 		return returnDictionary;
 	}
-	static public List<Interaction> ReportRightClickActions(GameObject targ, GameObject source){
+	static public List<Interaction> ReportRightClickActions(GameObject targ, GameObject source, bool inverse=false){
 		List<Interactive>interactives = new List<Interactive>(source.GetComponentsInChildren<Interactive>());
 		List<Interaction>returnDictionary = new List<Interaction>();
 		foreach (Interactive interactive in interactives)
 			interactive.target = targ;
 		foreach (Interactive interactive in interactives){
 			List<Interaction> possibleActions = interactive.GetRightClickActions();
-			foreach (Interaction action in possibleActions)
-				returnDictionary.Add(action);
+			foreach (Interaction action in possibleActions){
+				if (inverse && action.reversible)
+					returnDictionary.Add(action);
+				if (!inverse)
+					returnDictionary.Add(action);
+			}	
 		}
 		return returnDictionary;
 	}
-	static public List<Interaction> ReportActions(GameObject targ, GameObject source){
-		List<Interactive> interactives = new List<Interactive> (source.GetComponentsInChildren<Interactive>() );
-		List<Interaction> returnDictionary = new List<Interaction> ();
-		foreach (Interactive interactive in interactives)
-			interactive.target = targ;
-		foreach (Interactive interactive in interactives){
-			List<Interaction> possibleActions = interactive.GetEnabledActions();
-			foreach (Interaction action in possibleActions)
-				returnDictionary.Add(action);
-		}
-		return returnDictionary;
-	}
+	// static public List<Interaction> ReportActions(GameObject targ, GameObject source){
+	// 	List<Interactive> interactives = new List<Interactive> (source.GetComponentsInChildren<Interactive>() );
+	// 	List<Interaction> returnDictionary = new List<Interaction> ();
+	// 	foreach (Interactive interactive in interactives)
+	// 		interactive.target = targ;
+	// 	foreach (Interactive interactive in interactives){
+	// 		List<Interaction> possibleActions = interactive.GetEnabledActions();
+	// 		foreach (Interaction action in possibleActions)
+	// 			returnDictionary.Add(action);
+	// 	}
+	// 	return returnDictionary;
+	// }
 }
