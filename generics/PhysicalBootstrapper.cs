@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
+// using System.Collections.Generic;
 public class PhysicalBootstrapper : MonoBehaviour {
 	public AudioClip[] impactSounds;
 	public AudioClip[] landSounds;
@@ -164,8 +164,9 @@ public class PhysicalBootstrapper : MonoBehaviour {
 			if (physical.currentMode == Physical.mode.zip){
 				// Debug.Log("physical bootstrapper collision: "+gameObject.name+" + "+coll.gameObject.name);
 				MessageDamage message = new MessageDamage();
-				message.responsibleParty = new List<GameObject>();
-				message.responsibleParty.Add(thrownBy);
+				// message.responsibleParty = new List<GameObject>();
+				// message.responsibleParty.Add(thrownBy);
+				message.responsibleParty = thrownBy;
 				message.force = physical.objectBody.velocity;
 				message.amount = 20f;
 				message.type = damageType.physical;
