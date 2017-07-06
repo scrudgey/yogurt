@@ -75,6 +75,7 @@ public class Awareness : MonoBehaviour, IMessagable {
 	public Ref<GameObject> nearestFire = new Ref<GameObject>(null);
 	public SerializableDictionary<GameObject, Knowledge> knowledgebase = new SerializableDictionary<GameObject, Knowledge>();
 	public SerializableDictionary<GameObject, PersonalAssessment> people = new SerializableDictionary<GameObject, PersonalAssessment>();
+	// public DecisionMaker decisionMaker;
 	void Start () {
 		control = gameObject.GetComponent<Controllable>();
 		sightCone = Instantiate( Resources.Load("sightcone1"), gameObject.transform.position, Quaternion.identity ) as GameObject;
@@ -87,6 +88,7 @@ public class Awareness : MonoBehaviour, IMessagable {
 				initialAwareness.Add(possession);
 			Perceive();
 		}
+
 	}
 	public List<GameObject> FindObjectWithName(string targetName){
 		List<GameObject> returnArray = new List<GameObject>();
@@ -186,6 +188,28 @@ public class Awareness : MonoBehaviour, IMessagable {
 			}
 		}
 	}
+	void OnTriggerEnter2D(Collider2D other){
+		if (other.tag == "occurrenceFlag"){
+			NoticeOccurrence(other.gameObject);
+		}
+	}
+	void NoticeOccurrence(GameObject flag){
+		Occurrence occurrence = flag.GetComponent<Occurrence>();
+		if (occurrence == null)
+			return;
+		foreach (OccurrenceData od in occurrence.data){
+			Toolbox.Instance.SendMessage(gameObject, this, new MessageOccurrence(od));
+			if (od is OccurrenceViolence){
+				OccurrenceViolence dat = (OccurrenceViolence)od;
+				if (gameObject == dat.attacker || gameObject == dat.victim)
+					continue;
+				// TODO: decide whether the attacker or the victim is the enemy depending on alleigance
+				// TODO: don't make enemies with someone who fights back
+				PersonalAssessment attacker = FormPersonalAssessment(dat.attacker);
+				attacker.status = PersonalAssessment.friendStatus.enemy;
+			}
+		}
+	}
 	// process the list of objects in the field of view.
 	void Perceive(){
 		viewed = false;
@@ -257,6 +281,7 @@ public class Awareness : MonoBehaviour, IMessagable {
 		PersonalAssessment assessment = FormPersonalAssessment(g);
 		if (assessment != null){
 			assessment.status = PersonalAssessment.friendStatus.enemy;
+			assessment.knowledge.lastSeenPosition = g.transform.position;
 		}
 	}
 	public void ReceiveMessage(Message incoming){
@@ -270,9 +295,9 @@ public class Awareness : MonoBehaviour, IMessagable {
 			return;
 		if (incoming is MessageDamage){
 			MessageDamage message = (MessageDamage)incoming;
-			foreach (GameObject responsible in message.responsibleParty){
-				AttackedByPerson(responsible);
-			}
+			// foreach (GameObject responsible in message.responsibleParty){
+			AttackedByPerson(message.responsibleParty);
+			// }
 		}
 		if (incoming is MessageInsult){
 			PersonalAssessment assessment = FormPersonalAssessment(incoming.messenger.gameObject);
