@@ -1,12 +1,12 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
+// using System.Collections.Generic;
 // using System.Collections;
 
 public class Slasher : MonoBehaviour {
 	public AudioClip[] impactSounds;
 	public Vector2 direction; 
-	public List<GameObject> owners = new List<GameObject>();
-
+	// public List<GameObject> owners = new List<GameObject>();
+	public GameObject responsibleParty;
 	public float damage;
 	
 	void SlashOn(){
@@ -20,15 +20,17 @@ public class Slasher : MonoBehaviour {
 		impact.direction = direction;
 		impact.size = 0.11f;
 		impact.magnitude = damage;
-		impact.responsibleParty = owners;
+		impact.responsibleParty = responsibleParty;
 
 		CircleCollider2D impactCollider = impact.GetComponent<CircleCollider2D>();
-		foreach (GameObject owner in owners){
-			Collider2D[] ownerColliders = owner.GetComponentsInChildren<Collider2D>();
-			foreach (Collider2D ownerCollider in ownerColliders){
-				Physics2D.IgnoreCollision(impactCollider, ownerCollider, true);
-			}
-		}
+		// foreach (GameObject owner in owners){
+			// Collider2D[] ownerColliders = responsibleParty.GetComponentsInChildren<Collider2D>();
+			// foreach (Collider2D ownerCollider in ownerColliders){
+				// Physics2D.IgnoreCollision(impactCollider, ownerCollider, true);
+		foreach (Collider2D responsibleCollider in responsibleParty.GetComponentsInChildren<Collider2D>())
+			Physics2D.IgnoreCollision(impactCollider, responsibleCollider, true);
+			// }
+		// }
 		
 	}
 	void SlashOff(){
