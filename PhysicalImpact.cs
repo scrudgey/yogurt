@@ -8,7 +8,8 @@ public class PhysicalImpact : MonoBehaviour {
 	public List<Transform> impactedObjects = new List<Transform>();
 	public float magnitude = 20f;
 	public float size = 0.08f;
-	public List<GameObject> responsibleParty = new List<GameObject>();
+	// public List<GameObject> responsibleParty = new List<GameObject>();
+	public GameObject responsibleParty;
 
 	void Start(){
 		Destroy(gameObject, 0.5f);
@@ -32,6 +33,14 @@ public class PhysicalImpact : MonoBehaviour {
 		message.impactor = this;
 		message.responsibleParty = responsibleParty;
 		Toolbox.Instance.SendMessage(collider.gameObject, this, message);
+
+		
+		OccurrenceViolence violence = new OccurrenceViolence();
+		violence.attacker = responsibleParty;
+		violence.victim = collider.gameObject;
+		violence.disturbing = 10f;
+		violence.chaos = 10f;
+		Toolbox.Instance.OccurenceFlag(gameObject, violence);
 	}
 
 	public void PlayImpactSound(){
