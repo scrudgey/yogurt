@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 
 namespace AI {
+	[System.Serializable]
 	public class Ref<T> {
 		public T val;
 		public Ref(T t){
