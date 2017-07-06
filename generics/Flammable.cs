@@ -79,7 +79,7 @@ public class Flammable : MonoBehaviour {
 
 			OccurrenceFire fireData = new OccurrenceFire();
 			fireData.objectName = Toolbox.Instance.CloneRemover(name);
-			fireData.chaos = 100;
+			fireData.chaos = 10;
 			Toolbox.Instance.OccurenceFlag(gameObject, fireData);
 		}
 		if (onFire){
