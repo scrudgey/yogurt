@@ -33,6 +33,7 @@ namespace AI{
 			return urgency;
 		}
 		public virtual void ReceiveMessage(Message m){}
+		// public virtual void ObserveOccurrence(OccurrenceData data){}
 	}
 	public class PriorityFightFire: Priority{
 		public float updateInterval;
@@ -175,7 +176,26 @@ namespace AI{
 			if (incoming is MessageThreaten){
 				urgency += Priority.urgencyMinor;
 			}
+			if (incoming is MessageOccurrence){
+				MessageOccurrence message = (MessageOccurrence)incoming;
+				if (message.data is OccurrenceViolence){
+					OccurrenceViolence dat = (OccurrenceViolence)message.data;
+					if (gameObject == dat.attacker || gameObject == dat.victim)
+						return;
+					urgency += Priority.urgencyMinor;
+				}
+			}
 		}
+		// public override void ObserveOccurrence(OccurrenceData od){
+		// 	// TODO: bravery determines whether to attack or run away
+		// 	// Debug.Log("attack priority observes occurrence");
+		// 	if (od is OccurrenceViolence){
+		// 		OccurrenceViolence dat = (OccurrenceViolence)od;
+		// 		if (gameObject == dat.attacker || gameObject == dat.victim)
+		// 			return;
+		// 		urgency += Priority.urgencyMinor;
+		// 	}
+		// }
 		public override void Update(){
 			if (awareness.nearestEnemy.val == null)
 				urgency -= Time.deltaTime / 10f;
