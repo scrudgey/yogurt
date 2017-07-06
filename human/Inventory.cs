@@ -283,8 +283,9 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		Slasher s = slash.GetComponent<Slasher>();
 		s.impactSounds = holding.GetComponent<MeleeWeapon>().impactSounds;
 		s.direction = direction;
-		s.owners.Add(gameObject);
-		s.owners.Add(holding.gameObject);
+		// s.owners.Add(gameObject);
+		// s.owners.Add(holding.gameObject);
+		s.responsibleParty = gameObject;
 
 		MeleeWeapon melee = holding.GetComponent<MeleeWeapon>();
 		if (melee){
@@ -306,7 +307,8 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 	public void PunchImpact(){
 		GameObject slash = Instantiate(Resources.Load("PhysicalImpact"), holdpoint.position, holdpoint.rotation) as GameObject;
 		PhysicalImpact impact = slash.GetComponent<PhysicalImpact>();
-		impact.responsibleParty.Add(gameObject);
+		// impact.responsibleParty.Add(gameObject);
+		impact.responsibleParty = gameObject;
 		impact.direction = direction;
 		Collider2D slashCollider = slash.GetComponent<Collider2D>();
 		foreach (Collider2D tomCollider in GetComponentsInChildren<Collider2D>()){
