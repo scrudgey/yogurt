@@ -1,13 +1,9 @@
 ﻿using UnityEngine;
-// using System.Collections;
 using System.Collections.Generic;
 
 public class Messenger : Singleton<Messenger> {
 	public string MOTD = "smoke weed every day";
 	public Dictionary<GameObject, IExcludable> claimedItems = new Dictionary<GameObject, IExcludable>();
-	void Start(){
-		claimedItems = new Dictionary<GameObject, IExcludable>();
-	}
 	public void ListObjects(){
 		foreach (GameObject o in claimedItems.Keys){
 			Debug.Log(o.name);
