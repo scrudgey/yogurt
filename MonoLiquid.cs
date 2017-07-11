@@ -9,13 +9,13 @@ public class MonoLiquid : MonoBehaviour {
 			edible = gameObject.AddComponent<Edible>();
 		physB = GetComponent<PhysicalBootstrapper>();
 	}
-
 	 void Start () {
 		SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
 		if (spriteRenderer && liquid != null){
 			spriteRenderer.color = liquid.color;
 		}
 	}
+	//TODO: figure out why splashes are happening instead of puddles for vomit
 	void OnCollisionEnter2D(Collision2D coll){
 		if (physB == null)
 			return;
@@ -30,18 +30,14 @@ public class MonoLiquid : MonoBehaviour {
 			Destroy(gameObject);
 		}
 	}
-
 	public void LoadLiquid(string type){
 		// TODO: make this fancier: retrieve liquid in buffer, only change variable
 		// if liquid was returned
 		liquid = LiquidCollection.LoadLiquid(type);
-
 		// add things here for changing edible properties according to liquid properties
 	}
-
 	void OnGroundImpact(Physical phys){
 		Toolbox.Instance.DataFlag(gameObject, 1f, 1f, 0f, 0f, 0f);
-		// Debug.Break();
 		GameObject puddle = Instantiate(Resources.Load("Puddle"), transform.position, Quaternion.identity) as GameObject;
 		puddle.layer = 9;
 		PhysicalBootstrapper pb = GetComponent<PhysicalBootstrapper>();
@@ -50,5 +46,4 @@ public class MonoLiquid : MonoBehaviour {
 		puddle.GetComponent<Edible>().offal = true;
 		Destroy(gameObject);
 	}
-
 }
