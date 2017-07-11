@@ -3,6 +3,8 @@
 public class Eater : Interactive {
 	public float nutrition;
 	public enum preference{neutral, likes, dislikes}
+	enum nauseaStatement{none, warning, imminent}
+	nauseaStatement lastStatement;
 	public preference vegetablePreference;
 	public preference meatPreference;
 	public preference immoralPreference;
@@ -23,12 +25,15 @@ public class Eater : Interactive {
 	private GameObject eaten;
 	private bool LoadInitialized = false;
 	private void CheckNausea(){
-		if (nausea > 15 && lastNausea < 15){
+		//TODO: this is spawning lots of flags
+		if (nausea > 15 && nausea < 30 && lastStatement != nauseaStatement.warning){
+			lastStatement = nauseaStatement.warning;
 			lastNausea = nausea;
 			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I don't feel so good!"));
 			Toolbox.Instance.DataFlag(gameObject, 0f, 5f, 10f, 0f, 0f);
 		}
-		if (nausea > 30 && lastNausea < 30){
+		if (nausea > 30 && lastStatement != nauseaStatement.imminent){
+			lastStatement = nauseaStatement.imminent;
 			lastNausea = nausea;
 			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I'm gonna puke!"));
 			Toolbox.Instance.DataFlag(gameObject, 0f, 10f, 10f, 0f, 0f);
@@ -133,12 +138,19 @@ public class Eater : Interactive {
         OccurrenceEat eatData = new OccurrenceEat();
         eatData.food = food.name;
         eatData.amount = food.nutrition;
+		eatData.vomit = food.vomit;
+		if (food.vomit){
+			eatData.disgusting += 100f;
+			eatData.disturbing += 75f;
+			eatData.chaos += 125f;
+		}
         MonoLiquid mliquid = food.GetComponent<MonoLiquid>();
         if (mliquid){
             eatData.liquid = mliquid.liquid;
             if (mliquid.liquid.vomit){
                 eatData.disgusting += 100f;
                 eatData.chaos += 200f;
+				eatData.disturbing += 105f;
             }
             if (mliquid.liquid.offal){
                 eatData.disgusting += 75f;
