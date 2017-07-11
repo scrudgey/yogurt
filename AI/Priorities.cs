@@ -186,16 +186,6 @@ namespace AI{
 				}
 			}
 		}
-		// public override void ObserveOccurrence(OccurrenceData od){
-		// 	// TODO: bravery determines whether to attack or run away
-		// 	// Debug.Log("attack priority observes occurrence");
-		// 	if (od is OccurrenceViolence){
-		// 		OccurrenceViolence dat = (OccurrenceViolence)od;
-		// 		if (gameObject == dat.attacker || gameObject == dat.victim)
-		// 			return;
-		// 		urgency += Priority.urgencyMinor;
-		// 	}
-		// }
 		public override void Update(){
 			if (awareness.nearestEnemy.val == null)
 				urgency -= Time.deltaTime / 10f;
