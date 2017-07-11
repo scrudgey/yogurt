@@ -16,7 +16,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	public float initHeight = 0.01f;
 	public float groundDrag = 10f;
 	public Vector2 initVelocity;
-	public bool ignoreCollisions;
+	// public bool ignoreCollisions;
 	public bool doInit = true;
 	private Vector3 setV;
 	public GameObject thrownBy;
@@ -146,18 +146,18 @@ public class PhysicalBootstrapper : MonoBehaviour {
 			}
 			Toolbox.Instance.DataFlag(gameObject, 50f, 0f, 0f, 0f, 0f);
 		}
-		if (ignoreCollisions)
-			return;
+		// if (ignoreCollisions)
+		// 	return;
 		if (coll.gameObject == groundObject){
 			// Debug.Log("I collided with the ground.");
 		} else if (coll.gameObject == horizon){
 			if (coll.relativeVelocity.magnitude > 0.1){
 				physical.GroundMode();
+				physical.BroadcastMessage("OnGroundImpact", physical, SendMessageOptions.DontRequireReceiver);
 			} else {
 				physical.suppressLandSound = true;
 				physical.GroundMode();
 			}
-			physical.BroadcastMessage("OnGroundImpact", physical, SendMessageOptions.DontRequireReceiver);
 		} else {
 			if (physical == null)
 				return;
