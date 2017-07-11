@@ -19,6 +19,7 @@ public class Head : Interactive, IExcludable {
 	void LoadInit(){
 		Interaction wearAct = new Interaction(this, "Wear", "DonHat");
 		wearAct.dontWipeInterface = false;
+		wearAct.validationFunction = true;
 		wearAct.reversible = false;
 		interactions.Add(wearAct);
 		hatPoint = transform.Find("hatPoint").gameObject;
@@ -51,6 +52,10 @@ public class Head : Interactive, IExcludable {
 	}
 	public string DonHat_desc(Hat h){
 		return "Wear "+Toolbox.Instance.GetName(h.gameObject);
+	}
+	public bool DonHat_Validation(Hat h){
+		// Debug.Log(Messenger.Instance.claimedItems.ContainsKey(h.gameObject));
+		return !Messenger.Instance.claimedItems.ContainsKey(h.gameObject);
 	}
 
 
