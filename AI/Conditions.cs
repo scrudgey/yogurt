@@ -65,12 +65,14 @@ namespace AI{
 			dist = 0.25f;
 		}
 		public override status Evaluate(){
-			if (target.val == null)
-				return status.neutral;
+			if (target.val == null){
+				return status.failure;
+			}
 			if (Vector2.Distance(gameObject.transform.position, target.val.transform.position) < dist){
+				// Debug.Log("close to object "+target.val.name+" at dist "+dist.ToString());
 				return status.success;
 			} else {
-				return status.neutral;
+				return status.failure;
 			}
 		}
 	}
@@ -197,8 +199,6 @@ namespace AI{
 				return status.failure;
 			if (inv){
 				if (inv.holding){
-					// Debug.Log(inv.holding);
-					// Debug.Log(target.val);
 					if (inv.holding.gameObject == target.val){
 						return status.success;
 					}else{
