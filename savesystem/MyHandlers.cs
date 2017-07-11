@@ -134,10 +134,12 @@ public class TraderHandler: SaveHandler<Trader>{
 }
 public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
 	public override void SaveData(DecisionMaker instance, PersistentComponent data, ReferenceResolver resolver){
-		data.ints["possession"] = resolver.ResolveReference(instance.possession, data.persistent);
+		if (instance.possession != null)
+			data.ints["possession"] = resolver.ResolveReference(instance.possession, data.persistent);
 	}
 	public override void LoadData(DecisionMaker instance, PersistentComponent data){
-		instance.possession = MySaver.loadedObjects[data.ints["possession"]];
+		if (data.ints.ContainsKey("possession"))
+			instance.possession = MySaver.loadedObjects[data.ints["possession"]];
 	}
 }
 
