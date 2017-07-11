@@ -255,11 +255,23 @@ public class Speech : Interactive, IMessagable {
         }
         if (incoming is MessageAnimation){
             MessageAnimation message = (MessageAnimation)incoming;
-            // if (message.value == false)
-            //     return;
             if (message.type == MessageAnimation.AnimType.punching && message.value == true){
                 SayFromNimrod("punchsay");
             }
+        }
+        if (incoming is MessageOccurrence){
+            MessageOccurrence occur = (MessageOccurrence)incoming;
+            // foreach (OccurrenceData data in occur.data)
+            ReactToOccurrence(occur.data);
+        }
+    }
+    void ReactToOccurrence(OccurrenceData od){
+        if (od is OccurrenceVomit){
+            SayFromNimrod("grossreact");
+        }
+        if (od is OccurrenceEat){
+            if (od.disgusting > 10)
+                SayFromNimrod("grossreact");
         }
     }
     public void CompareLastNetIntrinsic(Intrinsic net){
