@@ -19,7 +19,7 @@ public class PhysicalImpact : MonoBehaviour {
 	}
 
 	void OnTriggerEnter2D(Collider2D collider){
-		if (collider.tag == "background" || collider.tag == "Puddle")
+		if (collider.tag == "background" || collider.tag == "Puddle" || collider.tag == "fire")
 			return;
 		if (impactedObjects.Contains(collider.transform.root))
 			return;
@@ -33,7 +33,6 @@ public class PhysicalImpact : MonoBehaviour {
 		message.impactor = this;
 		message.responsibleParty = responsibleParty;
 		Toolbox.Instance.SendMessage(collider.gameObject, this, message);
-
 		
 		OccurrenceViolence violence = new OccurrenceViolence();
 		violence.attacker = responsibleParty;
