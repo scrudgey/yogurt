@@ -130,6 +130,12 @@ public class Hurtable : MonoBehaviour, IMessagable {
 		if (impulse <= 0f && doubledOver && hitState < Controllable.HitState.unconscious){
 			DoubleOver(false);
 		}
+		if (dizzyEffect != null){
+			if (dizzyEffect.transform.localScale != transform.localScale){
+				Vector3 tempscale = transform.localScale;
+				dizzyEffect.transform.localScale = tempscale; 
+			}
+		}
 	}
 	// TODO: knockdown message!
 	public void KnockDown(){
