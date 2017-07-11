@@ -93,7 +93,7 @@ public class Toolbox : Singleton<Toolbox> {
 		PhysicalBootstrapper phys = droplet.GetComponent<PhysicalBootstrapper>();
 		phys.initHeight = 0.05f;
 		phys.initVelocity = initialVelocity;
-		phys.ignoreCollisions = true;
+		// phys.ignoreCollisions = true;
 		LiquidCollection.MonoLiquidify(droplet, l);
 		return droplet;
 	}
