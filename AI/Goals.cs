@@ -189,7 +189,8 @@ namespace AI {
 	public class GoalRunFromObject : Goal {
 		public GoalRunFromObject(GameObject g, Controllable c, Ref<GameObject> threat) : base(g, c){
 			goalThought = "I'm trying to avoid a bad thing.";
-			successCondition = new ConditionLocation(g, new Ref<Vector2>(Vector2.zero));
+			// successCondition = new ConditionLocation(g, new Ref<Vector2>(Vector2.zero));
+			successCondition = new ConditionLocation(g, new Ref<Vector2>(new Vector2(-999f, -999f)));
 			routines.Add(new RoutineAvoidGameObject(g, c, threat));
 		}
 	}
