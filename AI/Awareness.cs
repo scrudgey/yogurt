@@ -141,10 +141,10 @@ public class Awareness : MonoBehaviour, IMessagable {
 				continue;
 			if (assessment.unconscious)
 				continue;
-			Vector3 directionToTarget = assessment.knowledge.lastSeenPosition - currentPosition;
+			// Vector3 directionToTarget = assessment.knowledge.lastSeenPosition - currentPosition;
+			Vector3 directionToTarget = assessment.knowledge.transform.position - currentPosition;
             float dSqrToTarget = directionToTarget.sqrMagnitude;
-            if (dSqrToTarget < closestDistanceSqr)
-            {
+            if (dSqrToTarget < closestDistanceSqr) {
                 closestDistanceSqr = dSqrToTarget;
                 nearestEnemy.val = assessment.knowledge.obj;
             }
@@ -201,12 +201,38 @@ public class Awareness : MonoBehaviour, IMessagable {
 			Toolbox.Instance.SendMessage(gameObject, this, new MessageOccurrence(od));
 			if (od is OccurrenceViolence){
 				OccurrenceViolence dat = (OccurrenceViolence)od;
-				if (gameObject == dat.attacker || gameObject == dat.victim)
-					continue;
-				// TODO: decide whether the attacker or the victim is the enemy depending on alleigance
-				// TODO: don't make enemies with someone who fights back
 				PersonalAssessment attacker = FormPersonalAssessment(dat.attacker);
-				attacker.status = PersonalAssessment.friendStatus.enemy;
+				PersonalAssessment victim = FormPersonalAssessment(dat.victim);
+				if (attacker == null || victim == null){
+					continue;
+				}
+				// Debug.Log(dat.attacker.name + " attacked "+ dat.victim.name);
+				if (gameObject == attacker.knowledge.obj || gameObject == victim.knowledge.obj)
+					continue;
+
+				switch (attacker.status)
+				{
+					case PersonalAssessment.friendStatus.friend:
+						victim.status = PersonalAssessment.friendStatus.enemy;
+						// Debug.Log(name + " friend attacked friend");
+					break;
+					case PersonalAssessment.friendStatus.neutral:
+						if (victim.status == PersonalAssessment.friendStatus.friend){
+							attacker.status = PersonalAssessment.friendStatus.enemy;
+							// Debug.Log(name + " neutral attacked friend");
+						}
+						if (victim.status == PersonalAssessment.friendStatus.neutral){
+							attacker.status = PersonalAssessment.friendStatus.enemy;
+							// Debug.Log(name + " neutral attacked neutral");
+						}
+						if (victim.status == PersonalAssessment.friendStatus.enemy){
+							attacker.status = PersonalAssessment.friendStatus.friend;
+							// Debug.Log(name + " neutral attacked enemy");
+						}
+					break;
+					default:
+					break;
+				}
 			}
 		}
 	}
@@ -215,16 +241,15 @@ public class Awareness : MonoBehaviour, IMessagable {
 		viewed = false;
 		speciousPresent = 1f;
 		foreach (GameObject g in fieldOfView){
+
 			if (g == null)
 				continue;
 			Knowledge knowledge = null;
 			if (g == possession){
 				if (!knowledgebase.ContainsKey(g)){
-					// Debug
 					possessionDefaultState = new Knowledge(g);
 					knowledge = new Knowledge(g);
 					knowledgebase.Add(g, knowledge);
-					// knowledgebase.Add(g, possessionDefaultState);
 				}
 			}
 			if (knowledgebase.TryGetValue(g, out knowledge)){
@@ -236,7 +261,6 @@ public class Awareness : MonoBehaviour, IMessagable {
 			PersonalAssessment assessment = FormPersonalAssessment(g);
 			Humanoid human = g.GetComponent<Humanoid>();
 			if (human){
-				// assessment.unconscious = human.hitstun;
 				assessment.unconscious = human.hitState >= Controllable.HitState.stun;
 			}
 		}
@@ -263,24 +287,38 @@ public class Awareness : MonoBehaviour, IMessagable {
 		}
 	}
 
-	public PersonalAssessment FormPersonalAssessment(GameObject g){
-		if (!knowledgebase.ContainsKey(g))
-			knowledgebase.Add(g, new Knowledge(g));
-		PersonalAssessment storedAssessment;
-		if (people.TryGetValue(g, out storedAssessment)){
-			return storedAssessment;
-		}
-		if (!g.GetComponent<Controllable>()){
+	public PersonalAssessment FormPersonalAssessment(GameObject g, bool debug=false){
+		if (g == null)
+			return null;
+		if (debug)
+			Debug.Log("assess "+g.name+":");
+		Controllable rootControllable = g.GetComponentInParent<Controllable>();
+		if (rootControllable == null){
+			if (debug)
+				Debug.Log("no root controllable. quitting...");
 			return null;
 		}
-		PersonalAssessment assessment = new PersonalAssessment(knowledgebase[g]);
-		people.Add(g, assessment);
+		GameObject rootObject = rootControllable.gameObject;
+		if (debug)
+			Debug.Log("root object: "+rootObject.name);
+
+		if (!knowledgebase.ContainsKey(rootObject))
+			knowledgebase.Add(rootObject, new Knowledge(rootObject));
+		PersonalAssessment storedAssessment;
+		if (people.TryGetValue(rootObject, out storedAssessment)){
+			return storedAssessment;
+		}
+
+		PersonalAssessment assessment = new PersonalAssessment(knowledgebase[rootObject]);
+		people.Add(rootObject, assessment);
 		return assessment;
 	}
 	void AttackedByPerson(GameObject g){
 		PersonalAssessment assessment = FormPersonalAssessment(g);
 		if (assessment != null){
-			assessment.status = PersonalAssessment.friendStatus.enemy;
+			if (assessment.status != PersonalAssessment.friendStatus.friend){
+				assessment.status = PersonalAssessment.friendStatus.enemy;
+			}
 			assessment.knowledge.lastSeenPosition = g.transform.position;
 		}
 	}
@@ -288,16 +326,12 @@ public class Awareness : MonoBehaviour, IMessagable {
 		if (incoming is MessageHitstun){
 			MessageHitstun hits = (MessageHitstun)incoming;
 			hitState = hits.hitState;
-			// if (hits.updateUnconscious)	
-			// 	unconscious = hits.unconscious;
 		}
 		if (hitState >= Controllable.HitState.unconscious)
 			return;
 		if (incoming is MessageDamage){
 			MessageDamage message = (MessageDamage)incoming;
-			// foreach (GameObject responsible in message.responsibleParty){
 			AttackedByPerson(message.responsibleParty);
-			// }
 		}
 		if (incoming is MessageInsult){
 			PersonalAssessment assessment = FormPersonalAssessment(incoming.messenger.gameObject);
@@ -310,8 +344,6 @@ public class Awareness : MonoBehaviour, IMessagable {
 		if (incoming is MessageInventoryChanged){
 			MessageInventoryChanged message = (MessageInventoryChanged)incoming;
 			if (message.holding != null){
-				// fieldOfView.Add(message.holding);
-				// Perceive();
 				Knowledge knowledge = null;
 				if (knowledgebase.TryGetValue(message.holding, out knowledge)){
 					knowledge.UpdateInfo();
