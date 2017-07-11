@@ -6,6 +6,7 @@ public class Occurrence : MonoBehaviour {
     public static Dictionary<string, string> KeyDescriptions = new Dictionary<string, string>{
         {"yogurt", "yogurts eaten"},
         {"vomit", "vomit events"},
+        {"vomit_eat", "vomit eaten"},
         {"yogurt_vomit", "yogurt emesis event"},
         {"yogurt_vomit_eat", "eating yogurt vomit"},
         {"yogurt_floor", "yogurt eaten off the floor"},
@@ -76,20 +77,24 @@ public class OccurrenceEat : OccurrenceData {
     public float amount;
     public string food;
     public Liquid liquid;
+    public bool vomit;
     public override void UpdateCommercialOccurrences(Commercial commercial){
         if (liquid != null){
             if (liquid.name == "yogurt"){
                 commercial.IncrementValue("yogurt", 1f);
-                if (liquid.vomit)
+                if (liquid.vomit){
                     commercial.IncrementValue("yogurt_vomit_eat", 1f);
+                    commercial.IncrementValue("vomit_eat", 1f);
+                }
                 if (food == "Puddle(Clone)")
                     commercial.IncrementValue("yogurt_floor", 1f);
             }
+        } else {
+            if (vomit)
+                commercial.IncrementValue("vomit_eat", 1f);
         }
-        if (Toolbox.Instance.CloneRemover(food) == "eggplant"){
+        if (Toolbox.Instance.CloneRemover(food) == "eggplant")
             commercial.IncrementValue("eggplant", 1f);
-        }
-
     }
     protected override bool MatchSpecific(OccurrenceData data){
         OccurrenceEat otherData = (OccurrenceEat)data;
@@ -110,9 +115,10 @@ public class OccurrenceVomit : OccurrenceData {
     public Liquid liquid;
     public override void UpdateCommercialOccurrences(Commercial commercial){
         commercial.IncrementValue("vomit", 1f);
-        if (liquid.name == "yogurt"){
-            commercial.IncrementValue("yogurt_vomit", 1f);
-        }
+        if (liquid != null){
+            if (liquid.name == "yogurt")
+                commercial.IncrementValue("yogurt_vomit", 1f);
+        } 
     }
 }
 [System.Serializable]
@@ -131,5 +137,4 @@ public class OccurrenceSpeech : OccurrenceData {
 public class OccurrenceViolence : OccurrenceData {
     public GameObject attacker;
     public GameObject victim;
-    // public override void
 }
