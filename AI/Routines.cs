@@ -399,6 +399,7 @@ namespace AI{
 		public Ref<GameObject> threat;
 		private Transform cachedTransform;
 		private GameObject cachedGameObject;
+		private Vector3 lastSeenPosition;
 		public Transform threatTransform{
 			get {
 				if (cachedGameObject == threat.val){
@@ -423,6 +424,7 @@ namespace AI{
 		{
 			if (threat.val){
 				control.leftFlag = control.rightFlag = control.upFlag = control.downFlag = false;
+				lastSeenPosition = threatTransform.position;
 				if ( Math.Abs(transform.position.x - threatTransform.position.x) > 0.1f ){
 					if (transform.position.x < threatTransform.position.x){
 						control.leftFlag = true;
