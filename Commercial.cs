@@ -14,6 +14,7 @@ public class Commercial {
 	public SerializableDictionary<string, CommercialProperty> properties = new SerializableDictionary<string, CommercialProperty>(); 
     public List<string> unlockUponCompletion;
     public OccurrenceData data;
+	public List<string> outfitsWorn;
 	public Commercial(){
         unlockUponCompletion = new List<string>();
         data = new OccurrenceData();
@@ -88,14 +89,11 @@ public class Commercial {
 		return requirementsMet;
 	}
 }
-
 [System.Serializable]
 public class CommercialProperty {
-	// public string name;
 	public float val;
 	public CommercialComparison comp;
 	public CommercialProperty(){
-		// name = "default";
 		val = 0;
 		comp = CommercialComparison.equal;
 	}
