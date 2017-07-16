@@ -36,7 +36,7 @@ public class Persistent {
 		transformScale = gameObject.transform.localScale;
 		// here i will add a persistentcomponent object for each component that has a handler
 		foreach (Component component in gameObject.GetComponents<Component>() ){
-			if ( MySaver.Handlers.ContainsKey(component.GetType()) ){
+			if (MySaver.Handlers.ContainsKey(component.GetType())){
 				PersistentComponent persist = new PersistentComponent(this);
 				persistentComponents.Add(component.GetType().ToString(), persist);
 			}
