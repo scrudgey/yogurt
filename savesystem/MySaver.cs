@@ -6,8 +6,6 @@ using System.Xml.Serialization;
 using System.Linq;
 using System.Text.RegularExpressions;
 public class MySaver {
-	public enum SaverState{None, Saving, Loading}
-	public static SaverState saveState;
 	public static List<GameObject> disabledPersistents = new List<GameObject>();
 	public static Dictionary<int, GameObject> loadedObjects = new Dictionary<int, GameObject>();
 	public static Dictionary<Type, Func<SaveHandler> > Handlers = new Dictionary<Type, Func<SaveHandler>>{
@@ -45,7 +43,6 @@ public class MySaver {
 	}
 	public static void Save(){
 		try {
-			saveState = SaverState.Saving;
 			// open XML serialization stream
 			// TODO: make this path nicer later when i have a directory structure
 			var serializer = new XmlSerializer(typeof(PersistentContainer));
@@ -56,8 +53,7 @@ public class MySaver {
 			// retrieve all persistent objects
 			// TODO: theres probably a nice way to do this with linq but what the hell
 			List<GameObject> objectList = new List<GameObject>();
-			List<MyMarker> marks = new List<MyMarker>(GameObject.FindObjectsOfType<MyMarker>());
-			foreach (MyMarker mark in marks){
+			foreach (MyMarker mark in new List<MyMarker>(GameObject.FindObjectsOfType<MyMarker>())){
 				objectList.Add(mark.gameObject);
 			}
 			// add those objects which are disabled and would therefore not be found by our first search
@@ -98,19 +94,17 @@ public class MySaver {
 			// close the XML serialization stream
 			sceneStream.Close();
 			playerStream.Close();
-		} catch (System.Exception ex){
+		} catch (System.Exception ex) {
 			Debug.Log("Problem saving!");
 			Debug.Log(ex.Message);
 			Debug.Log(ex.Data);
 			Debug.Log(ex.TargetSite);
 		}
 		GameManager.Instance.SaveGameData();
-		saveState = SaverState.None;
 	}
 	public static GameObject LoadScene(){
 		GameObject playerObject = null;
 		try {
-			saveState = SaverState.Loading;
 			string scenePath = GameManager.Instance.LevelSavePath();
 			string playerPath = GameManager.Instance.data.lastSavedPlayerPath;
 			var serializer = new XmlSerializer(typeof(PersistentContainer));
@@ -146,7 +140,6 @@ public class MySaver {
 		} catch {
 			Debug.Log("problem loading!");
 		}
-		saveState = SaverState.None;
 		return playerObject;
 	}
 	public static GameObject LoadPersistentContainer(PersistentContainer container){
