@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
 public class MyMarker : MonoBehaviour {
+	public int id = -1;
 	void OnDisable(){
 		MySaver.disabledPersistents.Add(gameObject);
 	}
