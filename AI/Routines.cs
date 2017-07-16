@@ -399,6 +399,7 @@ namespace AI{
 		public Ref<GameObject> threat;
 		private Transform cachedTransform;
 		private GameObject cachedGameObject;
+		//TODO: make use of lastSeenPosition
 		private Vector3 lastSeenPosition;
 		public Transform threatTransform{
 			get {
