@@ -231,7 +231,7 @@ public class Container : Interactive, IExcludable {
 	}
 
 	void OnDestroy(){
-		if (!isQuitting && MySaver.saveState != MySaver.SaverState.Loading){
+		if (!isQuitting){
 			while (items.Count > 0){
 				foreach (MonoBehaviour component in items[0].GetComponents<MonoBehaviour>() )
 					component.enabled = true;
