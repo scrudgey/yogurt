@@ -17,7 +17,8 @@ public class Interaction {
 	public bool hideInRightClickMenu;
 	public bool staticInteraction;
 	public int defaultPriority;
-	public float range = 0.35f;
+	// public float range = 0.35f ^ 2f;
+	public float range = Mathf.Pow(0.35f, 2f);
 	public bool limitless = false;
 	public bool dontWipeInterface = false;
 	public string actionName;
