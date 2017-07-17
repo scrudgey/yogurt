@@ -34,15 +34,8 @@ public class UINew: Singleton<UINew> {
 	private GameObject fightButton;
 	private GameObject punchButton;
 	private GameObject speakButton;	
-	// private GameObject recordStopButton;
 	private bool init = false;
 	public bool inventoryVisible = false;
-	// private string statusText;
-	// private string statusTemp;
-	// private float statusTempTime;
-	// private TextFX statusFX;
-	// private TextFX.FXstyle statusTempStyle;
-	// public TextFX.FXstyle statusStyle;
 	public Text status;
 	public Text actionTextObject;
 	public string actionTextString;
@@ -61,20 +54,6 @@ public class UINew: Singleton<UINew> {
 		cursorHighlight = (Texture2D)Resources.Load("UI/cursor3_64_1");
 	}
 	void Update(){
-		// if (statusTempTime > 0){
-		// 	statusTempTime -= Time.deltaTime;
-		// }
-		// if (statusTempTime > 0){
-		// 	status.text = statusTemp;
-		// 	if (statusFX.style != statusTempStyle){
-		// 		statusFX.style = statusTempStyle;
-		// 	}
-		// } else {
-		// 	status.text = statusText;
-		// 	if (statusFX.style != statusStyle){
-		// 		statusFX.style = statusStyle;
-		// 	}
-		// }
 		if (!achievementPopupInProgress && collectedStack.Count > 0){
 			PopupCollected(collectedStack.Pop());
 		}
@@ -109,14 +88,12 @@ public class UINew: Singleton<UINew> {
 		punchButton = UICanvas.transform.Find("topdock/PunchButton").gameObject;
 		speakButton = UICanvas.transform.Find("topdock/SpeakButton").gameObject;
 		status = UICanvas.transform.Find("topdock/topBar/status").GetComponent<Text>();
-		// statusFX = status.gameObject.GetComponent<TextFX>();
 		actionTextObject = UICanvas.transform.Find("bottomdock/ActionText").GetComponent<Text>();
 
 		status.gameObject.SetActive(false);
 		inventoryButton.SetActive(false);
 		fightButton.SetActive(false);
 		speakButton.SetActive(false);
-		// punchButton.SetActive(false);
 		HidePunchButton();
 	}
 	public GameObject ShowMenu(MenuType typeMenu){
@@ -355,6 +332,7 @@ public class UINew: Singleton<UINew> {
 	actionButton SpawnButton(Interaction interaction){
 		GameObject newButton = Instantiate(Resources.Load("UI/NeoActionButton"), Vector2.zero, Quaternion.identity) as GameObject;
 		ActionButtonScript buttonScript = newButton.GetComponent<ActionButtonScript>();
+		buttonScript.button = newButton.GetComponent<Button>();
 		Text buttonText = newButton.transform.FindChild("Text").GetComponent<Text>();
 		actionButton returnbut;
 		returnbut.gameobject = newButton;
