@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class ActionButtonScript: MonoBehaviour {
 
@@ -10,6 +11,7 @@ public class ActionButtonScript: MonoBehaviour {
 	public string buttonText;
 	private bool mouseHeld;
 	public Inventory inventory;
+	public Button button;
 	public void clicked(){
 		if (bType == buttonType.Action){
 			if (Controller.Instance.InteractionIsWithinRange(action) || manualAction){
@@ -32,6 +34,15 @@ public class ActionButtonScript: MonoBehaviour {
 		if (mouseHeld && bType == buttonType.Action){
 			if (action.continuous && (Controller.Instance.InteractionIsWithinRange(action) || manualAction )){
 				action.DoAction();
+			}
+		} else {
+			if (!manualAction && action != null){
+				if (Controller.Instance.InteractionIsWithinRange(action)){
+					button.interactable = true;
+				}
+				if (!Controller.Instance.InteractionIsWithinRange(action)){
+					button.interactable = false;
+				}
 			}
 		}
 	}
