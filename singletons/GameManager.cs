@@ -119,7 +119,6 @@ public partial class GameManager : Singleton<GameManager> {
 			}
 		}
 	}
-	
 	public void SetFocus(GameObject target){
 		playerObject = target;
 		Controller.Instance.focus = target.GetComponent<Controllable>();
