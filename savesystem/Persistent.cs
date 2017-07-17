@@ -1,11 +1,6 @@
 ﻿using UnityEngine;
 using System;
-// using System.Collections;
-using System.Collections.Generic;
-// using System.Xml;
-// using System.Xml.Serialization;
 using System.Text.RegularExpressions;
-
 
 public class Persistent {
 	private Regex rgx = new Regex(@"(.+)\(Clone\)$", RegexOptions.Multiline);
@@ -16,7 +11,6 @@ public class Persistent {
 	public Quaternion transformRotation;
 	public SerializableDictionary<string, PersistentComponent> persistentComponents = new SerializableDictionary<string, PersistentComponent>();
 	public SerializableDictionary<string, PersistentComponent> persistentChildComponents = new SerializableDictionary<string, PersistentComponent>();
-
 	public Persistent(){
 		// needed for XML serialization
 	}
@@ -42,9 +36,8 @@ public class Persistent {
 			}
 		}
 		// handle marked child objects
-		List<MyMarkerChild> markedChildren = new List<MyMarkerChild>(gameObject.GetComponentsInChildren<MyMarkerChild>());
-		foreach (MyMarkerChild childMarker in markedChildren){
-			GameObject childObject = childMarker.gameObject;
+		MyMarker marker = gameObject.GetComponent<MyMarker>();
+		foreach (GameObject childObject in marker.persistentChildren){
 			foreach (Component component in childObject.GetComponents<Component>()){
 				if (MySaver.Handlers.ContainsKey(component.GetType())){
 					PersistentComponent persist = new PersistentComponent(this);
@@ -55,12 +48,11 @@ public class Persistent {
 			}
 		}
 	}
-
 	public void HandleSave(ReferenceResolver resolver){
 		GameObject parentObject = resolver.persistentObjects[this].gameObject;
 		foreach (Component component in parentObject.GetComponents<Component>() ){
 			Func<SaveHandler> get;
-			if ( MySaver.Handlers.TryGetValue(component.GetType(), out get ) ){
+			if (MySaver.Handlers.TryGetValue(component.GetType(), out get )){
 				PersistentComponent persistentComponent = persistentComponents[component.GetType().ToString()];
 				var handler = get();
 				handler.SaveData(component,persistentComponent,resolver);
@@ -71,7 +63,7 @@ public class Persistent {
 			Component component = childObject.GetComponent(persistentChildComponent.type);
 			if (childObject && component){
 				Func<SaveHandler> get;
-				if ( MySaver.Handlers.TryGetValue(component.GetType(), out get ) ){
+				if (MySaver.Handlers.TryGetValue(component.GetType(), out get )){
 					var handler = get();
 					handler.SaveData(component, persistentChildComponent, resolver);
 				}
