@@ -6,8 +6,11 @@ using System.Xml.Serialization;
 using System.Linq;
 using System.Text.RegularExpressions;
 public class MySaver {
+	static int idIndex;
 	public static List<GameObject> disabledPersistents = new List<GameObject>();
 	public static Dictionary<int, GameObject> loadedObjects = new Dictionary<int, GameObject>();
+	// NOTE: this system will not support having more than 2,147,483,648 saved objects.
+	public static HashSet<int> loadedIds = new HashSet<int>();
 	public static Dictionary<Type, Func<SaveHandler> > Handlers = new Dictionary<Type, Func<SaveHandler>>{
 		{typeof(Inventory), 						() => new InventoryHandler() },
 		{typeof(PhysicalBootstrapper), 				() => new PhysicalBootStrapperHandler() },
@@ -25,8 +28,11 @@ public class MySaver {
 		{typeof(Package),							() => new PackageHandler() },
 		{typeof(Trader),							() => new TraderHandler() },
 		{typeof(DecisionMaker),						() => new DecisionMakerHandler() },
+		// {typeof(Awareness),							() => new AwarenessHandler() },
 	};
 	public static void CleanupSaves(){
+		idIndex = 0;
+		loadedIds = new HashSet<int>();
 		string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
 		if (!System.IO.Directory.Exists(path))
 			return;
@@ -45,47 +51,49 @@ public class MySaver {
 		try {
 			// open XML serialization stream
 			// TODO: make this path nicer later when i have a directory structure
+			ReferenceResolver resolver = new ReferenceResolver();
 			var serializer = new XmlSerializer(typeof(PersistentContainer));
 			string scenePath = GameManager.Instance.LevelSavePath();
 			string playerPath = GameManager.Instance.PlayerSavePath();
 			FileStream sceneStream = File.Create(scenePath);
 			FileStream playerStream = File.Create(playerPath);
 			// retrieve all persistent objects
-			// TODO: theres probably a nice way to do this with linq but what the hell
 			List<GameObject> objectList = new List<GameObject>();
+			List<Persistent> persistents = new List<Persistent>();
+			// add those objects which are disabled and would therefore not be found by our first search
+			objectList.AddRange(disabledPersistents);
 			foreach (MyMarker mark in new List<MyMarker>(GameObject.FindObjectsOfType<MyMarker>())){
 				objectList.Add(mark.gameObject);
 			}
-			// add those objects which are disabled and would therefore not be found by our first search
-			objectList.AddRange(disabledPersistents);
-			ReferenceResolver resolver = new ReferenceResolver();
-			List<Persistent> persistentObjects = new List<Persistent>();
-			int idIndex = 0;
 			// create a persistent for each gameobject with the appropriate data
 			foreach (GameObject gameObject in objectList){
 				Persistent persistent = new Persistent(gameObject);
-				persistent.id = idIndex;
-				persistentObjects.Add(persistent);
-				resolver.objectIDs.Add(gameObject, idIndex);
+				MyMarker marker = gameObject.GetComponent<MyMarker>();
+				if (marker.id != - 1){
+					persistent.id = marker.id;
+					loadedIds.Add(marker.id);
+				} else {
+					idIndex++;
+					while (loadedIds.Contains(idIndex)){
+						// Debug.Log("idIndex taken, incrementing "+idIndex.ToString());
+						idIndex++;
+					}
+					persistent.id = idIndex;
+					//TODO: check if next index is taken!
+				}
+				// Debug.Log("saving "+gameObject.name+" with id "+persistent.id.ToString());
+				persistents.Add(persistent);
+				resolver.objectIDs.Add(gameObject, persistent.id);
 				resolver.persistentObjects.Add(persistent, gameObject);
-				idIndex++;
 			}
 			// invoke the data handling here - this will populate all the component data, and assign a unique id to everything.
-			foreach (Persistent persistent in persistentObjects){
-					persistent.HandleSave(resolver);
+			foreach (Persistent persistent in persistents){
+				persistent.HandleSave(resolver);
 			}
 			List<Persistent> playerTree = resolver.RetrieveReferenceTree(GameManager.Instance.playerObject);
-			List<Persistent> sceneTree = persistentObjects.Except(playerTree).ToList();
+			List<Persistent> sceneTree = persistents.Except(playerTree).ToList();
 			// lastly we need to clean up any references the scene objects have to the player objects
-			ReferenceResolver sceneResolver = new ReferenceResolver();
 			Dictionary<GameObject, int> sceneIDs = new Dictionary<GameObject, int>();
-			sceneResolver.persistentObjects = resolver.persistentObjects;
-			foreach (Persistent persistent in sceneTree){
-				sceneIDs.Add(resolver.persistentObjects[persistent], resolver.objectIDs[resolver.persistentObjects[persistent]]);
-			}
-			sceneResolver.objectIDs = sceneIDs;
-			foreach (Persistent persistenet in sceneTree)
-				persistenet.HandleSave(sceneResolver);
 			PersistentContainer sceneContainer = new PersistentContainer(sceneTree);
 			PersistentContainer playerContainer = new PersistentContainer(playerTree);
 			// save the persistent object container
@@ -123,51 +131,38 @@ public class MySaver {
 				}
 			}
 			disabledPersistents = new List<GameObject>();
+			loadedObjects = new Dictionary<int, GameObject>();
+			PersistentContainer sceneContainer = null;
+			PersistentContainer playerContainer = null;
 			if (File.Exists(scenePath)){
-				var sceneStream = new FileStream(scenePath,FileMode.Open);
-				PersistentContainer sceneContainer = serializer.Deserialize(sceneStream) as PersistentContainer;
+				var sceneStream = new FileStream(scenePath, FileMode.Open);
+				sceneContainer = serializer.Deserialize(sceneStream) as PersistentContainer;
 				sceneStream.Close();
 				LoadPersistentContainer(sceneContainer);
 			}
 			if (File.Exists(playerPath)){
-				var playerStream = new FileStream(playerPath,FileMode.Open);
-				PersistentContainer playerContainer = serializer.Deserialize(playerStream) as PersistentContainer;
+				var playerStream = new FileStream(playerPath, FileMode.Open);
+				playerContainer = serializer.Deserialize(playerStream) as PersistentContainer;
 				playerStream.Close();
 				playerObject = LoadPersistentContainer(playerContainer);
 			} else {
 				playerObject = GameObject.Instantiate(Resources.Load("prefabs/Tom")) as GameObject;
 			}
-		} catch {
+			if (sceneContainer != null)
+				HandleLoadedPersistents(sceneContainer.PersistentObjects);
+			if (playerContainer != null)
+				HandleLoadedPersistents(playerContainer.PersistentObjects);
+		} catch (Exception e) {
 			Debug.Log("problem loading!");
-		}
+			Debug.Log(e.Message);
+			Debug.Log(e.TargetSite);
+		}	
 		return playerObject;
 	}
-	public static GameObject LoadPersistentContainer(PersistentContainer container){
+	public static void HandleLoadedPersistents(List<Persistent> persistents){
 		string lastName = "first";
 		string lastComponent = "first";
-		GameObject rootObject = null;
-		try {
-			Regex reg =  new Regex("\\s+", RegexOptions.Multiline);
-			loadedObjects = new Dictionary<int, GameObject>();
-			foreach(Persistent persistent in container.PersistentObjects){
-				lastName = persistent.name;
-				string path = @"prefabs/"+persistent.name;
-				path = reg.Replace(path, "_");
-				GameObject go = GameObject.Instantiate(
-					Resources.Load(path),
-					persistent.transformPosition,
-					persistent.transformRotation) as GameObject;
-				loadedObjects.Add(persistent.id, go);
-				go.BroadcastMessage("LoadInit", SendMessageOptions.DontRequireReceiver);
-				go.name = Toolbox.Instance.ScrubText(go.name);
-				if (!rootObject)
-					rootObject = go;
-			}
-		} catch {
-			Debug.Log("Error occurred when instantiating persistent object "+ lastName);
-		}
-		//		now that each persistent object is loaded, handle references
-		foreach (Persistent persistent in container.PersistentObjects){
+		foreach (Persistent persistent in persistents){
 			lastName = persistent.name;
 			foreach (Component component in loadedObjects[persistent.id].GetComponents<Component>()){
 				lastComponent = component.GetType().ToString();
@@ -207,6 +202,35 @@ public class MySaver {
 				}
 			}
 		}
+	}
+	public static GameObject LoadPersistentContainer(PersistentContainer container){
+		string lastName = "first";
+		GameObject rootObject = null;
+		try {
+			Regex reg =  new Regex("\\s+", RegexOptions.Multiline);
+			foreach(Persistent persistent in container.PersistentObjects){
+				lastName = persistent.name;
+				loadedIds.Add(persistent.id);
+				// Debug.Log("loading "+persistent.name+" with id "+persistent.id.ToString());
+				string path = @"prefabs/"+persistent.name;
+				path = reg.Replace(path, "_");
+				GameObject go = GameObject.Instantiate(
+					Resources.Load(path),
+					persistent.transformPosition,
+					persistent.transformRotation) as GameObject;
+				loadedObjects.Add(persistent.id, go);
+				go.BroadcastMessage("LoadInit", SendMessageOptions.DontRequireReceiver);
+				go.name = Toolbox.Instance.ScrubText(go.name);
+				if (!rootObject)
+					rootObject = go;
+				MyMarker marker = go.GetComponent<MyMarker>();
+				if (marker){
+					marker.id = persistent.id;
+				}
+			}
+		} catch {
+			Debug.Log("Error occurred when instantiating persistent object "+ lastName);
+		}
 		return rootObject;
 	}
 }
@@ -219,8 +243,10 @@ public class ReferenceResolver{
 		if (objectIDs.ContainsKey(referent))
 			returnID = objectIDs[referent];
 		if (!referenceTree.ContainsKey(requester))
-			referenceTree.Add(requester,new List<Persistent>());
+			referenceTree.Add(requester, new List<Persistent>());
 		referenceTree[requester].Add(persistentObjects.FindKeyByValue(referent));
+		if (returnID == -1)
+			Debug.Log("reference not resolved!");
 		return returnID;
 	}
 	public List<Persistent> RetrieveReferenceTree(GameObject target){
@@ -245,7 +271,6 @@ public class ReferenceResolver{
 				tree = nextTree;
 				checkIterations++;
 			}
-
 		}
 		return tree;
 	}
