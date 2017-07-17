@@ -5,7 +5,6 @@ public abstract class SaveHandler{
 	public abstract void SaveData(Component instance, PersistentComponent data, ReferenceResolver resolver);
 	public abstract void LoadData(Component instance, PersistentComponent data);
 }
-
 public abstract class SaveHandler<T> : SaveHandler where T : Component
 {
 	public sealed override void SaveData(Component instance, PersistentComponent data, ReferenceResolver resolver){
@@ -17,7 +16,6 @@ public abstract class SaveHandler<T> : SaveHandler where T : Component
 	public abstract void SaveData(T instance, PersistentComponent data, ReferenceResolver resolver);
 	public abstract void LoadData(T instance, PersistentComponent data);
 }
-
 public class InventoryHandler : SaveHandler<Inventory> {
 	public override void SaveData(Inventory instance, PersistentComponent data, ReferenceResolver resolver){
 		if (instance.holding != null){
@@ -55,10 +53,8 @@ public class InventoryHandler : SaveHandler<Inventory> {
 			}
 		}
 		instance.initHolding = null;
-
 	}
 }
-
 public class ContainerHandler: SaveHandler<Container> {
 	public override void SaveData(Container instance, PersistentComponent data, ReferenceResolver resolver){
 		data.ints["maxItems"] = 						instance.maxNumber;
@@ -83,7 +79,6 @@ public class ContainerHandler: SaveHandler<Container> {
 		}
 	}
 }
-
 public class BlenderHandler: SaveHandler<Blender> {
 	public override void SaveData(Blender instance, PersistentComponent data, ReferenceResolver resolver){
 		ContainerHandler handler = new ContainerHandler();
@@ -96,7 +91,6 @@ public class BlenderHandler: SaveHandler<Blender> {
 		instance.power = data.bools["power"];
 	}
 }
-
 public class HeadHandler: SaveHandler<Head> {
 	public override void SaveData(Head instance,PersistentComponent data, ReferenceResolver resolver){
 		if (instance.hat != null){
@@ -108,8 +102,28 @@ public class HeadHandler: SaveHandler<Head> {
 	public override void LoadData(Head instance,PersistentComponent data){
 		instance.initHat = null;
 		if (data.ints["hat"] != -1){
-			instance.DonHat(MySaver.loadedObjects[ data.ints["hat"]].GetComponent<Hat>());
+			instance.DonHat(MySaver.loadedObjects[data.ints["hat"]].GetComponent<Hat>());
 		}
+	}
+}
+public class TraderHandler: SaveHandler<Trader>{
+	public override void SaveData(Trader instance, PersistentComponent data, ReferenceResolver resolver){
+		if (instance.give != null){
+			data.ints["give"] = resolver.ResolveReference(instance.give, data.persistent);
+			// Debug.Log("saving reference to give: "+data.ints["give"].ToString());
+		}
+		data.strings["receive"] = instance.receive;
+	}
+	public override void LoadData(Trader instance, PersistentComponent data){
+		if (data.ints.ContainsKey("give")){
+			// Debug.Log("handler loading give");
+			// Debug.Log("looking for id "+data.ints["give"]);
+			// foreach(KeyValuePair<int, GameObject> keyval in MySaver.loadedObjects){
+			// 	Debug.Log(keyval.Key.ToString()+" "+keyval.Value.ToString());
+			// }
+			instance.give = MySaver.loadedObjects[data.ints["give"]];
+		}
+		instance.receive = data.strings["receive"];
 	}
 }
 public class PackageHandler: SaveHandler<Package> {
@@ -120,18 +134,7 @@ public class PackageHandler: SaveHandler<Package> {
 		instance.contents = data.strings["contents"];
 	}
 }
-public class TraderHandler: SaveHandler<Trader>{
-	public override void SaveData(Trader instance, PersistentComponent data, ReferenceResolver resolver){
-		if (instance.give != null)
-			data.ints["give"] = resolver.ResolveReference(instance.give, data.persistent);
-		data.strings["receive"] = instance.receive;
-	}
-	public override void LoadData(Trader instance, PersistentComponent data){
-		if (data.ints.ContainsKey("give"))
-			instance.give = MySaver.loadedObjects[data.ints["give"]];
-		instance.receive = data.strings["receive"];
-	}
-}
+
 public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
 	public override void SaveData(DecisionMaker instance, PersistentComponent data, ReferenceResolver resolver){
 		if (instance.possession != null)
@@ -142,7 +145,6 @@ public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
 			instance.possession = MySaver.loadedObjects[data.ints["possession"]];
 	}
 }
-
 public class PhysicalBootStrapperHandler: SaveHandler<PhysicalBootstrapper> {
 	public override void SaveData(PhysicalBootstrapper instance, PersistentComponent data, ReferenceResolver resolver){
 		data.bools["doInit"] = instance.doInit;
@@ -151,7 +153,6 @@ public class PhysicalBootStrapperHandler: SaveHandler<PhysicalBootstrapper> {
 		instance.doInit = data.bools["doInit"];
 	}
 }
-
 // to add: food preference enums
 public class EaterHandler: SaveHandler<Eater> {
 	public override void SaveData(Eater instance, PersistentComponent data, ReferenceResolver resolver){
@@ -161,7 +162,6 @@ public class EaterHandler: SaveHandler<Eater> {
 		instance.nutrition = data.floats["nutrition"];
 	}
 }
-
 public class AdvancedAnimationHandler: SaveHandler<AdvancedAnimation> {
 	public override void SaveData(AdvancedAnimation instance, PersistentComponent data, ReferenceResolver resolver){
 		data.strings["baseName"] = instance.baseName;
@@ -171,7 +171,6 @@ public class AdvancedAnimationHandler: SaveHandler<AdvancedAnimation> {
 		instance.LoadSprites();
 	}
 }
-
 public class FlammableHandler: SaveHandler<Flammable> {
 	public override void SaveData(Flammable instance, PersistentComponent data, ReferenceResolver resolver){
 		data.floats["heat"] = 				instance.heat;
@@ -184,7 +183,6 @@ public class FlammableHandler: SaveHandler<Flammable> {
 		instance.onFire = 					data.bools["onFire"];
 	}
 }
-
 public class DestructibleHandler: SaveHandler<Destructible> {
 	public override void SaveData(Destructible instance, PersistentComponent data, ReferenceResolver resolver){
 		data.floats["health"] = 			instance.health;
@@ -201,7 +199,6 @@ public class DestructibleHandler: SaveHandler<Destructible> {
 		instance.lastDamage =				(damageType)data.ints["lastDamage"];
 	}
 }
-
 public class OutfitHandler: SaveHandler<Outfit> {
 	public override void SaveData(Outfit instance, PersistentComponent data, ReferenceResolver resolver){
 		data.strings["worn"] = 			instance.wornUniformName;
@@ -211,12 +208,10 @@ public class OutfitHandler: SaveHandler<Outfit> {
 		instance.initUniform = null;
 	}
 }
-
 public class CabinetHandler: SaveHandler<Cabinet> {
 	public override void SaveData(Cabinet instance, PersistentComponent data, ReferenceResolver resolver){
 		data.bools["opened"] = 			instance.opened;
 	}
-	
 	public override void LoadData(Cabinet instance, PersistentComponent data){
 		instance.opened = data.bools["opened"];
 		if (instance.opened){
@@ -224,7 +219,6 @@ public class CabinetHandler: SaveHandler<Cabinet> {
 		}
 	}
 }
-
 public class LiquidContainerHandler: SaveHandler<LiquidContainer>{
 	public override void SaveData(LiquidContainer instance, PersistentComponent data, ReferenceResolver resolver){
 		data.floats["fillCapacity"] = 		instance.fillCapacity;
@@ -249,7 +243,6 @@ public class LiquidContainerHandler: SaveHandler<LiquidContainer>{
 		instance.lid =						data.bools["lid"];
 	}
 }
-
 public class IntrinsicsHandler: SaveHandler<Intrinsics>{
 	public override void SaveData(Intrinsics instance, PersistentComponent data, ReferenceResolver resolver){
 		data.intrinsics = new List<Intrinsic>();
@@ -264,5 +257,24 @@ public class IntrinsicsHandler: SaveHandler<Intrinsics>{
 		}
 		if (data.intrinsics.Count > 0)
 			instance.IntrinsicsChanged();
+	}
+}
+// TODO: fix the serializability of knowledge.
+public class AwarenessHandler: SaveHandler<Awareness>{
+	public override void SaveData(Awareness instance, PersistentComponent data, ReferenceResolver resolver){
+		int index = 0;
+		foreach(KeyValuePair<GameObject, PersonalAssessment> keyVal in instance.people){
+			data.personalAssessments.Add(keyVal.Value);
+			data.ints["person"+index.ToString()] = resolver.ResolveReference(keyVal.Key, data.persistent);
+			index++;
+		}
+		data.ints["assessmentsCount"] = index + 1;
+	}
+	public override void LoadData(Awareness instance, PersistentComponent data){
+		if (data.personalAssessments.Count > 0){
+			for (int i = 0; i < data.ints["assessmentsCount"]; i++){
+				instance.people[MySaver.loadedObjects[data.ints["person"+i.ToString()]]] = data.personalAssessments[i];
+			}
+		}
 	}
 }
