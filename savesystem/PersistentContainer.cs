@@ -7,7 +7,7 @@ public class PersistentContainer{
 	public List<Persistent> PersistentObjects = new List<Persistent>();
 	public PersistentContainer(){
 	}
-	public PersistentContainer( List<Persistent> persistents){
+	public PersistentContainer(List<Persistent> persistents){
 		PersistentObjects = persistents;
 	}
 }
