@@ -142,12 +142,13 @@ public class Controller : Singleton<Controller> {
 	}
 
 	public bool InteractionIsWithinRange(Interaction i){
-		if (i == null || lastLeftClicked == null){
+		// TODO: this all should use something other than lastleftclicked, for persistent buttons of sorts.
+		// using i.action.parent doesn't work, because some actions are sourced from player gameobject, not "target", whatever it is
+		if (i == null || lastLeftClicked == null)
 			return false;
-		}
 		if (i.limitless)
 			return true;
-		float dist = Vector3.Distance(lastLeftClicked.transform.position, focus.transform.position);
+		float dist = Vector3.SqrMagnitude(lastLeftClicked.transform.position - focus.transform.position);
 		if (dist < i.range){
 			return true;
 		} else {
