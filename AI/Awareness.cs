@@ -8,22 +8,22 @@ public class Knowledge{
 	public Transform transform;
 	public Vector3 lastSeenPosition;
 	public float lastSeenTime;
-
 	public Flammable flammable;
-	public MeleeWeapon meleeWeapon;
+	public Knowledge(){
+		
+	}
 	public Knowledge(GameObject o){
 		this.obj = o;
 		transform = o.transform;
-
 		lastSeenPosition = transform.position;
 		lastSeenTime = Time.time;
 		foreach(Component component in o.GetComponents<Component>()){
 			if (component is Flammable){
 				flammable = (Flammable)component;
 			}
-			if (component is MeleeWeapon){
-				meleeWeapon = (MeleeWeapon)component;
-			}
+			// if (component is MeleeWeapon){
+			// 	meleeWeapon = (MeleeWeapon)component;
+			// }
 		}
 	}
 	public void UpdateInfo(){
