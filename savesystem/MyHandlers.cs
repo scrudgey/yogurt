@@ -135,16 +135,7 @@ public class PackageHandler: SaveHandler<Package> {
 	}
 }
 
-public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
-	public override void SaveData(DecisionMaker instance, PersistentComponent data, ReferenceResolver resolver){
-		if (instance.possession != null)
-			data.ints["possession"] = resolver.ResolveReference(instance.possession, data.persistent);
-	}
-	public override void LoadData(DecisionMaker instance, PersistentComponent data){
-		if (data.ints.ContainsKey("possession"))
-			instance.possession = MySaver.loadedObjects[data.ints["possession"]];
-	}
-}
+
 public class PhysicalBootStrapperHandler: SaveHandler<PhysicalBootstrapper> {
 	public override void SaveData(PhysicalBootstrapper instance, PersistentComponent data, ReferenceResolver resolver){
 		data.bools["doInit"] = instance.doInit;
@@ -259,22 +250,78 @@ public class IntrinsicsHandler: SaveHandler<Intrinsics>{
 			instance.IntrinsicsChanged();
 	}
 }
-// TODO: fix the serializability of knowledge.
+public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
+	public override void SaveData(DecisionMaker instance, PersistentComponent data, ReferenceResolver resolver){
+		if (instance.possession != null)
+			data.ints["possession"] = resolver.ResolveReference(instance.possession, data.persistent);
+	}
+	public override void LoadData(DecisionMaker instance, PersistentComponent data){
+		instance.initialAwareness = new List<GameObject>();
+		if (data.ints.ContainsKey("possession")){
+			instance.possession = MySaver.loadedObjects[data.ints["possession"]];
+			instance.awareness.possession = MySaver.loadedObjects[data.ints["possession"]];
+			instance.initialAwareness.Add(MySaver.loadedObjects[data.ints["possession"]]);
+		}
+	}
+}
 public class AwarenessHandler: SaveHandler<Awareness>{
 	public override void SaveData(Awareness instance, PersistentComponent data, ReferenceResolver resolver){
-		int index = 0;
-		foreach(KeyValuePair<GameObject, PersonalAssessment> keyVal in instance.people){
-			data.personalAssessments.Add(keyVal.Value);
-			data.ints["person"+index.ToString()] = resolver.ResolveReference(keyVal.Key, data.persistent);
-			index++;
+		// Debug.Log("saving awareness "+instance.gameObject.name);
+		data.knowledgeBase = new List<SerializedKnowledge>();
+		data.people = new List<SerializedPersonalAssessment>();
+		foreach (KeyValuePair<GameObject, Knowledge> keyVal in instance.knowledgebase){
+			SerializedKnowledge knowledge = SaveKnowledge(keyVal.Value, resolver, data.persistent);
+			if (knowledge.gameObjectID == -1)
+				continue;
+			data.knowledgeBase.Add(knowledge);
+			// data.knowledgeBase.Add(SaveKnowledge(keyVal.Value, resolver, data.persistent));
 		}
-		data.ints["assessmentsCount"] = index + 1;
+		foreach (KeyValuePair<GameObject, PersonalAssessment> keyVal in instance.people){
+			data.people.Add(SavePerson(keyVal.Value, resolver, data.persistent));
+		}
 	}
 	public override void LoadData(Awareness instance, PersistentComponent data){
-		if (data.personalAssessments.Count > 0){
-			for (int i = 0; i < data.ints["assessmentsCount"]; i++){
-				instance.people[MySaver.loadedObjects[data.ints["person"+i.ToString()]]] = data.personalAssessments[i];
-			}
+		// Debug.Log("loading awareness "+instance.gameObject.name);
+		foreach(SerializedKnowledge knowledge in data.knowledgeBase){
+			Knowledge newKnowledge = LoadKnowledge(knowledge);
+			GameObject subject = MySaver.loadedObjects[knowledge.gameObjectID];
+			instance.knowledgebase[subject] = newKnowledge;
 		}
+		foreach(SerializedPersonalAssessment pa in data.people){
+			PersonalAssessment assessment = LoadPerson(pa);
+			GameObject subject = MySaver.loadedObjects[pa.gameObjectID];
+			assessment.knowledge = instance.knowledgebase[subject];
+			instance.people[subject] = assessment;
+			// Debug.Log(assessment.status);
+		}
+	}
+	SerializedKnowledge SaveKnowledge(Knowledge input, ReferenceResolver resolver, Persistent persistent){
+		SerializedKnowledge data = new SerializedKnowledge();
+		data.lastSeenPosition = input.lastSeenPosition;
+		data.lastSeenTime = input.lastSeenTime;
+		data.gameObjectID = resolver.ResolveReference(input.obj, persistent);
+		return data;
+	}
+	Knowledge LoadKnowledge(SerializedKnowledge input){
+		Knowledge knowledge = new Knowledge();
+		knowledge.lastSeenPosition = input.lastSeenPosition;
+		knowledge.lastSeenTime = input.lastSeenTime;
+		knowledge.obj = MySaver.loadedObjects[input.gameObjectID];
+		knowledge.transform = knowledge.obj.transform;
+		knowledge.flammable = knowledge.obj.GetComponent<Flammable>();
+		return knowledge;
+	}
+	SerializedPersonalAssessment SavePerson(PersonalAssessment input, ReferenceResolver resolver, Persistent persistent){
+		SerializedPersonalAssessment data = new SerializedPersonalAssessment();
+		data.status = input.status;
+		data.unconscious = input.unconscious;
+		data.gameObjectID = resolver.ResolveReference(input.knowledge.obj, persistent);
+		return data;
+	}
+	PersonalAssessment LoadPerson(SerializedPersonalAssessment input){
+		PersonalAssessment assessment = new PersonalAssessment();
+		assessment.status = input.status;
+		assessment.unconscious = input.unconscious;
+		return assessment;
 	}
 }
