@@ -23,11 +23,18 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 	public List<GameObject> initialAwareness;
 	public GameObject possession;
 	public Controllable.HitState hitState;
-	void Start() {
+	public Awareness awareness;
+	void Awake() {
 		// make sure there's Awareness
-		Awareness awareness = Toolbox.Instance.GetOrCreateComponent<Awareness>(gameObject);
+		awareness = Toolbox.Instance.GetOrCreateComponent<Awareness>(gameObject);
+
+	}
+	void Start() {
+		if (possession != null){
+			initialAwareness.Add(possession);
+			awareness.possession = possession;
+		}
 		awareness.initialAwareness = initialAwareness;
-		awareness.possession = possession;
 
 		// initialize thought bubble
 		thought = Instantiate(Resources.Load("UI/thoughtbubble"), gameObject.transform.position, Quaternion.identity) as GameObject;
