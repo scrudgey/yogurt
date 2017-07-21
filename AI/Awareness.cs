@@ -21,14 +21,10 @@ public class Knowledge{
 			if (component is Flammable){
 				flammable = (Flammable)component;
 			}
-			// if (component is MeleeWeapon){
-			// 	meleeWeapon = (MeleeWeapon)component;
-			// }
 		}
 	}
 	public void UpdateInfo(){
 		if (obj){
-			// Debug.Log(obj.name + " updating");
 			lastSeenPosition = transform.position;
 			lastSeenTime = Time.time;
 		}
@@ -43,6 +39,9 @@ public class PersonalAssessment{
 	public bool unconscious;
 	public PersonalAssessment(Knowledge k){
 		knowledge = k;
+	}
+	public PersonalAssessment(){
+
 	}
 }
 
@@ -83,9 +82,12 @@ public class Awareness : MonoBehaviour, IMessagable {
 		sightConeTransform = sightCone.transform;
 		sightConeTransform.parent = transform;
 		if (initialAwareness.Count > 0){
-			fieldOfView = initialAwareness;
+			// Debug.Log("perceiving initial awarenss");
 			if (possession != null)
 				initialAwareness.Add(possession);
+			fieldOfView = initialAwareness;
+			// foreach(GameObject obj in initialAwareness)
+			// 	Debug.Log(obj.name);
 			Perceive();
 		}
 
@@ -289,6 +291,8 @@ public class Awareness : MonoBehaviour, IMessagable {
 
 	public PersonalAssessment FormPersonalAssessment(GameObject g, bool debug=false){
 		if (g == null)
+			return null;
+		if (g == gameObject)
 			return null;
 		if (debug)
 			Debug.Log("assess "+g.name+":");
