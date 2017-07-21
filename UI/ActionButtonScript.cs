@@ -36,6 +36,8 @@ public class ActionButtonScript: MonoBehaviour {
 				action.DoAction();
 			}
 		} else {
+			if (button == null)
+				return;
 			if (!manualAction && action != null){
 				if (Controller.Instance.InteractionIsWithinRange(action)){
 					button.interactable = true;
