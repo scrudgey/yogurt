@@ -28,7 +28,7 @@ public class MySaver {
 		{typeof(Package),							() => new PackageHandler() },
 		{typeof(Trader),							() => new TraderHandler() },
 		{typeof(DecisionMaker),						() => new DecisionMakerHandler() },
-		// {typeof(Awareness),							() => new AwarenessHandler() },
+		{typeof(Awareness),							() => new AwarenessHandler() },
 	};
 	public static void CleanupSaves(){
 		idIndex = 0;
@@ -93,7 +93,7 @@ public class MySaver {
 			List<Persistent> playerTree = resolver.RetrieveReferenceTree(GameManager.Instance.playerObject);
 			List<Persistent> sceneTree = persistents.Except(playerTree).ToList();
 			// lastly we need to clean up any references the scene objects have to the player objects
-			Dictionary<GameObject, int> sceneIDs = new Dictionary<GameObject, int>();
+			// Dictionary<GameObject, int> sceneIDs = new Dictionary<GameObject, int>();
 			PersistentContainer sceneContainer = new PersistentContainer(sceneTree);
 			PersistentContainer playerContainer = new PersistentContainer(playerTree);
 			// save the persistent object container
@@ -245,8 +245,10 @@ public class ReferenceResolver{
 		if (!referenceTree.ContainsKey(requester))
 			referenceTree.Add(requester, new List<Persistent>());
 		referenceTree[requester].Add(persistentObjects.FindKeyByValue(referent));
-		if (returnID == -1)
-			Debug.Log("reference not resolved!");
+		// if (returnID == -1){
+		// 	Debug.Log("reference not resolved!");
+		// 	Debug.Log("tried to resolve reference to "+referent.name);
+		// }
 		return returnID;
 	}
 	public List<Persistent> RetrieveReferenceTree(GameObject target){
