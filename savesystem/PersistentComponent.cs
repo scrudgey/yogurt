@@ -1,17 +1,17 @@
-﻿// using UnityEngine;
-// using System.Collections;
-using System.Collections.Generic;
-// using System.Xml;
+﻿using System.Collections.Generic;
 using System.Xml.Serialization;
+using UnityEngine;
 
 public class PersistentComponent {
-
 	public string type;
 	public string parentObject;
 	public SerializableDictionary<string,string> strings =		 new SerializableDictionary<string,string>();
 	public SerializableDictionary<string,int> ints = 			 new SerializableDictionary<string,int> ();
-	public SerializableDictionary<string,float> floats = 		 new SerializableDictionary<string,float>() ;
+	public SerializableDictionary<string,float> floats = 		 new SerializableDictionary<string,float>();
 	public SerializableDictionary<string,bool> bools = 			 new SerializableDictionary<string,bool >();
+	// TODO: initialize lists as necessary
+	public List<SerializedKnowledge> knowledgeBase;
+	public List<SerializedPersonalAssessment> people;
 	public List<Intrinsic> intrinsics;
 	[XmlIgnoreAttribute]	
 	public Persistent persistent;
@@ -21,5 +21,17 @@ public class PersistentComponent {
 	public PersistentComponent(Persistent owner){
 		persistent = owner;
 	}
-
+}
+[System.Serializable]
+public struct SerializedKnowledge{
+	public Vector3 lastSeenPosition;
+	public float lastSeenTime;
+	public int gameObjectID;
+}
+[System.Serializable]
+public struct SerializedPersonalAssessment{
+	public PersonalAssessment.friendStatus status;
+	public SerializedKnowledge knowledge;
+	public bool unconscious;
+	public int gameObjectID;
 }
