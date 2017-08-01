@@ -2,7 +2,6 @@
 // using System.Collections;
 
 public class Doorway : Interactive {
-
 	public string destination;
 	public int destinationEntry;
 	public int entryID;
@@ -11,6 +10,7 @@ public class Doorway : Interactive {
 	public AudioClip enterSound;
 	protected AudioSource audioSource;
 	public string leaveDesc;
+	public string actionDesc;
 
 	// Use this for initialization
 	public virtual void Start () {
