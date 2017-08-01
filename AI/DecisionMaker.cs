@@ -52,7 +52,8 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 		priorities.Add(new PriorityWander(gameObject, control));
 		priorities.Add(new PriorityRunAway(gameObject, control));
 		priorities.Add(new PriorityAttack(gameObject, control));
-		priorities.Add(new PriorityReadScript(gameObject, control));
+		if (personality.actor == Personality.Actor.yes)
+			priorities.Add(new PriorityReadScript(gameObject, control));
 		priorities.Add(new PriorityProtectPossessions(gameObject, control));
 	}
 	public void ReceiveMessage(Message message){
