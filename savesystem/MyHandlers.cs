@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
+using AI;
 
 public abstract class SaveHandler{
 	public abstract void SaveData(Component instance, PersistentComponent data, ReferenceResolver resolver);
@@ -250,10 +252,26 @@ public class IntrinsicsHandler: SaveHandler<Intrinsics>{
 			instance.IntrinsicsChanged();
 	}
 }
+
 public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
+	static List<Type> priorityTypes = new List<Type>(){
+		{typeof(PriorityAttack)},
+		{typeof(PriorityFightFire)},
+		{typeof(PriorityProtectPossessions)},
+		{typeof(PriorityReadScript)},
+		{typeof(PriorityRunAway)},
+		{typeof(PriorityWander)}
+	};
 	public override void SaveData(DecisionMaker instance, PersistentComponent data, ReferenceResolver resolver){
 		if (instance.possession != null)
 			data.ints["possession"] = resolver.ResolveReference(instance.possession, data.persistent);
+		foreach (Type priorityType in priorityTypes){
+			foreach(Priority priority in instance.priorities){
+				if (priority.GetType() == priorityType){
+					data.floats[priorityType.ToString()] = priority.urgency;
+				}
+			}
+		}
 	}
 	public override void LoadData(DecisionMaker instance, PersistentComponent data){
 		instance.initialAwareness = new List<GameObject>();
@@ -262,8 +280,19 @@ public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
 			instance.awareness.possession = MySaver.loadedObjects[data.ints["possession"]];
 			instance.initialAwareness.Add(MySaver.loadedObjects[data.ints["possession"]]);
 		}
+		foreach (Priority priority in instance.priorities){
+			foreach (Type priorityType in priorityTypes){
+				if (priority.GetType() == priorityType){
+					string priorityName = priorityType.ToString();
+					if (data.floats.ContainsKey(priorityName))
+						priority.urgency = data.floats[priorityName];
+				}
+			}
+		}
 	}
 }
+
+
 public class AwarenessHandler: SaveHandler<Awareness>{
 	public override void SaveData(Awareness instance, PersistentComponent data, ReferenceResolver resolver){
 		// Debug.Log("saving awareness "+instance.gameObject.name);
