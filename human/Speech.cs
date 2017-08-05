@@ -47,9 +47,9 @@ public class Speech : Interactive, IMessagable {
             speakWith.validationFunction = true;
             interactions.Add(speakWith);
         }
-        flipper = transform.FindChild("SpeechChild").gameObject;
-		bubbleParent = transform.FindChild("SpeechChild/Speechbubble").gameObject;
-		bubbleText = bubbleParent.transform.FindChild("Text").gameObject.GetComponent<Text>();
+        flipper = transform.Find("SpeechChild").gameObject;
+		bubbleParent = transform.Find("SpeechChild/Speechbubble").gameObject;
+		bubbleText = bubbleParent.transform.Find("Text").gameObject.GetComponent<Text>();
         follower = bubbleParent.GetComponentInChildren<FollowGameObjectInCamera>();
         audioSource = GetComponent<AudioSource>();
         if (flipper.transform.localScale != transform.localScale){
