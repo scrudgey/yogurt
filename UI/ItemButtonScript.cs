@@ -6,7 +6,7 @@ public class ItemButtonScript : MonoBehaviour {
 	public Inventory inventory;
 	public void SetButtonAttributes(GameObject item, Inventory inv){
 		inventory = inv;
-		Text buttonText = transform.FindChild("Text").GetComponent<Text>();
+		Text buttonText = transform.Find("Text").GetComponent<Text>();
 		GameObject icon = transform.Find("icon").gameObject;
 		Item itemComponent = item.GetComponent<Item>();
 		Image iconImage = icon.GetComponent<Image>();
