@@ -181,7 +181,7 @@ public class MySaver {
 			lastComponent = "finished"; 
 			// handle child objects
 			foreach (PersistentComponent persistentChild in persistent.persistentChildComponents.Values){
-				GameObject childObject = loadedObjects[persistent.id].transform.FindChild(persistentChild.parentObject).gameObject;
+				GameObject childObject = loadedObjects[persistent.id].transform.Find(persistentChild.parentObject).gameObject;
 				Component childComponent = childObject.GetComponent(persistentChild.type);
 				if (childObject && childComponent){
 					string lastChildComponent = childComponent.GetType().ToString();
