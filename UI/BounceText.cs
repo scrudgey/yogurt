@@ -18,8 +18,8 @@ public class BounceText : MonoBehaviour {
 		followScript = GetComponentInChildren<FollowGameObjectInCamera>();
 		if (target)
 			followScript.target = target;
-		trans = transform.FindChild("Text").GetComponent<RectTransform>();
-		textObject = transform.FindChild("Text").GetComponent<Text>();
+		trans = transform.Find("Text").GetComponent<RectTransform>();
+		textObject = transform.Find("Text").GetComponent<Text>();
 		textObject.text = text;
 		
 		tempScale = Vector3.one;
