@@ -14,7 +14,6 @@ public class DeathMenu : MonoBehaviour {
 		button = transform.Find("Button").gameObject;
 		lettersInactive = false;
 		button.SetActive(false);
-		// GetComponent<Rigidbody2D>().
 		letters.Add(transform.Find("Y").GetComponent<Rigidbody2D>());
 		letters.Add(transform.Find("O").GetComponent<Rigidbody2D>());
 		letters.Add(transform.Find("U").GetComponent<Rigidbody2D>());
