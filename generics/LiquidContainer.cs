@@ -48,7 +48,7 @@ public class LiquidContainer : Interactive {
 		fillContainer.validationFunction = true;
 		interactions.Add(fillContainer);
 		empty = true;
-		Transform child = transform.FindChild("liquidSprite");
+		Transform child = transform.Find("liquidSprite");
 		if (child){
 			liquidSprite = child.GetComponent<SpriteRenderer>();
 			if (liquidSprite) 
