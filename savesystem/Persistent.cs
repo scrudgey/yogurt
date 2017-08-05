@@ -59,7 +59,7 @@ public class Persistent {
 			}
 		}
 		foreach (PersistentComponent persistentChildComponent in persistentChildComponents.Values){
-			GameObject childObject = parentObject.transform.FindChild(persistentChildComponent.parentObject).gameObject;
+			GameObject childObject = parentObject.transform.Find(persistentChildComponent.parentObject).gameObject;
 			Component component = childObject.GetComponent(persistentChildComponent.type);
 			if (childObject && component){
 				Func<SaveHandler> get;
