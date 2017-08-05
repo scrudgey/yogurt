@@ -333,7 +333,7 @@ public class UINew: Singleton<UINew> {
 		GameObject newButton = Instantiate(Resources.Load("UI/NeoActionButton"), Vector2.zero, Quaternion.identity) as GameObject;
 		ActionButtonScript buttonScript = newButton.GetComponent<ActionButtonScript>();
 		buttonScript.button = newButton.GetComponent<Button>();
-		Text buttonText = newButton.transform.FindChild("Text").GetComponent<Text>();
+		Text buttonText = newButton.transform.Find("Text").GetComponent<Text>();
 		actionButton returnbut;
 		returnbut.gameobject = newButton;
 		returnbut.buttonScript = buttonScript;
