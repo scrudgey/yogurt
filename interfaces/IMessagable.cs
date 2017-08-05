@@ -55,7 +55,6 @@ public class MessageDamage : Message {
 	public Vector2 force;
 	public PhysicalImpact impactor;
 	public MessageDamage(){}
-	// public List<GameObject> responsibleParty = new List<GameObject>();
 	public GameObject responsibleParty;
 	public MessageDamage(float amount, damageType type){
 		this.amount = amount;
