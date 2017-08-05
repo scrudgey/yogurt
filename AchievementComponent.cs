@@ -25,6 +25,11 @@ public class Achievement {
 			pass = pass && otherStats.dollarsDuplicated >= stats.dollarsDuplicated;
 		if (stats.dollarsFlushed > 0)
 			pass = pass && otherStats.dollarsFlushed >= stats.dollarsFlushed;
+		if (stats.immolations > 0)
+			pass = pass && otherStats.immolations >= stats.immolations;
+		if (stats.selfImmolations > 0)
+			pass = pass && otherStats.selfImmolations >= stats.selfImmolations;
+
 		return pass;
 	}
 	public Achievement(){ }
@@ -46,6 +51,8 @@ public class AchievementStats {
 	public float dollarsFlushed;
 	public float dollarsDuplicated;
 	public float dollarsBurned;
+	public int immolations;
+	public int selfImmolations;
 	public AchievementStats(){ }
 	public AchievementStats(AchievementStats source){
 		secondsPlayed = source.secondsPlayed;
@@ -55,6 +62,8 @@ public class AchievementStats {
 		dollarsBurned = source.dollarsBurned;
 		dollarsDuplicated = source.dollarsDuplicated;
 		dollarsFlushed = source.dollarsFlushed;
+		immolations = source.immolations;
+		selfImmolations = source.selfImmolations;
 	}
 
 }
