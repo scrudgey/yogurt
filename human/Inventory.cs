@@ -97,6 +97,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 				holding.transform.rotation = Quaternion.identity;
 				holding.GetComponent<Rigidbody2D>().isKinematic = true;
 				holding.GetComponent<Collider2D>().isTrigger = true;
+				holding.holder = this;
 				if (holding.pickupSounds.Length > 0)
 					GetComponent<AudioSource>().PlayOneShot(holding.pickupSounds[Random.Range(0, holding.pickupSounds.Length)]);
 			}
@@ -113,10 +114,6 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		item.SetActive(false);
 	}
 	public bool PlaceItem(Vector2 place){
-		// if (Vector2.Distance(place, transform.position) > 0.2){
-		// 	Debug.Log("place failed");
-		// 	return false;
-		// } else {
 		Messenger.Instance.DisclaimObject(holding.gameObject, this);
 		holding.GetComponent<Rigidbody2D>().isKinematic = false;
 		holding.GetComponent<Collider2D>().isTrigger = false;
@@ -130,10 +127,10 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		sprite.sortingLayerName = "main";
 		holding = null;
 		return true;
-		// }
 	}
 	public void SoftDropItem(){
 		Messenger.Instance.DisclaimObject(holding.gameObject, this);
+		holding.holder = null;
 		PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
 		if (phys)	
 			phys.doInit = false;
@@ -143,6 +140,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 	}
 	public void DropItem(){
 		Messenger.Instance.DisclaimObject(holding.gameObject, this);
+		holding.holder = null;
 		holding.GetComponent<Rigidbody2D>().isKinematic = false;
 		holding.GetComponent<Collider2D>().isTrigger = false;
 		PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
@@ -150,17 +148,12 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 			Vector2 initV = Vector2.ClampMagnitude(direction, 0.1f);
 			initV = initV + GetComponent<Rigidbody2D>().velocity;
 			float vx = initV.x;
-			// float vy = initV.y / 2;
 			float vy = initV.y / 2;
 			float vz = 0.1f;
 			phys.InitPhysical(dropHeight, new Vector3(vx, vy, vz));
 		} else {
-			// holding.transform.parent = null;
 			holding.transform.SetParent(null);
 		}
-		// OrderByY yorder = holding.GetComponent<OrderByY>();
-		// if (yorder)
-		// 	yorder.RemoveFollower(gameObject);
 		SpriteRenderer sprite = holding.GetComponent<SpriteRenderer>();
 		sprite.sortingLayerName = "main";
 		holding = null;
@@ -283,8 +276,6 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		Slasher s = slash.GetComponent<Slasher>();
 		s.impactSounds = holding.GetComponent<MeleeWeapon>().impactSounds;
 		s.direction = direction;
-		// s.owners.Add(gameObject);
-		// s.owners.Add(holding.gameObject);
 		s.responsibleParty = gameObject;
 
 		MeleeWeapon melee = holding.GetComponent<MeleeWeapon>();
