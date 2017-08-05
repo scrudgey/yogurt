@@ -17,6 +17,9 @@ public class Fire : MonoBehaviour {
 	void OnTriggerStay2D(Collider2D coll){
 		if (flammables.ContainsKey(coll.gameObject) && flammable.onFire){
 			flammables[coll.gameObject].heat += Time.deltaTime * 2f;
+			if (flammable.responsibleParty != null){
+					flammables[coll.gameObject].responsibleParty = flammable.responsibleParty;
+			}
 		}
 	}
 }
