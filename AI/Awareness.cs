@@ -81,16 +81,17 @@ public class Awareness : MonoBehaviour, IMessagable {
 		sightConeScale = sightCone.transform.localScale;
 		sightConeTransform = sightCone.transform;
 		sightConeTransform.parent = transform;
-		if (initialAwareness.Count > 0){
-			// Debug.Log("perceiving initial awarenss");
-			if (possession != null)
-				initialAwareness.Add(possession);
-			fieldOfView = initialAwareness;
-			// foreach(GameObject obj in initialAwareness)
-			// 	Debug.Log(obj.name);
-			Perceive();
+		if (initialAwareness!= null){
+			if (initialAwareness.Count > 0){
+				// Debug.Log("perceiving initial awarenss");
+				if (possession != null)
+					initialAwareness.Add(possession);
+				fieldOfView = initialAwareness;
+				// foreach(GameObject obj in initialAwareness)
+				// 	Debug.Log(obj.name);
+				Perceive();
+			}
 		}
-
 	}
 	public List<GameObject> FindObjectWithName(string targetName){
 		List<GameObject> returnArray = new List<GameObject>();
