@@ -80,10 +80,16 @@ public partial class GameManager : Singleton<GameManager> {
 		}
 		publicAudio = Toolbox.Instance.SetUpAudioSource(gameObject);
 		SceneManager.sceneLoaded += LevelWasLoaded;
+
+		// these bits are for debug!
 		if (SceneManager.GetActiveScene().name == "boardroom_cutscene"){
 			CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.boardRoom);
 			CutsceneManager.Instance.cutscene.Configure();
 		}
+		// if (SceneManager.GetActiveScene().name == "boardroom_cutscene"){
+		// 	CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.fall);
+		// 	CutsceneManager.Instance.cutscene.Configure();
+		// }
 	}
 	void Update(){
 		timeSinceLastSave += Time.deltaTime;
@@ -160,7 +166,6 @@ public partial class GameManager : Singleton<GameManager> {
 			Toolbox.Instance.GetOrCreateComponent<CameraControl>(cam.gameObject);
 		}
 		UINew.Instance.ConfigureUIElements();
-
 		if (loadLevel){
 			playerObject = MySaver.LoadScene();
 		} else {
@@ -177,7 +182,8 @@ public partial class GameManager : Singleton<GameManager> {
 			data.entryID = 99;
 		}
 		SetFocus(playerObject);
-		if (SceneManager.GetActiveScene().name == "krazy1"){
+		string sceneName = SceneManager.GetActiveScene().name;
+		if (sceneName == "krazy1"){
 			GameObject packageSpawnPoint = GameObject.Find("packageSpawnPoint");
 			if (data.firstTimeLeavingHouse){
 				foreach(string package in data.packages){
@@ -194,6 +200,9 @@ public partial class GameManager : Singleton<GameManager> {
 				data.entryID = 0;
 			}
 			data.firstTimeLeavingHouse = false;
+		}
+		if (sceneName == "cave1"){
+			CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.fall);
 		}
 		PlayerEnter();
 	}
@@ -497,6 +506,7 @@ public partial class GameManager : Singleton<GameManager> {
 	}
 	public void PlayerDeath(){
 		data.deaths += 1;
+		UINew.Instance.SetActiveUI(active:false);
 		Instantiate(Resources.Load("UI/deathMenu"));
 	}
 }
