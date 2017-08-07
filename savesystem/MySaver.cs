@@ -48,7 +48,7 @@ public class MySaver {
 		}
 	}
 	public static void Save(){
-		try {
+		// try {
 			// open XML serialization stream
 			// TODO: make this path nicer later when i have a directory structure
 			ReferenceResolver resolver = new ReferenceResolver();
@@ -102,17 +102,17 @@ public class MySaver {
 			// close the XML serialization stream
 			sceneStream.Close();
 			playerStream.Close();
-		} catch (System.Exception ex) {
-			Debug.Log("Problem saving!");
-			Debug.Log(ex.Message);
-			Debug.Log(ex.Data);
-			Debug.Log(ex.TargetSite);
-		}
+		// } catch (System.Exception ex) {
+		// 	Debug.Log("Problem saving!");
+		// 	Debug.Log(ex.Message);
+		// 	Debug.Log(ex.Data);
+		// 	Debug.Log(ex.TargetSite);
+		// }
 		GameManager.Instance.SaveGameData();
 	}
 	public static GameObject LoadScene(){
 		GameObject playerObject = null;
-		try {
+		// try {
 			string scenePath = GameManager.Instance.LevelSavePath();
 			string playerPath = GameManager.Instance.data.lastSavedPlayerPath;
 			var serializer = new XmlSerializer(typeof(PersistentContainer));
@@ -152,11 +152,11 @@ public class MySaver {
 				HandleLoadedPersistents(sceneContainer.PersistentObjects);
 			if (playerContainer != null)
 				HandleLoadedPersistents(playerContainer.PersistentObjects);
-		} catch (Exception e) {
-			Debug.Log("problem loading!");
-			Debug.Log(e.Message);
-			Debug.Log(e.TargetSite);
-		}	
+		// } catch (Exception e) {
+		// 	Debug.Log("problem loading!");
+		// 	Debug.Log(e.Message);
+		// 	Debug.Log(e.TargetSite);
+		// }	
 		return playerObject;
 	}
 	public static void HandleLoadedPersistents(List<Persistent> persistents){
@@ -206,7 +206,7 @@ public class MySaver {
 	public static GameObject LoadPersistentContainer(PersistentContainer container){
 		string lastName = "first";
 		GameObject rootObject = null;
-		try {
+		// try {
 			Regex reg =  new Regex("\\s+", RegexOptions.Multiline);
 			foreach(Persistent persistent in container.PersistentObjects){
 				lastName = persistent.name;
@@ -228,9 +228,9 @@ public class MySaver {
 					marker.id = persistent.id;
 				}
 			}
-		} catch {
-			Debug.Log("Error occurred when instantiating persistent object "+ lastName);
-		}
+		// } catch {
+		// 	Debug.Log("Error occurred when instantiating persistent object "+ lastName);
+		// }
 		return rootObject;
 	}
 }
@@ -260,7 +260,7 @@ public class ReferenceResolver{
 		if (referenceTree.ContainsKey(targetPersistent)){
 			bool refCheck = true;
 			int checkIterations = 0;
-			while( refCheck && checkIterations < 7){
+			while(refCheck && checkIterations < 7){
 				refCheck = false;
 				List<Persistent> nextTree = new List<Persistent>(tree);
 				foreach (Persistent persistent in tree){
