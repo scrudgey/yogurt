@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-// using System.Collections;
-
 public class Doorway : Interactive {
 	public string destination;
 	public int destinationEntry;
@@ -10,11 +8,10 @@ public class Doorway : Interactive {
 	public AudioClip enterSound;
 	protected AudioSource audioSource;
 	public string leaveDesc;
-	public string actionDesc;
+	public string actionDesc = "Exit";
 
-	// Use this for initialization
 	public virtual void Start () {
-		Interaction leaveaction = new Interaction(this, "Exit", "Leave");
+		Interaction leaveaction = new Interaction(this, actionDesc, "Leave");
 		interactions.Add(leaveaction);
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 	}
@@ -25,7 +22,6 @@ public class Doorway : Interactive {
 		PlayEnterSound();
 	}	
 	public void Leave(){
-		// audioSource.PlayOneShot(leaveSound);
 		GameManager.Instance.publicAudio.PlayOneShot(leaveSound);
 		GameManager.Instance.LeaveScene(destination, destinationEntry);
 	}
