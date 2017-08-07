@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Collections.Generic;
 public class Controller : Singleton<Controller> {
-
 	public Controllable focus;
     private bool _suspendInput = false;
     public bool suspendInput{
@@ -49,7 +48,6 @@ public class Controller : Singleton<Controller> {
 			}
 		}
 	}
-
 	void OnGUI(){
 		if (Event.current.isMouse){
 			// right click
@@ -66,7 +64,6 @@ public class Controller : Singleton<Controller> {
 			// }
 		}
 	}
-    
     void RightClick(){
         //detect if we clicked anything
         RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
@@ -91,6 +88,8 @@ public class Controller : Singleton<Controller> {
 		}
 	}
     void LeftClick(){
+		if (focus.hitState >= Controllable.HitState.stun)
+			return;
         RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero).OrderBy(h=>h.collider.gameObject.name).ToArray();
         // IsPointerOverGameObject is required here to exclude clicks if we are hovering over a UI element.
         // this may or may not cause problems down the road, but I'm unsure how else to do this.
