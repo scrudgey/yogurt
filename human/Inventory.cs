@@ -129,6 +129,8 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		return true;
 	}
 	public void SoftDropItem(){
+		if (holding == null)
+			return;
 		Messenger.Instance.DisclaimObject(holding.gameObject, this);
 		holding.holder = null;
 		PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
@@ -139,6 +141,8 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		holding = null;
 	}
 	public void DropItem(){
+		if (holding == null)
+			return;
 		Messenger.Instance.DisclaimObject(holding.gameObject, this);
 		holding.holder = null;
 		holding.GetComponent<Rigidbody2D>().isKinematic = false;
