@@ -92,11 +92,7 @@ namespace AI {
 			}
 		}
 	}
-	// public class GoalReturnObject : Goal {
-	// 	public GoalReturnObject(GameObject g, Controllable c, GameObject target) : base(g,c ){
-			
-	// 	}
-	// }
+
 	public class GoalGetItem : Goal {
 		public bool findingFail;
 		public GoalGetItem(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c){
