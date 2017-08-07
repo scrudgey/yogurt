@@ -75,6 +75,12 @@ public class Toolbox : Singleton<Toolbox> {
 		source.spatialBlend = 1;
 		return source;
 	}
+	public void AudioSpeaker(string clipName, Vector3 position){
+		AudioClip clip = Resources.Load("sounds/"+clipName, typeof(AudioClip)) as AudioClip;
+		GameObject speaker = Instantiate(Resources.Load("Speaker"), position, Quaternion.identity) as GameObject;
+		speaker.GetComponent<AudioSource>().clip = clip;
+		speaker.GetComponent<AudioSource>().Play();
+	}
 	public void AudioSpeaker(AudioClip clip, Vector3 position){
 		GameObject speaker = Instantiate(Resources.Load("Speaker"), position, Quaternion.identity) as GameObject;
 		speaker.GetComponent<AudioSource>().clip = clip;
