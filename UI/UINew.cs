@@ -87,10 +87,9 @@ public class UINew: Singleton<UINew> {
 		fightButton = UICanvas.transform.Find("topdock/FightButton").gameObject;
 		punchButton = UICanvas.transform.Find("topdock/PunchButton").gameObject;
 		speakButton = UICanvas.transform.Find("topdock/SpeakButton").gameObject;
-		status = UICanvas.transform.Find("topdock/topBar/status").GetComponent<Text>();
+		// status = UICanvas.transform.Find("topdock/topBar/status").GetComponent<Text>();
 		actionTextObject = UICanvas.transform.Find("bottomdock/ActionText").GetComponent<Text>();
-
-		status.gameObject.SetActive(false);
+		// status.gameObject.SetActive(false);
 		inventoryButton.SetActive(false);
 		fightButton.SetActive(false);
 		speakButton.SetActive(false);
@@ -146,10 +145,8 @@ public class UINew: Singleton<UINew> {
 			UpdateInventoryButton(inv);
 		}
 		if (Controller.Instance.focus.fightMode){
-			// punchButton.SetActive(true);
 			ShowPunchButton();
 		} else {
-			// punchButton.SetActive(false);
 			HidePunchButton();
 		}
 		fightButton.SetActive(true);
