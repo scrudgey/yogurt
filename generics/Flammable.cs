@@ -12,6 +12,7 @@ public class Flammable : MonoBehaviour {
 	private AudioSource audioSource;
 	private float flagTimer;
 	public GameObject responsibleParty;
+	public bool playSounds = true;
 	void Start () {
 		//ensure that there is a speaker
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
@@ -62,7 +63,7 @@ public class Flammable : MonoBehaviour {
 		}
 		if (!onFire && fireParticles.isPlaying){
 			fireParticles.Stop();
-			GetComponent<AudioSource>().Stop();
+			audioSource.Stop();
 		}
 		if (heat <= -2 && smoke.isPlaying){
 			smoke.Stop();
@@ -73,11 +74,12 @@ public class Flammable : MonoBehaviour {
 		if (heat > flashpoint && fireParticles.isStopped){
 			fireParticles.Play();
 			onFire = true;
-			audioSource.PlayOneShot(igniteSounds[Random.Range(0, 1)]);
-			audioSource.loop = true;
-			audioSource.clip = burnSounds;
-			audioSource.Play();
-
+			if (playSounds){
+				audioSource.PlayOneShot(igniteSounds[Random.Range(0, 1)]);
+				audioSource.loop = true;
+				audioSource.clip = burnSounds;
+				audioSource.Play();
+			}
 			OccurrenceFire fireData = new OccurrenceFire();
 			fireData.objectName = Toolbox.Instance.CloneRemover(name);
 			fireData.chaos = 10;
@@ -92,7 +94,7 @@ public class Flammable : MonoBehaviour {
 				fireData.chaos = 100;
 				Toolbox.Instance.OccurenceFlag(gameObject, fireData);
 			}
-			// TODO: make this more sophisticated.
+			// TODO: make this more sophisticated,
 			MessageDamage message = new MessageDamage(Time.deltaTime, damageType.fire);
 			Toolbox.Instance.SendMessage(gameObject, this, message, sendUpwards: false);
 			if (Random.Range(0, 100f) < 1){
