@@ -20,9 +20,10 @@ public class Hurtable : MonoBehaviour, IMessagable {
 	private float hitStunCounter;
 	private bool doubledOver;
 	public float impulse;
-	private float downedTimer;
+	public float downedTimer;
 	private float ouchFrequency = 0.1f;
 	public GameObject dizzyEffect;
+	public GameObject lastAttacker;
 	public void TakeDamage(damageType type, float amount){
 		bool tookDamage = false;
 		if (!myIntrinsic.invulnerable.boolValue){
@@ -45,6 +46,9 @@ public class Hurtable : MonoBehaviour, IMessagable {
 				break;
 			}
 		}
+		if (health <= 0 && type == damageType.fire && hitState != Controllable.HitState.dead){
+			Die(type);
+		}
 		if (health <= -0.5 * maxHealth && hitState != Controllable.HitState.dead){
 			Die(type);
 		}
@@ -52,7 +56,6 @@ public class Hurtable : MonoBehaviour, IMessagable {
 			hitState = Controllable.AddHitState(hitState, Controllable.HitState.stun);
 			hitStunCounter = 0.25f;
 		}
-
 		if (tookDamage && Random.Range(0.0f, 1.0f) < ouchFrequency){
 			MessageSpeech speechMessage = new MessageSpeech();
 			speechMessage.nimrodKey = true;
@@ -71,16 +74,33 @@ public class Hurtable : MonoBehaviour, IMessagable {
 		}
 	}
 	public void Die(damageType type){
-		KnockDown();
+		if (type == damageType.fire){
+			Inventory inv = GetComponent<Inventory>();
+			if (inv){
+				inv.DropItem();
+			}
+			Instantiate(Resources.Load("prefabs/skeleton"), transform.position, transform.rotation);
+			Toolbox.Instance.AudioSpeaker("Flash Fire Ignite 01", transform.position);
+			Destroy(gameObject);
+			if (lastAttacker == gameObject){
+				GameManager.Instance.data.achievementStats.selfImmolations += 1;
+				GameManager.Instance.CheckAchievements();
+			} else {
+				GameManager.Instance.data.achievementStats.immolations += 1;
+				GameManager.Instance.CheckAchievements();
+			}
+		} else {
+			KnockDown();
+		}
+		if (dizzyEffect != null)
+			Destroy(dizzyEffect);
 		if (GameManager.Instance.playerObject == gameObject){
 			GameManager.Instance.PlayerDeath();
 		}
 		hitState = Controllable.AddHitState(hitState, Controllable.HitState.dead);
-
 	}
 	public void ReceiveMessage(Message incoming){
 		if (incoming is MessageNetIntrinsic){
-			// Debug.Log("net intrinsic message arrive");
 			MessageNetIntrinsic intrins = (MessageNetIntrinsic)incoming;
 			myIntrinsic = intrins.netIntrinsic;
 			if (intrins.netIntrinsic.bonusHealth.floatValue > bonusHealth){
@@ -90,6 +110,9 @@ public class Hurtable : MonoBehaviour, IMessagable {
 		}
 		if (incoming is MessageDamage){
 			MessageDamage dam = (MessageDamage)incoming;
+			if (dam.responsibleParty != null){
+				lastAttacker = dam.responsibleParty;
+			}
 			TakeDamage(dam.type, dam.amount);
 			if (dam.impactor)	
 				dam.impactor.PlayImpactSound();
@@ -181,5 +204,10 @@ public class Hurtable : MonoBehaviour, IMessagable {
 			message.hitState = hitState;
 			Toolbox.Instance.SendMessage(gameObject, this, message);
 		}
+	}
+	public void Bleed(Vector3 position){
+		Liquid blood = LiquidCollection.LoadLiquid("blood");
+		float initHeight = (position.y - transform.position.y ) + 0.15f;
+		Toolbox.Instance.SpawnDroplet(blood, 0.3f, gameObject, initHeight);
 	}
 }
