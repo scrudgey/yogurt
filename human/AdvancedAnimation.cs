@@ -112,6 +112,8 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 
 		if (hitState > Controllable.HitState.none){
 			updateSequence = GetHitStunState("generic3");
+			if (sequence == null)
+				return;
 			GetComponent<Animation>().Play(sequence);
 		}
 
