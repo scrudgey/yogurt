@@ -138,6 +138,63 @@ public class CutsceneBoardroom : Cutscene {
         GameManager.Instance.NewDayCutscene();
     }
 }
+public class CutsceneFall : Cutscene {
+    private GameObject player;
+    AdvancedAnimation playerAnimation;
+    Collider2D playerCollider;
+    Rigidbody2D playerBody;
+    Controllable playerControl;
+    Hurtable playerHurtable;
+    float initDrag;
+    public override void Configure(){
+        player = GameManager.Instance.playerObject;
+        playerAnimation = player.GetComponent<AdvancedAnimation>();
+        playerCollider = player.GetComponent<Collider2D>();
+        playerBody = player.GetComponent<Rigidbody2D>();
+        playerControl = player.GetComponent<Humanoid>();
+        playerHurtable = player.GetComponent<Hurtable>();
+        if (playerAnimation)
+            playerAnimation.enabled = false;
+        if (playerCollider)
+            playerCollider.enabled = false;
+        if (playerControl){
+            playerControl.enabled = false;
+        }
+        if (playerBody){
+            playerBody.gravityScale = 1f;
+            initDrag = playerBody.drag;
+            playerBody.drag = 0;
+        }
+        Controller.Instance.suspendInput = true;
+        UINew.Instance.SetActiveUI();
+        configured = true;
+    }
+    public override void Update(){
+        if (player.transform.position.y < -0.35f){
+            Toolbox.Instance.AudioSpeaker("Poof 01", player.transform.position);
+            if (playerAnimation)
+                playerAnimation.enabled = true;
+            if (playerCollider)
+                playerCollider.enabled = true;
+            if (playerControl){
+                playerControl.enabled = true;
+            }
+            if (playerBody){
+                playerBody.gravityScale = 0;;
+                playerBody.drag = initDrag;
+            }
+            if (playerHurtable){
+                playerHurtable.KnockDown();
+                playerHurtable.downedTimer = 3f;
+            }
+            Controller.Instance.suspendInput = false;
+            UINew.Instance.SetActiveUI(active:true);
+            // MessageSpeech message = new MessageSpeech("that hurt!");
+            // Toolbox.Instance.SendMessage(player, CutsceneManager.Instance, message);
+            complete = true;
+        }
+    }
+}
 public class CutsceneMayor : Cutscene {
     private GameObject spawnPoint;
     private GameObject mayor;
@@ -228,8 +285,9 @@ public class CutsceneNewDay : Cutscene {
 }
 
 public class CutsceneManager : Singleton<CutsceneManager> {
-    public enum CutsceneType {newDay, mayorTalk, boardRoom}
+    public enum CutsceneType {newDay, mayorTalk, boardRoom, fall}
     public Cutscene cutscene;
+    // public string MOTD = "smoke weed everyday";
     void Start (){
         SceneManager.sceneLoaded += LevelWasLoaded;
     }
@@ -246,6 +304,10 @@ public class CutsceneManager : Singleton<CutsceneManager> {
             case CutsceneType.boardRoom:
             cutscene = new CutsceneBoardroom();
             break;
+            case CutsceneType.fall:
+            cutscene = new CutsceneFall();
+            cutscene.Configure();
+            break;
             default:
             break;
         }
@@ -259,10 +321,10 @@ public class CutsceneManager : Singleton<CutsceneManager> {
             return;
         }
         if (cutscene.configured == false){
-            if (cutscene is CutsceneNewDay || cutscene is CutsceneBoardroom){
+            if (cutscene is CutsceneNewDay || cutscene is CutsceneBoardroom || cutscene is CutsceneFall){
                 cutscene.Configure();
             }
-        } else if (cutscene is CutsceneNewDay || cutscene is CutsceneBoardroom) {
+        } else if (cutscene is CutsceneNewDay || cutscene is CutsceneBoardroom || cutscene is CutsceneFall) {
             cutscene.CleanUp();
             cutscene = null;
         }
