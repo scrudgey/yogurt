@@ -44,7 +44,9 @@ public class UINew: Singleton<UINew> {
 	public bool achievementPopupInProgress;
 	public Texture2D cursorDefault;
 	public Texture2D cursorHighlight;
-
+	public RectTransform lifebar;
+	private Vector2 lifebarDefaultSize;
+	public GameObject topRightBar;
 	public void Start(){
 		if (!init){
 			ConfigureUIElements();
@@ -73,6 +75,10 @@ public class UINew: Singleton<UINew> {
 		} else {
 			Cursor.SetCursor(cursorDefault, new Vector2(28, 16), CursorMode.Auto);
 		}
+		if (Controller.Instance.focusHurtable != null){
+			float width = (Controller.Instance.focusHurtable.health / Controller.Instance.focusHurtable.maxHealth) * lifebarDefaultSize.x;
+			lifebar.sizeDelta = new Vector2(width, lifebarDefaultSize.y);
+		}
 	}
 	public void ConfigureUIElements() {
 		init = true;
@@ -87,12 +93,15 @@ public class UINew: Singleton<UINew> {
 		fightButton = UICanvas.transform.Find("topdock/FightButton").gameObject;
 		punchButton = UICanvas.transform.Find("topdock/PunchButton").gameObject;
 		speakButton = UICanvas.transform.Find("topdock/SpeakButton").gameObject;
-		// status = UICanvas.transform.Find("topdock/topBar/status").GetComponent<Text>();
 		actionTextObject = UICanvas.transform.Find("bottomdock/ActionText").GetComponent<Text>();
-		// status.gameObject.SetActive(false);
+		lifebar = UICanvas.transform.Find("topright/lifebar/mask/fill").GetComponent<RectTransform>();
+		topRightBar = UICanvas.transform.Find("topright").gameObject;
+		if (lifebarDefaultSize == Vector2.zero)
+			lifebarDefaultSize = new Vector2(lifebar.rect.width, lifebar.rect.height);
 		inventoryButton.SetActive(false);
 		fightButton.SetActive(false);
 		speakButton.SetActive(false);
+		topRightBar.SetActive(false);
 		HidePunchButton();
 	}
 	public GameObject ShowMenu(MenuType typeMenu){
@@ -129,6 +138,7 @@ public class UINew: Singleton<UINew> {
 			if (button)
 				button.SetActive(active);
 		}
+		topRightBar.SetActive(active);
 		CloseActiveMenu();
 		ClearWorldButtons();
 		ClearActionButtons();
@@ -136,6 +146,7 @@ public class UINew: Singleton<UINew> {
 			UpdateButtons();
 	}
 	public void UpdateButtons(){
+		// TODO: this is why the buttons are active but not the health bar
 		if (GameManager.Instance.playerObject.GetComponent<Speech>()){
 			speakButton.SetActive(true);
 		}
