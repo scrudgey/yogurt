@@ -2,7 +2,17 @@
 using System.Linq;
 using System.Collections.Generic;
 public class Controller : Singleton<Controller> {
-	public Controllable focus;
+	private Controllable _focus;
+	public Controllable focus{
+		get{
+			return _focus;
+		}
+		set{
+			_focus = value;
+			focusHurtable = _focus.GetComponent<Hurtable>();
+		}
+	}
+	public Hurtable focusHurtable;
     private bool _suspendInput = false;
     public bool suspendInput{
         get{ 
