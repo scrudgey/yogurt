@@ -400,7 +400,7 @@ namespace AI{
 		private Transform cachedTransform;
 		private GameObject cachedGameObject;
 		//TODO: make use of lastSeenPosition
-		private Vector3 lastSeenPosition;
+		// private Vector3 lastSeenPosition;
 		public Transform threatTransform{
 			get {
 				if (cachedGameObject == threat.val){
@@ -425,8 +425,8 @@ namespace AI{
 		{
 			if (threat.val){
 				control.leftFlag = control.rightFlag = control.upFlag = control.downFlag = false;
-				lastSeenPosition = threatTransform.position;
-				if ( Math.Abs(transform.position.x - threatTransform.position.x) > 0.1f ){
+				// lastSeenPosition = threatTransform.position;
+				if (Math.Abs(transform.position.x - threatTransform.position.x) > 0.1f){
 					if (transform.position.x < threatTransform.position.x){
 						control.leftFlag = true;
 					} 
@@ -434,7 +434,7 @@ namespace AI{
 						control.rightFlag = true;
 					}
 				}
-				if ( Math.Abs(transform.position.y - threatTransform.position.y) > 0.1f ){
+				if (Math.Abs(transform.position.y - threatTransform.position.y) > 0.1f){
 					if (transform.position.y < threatTransform.position.y){
 						control.downFlag = true;
 					}
