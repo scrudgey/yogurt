@@ -18,18 +18,22 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 	public List<Priority> priorities;
 	public Personality personality;
 	private Priority activePriority = null;
-	public PriorityAttack priorityAttack;
-	public PriorityRunAway priorityRunAway;
 	public List<GameObject> initialAwareness;
 	public GameObject possession;
 	public Controllable.HitState hitState;
 	public Awareness awareness;
+	public bool initialized = false;
 	void Awake() {
+		if (!initialized)
+			Initialize();
+	}
+	void Initialize(){
+		initialized = true;
 		// make sure there's Awareness
 		awareness = Toolbox.Instance.GetOrCreateComponent<Awareness>(gameObject);
+		control = GetComponent<Controllable>();
 
-	}
-	void Start() {
+		// start awareness with knowledge of possessions
 		if (possession != null){
 			initialAwareness.Add(possession);
 			awareness.possession = possession;
@@ -44,10 +48,8 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 		thoughtText = thought.GetComponentInChildren<Text>();
 		thoughtText.text = "";
 
-		control = GetComponent<Controllable>();
-
+		// create priorities
 		priorities = new List<Priority>();
-
 		priorities.Add(new PriorityFightFire(gameObject, control));
 		priorities.Add(new PriorityWander(gameObject, control));
 		priorities.Add(new PriorityRunAway(gameObject, control));
