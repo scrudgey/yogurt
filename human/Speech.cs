@@ -33,7 +33,6 @@ public class Speech : Interactive, IMessagable {
         if (!LoadInitialized)
 			LoadInit();
 	}
-    
     void LoadInit(){
         LoadInitialized = true;
         Interaction speak = new Interaction(this, "Look", "Describe", true, false);
