@@ -161,6 +161,9 @@ public class UINew: Singleton<UINew> {
 			HidePunchButton();
 		}
 		fightButton.SetActive(true);
+		if (GameManager.Instance.playerObject.GetComponent<Hurtable>()){
+			topRightBar.SetActive(true);
+		}
 	}
 	public void UpdateRecordButtons(Commercial commercial){
 		if (GameManager.Instance.activeCommercial == null){
@@ -199,7 +202,6 @@ public class UINew: Singleton<UINew> {
 	public void HidePunchButton(){
 		punchButton.SetActive(false);
 	}
-
 	public void PopupCounter(string text, float initValue, float finalValue, Commercial commercial){
 		GameObject existingPop = GameObject.Find("Poptext(Clone)");
 		if (existingPop == null){
