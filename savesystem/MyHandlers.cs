@@ -158,10 +158,32 @@ public class EaterHandler: SaveHandler<Eater> {
 public class AdvancedAnimationHandler: SaveHandler<AdvancedAnimation> {
 	public override void SaveData(AdvancedAnimation instance, PersistentComponent data, ReferenceResolver resolver){
 		data.strings["baseName"] = instance.baseName;
+		data.ints["hitstate"] = (int)instance.hitState;
 	}
 	public override void LoadData(AdvancedAnimation instance, PersistentComponent data){
+		instance.hitState = (Controllable.HitState)data.ints["hitstate"];
 		instance.baseName = data.strings["baseName"];
 		instance.LoadSprites();
+	}
+}
+public class HeadAnimationHandler: SaveHandler<HeadAnimation> {
+	public override void SaveData(HeadAnimation instance, PersistentComponent data, ReferenceResolver resolver){
+		data.ints["hitstate"] = (int)instance.hitState;
+		data.strings["baseName"] = instance.baseName;
+	}
+	public override void LoadData(HeadAnimation instance, PersistentComponent data){
+		instance.hitState = (Controllable.HitState)data.ints["hitstate"];
+		instance.baseName = data.strings["baseName"];
+	}
+}
+public class SpeechHandler: SaveHandler<Speech>{
+	public override void SaveData(Speech instance, PersistentComponent data, ReferenceResolver resolver){
+		data.bools["speaking"] = instance.speaking;
+		data.ints["hitstate"] = (int)instance.hitState;
+	}
+	public override void LoadData(Speech instance, PersistentComponent data){
+		instance.speaking = data.bools["speaking"];
+		instance.hitState = (Controllable.HitState)data.ints["hitstate"];
 	}
 }
 public class FlammableHandler: SaveHandler<Flammable> {
@@ -195,10 +217,12 @@ public class DestructibleHandler: SaveHandler<Destructible> {
 public class OutfitHandler: SaveHandler<Outfit> {
 	public override void SaveData(Outfit instance, PersistentComponent data, ReferenceResolver resolver){
 		data.strings["worn"] = 			instance.wornUniformName;
+		data.ints["hitstate"] = (int)instance.hitState;
 	}
 	public override void LoadData(Outfit instance, PersistentComponent data){
 		instance.wornUniformName = 		data.strings["worn"];
 		instance.initUniform = null;
+		instance.hitState = (Controllable.HitState)data.ints["hitstate"];
 	}
 }
 public class CabinetHandler: SaveHandler<Cabinet> {
@@ -252,7 +276,24 @@ public class IntrinsicsHandler: SaveHandler<Intrinsics>{
 			instance.IntrinsicsChanged();
 	}
 }
-
+public class HurtableHandler: SaveHandler<Hurtable>{
+	public override void SaveData(Hurtable instance, PersistentComponent data, ReferenceResolver resolver){
+		data.floats["health"] = instance.health;
+		data.floats["maxHealth"] = instance.maxHealth;
+		data.floats["bonusHealth"] = instance.bonusHealth;
+		data.floats["impulse"] = instance.impulse;
+		data.floats["downed_timer"] = instance.downedTimer;
+		data.ints["hitstate"] = (int)instance.hitState;
+	}
+	public override void LoadData(Hurtable instance, PersistentComponent data){
+		instance.health = data.floats["health"];
+		instance.maxHealth = data.floats["maxHealth"];
+		instance.bonusHealth = data.floats["bonusHealth"];
+		instance.impulse = data.floats["impulse"];
+		instance.downedTimer = data.floats["downed_timer"];
+		instance.hitState = (Controllable.HitState)data.ints["hitstate"];
+	}
+}
 public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
 	static List<Type> priorityTypes = new List<Type>(){
 		{typeof(PriorityAttack)},
@@ -263,6 +304,7 @@ public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
 		{typeof(PriorityWander)}
 	};
 	public override void SaveData(DecisionMaker instance, PersistentComponent data, ReferenceResolver resolver){
+		data.ints["hitstate"] = (int)instance.hitState;
 		if (instance.possession != null)
 			data.ints["possession"] = resolver.ResolveReference(instance.possession, data.persistent);
 		foreach (Type priorityType in priorityTypes){
@@ -274,6 +316,7 @@ public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
 		}
 	}
 	public override void LoadData(DecisionMaker instance, PersistentComponent data){
+		instance.hitState = (Controllable.HitState)data.ints["hitstate"];
 		instance.initialAwareness = new List<GameObject>();
 		if (data.ints.ContainsKey("possession")){
 			instance.possession = MySaver.loadedObjects[data.ints["possession"]];
@@ -284,18 +327,17 @@ public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
 			foreach (Type priorityType in priorityTypes){
 				if (priority.GetType() == priorityType){
 					string priorityName = priorityType.ToString();
-					if (data.floats.ContainsKey(priorityName))
+					if (data.floats.ContainsKey(priorityName)){
 						priority.urgency = data.floats[priorityName];
+					}
 				}
 			}
 		}
 	}
 }
-
-
 public class AwarenessHandler: SaveHandler<Awareness>{
 	public override void SaveData(Awareness instance, PersistentComponent data, ReferenceResolver resolver){
-		// Debug.Log("saving awareness "+instance.gameObject.name);
+		data.ints["hitstate"] = (int)instance.hitState;
 		data.knowledgeBase = new List<SerializedKnowledge>();
 		data.people = new List<SerializedPersonalAssessment>();
 		foreach (KeyValuePair<GameObject, Knowledge> keyVal in instance.knowledgebase){
@@ -303,14 +345,13 @@ public class AwarenessHandler: SaveHandler<Awareness>{
 			if (knowledge.gameObjectID == -1)
 				continue;
 			data.knowledgeBase.Add(knowledge);
-			// data.knowledgeBase.Add(SaveKnowledge(keyVal.Value, resolver, data.persistent));
 		}
 		foreach (KeyValuePair<GameObject, PersonalAssessment> keyVal in instance.people){
 			data.people.Add(SavePerson(keyVal.Value, resolver, data.persistent));
 		}
 	}
 	public override void LoadData(Awareness instance, PersistentComponent data){
-		// Debug.Log("loading awareness "+instance.gameObject.name);
+		instance.hitState = (Controllable.HitState)data.ints["hitstate"];
 		foreach(SerializedKnowledge knowledge in data.knowledgeBase){
 			Knowledge newKnowledge = LoadKnowledge(knowledge);
 			GameObject subject = MySaver.loadedObjects[knowledge.gameObjectID];
@@ -321,8 +362,9 @@ public class AwarenessHandler: SaveHandler<Awareness>{
 			GameObject subject = MySaver.loadedObjects[pa.gameObjectID];
 			assessment.knowledge = instance.knowledgebase[subject];
 			instance.people[subject] = assessment;
-			// Debug.Log(assessment.status);
 		}
+		instance.SetNearestEnemy();
+		instance.SetNearestFire();
 	}
 	SerializedKnowledge SaveKnowledge(Knowledge input, ReferenceResolver resolver, Persistent persistent){
 		SerializedKnowledge data = new SerializedKnowledge();
@@ -354,3 +396,5 @@ public class AwarenessHandler: SaveHandler<Awareness>{
 		return assessment;
 	}
 }
+
+
