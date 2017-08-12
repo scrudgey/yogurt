@@ -34,7 +34,7 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 	public string baseName;
 	private int baseFrame;
 	private int frame;
-	private Controllable.HitState hitState;
+	public Controllable.HitState hitState;
 	private bool doubledOver;
 	void Start () {
 		spriteRenderer = GetComponent<SpriteRenderer>();
