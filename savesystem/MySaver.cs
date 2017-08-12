@@ -29,6 +29,9 @@ public class MySaver {
 		{typeof(Trader),							() => new TraderHandler() },
 		{typeof(DecisionMaker),						() => new DecisionMakerHandler() },
 		{typeof(Awareness),							() => new AwarenessHandler() },
+		{typeof(Hurtable),							() => new HurtableHandler() },
+		{typeof(HeadAnimation),						() => new HeadAnimationHandler() },
+		{typeof(Speech),							() => new SpeechHandler() },
 	};
 	public static void CleanupSaves(){
 		idIndex = 0;
