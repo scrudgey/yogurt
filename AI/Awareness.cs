@@ -82,8 +82,8 @@ public class Awareness : MonoBehaviour, IMessagable {
 		sightConeTransform.parent = transform;
 		if (initialAwareness!= null){
 			if (initialAwareness.Count > 0){
-				if (possession != null)
-					initialAwareness.Add(possession);
+				// if (possession != null)
+				// 	initialAwareness.Add(possession);
 				fieldOfView = initialAwareness;
 				Perceive();
 			}
@@ -265,14 +265,19 @@ public class Awareness : MonoBehaviour, IMessagable {
 		}
 	}
 	public bool PossessionsAreOkay(){
-		if (possession == null)
-			return true;
-		Knowledge knowledge = null;
-		if (!knowledgebase.TryGetValue(possession, out knowledge)){
+		if (possession == null){
+			// Debug.Log("no possession, it's okay");
 			return true;
 		}
-		if (possessionDefaultState == null)
+		Knowledge knowledge = null;
+		if (!knowledgebase.TryGetValue(possession, out knowledge)){
+			// Debug.Log("I have no knowledge of my possession. It's okay.");
 			return true;
+		}
+		if (possessionDefaultState == null){
+			// Debug.Log("there's no default state for possession. it's okay.");
+			return true;
+		}
 
 		if (Time.time - knowledge.lastSeenTime > 2){
 			// Debug.Log("possession not okay: timeout");
@@ -282,6 +287,7 @@ public class Awareness : MonoBehaviour, IMessagable {
 			// Debug.Log("possession not okay: location");			
 			return false;
 		} else {
+			// Debug.Log("possession is where it should be.");
 			return true;
 		}
 	}
