@@ -305,8 +305,8 @@ public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
 	};
 	public override void SaveData(DecisionMaker instance, PersistentComponent data, ReferenceResolver resolver){
 		data.ints["hitstate"] = (int)instance.hitState;
-		if (instance.possession != null)
-			data.ints["possession"] = resolver.ResolveReference(instance.possession, data.persistent);
+		// if (instance.possession != null)
+		// 	data.ints["possession"] = resolver.ResolveReference(instance.possession, data.persistent);
 		foreach (Type priorityType in priorityTypes){
 			foreach(Priority priority in instance.priorities){
 				if (priority.GetType() == priorityType){
@@ -318,17 +318,18 @@ public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
 	public override void LoadData(DecisionMaker instance, PersistentComponent data){
 		instance.hitState = (Controllable.HitState)data.ints["hitstate"];
 		instance.initialAwareness = new List<GameObject>();
-		if (data.ints.ContainsKey("possession")){
-			instance.possession = MySaver.loadedObjects[data.ints["possession"]];
-			instance.awareness.possession = MySaver.loadedObjects[data.ints["possession"]];
-			instance.initialAwareness.Add(MySaver.loadedObjects[data.ints["possession"]]);
-		}
+		// if (data.ints.ContainsKey("possession")){
+		// 	instance.possession = MySaver.loadedObjects[data.ints["possession"]];
+		// 	// instance.awareness.possession = MySaver.loadedObjects[data.ints["possession"]];
+		// 	instance.initialAwareness.Add(MySaver.loadedObjects[data.ints["possession"]]);
+		// }
 		foreach (Priority priority in instance.priorities){
 			foreach (Type priorityType in priorityTypes){
 				if (priority.GetType() == priorityType){
 					string priorityName = priorityType.ToString();
 					if (data.floats.ContainsKey(priorityName)){
 						priority.urgency = data.floats[priorityName];
+						// Debug.Log("loaded "+priorityName+" with urgency "+priority.urgency.ToString());
 					}
 				}
 			}
@@ -340,6 +341,8 @@ public class AwarenessHandler: SaveHandler<Awareness>{
 		data.ints["hitstate"] = (int)instance.hitState;
 		data.knowledgeBase = new List<SerializedKnowledge>();
 		data.people = new List<SerializedPersonalAssessment>();
+		if (instance.possession != null)
+			data.ints["possession"] = resolver.ResolveReference(instance.possession, data.persistent);
 		foreach (KeyValuePair<GameObject, Knowledge> keyVal in instance.knowledgebase){
 			SerializedKnowledge knowledge = SaveKnowledge(keyVal.Value, resolver, data.persistent);
 			if (knowledge.gameObjectID == -1)
@@ -349,8 +352,16 @@ public class AwarenessHandler: SaveHandler<Awareness>{
 		foreach (KeyValuePair<GameObject, PersonalAssessment> keyVal in instance.people){
 			data.people.Add(SavePerson(keyVal.Value, resolver, data.persistent));
 		}
+		if (instance.possessionDefaultState != null){
+			SerializedKnowledge knowledge = SaveKnowledge(instance.possessionDefaultState, resolver, data.persistent);
+			if (knowledge.gameObjectID != -1)
+				data.knowledges["defaultState"] = knowledge;
+		}
 	}
 	public override void LoadData(Awareness instance, PersistentComponent data){
+		if (data.ints.ContainsKey("possession")){
+			instance.possession = MySaver.loadedObjects[data.ints["possession"]];
+		}
 		instance.hitState = (Controllable.HitState)data.ints["hitstate"];
 		foreach(SerializedKnowledge knowledge in data.knowledgeBase){
 			Knowledge newKnowledge = LoadKnowledge(knowledge);
@@ -362,6 +373,9 @@ public class AwarenessHandler: SaveHandler<Awareness>{
 			GameObject subject = MySaver.loadedObjects[pa.gameObjectID];
 			assessment.knowledge = instance.knowledgebase[subject];
 			instance.people[subject] = assessment;
+		}
+		if (data.knowledges.ContainsKey("defaultState")){
+			instance.possessionDefaultState = LoadKnowledge(data.knowledges["defaultState"]);
 		}
 		instance.SetNearestEnemy();
 		instance.SetNearestFire();
