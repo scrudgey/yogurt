@@ -34,8 +34,7 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
 	public Color crumbColor = Color.white;
 	private float eatingCountDown;
 	private float vomitCountDown;
-	// private Head head;
-	private Controllable.HitState hitState;
+	public Controllable.HitState hitState;
 	private string lastPressed;
 	void LoadSprites(){
 		sprites = Resources.LoadAll<Sprite>("spritesheets/" + spriteSheet);
