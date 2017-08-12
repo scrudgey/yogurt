@@ -74,7 +74,6 @@ public class Awareness : MonoBehaviour, IMessagable {
 	public Ref<GameObject> nearestFire = new Ref<GameObject>(null);
 	public SerializableDictionary<GameObject, Knowledge> knowledgebase = new SerializableDictionary<GameObject, Knowledge>();
 	public SerializableDictionary<GameObject, PersonalAssessment> people = new SerializableDictionary<GameObject, PersonalAssessment>();
-	// public DecisionMaker decisionMaker;
 	void Start () {
 		control = gameObject.GetComponent<Controllable>();
 		sightCone = Instantiate( Resources.Load("sightcone1"), gameObject.transform.position, Quaternion.identity ) as GameObject;
@@ -83,12 +82,9 @@ public class Awareness : MonoBehaviour, IMessagable {
 		sightConeTransform.parent = transform;
 		if (initialAwareness!= null){
 			if (initialAwareness.Count > 0){
-				// Debug.Log("perceiving initial awarenss");
 				if (possession != null)
 					initialAwareness.Add(possession);
 				fieldOfView = initialAwareness;
-				// foreach(GameObject obj in initialAwareness)
-				// 	Debug.Log(obj.name);
 				Perceive();
 			}
 		}
@@ -135,7 +131,7 @@ public class Awareness : MonoBehaviour, IMessagable {
 		}
 	}
 
-	void SetNearestEnemy(){
+	public void SetNearestEnemy(){
 		nearestEnemy.val = null;
         float closestDistanceSqr = Mathf.Infinity;
         Vector3 currentPosition = transform.position;
@@ -153,7 +149,7 @@ public class Awareness : MonoBehaviour, IMessagable {
             }
 		}
 	}
-	void SetNearestFire(){
+	public void SetNearestFire(){
 		nearestFire.val = null;
         float closestDistanceSqr = Mathf.Infinity;
         Vector3 currentPosition = transform.position;
