@@ -12,6 +12,7 @@ public class PersistentComponent {
 	// TODO: initialize lists as necessary
 	public List<SerializedKnowledge> knowledgeBase;
 	public List<SerializedPersonalAssessment> people;
+	public SerializableDictionary<string, SerializedKnowledge> knowledges = new SerializableDictionary<string, SerializedKnowledge>();
 	public List<Intrinsic> intrinsics;
 	[XmlIgnoreAttribute]	
 	public Persistent persistent;
