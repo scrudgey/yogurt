@@ -9,9 +9,7 @@ public class Knowledge{
 	public Vector3 lastSeenPosition;
 	public float lastSeenTime;
 	public Flammable flammable;
-	public Knowledge(){
-		
-	}
+	public Knowledge(){ }
 	public Knowledge(GameObject o){
 		this.obj = o;
 		transform = o.transform;
