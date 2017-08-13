@@ -153,14 +153,7 @@ public class Hurtable : MonoBehaviour, IMessagable {
 		if (impulse <= 0f && doubledOver && hitState < Controllable.HitState.unconscious){
 			DoubleOver(false);
 		}
-		if (dizzyEffect != null){
-			if (dizzyEffect.transform.localScale != transform.localScale){
-				Vector3 tempscale = transform.localScale;
-				dizzyEffect.transform.localScale = tempscale; 
-			}
-		}
 	}
-	// TODO: knockdown message!
 	public void KnockDown(){
 		if (hitState >= Controllable.HitState.unconscious)
 			return;
@@ -175,9 +168,10 @@ public class Hurtable : MonoBehaviour, IMessagable {
 		message.hitState = hitState;
 		Toolbox.Instance.SendMessage(gameObject, this, message);
 
-		dizzyEffect = Instantiate(Resources.Load("prefabs/fx/dizzy"), transform.position + transform.up * 0.15f + new Vector3(0, 0.15f, 0), Quaternion.identity) as GameObject;
-		dizzyEffect.transform.rotation = Quaternion.identity;
-		dizzyEffect.transform.SetParent(transform, true);
+		dizzyEffect = Instantiate(Resources.Load("prefabs/fx/dizzy"), transform.position + new Vector3(0.1f, 0.1f, 0), Quaternion.identity) as GameObject;
+		FollowGameObject dizzyFollower = dizzyEffect.GetComponent<FollowGameObject>();
+		dizzyFollower.target = gameObject;
+		dizzyFollower.Init();
 	}
 	public void GetUp(){
 		hitState = Controllable.RemoveHitState(hitState, Controllable.HitState.unconscious);
