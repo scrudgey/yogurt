@@ -207,12 +207,12 @@ public class MySaver {
 		}
 	}
 	public static GameObject LoadPersistentContainer(PersistentContainer container){
-		string lastName = "first";
+		// string lastName = "first";
 		GameObject rootObject = null;
 		// try {
 			Regex reg =  new Regex("\\s+", RegexOptions.Multiline);
 			foreach(Persistent persistent in container.PersistentObjects){
-				lastName = persistent.name;
+				// lastName = persistent.name;
 				loadedIds.Add(persistent.id);
 				// Debug.Log("loading "+persistent.name+" with id "+persistent.id.ToString());
 				string path = @"prefabs/"+persistent.name;
@@ -243,6 +243,8 @@ public class ReferenceResolver{
 	private Dictionary<Persistent, List<Persistent> > referenceTree = new Dictionary<Persistent, List<Persistent>>();
 	public int ResolveReference(GameObject referent, Persistent requester){
 		int returnID = -1;
+		if (referent == null)
+			return -1;
 		if (objectIDs.ContainsKey(referent))
 			returnID = objectIDs[referent];
 		if (!referenceTree.ContainsKey(requester))
