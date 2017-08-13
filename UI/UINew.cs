@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using Easings;
 
 public class UINew: Singleton<UINew> {
 	public enum MenuType{none, escape, inventory, speech, closet, scriptSelect, commercialReport, newDayReport, email, diary, dialogue, phone}
@@ -47,6 +48,10 @@ public class UINew: Singleton<UINew> {
 	public RectTransform lifebar;
 	private Vector2 lifebarDefaultSize;
 	public GameObject topRightBar;
+	private RectTransform topRightRectTransform;
+	private float healthBarEasingTimer;
+	private enum EasingDirection{none, up, down};
+	private EasingDirection healthBarEasingDirection;
 	public void Start(){
 		if (!init){
 			ConfigureUIElements();
@@ -78,6 +83,27 @@ public class UINew: Singleton<UINew> {
 		if (Controller.Instance.focusHurtable != null){
 			float width = (Controller.Instance.focusHurtable.health / Controller.Instance.focusHurtable.maxHealth) * lifebarDefaultSize.x;
 			lifebar.sizeDelta = new Vector2(width, lifebarDefaultSize.y);
+			if (Controller.Instance.focusHurtable.health < Controller.Instance.focusHurtable.maxHealth){
+				HealthBarOn();
+			} else {
+				HealthBarOff();
+			}
+		}
+		if (healthBarEasingDirection != EasingDirection.none){
+			healthBarEasingTimer += Time.deltaTime;
+			Vector3 tempPos = topRightRectTransform.anchoredPosition;
+			if (healthBarEasingTimer >= 1f){
+				healthBarEasingDirection = EasingDirection.none;
+				healthBarEasingTimer = 0f;
+			}
+			if (healthBarEasingDirection == EasingDirection.up){
+				tempPos.y = (float)PennerDoubleAnimation.ExpoEaseOut(healthBarEasingTimer, 0, 50, 1f);
+            	topRightRectTransform.anchoredPosition = tempPos;
+			}
+			if (healthBarEasingDirection == EasingDirection.down){
+				tempPos.y = (float)PennerDoubleAnimation.ExpoEaseOut(healthBarEasingTimer, 50, -50f, 1f);
+            	topRightRectTransform.anchoredPosition = tempPos;
+			}
 		}
 	}
 	public void ConfigureUIElements() {
@@ -96,6 +122,7 @@ public class UINew: Singleton<UINew> {
 		actionTextObject = UICanvas.transform.Find("bottomdock/ActionText").GetComponent<Text>();
 		lifebar = UICanvas.transform.Find("topright/lifebar/mask/fill").GetComponent<RectTransform>();
 		topRightBar = UICanvas.transform.Find("topright").gameObject;
+		topRightRectTransform = topRightBar.GetComponent<RectTransform>();
 		if (lifebarDefaultSize == Vector2.zero)
 			lifebarDefaultSize = new Vector2(lifebar.rect.width, lifebar.rect.height);
 		inventoryButton.SetActive(false);
@@ -103,6 +130,22 @@ public class UINew: Singleton<UINew> {
 		speakButton.SetActive(false);
 		topRightBar.SetActive(false);
 		HidePunchButton();
+	}
+	public void HealthBarOn(){
+		if (healthBarEasingDirection == EasingDirection.none){
+			if (topRightRectTransform.anchoredPosition.y > 10f){
+				healthBarEasingTimer = 0f;
+				healthBarEasingDirection = EasingDirection.down;
+			}
+		}
+	}	
+	public void HealthBarOff(){
+		if (healthBarEasingDirection == EasingDirection.none){
+			if (topRightRectTransform.anchoredPosition.y < 40f){
+				healthBarEasingTimer = 0f;
+				healthBarEasingDirection = EasingDirection.up;
+			}
+		}
 	}
 	public GameObject ShowMenu(MenuType typeMenu){
 		if (activeMenu == null){
@@ -470,6 +513,4 @@ public class UINew: Singleton<UINew> {
 		}
 		bounceScript.text = text;
 	}
-
-
 }
