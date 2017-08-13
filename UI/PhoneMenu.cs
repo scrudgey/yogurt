@@ -54,7 +54,6 @@ public class PhoneMenu : MonoBehaviour {
 			Debug.Log("no selected");
 			return;
 		} 
-		Debug.Log(selectedButton.number);
 		switch (selectedButton.number){
 			case PhoneNumberButton.phoneNumber.fire:
 			telephone.FireButtonCallback();
