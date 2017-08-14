@@ -8,6 +8,7 @@ public class Fire : MonoBehaviour {
 	private MessageDamage message;
 	private HashSet<GameObject> damageQueue = new HashSet<GameObject>();
 	private float damageTimer;
+	static List<string> forbiddenTags = new List<string>(new string[]{"fire", "occurrenceFlag", "background", "sightcone"});
 	void Start(){
 		message = new MessageDamage(1f, damageType.fire);
 	}
@@ -18,14 +19,16 @@ public class Fire : MonoBehaviour {
 			if (flammable)
 				message.responsibleParty = flammable.responsibleParty;
 			foreach(GameObject obj in damageQueue){
-				if (obj != null)
+				if (obj != null){
 					Toolbox.Instance.SendMessage(obj, this, message);
+					Debug.Log("fire damaging "+obj.name);
+				}
 			}
 			damageQueue = new HashSet<GameObject>();
 		}
 	}
 	void OnTriggerEnter2D(Collider2D coll){
-		if (!flammables.ContainsKey(coll.gameObject) ){
+		if (!flammables.ContainsKey(coll.gameObject)){
 			Flammable flam = coll.GetComponentInParent<Flammable>();
 			if (flam != null && flam != flammable){
 				flammables.Add(coll.gameObject, flam);
@@ -35,6 +38,8 @@ public class Fire : MonoBehaviour {
 	
 	void OnTriggerStay2D(Collider2D coll){
 		if (!flammable.onFire)
+			return;
+		if (forbiddenTags.Contains(coll.tag))
 			return;
 		damageQueue.Add(coll.gameObject);
 		if (flammables.ContainsKey(coll.gameObject)){
