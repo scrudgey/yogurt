@@ -20,7 +20,7 @@ public class FireExtinguisher : Interactive, IDirectable {
 			LoadInit();
 	}
 	public void LoadInit(){
-		Interaction spray = new Interaction(this,"Spray", "Spray", false, true);
+		Interaction spray = new Interaction(this, "Spray", "Spray", false, true);
 		spray.defaultPriority = 1;
 		spray.continuous = true;
 		spray.dontWipeInterface = true;
@@ -32,7 +32,6 @@ public class FireExtinguisher : Interactive, IDirectable {
 		spray2.continuous = true;
 		spray2.limitless = true;
 		spray2.dontWipeInterface = true;
-		// spray2.displayVerb = "Spray at";
 		spray2.validationFunction = true;
 		interactions.Add(spray2);
 
