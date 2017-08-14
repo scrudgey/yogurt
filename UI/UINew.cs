@@ -296,23 +296,9 @@ public class UINew: Singleton<UINew> {
 			achievementStack.Push(achieve);
 		}
 	}
-
-
 	public void SetActionText(string text){
 		actionTextString = text;
 	}
-	// public void SetStatus(string text){
-	// 	statusText = text;
-	// }
-	// public void SetTempStatus(string text, float time, TextFX.FXstyle style){
-	// 	statusTemp = text;
-	// 	statusTempTime = time;
-	// 	statusTempStyle = style;
-	// }
-	// public void SetStatusStyle(TextFX.FXstyle style){
-	// 	statusStyle = style;
-	// }
-	
 	public void DisplayHandActions(Inventory inventory){
 		ClearWorldButtons();
 		activeElements = new List<GameObject>();
@@ -339,7 +325,6 @@ public class UINew: Singleton<UINew> {
 		}
 		activeElements.Add(CircularizeButtons(buttons, GameManager.Instance.playerObject));
 	}
-
 	public void ShowInventoryMenu(){
 		Inventory inventory = GameManager.Instance.playerObject.GetComponent<Inventory>();
 		GameObject inventoryMenu = ShowMenu(UINew.MenuType.inventory);
@@ -352,7 +337,6 @@ public class UINew: Singleton<UINew> {
 			}
 		}
 	}
-	
 	public void SetClickedActions(GameObject clickedOn, GameObject clickSite){
 		ClearWorldButtons();
 		activeElements = new List<GameObject>();
@@ -362,13 +346,11 @@ public class UINew: Singleton<UINew> {
 			activeElements.Add(button.gameobject);
 		activeElements.Add(CircularizeButtons(actionButtons, clickSite));
 	}
-
 	public void ClearWorldButtons(){
 		foreach (GameObject element in activeElements)
 			Destroy(element);
 		activeElements = new List<GameObject>();
 	}
-
 	private List<actionButton> CreateButtonsFromActions(List<Interaction> interactions, bool removeColliders=false){
 		List<actionButton> returnList = new List<actionButton>();
 		foreach (Interaction interaction in interactions){
@@ -381,7 +363,6 @@ public class UINew: Singleton<UINew> {
 		}
 		return returnList;
 	}
-
 	actionButton SpawnButton(Interaction interaction){
 		GameObject newButton = Instantiate(Resources.Load("UI/NeoActionButton"), Vector2.zero, Quaternion.identity) as GameObject;
 		ActionButtonScript buttonScript = newButton.GetComponent<ActionButtonScript>();
@@ -396,13 +377,11 @@ public class UINew: Singleton<UINew> {
 			returnbut.buttonText.text = interaction.actionName;
 		return returnbut;
 	}
-
 	private GameObject CircularizeButtons(List<actionButton> buttons, GameObject target){
 		float incrementAngle = (Mathf.PI * 2f) / buttons.Count; 
 		float angle = 0f;
 		RectTransform canvasRect = UICanvas.GetComponent<RectTransform>();
 		Camera renderingCamera = UICanvas.GetComponent<Canvas>().worldCamera;
-
 		GameObject buttonAnchor = Instantiate(Resources.Load("UI/ButtonAnchor"), UICanvas.transform.position, Quaternion.identity) as GameObject;
 		Rigidbody2D firstBody = null;
 		Rigidbody2D priorBody = null;
@@ -439,7 +418,6 @@ public class UINew: Singleton<UINew> {
 			}
 			if (!firstBody)
 				firstBody = button.gameobject.GetComponent<Rigidbody2D>();
-
 			// set up spring connection to anchor
 			SpringJoint2D anchorSpring = buttonAnchor.AddComponent<SpringJoint2D>();
 			anchorSpring.autoConfigureDistance = false;
@@ -447,7 +425,6 @@ public class UINew: Singleton<UINew> {
 			anchorSpring.dampingRatio = 0.9f;
 			anchorSpring.frequency = 15f;
 			anchorSpring.connectedBody = button.gameobject.GetComponent<Rigidbody2D>();
-
 			// connect buttons in circular sequence
 			if (n == buttons.Count && n > 2){
 				SpringJoint2D finalSpring = button.gameobject.AddComponent<SpringJoint2D>();
@@ -481,15 +458,10 @@ public class UINew: Singleton<UINew> {
 		GameObject indicator = Instantiate(Resources.Load("UI/defaultButtonIndicator")) as GameObject;
 		indicator.transform.SetParent(button.gameobject.transform, false);
 		indicator.transform.SetAsLastSibling();
-		// Image image = button.gameobject.GetComponent<Image>();
-		// image.sprite = Resources.Load<Sprite>("sprites/UI/BoxTexture5");
 	}
 	public void CreateActionButtons(List<Interaction> manualActions, Interaction defaultInteraction){
-		// Debug.Log("create action buttons");
 		ClearActionButtons();
-		// Debug.Break();
 		List<actionButton> manualButtons = CreateButtonsFromActions(manualActions, true);
-		// Debug.Break();
 		foreach (actionButton button in manualButtons){
 			bottomElements.Add(button.gameobject);
 			button.buttonScript.manualAction = true;
@@ -498,9 +470,7 @@ public class UINew: Singleton<UINew> {
 		}
 		ArrangeButtonsOnScreenTop(manualButtons);
 	}
-
 	public void ClearActionButtons(){
-		// Debug.Log("clear action buttons");
 		foreach (GameObject element in bottomElements)
 			Destroy(element);
 		bottomElements = new List<GameObject>();
