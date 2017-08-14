@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-// using System.Collections;
 using System.Collections.Generic;
 
 public class Interactor{
@@ -30,7 +29,6 @@ public class Interactor{
 		}
 		return returnInteraction;
 	}
-
 	static public List<Interaction> ReportFreeActions(GameObject targ){
 		List<Interaction> returnDictionary = new List<Interaction> ();
 		foreach (Interactive interactive in targ.GetComponentsInChildren<Interactive>() ){
@@ -68,16 +66,4 @@ public class Interactor{
 		}
 		return returnDictionary;
 	}
-	// static public List<Interaction> ReportActions(GameObject targ, GameObject source){
-	// 	List<Interactive> interactives = new List<Interactive> (source.GetComponentsInChildren<Interactive>() );
-	// 	List<Interaction> returnDictionary = new List<Interaction> ();
-	// 	foreach (Interactive interactive in interactives)
-	// 		interactive.target = targ;
-	// 	foreach (Interactive interactive in interactives){
-	// 		List<Interaction> possibleActions = interactive.GetEnabledActions();
-	// 		foreach (Interaction action in possibleActions)
-	// 			returnDictionary.Add(action);
-	// 	}
-	// 	return returnDictionary;
-	// }
 }
