@@ -29,7 +29,7 @@ public class Head : Interactive, IExcludable {
 	public void DonHat(Hat h){
 		if (hat)
 			RemoveHat();
-		Messenger.Instance.ClaimObject(h.gameObject,this);
+		Messenger.Instance.ClaimObject(h.gameObject, this);
 		hat = h;
 
 		PhysicalBootstrapper phys = hat.GetComponent<PhysicalBootstrapper>();
@@ -39,7 +39,8 @@ public class Head : Interactive, IExcludable {
 		hatPoint.transform.localScale = Vector3.one;
 		transform.localScale = Vector3.one;
 		hat.transform.rotation = Quaternion.identity;
-		hat.transform.parent = hatPoint.transform;
+		// hat.transform.parent = hatPoint.transform;
+		hat.transform.SetParent(hatPoint.transform, true);
 		hat.transform.rotation = Quaternion.identity;
 		hat.GetComponent<Rigidbody2D>().isKinematic = true;
 		hat.GetComponent<Collider2D>().isTrigger = true;
