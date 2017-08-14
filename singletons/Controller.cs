@@ -25,7 +25,7 @@ public class Controller : Singleton<Controller> {
         }
     }
 	private GameObject lastLeftClicked;
-	public List<string> forbiddenColliders = new List<string> {"fire", "sightcone", "table", "background"};
+	public List<string> forbiddenColliders = new List<string> {"fire", "sightcone", "table", "background", "occurrenceFlag"};
 	public string message = "smoke weed every day";
     public enum SelectType{
         none, swearAt
