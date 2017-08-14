@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-// using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System;
@@ -17,7 +16,6 @@ public class Interaction {
 	public bool hideInRightClickMenu;
 	public bool staticInteraction;
 	public int defaultPriority;
-	// public float range = 0.35f ^ 2f;
 	public float range = Mathf.Pow(0.35f, 2f);
 	public bool limitless = false;
 	public bool dontWipeInterface = false;
@@ -31,19 +29,13 @@ public class Interaction {
 			ConfigureValidator();
 		}
 	}
-
 	public Action<Component> actionDelegate;
 	public bool continuous;
-	
-	
 	private System.Reflection.MethodInfo methodInfo;
 	private System.Reflection.MethodInfo validationMethodInfo;
 	private System.Reflection.MethodInfo descMethodInfo;
 	public string descString = null;
-	
-	
-	public Interaction (Interactive o, string name, string action) : this(o,name,action,false,false){ }
-	
+	public Interaction (Interactive o, string name, string action) : this(o, name, action, false, false){ }
 	public Interaction (Interactive o, string name, string action, bool manualHide, bool rightHide){
 		this.action = action;
 		actionName = name;
@@ -82,7 +74,6 @@ public class Interaction {
 		parameters = new List<Component>();
 		int parameterMatches = 0;
 		int parameterMisses = 0;
-		
 		// set up the parameter list: check each Type required to be passed, check
 		// if any Component in targetComponents is of that type, if so add it to 
 		// the parameter list.
@@ -110,7 +101,6 @@ public class Interaction {
 				parameterMisses++;
 			}
 		}
-		
 		if (parameterMatches == parameterTypes.Count){
 			enabled = true;
 			// if a validation function is specified, we have to also check to see whether it 
@@ -126,7 +116,6 @@ public class Interaction {
 			enabled = false;
 		}
 	}
-	
 	public bool IsValid(){
 		bool validation = true;
 		if (validationFunction){
@@ -140,7 +129,6 @@ public class Interaction {
 		}
 		return validation;
 	}
-
 	public string Description(){
 		if (descString != null){
 			return descString;
@@ -155,7 +143,6 @@ public class Interaction {
 			return "";
 		}
 	}
-	
 	// this can be sped up if I store it in a delegate instead of calling Invoke
 	public void DoAction(){
 		if (!enabled)
@@ -170,12 +157,8 @@ public class Interaction {
 			actionDelegate(parameters[0] as Component);
 		}
 	}
-	
 }
-
-
 public class Interactive : MonoBehaviour{
-
 	private GameObject _target;
 	public GameObject target{
 		get{return _target;}
@@ -184,10 +167,8 @@ public class Interactive : MonoBehaviour{
 			targetUpdate();
 		}
 	}
-
 	public bool disableInteractions;
 	public List<Interaction> interactions = new List<Interaction>();
-
 	public List<Interaction> GetEnabledActions(){
 		List<Interaction> returnList = new List<Interaction>();
 		foreach (Interaction interaction in interactions){
@@ -196,7 +177,6 @@ public class Interactive : MonoBehaviour{
 		}
 		return returnList;
 	}
-
 	public List<Interaction> GetRightClickActions(){
 		List<Interaction> returnList = new List<Interaction> ();
 		foreach (Interaction interaction in interactions){
@@ -205,7 +185,6 @@ public class Interactive : MonoBehaviour{
 		}
 		return returnList;
 	}
-
 	public List<Interaction> GetManualActions(){
 		List<Interaction> returnList = new List<Interaction> ();
 		foreach (Interaction interaction in interactions){
@@ -214,7 +193,6 @@ public class Interactive : MonoBehaviour{
 		}
 		return returnList;	
 	}
-
 	public List<Interaction> GetFreeActions(){
 		// Free interactions have no required input, and therefore 
 		List<Interaction> returnList = new List<Interaction> ();
@@ -226,7 +204,6 @@ public class Interactive : MonoBehaviour{
 		}
 		return returnList;
 	}
-
 	public void CallAction(string requestAction, bool continuous = false){
 		Interaction doThis = null;
 		// this logic might be tuned up a bit- checking versus duplicate action names
@@ -238,10 +215,7 @@ public class Interactive : MonoBehaviour{
 		if ( doThis != null  ){
 			doThis.DoAction();
 		}
-
 	}
-
-
 	public Interaction GetAction(string requestAction){
 		Interaction returnAction = null;
 		// this logic might be tuned up a bit- checking versus duplicate action names
@@ -249,20 +223,16 @@ public class Interactive : MonoBehaviour{
 			if (interaction.actionName == requestAction )
 				returnAction = interaction;
 		}
-
 		return returnAction;
 	}
-
 	private void targetUpdate(){
 		// this is what i will have to update: change from monobehavior to InteractiveBase
 		// and take only the enabled ones
 		Interactive[] components = target.GetComponentsInChildren<Interactive>();
-
 		var actives = 
 			from iBase in components
 			where iBase.disableInteractions == false
 			select iBase;
-
 		foreach (Interaction interaction in interactions){
 			if (!interaction.staticInteraction ){
 				interaction.targetComponents = new List<Interactive>(actives);
@@ -270,7 +240,6 @@ public class Interactive : MonoBehaviour{
 			}
 		}
 	}
-
 	public Interaction ReportHighestPriority(){
 		Interaction returnInteraction = null;
 		int highestP = 0;
@@ -282,5 +251,4 @@ public class Interactive : MonoBehaviour{
 		}
 		return returnInteraction;
 	}
-
 }
