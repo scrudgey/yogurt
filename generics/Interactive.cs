@@ -20,7 +20,7 @@ public class Interaction {
 	public bool limitless = false;
 	public bool dontWipeInterface = false;
 	public string actionName;
-	public bool reversible = true;
+	// public bool reversible = true;
 	private bool _validationFunction;
 	public bool validationFunction{
 		get {return _validationFunction;}
@@ -159,14 +159,17 @@ public class Interaction {
 	}
 }
 public class Interactive : MonoBehaviour{
-	private GameObject _target;
-	public GameObject target{
-		get{return _target;}
-		set{
-			_target = value;
-			targetUpdate();
-		}
-	}
+	// private GameObject _target;
+	// public GameObject target{
+	// 	get{return _target;}
+	// 	set{
+	// 		_target = value;
+	// 		targetUpdate();
+	// 	}
+	// }
+	// make this value false if the player can't force another instance of this interactive
+	// to take actions.
+	public bool reversibleActions = true;
 	public bool disableInteractions;
 	public List<Interaction> interactions = new List<Interaction>();
 	public List<Interaction> GetEnabledActions(){
@@ -225,10 +228,10 @@ public class Interactive : MonoBehaviour{
 		}
 		return returnAction;
 	}
-	private void targetUpdate(){
+	public void targetUpdate(List<Interactive> components){
 		// this is what i will have to update: change from monobehavior to InteractiveBase
 		// and take only the enabled ones
-		Interactive[] components = target.GetComponentsInChildren<Interactive>();
+		// Interactive[] components = target.GetComponentsInChildren<Interactive>();
 		var actives = 
 			from iBase in components
 			where iBase.disableInteractions == false
