@@ -20,7 +20,7 @@ public class Head : Interactive, IExcludable {
 		Interaction wearAct = new Interaction(this, "Wear", "DonHat");
 		wearAct.dontWipeInterface = false;
 		wearAct.validationFunction = true;
-		wearAct.reversible = false;
+		// wearAct.reversible = false;
 		interactions.Add(wearAct);
 		hatPoint = transform.Find("hatPoint").gameObject;
 		LoadInitialized = true;
