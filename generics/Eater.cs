@@ -47,9 +47,12 @@ public class Eater : Interactive {
 			LoadInit();
 	}
 	public void LoadInit(){
+		// reversibleActions = false;
 		Interaction eatAction = new Interaction(this, "Eat", "Eat");
 		eatAction.defaultPriority = 1;
 		eatAction.dontWipeInterface = false;
+		// eatAction.otherConsent = false;
+		eatAction.otherOnPlayerConsent = false;
 		interactions.Add(eatAction);
 		LoadInitialized = true;
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);

@@ -86,7 +86,9 @@ public class Controller : Singleton<Controller> {
 	GameObject GetBaseInteractive(Transform target){
 		Transform currentChild = target;
 		while (true){
-			if (currentChild.name.Substring(Mathf.Max(0, currentChild.name.Length-6)) == "Ground"){
+			// if (currentChild.name.Substring(Mathf.Max(0, currentChild.name.Length-6)) == "Ground"){
+
+			if (currentChild.tag == "Physical"){
 				// Debug.Log("found ground, returning "+currentChild.gameObject.name);
 				return currentChild.gameObject;
 			}

@@ -44,6 +44,7 @@ public class LiquidContainer : Interactive {
 		Interaction fillContainer = new Interaction(this, "Fill", "FillFromContainer");
 		Interaction drinker = new Interaction(this, "Drink", "Drink");
 		drinker.validationFunction = true;
+		drinker.playerOnOtherConsent = false;
 		interactions.Add(drinker);
 		fillContainer.validationFunction = true;
 		interactions.Add(fillContainer);

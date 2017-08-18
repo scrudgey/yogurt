@@ -34,16 +34,21 @@ public class Speech : Interactive, IMessagable {
 			LoadInit();
 	}
     void LoadInit(){
+        // reversibleActions = false;
         LoadInitialized = true;
         Interaction speak = new Interaction(this, "Look", "Describe", true, false);
 		speak.limitless = true;
-        speak.reversible = false;
+        speak.otherOnPlayerConsent = false;
+        speak.playerOnOtherConsent = false;
+        speak.inertOnPlayerConsent = false;
+        // speak.reversible = false;
 		speak.dontWipeInterface = false;
 		interactions.Add(speak);
         if (!disableSpeakWith){
             Interaction speakWith = new Interaction(this, "Talk...", "SpeakWith");
             speakWith.limitless = true;
             speakWith.validationFunction = true;
+            // speakWith.debug = true;
             interactions.Add(speakWith);
         }
         flipper = transform.Find("SpeechChild").gameObject;

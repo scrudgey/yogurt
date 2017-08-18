@@ -58,7 +58,9 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		holdSortGroup = holdpoint.GetComponent<SortingGroup>();
 		Interaction getAction = new Interaction(this, "Get", "GetItem", true, false);
 		getAction.dontWipeInterface = false;
-		getAction.reversible = false;
+		getAction.otherOnPlayerConsent = false;
+		getAction.playerOnOtherConsent = false;
+		// getAction.hideInManualActions = true;
 		interactions.Add(getAction);
 		Interaction swingAction = new Interaction(this, "Swing", "SwingItem", false, true);
 		swingAction.defaultPriority = 5;

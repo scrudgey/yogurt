@@ -7,14 +7,14 @@ using System;
 public class Interaction {
 	public List<System.Type> parameterTypes;
 	public List<Interactive> targetComponents;
-	public bool enabled;
+	public bool enabled = true;
 	public bool debug;
 	public Interactive parent;
 	public string action;
 	public List<Component> parameters;
 	public bool hideInManualActions;
 	public bool hideInRightClickMenu;
-	public bool staticInteraction;
+	// public bool staticInteraction;
 	public int defaultPriority;
 	public float range = Mathf.Pow(0.35f, 2f);
 	public bool limitless = false;
@@ -34,6 +34,10 @@ public class Interaction {
 	private System.Reflection.MethodInfo methodInfo;
 	private System.Reflection.MethodInfo validationMethodInfo;
 	private System.Reflection.MethodInfo descMethodInfo;
+	public bool playerOnOtherConsent = true;
+	public bool otherOnPlayerConsent = true;
+	public bool inertOnPlayerConsent = true;
+	// public bool inertConsent = true;
 	public string descString = null;
 	public Interaction (Interactive o, string name, string action) : this(o, name, action, false, false){ }
 	public Interaction (Interactive o, string name, string action, bool manualHide, bool rightHide){
@@ -102,6 +106,8 @@ public class Interaction {
 			}
 		}
 		if (parameterMatches == parameterTypes.Count){
+			if (debug)
+				Debug.Log("enabled");
 			enabled = true;
 			// if a validation function is specified, we have to also check to see whether it 
 			// is okay with being enabled.
@@ -113,19 +119,21 @@ public class Interaction {
 					enabled = false;
 			}
 		} else {
+			if (debug)
+				Debug.Log("disabled");
 			enabled = false;
 		}
 	}
 	public bool IsValid(){
 		bool validation = true;
 		if (validationFunction){
-				if (validationMethodInfo == null)
-					ConfigureValidator();
-				if (parameters != null){
-					validation = (bool)validationMethodInfo.Invoke(parent, parameters.ToArray());
-				} else {
-					validation = (bool)validationMethodInfo.Invoke(parent, null);
-				}
+			if (validationMethodInfo == null)
+				ConfigureValidator();
+			if (parameters != null){
+				validation = (bool)validationMethodInfo.Invoke(parent, parameters.ToArray());
+			} else {
+				validation = (bool)validationMethodInfo.Invoke(parent, null);
+			}
 		}
 		return validation;
 	}
@@ -159,19 +167,13 @@ public class Interaction {
 	}
 }
 public class Interactive : MonoBehaviour{
-	// private GameObject _target;
-	// public GameObject target{
-	// 	get{return _target;}
-	// 	set{
-	// 		_target = value;
-	// 		targetUpdate();
-	// 	}
-	// }
-	// make this value false if the player can't force another instance of this interactive
-	// to take actions.
-	public bool reversibleActions = true;
 	public bool disableInteractions;
 	public List<Interaction> interactions = new List<Interaction>();
+	// public void NullOutInteractions(){
+	// 	foreach (Interaction interaction in interactions){
+	// 		interaction.enabled = false;
+	// 	}
+	// }
 	public List<Interaction> GetEnabledActions(){
 		List<Interaction> returnList = new List<Interaction>();
 		foreach (Interaction interaction in interactions){
@@ -181,7 +183,7 @@ public class Interactive : MonoBehaviour{
 		return returnList;
 	}
 	public List<Interaction> GetRightClickActions(){
-		List<Interaction> returnList = new List<Interaction> ();
+		List<Interaction> returnList = new List<Interaction>();
 		foreach (Interaction interaction in interactions){
 			if (interaction.enabled && !interaction.hideInRightClickMenu && interaction.parameterTypes.Count > 0)
 				returnList.Add(interaction);
@@ -196,11 +198,29 @@ public class Interactive : MonoBehaviour{
 		}
 		return returnList;	
 	}
-	public List<Interaction> GetFreeActions(){
+	public List<Interaction> GetFreeActions(GameObject target, GameObject source){
+		targetType targType = TypeOfTarget(target);
+		targetType sourceType = TypeOfTarget(source);
 		// Free interactions have no required input, and therefore 
 		List<Interaction> returnList = new List<Interaction> ();
 		foreach (Interaction interaction in interactions){
+			if (interaction.debug)
+				Debug.Log("free action "+interaction.actionName+" checking");
+			if (!interaction.playerOnOtherConsent && sourceType == targetType.player && targType == targetType.other){
+				interaction.enabled = false;
+				continue;
+			}
+			if (!interaction.otherOnPlayerConsent && sourceType == targetType.other && targType == targetType.player){
+				interaction.enabled = false;
+				continue;
+			}
+			if (!interaction.inertOnPlayerConsent && sourceType == targetType.inert && targType == targetType.player){
+				interaction.enabled = false;
+				continue;
+			}
 			if (interaction.parameterTypes.Count == 0 && interaction.IsValid()){
+				if (interaction.debug)
+					Debug.Log("free action "+interaction.actionName+" enabled free action");
 				returnList.Add(interaction);
 				interaction.enabled = true;
 			}
@@ -228,19 +248,50 @@ public class Interactive : MonoBehaviour{
 		}
 		return returnAction;
 	}
-	public void targetUpdate(List<Interactive> components){
-		// this is what i will have to update: change from monobehavior to InteractiveBase
-		// and take only the enabled ones
-		// Interactive[] components = target.GetComponentsInChildren<Interactive>();
+	public enum targetType {inert, player, other};
+	static public Interactive.targetType TypeOfTarget(GameObject target){
+		if (target.transform.IsChildOf(GameManager.Instance.playerObject.transform)){
+			return targetType.player;
+		}
+		List<DecisionMaker> AIs = new List<DecisionMaker>(target.GetComponentsInParent<DecisionMaker>());
+		if (AIs.Count() > 0){
+			return targetType.other;
+		}
+		return targetType.inert;
+	}
+	public void targetUpdate(List<Interactive> components, GameObject targ, GameObject source){
+		Interactive.targetType targType = TypeOfTarget(targ);
+		Interactive.targetType sourceType = TypeOfTarget(source);
 		var actives = 
 			from iBase in components
 			where iBase.disableInteractions == false
 			select iBase;
 		foreach (Interaction interaction in interactions){
-			if (!interaction.staticInteraction ){
-				interaction.targetComponents = new List<Interactive>(actives);
-				interaction.CheckDependency();
+			// if (interaction.debug){
+			// 	Debug.Log("Checking the consent for interaction "+interaction.actionName);
+			// 	Debug.Log("target is "+targType.ToString());
+			// 	Debug.Log("source is "+sourceType);
+			// 	Debug.Log("other on player consent: "+interaction.otherOnPlayerConsent);
+			// 	Debug.Log("player on other consent: "+interaction.playerOnOtherConsent);
+			// 	Debug.Log("inert on other consent: "+interaction.inertOnPlayerConsent);
+			// }
+			interaction.targetComponents = new List<Interactive>(actives);
+			if (!interaction.playerOnOtherConsent && sourceType == targetType.player && targType == targetType.other){
+				interaction.enabled = false;
+				continue;
 			}
+			if (!interaction.otherOnPlayerConsent && sourceType == targetType.other && targType == targetType.player){
+				interaction.enabled = false;
+				continue;
+			}
+			if (!interaction.inertOnPlayerConsent && sourceType == targetType.inert && targType == targetType.player){
+				interaction.enabled = false;
+				continue;
+			}
+			interaction.CheckDependency();
+			if (interaction.debug)
+				Debug.Log("interaction enabled : "+interaction.enabled);
+			continue;
 		}
 	}
 	public Interaction ReportHighestPriority(){

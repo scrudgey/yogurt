@@ -191,12 +191,12 @@ public class Controllable : MonoBehaviour, IMessagable {
 			return;
 		if (inv.holding){
 			List<Interaction> manualActions = Interactor.ReportManualActions(inv.holding.gameObject, gameObject);
-			foreach (Interaction inter in Interactor.ReportRightClickActions(gameObject, inv.holding.gameObject))
-				if (!manualActions.Contains(inter))   // inverse double-count diode
-					manualActions.Add(inter);
-			foreach (Interaction inter in Interactor.ReportFreeActions(inv.holding.gameObject))
-				if (!manualActions.Contains(inter))
-					manualActions.Add(inter);
+			// foreach (Interaction inter in Interactor.ReportRightClickActions(gameObject, inv.holding.gameObject))
+			// 	if (!manualActions.Contains(inter))   // inverse double-count diode
+			// 		manualActions.Add(inter);
+			// foreach (Interaction inter in Interactor.ReportFreeActions(inv.holding.gameObject, inv.gameObject))
+			// 	if (!manualActions.Contains(inter))
+			// 		manualActions.Add(inter);
 			defaultInteraction = Interactor.GetDefaultAction(manualActions);
 			if (Controller.Instance.focus == this)
 				UINew.Instance.CreateActionButtons(manualActions, defaultInteraction);
