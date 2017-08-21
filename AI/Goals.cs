@@ -77,15 +77,17 @@ namespace AI {
 		public bool phoneCalled;
 		private RoutineUseTelephone telRoutine;
 		public GoalUsePhone(GameObject g, Controllable c): base(g, c){
+			successCondition = new ConditionBoolSwitch(g);
 			Telephone phoneObject = GameObject.FindObjectOfType<Telephone>();
+			// Debug.Log(successCondition);
 			if (phoneObject){
 				Ref<GameObject> phoneRef = new Ref<GameObject>(phoneObject.gameObject);
-				successCondition = new ConditionBoolSwitch(g);
 				telRoutine = new RoutineUseTelephone(g, c, phoneRef, (ConditionBoolSwitch)successCondition);
 				routines.Add(telRoutine);
 			}
 		}
 		public override void Update(){
+			// Debug.Log(successCondition);
 			base.Update();
 			if (successCondition.Evaluate() == status.success && !phoneCalled){
 				phoneCalled = true;
@@ -138,6 +140,7 @@ namespace AI {
 			// GameObject targetObject = GameObject.FindObjectOfType<typeof(objType)>();
 			UnityEngine.Object obj = GameObject.FindObjectOfType(objType);
 			Component targetComponent = (Component)obj;
+			successCondition = new ConditionFail(g);
 			if (targetComponent != null){
 				GameObject targetObject = targetComponent.gameObject;
 				target = new Ref<GameObject>(targetObject);
