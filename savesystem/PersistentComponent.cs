@@ -5,10 +5,11 @@ using UnityEngine;
 public class PersistentComponent {
 	public string type;
 	public string parentObject;
-	public SerializableDictionary<string,string> strings =		 new SerializableDictionary<string,string>();
-	public SerializableDictionary<string,int> ints = 			 new SerializableDictionary<string,int> ();
-	public SerializableDictionary<string,float> floats = 		 new SerializableDictionary<string,float>();
-	public SerializableDictionary<string,bool> bools = 			 new SerializableDictionary<string,bool >();
+	public SerializableDictionary<string, string> strings =		 new SerializableDictionary<string, string>();
+	public SerializableDictionary<string, int> ints = 			 new SerializableDictionary<string, int> ();
+	public SerializableDictionary<string, float> floats = 		 new SerializableDictionary<string, float>();
+	public SerializableDictionary<string, bool> bools = 		 new SerializableDictionary<string, bool>();
+	public SerializableDictionary<string, Vector3> vectors = 	 new SerializableDictionary<string, Vector3>();
 	// TODO: initialize lists as necessary
 	public List<SerializedKnowledge> knowledgeBase;
 	public List<SerializedPersonalAssessment> people;
