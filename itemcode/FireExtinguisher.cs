@@ -23,7 +23,6 @@ public class FireExtinguisher : Interactive, IDirectable {
 		spray.dontWipeInterface = true;
 		spray.otherOnPlayerConsent = false;
 		spray.playerOnOtherConsent = false;
-		// spray.debug = true;
 		interactions.Add(spray);
 
 		Interaction spray2 = new Interaction(this, "Spray", "SprayObject", true, false);
@@ -33,7 +32,6 @@ public class FireExtinguisher : Interactive, IDirectable {
 		spray2.limitless = true;
 		spray2.dontWipeInterface = true;
 		spray2.validationFunction = true;
-		// spray2.debug = true;
 		interactions.Add(spray2);
 
 		if (!GetComponent<AudioSource>()){
