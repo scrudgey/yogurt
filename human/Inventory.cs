@@ -34,7 +34,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 	private bool LoadInitialized = false;
 	private GameObject throwObject;
 	private float dropHeight = 0.20f;
-	private Vector2 direction;
+	public Vector2 direction;
 	private float directionAngle;
 	private SortingGroup holdSortGroup;
 	void Start(){
