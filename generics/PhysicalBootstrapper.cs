@@ -21,6 +21,8 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	private Vector3 setV;
 	public GameObject thrownBy;
 	public Collider2D objectCollider;
+	public PersistentComponent loadData;
+	public bool doLoad;
 	public void Start () {
 		tag = "Physical";
 		GetComponent<Renderer>().sortingLayerName="main";
@@ -43,6 +45,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		doInit = false;
 	}
 	public void InitPhysical(float height, Vector3 initialVelocity){
+		// Debug.Log(name + " init physical");
 		doInit = false; 
 		Vector2 initPos = transform.position;
 		Vector2 groundPos = transform.position;
@@ -136,7 +139,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 			return;
 		if (physical.slider.useLimits == false){
 			float dist = coll.collider.Distance(objectCollider).distance;
-			physical.SetSliderLimit(-2 * dist);
+			physical.SetSliderLimit(Mathf.Abs(2 * dist));
 		}
 	}
 	void OnCollisionEnter2D(Collision2D coll){
@@ -205,6 +208,32 @@ public class PhysicalBootstrapper : MonoBehaviour {
 			physical.objectBody.velocity = objectVelocity;
 			groundBody.velocity = groundVelocity;
 			setV = Vector3.zero;
+		}
+		if (doLoad){
+			doLoad = false;
+			initHeight = 0;
+			initVelocity = Vector3.zero;
+			GetComponent<Rigidbody2D>().velocity = Vector3.zero;
+			if (loadData == null)
+				return;
+			if (physical != null){
+				physical.currentMode = (Physical.mode)loadData.ints["mode"];
+				physical.transform.position = loadData.vectors["groundPosition"];
+				physical.hinge.transform.localPosition = loadData.vectors["objectPosition"];
+				Vector2 offset = new Vector2(loadData.floats["horizonOffsetX"], loadData.floats["horizonOffsetY"]);
+				physical.horizonCollider.offset = offset;
+
+				if (physical.currentMode == Physical.mode.fly){
+					physical.StartFlyMode();
+				}
+				if (physical.currentMode == Physical.mode.zip){
+					physical.StartZipMode();
+				}
+				if (physical.currentMode == Physical.mode.ground){
+					physical.StartGroundMode();
+				}
+				physical.objectBody.velocity = Vector3.zero;
+			}
 		}
 	}
 	void OnDestroy(){
