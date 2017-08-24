@@ -21,4 +21,13 @@ public class UIButtonCallbacks : MonoBehaviour {
 		ScriptDirector director = GameObject.FindObjectOfType<ScriptDirector>();
 		director.ResetScript();
 	}
+	public void SaveButtonClick(){
+		MySaver.Save();
+		Debug.Log("save...");
+	}
+	public void LoadButtonClick(){
+		GameManager.Instance.SetFocus(MySaver.LoadScene()); 
+		Debug.Log("load...");
+		// Debug.Break();
+	}
 }
