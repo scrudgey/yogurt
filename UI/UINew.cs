@@ -35,11 +35,14 @@ public class UINew: Singleton<UINew> {
 	private GameObject fightButton;
 	private GameObject punchButton;
 	private GameObject speakButton;	
+	private GameObject saveButton;
+	private GameObject loadButton;
 	private bool init = false;
 	public bool inventoryVisible = false;
 	public Text status;
 	public Text actionTextObject;
 	public string actionTextString;
+	private GameObject bottomDock;
 	private Stack<AchievementPopup.CollectedInfo> collectedStack = new Stack<AchievementPopup.CollectedInfo>();
 	private Stack<Achievement> achievementStack = new Stack<Achievement>();
 	public bool achievementPopupInProgress;
@@ -119,6 +122,9 @@ public class UINew: Singleton<UINew> {
 		fightButton = UICanvas.transform.Find("topdock/FightButton").gameObject;
 		punchButton = UICanvas.transform.Find("topdock/PunchButton").gameObject;
 		speakButton = UICanvas.transform.Find("topdock/SpeakButton").gameObject;
+		saveButton = UICanvas.transform.Find("save").gameObject;
+		loadButton = UICanvas.transform.Find("load").gameObject;
+		bottomDock = UICanvas.transform.Find("bottomdock").gameObject;
 		actionTextObject = UICanvas.transform.Find("bottomdock/ActionText").GetComponent<Text>();
 		lifebar = UICanvas.transform.Find("topright/lifebar/mask/fill").GetComponent<RectTransform>();
 		topRightBar = UICanvas.transform.Find("topright").gameObject;
@@ -130,6 +136,12 @@ public class UINew: Singleton<UINew> {
 		speakButton.SetActive(false);
 		topRightBar.SetActive(false);
 		HidePunchButton();
+		if (!GameManager.Instance.debug){
+			if (saveButton)
+				saveButton.SetActive(false);
+			if (loadButton)
+				loadButton.SetActive(false);
+		}
 	}
 	public void HealthBarOn(){
 		if (healthBarEasingDirection == EasingDirection.none){
@@ -439,6 +451,7 @@ public class UINew: Singleton<UINew> {
 		buttonAnchor.transform.position = target.transform.position;
 		buttonAnchor.transform.SetParent(target.transform);
 		// Debug.Log("anchor screen point: "+renderingCamera.WorldToScreenPoint(target.transform.position).ToString());
+		bottomDock.transform.SetAsLastSibling();
 		return buttonAnchor;
 	}
 	private void ArrangeButtonsOnScreenTop(List<actionButton> buttons){
