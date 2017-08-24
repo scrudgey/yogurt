@@ -239,6 +239,10 @@ public partial class GameManager : Singleton<GameManager> {
 							focusEater.nutrition = 0;
 							focusEater.nausea = 0;
 						}
+						Hurtable playerHurtable = playerObject.GetComponent<Hurtable>();
+						if (playerHurtable){
+							playerHurtable.health = playerHurtable.maxHealth;
+						}
 						MySaver.Save();
 						awaitNewDayPrompt = CheckNewDayPrompt();
 						// TODO: check events related to having completed the last completed commercial
@@ -360,6 +364,8 @@ public partial class GameManager : Singleton<GameManager> {
 			.Cast<GameObject>()
 			.ToArray();
 		foreach (GameObject prefab in achievementPrefabs){
+			if (debug && prefab.name == "StartGame")
+				continue;
 			AchievementComponent component = prefab.GetComponent<AchievementComponent>();
 			if (component){
 				Achievement cloneAchievement = new Achievement(component.achivement);
