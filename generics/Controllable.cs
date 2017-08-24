@@ -60,7 +60,8 @@ public class Controllable : MonoBehaviour, IMessagable {
 	public Interaction defaultInteraction;
 	public bool fightMode;
 	public bool disabled = false;
-	public HitState hitState;
+	public HitState hitState;	
+	public GameObject lastRightClicked;
 	public void ResetInput(){
 		upFlag = false;
 		downFlag = false;
@@ -69,7 +70,6 @@ public class Controllable : MonoBehaviour, IMessagable {
 		shootPressedFlag = false;
 		shootHeldFlag = false;
 	}
-	public GameObject lastRightClicked;
 	public virtual void Start(){
 		foreach(Component component in gameObject.GetComponentsInChildren<Component>())
 		{
@@ -84,7 +84,6 @@ public class Controllable : MonoBehaviour, IMessagable {
 		}
 		if (hitState > Controllable.HitState.none){
 			ResetInput();
-			// return;
 		}
 		if (rightFlag || leftFlag)
 			lastPressed = "right";
