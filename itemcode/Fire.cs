@@ -13,15 +13,24 @@ public class Fire : MonoBehaviour {
 		message = new MessageDamage(1f, damageType.fire);
 	}
 	void Update(){
+		if (flammable)
+			if (flammable.noDamage)
+				return;
 		damageTimer += Time.deltaTime;
 		if (damageTimer > 0.2f){
 			damageTimer = 0;
 			if (flammable)
 				message.responsibleParty = flammable.responsibleParty;
+			// process the objects in the damage queue.
+			// do not send a damage message to anything above me in the transform tree: 
+			// this is so that the player can hold a flaming object without being hurt.
 			foreach(GameObject obj in damageQueue){
+				if (obj == null)
+					continue;
+				if (transform.IsChildOf(obj.transform.root))
+					continue;
 				if (obj != null){
 					Toolbox.Instance.SendMessage(obj, this, message);
-					Debug.Log("fire damaging "+obj.name);
 				}
 			}
 			damageQueue = new HashSet<GameObject>();
@@ -41,7 +50,7 @@ public class Fire : MonoBehaviour {
 			return;
 		if (forbiddenTags.Contains(coll.tag))
 			return;
-		damageQueue.Add(coll.gameObject);
+		damageQueue.Add(coll.transform.root.gameObject);
 		if (flammables.ContainsKey(coll.gameObject)){
 			flammables[coll.gameObject].heat += Time.deltaTime * 2f;
 			if (flammable.responsibleParty != null){
