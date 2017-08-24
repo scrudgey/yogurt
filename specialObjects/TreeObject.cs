@@ -15,6 +15,8 @@ public class TreeObject : MonoBehaviour, IMessagable {
 	public void ReceiveMessage(Message incoming){
 		if (incoming is MessageDamage){
 			MessageDamage message = (MessageDamage)incoming;
+			if (message.type != damageType.physical)
+				return;
 			if (message.impactor)
 					message.impactor.PlayImpactSound();
 			StartShake();
