@@ -14,13 +14,11 @@ public class Interaction {
 	public List<Component> parameters;
 	public bool hideInManualActions;
 	public bool hideInRightClickMenu;
-	// public bool staticInteraction;
 	public int defaultPriority;
 	public float range = Mathf.Pow(0.35f, 2f);
 	public bool limitless = false;
 	public bool dontWipeInterface = false;
 	public string actionName;
-	// public bool reversible = true;
 	private bool _validationFunction;
 	public bool validationFunction{
 		get {return _validationFunction;}
@@ -37,7 +35,6 @@ public class Interaction {
 	public bool playerOnOtherConsent = true;
 	public bool otherOnPlayerConsent = true;
 	public bool inertOnPlayerConsent = true;
-	// public bool inertConsent = true;
 	public string descString = null;
 	public Interaction (Interactive o, string name, string action) : this(o, name, action, false, false){ }
 	public Interaction (Interactive o, string name, string action, bool manualHide, bool rightHide){
@@ -167,13 +164,9 @@ public class Interaction {
 	}
 }
 public class Interactive : MonoBehaviour{
+	// TODO: cache default action parameters
 	public bool disableInteractions;
 	public List<Interaction> interactions = new List<Interaction>();
-	// public void NullOutInteractions(){
-	// 	foreach (Interaction interaction in interactions){
-	// 		interaction.enabled = false;
-	// 	}
-	// }
 	public List<Interaction> GetEnabledActions(){
 		List<Interaction> returnList = new List<Interaction>();
 		foreach (Interaction interaction in interactions){
@@ -250,9 +243,10 @@ public class Interactive : MonoBehaviour{
 	}
 	public enum targetType {inert, player, other};
 	static public Interactive.targetType TypeOfTarget(GameObject target){
-		if (target.transform.IsChildOf(GameManager.Instance.playerObject.transform)){
-			return targetType.player;
-		}
+		if (GameManager.Instance.playerObject != null)
+			if (target.transform.IsChildOf(GameManager.Instance.playerObject.transform)){
+				return targetType.player;
+			}
 		List<DecisionMaker> AIs = new List<DecisionMaker>(target.GetComponentsInParent<DecisionMaker>());
 		if (AIs.Count() > 0){
 			return targetType.other;
