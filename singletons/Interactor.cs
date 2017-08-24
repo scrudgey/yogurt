@@ -59,8 +59,6 @@ public class Interactor{
 		List<Interactive>targetInteractives = new List<Interactive>();
 		List<Interactive>sourceInteractives = new List<Interactive>();
 		targetInteractives = GetInteractorTree(targ);
-		// foreach(Interactive interactive in targetInteractives)
-		// 	Debug.Log(interactive);
 		sourceInteractives = GetInteractorTree(source);
 		List<Interaction>returnDictionary = new List<Interaction>();
 		foreach (Interactive interactive in sourceInteractives)
@@ -95,7 +93,7 @@ public class Interactor{
 		Pickup pickup = target.GetComponent<Pickup>();
 		if (pickup != null){
 			// Debug.Log("pickup");
-			Debug.Log(pickup.holder);
+			// Debug.Log(pickup.holder);
 			if (pickup.holder != null)
 				targetInteractives.AddRange(pickup.holder.gameObject.GetComponents<Interactive>());
 		}
