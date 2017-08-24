@@ -5,7 +5,6 @@ public class Telephone : Item {
 	public Doorway enterDoor;
 	public float fireTime;
 	public AudioClip phoneUp;
-	// public AudioClip dialTone;
 	public AudioClip phoneDown;
 	void Start () {
 		source = Toolbox.Instance.SetUpAudioSource(gameObject);
