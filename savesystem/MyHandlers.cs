@@ -31,9 +31,10 @@ public class InventoryHandler : SaveHandler<Inventory> {
 				data.ints["item"+i.ToString()] = resolver.ResolveReference(instance.items[i], data.persistent);
 			}
 		} 
+		data.vectors["direction"] = instance.direction;
 	}
 	public override void LoadData(Inventory instance, PersistentComponent data){
-
+		instance.direction = data.vectors["direction"];
 		if (data.ints["holdingID"] != -1){
 			if (MySaver.loadedObjects.ContainsKey(data.ints["holdingID"]) ){
 				instance.GetItem( MySaver.loadedObjects[data.ints["holdingID"]].GetComponent<Pickup>() );
@@ -73,10 +74,11 @@ public class ContainerHandler: SaveHandler<Container> {
 		instance.disableContents = 						data.bools["disableContents"];
 		if (data.ints["itemCount"] > 0){
 			for (int i = 0; i < data.ints["itemCount"]; i++){
-				instance.AddItem(MySaver.loadedObjects[data.ints["item"+i.ToString()] ].GetComponent<Pickup>());
+				instance.AddItem(MySaver.loadedObjects[data.ints["item"+i.ToString()]].GetComponent<Pickup>());
 				PhysicalBootstrapper phys = instance.items[i].GetComponent<PhysicalBootstrapper>();
 				if (phys)
 					phys.doInit = false;
+				// Debug.Log("container containing "+MySaver.loadedObjects[data.ints["item"+i.ToString()]].name);
 			}
 		}
 	}
@@ -136,14 +138,27 @@ public class PackageHandler: SaveHandler<Package> {
 		instance.contents = data.strings["contents"];
 	}
 }
-
-
 public class PhysicalBootStrapperHandler: SaveHandler<PhysicalBootstrapper> {
 	public override void SaveData(PhysicalBootstrapper instance, PersistentComponent data, ReferenceResolver resolver){
 		data.bools["doInit"] = instance.doInit;
+		data.bools["physical"] = false;
+		if (instance.physical != null){
+			if (!instance.physical.isActiveAndEnabled)
+				return;
+			data.bools["physical"] = true;
+			data.ints["mode"] = (int)instance.physical.currentMode;
+			data.vectors["groundPosition"] = instance.physical.transform.position;
+			data.vectors["objectPosition"] = instance.physical.hinge.transform.localPosition;
+
+			data.floats["horizonOffsetX"] = instance.physical.horizonCollider.offset.x;
+			data.floats["horizonOffsetY"] = instance.physical.horizonCollider.offset.y;
+		}
 	}
 	public override void LoadData(PhysicalBootstrapper instance, PersistentComponent data){
-		instance.doInit = data.bools["doInit"];
+		if (data.bools["physical"]){
+			instance.loadData = data;
+		}
+		instance.doLoad = true;
 	}
 }
 // to add: food preference enums
@@ -155,6 +170,7 @@ public class EaterHandler: SaveHandler<Eater> {
 		instance.nutrition = data.floats["nutrition"];
 	}
 }
+// public class 
 public class AdvancedAnimationHandler: SaveHandler<AdvancedAnimation> {
 	public override void SaveData(AdvancedAnimation instance, PersistentComponent data, ReferenceResolver resolver){
 		data.strings["baseName"] = instance.baseName;
@@ -294,6 +310,24 @@ public class HurtableHandler: SaveHandler<Hurtable>{
 		instance.hitState = (Controllable.HitState)data.ints["hitstate"];
 	}
 }
+public class HumanoidHandler: SaveHandler<Humanoid>{
+	public override void SaveData(Humanoid instance, PersistentComponent data, ReferenceResolver resolver){
+		data.strings["lastPressed"] = instance.lastPressed;
+		data.vectors["direction"] = instance.direction;
+		data.bools["fightMode"] = instance.fightMode;
+		data.bools["disabled"] = instance.disabled;
+		data.ints["hitstate"] = (int)instance.hitState;
+	}
+	public override void LoadData(Humanoid instance, PersistentComponent data){
+		instance.lastPressed = data.strings["lastPressed"];
+		instance.SetDirection(data.vectors["direction"]);
+		instance.disabled = data.bools["disabled"];
+		instance.hitState = (Controllable.HitState)data.ints["hitstate"];
+		if (data.bools["fightMode"] && !instance.fightMode){
+			instance.ToggleFightMode();
+		}	
+	}
+}
 public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
 	static List<Type> priorityTypes = new List<Type>(){
 		{typeof(PriorityAttack)},
@@ -318,11 +352,6 @@ public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
 	public override void LoadData(DecisionMaker instance, PersistentComponent data){
 		instance.hitState = (Controllable.HitState)data.ints["hitstate"];
 		instance.initialAwareness = new List<GameObject>();
-		// if (data.ints.ContainsKey("possession")){
-		// 	instance.possession = MySaver.loadedObjects[data.ints["possession"]];
-		// 	// instance.awareness.possession = MySaver.loadedObjects[data.ints["possession"]];
-		// 	instance.initialAwareness.Add(MySaver.loadedObjects[data.ints["possession"]]);
-		// }
 		foreach (Priority priority in instance.priorities){
 			foreach (Type priorityType in priorityTypes){
 				if (priority.GetType() == priorityType){
@@ -410,5 +439,6 @@ public class AwarenessHandler: SaveHandler<Awareness>{
 		return assessment;
 	}
 }
+
 
 
