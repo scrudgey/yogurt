@@ -32,6 +32,7 @@ public class Physical : MonoBehaviour, IMessagable {
 		InitValues();
 	}
 	void Start() {
+		// Debug.Log(name + " physical start");
 		// ignore collisions between ground and all other objects
 		foreach(Physical phys in GameObject.FindObjectsOfType<Physical>()){
 			if (phys == this)
@@ -123,12 +124,15 @@ public class Physical : MonoBehaviour, IMessagable {
 		}
 	}
 	public void GroundMode (){
+		// Debug.Log(name + " groundmode");
 		doGround = true;
 	}
 	public void FlyMode(){
+		// Debug.Log(name + " flymode");
 		doFly = true;
 	}
 	public void ZipMode(){
+		// Debug.Log(name + " zipmode");
 		doZip = true;
 	}
 	public void SetSliderLimit(float offset){
@@ -140,17 +144,12 @@ public class Physical : MonoBehaviour, IMessagable {
 		slider.useLimits = true;
 	}
 	public void StartGroundMode(){
+		// Debug.Log(name + " start ground mode");
 		doGround = false;
 		doFly = false;
 		doZip = false;
 		ziptime = 0f;
 		ClearTempColliders();
-		// SetSliderLimit(0);
-		// JointTranslationLimits2D tempLimits = slider.limits;
-		// tempLimits.min = 0;
-		// tempLimits.max = hinge.transform.localPosition.y + 0.005f;
-		// slider.limits = tempLimits;
-		// slider.useLimits = true;
 		GetComponent<Rigidbody2D>().drag = groundDrag;
 		GetComponent<Rigidbody2D>().mass = objectBody.mass;
 		currentMode = mode.ground;
@@ -174,6 +173,7 @@ public class Physical : MonoBehaviour, IMessagable {
 		temporaryDisabledColliders = new List<Collider2D>();
 	}
 	public void StartFlyMode(){
+		// Debug.Log(name + " start fly mode");
 		doGround = false;
 		doFly = false;
 		doZip = false;
@@ -213,6 +213,7 @@ public class Physical : MonoBehaviour, IMessagable {
 	}
 	void OnTriggerEnter2D(Collider2D coll){
 		if (coll.tag == "table" && coll.gameObject != gameObject){
+			// Debug.Log(name + " table collision detected, dostarttable true");
 			table = coll.GetComponentInParent<Table>();
 			doStartTable = true;
 		}
@@ -224,6 +225,7 @@ public class Physical : MonoBehaviour, IMessagable {
 		}
 	}
 	void StartTable(){
+		// Debug.Log(name + " start table");
 		Vector2 newOffset = new Vector2(0f, table.height);
 		horizonCollider.offset = newOffset;
 		Vector3 objectPosition = hinge.transform.localPosition;
