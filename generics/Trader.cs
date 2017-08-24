@@ -57,7 +57,11 @@ public class Trader : Interactive {
 		return TradeStatus.noItemOffered;
 	}
 	public string Trade_desc(Inventory other){
-		return "Trade a "+Toolbox.Instance.CloneRemover(receive)+ " for a "+Toolbox.Instance.CloneRemover(give.name);
+		if (give != null){
+			return "Trade a "+Toolbox.Instance.CloneRemover(receive)+ " for a "+Toolbox.Instance.CloneRemover(give.name);
+		} else {
+			return "Attempt barter";
+		}
 	}
 	public void Exchange(Inventory otherInv){
 		if (otherInv.holding)
