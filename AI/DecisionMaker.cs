@@ -95,4 +95,9 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 			// Debug.Log(gameObject.name + " " + activePriority.GetType().ToString());
 		}
 	}
+	void OnDestroy(){
+		if (thought){
+			Destroy(thought);
+		}
+	}
 }
