@@ -6,7 +6,7 @@ public class MonoLiquid : MonoBehaviour {
 	static GameObject CreateStain(GameObject target, Vector3 location){
 		SpriteMask parentMask = Toolbox.Instance.GetOrCreateComponent<SpriteMask>(target);
 		SpriteRenderer parentRenderer = target.GetComponent<SpriteRenderer>();
-		GameObject stainObject = Instantiate(Resources.Load("stain")) as GameObject;
+		GameObject stainObject = Instantiate(Resources.Load("prefabs/stain")) as GameObject;
 		Stain stain = stainObject.GetComponent<Stain>();
 		stain.parentMask = parentMask;
 		stain.parentRenderer = parentRenderer;
@@ -45,6 +45,7 @@ public class MonoLiquid : MonoBehaviour {
 			SpriteRenderer stainRenderer = stain.GetComponent<SpriteRenderer>();
 			stainRenderer.color = liquid.color;
 			LiquidCollection.MonoLiquidify(stain, liquid);
+			ClaimsManager.Instance.WasDestroyed(gameObject);
 			Destroy(gameObject);
 		}
 	}
@@ -63,5 +64,6 @@ public class MonoLiquid : MonoBehaviour {
 		LiquidCollection.MonoLiquidify(puddle, liquid);
 		puddle.GetComponent<Edible>().offal = true;
 		Destroy(gameObject);
+		ClaimsManager.Instance.WasDestroyed(gameObject);
 	}
 }
