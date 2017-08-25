@@ -164,12 +164,12 @@ public class MySaver {
 		return playerObject;
 	}
 	public static void HandleLoadedPersistents(List<Persistent> persistents){
-		string lastName = "first";
-		string lastComponent = "first";
+		// string lastName = "first";
+		// string lastComponent = "first";
 		foreach (Persistent persistent in persistents){
-			lastName = persistent.name;
+			// lastName = persistent.name;
 			foreach (Component component in loadedObjects[persistent.id].GetComponents<Component>()){
-				lastComponent = component.GetType().ToString();
+				// lastComponent = component.GetType().ToString();
 				Func<SaveHandler> get;
 				if (MySaver.Handlers.TryGetValue(component.GetType(), out get)){
 					var handler = get();
@@ -177,8 +177,8 @@ public class MySaver {
 					handler.LoadData(component, data);
 				}	
 			}
-			lastName = "finished";
-			lastComponent = "finished"; 
+			// lastName = "finished";
+			// lastComponent = "finished"; 
 			// handle child objects
 			foreach (PersistentComponent persistentChild in persistent.persistentChildComponents.Values){
 				GameObject childObject = loadedObjects[persistent.id].transform.Find(persistentChild.parentObject).gameObject;
