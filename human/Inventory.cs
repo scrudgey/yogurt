@@ -89,7 +89,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 					DropItem();
 				}
 				//make the object the current holding.
-				Messenger.Instance.ClaimObject(pickup.gameObject,this);
+				ClaimsManager.Instance.ClaimObject(pickup.gameObject,this);
 				holding = pickup;
 				PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
 				if (phys)
@@ -116,7 +116,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		item.SetActive(false);
 	}
 	public bool PlaceItem(Vector2 place){
-		Messenger.Instance.DisclaimObject(holding.gameObject, this);
+		ClaimsManager.Instance.DisclaimObject(holding.gameObject, this);
 		holding.GetComponent<Rigidbody2D>().isKinematic = false;
 		holding.GetComponent<Collider2D>().isTrigger = false;
 		holding.transform.SetParent(null);
@@ -133,7 +133,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 	public void SoftDropItem(){
 		if (holding == null)
 			return;
-		Messenger.Instance.DisclaimObject(holding.gameObject, this);
+		ClaimsManager.Instance.DisclaimObject(holding.gameObject, this);
 		holding.holder = null;
 		PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
 		if (phys)	
@@ -145,7 +145,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 	public void DropItem(){
 		if (holding == null)
 			return;
-		Messenger.Instance.DisclaimObject(holding.gameObject, this);
+		ClaimsManager.Instance.DisclaimObject(holding.gameObject, this);
 		holding.holder = null;
 		holding.GetComponent<Rigidbody2D>().isKinematic = false;
 		holding.GetComponent<Collider2D>().isTrigger = false;
@@ -175,7 +175,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 				items[i].transform.SetParent(holdpoint);
 				items[i].GetComponent<Rigidbody2D>().isKinematic = true;
 				items[i].GetComponent<Collider2D>().isTrigger = true;
-				Messenger.Instance.ClaimObject(items[i].gameObject, this);
+				ClaimsManager.Instance.ClaimObject(items[i].gameObject, this);
 				holding = items[i].GetComponent<Pickup>();
 				items.RemoveAt(i);
 			}
@@ -193,7 +193,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		}
 	}
 	private void DoThrow(){
-		Messenger.Instance.DisclaimObject(throwObject, this);
+		ClaimsManager.Instance.DisclaimObject(throwObject, this);
 		PhysicalBootstrapper phys = throwObject.GetComponent<PhysicalBootstrapper>();
 		if (phys){
 			phys.thrownBy = gameObject;
