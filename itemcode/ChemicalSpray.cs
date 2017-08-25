@@ -4,9 +4,7 @@ public class ChemicalSpray: MonoBehaviour {
 	private float height;
 	void OnCollisionEnter2D(Collision2D coll){
 		Instantiate(collisionPlume, transform.position,Quaternion.identity);
-		Destroy(gameObject);
-		// Flammable flam = coll.gameObject.GetComponentInChildren<Flammable>();
-		foreach(Flammable flam in coll.gameObject.GetComponentsInChildren<Flammable>()){
+		foreach(Flammable flam in coll.gameObject.GetComponentsInParent<Flammable>()){
 			if (flam.onFire){
 				flam.onFire = false;
 				flam.heat = -10f;
