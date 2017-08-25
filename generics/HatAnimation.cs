@@ -37,8 +37,4 @@ public class HatAnimation : MonoBehaviour, IDirectable {
 		lastPressed = Toolbox.Instance.DirectionToString(newdir);
 		UpdateSprite();
 	}
-	public void OnDestroy(){
-		// Debug.Log("hatanimation on OnDestroy");
-		// RemoveDirectable();
-	}
 }
