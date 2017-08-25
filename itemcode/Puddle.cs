@@ -35,6 +35,7 @@ public class Puddle : MonoBehaviour {
 					position = position + randomWalk;
 					transform.position = position;
 				} else {
+					ClaimsManager.Instance.WasDestroyed(coll.gameObject);
 					Destroy(coll.gameObject);
 					Sprite[] sprites = Resources.LoadAll<Sprite>("sprites/mediumpuddle");
 					spriteRenderer.sprite = sprites[Random.Range (0, 4)];

@@ -109,6 +109,7 @@ public class Eater : Interactive {
 		//randomly store a clone of the object for later vomiting
         if (!food.poison){
             if (eaten){
+				ClaimsManager.Instance.WasDestroyed(eaten);
                 Destroy(eaten);
             }
             eaten = Instantiate(food.gameObject) as GameObject;

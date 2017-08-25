@@ -18,8 +18,6 @@ public class AnimateFrames : MonoBehaviour {
 		spriteRenderer.sprite = frames[0];
 		audioSource = GetComponent<AudioSource>();
 	}
-	
-	// Update is called once per frame
 	void Update () {
 		animationTimer += Time.deltaTime;
 		if (animationTimer > frameTime){
@@ -28,6 +26,7 @@ public class AnimateFrames : MonoBehaviour {
 				frameIndex = 0;
 				if (destroyOnFinished){
 					Destroy(gameObject);
+					ClaimsManager.Instance.WasDestroyed(gameObject);
 				} else {
 					if (audioSource != null && flipSound != null)
 						audioSource.PlayOneShot(flipSound);

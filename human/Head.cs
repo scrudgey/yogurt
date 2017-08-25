@@ -29,7 +29,7 @@ public class Head : Interactive, IExcludable {
 	public void DonHat(Hat h){
 		if (hat)
 			RemoveHat();
-		Messenger.Instance.ClaimObject(h.gameObject, this);
+		ClaimsManager.Instance.ClaimObject(h.gameObject, this);
 		hat = h;
 
 		PhysicalBootstrapper phys = hat.GetComponent<PhysicalBootstrapper>();
@@ -56,13 +56,13 @@ public class Head : Interactive, IExcludable {
 	}
 	public bool DonHat_Validation(Hat h){
 		// Debug.Log(Messenger.Instance.claimedItems.ContainsKey(h.gameObject));
-		return !Messenger.Instance.claimedItems.ContainsKey(h.gameObject);
+		return !ClaimsManager.Instance.claimedItems.ContainsKey(h.gameObject);
 	}
 
 
 	void RemoveHat(){
 		Toolbox.Instance.RemoveIntrinsic(transform.parent.gameObject, hat.gameObject);
-		Messenger.Instance.DisclaimObject(hat.gameObject,this);
+		ClaimsManager.Instance.DisclaimObject(hat.gameObject,this);
 		HatAnimation hatAnimator = hat.GetComponent<HatAnimation>();
 		if (hatAnimator){
 			hatAnimator.RemoveDirectable();

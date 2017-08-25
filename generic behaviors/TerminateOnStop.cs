@@ -6,7 +6,7 @@ public class TerminateOnStop : MonoBehaviour {
 			if (GetComponent<Rigidbody2D>())
 				Destroy(GetComponent<Rigidbody2D>());
 			if (GetComponent<Collider2D>())
-				Destroy (GetComponent<Collider2D>());
+				Destroy(GetComponent<Collider2D>());
 			SpriteRenderer renderer = GetComponent<SpriteRenderer>();
 			renderer.sortingLayerName = "background";
 			Destroy(this);

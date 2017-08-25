@@ -9,10 +9,12 @@ public class Spawner : MonoBehaviour {
 		if (delayTime == 0){
 			timer = -1;
 			Destroy(gameObject);
+			ClaimsManager.Instance.WasDestroyed(gameObject);
 		}
 		if (timer > delayTime){
 			Instantiate(target, transform.position, Quaternion.identity);
 			Destroy(gameObject);
+			ClaimsManager.Instance.WasDestroyed(gameObject);
 		}
 	}
 }

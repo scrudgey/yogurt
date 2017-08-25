@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-// using System.Collections;
 public enum damageType{physical, fire, any}
 
 public class Destructible : MonoBehaviour, IMessagable {
@@ -69,7 +68,8 @@ public class Destructible : MonoBehaviour, IMessagable {
 			Toolbox.Instance.SpawnDroplet(transform.position, container.liquid);
 		}
 		BroadcastMessage("OnDestruction", SendMessageOptions.DontRequireReceiver);
-		Messenger.Instance.WasDestroyed(gameObject);
+		ClaimsManager.Instance.WasDestroyed(gameObject);
+		Destroy(gameObject);
 		Toolbox.Instance.DataFlag(gameObject, 175f, 0f, 0f, 0f, 0f);
 		if (lastDamage == damageType.fire){
 			if (Toolbox.Instance.CloneRemover(name) == "dollar"){

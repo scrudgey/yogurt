@@ -1,13 +1,10 @@
-﻿// using System.Collections;
-// using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class DisableParticlesAfterTime : MonoBehaviour {
 	public ParticleSystem[] particles;
 	public float lifetime;
 	public float time;
 	void Start(){
-		// particles = GetComponentInChildren<ParticleSystem>();
 		particles = GetComponentsInChildren<ParticleSystem>();
 		if (particles == null){
 			Destroy(this);

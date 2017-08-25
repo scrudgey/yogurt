@@ -37,6 +37,7 @@ public class Slasher : MonoBehaviour {
 		// GetComponent<Collider2D>().enabled = false;
 	}
 	void SlashEnd(){
+		ClaimsManager.Instance.WasDestroyed(gameObject);
 		Destroy(gameObject);
 	}
 }

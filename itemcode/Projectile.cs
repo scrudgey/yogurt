@@ -21,6 +21,7 @@ public class Projectile : MonoBehaviour {
 			}
 			
 			hurtable.Bleed(transform.position);
+			ClaimsManager.Instance.WasDestroyed(gameObject);
 			Destroy(gameObject);
 		} else {
 			Vector2 normal = coll.contacts[0].normal;

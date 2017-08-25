@@ -67,6 +67,7 @@ public class Outfit : Interactive, IMessagable {
 
 		wornUniformName = Toolbox.Instance.CloneRemover(uniform.gameObject.name);
 		GameManager.Instance.CheckItemCollection(uniform.gameObject, gameObject);
+		ClaimsManager.Instance.WasDestroyed(uniform.gameObject);
 		Destroy(uniform.gameObject);
 		return removedUniform;
 	}

@@ -51,6 +51,7 @@ public class Blender : Container {
 				if (edible && edible.blendable){
 					liquidContainer.FillWithLiquid(edible.Liquify());
 					RemoveRetrieveAction(items[0]);
+					ClaimsManager.Instance.WasDestroyed(items[0].gameObject);
 					Destroy(items[0].gameObject);
 					items.RemoveAt(0);
 				}

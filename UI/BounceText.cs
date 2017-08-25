@@ -1,10 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using Easings;
-// using System.Collections;
 
 public class BounceText : MonoBehaviour {
-
 	public GameObject target;
 	private Text textObject;
 	public string text = "Success!";
@@ -13,7 +11,6 @@ public class BounceText : MonoBehaviour {
 	public float timer = 0f;
 	private RectTransform trans;
 	private Vector3 tempScale;
-	
 	void Start () {
 		followScript = GetComponentInChildren<FollowGameObjectInCamera>();
 		if (target)
@@ -21,7 +18,6 @@ public class BounceText : MonoBehaviour {
 		trans = transform.Find("Text").GetComponent<RectTransform>();
 		textObject = transform.Find("Text").GetComponent<Text>();
 		textObject.text = text;
-		
 		tempScale = Vector3.one;
 	}
 	void Update () {
@@ -31,7 +27,6 @@ public class BounceText : MonoBehaviour {
 		}
 		tempScale.x = (float)PennerDoubleAnimation.ElasticEaseOut(timer, 0.001, 1, 0.8);
 		tempScale.y = (float)PennerDoubleAnimation.ElasticEaseOut(timer, 0.001, 1, 1.0);
-		// Debug.Log(tempScale);
 		trans.localScale = tempScale;
 	}
 

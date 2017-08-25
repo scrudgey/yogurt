@@ -23,6 +23,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	public Collider2D objectCollider;
 	public PersistentComponent loadData;
 	public bool doLoad;
+	private bool isQuitting = false;
 	public void Start () {
 		tag = "Physical";
 		GetComponent<Renderer>().sortingLayerName="main";
@@ -37,6 +38,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	}
 	public void DestroyPhysical(){
 		transform.SetParent(null);
+		ClaimsManager.Instance.WasDestroyed(groundObject);
 		Destroy(groundObject);
 		Rigidbody2D body = GetComponent<Rigidbody2D>();
 		body.gravityScale = 0;
@@ -236,8 +238,15 @@ public class PhysicalBootstrapper : MonoBehaviour {
 			}
 		}
 	}
+	void OnApplicationQuit(){
+		isQuitting = true;
+	}
 	void OnDestroy(){
-		if (physical)
+		if (isQuitting)
+			return;
+		if (physical){
+			ClaimsManager.Instance.WasDestroyed(physical.gameObject);
 			Destroy(physical.gameObject);
+		}
 	}
 }
