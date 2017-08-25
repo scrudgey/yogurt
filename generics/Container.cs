@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System;
 
-
 public class Container : Interactive, IExcludable {
-
 	public List<Pickup> items = new List<Pickup>();
 	public int maxNumber;
 	public bool disableContents = true;
@@ -12,7 +10,6 @@ public class Container : Interactive, IExcludable {
 
 	virtual protected void Start() {
 		Interaction stasher = new Interaction(this, "Stash", "Store");
-		// stasher.displayVerb = "Stash in";
 		stasher.validationFunction = true;
 		interactions.Add(stasher);
 		// good example of loop closure here
@@ -65,7 +62,6 @@ public class Container : Interactive, IExcludable {
 			return false;
 		}
 	}
-
 	virtual public void Store(Inventory inv){
 		Pickup pickup = inv.holding;
 		if (maxNumber == 0 || items.Count < maxNumber){
@@ -76,7 +72,6 @@ public class Container : Interactive, IExcludable {
 				Remove(i, pickup);
 			};
 			Interaction newInteraction = new Interaction(this, pickup.itemName, removeIt);
-			// newInteraction.displayVerb = "Retreive "+pickup.itemName+" from";
 			newInteraction.actionDelegate = removeIt;
 			newInteraction.parameterTypes = new List<Type>();
 			newInteraction.parameterTypes.Add(typeof(Inventory));
@@ -95,20 +90,9 @@ public class Container : Interactive, IExcludable {
 			return "";
 		}
 	}
-
 	public void AddItem(Pickup pickup){
 		items.Add(pickup);
-		Messenger.Instance.ClaimObject(pickup.gameObject,this);
-		
-		// place it behind me
-		// OrderByY yorder = pickup.GetComponent<OrderByY>();
-		// if (yorder)
-		// 	yorder.AddFollower(gameObject, -1);
-		// if (yorder)
-		// 	yorder.enabled = false;
-		// SpriteRenderer rend = pickup.GetComponent<SpriteRenderer>();
-		// if (rend)
-		// 	rend.sortingOrder = GetComponent<SpriteRenderer>().sortingOrder - 1;
+		ClaimsManager.Instance.ClaimObject(pickup.gameObject,this);
 		
 		// disable its physical
 		PhysicalBootstrapper physical = pickup.GetComponent<PhysicalBootstrapper>();
@@ -136,7 +120,6 @@ public class Container : Interactive, IExcludable {
 		if (pickup.GetComponent<Rigidbody2D>())
 			pickup.GetComponent<Rigidbody2D>().isKinematic = true;
 	}
-	
 	public void Remove(Inventory inv, Pickup pickup){
 		Vector3 pos = inv.transform.position;
 		pickup.transform.parent = null;
@@ -156,21 +139,10 @@ public class Container : Interactive, IExcludable {
 
 		if (disableContents)
 			pickup.gameObject.SetActive(true);
-
-		// OrderByY yorder = pickup.GetComponent<OrderByY>();
-		// if (yorder)
-		// 	yorder.RemoveFollower(gameObject);
-		// if (yorder)
-		// 	yorder.enabled = true;
-
-		Messenger.Instance.DisclaimObject(pickup.gameObject, this);
-
+		ClaimsManager.Instance.DisclaimObject(pickup.gameObject, this);
 		items.Remove(pickup);
 		RemoveRetrieveAction(pickup);
-//		inv.UpdateActions();
-
 	}
-
 	public void Dump(Pickup pickup){
 		Vector3 pos = transform.position;
 		pickup.transform.parent = null;
@@ -189,29 +161,20 @@ public class Container : Interactive, IExcludable {
 		
 		if (disableContents)
 			pickup.gameObject.SetActive(true);
-
 		
 		PhysicalBootstrapper physical = pickup.GetComponent<PhysicalBootstrapper>();
 		if(physical && physical.doInit)
 			physical.InitPhysical(0.05f,Vector2.zero);
 
-		// OrderByY yorder = pickup.GetComponent<OrderByY>();
-		// if (yorder)
-		// 	yorder.RemoveFollower(gameObject);
-		// if (yorder)
-		// 	yorder.enabled = true;
-
-		Messenger.Instance.DisclaimObject(pickup.gameObject,this);
+		ClaimsManager.Instance.DisclaimObject(pickup.gameObject,this);
 		items.Remove(pickup);
 		RemoveRetrieveAction(pickup);
 	}
-
 	public void DropMessage(GameObject obj){
 		Pickup pickup = obj.GetComponent<Pickup>();
 		if (pickup != null)
 			Dump(pickup);
 	}
-
 	public void WasDestroyed(GameObject obj){
 		Pickup pickup = obj.GetComponent<Pickup>();
 		LiquidContainer liquidContainer = obj.GetComponent<LiquidContainer>();
@@ -224,19 +187,16 @@ public class Container : Interactive, IExcludable {
 			RemoveRetrieveAction(pickup);
 		}
 	}
-
-	void OnApplicationQuit()
-	{
+	void OnApplicationQuit(){
 		isQuitting = true;
 	}
-
 	void OnDestroy(){
-		if (!isQuitting){
-			while (items.Count > 0){
-				foreach (MonoBehaviour component in items[0].GetComponents<MonoBehaviour>() )
-					component.enabled = true;
-				Dump(items[0]);
-			}
+		if (isQuitting)
+			return;
+		while (items.Count > 0){
+			foreach (MonoBehaviour component in items[0].GetComponents<MonoBehaviour>() )
+				component.enabled = true;
+			Dump(items[0]);
 		}
 	}
 
