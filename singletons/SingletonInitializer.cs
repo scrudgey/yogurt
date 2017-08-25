@@ -4,7 +4,7 @@ public class SingletonInitializer : MonoBehaviour {
 		string tempstring;
 		tempstring = Toolbox.Instance.message;
 		tempstring = GameManager.Instance.message;
-		tempstring = Messenger.Instance.MOTD;
+		tempstring = ClaimsManager.Instance.MOTD;
 		tempstring = UINew.Instance.MOTD;
 		// tempstring = CutsceneManager.Instance.MOTD;
         tempstring += " my droogs";
