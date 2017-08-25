@@ -81,6 +81,7 @@ public class Hurtable : MonoBehaviour, IMessagable {
 			}
 			Instantiate(Resources.Load("prefabs/skeleton"), transform.position, transform.rotation);
 			Toolbox.Instance.AudioSpeaker("Flash Fire Ignite 01", transform.position);
+			ClaimsManager.Instance.WasDestroyed(gameObject);
 			Destroy(gameObject);
 			if (lastAttacker == gameObject){
 				GameManager.Instance.data.achievementStats.selfImmolations += 1;
@@ -92,8 +93,10 @@ public class Hurtable : MonoBehaviour, IMessagable {
 		} else {
 			KnockDown();
 		}
-		if (dizzyEffect != null)
+		if (dizzyEffect != null){
+			ClaimsManager.Instance.WasDestroyed(dizzyEffect);
 			Destroy(dizzyEffect);
+		}
 		if (GameManager.Instance.playerObject == gameObject){
 			GameManager.Instance.PlayerDeath();
 		}
@@ -136,7 +139,12 @@ public class Hurtable : MonoBehaviour, IMessagable {
 			}
 		}
 		if (health < 0.5 * maxHealth){
-			health += Time.deltaTime;
+			if (gameObject == GameManager.Instance.playerObject){
+				health += Time.deltaTime*3f;
+			} else {
+				health += Time.deltaTime;
+			}
+			// health += Time.deltaTime;
 		}
 		if (health <= 0 && hitState < Controllable.HitState.unconscious){
 			KnockDown();
@@ -159,7 +167,11 @@ public class Hurtable : MonoBehaviour, IMessagable {
 			return;
 		hitState = Controllable.AddHitState(hitState, Controllable.HitState.unconscious);
 		doubledOver = false;
-		downedTimer = 10f;
+		if (gameObject == GameManager.Instance.playerObject){
+			downedTimer = 2f;
+		} else {
+			downedTimer = 10f;
+		}
 		Vector3 pivot = transform.position;
 		pivot.y -= 0.15f;
 		transform.RotateAround(pivot, new Vector3(0, 0, 1), -90);
@@ -179,8 +191,10 @@ public class Hurtable : MonoBehaviour, IMessagable {
 		Vector3 pivot = transform.position;
 		pivot.x -= 0.15f;
 		transform.RotateAround(pivot, new Vector3(0, 0, 1), 90);
-		if (dizzyEffect != null)
+		if (dizzyEffect != null){
+			ClaimsManager.Instance.WasDestroyed(dizzyEffect);
 			Destroy(dizzyEffect);
+		}
 	}
 	public void DoubleOver(bool val){
 		if (val){
