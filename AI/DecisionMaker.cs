@@ -9,6 +9,8 @@ public class Personality {
 	public Bravery bravery;
 	public enum Actor {no, yes};
 	public Actor actor;
+	public enum Stoicism{neutral, fragile, noble};
+	public Stoicism stoicism;
 }
 
 public class DecisionMaker : MonoBehaviour, IMessagable {
@@ -37,6 +39,7 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 		if (possession != null){
 			initialAwareness.Add(possession);
 			awareness.possession = possession;
+			awareness.decisionMaker = this;
 		}
 		awareness.initialAwareness = initialAwareness;
 
