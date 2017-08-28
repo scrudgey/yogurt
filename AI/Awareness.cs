@@ -35,6 +35,7 @@ public class PersonalAssessment{
 	public friendStatus status;
 	public Knowledge knowledge;
 	public bool unconscious;
+	public int numberOfTimesInsulted;
 	public PersonalAssessment(Knowledge k){
 		knowledge = k;
 	}
@@ -44,6 +45,7 @@ public class PersonalAssessment{
 }
 
 public class Awareness : MonoBehaviour, IMessagable {
+	public DecisionMaker decisionMaker;
 	public List<GameObject> initialAwareness;
 	public GameObject possession;
 	public Knowledge possessionDefaultState;
@@ -264,32 +266,24 @@ public class Awareness : MonoBehaviour, IMessagable {
 	}
 	public bool PossessionsAreOkay(){
 		if (possession == null){
-			// Debug.Log("no possession, it's okay");
 			return true;
 		}
 		Knowledge knowledge = null;
 		if (!knowledgebase.TryGetValue(possession, out knowledge)){
-			// Debug.Log("I have no knowledge of my possession. It's okay.");
 			return true;
 		}
 		if (possessionDefaultState == null){
-			// Debug.Log("there's no default state for possession. it's okay.");
 			return true;
 		}
-
 		if (Time.time - knowledge.lastSeenTime > 2){
-			// Debug.Log("possession not okay: timeout");
 			return false;
 		}
 		if (Vector2.Distance(knowledge.lastSeenPosition, possessionDefaultState.lastSeenPosition) > 0.1){
-			// Debug.Log("possession not okay: location");			
 			return false;
 		} else {
-			// Debug.Log("possession is where it should be.");
 			return true;
 		}
 	}
-
 	public PersonalAssessment FormPersonalAssessment(GameObject g, bool debug=false){
 		if (g == null)
 			return null;
@@ -306,14 +300,12 @@ public class Awareness : MonoBehaviour, IMessagable {
 		GameObject rootObject = rootControllable.gameObject;
 		if (debug)
 			Debug.Log("root object: "+rootObject.name);
-
 		if (!knowledgebase.ContainsKey(rootObject))
 			knowledgebase.Add(rootObject, new Knowledge(rootObject));
 		PersonalAssessment storedAssessment;
 		if (people.TryGetValue(rootObject, out storedAssessment)){
 			return storedAssessment;
 		}
-
 		PersonalAssessment assessment = new PersonalAssessment(knowledgebase[rootObject]);
 		people.Add(rootObject, assessment);
 		return assessment;
@@ -339,8 +331,7 @@ public class Awareness : MonoBehaviour, IMessagable {
 			AttackedByPerson(message.responsibleParty);
 		}
 		if (incoming is MessageInsult){
-			PersonalAssessment assessment = FormPersonalAssessment(incoming.messenger.gameObject);
-			assessment.status = PersonalAssessment.friendStatus.enemy;
+			ProcessInsult((MessageInsult)incoming);
 		}
 		if (incoming is MessageThreaten){
 			PersonalAssessment assessment = FormPersonalAssessment(incoming.messenger.gameObject);
@@ -365,6 +356,42 @@ public class Awareness : MonoBehaviour, IMessagable {
 					knowledge = new Knowledge(message.dropped);
 					knowledgebase.Add(message.dropped, knowledge);
 				}
+			}
+		}
+	}
+
+	public void ProcessInsult(MessageInsult message){
+		// TODO: make the reaction to insults more sophisticated
+		PersonalAssessment assessment = FormPersonalAssessment(message.messenger.gameObject);
+		Speech mySpeech = GetComponent<Speech>();
+		assessment.numberOfTimesInsulted += 1;
+
+		// process hurt feelings
+		// switch(assessment.status){
+		// 	case PersonalAssessment.friendStatus.friend:
+		// 	if (assessment.numberOfTimesInsulted > 3){
+		// 		assessment.status = PersonalAssessment.friendStatus.enemy;
+		// 	}
+		// 	break;
+		// 	case PersonalAssessment.friendStatus.neutral:
+		// 	if (assessment.numberOfTimesInsulted > 2){
+		// 		assessment.status = PersonalAssessment.friendStatus.enemy;
+		// 	}
+		// 	break;
+		// 	case PersonalAssessment.friendStatus.enemy:
+		// 	break;
+		// }
+		//speech reaction
+		if (mySpeech != null){
+			switch(assessment.status){
+				case PersonalAssessment.friendStatus.friend:
+				// perso
+				break;
+				case PersonalAssessment.friendStatus.neutral:
+				
+				break;
+				case PersonalAssessment.friendStatus.enemy:
+				break;
 			}
 		}
 	}
