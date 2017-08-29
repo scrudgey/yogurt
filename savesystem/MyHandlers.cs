@@ -328,6 +328,24 @@ public class HumanoidHandler: SaveHandler<Humanoid>{
 		}	
 	}
 }
+public class StainHandler: SaveHandler<Stain>{
+	public override void SaveData(Stain instance, PersistentComponent data, ReferenceResolver resolver){
+		data.ints["parentID"] = resolver.ResolveReference(instance.parent, data.persistent);
+		MonoLiquid stainLiquid = instance.GetComponent<MonoLiquid>();
+		if (stainLiquid != null)
+			data.strings["liquid"] = stainLiquid.liquid.name;
+	}
+	public override void LoadData(Stain instance, PersistentComponent data){
+		if (data.ints["parentID"] != -1){
+			instance.ConfigureParentObject(MySaver.loadedObjects[data.ints["parentID"]]);
+			if (data.strings.ContainsKey("liquid")){
+				LiquidCollection.MonoLiquidify(instance.gameObject, LiquidCollection.LoadLiquid(data.strings["liquid"]));
+			}
+		} else {
+			instance.RemoveStain();
+		}
+	}
+}
 public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
 	static List<Type> priorityTypes = new List<Type>(){
 		{typeof(PriorityAttack)},
