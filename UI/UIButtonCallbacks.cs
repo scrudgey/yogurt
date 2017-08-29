@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-
+using Nimrod;
 public class UIButtonCallbacks : MonoBehaviour {
 	public void FightButtonClick(){
 		Controller.Instance.focus.ToggleFightMode();
@@ -29,5 +29,17 @@ public class UIButtonCallbacks : MonoBehaviour {
 		GameManager.Instance.SetFocus(MySaver.LoadScene()); 
 		Debug.Log("load...");
 		// Debug.Break();
+	}
+	public void TestButtonClick(){
+		Debug.Log("test");
+		Grammar g = new Grammar();
+		g.Load("insult");
+		// g.Load("insult_item");
+		// g.Load("insult_clothes");
+		// g.Load("insult_hat");
+		// g.AddSymbol("clothes-name", "suit");
+		// g.AddSymbol("hat-name", "hat");
+		// g.AddSymbol("item-name", "eggplant");
+		Debug.Log(g.Parse("{main}"));
 	}
 }
