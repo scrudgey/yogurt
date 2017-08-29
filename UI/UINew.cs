@@ -37,6 +37,7 @@ public class UINew: Singleton<UINew> {
 	private GameObject speakButton;	
 	private GameObject saveButton;
 	private GameObject loadButton;
+	private GameObject testButton;
 	private bool init = false;
 	public bool inventoryVisible = false;
 	public Text status;
@@ -48,9 +49,12 @@ public class UINew: Singleton<UINew> {
 	public bool achievementPopupInProgress;
 	public Texture2D cursorDefault;
 	public Texture2D cursorHighlight;
+	public Texture2D cursorTarget;
 	public RectTransform lifebar;
 	private Vector2 lifebarDefaultSize;
 	public GameObject topRightBar;
+	public GameObject cursorText;
+	public Text cursorTextText;
 	private RectTransform topRightRectTransform;
 	private float healthBarEasingTimer;
 	private enum EasingDirection{none, up, down};
@@ -62,6 +66,7 @@ public class UINew: Singleton<UINew> {
 		}
 		cursorDefault = (Texture2D)Resources.Load("UI/cursor3_64_2");
 		cursorHighlight = (Texture2D)Resources.Load("UI/cursor3_64_1");
+		cursorTarget = (Texture2D)Resources.Load("UI/cursor3_target3");
 	}
 	void Update(){
 		if (!achievementPopupInProgress && collectedStack.Count > 0){
@@ -72,6 +77,7 @@ public class UINew: Singleton<UINew> {
 		}
 		actionTextObject.text = actionTextString;
 		bool highlight = false;
+		// GameObject 
 		RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
         foreach (RaycastHit2D hit in hits){
             if (hit.collider != null && !Controller.Instance.forbiddenColliders.Contains(hit.collider.tag)){
@@ -79,9 +85,44 @@ public class UINew: Singleton<UINew> {
             }
         }
 		if (highlight){
-			Cursor.SetCursor(cursorHighlight, new Vector2(28, 16), CursorMode.Auto);
+			GameObject top = Controller.Instance.GetFrontObject(hits);
+			GameObject target = Controller.Instance.GetBaseInteractive(top.transform);
+			switch (Controller.Instance.currentSelect){
+				case Controller.SelectType.none:
+				Cursor.SetCursor(cursorHighlight, new Vector2(28, 16), CursorMode.Auto);
+				break;
+				case Controller.SelectType.swearAt:
+				SetActionText("Swear at "+Toolbox.Instance.GetName(target));
+				break;
+				case Controller.SelectType.insultAt:
+				SetActionText("Insult "+Toolbox.Instance.GetName(target));
+				break;
+				default:
+				break;
+			}
 		} else {
-			Cursor.SetCursor(cursorDefault, new Vector2(28, 16), CursorMode.Auto);
+			if (Controller.Instance.currentSelect == Controller.SelectType.none){
+				Cursor.SetCursor(cursorDefault, new Vector2(28, 16), CursorMode.Auto);
+			} else {
+				Cursor.SetCursor(cursorTarget, new Vector2(16, 16), CursorMode.Auto);
+				SetActionText("");
+			}
+		}
+		if (Controller.Instance.currentSelect == Controller.SelectType.swearAt || Controller.Instance.currentSelect == Controller.SelectType.insultAt){
+			if (!cursorText.activeInHierarchy)
+				cursorText.SetActive(true);
+			Vector3 mousePos = Input.mousePosition;
+			mousePos.y -= 30;
+			Vector2 pos;
+			RectTransformUtility.ScreenPointToLocalPointInRectangle(UICanvas.transform as RectTransform, mousePos, GameManager.Instance.cam, out pos);
+			cursorText.transform.position = UICanvas.transform.TransformPoint(pos);
+			if (Controller.Instance.currentSelect == Controller.SelectType.swearAt)
+				cursorTextText.text = "SWEAR\nAT";
+			if (Controller.Instance.currentSelect == Controller.SelectType.insultAt)
+				cursorTextText.text = "INSULT";
+		} else {
+			if (cursorText.activeInHierarchy)
+				cursorText.SetActive(false);
 		}
 		if (Controller.Instance.focusHurtable != null){
 			float width = (Controller.Instance.focusHurtable.health / Controller.Instance.focusHurtable.maxHealth) * lifebarDefaultSize.x;
@@ -124,7 +165,10 @@ public class UINew: Singleton<UINew> {
 		speakButton = UICanvas.transform.Find("topdock/SpeakButton").gameObject;
 		saveButton = UICanvas.transform.Find("save").gameObject;
 		loadButton = UICanvas.transform.Find("load").gameObject;
+		testButton = UICanvas.transform.Find("test").gameObject;
 		bottomDock = UICanvas.transform.Find("bottomdock").gameObject;
+		cursorText = UICanvas.transform.Find("cursorText").gameObject;
+		cursorTextText = cursorText.GetComponent<Text>();
 		actionTextObject = UICanvas.transform.Find("bottomdock/ActionText").GetComponent<Text>();
 		lifebar = UICanvas.transform.Find("topright/lifebar/mask/fill").GetComponent<RectTransform>();
 		topRightBar = UICanvas.transform.Find("topright").gameObject;
@@ -135,12 +179,15 @@ public class UINew: Singleton<UINew> {
 		fightButton.SetActive(false);
 		speakButton.SetActive(false);
 		topRightBar.SetActive(false);
+		cursorText.SetActive(false);
 		HidePunchButton();
 		if (!GameManager.Instance.debug){
 			if (saveButton)
 				saveButton.SetActive(false);
 			if (loadButton)
 				loadButton.SetActive(false);
+			if (testButton)
+				testButton.SetActive(false);
 		}
 	}
 	public void HealthBarOn(){
