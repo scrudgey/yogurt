@@ -4,16 +4,10 @@ public class MonoLiquid : MonoBehaviour {
 	public Edible edible;
 	public PhysicalBootstrapper physB;
 	static GameObject CreateStain(GameObject target, Vector3 location){
-		SpriteMask parentMask = Toolbox.Instance.GetOrCreateComponent<SpriteMask>(target);
-		SpriteRenderer parentRenderer = target.GetComponent<SpriteRenderer>();
 		GameObject stainObject = Instantiate(Resources.Load("prefabs/stain")) as GameObject;
-		Stain stain = stainObject.GetComponent<Stain>();
-		stain.parentMask = parentMask;
-		stain.parentRenderer = parentRenderer;
 		stainObject.transform.position = location;
-		stainObject.transform.SetParent(target.transform, true);
-		SpriteRenderer stainRenderer = stainObject.GetComponent<SpriteRenderer>();
-		stainRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+		Stain stain = stainObject.GetComponent<Stain>();
+		stain.ConfigureParentObject(target);
 		return stainObject;
 	}
 	void Awake(){
