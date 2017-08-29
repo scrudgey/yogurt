@@ -28,13 +28,13 @@ public class Controller : Singleton<Controller> {
 	public List<string> forbiddenColliders = new List<string> {"fire", "sightcone", "table", "background", "occurrenceFlag"};
 	public string message = "smoke weed every day";
     public enum SelectType{
-        none, swearAt
+        none, swearAt, insultAt
     }
     public SelectType currentSelect = SelectType.none;
 	void Update () {
 		if (focus != null & !suspendInput){
 			focus.ResetInput();
-			if( Input.GetAxis("Vertical") > 0 )
+			if(Input.GetAxis("Vertical") > 0)
 				focus.upFlag = true;
 			if(Input.GetAxis("Vertical") < 0)
 				focus.downFlag = true;
@@ -83,17 +83,61 @@ public class Controller : Singleton<Controller> {
             }
         }
     }
-	GameObject GetBaseInteractive(Transform target){
+	SpriteRenderer WhichIsFirst(SpriteRenderer one, SpriteRenderer two){
+		if (one == null && two == null){
+			return one;
+		}
+		if (one == null && two != null){
+			return two;
+		}
+		if (one != null && two == null){
+			return one;
+		}
+		if (one.sortingLayerID > two.sortingLayerID){
+			return one;
+		}
+		if (two.sortingLayerID > one.sortingLayerID){
+			return two;
+		}
+		if (one.sortingOrder > two.sortingOrder){
+			return one;
+		}
+		if (two.sortingOrder > one.sortingOrder){
+			return two;
+		}
+		return one;
+	}
+	public GameObject GetFrontObject(RaycastHit2D[] hits){
+		List<GameObject> candidates = new List<GameObject>();
+		foreach (RaycastHit2D hit in hits){
+			if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)){
+				candidates.Add(hit.collider.gameObject);
+			}
+		}
+		if (candidates.Count == 0)
+			return null;
+		if (candidates.Count == 1)
+			return candidates[0];
+		GameObject front = null;
+		SpriteRenderer frontRenderer = null;
+		foreach (GameObject candidate in candidates){
+			if (front == null){
+				front = candidate;
+				frontRenderer = candidate.GetComponent<SpriteRenderer>();
+				continue;
+			}
+			frontRenderer = WhichIsFirst(frontRenderer, candidate.GetComponent<SpriteRenderer>());
+			front = frontRenderer.gameObject;
+		}
+		return frontRenderer.gameObject;
+	}
+	public GameObject GetBaseInteractive(Transform target){
 		Transform currentChild = target;
 		while (true){
-			// if (currentChild.name.Substring(Mathf.Max(0, currentChild.name.Length-6)) == "Ground"){
-
 			if (currentChild.tag == "Physical"){
-				// Debug.Log("found ground, returning "+currentChild.gameObject.name);
 				return currentChild.gameObject;
 			}
 			if (currentChild.parent == null){
-				// Debug.Log("no parent, returning "+currentChild.gameObject.name);
 				return currentChild.gameObject;
 			}
 			currentChild = currentChild.parent;
@@ -105,18 +149,24 @@ public class Controller : Singleton<Controller> {
         RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero).OrderBy(h=>h.collider.gameObject.name).ToArray();
         // IsPointerOverGameObject is required here to exclude clicks if we are hovering over a UI element.
         // this may or may not cause problems down the road, but I'm unsure how else to do this.
-        // TODO: currently unresolved. UI overlapping objects in world creates problem clicks.
+		// NOTE: if an overlapping UI is causing problems, add a layout group and uncheck "blocks raycast"
         
         if (currentSelect == SelectType.none && !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()){
         // if (currentSelect == SelectType.none){
-            foreach (RaycastHit2D hit in hits){
-                if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)){
-                    focus.lastLeftClicked = hit.collider.gameObject;
-					// we need to check the object from the root for interactions, but place buttons at the child clicked on
-					Clicked(GetBaseInteractive(hit.collider.transform), hit.collider.transform.gameObject);
-					break;
-                }
-            }
+            // foreach (RaycastHit2D hit in hits){
+            //     if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)){
+            //         focus.lastLeftClicked = hit.collider.gameObject;
+			// 		// we need to check the object from the root for interactions, but place buttons at the child clicked on
+			// 		Clicked(GetBaseInteractive(hit.collider.transform), hit.collider.transform.gameObject);
+			// 		break;
+            //     }
+            // }
+			GameObject top = GetFrontObject(hits);
+			if (top != null){
+				// Debug.Log(top);
+				focus.lastLeftClicked = top;
+				Clicked(GetBaseInteractive(top.transform), top);
+			}
         }
         if (currentSelect == SelectType.swearAt){
             currentSelect = SelectType.none;
@@ -125,9 +175,19 @@ public class Controller : Singleton<Controller> {
 					MessageSpeech message = new MessageSpeech();
 					message.swearTarget = hit.collider.gameObject;
 					Toolbox.Instance.SendMessage(focus.gameObject, this, message);
+					UINew.Instance.SetActionText("");
                 }
             }
         }
+		if (currentSelect == SelectType.insultAt){
+			currentSelect = SelectType.none;
+			GameObject top = Controller.Instance.GetFrontObject(hits);
+			if (top != null){
+				GameObject target = Controller.Instance.GetBaseInteractive(top.transform);
+				Insult.DoInsult(GameManager.Instance.playerObject, top);
+				UINew.Instance.SetActionText("");
+			}
+		}
     }
 
     public void Clicked(GameObject clicked, GameObject clickSite){
