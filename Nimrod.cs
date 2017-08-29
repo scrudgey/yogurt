@@ -16,7 +16,8 @@ namespace Nimrod{
                 Match match = def_hook.Match(line);
                 if (match.Success){
                     currentSymbol = match.Groups[1].Value;
-                    symbols[currentSymbol] = new List<string>();
+                    if (!symbols.ContainsKey(currentSymbol))
+                        symbols[currentSymbol] = new List<string>();
                 } else {
                     if (line != "")
                         symbols[currentSymbol].Add(line);
@@ -69,6 +70,12 @@ namespace Nimrod{
             } else {
                 return symbol;
             }
+        }
+        public void AddSymbol(string key, string val){
+            if (!symbols.ContainsKey(key)){
+                symbols[key] = new List<string>();
+            } 
+            symbols[key].Add(val);
         }
     }
 }
