@@ -300,13 +300,14 @@ public class Speech : Interactive, IMessagable {
         }
         return result;
     }
-    // this function will change to incorporate Nimrod and flavor
+    // TODO: this function will change to incorporate Nimrod and flavor
     public void Swear(GameObject target=null){
         if (!target){
             Say("shazbot!", "shazbot");
             return;
         }
-        string targetname = Toolbox.Instance.GetName(target);
+        GameObject mainTarget = Controller.Instance.GetBaseInteractive(target.transform);
+        string targetname = Toolbox.Instance.GetName(mainTarget);
         Say("that shazbotting "+targetname+"!", "shazbotting");
     }
     public Monologue Insult(GameObject target){
