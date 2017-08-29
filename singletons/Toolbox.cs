@@ -99,7 +99,6 @@ public class Toolbox : Singleton<Toolbox> {
 		PhysicalBootstrapper phys = droplet.GetComponent<PhysicalBootstrapper>();
 		phys.initHeight = 0.05f;
 		phys.initVelocity = initialVelocity;
-		// phys.ignoreCollisions = true;
 		LiquidCollection.MonoLiquidify(droplet, l);
 		return droplet;
 	}
@@ -120,8 +119,6 @@ public class Toolbox : Singleton<Toolbox> {
         PhysicalBootstrapper phys = droplet.GetComponent<PhysicalBootstrapper>();
         
         Vector2 initpos = spiller.transform.position;
-        // float initHeight = 0.01f;
-        // phys.ignoreCollisions = true;
         Physical pb = spiller.GetComponentInParent<Physical>();
         if (pb != null){ 
             initHeight = pb.height; 
