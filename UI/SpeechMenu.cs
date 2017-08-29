@@ -16,21 +16,21 @@ public class SpeechMenu : MonoBehaviour {
         Toolbox.Instance.SendMessage(GameManager.Instance.playerObject, this, message);
         Destroy(gameObject);
     }
-    
     public void SwearAtButton(){
         Controller.Instance.currentSelect = Controller.SelectType.swearAt;
         Destroy(gameObject);
     }
-    
+    public void InsultButton(){
+        Controller.Instance.currentSelect = Controller.SelectType.insultAt;
+        Destroy(gameObject);
+    }
     public void RandomButton(){
         MessageSpeech message = new MessageSpeech();
         message.randomSpeech = true;
         Toolbox.Instance.SendMessage(GameManager.Instance.playerObject, this, message);
         Destroy(gameObject);
     }
-    
     public void CancelButton(){
         Destroy(gameObject);
     }
-    
 }
