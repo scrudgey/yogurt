@@ -69,6 +69,10 @@ public class Outfit : Interactive, IMessagable {
 		GameManager.Instance.CheckItemCollection(uniform.gameObject, gameObject);
 		ClaimsManager.Instance.WasDestroyed(uniform.gameObject);
 		Destroy(uniform.gameObject);
+
+		foreach(Stain stain in GetComponentsInChildren<Stain>()){
+			Destroy(stain.gameObject);
+		}
 		return removedUniform;
 	}
 
