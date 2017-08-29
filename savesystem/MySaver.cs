@@ -33,7 +33,8 @@ public class MySaver {
 		{typeof(Hurtable),							() => new HurtableHandler() },
 		{typeof(HeadAnimation),						() => new HeadAnimationHandler() },
 		{typeof(Speech),							() => new SpeechHandler() },
-		{typeof(Humanoid),							() => new HumanoidHandler() }
+		{typeof(Humanoid),							() => new HumanoidHandler() },
+		{typeof(Stain),								() => new StainHandler() }, 
 	};
 	public static void CleanupSaves(){
 		idIndex = 0;
@@ -53,9 +54,6 @@ public class MySaver {
 		}
 	}
 	public static void Save(){
-		// try {
-			// open XML serialization stream
-			// TODO: make this path nicer later when i have a directory structure
 		ReferenceResolver resolver = new ReferenceResolver();
 		var serializer = new XmlSerializer(typeof(PersistentContainer));
 		string scenePath = GameManager.Instance.LevelSavePath();
@@ -80,13 +78,11 @@ public class MySaver {
 			} else {
 				idIndex++;
 				while (loadedIds.Contains(idIndex)){
-					// Debug.Log("idIndex taken, incrementing "+idIndex.ToString());
 					idIndex++;
 				}
 				persistent.id = idIndex;
 				//TODO: check if next index is taken!
 			}
-			// Debug.Log("saving "+gameObject.name+" with id "+persistent.id.ToString());
 			persistents.Add(persistent);
 			resolver.objectIDs.Add(gameObject, persistent.id);
 			resolver.persistentObjects.Add(persistent, gameObject);
@@ -107,23 +103,13 @@ public class MySaver {
 		// close the XML serialization stream
 		sceneStream.Close();
 		playerStream.Close();
-		// } catch (System.Exception ex) {
-		// 	Debug.Log("Problem saving!");
-		// 	Debug.Log(ex.Message);
-		// 	Debug.Log(ex.Data);
-		// 	Debug.Log(ex.TargetSite);
-		// }
 		GameManager.Instance.SaveGameData();
 	}
 	public static GameObject LoadScene(){
-		// UINew.Instance.ClearActionButtons();
 		UINew.Instance.ClearWorldButtons();
 		GameObject playerObject = null;
-		// try {
 		string scenePath = GameManager.Instance.LevelSavePath();
 		string playerPath = GameManager.Instance.data.lastSavedPlayerPath;
-		// Debug.Log(scenePath);
-		// Debug.Log(playerPath);
 		var serializer = new XmlSerializer(typeof(PersistentContainer));
 		// destroy any currently existing permanent object
 		// this should only be done if there exists a savestate for the level.
@@ -164,12 +150,8 @@ public class MySaver {
 		return playerObject;
 	}
 	public static void HandleLoadedPersistents(List<Persistent> persistents){
-		// string lastName = "first";
-		// string lastComponent = "first";
 		foreach (Persistent persistent in persistents){
-			// lastName = persistent.name;
 			foreach (Component component in loadedObjects[persistent.id].GetComponents<Component>()){
-				// lastComponent = component.GetType().ToString();
 				Func<SaveHandler> get;
 				if (MySaver.Handlers.TryGetValue(component.GetType(), out get)){
 					var handler = get();
@@ -177,8 +159,6 @@ public class MySaver {
 					handler.LoadData(component, data);
 				}	
 			}
-			// lastName = "finished";
-			// lastComponent = "finished"; 
 			// handle child objects
 			foreach (PersistentComponent persistentChild in persistent.persistentChildComponents.Values){
 				GameObject childObject = loadedObjects[persistent.id].transform.Find(persistentChild.parentObject).gameObject;
@@ -187,14 +167,10 @@ public class MySaver {
 					string lastChildComponent = childComponent.GetType().ToString();
 					Func<SaveHandler> get;
 					if (MySaver.Handlers.TryGetValue(childComponent.GetType(), out get)){
-						// try{
-							var handler = get();
-							PersistentComponent data = new PersistentComponent();
-							if (persistent.persistentChildComponents.TryGetValue(childComponent.GetType().ToString(), out data ))
-								handler.LoadData(childComponent, data);
-						// } catch {
-						// 	Debug.Log("Problem configuring child component "+lastChildComponent);
-						// }
+						var handler = get();
+						PersistentComponent data = new PersistentComponent();
+						if (persistent.persistentChildComponents.TryGetValue(childComponent.GetType().ToString(), out data ))
+							handler.LoadData(childComponent, data);
 					}
 				} else {
 					Debug.Log("could not resolve child or component on load");
@@ -204,33 +180,26 @@ public class MySaver {
 		}
 	}
 	public static GameObject LoadPersistentContainer(PersistentContainer container){
-		// string lastName = "first";
 		GameObject rootObject = null;
-		// try {
-			Regex reg =  new Regex("\\s+", RegexOptions.Multiline);
-			foreach(Persistent persistent in container.PersistentObjects){
-				// lastName = persistent.name;
-				loadedIds.Add(persistent.id);
-				// Debug.Log("loading "+persistent.name+" with id "+persistent.id.ToString());
-				string path = @"prefabs/"+persistent.name;
-				path = reg.Replace(path, "_");
-				GameObject go = GameObject.Instantiate(
-					Resources.Load(path),
-					persistent.transformPosition,
-					persistent.transformRotation) as GameObject;
-				loadedObjects.Add(persistent.id, go);
-				go.BroadcastMessage("LoadInit", SendMessageOptions.DontRequireReceiver);
-				go.name = Toolbox.Instance.ScrubText(go.name);
-				if (!rootObject)
-					rootObject = go;
-				MyMarker marker = go.GetComponent<MyMarker>();
-				if (marker){
-					marker.id = persistent.id;
-				}
+		Regex reg =  new Regex("\\s+", RegexOptions.Multiline);
+		foreach(Persistent persistent in container.PersistentObjects){
+			loadedIds.Add(persistent.id);
+			string path = @"prefabs/"+persistent.name;
+			path = reg.Replace(path, "_");
+			GameObject go = GameObject.Instantiate(
+				Resources.Load(path),
+				persistent.transformPosition,
+				persistent.transformRotation) as GameObject;
+			loadedObjects.Add(persistent.id, go);
+			go.BroadcastMessage("LoadInit", SendMessageOptions.DontRequireReceiver);
+			go.name = Toolbox.Instance.ScrubText(go.name);
+			if (!rootObject)
+				rootObject = go;
+			MyMarker marker = go.GetComponent<MyMarker>();
+			if (marker){
+				marker.id = persistent.id;
 			}
-		// } catch {
-		// 	Debug.Log("Error occurred when instantiating persistent object "+ lastName);
-		// }
+		}
 		return rootObject;
 	}
 }
