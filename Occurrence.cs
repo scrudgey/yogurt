@@ -133,6 +133,10 @@ public class OccurrenceSpeech : OccurrenceData {
         return line == otherData.line;
     }
 }
+public class OccurrenceInsult : OccurrenceData {
+    public GameObject insulter;
+    public GameObject insulted;
+}
 [System.Serializable]
 public class OccurrenceViolence : OccurrenceData {
     public GameObject attacker;
