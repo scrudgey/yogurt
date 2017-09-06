@@ -122,6 +122,17 @@ public class Physical : MonoBehaviour, IMessagable {
 			doStopTable = false;
 			StopTable();
 		}
+		if (currentMode == mode.ground){
+			if (objectCollider.Distance(horizonCollider).isOverlapped){
+				slider.useLimits = false;
+				// Debug.Log("horizon overlap, undo limits "+name);
+			} else {
+				if (slider.useLimits == false){
+					// Debug.Log("non overlap, reseting limit "+name);
+					SetSliderLimit(0);
+				}
+			}
+		}
 	}
 	public void GroundMode (){
 		// Debug.Log(name + " groundmode");
@@ -164,6 +175,7 @@ public class Physical : MonoBehaviour, IMessagable {
 		if (landSounds.Length > 0 && !suppressLandSound)
 			audioSource.PlayOneShot(landSounds[Random.Range(0, landSounds.Length)]);
 		suppressLandSound = false;
+		SetSliderLimit(1f* objectCollider.Distance(horizonCollider).distance);
 	}
 	public void ClearTempColliders(){
 		foreach (Collider2D temporaryCollider in temporaryDisabledColliders){
