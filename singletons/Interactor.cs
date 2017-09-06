@@ -5,16 +5,13 @@ public class Interactor{
 	// maybe the most important method, it tells all available actions
 	// from the perspective of a player or whatever
 	static public List<Interaction> GetInteractions(GameObject focus, GameObject target){
-		// Debug.Log(focus.name+" on "+target.name);
-		List<Interaction> actionDictionary = new List<Interaction>();
 		// no manual actions in here, only right click
-		actionDictionary = ReportRightClickActions(target, focus);
+		List<Interaction> actionDictionary = ReportRightClickActions(target, focus);
 		// free actions are okay whatever the occasion
 		List<Interaction> freeActions = ReportFreeActions(target, focus);
 		actionDictionary.AddRange(freeActions);
 		// what actions can the target do on *me* and my junk?
-		List<Interaction> inverseActions = ReportRightClickActions(focus, target);
-		foreach (Interaction inter in inverseActions)
+		foreach (Interaction inter in ReportRightClickActions(focus, target))
 			if (!actionDictionary.Contains(inter))   // inverse double-count diode
 				actionDictionary.Add(inter);
 		return actionDictionary;
