@@ -164,7 +164,7 @@ public class MySaver {
 				GameObject childObject = loadedObjects[persistent.id].transform.Find(persistentChild.parentObject).gameObject;
 				Component childComponent = childObject.GetComponent(persistentChild.type);
 				if (childObject && childComponent){
-					string lastChildComponent = childComponent.GetType().ToString();
+					// string lastChildComponent = childComponent.GetType().ToString();
 					Func<SaveHandler> get;
 					if (MySaver.Handlers.TryGetValue(childComponent.GetType(), out get)){
 						var handler = get();
