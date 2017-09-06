@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-// using System.Collections;
 
 public class PhysicalImpact : MonoBehaviour {
 	public Vector2 direction;
@@ -8,7 +7,6 @@ public class PhysicalImpact : MonoBehaviour {
 	public List<Transform> impactedObjects = new List<Transform>();
 	public float magnitude = 20f;
 	public float size = 0.08f;
-	// public List<GameObject> responsibleParty = new List<GameObject>();
 	public GameObject responsibleParty;
 
 	void Start(){
@@ -46,8 +44,6 @@ public class PhysicalImpact : MonoBehaviour {
 
 	public void PlayImpactSound(){
 		AudioSource source = GetComponent<AudioSource>();
-		// if (source.isPlaying)
-		// 	return;
 		if (impactSounds.Length > 0){
 			source.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
 		}
