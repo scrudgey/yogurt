@@ -18,6 +18,8 @@ public class Interaction {
 	public float range = Mathf.Pow(0.35f, 2f);
 	public bool limitless = false;
 	public bool dontWipeInterface = false;
+	public bool duplicator = false;
+	public GameObject duplicationTarget;
 	public string actionName;
 	private bool _validationFunction;
 	public bool validationFunction{
@@ -71,6 +73,16 @@ public class Interaction {
 				Debug.Log("interaction validation function was not located.");
 		}
 	}
+	public void CheckDuplicationDependency(){
+		GameObject test = Resources.Load("prefabs/"+Toolbox.Instance.CloneRemover(duplicationTarget.name)) as GameObject;
+		if (test == null){
+			// Debug.Log("loading resource failed");
+			// Debug.Log("prefabs/"+Toolbox.Instance.CloneRemover(duplicationTarget.name));
+			enabled = false;
+		} else {
+			enabled = true;
+		}
+	}
 	public void CheckDependency(){
 		parameters = new List<Component>();
 		int parameterMatches = 0;
@@ -81,7 +93,10 @@ public class Interaction {
 		if (debug)
 			Debug.Log("Checking the dependency for interaction "+actionName);
 		// there's probably a nicer way to do this with linq or something
-		// for (int i =0; i < parameterTypes.Count; i++){
+		if (duplicator){
+			CheckDuplicationDependency();
+			return;
+		}
 		foreach (Type requiredType in parameterTypes){
 			bool parameterMatched = false;
 			if (debug)
@@ -123,6 +138,13 @@ public class Interaction {
 	}
 	public bool IsValid(){
 		bool validation = true;
+		// if (duplicator){
+		// 	if (duplicationTarget != parent.gameObject){
+		// 		return true;
+		// 	} else {
+		// 		return false;
+		// 	}
+		// }
 		if (validationFunction){
 			if (validationMethodInfo == null)
 				ConfigureValidator();
@@ -179,6 +201,8 @@ public class Interactive : MonoBehaviour{
 		List<Interaction> returnList = new List<Interaction>();
 		foreach (Interaction interaction in interactions){
 			if (interaction.enabled && !interaction.hideInRightClickMenu && interaction.parameterTypes.Count > 0)
+				returnList.Add(interaction);
+			if (interaction.enabled && interaction.duplicator)
 				returnList.Add(interaction);
 		}
 		return returnList;
@@ -269,6 +293,9 @@ public class Interactive : MonoBehaviour{
 			// 	Debug.Log("player on other consent: "+interaction.playerOnOtherConsent);
 			// 	Debug.Log("inert on other consent: "+interaction.inertOnPlayerConsent);
 			// }
+			if (interaction.duplicator){
+				interaction.duplicationTarget = targ;
+			}
 			interaction.targetComponents = new List<Interactive>(actives);
 			if (!interaction.playerOnOtherConsent && sourceType == targetType.player && targType == targetType.other){
 				interaction.enabled = false;
