@@ -1,6 +1,6 @@
 ﻿using Nimrod;
 using UnityEngine;
-using System.Collections.Generic;
+// using System.Collections.Generic;
 
 public class Insult {
 	public static void DoInsult(GameObject insulter, GameObject insulted){
