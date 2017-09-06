@@ -1,7 +1,3 @@
-﻿// using UnityEngine;
-// using System.Collections;
-// using System.Collections.Generic;
-
-public class Hat : Interactive {
-
+﻿public class Hat : Interactive {
+    public bool helmet;
 }
