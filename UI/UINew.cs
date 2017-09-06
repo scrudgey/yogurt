@@ -86,19 +86,23 @@ public class UINew: Singleton<UINew> {
         }
 		if (highlight){
 			GameObject top = Controller.Instance.GetFrontObject(hits);
+			// GameObject target = null;
+			// if (target != null)
 			GameObject target = Controller.Instance.GetBaseInteractive(top.transform);
-			switch (Controller.Instance.currentSelect){
-				case Controller.SelectType.none:
-				Cursor.SetCursor(cursorHighlight, new Vector2(28, 16), CursorMode.Auto);
-				break;
-				case Controller.SelectType.swearAt:
-				SetActionText("Swear at "+Toolbox.Instance.GetName(target));
-				break;
-				case Controller.SelectType.insultAt:
-				SetActionText("Insult "+Toolbox.Instance.GetName(target));
-				break;
-				default:
-				break;
+			if (target != null){
+				switch (Controller.Instance.currentSelect){
+					case Controller.SelectType.none:
+					Cursor.SetCursor(cursorHighlight, new Vector2(28, 16), CursorMode.Auto);
+					break;
+					case Controller.SelectType.swearAt:
+					SetActionText("Swear at "+Toolbox.Instance.GetName(target));
+					break;
+					case Controller.SelectType.insultAt:
+					SetActionText("Insult "+Toolbox.Instance.GetName(target));
+					break;
+					default:
+					break;
+				}
 			}
 		} else {
 			if (Controller.Instance.currentSelect == Controller.SelectType.none){
