@@ -5,27 +5,33 @@ public class Duplicator : Interactive, IDirectable {
 	public AudioClip failSound;
 	private AudioSource audioSource;
 	public ParticleSystem particles;
+	public Interaction dup;
 	public void DirectionChange(Vector2 d){
 		if (particles){
 			particles.transform.rotation = Quaternion.AngleAxis(Toolbox.Instance.ProperAngle(d.x, d.y)-20f, new Vector3(0, 0, 1));
 		}
 	}
-	void Start () {
+	void Start() {
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
-		Interaction dup = new Interaction(this, "Duplicate", "Duplicate");
+		dup = new Interaction(this, "Duplicate", "Duplicate");
 		dup.limitless = true;
+		dup.duplicator = true;
 		dup.validationFunction = true;
+		dup.inertOnPlayerConsent = false;
+		dup.otherOnPlayerConsent = false;
 		interactions.Add(dup);
 	}
-	public void Duplicate(Pickup target){
+	public void Duplicate(){
+		GameObject target = dup.duplicationTarget;
 		string prefabName = Toolbox.Instance.CloneRemover(target.name);
-		GameObject dup = Instantiate(Resources.Load("prefabs/"+prefabName), target.transform.position, Quaternion.identity) as GameObject;
+			Vector3 jitter = new Vector3(Random.Range(0, 0.1f), Random.Range(0, 0.1f), 0);
+		GameObject dupObj = Instantiate(Resources.Load("prefabs/"+prefabName), target.transform.position + jitter, Quaternion.identity) as GameObject;
 		if (dup == null){
 			audioSource.PlayOneShot(failSound);
 		} else {
-			dup.name = Toolbox.Instance.CloneRemover(dup.name);
+			dupObj.name = Toolbox.Instance.CloneRemover(dupObj.name);
 			audioSource.PlayOneShot(dupSound);
-			Instantiate(Resources.Load("particles/poof"), dup.transform.position, Quaternion.identity);
+			Instantiate(Resources.Load("particles/poof"), dupObj.transform.position, Quaternion.identity);
 			if (prefabName == "dollar"){
 				GameManager.Instance.data.achievementStats.dollarsDuplicated += 1;
 				GameManager.Instance.CheckAchievements();
@@ -35,14 +41,17 @@ public class Duplicator : Interactive, IDirectable {
 			}
 		}
 	}
-	public bool Duplicate_Validation(Pickup target){
+	public bool Duplicate_Validation(){
+		GameObject target = dup.duplicationTarget;
+		if (target == null)
+			return false;
 		if (target.gameObject == gameObject){
 			return false;
 		} else {
 			return true;
 		}
 	}
-	public string Duplicate_desc(Pickup target){
-		return "Duplicate "+Toolbox.Instance.GetName(target.gameObject);
+	public string Duplicate_desc(){
+		return "Duplicate "+Toolbox.Instance.GetName(dup.duplicationTarget);
 	}
 }
