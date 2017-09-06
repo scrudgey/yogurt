@@ -14,5 +14,6 @@ public class ChemicalSpray: MonoBehaviour {
 				Toolbox.Instance.OccurenceFlag(gameObject, fireData);
 			}
 		}
+		Destroy(gameObject);
 	}
 }
