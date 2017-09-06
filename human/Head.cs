@@ -4,6 +4,7 @@ public class Head : Interactive, IExcludable {
 	public Hat hat;
 	public Hat initHat;
 	private bool LoadInitialized = false;
+	private SpriteRenderer spriteRenderer;
 	void Start(){
 		if (!LoadInitialized)
 			LoadInit();
@@ -24,6 +25,7 @@ public class Head : Interactive, IExcludable {
 		interactions.Add(wearAct);
 		hatPoint = transform.Find("hatPoint").gameObject;
 		LoadInitialized = true;
+		spriteRenderer = GetComponent<SpriteRenderer>();
 	}
 	
 	public void DonHat(Hat h){
@@ -35,12 +37,17 @@ public class Head : Interactive, IExcludable {
 		PhysicalBootstrapper phys = hat.GetComponent<PhysicalBootstrapper>();
 		if (phys)
 			phys.DestroyPhysical();
-		hat.transform.position = hatPoint.transform.position;
 		hatPoint.transform.localScale = Vector3.one;
 		transform.localScale = Vector3.one;
 		hat.transform.rotation = Quaternion.identity;
-		// hat.transform.parent = hatPoint.transform;
-		hat.transform.SetParent(hatPoint.transform, true);
+		if (hat.helmet){
+			hat.transform.position = transform.position;
+			hat.transform.SetParent(transform, true);
+			spriteRenderer.enabled = false;
+		} else {
+			hat.transform.position = hatPoint.transform.position;
+			hat.transform.SetParent(hatPoint.transform, true);
+		}
 		hat.transform.rotation = Quaternion.identity;
 		hat.GetComponent<Rigidbody2D>().isKinematic = true;
 		hat.GetComponent<Collider2D>().isTrigger = true;
@@ -58,9 +65,10 @@ public class Head : Interactive, IExcludable {
 		// Debug.Log(Messenger.Instance.claimedItems.ContainsKey(h.gameObject));
 		return !ClaimsManager.Instance.claimedItems.ContainsKey(h.gameObject);
 	}
-
-
 	void RemoveHat(){
+		if (hat.helmet){
+			spriteRenderer.enabled = true;
+		}
 		Toolbox.Instance.RemoveIntrinsic(transform.parent.gameObject, hat.gameObject);
 		ClaimsManager.Instance.DisclaimObject(hat.gameObject,this);
 		HatAnimation hatAnimator = hat.GetComponent<HatAnimation>();
