@@ -51,6 +51,7 @@ public class Awareness : MonoBehaviour, IMessagable {
 	public Knowledge possessionDefaultState;
 	public GameObject wayWardPossession;
 	private GameObject sightCone;
+	private List<GameObject> seenFlags = new List<GameObject>();
 	Transform cachedTransform;
 	public new Transform transform
 		{
@@ -188,8 +189,11 @@ public class Awareness : MonoBehaviour, IMessagable {
 		}
 	}
 	void OnTriggerEnter2D(Collider2D other){
+		if (seenFlags.Contains(other.gameObject))
+			return;
 		if (other.tag == "occurrenceFlag"){
 			NoticeOccurrence(other.gameObject);
+			seenFlags.Add(other.gameObject);
 		}
 	}
 	void NoticeOccurrence(GameObject flag){
@@ -200,15 +204,25 @@ public class Awareness : MonoBehaviour, IMessagable {
 			Toolbox.Instance.SendMessage(gameObject, this, new MessageOccurrence(od));
 			if (od is OccurrenceViolence){
 				OccurrenceViolence dat = (OccurrenceViolence)od;
-				PersonalAssessment attacker = FormPersonalAssessment(dat.attacker);
-				PersonalAssessment victim = FormPersonalAssessment(dat.victim);
+				if (dat.victim == null || dat.attacker == null)
+					continue;
+				GameObject victimObject = Controller.Instance.GetBaseInteractive(dat.victim.transform);
+				GameObject attackerObject = Controller.Instance.GetBaseInteractive(dat.attacker.transform);
+				PersonalAssessment attacker = FormPersonalAssessment(attackerObject);
+				PersonalAssessment victim = FormPersonalAssessment(victimObject);
+				// Debug.Log(victimObject);
+				if (possession != null && possession == victimObject){
+					Debug.Log(dat.attacker.name + " attacked my possession!");
+					if (attacker != null){
+						attacker.status = PersonalAssessment.friendStatus.enemy;
+					}
+				}
 				if (attacker == null || victim == null){
 					continue;
 				}
-				// Debug.Log(dat.attacker.name + " attacked "+ dat.victim.name);
 				if (gameObject == attacker.knowledge.obj || gameObject == victim.knowledge.obj)
 					continue;
-
+				
 				switch (attacker.status)
 				{
 					case PersonalAssessment.friendStatus.friend:
@@ -233,6 +247,7 @@ public class Awareness : MonoBehaviour, IMessagable {
 					break;
 				}
 			}
+
 		}
 	}
 	// process the list of objects in the field of view.
@@ -240,7 +255,6 @@ public class Awareness : MonoBehaviour, IMessagable {
 		viewed = false;
 		speciousPresent = 1f;
 		foreach (GameObject g in fieldOfView){
-
 			if (g == null)
 				continue;
 			Knowledge knowledge = null;
