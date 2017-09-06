@@ -103,6 +103,8 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		float theta = Vector3.Angle(transform.up, Vector2.up) * (6.28f / 360.0f);
 		float offset = objectCollider.bounds.extents.y - objectCollider.offset.x * Mathf.Sin(theta) + objectCollider.offset.y * Mathf.Cos(theta);
 		height = Mathf.Max(height, offset);
+		// height = height - offset;
+		// Debug.Log(name + " " + height.ToString());
 		// height += 0.005f;
 		// if (objectCollider.offset.y > height)
 		// 	height += objectCollider.offset.y;
@@ -124,6 +126,8 @@ public class PhysicalBootstrapper : MonoBehaviour {
 
 		//Slider joint
 		sliderJoint2D = groundObject.AddComponent<SliderJoint2D>();
+		sliderJoint2D.autoConfigureAngle = false;
+		sliderJoint2D.autoConfigureConnectedAnchor = false;
 		sliderJoint2D.enableCollision = false;
 		sliderJoint2D.angle = 90f;
 		sliderJoint2D.connectedBody = hingeBody;
@@ -139,10 +143,10 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	void OnCollisionStay2D(Collision2D coll){
 		if (coll.gameObject != horizon)
 			return;
-		if (physical.slider.useLimits == false){
-			float dist = coll.collider.Distance(objectCollider).distance;
-			physical.SetSliderLimit(Mathf.Abs(2 * dist));
-		}
+		// if (physical.slider.useLimits == false){
+		// 	float dist = coll.collider.Distance(objectCollider).distance;
+		// 	physical.SetSliderLimit(Mathf.Abs(-2f * dist));
+		// }
 	}
 	void OnCollisionEnter2D(Collision2D coll){
 		if (coll.relativeVelocity.magnitude > 0.5){
