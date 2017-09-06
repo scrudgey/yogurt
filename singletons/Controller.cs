@@ -127,12 +127,24 @@ public class Controller : Singleton<Controller> {
 				continue;
 			}
 			frontRenderer = WhichIsFirst(frontRenderer, candidate.GetComponent<SpriteRenderer>());
-			front = frontRenderer.gameObject;
+			if (frontRenderer != null)
+				front = frontRenderer.gameObject;
 		}
-		return frontRenderer.gameObject;
+		// if (frontRenderer != null){
+		// 	return frontRenderer.gameObject;
+		// }else{
+		// 	return null;
+		// }
+		return front;
 	}
 	public GameObject GetBaseInteractive(Transform target){
 		Transform currentChild = target;
+		if (currentChild.tag == "footprint"){
+			Physical physical = target.GetComponent<Physical>();
+			if (physical){
+				return physical.objectBody.gameObject;
+			}
+		}
 		while (true){
 			if (currentChild.tag == "Physical"){
 				return currentChild.gameObject;
@@ -184,7 +196,7 @@ public class Controller : Singleton<Controller> {
 			GameObject top = Controller.Instance.GetFrontObject(hits);
 			if (top != null){
 				GameObject target = Controller.Instance.GetBaseInteractive(top.transform);
-				Insult.DoInsult(GameManager.Instance.playerObject, top);
+				Insult.DoInsult(GameManager.Instance.playerObject, target);
 				UINew.Instance.SetActionText("");
 			}
 		}
