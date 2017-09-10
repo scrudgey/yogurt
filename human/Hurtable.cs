@@ -14,6 +14,7 @@ public class Hurtable : MonoBehaviour, IMessagable {
 		}
 	}
 	public float health;
+	public float armor;
 	public float maxHealth;
 	public float bonusHealth;
 	public Intrinsic myIntrinsic = new Intrinsic();
@@ -110,6 +111,7 @@ public class Hurtable : MonoBehaviour, IMessagable {
 				health += intrins.netIntrinsic.bonusHealth.floatValue;
 			}
 			bonusHealth = intrins.netIntrinsic.bonusHealth.floatValue;
+			armor = intrins.netIntrinsic.armor.floatValue;
 		}
 		if (incoming is MessageDamage){
 			MessageDamage dam = (MessageDamage)incoming;
