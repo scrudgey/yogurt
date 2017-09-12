@@ -31,7 +31,7 @@ public class Hurtable : MonoBehaviour, IMessagable {
 			switch (type){
 			case damageType.physical:
 				if (!myIntrinsic.noPhysicalDamage.boolValue){
-					float netDam = Mathf.Max(amount - myIntrinsic.armor.floatValue, 0);
+					float netDam = Mathf.Max(amount - armor, 0);
 					health -= netDam;
 					impulse += netDam;
 					tookDamage = true;
