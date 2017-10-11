@@ -288,6 +288,18 @@ namespace AI{
 			return status.neutral;
 		}
 	}
+	public class RoutineLookInDirection : Routine {
+		public Vector2 dir;
+		public RoutineLookInDirection(GameObject g, Controllable c, Vector2 dir) : base(g, c){
+			this.dir = dir;
+		}
+		protected override status DoUpdate (){
+			// Debug.Log("looking in direction "+dir.ToString());
+			control.ResetInput();
+			control.SetDirection(dir);
+			return status.neutral;
+		}
+	}
 	public class RoutineWalkToPoint : Routine {
 		public Ref<Vector2> target = new Ref<Vector2>(Vector2.zero);
 		public RoutineWalkToPoint(GameObject g, Controllable c, Ref<Vector2> t) : base(g, c){
@@ -468,6 +480,7 @@ namespace AI{
 			if (target.val != null){
 				control.SetDirection(Vector2.ClampMagnitude(target.val.transform.position - gameObject.transform.position, 1f));
 				if (timer > 0.5){
+					Debug.Log("punch");
 					timer = 0f;
 					control.shootPressedFlag = true;
 				} else {
