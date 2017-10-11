@@ -133,6 +133,26 @@ namespace AI{
 			}
 		}
 	}
+	public class ConditionLookingInDirection : Condition {
+		public Vector2 dir;
+		public Controllable controllable;
+		public ConditionLookingInDirection(GameObject g, Controllable c, Vector2 dir): base(g) {
+			this.dir = dir;
+			controllable = c;
+		}
+		public override status Evaluate(){
+			// Vector2 dif = (Vector2)gameObject.transform.position - (Vector2)target.val.transform.position;
+			Vector2 dif = controllable.direction - dir;
+			Debug.Log(dif);
+			float angle = Toolbox.Instance.ProperAngle(dif.x, dif.y);
+			Debug.Log(angle);
+			if (Mathf.Abs(angle - controllable.directionAngle) < 20){
+				return status.success;
+			} else {
+				return status.neutral;
+			}
+		}
+	}
 	// this success condition is going to be pretty update intensive, getting a component on each frame??
 	// find a better way to do this
 	public class ConditionHoldingObjectOfType : Condition{
@@ -214,10 +234,21 @@ namespace AI{
 	}
 	public class ConditionInFightMode : Condition{
 		Controllable control;
+		Inventory inv;
 		public ConditionInFightMode(GameObject g, Controllable c) : base(g) {
 			control = c;
+			inv = g.GetComponent<Inventory>();
 		}
 		public override status Evaluate(){
+			// TODO: check if i am holding a melee weapon
+			if (inv != null){
+				if (inv.holding){
+					MeleeWeapon weapon = inv.holding.GetComponent<MeleeWeapon>();
+					if (weapon){
+						return status.success;
+					}
+				}
+			}
 			if (control.fightMode){
 				return status.success;
 			} else {
