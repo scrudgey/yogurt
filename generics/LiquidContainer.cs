@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
-// using System.Collections;
 
-public class LiquidContainer : Interactive {
-//	public static AudioClip pourSound;
+public class LiquidContainer : Interactive, IMessagable {
 	private SpriteRenderer liquidSprite;
 	public Liquid liquid;
 	private float _amount;
@@ -87,9 +85,9 @@ public class LiquidContainer : Interactive {
 		}
 	}
 	public string FillFromContainer_desc(LiquidContainer l){
-		string myname = Toolbox.Instance.GetName(gameObject);
+		// string myname = Toolbox.Instance.GetName(gameObject);
 		string resname = Toolbox.Instance.GetName(l.gameObject);
-		return "Fill "+myname+" with "+l.liquid.name+" from "+resname;
+		return "Fill "+containerName+" with "+l.liquid.name+" from "+resname;
 	}
 	public void FillWithLiquid(Liquid l){
 		if (amount > 0){
@@ -100,7 +98,8 @@ public class LiquidContainer : Interactive {
 		CheckLiquid();
 	}
 	public void FillByLoad(string type){
-	    liquid = LiquidCollection.LoadLiquid(type);
+	    // liquid = LiquidCollection.LoadLiquid(type);
+		liquid = Liquid.LoadLiquid(type);
 		amount = fillCapacity;
 		CheckLiquid();
 	}
@@ -125,7 +124,6 @@ public class LiquidContainer : Interactive {
 			empty = true;
 		}
 	}
-
     public void Spill(){
         Spill(0.2f);
     }
@@ -133,7 +131,6 @@ public class LiquidContainer : Interactive {
 		doSpill = true;
         spillSeverity = severity;
 	}
-
 	void FixedUpdate(){
 		if (doSpill){
 			doSpill = false;
@@ -156,25 +153,36 @@ public class LiquidContainer : Interactive {
 		if (eater){
 			GameObject sip = new GameObject();
 			sip.AddComponent<MonoLiquid>();
-			LiquidCollection.MonoLiquidify(sip, liquid);
+			Liquid.MonoLiquidify(sip, liquid);
 			eater.Eat(sip.GetComponent<Edible>());
 			amount -= 1f;
 			if (drinkSounds.Length > 0){
 				Toolbox.Instance.AudioSpeaker(drinkSounds[Random.Range(0, drinkSounds.Length-1)], transform.position);
 			}
 			GameManager.Instance.CheckItemCollection(gameObject, eater.gameObject);
+			//TODO: remove this when intrinsics are tied to liquids
+			// Toolbox.Instance.AddIntrinsic(eater.gameObject, gameObject);
+			// Toolbox.Instance.AddIntrinsic(eater.gameObject, liquid.intrinsic);
 		}
 	}
 	public bool Drink_Validation(Eater eater){
 		return amount > 0;
 	}
 	public string Drink_desc(Eater eater){
-		string myname = Toolbox.Instance.GetName(gameObject);
-		return "Drink "+liquid.name+" from "+myname;
+		// string myname = Toolbox.Instance.GetName(gameObject);
+		return "Drink "+liquid.name+" from "+containerName;
 	}
 	void OnGroundImpact(Physical phys){
 		if (!lid)
 			Spill();
 	}
-
+	public void ReceiveMessage(Message incoming){
+		if (incoming is MessageDamage){
+			MessageDamage message = (MessageDamage)incoming;
+			if (message.type == damageType.physical || message.type == damageType.cutting){
+				if (!lid)
+					Spill();
+			}
+		}
+	}
 }
