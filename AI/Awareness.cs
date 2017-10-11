@@ -36,6 +36,8 @@ public class PersonalAssessment{
 	public Knowledge knowledge;
 	public bool unconscious;
 	public int numberOfTimesInsulted;
+	public bool warned;
+	public float timeWarned = -99f; 
 	public PersonalAssessment(Knowledge k){
 		knowledge = k;
 	}
@@ -48,6 +50,8 @@ public class Awareness : MonoBehaviour, IMessagable {
 	public DecisionMaker decisionMaker;
 	public List<GameObject> initialAwareness;
 	public GameObject possession;
+	public Collider2D protectZone;
+	public Collider2D warnZone;
 	public Knowledge possessionDefaultState;
 	public GameObject wayWardPossession;
 	private GameObject sightCone;
@@ -68,6 +72,7 @@ public class Awareness : MonoBehaviour, IMessagable {
 	private Vector3 sightConeScale;
 	private Controllable control;
 	private float speciousPresent; 
+	private const float perceptionInterval = 0.25f;
 	private List<GameObject> fieldOfView = new List<GameObject>();
 	private bool viewed;
 	public Controllable.HitState hitState;
@@ -139,7 +144,7 @@ public class Awareness : MonoBehaviour, IMessagable {
 		foreach (PersonalAssessment assessment in people.Values){
 			if (assessment.status != PersonalAssessment.friendStatus.enemy)
 				continue;
-			if (assessment.unconscious)
+			if (assessment.unconscious && decisionMaker.personality.battleStyle != Personality.BattleStyle.bloodthirsty)
 				continue;
 			// Vector3 directionToTarget = assessment.knowledge.lastSeenPosition - currentPosition;
 			Vector3 directionToTarget = assessment.knowledge.transform.position - currentPosition;
@@ -172,6 +177,13 @@ public class Awareness : MonoBehaviour, IMessagable {
 	// we don't know when this will be run or how many times, so i need a boolean to track
 	// whether it has run this cycle yet or not.
 	void OnTriggerStay2D(Collider2D other){
+		if (other.isTrigger)
+			return;
+		if (other.transform.IsChildOf(transform.root))
+			return;
+		// if it's background
+		if (other.gameObject.layer == 8)
+			return;
 		if (speciousPresent <= 0){
 			if (viewed == false){
 				fieldOfView = new List<GameObject>();
@@ -181,9 +193,10 @@ public class Awareness : MonoBehaviour, IMessagable {
 				return;
 			// might be able to have better logic for how to add things to the field of view here. I need 
 			// "high level" objects of import.
+			// Debug.Log(other.transform.parent.gameObject);
 			if (other.tag == "Physical")
 				fieldOfView.Add(other.gameObject);
-			if (other.gameObject.GetComponent<Controllable>()){
+			if (other.gameObject.GetComponentInParent<Controllable>()){
 				fieldOfView.Add(other.gameObject);
 			}
 		}
@@ -253,7 +266,7 @@ public class Awareness : MonoBehaviour, IMessagable {
 	// process the list of objects in the field of view.
 	void Perceive(){
 		viewed = false;
-		speciousPresent = 1f;
+		speciousPresent = perceptionInterval;
 		foreach (GameObject g in fieldOfView){
 			if (g == null)
 				continue;
@@ -272,9 +285,31 @@ public class Awareness : MonoBehaviour, IMessagable {
 				knowledgebase.Add(g, knowledge);
 			}
 			PersonalAssessment assessment = FormPersonalAssessment(g);
-			Humanoid human = g.GetComponent<Humanoid>();
+			Humanoid human = g.GetComponentInParent<Humanoid>();
 			if (human){
 				assessment.unconscious = human.hitState >= Controllable.HitState.stun;
+				if (protectZone != null){
+					if (warnZone.bounds.Contains(knowledge.transform.position) && 
+						GameManager.Instance.sceneTime - assessment.timeWarned > 4f && 
+						assessment.status != PersonalAssessment.friendStatus.enemy){
+						assessment.timeWarned = GameManager.Instance.sceneTime;
+						MessageSpeech message = new MessageSpeech();
+						if (!assessment.warned){
+							message.phrase = "Halt! Come no closer!";
+						} else {
+							message.phrase = "I am sworn to protect this bridge";
+						}
+						Toolbox.Instance.SendMessage(gameObject, this, message);
+						assessment.warned = true;
+					}
+					if (protectZone.bounds.Contains(knowledge.transform.position)){
+						assessment.status = PersonalAssessment.friendStatus.enemy;
+						foreach(Priority priority in decisionMaker.priorities){
+							priority.ReceiveMessage(new MessageThreaten());
+						}
+					}
+				}
+				
 			}
 		}
 	}
