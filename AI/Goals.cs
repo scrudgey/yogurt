@@ -35,6 +35,7 @@ namespace AI {
 			return successCondition.Evaluate();
 		}
 		public virtual void Update(){
+
 			// if i have any unmet requirements, my update goes to the first unmet one.
 			foreach (Goal requirement in requirements){
 				if (requirement.Evaluate() != status.success){
@@ -54,6 +55,8 @@ namespace AI {
 			}
 			try {
 				status routineStatus = routines[index].Update();
+				// Debug.Log(routines[index].GetType().ToString());
+				// Debug.Log(routineStatus);
 				if (routineStatus == status.failure){
 					control.ResetInput();
 					index ++;
@@ -157,6 +160,18 @@ namespace AI {
 			routines.Add(new RoutineLookAtObject(g, c, target));
 		}
 	}
+	public class GoalLookInDirection: Goal {
+		public Vector2 dir;
+		public GoalLookInDirection(GameObject g, Controllable c, Vector2 dir) : base(g, c){
+			this.dir = dir;
+			successCondition = new ConditionLookingInDirection(g, c, dir);
+			routines.Add(new RoutineLookInDirection(g, c, dir));
+		}
+		public override void Update(){
+			base.Update();
+			// Debug.Log("look in direction update");
+		}
+	}
 	public class GoalWalkToPoint : Goal {
 		public Ref<Vector2> target;
 		public GoalWalkToPoint(GameObject g, Controllable c, Ref<Vector2> target) : base(g, c){
@@ -197,6 +212,7 @@ namespace AI {
 	public class GoalDukesUp : Goal {
 		public GoalDukesUp(GameObject g, Controllable c, Inventory i) : base(g, c){
 			successCondition = new ConditionInFightMode(g, control);
+			// TODO: add a routine for checking inventory
 			routines.Add(new RoutineToggleFightMode(g, c));
 			routines.Add(new RoutineToggleFightMode(g, c));
 		}
