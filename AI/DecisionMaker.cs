@@ -6,11 +6,13 @@ using AI;
 [System.Serializable]
 public class Personality {
 	public enum Bravery {neutral, cowardly, brave};
-	public Bravery bravery;
-	public enum Actor {no, yes};
-	public Actor actor;
 	public enum Stoicism{neutral, fragile, noble};
+	public enum BattleStyle{normal, bloodthirsty};
+	public enum Actor {no, yes};
+	public Bravery bravery;
+	public Actor actor;
 	public Stoicism stoicism;
+	public BattleStyle battleStyle;
 }
 
 public class DecisionMaker : MonoBehaviour, IMessagable {
@@ -24,6 +26,9 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 	public GameObject possession;
 	public Controllable.HitState hitState;
 	public Awareness awareness;
+	public BoxCollider2D protectionZone;
+	public Collider2D warnZone;
+	public Vector3 guardPoint;
 	public bool initialized = false;
 	void Awake() {
 		if (!initialized)
@@ -33,15 +38,17 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 		initialized = true;
 		// make sure there's Awareness
 		awareness = Toolbox.Instance.GetOrCreateComponent<Awareness>(gameObject);
+		awareness.decisionMaker = this;
 		control = GetComponent<Controllable>();
 
 		// start awareness with knowledge of possessions
 		if (possession != null){
 			initialAwareness.Add(possession);
 			awareness.possession = possession;
-			awareness.decisionMaker = this;
 		}
 		awareness.initialAwareness = initialAwareness;
+		awareness.protectZone = protectionZone;
+		awareness.warnZone = warnZone;
 
 		// initialize thought bubble
 		thought = Instantiate(Resources.Load("UI/thoughtbubble"), gameObject.transform.position, Quaternion.identity) as GameObject;
@@ -52,14 +59,19 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 		thoughtText.text = "";
 
 		// create priorities
+		// TODO: allow for a default priority
 		priorities = new List<Priority>();
 		priorities.Add(new PriorityFightFire(gameObject, control));
-		priorities.Add(new PriorityWander(gameObject, control));
 		priorities.Add(new PriorityRunAway(gameObject, control));
 		priorities.Add(new PriorityAttack(gameObject, control));
 		if (personality.actor == Personality.Actor.yes)
 			priorities.Add(new PriorityReadScript(gameObject, control));
 		priorities.Add(new PriorityProtectPossessions(gameObject, control));
+		if (protectionZone != null){
+			priorities.Add(new PriorityProtectZone(gameObject, control, protectionZone, guardPoint));
+		} else {
+			priorities.Add(new PriorityWander(gameObject, control));
+		}
 	}
 	public void ReceiveMessage(Message message){
 		if (message is MessageHitstun){
