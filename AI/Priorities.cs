@@ -101,7 +101,25 @@ namespace AI{
 			}
 		}
 	}
-
+	public class PriorityProtectZone: Priority {
+		public Collider2D zone;
+		public PriorityProtectZone(GameObject g, Controllable c, Collider2D zone, Vector3 guardPoint): base(g, c){
+			this.zone = zone;
+			priorityName = "protectZone";
+			Goal getToZone = new GoalWalkToPoint(gameObject, control, new Ref<Vector2>((Vector2)guardPoint));
+			Goal lookGoal = new GoalLookInDirection(gameObject, control, Vector2.right);
+			lookGoal.requirements.Add(getToZone);
+			goal = lookGoal;
+		}
+		public override float Urgency(Personality personality){
+			if (zone.bounds.Contains(gameObject.transform.position)){
+				return Priority.urgencyMinor;
+			} else {
+				urgency = Priority.urgencySmall;
+				return Priority.urgencySmall;
+			}
+		}
+	}
 	public class PriorityWander: Priority{
 		public PriorityWander(GameObject g, Controllable c): base(g, c) {
 			priorityName = "wander";
@@ -115,7 +133,6 @@ namespace AI{
 			}
 		}
 	}
-
 	public class PriorityRunAway: Priority{
 		public PriorityRunAway(GameObject g, Controllable c): base(g, c){
 			priorityName = "run away";
@@ -135,7 +152,7 @@ namespace AI{
 		}
 		public override float Urgency(Personality personality){
 			if (personality.bravery == Personality.Bravery.brave)
-				return urgency / 2f;
+				return urgency / 10f;
 			if (personality.bravery == Personality.Bravery.cowardly)
 				return urgency * 2f;
 			return urgency;
