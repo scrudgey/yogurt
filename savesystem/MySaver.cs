@@ -65,7 +65,7 @@ public class MySaver {
 		List<Persistent> persistents = new List<Persistent>();
 		// add those objects which are disabled and would therefore not be found by our first search
 		objectList.AddRange(disabledPersistents);
-		foreach (MyMarker mark in new List<MyMarker>(GameObject.FindObjectsOfType<MyMarker>())){
+		foreach (MyMarker mark in GameObject.FindObjectsOfType<MyMarker>()){
 			objectList.Add(mark.gameObject);
 		}
 		// create a persistent for each gameobject with the appropriate data
@@ -206,7 +206,7 @@ public class MySaver {
 public class ReferenceResolver{
 	public  Dictionary<Persistent, GameObject> persistentObjects = new Dictionary<Persistent, GameObject>();
 	public  Dictionary<GameObject, int> objectIDs = new Dictionary<GameObject ,int>();
-	private Dictionary<Persistent, List<Persistent> > referenceTree = new Dictionary<Persistent, List<Persistent>>();
+	private Dictionary<Persistent, List<Persistent>> referenceTree = new Dictionary<Persistent, List<Persistent>>();
 	public int ResolveReference(GameObject referent, Persistent requester){
 		int returnID = -1;
 		if (referent == null)
@@ -222,11 +222,18 @@ public class ReferenceResolver{
 		// }
 		return returnID;
 	}
+	public void AddToReferenceTree(Persistent treeParent, Persistent child){
+		if (child == null || treeParent == null)
+			return;
+		if (!referenceTree.ContainsKey(treeParent))
+			referenceTree.Add(treeParent, new List<Persistent>());
+		referenceTree[treeParent].Add(child);
+	}
 	public List<Persistent> RetrieveReferenceTree(GameObject target){
 		Persistent targetPersistent = null;
 		List<Persistent> tree = new List<Persistent>();
-		if ( persistentObjects.ContainsValue(target) )
-			targetPersistent = persistentObjects.FindKeyByValue( target );
+		if (persistentObjects.ContainsValue(target))
+			targetPersistent = persistentObjects.FindKeyByValue(target);
 		tree.Add(targetPersistent);
 		if (referenceTree.ContainsKey(targetPersistent)){
 			bool refCheck = true;
