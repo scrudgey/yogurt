@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
-// using System.Collections;
 
 public class Blender : Container {
-//	public bool lidOn;
 	public bool power;
 	private bool vibrate;
 	public Sprite[] spriteSheet;
@@ -29,7 +27,6 @@ public class Blender : Container {
 		LoadInitialized = true;
 	}
 	void Update () {
-
 		if(power){
 			if(!audioSource.isPlaying){
 				audioSource.clip = blendNoise;
@@ -46,7 +43,6 @@ public class Blender : Container {
 			transform.position = pos;
 			//blend contained item
 			if(items.Count > 0){
-				Destructible d = items[0].GetComponent<Destructible>();
 				Edible edible = items[0].GetComponent<Edible>();
 				if (edible && edible.blendable){
 					liquidContainer.FillWithLiquid(edible.Liquify());
@@ -55,9 +51,11 @@ public class Blender : Container {
 					Destroy(items[0].gameObject);
 					items.RemoveAt(0);
 				}
-				if (d){
-					d.TakeDamage(damageType.physical, Time.deltaTime * 10);
-				}
+				MessageDamage message = new MessageDamage();
+				message.amount = Time.deltaTime * 10;
+				message.force = Vector2.zero;
+				message.type = damageType.physical;
+				Toolbox.Instance.SendMessage(items[0].gameObject, this, message);
 			}
 			if(liquidContainer.amount > 0 && !liquidContainer.lid){
 				liquidContainer.Spill(1f);
@@ -81,7 +79,6 @@ public class Blender : Container {
 			return "Turn on power";
 		}
 	}
-
 	public void Lid(){
 		liquidContainer.lid = !liquidContainer.lid;
 		if(liquidContainer.lid){
