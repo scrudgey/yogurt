@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
-public class Hurtable : MonoBehaviour, IMessagable {
+using System.Collections.Generic;
+
+public class Hurtable : MonoBehaviour, IMessagable, IDamageable {
 	private Controllable.HitState _hitState;
 	public Controllable.HitState hitState{
 		get {return _hitState;}
@@ -25,21 +27,55 @@ public class Hurtable : MonoBehaviour, IMessagable {
 	private float ouchFrequency = 0.1f;
 	public GameObject dizzyEffect;
 	public GameObject lastAttacker;
-	public void TakeDamage(damageType type, float amount){
+	public List<Collider2D> backgroundColliders = new List<Collider2D>();
+
+	public void Start(){
+		backgroundColliders = new List<Collider2D>();
+		foreach(Transform transform in transform.root.GetComponentsInChildren<Transform>()){
+			if (transform.gameObject.layer == 8){
+				Collider2D[] colliders = transform.GetComponents<Collider2D>();
+				backgroundColliders.AddRange(colliders);
+			}
+		}
+	}
+	public ImpactResult TakeDamage(MessageDamage message){
 		bool tookDamage = false;
+		if (message.responsibleParty != null){
+				lastAttacker = message.responsibleParty;
+		}
 		if (!myIntrinsic.invulnerable.boolValue){
-			switch (type){
+			float armor = this.armor;
+			if (message.strength)
+				armor = 0;
+
+			switch (message.type){
+			case damageType.cutting:
+				if (armor <= message.amount)
+					Bleed(transform.position);
+				goto case damageType.physical;
 			case damageType.physical:
-				if (!myIntrinsic.noPhysicalDamage.boolValue){
-					float netDam = Mathf.Max(amount - armor, 0);
-					health -= netDam;
-					impulse += netDam;
-					tookDamage = true;
+				if (armor > message.amount){
+					tookDamage = false;
+				} else {
+					if (message.strength){
+						message.amount *= 2.5f;
+						message.force *= 10f;
+					}
+					if (!myIntrinsic.noPhysicalDamage.boolValue){
+						float netDam = Mathf.Max(message.amount - armor, 0);
+						health -= netDam;
+						impulse += netDam;
+						tookDamage = true;
+					}
+				}
+				Rigidbody2D body = GetComponent<Rigidbody2D>();
+				if (body){
+					body.AddForce(message.force * 100f);
 				}
 				break;
 			case damageType.fire:
 				if (!myIntrinsic.fireproof.boolValue){
-					health -= amount;
+					health -= message.amount;
 					tookDamage = true;
 				}
 				break;
@@ -47,20 +83,20 @@ public class Hurtable : MonoBehaviour, IMessagable {
 				break;
 			}
 		}
-		if (health <= 0 && type == damageType.fire && hitState != Controllable.HitState.dead){
-			Die(type);
+		if (health <= 0 && (message.type == damageType.fire || message.type == damageType.cutting) && hitState != Controllable.HitState.dead){
+			Die(message.type);
 		}
 		if (health <= -0.5 * maxHealth && hitState != Controllable.HitState.dead){
-			Die(type);
+			Die(message.type);
 		}
-		if (type != damageType.fire){
+		if (message.type != damageType.fire){
 			hitState = Controllable.AddHitState(hitState, Controllable.HitState.stun);
 			hitStunCounter = 0.25f;
 		}
 		if (tookDamage && Random.Range(0.0f, 1.0f) < ouchFrequency){
 			MessageSpeech speechMessage = new MessageSpeech();
 			speechMessage.nimrodKey = true;
-			switch(type){
+			switch(message.type){
 				case damageType.physical:
 				speechMessage.phrase = "pain-physical";
 				break;
@@ -72,6 +108,15 @@ public class Hurtable : MonoBehaviour, IMessagable {
 				break;
 			}
 			Toolbox.Instance.SendMessage(gameObject, this, speechMessage);
+		}
+		if (tookDamage){
+			if (message.strength){
+				return ImpactResult.strong;
+			} else {
+				return ImpactResult.normal;
+			}
+		} else {
+			return ImpactResult.repel;
 		}
 	}
 	public void Die(damageType type){
@@ -102,6 +147,8 @@ public class Hurtable : MonoBehaviour, IMessagable {
 			GameManager.Instance.PlayerDeath();
 		}
 		hitState = Controllable.AddHitState(hitState, Controllable.HitState.dead);
+		Toolbox.Instance.DataFlag(gameObject, 3575f, 2000f, 3500f, 8950f, -5500f);
+		// Toolbox.Instance.OccurenceFlag()
 	}
 	public void ReceiveMessage(Message incoming){
 		if (incoming is MessageNetIntrinsic){
@@ -115,16 +162,11 @@ public class Hurtable : MonoBehaviour, IMessagable {
 		}
 		if (incoming is MessageDamage){
 			MessageDamage dam = (MessageDamage)incoming;
-			if (dam.responsibleParty != null){
-				lastAttacker = dam.responsibleParty;
-			}
-			TakeDamage(dam.type, dam.amount);
-			if (dam.impactor)	
-				dam.impactor.PlayImpactSound();
-			Rigidbody2D body = GetComponent<Rigidbody2D>();
-			if (body){
-				body.AddForce(dam.force * 100f);
-			}
+			
+			// TakeDamage(dam);
+			// if (dam.impactor)	
+			// 	dam.impactor.PlayImpactSound();
+			dam.TakeDamage(this);
 		}
 	}
 	public void Update(){
@@ -179,6 +221,7 @@ public class Hurtable : MonoBehaviour, IMessagable {
 		transform.RotateAround(pivot, new Vector3(0, 0, 1), -90);
 		MessageHitstun message = new MessageHitstun();
 		message.doubledOver = false;
+		message.knockedDown = true;
 		message.hitState = hitState;
 		Toolbox.Instance.SendMessage(gameObject, this, message);
 
@@ -186,6 +229,10 @@ public class Hurtable : MonoBehaviour, IMessagable {
 		FollowGameObject dizzyFollower = dizzyEffect.GetComponent<FollowGameObject>();
 		dizzyFollower.target = gameObject;
 		dizzyFollower.Init();
+
+		foreach(Collider2D collider in backgroundColliders){
+			collider.enabled = false;
+		}
 	}
 	public void GetUp(){
 		hitState = Controllable.RemoveHitState(hitState, Controllable.HitState.unconscious);
@@ -196,6 +243,9 @@ public class Hurtable : MonoBehaviour, IMessagable {
 		if (dizzyEffect != null){
 			ClaimsManager.Instance.WasDestroyed(dizzyEffect);
 			Destroy(dizzyEffect);
+		}
+		foreach(Collider2D collider in backgroundColliders){
+			collider.enabled = true;
 		}
 	}
 	public void DoubleOver(bool val){
@@ -216,7 +266,8 @@ public class Hurtable : MonoBehaviour, IMessagable {
 		}
 	}
 	public void Bleed(Vector3 position){
-		Liquid blood = LiquidCollection.LoadLiquid("blood");
+		// Liquid blood = LiquidCollection.LoadLiquid("blood");
+		Liquid blood = Liquid.LoadLiquid("blood");
 		float initHeight = (position.y - transform.position.y ) + 0.15f;
 		Toolbox.Instance.SpawnDroplet(blood, 0.3f, gameObject, initHeight);
 	}
