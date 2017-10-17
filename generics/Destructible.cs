@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
-public enum damageType{physical, fire, any}
+public enum damageType{physical, fire, any, cutting}
 
-public class Destructible : MonoBehaviour, IMessagable {
+public class Destructible : MonoBehaviour, IMessagable, IDamageable {
 	public float health;
 	public float maxHealth;
 	public float bonusHealth;
@@ -24,26 +24,33 @@ public class Destructible : MonoBehaviour, IMessagable {
 		}
 	}
 
-	public void TakeDamage(damageType type, float damage){
+	public ImpactResult TakeDamage(MessageDamage message){
 		if (!invulnerable){
-			switch (type)
+			switch (message.type)
 			{
+			case damageType.cutting:
 			case damageType.physical:
 				if (!no_physical_damage){
-					health -= damage * physicalMultiplier;
-					lastDamage = type;
+					health -= message.amount * physicalMultiplier;
+					
 				}
 				break;
 			case damageType.fire:
 				if (!fireproof){
-					health -= damage * fireMultiplier;
-					lastDamage = type;
+					health -= message.amount * fireMultiplier;
 				}
 				break;
 			default:
 				break;
 			}
+			lastDamage = message.type;
+			if (message.strength){
+				return ImpactResult.strong;
+			} else {
+				return ImpactResult.normal;
+			}
 		}
+		return ImpactResult.repel;
 	}
 
 	//TODO: make destruction chaos somehow proportional to object
@@ -86,12 +93,20 @@ public class Destructible : MonoBehaviour, IMessagable {
 			//i should fix this to be more physical
 			if (col.rigidbody){
 				float damage = col.rigidbody.mass * vel / 5.0f;
-				TakeDamage(damageType.physical, damage);
+				MessageDamage message = new MessageDamage();
+				message.amount = damage;
+				message.type = damageType.physical;
+				message.force = col.relativeVelocity;
+				TakeDamage(message);
 				// Debug.Log("Collision damage on " + gameObject.name + " to the tune of " + damage.ToString());	
 			} else {
 				Rigidbody2D rigidbody = GetComponent<Rigidbody2D>();
 				float damage = rigidbody.mass * vel / 5.0f;
-				TakeDamage(damageType.physical, damage);
+				MessageDamage message = new MessageDamage();
+				message.amount = damage;
+				message.type = damageType.physical;
+				message.force = col.relativeVelocity;
+				TakeDamage(message);
 				// Debug.Log("Collision damage on " + gameObject.name + " to the tune of " + damage.ToString());
 			}
 		}
@@ -113,9 +128,10 @@ public class Destructible : MonoBehaviour, IMessagable {
 		}
 		if (message is MessageDamage){
 			MessageDamage dam = (MessageDamage)message;
-			TakeDamage(dam.type, dam.amount);
-			if (dam.impactor)	
-				dam.impactor.PlayImpactSound();
+			// TakeDamage(dam.type, dam.amount);
+			// if (dam.impactor)	
+			// 	dam.impactor.PlayImpactSound();
+			dam.TakeDamage(this);
 		}
 	}
 
