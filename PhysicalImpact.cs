@@ -2,20 +2,17 @@
 using System.Collections.Generic;
 
 public class PhysicalImpact : MonoBehaviour {
-	public Vector2 direction;
 	public AudioClip[] impactSounds;
+	public AudioClip[] repelSounds;
+	public AudioClip[] strongImpactSounds;
 	public List<Transform> impactedObjects = new List<Transform>();
-	public float magnitude = 20f;
 	public float size = 0.08f;
-	public GameObject responsibleParty;
-
+	public MessageDamage message;
 	void Start(){
 		Destroy(gameObject, 0.5f);
-		Toolbox.Instance.SetUpAudioSource(gameObject);
 		CircleCollider2D circle = GetComponent<CircleCollider2D>();
 		circle.radius = size;
 	}
-
 	void OnTriggerEnter2D(Collider2D collider){
 		if (collider.isTrigger)
 			return;
@@ -24,28 +21,39 @@ public class PhysicalImpact : MonoBehaviour {
 		if (impactedObjects.Contains(collider.transform.root))
 			return;
 		impactedObjects.Add(collider.transform.root);
-		LiquidContainer container = collider.GetComponent<LiquidContainer>();
-		if (container){
-			container.Spill();
-		}
-		MessageDamage message = new MessageDamage(magnitude, damageType.physical);
-		message.force = new Vector2(direction.x * magnitude / 100f, direction.y * magnitude / 100f);
 		message.impactor = this;
-		message.responsibleParty = responsibleParty;
 		Toolbox.Instance.SendMessage(collider.gameObject, this, message);
-		
 		OccurrenceViolence violence = new OccurrenceViolence();
-		violence.attacker = responsibleParty;
+		violence.attacker = message.responsibleParty;
 		violence.victim = collider.gameObject;
 		violence.disturbing = 10f;
 		violence.chaos = 10f;
 		Toolbox.Instance.OccurenceFlag(gameObject, violence);
 	}
-
-	public void PlayImpactSound(){
-		AudioSource source = GetComponent<AudioSource>();
-		if (impactSounds.Length > 0){
-			source.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
+	public void PlayImpactSound(ImpactResult impactType){
+		if (message.impactSounds != null){
+			impactSounds = message.impactSounds;
+		}
+		// AudioSource source = GetComponent<AudioSource>();
+		switch(impactType){
+			case ImpactResult.normal:
+				if (impactSounds.Length > 0){
+					Toolbox.Instance.AudioSpeaker(impactSounds[Random.Range(0, impactSounds.Length)], transform.position);
+				}
+			break;
+			case ImpactResult.repel:
+				if (repelSounds.Length > 0){
+					Toolbox.Instance.AudioSpeaker(repelSounds[Random.Range(0, repelSounds.Length)], transform.position);
+				}
+			break;
+			case ImpactResult.strong:
+				if (strongImpactSounds.Length > 0){
+					Toolbox.Instance.AudioSpeaker(strongImpactSounds[Random.Range(0, strongImpactSounds.Length)], transform.position);
+				}
+				Instantiate(Resources.Load("particles/explosion1"), transform.position, Quaternion.identity);
+			break;
+			default:
+			break;
 		}
 	}
 }
