@@ -62,6 +62,7 @@ public class Controllable : MonoBehaviour, IMessagable {
 	public bool disabled = false;
 	public HitState hitState;	
 	public GameObject lastRightClicked;
+	private Rigidbody2D rigidBody2d;
 	public void ResetInput(){
 		upFlag = false;
 		downFlag = false;
@@ -77,6 +78,7 @@ public class Controllable : MonoBehaviour, IMessagable {
 				directables.Add((IDirectable)component);
 			}
 		}
+		rigidBody2d = GetComponent<Rigidbody2D>();
 	}
 	void Update(){
 		if (hitState > 0){
@@ -84,6 +86,7 @@ public class Controllable : MonoBehaviour, IMessagable {
 		}
 		if (hitState > Controllable.HitState.none){
 			ResetInput();
+			return;
 		}
 		if (rightFlag || leftFlag)
 			lastPressed = "right";
@@ -93,7 +96,7 @@ public class Controllable : MonoBehaviour, IMessagable {
 			lastPressed = "up";
 		// update direction vector if speed is above a certain value
 		if(GetComponent<Rigidbody2D>().velocity.normalized.magnitude > 0.1){// && (upFlag || downFlag || leftFlag || rightFlag) ){
-			SetDirection(GetComponent<Rigidbody2D>().velocity.normalized);
+			SetDirection(rigidBody2d.velocity.normalized);
 			directionAngle = Toolbox.Instance.ProperAngle(direction.x, direction.y);
 		}
 		if (!shootPressedFlag && shootPressedDone)
@@ -107,12 +110,15 @@ public class Controllable : MonoBehaviour, IMessagable {
 		}
 	}
 	public virtual void SetDirection(Vector2 d){
+		d = d.normalized;
+		if (d == Vector2.zero)
+			return;
 		direction = d;
 	}
 	public void ShootPressed(){
-		if (fightMode){
-			Toolbox.Instance.SendMessage(gameObject, this, new MessagePunch());
-		}
+		// if (fightMode){
+		Toolbox.Instance.SendMessage(gameObject, this, new MessagePunch());
+		// }
 		if (defaultInteraction != null)
 			defaultInteraction.DoAction();
 	}
