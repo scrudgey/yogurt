@@ -8,7 +8,8 @@ public class Projectile : MonoBehaviour {
 	private Rigidbody2D body;
 	private RotateTowardMotion rotator;
 	void Awake(){
-		message = new MessageDamage(damage, damageType.physical);
+		message = new MessageDamage(damage, damageType.cutting);
+		message.impactSounds = hurtableImpactSounds;
 		body = GetComponent<Rigidbody2D>();
 		rotator = GetComponent<RotateTowardMotion>();
 	}
@@ -16,11 +17,9 @@ public class Projectile : MonoBehaviour {
 		Hurtable hurtable = coll.gameObject.GetComponent<Hurtable>();
 		if (hurtable){
 			Toolbox.Instance.SendMessage(coll.gameObject, this, message);
-			if (hurtableImpactSounds.Length > 0){
-				Toolbox.Instance.AudioSpeaker(hurtableImpactSounds[Random.Range(0, hurtableImpactSounds.Length)], transform.position);
-			}
-			
-			hurtable.Bleed(transform.position);
+			// if (hurtableImpactSounds.Length > 0){
+			// 	Toolbox.Instance.AudioSpeaker(hurtableImpactSounds[Random.Range(0, hurtableImpactSounds.Length)], transform.position);
+			// }
 			ClaimsManager.Instance.WasDestroyed(gameObject);
 			Destroy(gameObject);
 		} else {
