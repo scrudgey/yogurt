@@ -53,17 +53,26 @@ public class MessageDamage : Message {
 	public float amount;
 	public damageType type;
 	public Vector2 force;
+	public AudioClip[] impactSounds;
 	public PhysicalImpact impactor;
 	public MessageDamage(){}
 	public GameObject responsibleParty;
+	public bool strength;
 	public MessageDamage(float amount, damageType type){
 		this.amount = amount;
 		this.type = type;
+	}
+	public void TakeDamage(IDamageable component){
+		ImpactResult result = component.TakeDamage(this);
+		if (impactor){
+			impactor.PlayImpactSound(result);
+		}
 	}
 }
 public class MessageHitstun : Message {
 	public Controllable.HitState hitState;
 	public bool doubledOver;
+	public bool knockedDown;
 }
 public class MessageInventoryChanged : Message {
 	public GameObject dropped;
