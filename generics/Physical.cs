@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-public class Physical : MonoBehaviour, IMessagable {
+public class Physical : MonoBehaviour, IMessagable, IDamageable {
 	public enum mode{none, fly, ground, zip}
 	public AudioClip[] impactSounds;
 	public AudioClip[] landSounds;
@@ -57,13 +57,18 @@ public class Physical : MonoBehaviour, IMessagable {
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 		spriteRenderer = GetComponent<SpriteRenderer>();
 	}
-	public void Impact(Vector2 f){
-		Vector2 force = f / (objectBody.mass / 25f);
+	public ImpactResult TakeDamage(MessageDamage message){
+		Vector2 force = message.force / (objectBody.mass / 25f);
 		if (currentMode != mode.fly)
 			FlyMode();
 		if (impactSounds.Length > 0)
 			audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
 		bootstrapper.Set3Motion(new Vector3(force.x, force.y, force.y + 0.5f));
+		if (message.strength){
+			return ImpactResult.strong;
+		} else {
+			return ImpactResult.normal;
+		}
 	}
 	void FixedUpdate() {
 		if (trueObject == null){
@@ -276,9 +281,11 @@ public class Physical : MonoBehaviour, IMessagable {
 		if (message is MessageDamage){
 			MessageDamage dam = (MessageDamage)message;
 			if (dam.type != damageType.fire){
-				Impact(dam.force);
-				if (dam.impactor)
-					dam.impactor.PlayImpactSound();
+				// Impact(dam.force);
+				// if (dam.impactor)
+				// 	dam.impactor.PlayImpactSound();
+				// dam.ImpactCallback();
+				dam.TakeDamage(this);
 			}
 		}
 	}
