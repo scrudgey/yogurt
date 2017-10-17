@@ -9,6 +9,7 @@ public class TerminateOnStop : MonoBehaviour {
 				Destroy(GetComponent<Collider2D>());
 			SpriteRenderer renderer = GetComponent<SpriteRenderer>();
 			renderer.sortingLayerName = "background";
+			renderer.sortingOrder=20;
 			Destroy(this);
 		}
 	}
