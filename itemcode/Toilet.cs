@@ -29,7 +29,7 @@ public class Toilet : Container {
 		items = new List<Pickup>();
 		timeout = refractoryPeriod;
         for (int i=0; i<3; i++){
-            Toolbox.Instance.SpawnDroplet(LiquidCollection.LoadLiquid("toilet water"), 0.5f, gameObject, 0.2f);
+            Toolbox.Instance.SpawnDroplet(Liquid.LoadLiquid("toilet_water"), 0.5f, gameObject, 0.2f);
         }
 	}
 	public string Flush_desc(){
