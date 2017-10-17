@@ -11,6 +11,7 @@ public class Puddle : MonoBehaviour {
 		amount = 1;
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		spriteRenderer.sortingLayerName = "background";
+		spriteRenderer.sortingOrder = 100;
 		// set random small puddle sprite
 		Sprite[] sprites = Resources.LoadAll<Sprite>("sprites/smallpuddle");
 		spriteRenderer.sprite = sprites[Random.Range (0,4)];
