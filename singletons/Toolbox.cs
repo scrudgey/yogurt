@@ -1,9 +1,6 @@
 using UnityEngine;
-// using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-// using System.Xml.Serialization;
-// using System.IO;
 
 public static class IDictionaryExtensions
 {
@@ -99,7 +96,7 @@ public class Toolbox : Singleton<Toolbox> {
 		PhysicalBootstrapper phys = droplet.GetComponent<PhysicalBootstrapper>();
 		phys.initHeight = 0.05f;
 		phys.initVelocity = initialVelocity;
-		LiquidCollection.MonoLiquidify(droplet, l);
+		Liquid.MonoLiquidify(droplet, l);
 		return droplet;
 	}
     public GameObject SpawnDroplet(Liquid l, float severity, GameObject spiller){
@@ -134,7 +131,7 @@ public class Toolbox : Singleton<Toolbox> {
 			Physics2D.IgnoreCollision(collider, phys.physical.objectCollider, true);
 			Physics2D.IgnoreCollision(collider, phys.physical.horizonCollider, true);
 		}
-        LiquidCollection.MonoLiquidify(droplet, l);
+        Liquid.MonoLiquidify(droplet, l);
 		return droplet;
     }
 	public Component CopyComponent(Component original, GameObject destination)
@@ -238,10 +235,16 @@ public class Toolbox : Singleton<Toolbox> {
 			receiver.ReceiveMessage(message);
 		}
 	}
-	public List<Intrinsic> AddIntrinsic(GameObject host, GameObject donor){
+	public List<Intrinsic> AddIntrinsic(GameObject host, GameObject donor, bool timeout=true){
 		Intrinsics intrinsics = GetOrCreateComponent<Intrinsics>(host);
 		Intrinsics donorIntrinsics = GetOrCreateComponent<Intrinsics>(donor);
-		return intrinsics.AddIntrinsic(donorIntrinsics);
+		return intrinsics.AddIntrinsic(donorIntrinsics, timeout:timeout);
+	}
+	public void AddIntrinsic(GameObject host, Intrinsic intrinsic){
+		if (intrinsic == null)
+			return;
+		Intrinsics intrinsics = GetOrCreateComponent<Intrinsics>(host);
+		intrinsics.AddIntrinsic(intrinsic);
 	}
 	public void RemoveIntrinsic(GameObject host, GameObject donor){
 		Intrinsics intrinsics = GetOrCreateComponent<Intrinsics>(host);
