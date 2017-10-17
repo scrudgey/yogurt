@@ -64,7 +64,8 @@ public class Speech : Interactive, IMessagable {
         if (bubbleParent){
             Canvas bubbleCanvas = bubbleParent.GetComponent<Canvas>();
             if (bubbleCanvas){
-                bubbleCanvas.worldCamera = GameManager.Instance.cam;
+                // bubbleCanvas.worldCamera = GameManager.Instance.cam;
+                bubbleCanvas.worldCamera = Camera.main;
             }
         }
     }
@@ -279,13 +280,24 @@ public class Speech : Interactive, IMessagable {
         if (lastNetIntrinsic == null)
             return;
         if (lastNetIntrinsic.fireproof.boolValue != net.fireproof.boolValue){
-            if (net.fireproof.boolValue)
+            if (net.fireproof.boolValue){
                 Say("I feel fireproof!");
+            } else {
+                Say("I no longer feel fireproof!");
+            } 
         }
         if (lastNetIntrinsic.telepathy.boolValue != net.telepathy.boolValue){
             if (net.telepathy.boolValue)
                 Say("I can hear thoughts!");
         }
+        if (lastNetIntrinsic.strength.boolValue != net.strength.boolValue){
+            if (net.strength.boolValue){
+                Say("I feel strong!");
+            } else {
+                Say("I no longer feel strong!");
+            }
+        }
+
     }
     // double-exponential seat easing function
     public float DoubleSeat(float x, float a, float w, float max, float min){
