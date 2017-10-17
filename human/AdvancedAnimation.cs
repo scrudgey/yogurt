@@ -88,7 +88,7 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 		GetComponent<Animation>().Play(sequence);
 	}
 
-	void LateUpdate(){
+	public void LateUpdate(){
 		if (controllable == null)
 			Start();
 		spriteSheet = baseName+"_spritesheet";
