@@ -267,9 +267,9 @@ public class LiquidContainerHandler: SaveHandler<LiquidContainer>{
 	// i think this would be a little better.
 	public override void LoadData(LiquidContainer instance, PersistentComponent data){
 		if (data.strings["liquid"] != "null"){
-			instance.FillByLoad(data.strings["liquid"]);
+			instance.FillByLoad(Toolbox.Instance.ReplaceUnderscore(data.strings["liquid"]));
 		} else {
-			instance.FillByLoad("Water");
+			instance.FillByLoad("water");
 		}
 		instance.fillCapacity = 			data.floats["fillCapacity"];
 		instance.amount = 					data.floats["amount"];
@@ -331,6 +331,9 @@ public class HumanoidHandler: SaveHandler<Humanoid>{
 public class StainHandler: SaveHandler<Stain>{
 	public override void SaveData(Stain instance, PersistentComponent data, ReferenceResolver resolver){
 		data.ints["parentID"] = resolver.ResolveReference(instance.parent, data.persistent);
+		Persistent stainPersistent = resolver.persistentObjects.FindKeyByValue(instance.gameObject);
+		Persistent parentPersistent = resolver.persistentObjects.FindKeyByValue(instance.parent);
+		resolver.AddToReferenceTree(parentPersistent, stainPersistent);
 		MonoLiquid stainLiquid = instance.GetComponent<MonoLiquid>();
 		if (stainLiquid != null)
 			data.strings["liquid"] = stainLiquid.liquid.name;
@@ -339,7 +342,8 @@ public class StainHandler: SaveHandler<Stain>{
 		if (data.ints["parentID"] != -1){
 			instance.ConfigureParentObject(MySaver.loadedObjects[data.ints["parentID"]]);
 			if (data.strings.ContainsKey("liquid")){
-				LiquidCollection.MonoLiquidify(instance.gameObject, LiquidCollection.LoadLiquid(data.strings["liquid"]));
+				string filename = Toolbox.Instance.ReplaceUnderscore(data.strings["liquid"]);
+				Liquid.MonoLiquidify(instance.gameObject, Liquid.LoadLiquid(filename));
 			}
 		} else {
 			instance.RemoveStain();
