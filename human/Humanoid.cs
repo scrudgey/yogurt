@@ -21,6 +21,8 @@ public class Humanoid : Controllable, IMessagable {
 	private Quaternion rightTilt;
 	private Quaternion leftTilt;
 	private Quaternion forward;
+	private float initFriction;
+	private Rigidbody2D rigidBody2D;
 	private Vector3 scaleVector{
 		get {
 			return _scaleVector;
@@ -57,13 +59,17 @@ public class Humanoid : Controllable, IMessagable {
 	}
 	void LoadInit(){
 		baseSpeed = maxSpeed;
+		rigidBody2D = GetComponent<Rigidbody2D>();
 	}
 	void FixedUpdate(){
 		Vector2 acceleration = Vector2.zero;
 		Vector2 deceleration = Vector2.zero;
-		if (hitState >= Controllable.HitState.unconscious){
+		if (hitState > Controllable.HitState.none){
+			rigidBody2D.drag = 10f;
+			ResetInput();
 			return;
 		}
+		rigidBody2D.drag = initFriction;
 		// Do the normal controls stuff
 		// set vertical force or damp if neither up nor down is held
 		if (upFlag)
@@ -87,15 +93,15 @@ public class Humanoid : Controllable, IMessagable {
 			transform.rotation = Quaternion.Lerp(transform.rotation, forward, 0.1f);
 		}
 		// apply force
-		GetComponent<Rigidbody2D>().AddForce(acceleration+deceleration);
+		rigidBody2D.AddForce(acceleration+deceleration);
 
 		// clamp velocity to maximum
 		// there's probably a more efficient way to do this calculation but whatevs
-		if (GetComponent<Rigidbody2D>().velocity.magnitude > maxSpeed)
-			GetComponent<Rigidbody2D>().velocity = Vector2.ClampMagnitude(GetComponent<Rigidbody2D>().velocity, maxSpeed);
+		if (rigidBody2D.velocity.magnitude > maxSpeed)
+			rigidBody2D.velocity = Vector2.ClampMagnitude(rigidBody2D.velocity, maxSpeed);
 
 		// use the scale x trick for left-facing animations
-		Vector2 vel = GetComponent<Rigidbody2D>().velocity;
+		Vector2 vel = rigidBody2D.velocity;
 		if (vel.x < -0.1){
 			Vector3 tempVector = Vector3.one;
 			tempVector.x = -1;
