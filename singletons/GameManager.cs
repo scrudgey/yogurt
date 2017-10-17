@@ -58,7 +58,7 @@ public partial class GameManager : Singleton<GameManager> {
 			_activeCommercial = value;
 		}
 	}
-    private float sceneTime;
+    public float sceneTime;
 	private bool awaitNewDayPrompt;
 	public float timeSinceLastSave = 0f;
 	private float intervalTimer;
