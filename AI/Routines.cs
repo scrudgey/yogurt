@@ -480,7 +480,6 @@ namespace AI{
 			if (target.val != null){
 				control.SetDirection(Vector2.ClampMagnitude(target.val.transform.position - gameObject.transform.position, 1f));
 				if (timer > 0.5){
-					Debug.Log("punch");
 					timer = 0f;
 					control.shootPressedFlag = true;
 				} else {
