@@ -12,7 +12,7 @@ public class Droplet : MonoBehaviour {
 		puddle.layer = 9;
 		PhysicalBootstrapper pb = GetComponent<PhysicalBootstrapper>();
 		pb.DestroyPhysical();
-		LiquidCollection.MonoLiquidify(puddle, monoLiquid.liquid);
+		Liquid.MonoLiquidify(puddle, monoLiquid.liquid);
 	}
 	void OnCollisionEnter2D(Collision2D coll){
 		if (physical.currentMode == Physical.mode.fly){
