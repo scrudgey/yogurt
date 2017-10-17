@@ -3,7 +3,6 @@
 using System.Collections.Generic;
 
 public class Cabinet : Interactive {
-
 	public bool open = false;
 	public bool opened = false;
 	public Sprite closedSprite;
@@ -12,7 +11,6 @@ public class Cabinet : Interactive {
 	public AudioClip closeSound;
 	public List<GameObject> contained;
 	private AudioSource audioSource;
-
 	void Start () {
 		// Interaction openAct = n
 		Interaction openAct = new Interaction(this, "Open", "Open");
@@ -23,7 +21,6 @@ public class Cabinet : Interactive {
 		interactions.Add(openAct);
 		interactions.Add(closeAct);
 	}
-	
 	public void Open(){
 		SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
 		spriteRenderer.sprite = openSprite;
@@ -47,19 +44,16 @@ public class Cabinet : Interactive {
 		string myname = Toolbox.Instance.GetName(gameObject);
 		return "Close "+myname;
 	}
-
 	public void Close(){
 		SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
 		spriteRenderer.sprite = closedSprite;
 		audioSource.PlayOneShot(closeSound);
 		open = false;
 	}
-	
 	public bool Open_Validation(){
 		return !open;
 	}
 	public bool Close_Validation(){
 		return open;
 	}
-
 }
