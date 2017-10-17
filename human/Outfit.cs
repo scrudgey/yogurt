@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
 
 public class Outfit : Interactive, IMessagable {
 	private bool LoadInitialized = false;
@@ -60,16 +59,11 @@ public class Outfit : Interactive, IMessagable {
 		MessageAnimation anim = new MessageAnimation();
 		anim.outfitName = uniform.baseName;
 		Toolbox.Instance.SendMessage(gameObject, this, anim);
-		List<Intrinsic> addedIntrins = Toolbox.Instance.AddIntrinsic(gameObject, uniform.gameObject);
-		foreach (Intrinsic intrins in addedIntrins){
-			intrins.persistent = true;
-		}
-
+		Toolbox.Instance.AddIntrinsic(gameObject, uniform.gameObject);
 		wornUniformName = Toolbox.Instance.CloneRemover(uniform.gameObject.name);
 		GameManager.Instance.CheckItemCollection(uniform.gameObject, gameObject);
 		ClaimsManager.Instance.WasDestroyed(uniform.gameObject);
 		Destroy(uniform.gameObject);
-
 		foreach(Stain stain in GetComponentsInChildren<Stain>()){
 			Destroy(stain.gameObject);
 		}
