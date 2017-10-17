@@ -188,7 +188,8 @@ public class StartMenu : MonoBehaviour {
 			"Moe",
 			"Tyrone Slothrop",
 			"Voorwerp",
-			"Stellar Harbinger"
+			"Stellar Harbinger",
+			"Scrauncho"
 		};
 		return names[UnityEngine.Random.Range( 0, names.Count )];
 	}
