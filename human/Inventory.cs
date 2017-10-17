@@ -28,15 +28,17 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 	}
 	private Pickup _holding;
 	private Transform holdpoint;
+	public float holdpoint_angle;
 	public GameObject slasher;
 	private string slashFlag;
 	private List<Interaction> manualActionDictionary;
 	private bool LoadInitialized = false;
 	private GameObject throwObject;
 	private float dropHeight = 0.20f;
-	public Vector2 direction;
+	public Vector2 direction = Vector2.right;
 	private float directionAngle;
 	private SortingGroup holdSortGroup;
+	private GameObject strengthFX;
 	void Start(){
 		if (!LoadInitialized)
 			LoadInit();
@@ -52,6 +54,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 				GetItem(pickup);
 			}
 		}
+		direction = Vector2.right;
 	}
 	public void LoadInit(){
 		holdpoint = transform.Find("holdpoint");
@@ -244,6 +247,12 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 				holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder + 2;
 			}
 			holding.transform.position = holdpoint.transform.position;
+			if (holdpoint_angle != 0){
+				string dirString = Toolbox.Instance.DirectionToString(direction);
+				if (dirString == "left" || dirString == "right"){
+					holdpoint.rotation = Quaternion.AngleAxis(holdpoint_angle * transform.localScale.x, new Vector3(0, 0, 1f));
+				}
+			}
 		}
 	}
 	public void SwingItem(MeleeWeapon weapon){
@@ -273,21 +282,29 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
 	}
 	void StartSwing(){
+		if (holding == null)
+			return;
 		GameObject slash = Instantiate(Resources.Load("Slash2"), transform.position, transform.rotation) as GameObject;
+		MeleeWeapon weapon = holding.GetComponent<MeleeWeapon>();
+		Intrinsics intrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
+
 		slash.transform.SetParent(transform);
 		slash.transform.localScale = Vector3.one;
 		holding.GetComponent<Renderer>().sortingLayerName = "main";
 		holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder + 1;
 		slash.GetComponent<Animator>().SetBool(slashFlag, true);
 		Slasher s = slash.GetComponent<Slasher>();
-		s.impactSounds = holding.GetComponent<MeleeWeapon>().impactSounds;
-		s.direction = direction;
-		s.responsibleParty = gameObject;
 
-		MeleeWeapon melee = holding.GetComponent<MeleeWeapon>();
-		if (melee){
-			s.damage = melee.damage;
+		MessageDamage message = new MessageDamage(weapon.damage, damageType.physical);
+		if (weapon.impactSounds.Length > 0){
+			message.impactSounds = weapon.impactSounds;
 		}
+		message.force = new Vector2(direction.x * weapon.damage / 100f, direction.y * weapon.damage / 100f);
+		message.responsibleParty = gameObject;
+		message.strength = intrins.NetIntrinsic().strength.boolValue;
+		message.type = weapon.damageType;
+		message.amount = weapon.damage;
+		s.message = message;
 	}
 	public void DropMessage(GameObject obj){
 		SoftDropItem();
@@ -302,10 +319,20 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		Toolbox.Instance.SendMessage(gameObject, this, anim);
 	}
 	public void PunchImpact(){
-		GameObject slash = Instantiate(Resources.Load("PhysicalImpact"), holdpoint.position, holdpoint.rotation) as GameObject;
+		Vector3 startPoint = transform.position;
+		startPoint.x += direction.normalized.x / 6f;
+		startPoint.y += direction.normalized.y / 6f + 0.02f;
+		GameObject slash = Instantiate(Resources.Load("PhysicalImpact"), startPoint, holdpoint.rotation) as GameObject;
 		PhysicalImpact impact = slash.GetComponent<PhysicalImpact>();
-		impact.responsibleParty = gameObject;
-		impact.direction = direction;
+		Intrinsics intrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
+		MessageDamage message = new MessageDamage(10f, damageType.physical);
+		message.force = new Vector2(direction.x * 0.2f, direction.y * 0.2f);
+		message.responsibleParty = gameObject;
+		message.strength = intrins.NetIntrinsic().strength.boolValue;
+		message.type = damageType.physical;
+		message.amount = 20f;
+		message.responsibleParty = gameObject;
+		impact.message = message;
 		Collider2D slashCollider = slash.GetComponent<Collider2D>();
 		foreach (Collider2D tomCollider in GetComponentsInChildren<Collider2D>()){
 			Physics2D.IgnoreCollision(tomCollider, slashCollider, true);
@@ -328,14 +355,33 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		}
 		if (m is MessageHitstun){
 			MessageHitstun message = (MessageHitstun)m;
-			if (message.doubledOver){
+			if (message.doubledOver || message.knockedDown){
 				if (holding)
 					DropItem();
 			}
 		}
 		if (m is MessagePunch){
-			StartPunch();
+			if (holding){
+				MeleeWeapon weapon = holding.GetComponent<MeleeWeapon>();
+				if (weapon != null){
+					SwingItem(weapon);
+				}
+			} else{
+				StartPunch();
+			}
 		}
-		
+		if (m is MessageNetIntrinsic){
+			MessageNetIntrinsic intrins = (MessageNetIntrinsic)m;
+			if (intrins.netIntrinsic.strength.boolValue){
+				if (strengthFX == null){
+					strengthFX = Instantiate(Resources.Load("particles/strength_particles")) as GameObject;
+					strengthFX.transform.SetParent(transform, false);
+				}
+			} else {
+				if (strengthFX != null){
+					Destroy(strengthFX);
+				}
+			}
+		}
 	}
 }
