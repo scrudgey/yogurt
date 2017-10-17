@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class TreeObject : MonoBehaviour, IMessagable {
+public class TreeObject : MonoBehaviour, IMessagable, IDamageable {
 	HingeJoint2D hinge;
 	public float timer;
 	JointMotor2D motor;
@@ -17,11 +17,14 @@ public class TreeObject : MonoBehaviour, IMessagable {
 			MessageDamage message = (MessageDamage)incoming;
 			if (message.type != damageType.physical)
 				return;
-			if (message.impactor)
-					message.impactor.PlayImpactSound();
-			StartShake();
+			// if (message.impactor)
+			// 	message.impactor.PlayImpactSound();
+			// message.ImpactCallback();
+			message.TakeDamage(this);
+			// StartShake();
 		}
 	}
+	// public ImpactResult
 	public void Update(){
 		if (doShake){
 			timer += Time.deltaTime;
@@ -35,7 +38,7 @@ public class TreeObject : MonoBehaviour, IMessagable {
 			}
 		}
 	}
-	public void StartShake(){
+	public ImpactResult TakeDamage(MessageDamage message){
 		hinge.useMotor = true;
 		timer = 0;
 		doShake = true;
@@ -43,5 +46,10 @@ public class TreeObject : MonoBehaviour, IMessagable {
 		GameObject newLeaf = Instantiate(leaf, leafSpawnPoint.position + randomBump, Quaternion.identity) as GameObject;
 		FallingLeaf newLeafScript = newLeaf.GetComponent<FallingLeaf>();
 		newLeafScript.height = 0.9f;
+		if (message.strength){
+			return ImpactResult.strong;
+		} else {
+			return ImpactResult.normal;
+		}
 	}
 }
