@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-// using System.Collections.Generic;
 public class PhysicalBootstrapper : MonoBehaviour {
 	public AudioClip[] impactSounds;
 	public AudioClip[] landSounds;
@@ -16,7 +15,6 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	public float initHeight = 0.01f;
 	public float groundDrag = 10f;
 	public Vector2 initVelocity;
-	// public bool ignoreCollisions;
 	public bool doInit = true;
 	private Vector3 setV;
 	public GameObject thrownBy;
@@ -100,9 +98,11 @@ public class PhysicalBootstrapper : MonoBehaviour {
 
 		hingeObject.transform.SetParent(groundObject.transform);
 		Vector2 tempPos = Vector2.zero;
-		float theta = Vector3.Angle(transform.up, Vector2.up) * (6.28f / 360.0f);
-		float offset = objectCollider.bounds.extents.y - objectCollider.offset.x * Mathf.Sin(theta) + objectCollider.offset.y * Mathf.Cos(theta);
-		height = Mathf.Max(height, offset);
+		// float theta = Vector3.Angle(transform.up, Vector2.up) * (6.28f / 360.0f);
+		// float offset = objectCollider.bounds.extents.y - objectCollider.offset.x * Mathf.Sin(theta) + objectCollider.offset.y * Mathf.Cos(theta);
+		// height = Mathf.Max(height, offset);
+
+		
 		// height = height - offset;
 		// Debug.Log(name + " " + height.ToString());
 		// height += 0.005f;
