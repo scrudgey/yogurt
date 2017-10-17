@@ -1,11 +1,6 @@
 ﻿using UnityEngine;
-// using System.Collections;
-
 
 public class Edible : Interactive {
-
-
-
 	public float nutrition;
 	public bool vegetable;
 	public bool meat;
@@ -16,9 +11,7 @@ public class Edible : Interactive {
 	public bool blendable;
 	public Color pureeColor;
 	public AudioClip eatSound;
-
 	virtual public void BeEaten(){
-
 		PhysicalBootstrapper pb = GetComponent<PhysicalBootstrapper>();
 		if (pb){
 			pb.DestroyPhysical();
@@ -26,17 +19,14 @@ public class Edible : Interactive {
 		ClaimsManager.Instance.WasDestroyed(gameObject);
 		Destroy(gameObject);
 	}
-
 	public Liquid Liquify(){
-		Liquid returnLiquid = LiquidCollection.LoadLiquid("Juice");
+		Liquid returnLiquid = Liquid.LoadLiquid("juice");
 		returnLiquid.vegetable = vegetable;
 		returnLiquid.meat = meat;
 		returnLiquid.immoral = immoral;
 		returnLiquid.nutrition = nutrition / 10;
 		returnLiquid.color = pureeColor;
-		returnLiquid.name = gameObject.name + " Juice";
-
+		returnLiquid.name = gameObject.name + " juice";
 		return returnLiquid;
 	}
-
 }
