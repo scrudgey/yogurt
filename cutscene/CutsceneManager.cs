@@ -153,8 +153,10 @@ public class CutsceneFall : Cutscene {
         playerBody = player.GetComponent<Rigidbody2D>();
         playerControl = player.GetComponent<Humanoid>();
         playerHurtable = player.GetComponent<Hurtable>();
-        if (playerAnimation)
+        if (playerAnimation){
             playerAnimation.enabled = false;
+            playerAnimation.LateUpdate();
+        }
         if (playerCollider)
             playerCollider.enabled = false;
         if (playerControl){
@@ -170,7 +172,7 @@ public class CutsceneFall : Cutscene {
         configured = true;
     }
     public override void Update(){
-        if (player.transform.position.y < -0.35f){
+        if (player.transform.position.y < -0.3f){
             Toolbox.Instance.AudioSpeaker("Poof 01", player.transform.position);
             if (playerAnimation)
                 playerAnimation.enabled = true;
