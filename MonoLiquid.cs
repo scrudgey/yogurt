@@ -38,7 +38,7 @@ public class MonoLiquid : MonoBehaviour {
 			GameObject stain = CreateStain(coll.gameObject, transform.position);
 			SpriteRenderer stainRenderer = stain.GetComponent<SpriteRenderer>();
 			stainRenderer.color = liquid.color;
-			LiquidCollection.MonoLiquidify(stain, liquid);
+			Liquid.MonoLiquidify(stain, liquid);
 			ClaimsManager.Instance.WasDestroyed(gameObject);
 			Destroy(gameObject);
 		}
@@ -46,7 +46,7 @@ public class MonoLiquid : MonoBehaviour {
 	public void LoadLiquid(string type){
 		// TODO: make this fancier: retrieve liquid in buffer, only change variable
 		// if liquid was returned
-		liquid = LiquidCollection.LoadLiquid(type);
+		liquid = Liquid.LoadLiquid(type);
 		// add things here for changing edible properties according to liquid properties
 	}
 	void OnGroundImpact(Physical phys){
@@ -55,7 +55,7 @@ public class MonoLiquid : MonoBehaviour {
 		puddle.layer = 9;
 		PhysicalBootstrapper pb = GetComponent<PhysicalBootstrapper>();
 		pb.DestroyPhysical();
-		LiquidCollection.MonoLiquidify(puddle, liquid);
+		Liquid.MonoLiquidify(puddle, liquid);
 		puddle.GetComponent<Edible>().offal = true;
 		Destroy(gameObject);
 		ClaimsManager.Instance.WasDestroyed(gameObject);
