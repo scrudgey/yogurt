@@ -24,7 +24,7 @@ public class Duplicator : Interactive, IDirectable {
 	public void Duplicate(){
 		GameObject target = dup.duplicationTarget;
 		string prefabName = Toolbox.Instance.CloneRemover(target.name);
-			Vector3 jitter = new Vector3(Random.Range(0, 0.1f), Random.Range(0, 0.1f), 0);
+		Vector3 jitter = new Vector3(Random.Range(0, 0.1f), Random.Range(0, 0.1f), 0);
 		GameObject dupObj = Instantiate(Resources.Load("prefabs/"+prefabName), target.transform.position + jitter, Quaternion.identity) as GameObject;
 		if (dup == null){
 			audioSource.PlayOneShot(failSound);
