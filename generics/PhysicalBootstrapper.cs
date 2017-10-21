@@ -8,7 +8,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	private HingeJoint2D hingeJoint2D;
 	private GameObject groundObject;
 	private Rigidbody2D groundBody;
-	private BoxCollider2D groundCollider;
+	public BoxCollider2D groundCollider;
 	private GameObject horizon;
 	private SliderJoint2D sliderJoint2D;
 	public Physical physical;
@@ -22,6 +22,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	public PersistentComponent loadData;
 	public bool doLoad;
 	private bool isQuitting = false;
+	public bool impactsMiss;
 	public void Start () {
 		tag = "Physical";
 		GetComponent<Renderer>().sortingLayerName="main";
@@ -123,6 +124,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		groundPhysical.objectBody = GetComponent<Rigidbody2D>();
 		groundPhysical.hingeBody = hingeBody;
 		groundPhysical.groundDrag = groundDrag;
+		groundPhysical.groundCollider = groundCollider;
 
 		//Slider joint
 		sliderJoint2D = groundObject.AddComponent<SliderJoint2D>();
@@ -137,6 +139,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		
 		physical = groundPhysical;
 		physical.InitValues();
+		physical.impactsMiss = impactsMiss;
 		groundPhysical.bootstrapper = this;
 		Set3Motion(new Vector3(initialVelocity.x, initialVelocity.y, initialVelocity.z));
 	}
