@@ -1,17 +1,19 @@
 ﻿using UnityEngine;
 public enum damageType{physical, fire, any, cutting}
 
-public class Destructible : MonoBehaviour, IMessagable, IDamageable {
-	public float health;
+public class Destructible : Damageable {
 	public float maxHealth;
+	public float health;
 	public float bonusHealth;
-	public damageType lastDamage;
+	public float armor;
+
+	// public damageType lastDamage;
+	public Intrinsic netIntrinsic;
 	public AudioClip[] hitSound;
 	public AudioClip[] destroySound;
 	public bool invulnerable;
 	public bool fireproof;
 	public bool no_physical_damage;
-	public float armor;
 	public float physicalMultiplier = 1f;
 	public float fireMultiplier = 1f;
 
@@ -24,7 +26,7 @@ public class Destructible : MonoBehaviour, IMessagable, IDamageable {
 		}
 	}
 
-	public ImpactResult TakeDamage(MessageDamage message){
+	public override ImpactResult CalculateDamage(MessageDamage message){
 		if (!invulnerable){
 			switch (message.type)
 			{
@@ -55,14 +57,7 @@ public class Destructible : MonoBehaviour, IMessagable, IDamageable {
 
 	//TODO: make destruction chaos somehow proportional to object
 	public void Die(){
-		foreach (Gibs gib in GetComponents<Gibs>())
-			if(gib.damageCondition == lastDamage || gib.damageCondition == damageType.any){
-				gib.Emit();
-			}
-		PhysicalBootstrapper phys = GetComponent<PhysicalBootstrapper>();
-		if (phys){
-			phys.DestroyPhysical();
-		}
+		Destruct();
 		if (destroySound.Length > 0){
 			GameObject speaker = Instantiate(Resources.Load("Speaker"),transform.position,Quaternion.identity) as GameObject;
 			speaker.GetComponent<AudioSource>().clip = destroySound[Random.Range(0,destroySound.Length)];
@@ -74,9 +69,6 @@ public class Destructible : MonoBehaviour, IMessagable, IDamageable {
 			Toolbox.Instance.SpawnDroplet(transform.position, container.liquid);
 			Toolbox.Instance.SpawnDroplet(transform.position, container.liquid);
 		}
-		BroadcastMessage("OnDestruction", SendMessageOptions.DontRequireReceiver);
-		ClaimsManager.Instance.WasDestroyed(gameObject);
-		Destroy(gameObject);
 		Toolbox.Instance.DataFlag(gameObject, 175f, 0f, 0f, 0f, 0f);
 		if (lastDamage == damageType.fire){
 			if (Toolbox.Instance.CloneRemover(name) == "dollar"){
@@ -115,23 +107,15 @@ public class Destructible : MonoBehaviour, IMessagable, IDamageable {
 		}
 	}
 
-	public void ReceiveMessage(Message message){
+	public override void ReceiveMessage(Message message){
+		base.ReceiveMessage(message);
 		if (message is MessageNetIntrinsic){
 			MessageNetIntrinsic intrins = (MessageNetIntrinsic)message;
-			// if (intrins.netIntrinsic != null){
 			armor = intrins.netIntrinsic.armor.floatValue;
 			if (intrins.netIntrinsic.bonusHealth.floatValue > bonusHealth){
 				health += intrins.netIntrinsic.bonusHealth.floatValue;
 			}
 			bonusHealth = intrins.netIntrinsic.bonusHealth.floatValue;
-			// }
-		}
-		if (message is MessageDamage){
-			MessageDamage dam = (MessageDamage)message;
-			// TakeDamage(dam.type, dam.amount);
-			// if (dam.impactor)	
-			// 	dam.impactor.PlayImpactSound();
-			dam.TakeDamage(this);
 		}
 	}
 
