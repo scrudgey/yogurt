@@ -55,18 +55,12 @@ public class MessageDamage : Message {
 	public Vector2 force;
 	public AudioClip[] impactSounds;
 	public PhysicalImpact impactor;
-	public MessageDamage(){}
 	public GameObject responsibleParty;
 	public bool strength;
+	public MessageDamage(){}
 	public MessageDamage(float amount, damageType type){
 		this.amount = amount;
 		this.type = type;
-	}
-	public void TakeDamage(IDamageable component){
-		ImpactResult result = component.TakeDamage(this);
-		if (impactor){
-			impactor.PlayImpactSound(result);
-		}
 	}
 }
 public class MessageHitstun : Message {
