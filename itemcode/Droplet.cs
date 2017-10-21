@@ -13,6 +13,11 @@ public class Droplet : MonoBehaviour {
 		PhysicalBootstrapper pb = GetComponent<PhysicalBootstrapper>();
 		pb.DestroyPhysical();
 		Liquid.MonoLiquidify(puddle, monoLiquid.liquid);
+		Edible edible = GetComponent<Edible>();
+		if (edible){
+			Edible puddleEdible = puddle.GetComponent<Edible>();
+			puddleEdible.human = edible.human;
+		}
 	}
 	void OnCollisionEnter2D(Collision2D coll){
 		if (physical.currentMode == Physical.mode.fly){
