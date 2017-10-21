@@ -1,30 +1,18 @@
 ﻿using UnityEngine;
 
-public class TreeObject : MonoBehaviour, IMessagable, IDamageable {
+public class TreeObject : Destructible {
 	HingeJoint2D hinge;
 	public float timer;
 	JointMotor2D motor;
 	private bool doShake;
 	public GameObject leaf;
 	private Transform leafSpawnPoint;
-	void Start () {
+	public override void Start() {
+		base.Start();
 		hinge = GetComponent<HingeJoint2D>();
 		motor = hinge.motor;
 		leafSpawnPoint = transform.Find("leafSpawnPoint");
 	}
-	public void ReceiveMessage(Message incoming){
-		if (incoming is MessageDamage){
-			MessageDamage message = (MessageDamage)incoming;
-			if (message.type != damageType.physical)
-				return;
-			// if (message.impactor)
-			// 	message.impactor.PlayImpactSound();
-			// message.ImpactCallback();
-			message.TakeDamage(this);
-			// StartShake();
-		}
-	}
-	// public ImpactResult
 	public void Update(){
 		if (doShake){
 			timer += Time.deltaTime;
@@ -38,7 +26,7 @@ public class TreeObject : MonoBehaviour, IMessagable, IDamageable {
 			}
 		}
 	}
-	public ImpactResult TakeDamage(MessageDamage message){
+	public override ImpactResult CalculateDamage(MessageDamage message){
 		hinge.useMotor = true;
 		timer = 0;
 		doShake = true;
