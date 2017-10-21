@@ -140,6 +140,7 @@ public class Eater : Interactive {
 		
         // set up an occurrence flag for this eating!
         OccurrenceEat eatData = new OccurrenceEat();
+		eatData.edible = food;
         eatData.food = food.name;
         eatData.amount = food.nutrition;
 		eatData.vomit = food.vomit;
