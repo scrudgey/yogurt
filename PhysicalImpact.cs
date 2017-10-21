@@ -9,7 +9,7 @@ public class PhysicalImpact : MonoBehaviour {
 	public float size = 0.08f;
 	public MessageDamage message;
 	void Start(){
-		Destroy(gameObject, 0.5f);
+		Destroy(gameObject, 0.05f);
 		CircleCollider2D circle = GetComponent<CircleCollider2D>();
 		circle.radius = size;
 	}
