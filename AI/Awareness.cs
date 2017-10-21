@@ -141,7 +141,12 @@ public class Awareness : MonoBehaviour, IMessagable {
 		nearestEnemy.val = null;
         float closestDistanceSqr = Mathf.Infinity;
         Vector3 currentPosition = transform.position;
+		List<GameObject> removeKeys = new List<GameObject>();
 		foreach (PersonalAssessment assessment in people.Values){
+			if (assessment.knowledge.obj == null){
+				removeKeys.Add(assessment.knowledge.obj);
+				continue;
+			}
 			if (assessment.status != PersonalAssessment.friendStatus.enemy)
 				continue;
 			if (assessment.unconscious && decisionMaker.personality.battleStyle != Personality.BattleStyle.bloodthirsty)
@@ -153,6 +158,9 @@ public class Awareness : MonoBehaviour, IMessagable {
                 closestDistanceSqr = dSqrToTarget;
                 nearestEnemy.val = assessment.knowledge.obj;
             }
+		}
+		foreach(GameObject key in removeKeys){
+			people.Remove(key);
 		}
 	}
 	public void SetNearestFire(){
