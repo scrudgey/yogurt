@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-public class Physical : MonoBehaviour, IMessagable, IDamageable {
+public class Physical : Damageable {
 	public enum mode{none, fly, ground, zip}
 	public AudioClip[] impactSounds;
 	public AudioClip[] landSounds;
@@ -9,6 +9,7 @@ public class Physical : MonoBehaviour, IMessagable, IDamageable {
 	private GameObject trueObject;
 	public Rigidbody2D objectBody;
 	public Collider2D objectCollider;
+	public Collider2D groundCollider;
 	public Rigidbody2D hingeBody;
 	public GameObject hinge;
 	public SliderJoint2D slider;
@@ -18,7 +19,6 @@ public class Physical : MonoBehaviour, IMessagable, IDamageable {
 	public bool doFly;
 	private bool doGround;
 	private bool doZip;
-	// private bool doFixSlider;
 	private bool doStartTable;
 	private bool doStopTable;
 	private SpriteRenderer spriteRenderer;
@@ -27,11 +27,12 @@ public class Physical : MonoBehaviour, IMessagable, IDamageable {
 	public bool suppressLandSound;
 	private Table table;
 	public List<Collider2D> temporaryDisabledColliders = new List<Collider2D>();
-
+	public bool impactsMiss;
 	void Awake(){
 		InitValues();
 	}
-	void Start() {
+	public override void Start() {
+		base.Start();
 		// Debug.Log(name + " physical start");
 		// ignore collisions between ground and all other objects
 		foreach(Physical phys in GameObject.FindObjectsOfType<Physical>()){
@@ -57,7 +58,7 @@ public class Physical : MonoBehaviour, IMessagable, IDamageable {
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 		spriteRenderer = GetComponent<SpriteRenderer>();
 	}
-	public ImpactResult TakeDamage(MessageDamage message){
+	public override ImpactResult CalculateDamage(MessageDamage message){
 		Vector2 force = message.force / (objectBody.mass / 25f);
 		if (currentMode != mode.fly)
 			FlyMode();
@@ -181,6 +182,7 @@ public class Physical : MonoBehaviour, IMessagable, IDamageable {
 			audioSource.PlayOneShot(landSounds[Random.Range(0, landSounds.Length)]);
 		suppressLandSound = false;
 		SetSliderLimit(1f* objectCollider.Distance(horizonCollider).distance);
+		// groundCollider.enabled = true;
 	}
 	public void ClearTempColliders(){
 		foreach (Collider2D temporaryCollider in temporaryDisabledColliders){
@@ -211,6 +213,7 @@ public class Physical : MonoBehaviour, IMessagable, IDamageable {
 				Physics2D.IgnoreCollision(objectCollider, phys.horizonCollider, true);
 			}
 		}
+		// groundCollider.enabled = false;
 	}
 	public void StartZipMode(){
 		doZip = false;
@@ -277,16 +280,10 @@ public class Physical : MonoBehaviour, IMessagable, IDamageable {
 			spriteRenderer.enabled = true;
 	}
 	
-	public void ReceiveMessage(Message message){
-		if (message is MessageDamage){
-			MessageDamage dam = (MessageDamage)message;
-			if (dam.type != damageType.fire){
-				// Impact(dam.force);
-				// if (dam.impactor)
-				// 	dam.impactor.PlayImpactSound();
-				// dam.ImpactCallback();
-				dam.TakeDamage(this);
-			}
+	public override void ReceiveMessage(Message message){
+		// TODO: change this?
+		if (message is MessageDamage && !impactsMiss){
+			base.ReceiveMessage(message);
 		}
 	}
 }
