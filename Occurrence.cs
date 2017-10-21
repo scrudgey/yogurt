@@ -11,7 +11,9 @@ public class Occurrence : MonoBehaviour {
         {"yogurt_vomit_eat", "eating yogurt vomit"},
         {"yogurt_floor", "yogurt eaten off the floor"},
         {"table_fire", "table set on fire"},
-        {"eggplant", "eggplants eaten"}
+        {"eggplant", "eggplants eaten"},
+        {"death", "deaths"},
+        {"cannibalism", "acts of cannibalism"}
 	};
 }
 /*
@@ -78,6 +80,7 @@ public class OccurrenceEat : OccurrenceData {
     public string food;
     public Liquid liquid;
     public bool vomit;
+    public Edible edible;
     public override void UpdateCommercialOccurrences(Commercial commercial){
         if (liquid != null){
             if (liquid.name == "yogurt"){
@@ -95,6 +98,9 @@ public class OccurrenceEat : OccurrenceData {
         }
         if (Toolbox.Instance.CloneRemover(food) == "eggplant")
             commercial.IncrementValue("eggplant", 1f);
+        if (edible.human){
+            commercial.IncrementValue("cannibalism", 1f);
+        }
     }
     protected override bool MatchSpecific(OccurrenceData data){
         OccurrenceEat otherData = (OccurrenceEat)data;
@@ -108,6 +114,11 @@ public class OccurrenceEat : OccurrenceData {
         }
         return match;
     }
+}
+public class OccurrenceDeath : OccurrenceData {
+     public override void UpdateCommercialOccurrences(Commercial commercial){
+         commercial.IncrementValue("death", 1f);
+     }
 }
 [System.Serializable]
 public class OccurrenceVomit : OccurrenceData {
