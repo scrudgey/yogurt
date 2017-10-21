@@ -9,6 +9,7 @@ public class Edible : Interactive {
     public bool poison;
     public bool vomit;
 	public bool blendable;
+	public bool human;
 	public Color pureeColor;
 	public AudioClip eatSound;
 	virtual public void BeEaten(){
