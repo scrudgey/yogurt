@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class Hurtable : MonoBehaviour, IMessagable, IDamageable {
+public class Hurtable : Damageable {
 	private Controllable.HitState _hitState;
 	public Controllable.HitState hitState{
 		get {return _hitState;}
@@ -16,9 +16,10 @@ public class Hurtable : MonoBehaviour, IMessagable, IDamageable {
 		}
 	}
 	public float health;
-	public float armor;
 	public float maxHealth;
 	public float bonusHealth;
+	public float armor;
+	
 	public Intrinsic myIntrinsic = new Intrinsic();
 	private float hitStunCounter;
 	private bool doubledOver;
@@ -29,7 +30,8 @@ public class Hurtable : MonoBehaviour, IMessagable, IDamageable {
 	public GameObject lastAttacker;
 	public List<Collider2D> backgroundColliders = new List<Collider2D>();
 
-	public void Start(){
+	public override void Start(){
+		base.Start();
 		backgroundColliders = new List<Collider2D>();
 		foreach(Transform transform in transform.root.GetComponentsInChildren<Transform>()){
 			if (transform.gameObject.layer == 8){
@@ -38,20 +40,25 @@ public class Hurtable : MonoBehaviour, IMessagable, IDamageable {
 			}
 		}
 	}
-	public ImpactResult TakeDamage(MessageDamage message){
+	public override ImpactResult CalculateDamage(MessageDamage message){
 		bool tookDamage = false;
 		if (message.responsibleParty != null){
 				lastAttacker = message.responsibleParty;
 		}
 		if (!myIntrinsic.invulnerable.boolValue){
 			float armor = this.armor;
-			if (message.strength)
+			if (message.strength || hitState == Controllable.HitState.dead)
 				armor = 0;
-
 			switch (message.type){
 			case damageType.cutting:
-				if (armor <= message.amount)
+				if (armor <= message.amount){
 					Bleed(transform.position);
+					if (hitState == Controllable.HitState.dead){
+						if (health <= -0.75 * maxHealth){
+							Destruct();
+						}
+					}
+				}
 				goto case damageType.physical;
 			case damageType.physical:
 				if (armor > message.amount){
@@ -147,10 +154,16 @@ public class Hurtable : MonoBehaviour, IMessagable, IDamageable {
 			GameManager.Instance.PlayerDeath();
 		}
 		hitState = Controllable.AddHitState(hitState, Controllable.HitState.dead);
-		Toolbox.Instance.DataFlag(gameObject, 3575f, 2000f, 3500f, 8950f, -5500f);
-		// Toolbox.Instance.OccurenceFlag()
+		OccurrenceDeath occurrenceData = new OccurrenceDeath();
+		occurrenceData.chaos = 3575f;
+		occurrenceData.disgusting = 2000f;
+		occurrenceData.disturbing = 3500f;
+		occurrenceData.offensive = 8950f;
+		occurrenceData.positive = -5500f;
+		Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData);
 	}
-	public void ReceiveMessage(Message incoming){
+	public override void ReceiveMessage(Message incoming){
+		base.ReceiveMessage(incoming);
 		if (incoming is MessageNetIntrinsic){
 			MessageNetIntrinsic intrins = (MessageNetIntrinsic)incoming;
 			myIntrinsic = intrins.netIntrinsic;
@@ -159,14 +172,6 @@ public class Hurtable : MonoBehaviour, IMessagable, IDamageable {
 			}
 			bonusHealth = intrins.netIntrinsic.bonusHealth.floatValue;
 			armor = intrins.netIntrinsic.armor.floatValue;
-		}
-		if (incoming is MessageDamage){
-			MessageDamage dam = (MessageDamage)incoming;
-			
-			// TakeDamage(dam);
-			// if (dam.impactor)	
-			// 	dam.impactor.PlayImpactSound();
-			dam.TakeDamage(this);
 		}
 	}
 	public void Update(){
@@ -188,7 +193,6 @@ public class Hurtable : MonoBehaviour, IMessagable, IDamageable {
 			} else {
 				health += Time.deltaTime;
 			}
-			// health += Time.deltaTime;
 		}
 		if (health <= 0 && hitState < Controllable.HitState.unconscious){
 			KnockDown();
@@ -266,9 +270,10 @@ public class Hurtable : MonoBehaviour, IMessagable, IDamageable {
 		}
 	}
 	public void Bleed(Vector3 position){
-		// Liquid blood = LiquidCollection.LoadLiquid("blood");
 		Liquid blood = Liquid.LoadLiquid("blood");
 		float initHeight = (position.y - transform.position.y ) + 0.15f;
-		Toolbox.Instance.SpawnDroplet(blood, 0.3f, gameObject, initHeight);
+		GameObject drop = Toolbox.Instance.SpawnDroplet(blood, 0.3f, gameObject, initHeight);
+		Edible edible = drop.GetComponent<Edible>();
+		edible.human = true;
 	}
 }
