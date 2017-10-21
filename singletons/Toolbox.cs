@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -92,9 +93,13 @@ public class Toolbox : Singleton<Toolbox> {
 		initialVelocity = Random.insideUnitCircle;
 		if (initialVelocity.y < 0)
 			initialVelocity.y = initialVelocity.y * -1;
+		return SpawnDroplet(pos, l, initialVelocity);
+	}
+	public GameObject SpawnDroplet(Vector3 pos, Liquid l, Vector3 initialVelocity){
 		GameObject droplet = Instantiate(Resources.Load("droplet"), pos, Quaternion.identity) as GameObject;
 		PhysicalBootstrapper phys = droplet.GetComponent<PhysicalBootstrapper>();
-		phys.initHeight = 0.05f;
+		phys.initHeight = pos.z;
+		phys.impactsMiss = true;
 		phys.initVelocity = initialVelocity;
 		Liquid.MonoLiquidify(droplet, l);
 		return droplet;
@@ -114,7 +119,7 @@ public class Toolbox : Singleton<Toolbox> {
         
         GameObject droplet = Instantiate(Resources.Load("droplet"), transform.position, Quaternion.identity) as GameObject;
         PhysicalBootstrapper phys = droplet.GetComponent<PhysicalBootstrapper>();
-        
+		phys.impactsMiss = true;
         Vector2 initpos = spiller.transform.position;
         Physical pb = spiller.GetComponentInParent<Physical>();
         if (pb != null){ 
@@ -266,4 +271,13 @@ public class Toolbox : Singleton<Toolbox> {
 		}
 		return lastPressed;
 	}
+	public void DisableAndReenable (MonoBehaviour target, float time){
+		StartCoroutine(EnableAfterSeconds(target, 1f));
+	}
+	public IEnumerator EnableAfterSeconds (MonoBehaviour target, float time){
+        target.enabled = false;
+        yield return new WaitForSeconds(time);
+        target.enabled = true;
+		yield return null;
+    }
 }
