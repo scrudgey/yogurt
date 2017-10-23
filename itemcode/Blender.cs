@@ -43,19 +43,12 @@ public class Blender : Container {
 			transform.position = pos;
 			//blend contained item
 			if(items.Count > 0){
-				Edible edible = items[0].GetComponent<Edible>();
-				if (edible && edible.blendable){
-					liquidContainer.FillWithLiquid(edible.Liquify());
-					RemoveRetrieveAction(items[0]);
-					ClaimsManager.Instance.WasDestroyed(items[0].gameObject);
-					Destroy(items[0].gameObject);
-					items.RemoveAt(0);
-				}
 				MessageDamage message = new MessageDamage();
 				message.amount = Time.deltaTime * 10;
 				message.force = Vector2.zero;
 				message.type = damageType.physical;
-				Toolbox.Instance.SendMessage(items[0].gameObject, this, message);
+				Toolbox.Instance.SendMessage(items[0].gameObject, this, message, false);
+				
 			}
 			if(liquidContainer.amount > 0 && !liquidContainer.lid){
 				liquidContainer.Spill(1f);
@@ -101,6 +94,13 @@ public class Blender : Container {
 			Toolbox.Instance.SendMessage(inv.gameObject, this, new MessageSpeech("The lid is on!"));
 		} else {
 			base.Store (inv);
+		}
+	}
+	public override void WasDestroyed(GameObject obj){
+		base.WasDestroyed(obj);
+		Edible edible = obj.GetComponent<Edible>();
+		if (edible && edible.blendable){
+			liquidContainer.FillWithLiquid(edible.Liquify());
 		}
 	}
 }
