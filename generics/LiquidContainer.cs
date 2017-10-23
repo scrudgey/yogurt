@@ -31,7 +31,7 @@ public class LiquidContainer : Interactive, IMessagable {
 			Spill();
 		}
 	}
-	void Awake () {
+	void Awake(){
 		if (!LoadInitialized)
 			LoadInit();
 	}
@@ -98,7 +98,6 @@ public class LiquidContainer : Interactive, IMessagable {
 		CheckLiquid();
 	}
 	public void FillByLoad(string type){
-	    // liquid = LiquidCollection.LoadLiquid(type);
 		liquid = Liquid.LoadLiquid(type);
 		amount = fillCapacity;
 		CheckLiquid();
@@ -109,7 +108,6 @@ public class LiquidContainer : Interactive, IMessagable {
 				liquidSprite.enabled = true;
 				liquidSprite.color = liquid.color;
 			}
-
 		}
 		if (amount <= 0 ){
 			if (liquidSprite)
@@ -117,8 +115,6 @@ public class LiquidContainer : Interactive, IMessagable {
 		}
 		if (empty && amount > 0){
 			empty = false;
-			// TODO: only update actions if i'm being held : message
-			// UINew.Instance.UpdateActionButtons();
 		}
 		if (!empty && amount <= 0){
 			empty = true;
@@ -160,16 +156,12 @@ public class LiquidContainer : Interactive, IMessagable {
 				Toolbox.Instance.AudioSpeaker(drinkSounds[Random.Range(0, drinkSounds.Length-1)], transform.position);
 			}
 			GameManager.Instance.CheckItemCollection(gameObject, eater.gameObject);
-			//TODO: remove this when intrinsics are tied to liquids
-			// Toolbox.Instance.AddIntrinsic(eater.gameObject, gameObject);
-			// Toolbox.Instance.AddIntrinsic(eater.gameObject, liquid.intrinsic);
 		}
 	}
 	public bool Drink_Validation(Eater eater){
 		return amount > 0;
 	}
 	public string Drink_desc(Eater eater){
-		// string myname = Toolbox.Instance.GetName(gameObject);
 		return "Drink "+liquid.name+" from "+containerName;
 	}
 	void OnGroundImpact(Physical phys){
