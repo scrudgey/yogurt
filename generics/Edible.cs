@@ -9,6 +9,7 @@ public class Edible : Interactive {
     public bool poison;
     public bool vomit;
 	public bool blendable;
+	public string blend_liquid_name;
 	public bool human;
 	public Color pureeColor;
 	public AudioClip eatSound;
@@ -21,13 +22,19 @@ public class Edible : Interactive {
 		Destroy(gameObject);
 	}
 	public Liquid Liquify(){
-		Liquid returnLiquid = Liquid.LoadLiquid("juice");
-		returnLiquid.vegetable = vegetable;
-		returnLiquid.meat = meat;
-		returnLiquid.immoral = immoral;
-		returnLiquid.nutrition = nutrition / 10;
-		returnLiquid.color = pureeColor;
-		returnLiquid.name = gameObject.name + " juice";
+		Liquid returnLiquid = null;
+		if (blend_liquid_name != ""){
+			returnLiquid = Liquid.LoadLiquid(blend_liquid_name);
+		} else {
+			returnLiquid = Liquid.LoadLiquid("juice");
+			returnLiquid.vegetable = vegetable;
+			returnLiquid.meat = meat;
+			returnLiquid.immoral = immoral;
+			returnLiquid.nutrition = nutrition / 10;
+			returnLiquid.color = pureeColor;
+			returnLiquid.name = gameObject.name + " juice";
+			// returnLiquid.human = human;
+		}
 		return returnLiquid;
 	}
 }
