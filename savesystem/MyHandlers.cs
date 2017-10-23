@@ -214,6 +214,14 @@ public class FlammableHandler: SaveHandler<Flammable> {
 		instance.onFire = 					data.bools["onFire"];
 	}
 }
+public class DropDripperHandler: SaveHandler<DropDripper> {
+	public override void SaveData(DropDripper instance, PersistentComponent data, ReferenceResolver resolver){
+		data.ints["amount"] = instance.amount;
+	}
+	public override void LoadData(DropDripper instance, PersistentComponent data){
+		instance.amount = data.ints["amount"];
+	}
+}
 public class DestructibleHandler: SaveHandler<Destructible> {
 	public override void SaveData(Destructible instance, PersistentComponent data, ReferenceResolver resolver){
 		data.floats["health"] = 			instance.health;
