@@ -234,6 +234,9 @@ public class ReferenceResolver{
 		List<Persistent> tree = new List<Persistent>();
 		if (persistentObjects.ContainsValue(target))
 			targetPersistent = persistentObjects.FindKeyByValue(target);
+		if (targetPersistent == null){
+			Debug.Log("no entry in persistentobjects for "+target.name);
+		}
 		tree.Add(targetPersistent);
 		if (referenceTree.ContainsKey(targetPersistent)){
 			bool refCheck = true;
@@ -242,6 +245,10 @@ public class ReferenceResolver{
 				refCheck = false;
 				List<Persistent> nextTree = new List<Persistent>(tree);
 				foreach (Persistent persistent in tree){
+					if (persistent == null){
+						Debug.Log("null object found in persistent tree! did you interact with something that isn't marked?");
+						continue;
+					}
 					if (referenceTree.ContainsKey(persistent))
 						nextTree.AddRange(referenceTree[persistent]);
 				}
