@@ -50,6 +50,7 @@ public class Hurtable : Damageable {
 			if (message.strength || hitState == Controllable.HitState.dead)
 				armor = 0;
 			switch (message.type){
+			case damageType.piercing:
 			case damageType.cutting:
 				if (armor <= message.amount){
 					Bleed(transform.position);
@@ -234,9 +235,9 @@ public class Hurtable : Damageable {
 		dizzyFollower.target = gameObject;
 		dizzyFollower.Init();
 
-		foreach(Collider2D collider in backgroundColliders){
-			collider.enabled = false;
-		}
+		// foreach(Collider2D collider in backgroundColliders){
+		// 	collider.enabled = false;
+		// }
 	}
 	public void GetUp(){
 		hitState = Controllable.RemoveHitState(hitState, Controllable.HitState.unconscious);
@@ -248,9 +249,9 @@ public class Hurtable : Damageable {
 			ClaimsManager.Instance.WasDestroyed(dizzyEffect);
 			Destroy(dizzyEffect);
 		}
-		foreach(Collider2D collider in backgroundColliders){
-			collider.enabled = true;
-		}
+		// foreach(Collider2D collider in backgroundColliders){
+		// 	collider.enabled = true;
+		// }
 	}
 	public void DoubleOver(bool val){
 		if (val){
