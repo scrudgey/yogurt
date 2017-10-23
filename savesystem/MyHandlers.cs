@@ -258,16 +258,16 @@ public class LiquidContainerHandler: SaveHandler<LiquidContainer>{
 		data.floats["amount"] = 			instance.amount;
 		data.bools["lid"] = 				instance.lid;
 		if (instance.liquid != null){
-			data.strings["liquid"] =			instance.liquid.name;
+			data.strings["liquid"] =		instance.liquid.filename;
 		} else {
-			data.strings["liquid"] = "null";
+			data.strings["liquid"] = 		"";
 		}
 	}
 	// if i had some nicer methods to handle loading an amount of liquid 
 	// i think this would be a little better.
 	public override void LoadData(LiquidContainer instance, PersistentComponent data){
-		if (data.strings["liquid"] != "null"){
-			instance.FillByLoad(Toolbox.Instance.ReplaceUnderscore(data.strings["liquid"]));
+		if (data.strings["liquid"] != ""){
+			instance.FillByLoad(data.strings["liquid"]);
 		} else {
 			instance.FillByLoad("water");
 		}
@@ -336,14 +336,14 @@ public class StainHandler: SaveHandler<Stain>{
 		resolver.AddToReferenceTree(parentPersistent, stainPersistent);
 		MonoLiquid stainLiquid = instance.GetComponent<MonoLiquid>();
 		if (stainLiquid != null)
-			data.strings["liquid"] = stainLiquid.liquid.name;
+			data.strings["liquid"] = stainLiquid.liquid.filename;
 	}
 	public override void LoadData(Stain instance, PersistentComponent data){
 		if (data.ints["parentID"] != -1){
 			instance.ConfigureParentObject(MySaver.loadedObjects[data.ints["parentID"]]);
 			if (data.strings.ContainsKey("liquid")){
-				string filename = Toolbox.Instance.ReplaceUnderscore(data.strings["liquid"]);
-				Liquid.MonoLiquidify(instance.gameObject, Liquid.LoadLiquid(filename));
+				// string filename = Toolbox.Instance.ReplaceUnderscore(data.strings["liquid"]);
+				Liquid.MonoLiquidify(instance.gameObject, Liquid.LoadLiquid(data.strings["liquid"]));
 			}
 		} else {
 			instance.RemoveStain();

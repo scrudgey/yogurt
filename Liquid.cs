@@ -4,6 +4,7 @@ using System.Collections.Generic;
 [System.Serializable]
 public class Liquid {
 	public string name;
+	public string filename;
 	public float colorR;
 	public float colorG;
 	public float colorB;
@@ -27,6 +28,7 @@ public class Liquid {
     }
 	public static Liquid MixLiquids(Liquid l1, Liquid l2){
 		Liquid returnLiquid = l1;
+		returnLiquid.filename = l1.filename;
 		returnLiquid.vegetable = l1.vegetable | l2.vegetable;
 		returnLiquid.meat = l1.meat | l2.meat;
 		returnLiquid.immoral = l1.immoral | l2.immoral;
@@ -52,6 +54,7 @@ public class Liquid {
 			data[bits[0]] = bits[1];
 		}
 		l.name = data["name"];
+		l.filename = name;
 		l.color = new Color(float.Parse(data["r"])/255.0F, 
 							float.Parse(data["g"])/255.0F, 
 							float.Parse(data["b"])/255.0F,
