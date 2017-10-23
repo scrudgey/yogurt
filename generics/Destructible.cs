@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-public enum damageType{physical, fire, any, cutting}
+public enum damageType{physical, fire, any, cutting, piercing}
 
 public class Destructible : Damageable {
 	public float maxHealth;
@@ -8,7 +8,7 @@ public class Destructible : Damageable {
 	public float armor;
 
 	// public damageType lastDamage;
-	public Intrinsic netIntrinsic;
+	// public Intrinsic netIntrinsic;
 	public AudioClip[] hitSound;
 	public AudioClip[] destroySound;
 	public bool invulnerable;
@@ -30,11 +30,11 @@ public class Destructible : Damageable {
 		if (!invulnerable){
 			switch (message.type)
 			{
+			case damageType.piercing:
 			case damageType.cutting:
 			case damageType.physical:
 				if (!no_physical_damage){
 					health -= message.amount * physicalMultiplier;
-					
 				}
 				break;
 			case damageType.fire:
@@ -57,6 +57,7 @@ public class Destructible : Damageable {
 
 	//TODO: make destruction chaos somehow proportional to object
 	public void Die(){
+		// Debug.Log(gameObject.name + " die");
 		Destruct();
 		if (destroySound.Length > 0){
 			GameObject speaker = Instantiate(Resources.Load("Speaker"),transform.position,Quaternion.identity) as GameObject;
