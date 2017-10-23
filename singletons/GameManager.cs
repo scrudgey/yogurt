@@ -68,8 +68,8 @@ public partial class GameManager : Singleton<GameManager> {
     void Start(){
 		if (data == null){
 			data = InitializedGameData();
-			ReceiveEmail("duplicator");
-			ReceivePackage("duplicator");
+			// ReceiveEmail("duplicator");
+			// ReceivePackage("duplicator");
 			if (debug)
 				data.mayorCutsceneHappened = true;
 		}
