@@ -8,7 +8,7 @@ public class Projectile : MonoBehaviour {
 	private Rigidbody2D body;
 	private RotateTowardMotion rotator;
 	void Awake(){
-		message = new MessageDamage(damage, damageType.cutting);
+		message = new MessageDamage(damage, damageType.piercing);
 		message.impactSounds = hurtableImpactSounds;
 		body = GetComponent<Rigidbody2D>();
 		rotator = GetComponent<RotateTowardMotion>();
