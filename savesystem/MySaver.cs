@@ -35,6 +35,7 @@ public class MySaver {
 		{typeof(Speech),							() => new SpeechHandler() },
 		{typeof(Humanoid),							() => new HumanoidHandler() },
 		{typeof(Stain),								() => new StainHandler() }, 
+		{typeof(DropDripper),						() => new DropDripperHandler() }
 	};
 	public static void CleanupSaves(){
 		idIndex = 0;
