@@ -68,8 +68,8 @@ public partial class GameManager : Singleton<GameManager> {
     void Start(){
 		if (data == null){
 			data = InitializedGameData();
-			// ReceiveEmail("duplicator");
-			// ReceivePackage("duplicator");
+			ReceiveEmail("duplicator");
+			ReceivePackage("duplicator");
 			if (debug)
 				data.mayorCutsceneHappened = true;
 		}
@@ -205,9 +205,21 @@ public partial class GameManager : Singleton<GameManager> {
 			CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.fall);
 		}
 		PlayerEnter();
+		// foreach(GameObject go in FindObjectsOfType<GameObject>()){
+		// 	if (go.layer == 9){
+		// 		Debug.Log(go);
+		// 	}
+		// }
 	}
 	public void InitializeNonPlayableLevel(){
+		string sceneName = SceneManager.GetActiveScene().name;
 		UINew.Instance.SetActiveUI();
+		if (sceneName == "morning_cutscene"){
+			CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.newDay);
+		}
+		if (sceneName == "boardroom_cutscene"){
+			CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.boardRoom);
+		}
 	}
 	void PlayerEnter(){
 		if (playerObject == null)
@@ -313,13 +325,11 @@ public partial class GameManager : Singleton<GameManager> {
 		SceneManager.LoadScene("morning_cutscene");
         sceneTime = 0f;
         data.entryID = -99;
-		CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.newDay);
 	}
 	public void BoardRoomCutscene(){
 		SceneManager.LoadScene("boardroom_cutscene");
         sceneTime = 0f;
         data.entryID = -99;
-		CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.boardRoom);
 	}
 	public void TitleScreen(){
 		SceneManager.LoadScene("title");

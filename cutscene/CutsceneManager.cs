@@ -147,7 +147,9 @@ public class CutsceneFall : Cutscene {
     Hurtable playerHurtable;
     float initDrag;
     public override void Configure(){
+        Debug.Log("configuring");
         player = GameManager.Instance.playerObject;
+        // Debug.Log(player);
         playerAnimation = player.GetComponent<AdvancedAnimation>();
         playerCollider = player.GetComponent<Collider2D>();
         playerBody = player.GetComponent<Rigidbody2D>();
@@ -326,21 +328,26 @@ public class CutsceneManager : Singleton<CutsceneManager> {
             if (cutscene is CutsceneNewDay || cutscene is CutsceneBoardroom || cutscene is CutsceneFall){
                 cutscene.Configure();
             }
-        } else if (cutscene is CutsceneNewDay || cutscene is CutsceneBoardroom || cutscene is CutsceneFall) {
-            cutscene.CleanUp();
-            cutscene = null;
-        }
+        } 
+        // else if (cutscene is CutsceneNewDay || cutscene is CutsceneBoardroom || cutscene is CutsceneFall) {
+        //     cutscene.CleanUp();
+        //     cutscene = null;
+        // }
         
     }
     void Update(){
-        if (cutscene == null)
+        if (cutscene == null){
             return;
+        }
         if (cutscene.complete){
             cutscene.CleanUp();
             cutscene = null;
         } else {
-            if (cutscene.configured)
+            if (cutscene.configured){
                 cutscene.Update();
+            } else {
+                cutscene.Configure();
+            }
         }
     }
     public void EscapePressed(){
