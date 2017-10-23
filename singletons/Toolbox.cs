@@ -124,9 +124,10 @@ public class Toolbox : Singleton<Toolbox> {
         Physical pb = spiller.GetComponentInParent<Physical>();
         if (pb != null){ 
             initHeight = pb.height; 
-        } else {
-			initHeight = 0.05f;
-		}
+        } 
+		// else {
+		// 	initHeight = 0.05f;
+		// }
         droplet.transform.position = initpos;
         phys.doInit = false;
         phys.InitPhysical(initHeight, initialVelocity);
@@ -276,8 +277,12 @@ public class Toolbox : Singleton<Toolbox> {
 	}
 	public IEnumerator EnableAfterSeconds (MonoBehaviour target, float time){
         target.enabled = false;
+		// Debug.Log("disabling "+target.ToString()+" on "+target.gameObject.name);
+		// Debug.Log(Time.time);
         yield return new WaitForSeconds(time);
+		// Debug.Log("enabling "+target.ToString()+" on "+target.gameObject.name);
         target.enabled = true;
+		// Debug.Log(Time.time);
 		yield return null;
     }
 }
