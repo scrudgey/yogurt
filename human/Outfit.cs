@@ -74,7 +74,7 @@ public class Outfit : Interactive, IMessagable {
 		string uniformName = Toolbox.Instance.GetName(uniform.gameObject);
 		return "Wear "+uniformName;
 	}
-	GameObject RemoveUniform(){
+	public GameObject RemoveUniform(){
 		// something has to change here if we're going to standardize name usage
 		string prefabName = Toolbox.Instance.ReplaceUnderscore(wornUniformName);
 		GameObject uniform = Instantiate(Resources.Load("prefabs/"+prefabName)) as GameObject;
