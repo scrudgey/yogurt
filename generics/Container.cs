@@ -175,7 +175,7 @@ public class Container : Interactive, IExcludable {
 		if (pickup != null)
 			Dump(pickup);
 	}
-	public void WasDestroyed(GameObject obj){
+	public virtual void WasDestroyed(GameObject obj){
 		Pickup pickup = obj.GetComponent<Pickup>();
 		LiquidContainer liquidContainer = obj.GetComponent<LiquidContainer>();
 		LiquidContainer myLiquidContainer = GetComponent<LiquidContainer>();
@@ -183,8 +183,10 @@ public class Container : Interactive, IExcludable {
 			myLiquidContainer.FillFromContainer(liquidContainer);
 		}
 		if (pickup != null){
-			items.Remove(pickup);
-			RemoveRetrieveAction(pickup);
+			if (items.Contains(pickup)){
+				items.Remove(pickup);
+				RemoveRetrieveAction(pickup);
+			}
 		}
 	}
 	void OnApplicationQuit(){
