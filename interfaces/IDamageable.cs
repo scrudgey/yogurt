@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections;
 
 public enum ImpactResult {normal, repel, strong}
 public class Damageable: MonoBehaviour, IMessagable{
@@ -29,6 +28,10 @@ public class Damageable: MonoBehaviour, IMessagable{
 		if (phys){
 			phys.DestroyPhysical();
 		}
+        Outfit outfit = GetComponent<Outfit>();
+        // if (outfit){
+        //     outfit.RemoveUniform();
+        // }
         ClaimsManager.Instance.WasDestroyed(gameObject);
         Destroy(gameObject);
     }
