@@ -23,6 +23,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 	public bool doLoad;
 	private bool isQuitting = false;
 	public bool impactsMiss;
+	public bool noCollisions;
 	public void Start () {
 		tag = "Physical";
 		GetComponent<Renderer>().sortingLayerName="main";
@@ -67,7 +68,11 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		// Set up ground object
 		groundObject = new GameObject(name + " Ground");
 		groundObject.tag = "footprint";
-		groundObject.layer = 8;
+		if (noCollisions){
+			groundObject.layer = 15;
+		} else {
+			groundObject.layer = 16;
+		}
 		groundObject.transform.position = initPos;
 		Toolbox.Instance.SetUpAudioSource(groundObject);
 		//rigidbody 2D
@@ -108,7 +113,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		// Debug.Log(name + " " + height.ToString());
 		// height += 0.005f;
 		// if (objectCollider.offset.y > height)
-		// 	height += objectCollider.offset.y;
+		// height += 0.1f;
 		tempPos.y = height;
 		groundPos.y -= height;
 		hingeObject.transform.localPosition = tempPos;
@@ -139,6 +144,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		
 		physical = groundPhysical;
 		physical.InitValues();
+		physical.noCollisions = noCollisions;
 		physical.impactsMiss = impactsMiss;
 		groundPhysical.bootstrapper = this;
 		Set3Motion(new Vector3(initialVelocity.x, initialVelocity.y, initialVelocity.z));

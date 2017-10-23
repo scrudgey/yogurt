@@ -28,6 +28,7 @@ public class Physical : Damageable {
 	private Table table;
 	public List<Collider2D> temporaryDisabledColliders = new List<Collider2D>();
 	public bool impactsMiss;
+	public bool noCollisions;
 	void Awake(){
 		InitValues();
 	}
@@ -59,7 +60,10 @@ public class Physical : Damageable {
 		spriteRenderer = GetComponent<SpriteRenderer>();
 	}
 	public override ImpactResult CalculateDamage(MessageDamage message){
-		Vector2 force = message.force / (objectBody.mass / 25f);
+		if (message.type == damageType.fire)
+			return ImpactResult.normal;
+		Vector2 force = message.force / (objectBody.mass / Time.deltaTime);
+		// Vector2 force = message.force * 10f;
 		if (currentMode != mode.fly)
 			FlyMode();
 		if (impactSounds.Length > 0)
@@ -183,6 +187,13 @@ public class Physical : Damageable {
 		suppressLandSound = false;
 		SetSliderLimit(1f* objectCollider.Distance(horizonCollider).distance);
 		// groundCollider.enabled = true;
+		if (noCollisions){
+			gameObject.layer = 15;
+		} else {
+			gameObject.layer = 16;
+		}
+		if (spriteRenderer)
+			spriteRenderer.enabled = false;
 	}
 	public void ClearTempColliders(){
 		foreach (Collider2D temporaryCollider in temporaryDisabledColliders){
@@ -214,6 +225,9 @@ public class Physical : Damageable {
 			}
 		}
 		// groundCollider.enabled = false;
+		gameObject.layer = 15;
+		if (spriteRenderer)
+			spriteRenderer.enabled = true;
 	}
 	public void StartZipMode(){
 		doZip = false;
