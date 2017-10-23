@@ -86,7 +86,8 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		}else{
 			// strength check to see if we can pick it up
 			if (strength < pickup.weight){
-				this.SendMessage("Say", "It's too heavy!");
+				// this.SendMessage("Say", "It's too heavy!");
+				Debug.Log("too heavy say");
 			} else {
 				if (holding){
 					DropItem();
