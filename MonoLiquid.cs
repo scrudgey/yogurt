@@ -54,12 +54,9 @@ public class MonoLiquid : MonoBehaviour {
 		// add things here for changing edible properties according to liquid properties
 	}
 	void OnGroundImpact(Physical phys){
-		// Debug.Log("spilling impact");
-		// Toolbox.Instance.DataFlag(gameObject, 1f, 1f, 0f, 0f, 0f);
 		EventData data = Toolbox.Instance.DataFlag(gameObject, chaos:1f);
-		// data.noun = "spilling";
 		data.whatHappened = liquid.name+" was spilled";
-		// Debug.Log("spilling set");
+		data.noun = "spilling";
 
 		GameObject puddle = Instantiate(Resources.Load("Puddle"), transform.position, Quaternion.identity) as GameObject;
 		puddle.layer = 9;
