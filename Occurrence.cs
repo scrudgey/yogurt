@@ -85,9 +85,6 @@ public class OccurrenceEat : OccurrenceData {
     public bool cannibalism;
     public Edible edible;
     public override void CalculateDescriptions() {
-        if (edible.human){
-			cannibalism = true;
-		}
 		if (edible.vomit){
             data.disgusting += 100f;
 			data.disturbing += 75f;
@@ -116,11 +113,11 @@ public class OccurrenceEat : OccurrenceData {
             if (vomit)
                 flags["vomit_eat"] = 1f;
         }
-        if (Toolbox.Instance.CloneRemover(food) == "eggplant")
+        if (Toolbox.Instance.GetName(edible.gameObject) == "eggplant")
             flags["eggplant"] = 1f;
-        if (cannibalism){
-            flags["cannibalism"] = 1f;
-        }
+        if (edible.human){
+			flags["cannibalism"] = 1f;
+		}
     }
 }
 public class OccurrenceDeath : OccurrenceData {
