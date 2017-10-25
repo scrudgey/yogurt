@@ -29,7 +29,7 @@ public class Speech : Interactive, IMessagable {
     public Sprite portrait;
     public string defaultMonologue;
     public bool disableSpeakWith;
-    OccurrenceSpeech speechData = new OccurrenceSpeech();
+    // OccurrenceSpeech speechData = new OccurrenceSpeech();
 	void Start () {
         if (!LoadInitialized)
 			LoadInit();
@@ -272,7 +272,7 @@ public class Speech : Interactive, IMessagable {
         if (incoming is MessageOccurrence){
             MessageOccurrence occur = (MessageOccurrence)incoming;
             // foreach (OccurrenceData data in occur.data)
-            ReactToOccurrence(occur.data.Data());
+            ReactToOccurrence(occur.data.data);
         }
     }
     void ReactToOccurrence(EventData od){

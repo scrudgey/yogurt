@@ -147,70 +147,24 @@ public class Eater : Interactive {
 		
         // set up an occurrence flag for this eating!
         OccurrenceEat eatData = new OccurrenceEat();
-		// eatData.edible = food;
+		eatData.edible = food;
         eatData.food = food.name;
         eatData.amount = food.nutrition;
 		eatData.vomit = food.vomit;
-		if (food.human){
-			eatData.cannibalism = true;
-		}
-		if (food.vomit){
-			eatData.disgusting += 100f;
-			eatData.disturbing += 75f;
-			eatData.chaos += 125f;
-		}
+		Toolbox.Instance.OccurenceFlag(gameObject, eatData);
+
+		// increment achievements
 		MonoLiquid mliquid = food.GetComponent<MonoLiquid>();
 		if (mliquid){
-			eatData.liquid = mliquid.liquid;
-			if (eatData.liquid != null){
-				if (eatData.liquid.vomit){
-					eatData.disgusting += 100f;
-					eatData.chaos += 200f;
-					eatData.disturbing += 105f;
-				}
-				if (eatData.liquid.offal){
-					eatData.disgusting += 75f;
-					eatData.chaos += 50f;
-				}
-				if (eatData.liquid.immoral){
-					eatData.disturbing += 100f;
-					eatData.chaos += 150f;
-					eatData.offensive += 500f;
-				}
-				if (eatData.liquid.name == "yogurt"){
+			if (mliquid.liquid != null){
+				if (mliquid.liquid.name == "yogurt"){
 					GameManager.Instance.data.achievementStats.yogurtEaten += 1;
 					GameManager.Instance.CheckAchievements();
 				}
 			}
 		}
-		// if (food.vomit){
-		// 	eatData.disgusting += 100f;
-		// 	eatData.disturbing += 75f;
-		// 	eatData.chaos += 125f;
-		// }
-        // MonoLiquid mliquid = food.GetComponent<MonoLiquid>();
-        // if (mliquid){
-        //     eatData.liquid = mliquid.liquid;
-        //     if (mliquid.liquid.vomit){
-        //         eatData.disgusting += 100f;
-        //         eatData.chaos += 200f;
-		// 		eatData.disturbing += 105f;
-        //     }
-        //     if (mliquid.liquid.offal){
-        //         eatData.disgusting += 75f;
-        //         eatData.chaos += 50f;
-        //     }
-        //     if (mliquid.liquid.immoral){
-        //         eatData.disturbing += 100f;
-        //         eatData.chaos += 150f;
-		// 		eatData.offensive += 500f;
-        //     }
-		// 	if (mliquid.liquid.name == "yogurt"){
-		//         GameManager.Instance.data.achievementStats.yogurtEaten += 1;
-		// 		GameManager.Instance.CheckAchievements();
-		// 	}
-        // }
-		Toolbox.Instance.OccurenceFlag(gameObject, eatData);
+
+		// play eat sound
 		if (food.eatSound != null){
 			Toolbox.Instance.AudioSpeaker(food.eatSound, transform.position);
 		}

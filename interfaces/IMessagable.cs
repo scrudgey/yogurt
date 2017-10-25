@@ -40,6 +40,7 @@ public class MessageSpeech : Message {
 	public bool sayLine;
 	public GameObject swearTarget;
 	public bool nimrodKey;
+	// public 
 	public MessageSpeech () {}
 	public MessageSpeech (string phrase){
 		this.phrase = phrase;

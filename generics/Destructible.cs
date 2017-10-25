@@ -68,7 +68,7 @@ public class Destructible : Damageable {
 			Toolbox.Instance.SpawnDroplet(transform.position, container.liquid);
 		}
 		// Toolbox.Instance.DataFlag(gameObject, 175f, 0f, 0f, 0f, 0f);
-		OccurrenceMisc data = Toolbox.Instance.DataFlag(gameObject, chaos:175f);
+		EventData data = Toolbox.Instance.DataFlag(gameObject, chaos:175f);
 		data.noun = "destruction";
 		data.whatHappened = Toolbox.Instance.CloneRemover(gameObject.name)+" was destroyed";
 		if (lastDamage == damageType.fire){

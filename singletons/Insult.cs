@@ -12,8 +12,8 @@ public class Insult {
 		Toolbox.Instance.SendMessage(insulted, insulter.GetComponent<Component>(), messageInsult);
 
 		OccurrenceSpeech of = new OccurrenceSpeech();
-		of.target = Toolbox.Instance.CloneRemover(insulted.name);
-		of.speaker = Toolbox.Instance.CloneRemover(insulter.name);
+		of.target = Toolbox.Instance.GetName(insulted);
+		of.speaker = Toolbox.Instance.GetName(insulter);
 		of.insult = true;
 		// of.chaos = 20f;
 		// of.offensive = Random.Range(20, 30);
