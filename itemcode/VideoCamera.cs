@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
+// using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.IO;
 using Easings;
@@ -73,11 +73,10 @@ public class VideoCamera : Interactive, IMessagable {
 	}
     void ProcessOccurrence(Occurrence oc){
         foreach (OccurrenceData data in oc.data){
-            Dictionary <string, float> events = data.Events();
-            foreach(string key in events.Keys){
-                commercial.IncrementValue(key, events[key]);
+            foreach(string key in data.flags.Keys){
+                commercial.IncrementValue(key, data.flags[key]);
             }
-            commercial.eventData.Add(data.Data());
+            commercial.eventData.Add(data.data);
             if (data is OccurrenceSpeech){
                 OccurrenceSpeech speech = (OccurrenceSpeech)data;
                 commercial.transcript.Add(speech.line);

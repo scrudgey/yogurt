@@ -29,17 +29,21 @@ public class Eater : Interactive {
 		if (nausea > 15 && nausea < 30 && lastStatement != nauseaStatement.warning){
 			lastStatement = nauseaStatement.warning;
 			// lastNausea = nausea;
-			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I don't feel so good!"));
+			// Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I don't feel so good!"));
 
 			// Toolbox.Instance.DataFlag(gameObject, 0f, 5f, 10f, 0f, 0f);
-			Toolbox.Instance.SpeechFlag(gameObject, "I don't feel so good!", chaos:2f, disturbing:10f, positive:-25f);
+			// Toolbox.Instance.SpeechFlag(gameObject, "I don't feel so good!", chaos:2f, disturbing:10f, positive:-25f);
+			MessageSpeech message = new MessageSpeech("I don't feel so good!!", eventData: new EventData(chaos:2f, disturbing:10f, positive:-25f));
+			Toolbox.Instance.SendMessage(gameObject, this, message);
 		}
 		if (nausea > 30 && lastStatement != nauseaStatement.imminent){
 			lastStatement = nauseaStatement.imminent;
 			// lastNausea = nausea;
-			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I'm gonna puke!"));
+			// Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I'm gonna puke!"));
 			// Toolbox.Instance.DataFlag(gameObject, 0f, 10f, 10f, 0f, 0f);
-			Toolbox.Instance.SpeechFlag(gameObject, "I'm gonna puke!", chaos:5f, disturbing:13f, positive:-30f);
+			// Toolbox.Instance.SpeechFlag(gameObject, "I'm gonna puke!", chaos:5f, disturbing:13f, positive:-30f);
+			MessageSpeech message = new MessageSpeech("I don't feel so good!!", eventData: new EventData(chaos:5f, disturbing:13f, positive:-40f));
+			Toolbox.Instance.SendMessage(gameObject, this, message);
 		}
 		// if (nausea < 50){
 		// 	lastNausea = 0;
@@ -99,7 +103,6 @@ public class Eater : Interactive {
 		return "Eat "+foodname;
 	}
 	public void Eat (Edible food){
-		string phrase ="";
 		int reaction;
 		nutrition += food.nutrition;
         if (food.poison)
@@ -121,21 +124,11 @@ public class Eater : Interactive {
 		//update our status based on our reaction to the food
 		reaction = CheckReaction(food);
 		if(reaction > 0){
-			phrase = "Yummy!";
-			// OccurrenceSpeech speech = new OccurrenceSpeech(positive:25f);
-			// Toolbox.Instance.OccurrenceFlag
-			// Toolbox.Instance.DataFlag(gameObject, 0f, 0f, 0f, 0f, 25f);
-			Toolbox.Instance.SpeechFlag(gameObject, phrase, positive:25f);
+			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I'm full!", eventData:new EventData(positive:25f)));
 		}
 		if(reaction < 0){
-			phrase = "Yuck!";
 			nausea += 30;
-			// Toolbox.Instance.DataFlag(gameObject, 0f, 0f, 0f, 0f, -25f);
-			Toolbox.Instance.SpeechFlag(gameObject, phrase, positive:-25f);
-		}
-		// if we can speak, say the thing
-		if (phrase != ""){
-			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech(phrase));
+			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Yuck", eventData:new EventData(positive:-25f)));
 		}
 		if (nutrition > 50){
 			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I'm full!"));
@@ -147,70 +140,23 @@ public class Eater : Interactive {
 		
         // set up an occurrence flag for this eating!
         OccurrenceEat eatData = new OccurrenceEat();
-		// eatData.edible = food;
+		eatData.edible = food;
         eatData.food = food.name;
         eatData.amount = food.nutrition;
 		eatData.vomit = food.vomit;
-		if (food.human){
-			eatData.cannibalism = true;
-		}
-		if (food.vomit){
-			eatData.disgusting += 100f;
-			eatData.disturbing += 75f;
-			eatData.chaos += 125f;
-		}
 		MonoLiquid mliquid = food.GetComponent<MonoLiquid>();
 		if (mliquid){
 			eatData.liquid = mliquid.liquid;
-			if (eatData.liquid != null){
-				if (eatData.liquid.vomit){
-					eatData.disgusting += 100f;
-					eatData.chaos += 200f;
-					eatData.disturbing += 105f;
-				}
-				if (eatData.liquid.offal){
-					eatData.disgusting += 75f;
-					eatData.chaos += 50f;
-				}
-				if (eatData.liquid.immoral){
-					eatData.disturbing += 100f;
-					eatData.chaos += 150f;
-					eatData.offensive += 500f;
-				}
-				if (eatData.liquid.name == "yogurt"){
+			if (mliquid.liquid != null){
+				if (mliquid.liquid.name == "yogurt"){
 					GameManager.Instance.data.achievementStats.yogurtEaten += 1;
 					GameManager.Instance.CheckAchievements();
 				}
 			}
 		}
-		// if (food.vomit){
-		// 	eatData.disgusting += 100f;
-		// 	eatData.disturbing += 75f;
-		// 	eatData.chaos += 125f;
-		// }
-        // MonoLiquid mliquid = food.GetComponent<MonoLiquid>();
-        // if (mliquid){
-        //     eatData.liquid = mliquid.liquid;
-        //     if (mliquid.liquid.vomit){
-        //         eatData.disgusting += 100f;
-        //         eatData.chaos += 200f;
-		// 		eatData.disturbing += 105f;
-        //     }
-        //     if (mliquid.liquid.offal){
-        //         eatData.disgusting += 75f;
-        //         eatData.chaos += 50f;
-        //     }
-        //     if (mliquid.liquid.immoral){
-        //         eatData.disturbing += 100f;
-        //         eatData.chaos += 150f;
-		// 		eatData.offensive += 500f;
-        //     }
-		// 	if (mliquid.liquid.name == "yogurt"){
-		//         GameManager.Instance.data.achievementStats.yogurtEaten += 1;
-		// 		GameManager.Instance.CheckAchievements();
-		// 	}
-        // }
 		Toolbox.Instance.OccurenceFlag(gameObject, eatData);
+
+		// play eat sound
 		if (food.eatSound != null){
 			Toolbox.Instance.AudioSpeaker(food.eatSound, transform.position);
 		}

@@ -40,13 +40,12 @@ public class MessageSpeech : Message {
 	public bool sayLine;
 	public GameObject swearTarget;
 	public bool nimrodKey;
+	public EventData eventData;
 	public MessageSpeech () {}
-	public MessageSpeech (string phrase){
-		this.phrase = phrase;
-	}
-	public MessageSpeech (string phrase, string swear){
+	public MessageSpeech (string phrase, string swear=null, EventData eventData = null){
 		this.phrase = phrase;
 		this.swear = swear;
+		this.eventData = eventData;
 	}
 }
 public class MessageDamage : Message {

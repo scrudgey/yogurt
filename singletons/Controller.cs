@@ -196,7 +196,10 @@ public class Controller : Singleton<Controller> {
 			GameObject top = Controller.Instance.GetFrontObject(hits);
 			if (top != null){
 				GameObject target = Controller.Instance.GetBaseInteractive(top.transform);
-				Insult.DoInsult(GameManager.Instance.playerObject, target);
+				Speech speech = focus.GetComponent<Speech>();
+				if (speech){
+					speech.Insult(target);
+				}
 				UINew.Instance.SetActionText("");
 			}
 		}

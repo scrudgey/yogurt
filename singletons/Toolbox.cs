@@ -28,32 +28,21 @@ public class Toolbox : Singleton<Toolbox> {
 			return component;
 		}
 	}
-	public Occurrence OccurenceFlag(GameObject spawner, List<OccurrenceData> datas){
-        GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
-        Occurrence occurrence = flag.GetComponent<Occurrence>();
-		foreach (OccurrenceData datum in datas)
-			occurrence.data.Add(datum);
-        return occurrence;
-    }
 	// TODO: fix mispelling
-	public Occurrence OccurenceFlag(GameObject spawner, OccurrenceData data){
+	public void OccurenceFlag(GameObject spawner, OccurrenceData data){
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
 		occurrence.data.Add(data);
-        return occurrence;
+		data.CalculateDescriptions();
     }
-	public void SpeechFlag(GameObject speaker, string phrase, float disturbing=0, float disgusting=0, float chaos=0, float offensive=0, float positive=0){
-		OccurrenceSpeech speech = new OccurrenceSpeech(disturbing:disturbing, disgusting:disgusting, chaos:chaos, offensive:offensive, positive:positive);
-		speech.speaker = Toolbox.Instance.CloneRemover(speaker.name);
-		speech.line = Toolbox.Instance.GetName(speaker)+": "+phrase;
-		OccurenceFlag(speaker, speech);
-	}
-	public OccurrenceMisc DataFlag(GameObject spawner, float chaos=0, float disgusting=0, float disturbing=0, float offensive=0, float positive=0){
+	public EventData DataFlag(GameObject spawner, float chaos=0, float disgusting=0, float disturbing=0, float offensive=0, float positive=0){
 		GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
-		OccurrenceMisc data = new OccurrenceMisc(chaos:chaos, disgusting:disgusting, disturbing:disturbing, offensive:offensive, positive:positive);
+		OccurrenceData data = new OccurrenceData();
 		occurrence.data.Add(data);
-        return data;
+
+		data.data = new EventData(chaos:chaos, disgusting:disgusting, disturbing:disturbing, offensive:offensive, positive:positive);
+        return data.data;
 	}
 	public AudioSource SetUpAudioSource(GameObject g){
 		AudioSource source = g.GetComponent<AudioSource>();
