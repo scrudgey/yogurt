@@ -46,9 +46,6 @@ public class MessageSpeech : Message {
 		this.phrase = phrase;
 		this.swear = swear;
 		this.eventData = eventData;
-		if (eventData != null){
-			Debug.Log(eventData.positive);
-		}
 	}
 }
 public class MessageDamage : Message {
