@@ -102,9 +102,10 @@ public class OccurrenceEat : OccurrenceData {
             data.chaos += 150f;
             data.offensive += 500f;
         }
-
+        Debug.Log("setting flags");
         if (liquid != null){
             if (liquid.name == "yogurt"){
+                Debug.Log("setting yogurt");
                 flags["yogurt"] = 1f;
                 if (liquid.vomit){
                     flags["yogurt_vomit_eat"] = 1f;
@@ -162,19 +163,11 @@ public class OccurrenceSpeech : OccurrenceData {
     public override void CalculateDescriptions(){
         data.whatHappened = speaker + " said " + line;
         data.noun = "speech act";
-
+        // insert bits here for script desc, transcript line
         if (threat){
-            data.chaos += 15;
-            data.offensive += 10;
-            data.positive -= 20;
-            data.offensive = Random.Range(20, 30);
             data.whatHappened = speaker + " threatened " + target;
         }
         if (insult){
-            data.chaos += 10;
-            data.offensive += 20;
-            data.positive -= 20;
-            data.offensive = Random.Range(20, 30);
             data.whatHappened = speaker + " insulted " + target;
         }
     }

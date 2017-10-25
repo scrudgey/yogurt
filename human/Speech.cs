@@ -168,7 +168,7 @@ public class Speech : Interactive, IMessagable {
 			Say (toSay);
 		}
 	}
-    public void Say(string phrase, string swear=null){
+    public void Say(string phrase, string swear=null, EventData data=null){
         if (phrase == "")
             return;
         if (hitState >= Controllable.HitState.unconscious)
@@ -182,9 +182,11 @@ public class Speech : Interactive, IMessagable {
         //     // data.line = Toolbox.Instance.GetName(gameObject)+": "+words;
         //     Toolbox.Instance.OccurenceFlag(gameObject, speechData);
         // }
-        speechData = new OccurrenceSpeech();
+        OccurrenceSpeech speechData = new OccurrenceSpeech();
+        if (data != null)
+            speechData.data = data;
         speechData.speaker = Toolbox.Instance.CloneRemover(gameObject.name);
-        speechData.line = Toolbox.Instance.GetName(gameObject)+": "+phrase;
+        // speechData.line = Toolbox.Instance.GetName(gameObject)+": "+phrase;
         string censoredPhrase = phrase;
         if (swear != null){
             StringBuilder builder = new StringBuilder();
@@ -210,13 +212,15 @@ public class Speech : Interactive, IMessagable {
             }
             // Toolbox.Instance.DataFlag(gameObject, extremity *2f, 0f, 0f, extremity * 5f, 0f);
             // Toolbox.Instance.SpeechFlag()
-            speechData.chaos = extremity * 2f;
-            speechData.offensive = extremity * 5f;
+            speechData.data.chaos += extremity * 2f;
+            speechData.data.offensive += extremity * 5f;
         }
 		words = censoredPhrase;
         speakTime = DoubleSeat(phrase.Length, 2f, 50f, 5f, 2f);
         speakTimeTotal = speakTime;
         speakSpeed = phrase.Length / speakTime;
+
+        speechData.line = words;
         Toolbox.Instance.OccurenceFlag(gameObject, speechData);
 	}
     public void ReceiveMessage(Message incoming){
@@ -342,12 +346,12 @@ public class Speech : Interactive, IMessagable {
 
         OccurrenceSpeech data = new OccurrenceSpeech();
         data.insult = true;
-        data.target = Toolbox.Instance.CloneRemover(target.name);
-		data.speaker = Toolbox.Instance.CloneRemover(gameObject.name);
-		// data.chaos = 10;
-
-		// data.offensive = 20;
-		// data.positive = -20;
+        data.target = Toolbox.Instance.GetName(target);
+		data.speaker = Toolbox.Instance.GetName(gameObject);
+        data.data.chaos += 10f;
+        data.data.offensive += 20f;
+        data.data.positive += -20f;
+        data.data.offensive = Random.Range(20, 30);
         data.line = strings[0];
         Toolbox.Instance.OccurenceFlag(gameObject, data);
 
@@ -368,9 +372,10 @@ public class Speech : Interactive, IMessagable {
         data.threat = true;
         data.target = Toolbox.Instance.CloneRemover(target.name);
 		data.speaker = Toolbox.Instance.CloneRemover(gameObject.name);
-		// data.chaos = 15;
-		// data.offensive = 10;
-		// data.positive = -20;
+        data.data.chaos += 15;
+        data.data.offensive += 10;
+        data.data.positive -= 20;
+        data.data.offensive = Random.Range(20, 30);
         data.line = strings[0];
         Toolbox.Instance.OccurenceFlag(gameObject, data);
 

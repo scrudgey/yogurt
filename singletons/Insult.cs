@@ -15,9 +15,9 @@ public class Insult {
 		of.target = Toolbox.Instance.GetName(insulted);
 		of.speaker = Toolbox.Instance.GetName(insulter);
 		of.insult = true;
-		// of.chaos = 20f;
-		// of.offensive = Random.Range(20, 30);
-		// of.disturbing = 2f;
+		of.data.chaos = 20f;
+		of.data.offensive = Random.Range(20, 30);
+		of.data.disturbing = 2f;
 		Toolbox.Instance.OccurenceFlag(insulter, of);
 	}
 	public static string ComposeInsult(GameObject inTarget){

@@ -42,12 +42,6 @@ public class Toolbox : Singleton<Toolbox> {
 		occurrence.data.Add(data);
 		data.CalculateDescriptions();
     }
-	// public void SpeechFlag(GameObject speaker, string phrase, float disturbing=0, float disgusting=0, float chaos=0, float offensive=0, float positive=0){
-	// 	OccurrenceSpeech speech = new OccurrenceSpeech(disturbing:disturbing, disgusting:disgusting, chaos:chaos, offensive:offensive, positive:positive);
-	// 	speech.speaker = Toolbox.Instance.CloneRemover(speaker.name);
-	// 	speech.line = Toolbox.Instance.GetName(speaker)+": "+phrase;
-	// 	OccurenceFlag(speaker, speech);
-	// }
 	public EventData DataFlag(GameObject spawner, float chaos=0, float disgusting=0, float disturbing=0, float offensive=0, float positive=0){
 		GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
