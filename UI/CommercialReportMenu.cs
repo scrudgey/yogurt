@@ -42,11 +42,15 @@ public class CommercialReportMenu : MonoBehaviour {
     public void Report(Commercial activeCommercial, Commercial commercial){
         SetRefs();
         descriptionText.text = activeCommercial.description;
-        positiveScore.text = commercial.data.positive.ToString();
-        chaosScore.text = commercial.data.chaos.ToString();
-        disgustingScore.text = commercial.data.disgusting.ToString();
-        disturbingScore.text = commercial.data.disturbing.ToString();
-        offensiveScore.text = commercial.data.offensive.ToString();
+        
+        EventData total = commercial.Total();
+
+        positiveScore.text = total.positive.ToString();
+        chaosScore.text = total.chaos.ToString();
+        disgustingScore.text = total.disgusting.ToString();
+        disturbingScore.text = total.disturbing.ToString();
+        offensiveScore.text = total.offensive.ToString();
+
         foreach (string line in commercial.transcript){
             transcript.text = transcript.text + line + "\n";
         }

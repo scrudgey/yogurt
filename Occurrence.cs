@@ -23,133 +23,219 @@ public class Occurrence : MonoBehaviour {
         to do some extra work with ScriptableObject.
 */
 [System.Serializable]
-public class OccurrenceData
-{
+public class EventData {
     public float disturbing;
     public float disgusting;
     public float chaos;
     public float offensive;
     public float positive;
-    public virtual void UpdateCommercialOccurrences(Commercial commercial){ }
-    public bool Matches(OccurrenceData otherData){
-        if (this.GetType() == otherData.GetType()){
-            return MatchSpecific(otherData);
-        } else {
-            return false;
-        }
+    public string whatHappened;
+    public string noun;
+    public EventData(){
+        // required for serialization
     }
-    protected virtual bool MatchSpecific(OccurrenceData otherData){
+    public EventData(float disturbing=0, float disgusting=0, float chaos=0, float offensive=0, float positive=0){
+        this.disturbing = disturbing;
+        this.disgusting = disgusting;
+        this.chaos = chaos;
+        this.offensive = offensive;
+        this.positive = positive;
+    }
+    public bool MatchSpecific(EventData other){
+        // TODO: include descriptions?
+        // match on descriptions?
         bool match = true;
-        match &= disturbing == otherData.disturbing;
-        match &= disgusting == otherData.disgusting;
-        match &= chaos == otherData.chaos;
-        match &= offensive == otherData.offensive;
-        match &= positive == otherData.positive;
+        match &= disturbing == other.disturbing;
+        match &= disgusting == other.disgusting;
+        match &= chaos == other.chaos;
+        match &= offensive == other.offensive;
+        match &= positive == other.positive;
         return match;
     }
-    public void AddData(OccurrenceData otherData){
-        disturbing += otherData.disturbing;
-        disgusting += otherData.disgusting;
-        chaos += otherData.chaos;
-        offensive += otherData.offensive;
-        positive += otherData.positive;
+    // public void AddData(EventData other){
+    //     disturbing += other.disturbing;
+    //     disgusting += other.disgusting;
+    //     chaos += other.chaos;
+    //     offensive += other.offensive;
+    //     positive += other.positive;
+    // }
+}
+public interface OccurrenceData
+{
+    Dictionary<string, float> Events();
+    EventData Data();
+}
+public class OccurrenceMisc : OccurrenceData {
+    // TODO: include disturbingness for swearing;
+    public float disturbing;
+    public float disgusting;
+    public float chaos;
+    public float offensive;
+    public float positive;
+    public string noun="";
+    public string whatHappened="";
+    public OccurrenceMisc(string noun="event", string whatHappened="a thing happened", float disturbing=0, float disgusting=0, float chaos=0, float offensive=0, float positive=0){
+        this.disturbing = disturbing;
+        this.disgusting = disgusting;
+        this.chaos = chaos;
+        this.offensive = offensive;
+        this.positive = positive;
+        this.noun = noun;
+        this.whatHappened = whatHappened;
+    }
+    public virtual EventData Data(){
+        EventData data = new EventData();
+        data.whatHappened = whatHappened;
+        data.noun = noun;
+        data.disturbing = disturbing;
+        data.disgusting = disgusting;
+        data.chaos = chaos;
+        data.offensive = offensive;
+        data.positive = positive;
+        return data;
+    }
+    public virtual Dictionary<string, float> Events(){
+        return new Dictionary<string, float>();
     }
 }
+
+
 [System.Serializable]
 public class OccurrenceFire : OccurrenceData {
     public string objectName;
     public bool extinguished;
-    protected override bool MatchSpecific(OccurrenceData data){
-        OccurrenceFire otherData = (OccurrenceFire)data;
-        return objectName == otherData.objectName;
-    }
-    public override void UpdateCommercialOccurrences(Commercial commercial){
-        // I can eventually modify this to only allow values 0, 1 if necessary
+    public Dictionary<string, float> Events(){
+        // TODO: make this binary again
+        Dictionary<string, float> events = new Dictionary<string, float>();
         if (objectName == "table"){
             if (extinguished == false){
-                commercial.SetValue("table_fire", 1);
-            } else {
-                commercial.SetValue("table_fire", 0);
+                events["table_fire"] = 1;
             }
         }
+        return events;
+    }
+    public EventData Data(){
+        EventData data = new EventData(chaos:100f);
+        data.noun = "fire";
+        data.whatHappened = "the "+objectName+" burned";
+        return data;
     }
 }
 [System.Serializable]
-public class OccurrenceEat : OccurrenceData {
+public class OccurrenceEat : OccurrenceMisc {
     public float amount;
     public string food;
     public Liquid liquid;
     public bool vomit;
-    public Edible edible;
-    public override void UpdateCommercialOccurrences(Commercial commercial){
+    public bool cannibalism;
+    // EventData dat = new EventData();
+    public override Dictionary<string, float> Events(){
+        Dictionary<string, float> events = new Dictionary<string, float>();
         if (liquid != null){
             if (liquid.name == "yogurt"){
-                commercial.IncrementValue("yogurt", 1f);
+                events["yogurt"] = 1f;
                 if (liquid.vomit){
-                    commercial.IncrementValue("yogurt_vomit_eat", 1f);
-                    commercial.IncrementValue("vomit_eat", 1f);
+                    events["yogurt_vomit_eat"] = 1f;
+                    events["vomit_eat"] = 1f;
                 }
                 if (food == "Puddle(Clone)")
-                    commercial.IncrementValue("yogurt_floor", 1f);
+                    events["yogurt_floor"] = 1f;
             }
         } else {
             if (vomit)
-                commercial.IncrementValue("vomit_eat", 1f);
+                events["vomit_eat"] = 1f;
         }
         if (Toolbox.Instance.CloneRemover(food) == "eggplant")
-            commercial.IncrementValue("eggplant", 1f);
-        if (edible.human){
-            commercial.IncrementValue("cannibalism", 1f);
+            events["eggplant"] = 1f;
+        if (cannibalism){
+            events["cannibalism"] = 1f;
         }
-    }
-    protected override bool MatchSpecific(OccurrenceData data){
-        OccurrenceEat otherData = (OccurrenceEat)data;
-        bool match = false;
-        if (liquid != null){
-            if (otherData.liquid == null)
-                return false;
-            match = liquid.name == otherData.liquid.name;
-        } else {
-            match = food == otherData.food;
-        }
-        return match;
+        return events;
     }
 }
 public class OccurrenceDeath : OccurrenceData {
-     public override void UpdateCommercialOccurrences(Commercial commercial){
-         commercial.IncrementValue("death", 1f);
-     }
+    public string nameOfTheDead;
+    public Dictionary<string, float> Events(){
+        Dictionary<string, float> events = new Dictionary<string, float>();
+        events["death"] = 1f;
+        return new Dictionary<string, float>{{"death", 1f}};
+    }
+    public EventData Data(){
+        EventData data = new EventData(chaos:3575f, disgusting:2000f, disturbing:3500f, offensive:8950f, positive:-5500f);
+        data.noun = "death";
+        data.whatHappened = nameOfTheDead + " died";
+        return data;
+    }
 }
 [System.Serializable]
 public class OccurrenceVomit : OccurrenceData {
     public string vomit;
+    public string vomiter;
     public Liquid liquid;
-    public override void UpdateCommercialOccurrences(Commercial commercial){
-        commercial.IncrementValue("vomit", 1f);
+    public Dictionary<string, float> Events(){
+        Dictionary<string, float> events = new Dictionary<string, float>();
+        events["vomit"] = 1f;
         if (liquid != null){
             if (liquid.name == "yogurt")
-                commercial.IncrementValue("yogurt_vomit", 1f);
+                events["yogurt_vomit"] = 1f;
         } 
+        return events;
+    }
+    public EventData Data(){
+        EventData data = new EventData(disgusting:350f);
+        data.noun = "vomiting";
+        data.whatHappened = vomiter + " vomited up (name)";
+        return data;
     }
 }
+
 [System.Serializable]
-public class OccurrenceSpeech : OccurrenceData {
+public class OccurrenceSpeech : OccurrenceMisc {
+    // TODO: include disturbingness for swearing;
     public string line;
-    public GameObject speaker;
-    public override void UpdateCommercialOccurrences(Commercial commercial){
-        commercial.transcript.Add(line);
-    }
-    protected override bool MatchSpecific(OccurrenceData data){
-        OccurrenceSpeech otherData = (OccurrenceSpeech)data;
-        return line == otherData.line;
+    public string speaker;
+    public bool threat;
+    public bool insult;
+    public string target;
+    public OccurrenceSpeech(string noun="speech", string whatHappened="someone said something", float disturbing=0, float disgusting=0, float chaos=0, float offensive=0, float positive=0):
+        base(noun:noun, whatHappened:whatHappened, disturbing:disturbing, disgusting:disgusting, chaos:chaos, offensive:offensive, positive:positive){}
+    public override EventData Data(){
+        EventData data = base.Data();
+        data.whatHappened = speaker + " said " + line;
+        data.noun = "speech act";
+        if (threat){
+            data.chaos += 15;
+            data.offensive += 10;
+            data.positive -= 20;
+            data.offensive = Random.Range(20, 30);
+            data.whatHappened = speaker + " threatened " + target;
+        }
+        if (insult){
+            data.chaos += 10;
+            data.offensive += 20;
+            data.positive -= 20;
+            data.offensive = Random.Range(20, 30);
+            data.whatHappened = speaker + " insulted " + target;
+        }
+        return data;
     }
 }
-public class OccurrenceInsult : OccurrenceData {
-    public GameObject insulter;
-    public GameObject insulted;
-}
+
 [System.Serializable]
 public class OccurrenceViolence : OccurrenceData {
     public GameObject attacker;
     public GameObject victim;
+    public string attackerName;
+    public string victimName;
+    public Dictionary<string, float> Events(){
+        return new Dictionary<string, float>();
+    }
+    public EventData Data(){
+        EventData data = new EventData(disturbing:10f, chaos:10f);
+        // violence.disturbing = 10f;
+		// violence.chaos = 10f;
+        data.noun = "violence";
+        data.whatHappened = attackerName + " attacked " + victimName;
+        return data;
+    }
 }

@@ -358,14 +358,14 @@ public partial class GameManager : Singleton<GameManager> {
 		// TODO: change this temporary hack into something more correct.
         data.unlockedCommercials = new List<Commercial>();
 		data.newUnlockedCommercials = new List<Commercial>();
-        data.unlockedCommercials.Add(LoadCommercialByName("eat1"));
+        data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eat1"));
 		if (debug){
 			data.days = 1;
-       		data.unlockedCommercials.Add(LoadCommercialByName("eat2"));
-       		data.unlockedCommercials.Add(LoadCommercialByName("eggplant1"));
-       		data.unlockedCommercials.Add(LoadCommercialByName("eggplant10"));
-       		data.unlockedCommercials.Add(LoadCommercialByName("fireman"));
-       		data.unlockedCommercials.Add(LoadCommercialByName("freestyle"));
+       		data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eat2"));
+       		data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eggplant1"));
+       		data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eggplant10"));
+       		data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("fireman"));
+       		// data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("freestyle"));
 		}
         data.completeCommercials = new List<Commercial>();
 		// initialize achievements

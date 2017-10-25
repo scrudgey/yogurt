@@ -11,12 +11,13 @@ public class Insult {
 		MessageInsult messageInsult = new MessageInsult();
 		Toolbox.Instance.SendMessage(insulted, insulter.GetComponent<Component>(), messageInsult);
 
-		OccurrenceInsult of = new OccurrenceInsult();
-		of.insulted = insulted;
-		of.insulter = insulter;
-		of.chaos = 20f;
-		of.offensive = Random.Range(20, 30);
-		of.disturbing = 2f;
+		OccurrenceSpeech of = new OccurrenceSpeech();
+		of.target = Toolbox.Instance.CloneRemover(insulted.name);
+		of.speaker = Toolbox.Instance.CloneRemover(insulter.name);
+		of.insult = true;
+		// of.chaos = 20f;
+		// of.offensive = Random.Range(20, 30);
+		// of.disturbing = 2f;
 		Toolbox.Instance.OccurenceFlag(insulter, of);
 	}
 	public static string ComposeInsult(GameObject inTarget){

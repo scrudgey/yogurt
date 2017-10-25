@@ -35,31 +35,25 @@ public class Toolbox : Singleton<Toolbox> {
 			occurrence.data.Add(datum);
         return occurrence;
     }
+	// TODO: fix mispelling
 	public Occurrence OccurenceFlag(GameObject spawner, OccurrenceData data){
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
 		occurrence.data.Add(data);
         return occurrence;
     }
-    public Occurrence OccurenceFlag(GameObject spawner){
-        GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
-        Occurrence occurrence = flag.GetComponent<Occurrence>();
-        return occurrence;
-    }
-	public Occurrence DataFlag(GameObject spawner, float chaos, float disgusting, float disturbing, float offensive, float positive){
+	public void SpeechFlag(GameObject speaker, string phrase, float disturbing=0, float disgusting=0, float chaos=0, float offensive=0, float positive=0){
+		OccurrenceSpeech speech = new OccurrenceSpeech(disturbing:disturbing, disgusting:disgusting, chaos:chaos, offensive:offensive, positive:positive);
+		speech.speaker = Toolbox.Instance.CloneRemover(speaker.name);
+		speech.line = Toolbox.Instance.GetName(speaker)+": "+phrase;
+		OccurenceFlag(speaker, speech);
+	}
+	public OccurrenceMisc DataFlag(GameObject spawner, float chaos=0, float disgusting=0, float disturbing=0, float offensive=0, float positive=0){
 		GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
-
-		OccurrenceData data = new OccurrenceData();
-		data.chaos = chaos;
-		data.disgusting = disgusting;
-		data.disturbing = disturbing;
-		data.offensive = offensive;
-		data.positive = positive;
-
+		OccurrenceMisc data = new OccurrenceMisc(chaos:chaos, disgusting:disgusting, disturbing:disturbing, offensive:offensive, positive:positive);
 		occurrence.data.Add(data);
-
-        return occurrence;
+        return data;
 	}
 	public AudioSource SetUpAudioSource(GameObject g){
 		AudioSource source = g.GetComponent<AudioSource>();
@@ -212,6 +206,7 @@ public class Toolbox : Singleton<Toolbox> {
 	public string GetName(GameObject obj){
 		// TODO: include extra description, like "vomited up"
 		// possibly also use intrinsics
+		// use player name, speech name
 		string nameOut = "";
 		Item item = obj.GetComponent<Item>();
 		if (item){
@@ -223,6 +218,10 @@ public class Toolbox : Singleton<Toolbox> {
 		if (edible){
 			if (edible.vomit)
 				nameOut = "vomited-up "+nameOut;
+		}
+		Speech speech = obj.GetComponent<Speech>();
+		if (speech){
+			nameOut = speech.name;
 		}
 		nameOut = ScrubText(nameOut);
 		return nameOut;
