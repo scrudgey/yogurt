@@ -1,32 +1,7 @@
 ﻿using Nimrod;
 using UnityEngine;
-// using System.Collections.Generic;
 
 public class Insults {
-	// public static void DoInsult(GameObject insulter, GameObject insulted){
-	// 	string content = ComposeInsult(insulted);
-
-	// 	MessageInsult messageInsult = new MessageInsult();
-	// 	Toolbox.Instance.SendMessage(insulted, insulter.GetComponent<Component>(), messageInsult);
-
-	// 	MessageSpeech message = new MessageSpeech(content);
-
-	// 	message.eventData.insult = true;
-	// 	message.eventData.chaos = 20f;
-
-
-	// 	OccurrenceSpeech of = new OccurrenceSpeech();
-	// 	// of.target = Toolbox.Instance.GetName(insulted);
-	// 	// of.speaker = Toolbox.Instance.GetName(insulter);
-	// 	of.insult = true;
-	// 	of.data.chaos = 20f;
-	// 	of.data.offensive = Random.Range(20, 30);
-	// 	of.data.disturbing = 2f;
-	// 	Toolbox.Instance.OccurenceFlag(insulter, of);
-
-
-	// 	Toolbox.Instance.SendMessage(insulter, null, message);
-	// }
 	public static string ComposeInsult(GameObject inTarget){
 		Grammar grammar = new Grammar();
 		grammar.Load("insult");

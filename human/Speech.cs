@@ -163,7 +163,7 @@ public class Speech : Interactive, IMessagable {
 			Say (toSay);
 		}
 	}
-    public void Say(string phrase, string swear=null, EventData data=null){
+    public void Say(string phrase, string swear=null, EventData data=null, bool insult=false, bool threat=false){
         if (phrase == "")
             return;
         if (hitState >= Controllable.HitState.unconscious)
@@ -317,21 +317,18 @@ public class Speech : Interactive, IMessagable {
     public Monologue Insult(GameObject target){
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
-        // List<string> strings = new List<string>();
-
         string content = Insults.ComposeInsult(target);
 		MessageInsult messageInsult = new MessageInsult();
 		Toolbox.Instance.SendMessage(target, this, messageInsult);
 
         EventData data = new EventData();
-
 		data.chaos = 20f;
         data.chaos += 20f;
         data.offensive += 20f;
         data.disturbing = 2f;
         data.positive += -20f;
         data.offensive = Random.Range(20, 30);
-        Say(content, data:data);
+        Say(content, data:data, insult:true);
 
         List<string> strings = new List<string>(){content};
         Monologue mono = new Monologue(this, strings.ToArray());
@@ -340,24 +337,22 @@ public class Speech : Interactive, IMessagable {
     public Monologue Threaten(GameObject target){
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
-        List<string> strings = new List<string>();
 
         Grammar grammar = new Grammar();
         grammar.Load("structure");
         grammar.Load("flavor_"+flavor);
-        strings.Add(grammar.Parse("{threat}"));
+        string content = grammar.Parse("{threat}");
 
-        OccurrenceSpeech data = new OccurrenceSpeech();
-        data.threat = true;
-        data.target = Toolbox.Instance.CloneRemover(target.name);
-		data.speaker = Toolbox.Instance.CloneRemover(gameObject.name);
-        data.data.chaos += 15;
-        data.data.offensive += 10;
-        data.data.positive -= 20;
-        data.data.offensive = Random.Range(20, 30);
-        data.line = strings[0];
-        Toolbox.Instance.OccurenceFlag(gameObject, data);
+        EventData data = new EventData();
+		data.chaos = 15f;
+        data.chaos += 15f;
+        data.offensive += 10f;
+        data.disturbing = 5f;
+        data.positive += -20f;
+        data.offensive = Random.Range(20, 30);
+        Say(content, data:data, threat:true);
 
+        List<string> strings = new List<string>(){content};
         Monologue mono = new Monologue(this, strings.ToArray());
         return mono;
     }

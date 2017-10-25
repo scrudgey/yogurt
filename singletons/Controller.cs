@@ -200,7 +200,6 @@ public class Controller : Singleton<Controller> {
 				if (speech){
 					speech.Insult(target);
 				}
-				// Insult.DoInsult(focus.gameObject, target);
 				UINew.Instance.SetActionText("");
 			}
 		}

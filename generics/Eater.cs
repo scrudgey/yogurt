@@ -103,7 +103,6 @@ public class Eater : Interactive {
 		return "Eat "+foodname;
 	}
 	public void Eat (Edible food){
-		string phrase ="";
 		int reaction;
 		nutrition += food.nutrition;
         if (food.poison)
@@ -124,17 +123,12 @@ public class Eater : Interactive {
         }
 		//update our status based on our reaction to the food
 		reaction = CheckReaction(food);
-		MessageSpeech message = null;
 		if(reaction > 0){
-			message = new MessageSpeech("Yummy!", eventData:new EventData(positive:25f));
+			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I'm full!", eventData:new EventData(positive:25f)));
 		}
 		if(reaction < 0){
 			nausea += 30;
-			message = new MessageSpeech("Yuck!", eventData:new EventData(positive:-25f));
-		}
-		// if we can speak, say the thing
-		if (message != null){
-			Toolbox.Instance.SendMessage(gameObject, this, message);
+			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Yuck", eventData:new EventData(positive:-25f)));
 		}
 		if (nutrition > 50){
 			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I'm full!"));
