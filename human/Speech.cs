@@ -163,7 +163,7 @@ public class Speech : Interactive, IMessagable {
 			Say (toSay);
 		}
 	}
-    public void Say(string phrase, string swear=null, EventData data=null, bool insult=false, bool threat=false){
+    public void Say(string phrase, string swear=null, EventData data=null, GameObject insult=null, GameObject threat=null){
         if (phrase == "")
             return;
         if (hitState >= Controllable.HitState.unconscious)
@@ -175,7 +175,16 @@ public class Speech : Interactive, IMessagable {
         if (data != null){
             speechData.data = data;
         }
-        speechData.speaker = Toolbox.Instance.CloneRemover(gameObject.name);
+        if (threat != null){
+            speechData.threat = true;
+            speechData.target = Toolbox.Instance.GetName(threat);
+        }
+        if (insult != null){
+            speechData.insult = true;
+            speechData.target = Toolbox.Instance.GetName(insult);
+        }
+        speechData.speaker = Toolbox.Instance.GetName(gameObject);
+
         string censoredPhrase = phrase;
         if (swear != null){
             StringBuilder builder = new StringBuilder();
@@ -328,7 +337,7 @@ public class Speech : Interactive, IMessagable {
         data.disturbing = 2f;
         data.positive += -20f;
         data.offensive = Random.Range(20, 30);
-        Say(content, data:data, insult:true);
+        Say(content, data:data, insult:target);
 
         List<string> strings = new List<string>(){content};
         Monologue mono = new Monologue(this, strings.ToArray());
@@ -350,7 +359,7 @@ public class Speech : Interactive, IMessagable {
         data.disturbing = 5f;
         data.positive += -20f;
         data.offensive = Random.Range(20, 30);
-        Say(content, data:data, threat:true);
+        Say(content, data:data, threat:target);
 
         List<string> strings = new List<string>(){content};
         Monologue mono = new Monologue(this, strings.ToArray());

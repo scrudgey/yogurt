@@ -28,13 +28,6 @@ public class Toolbox : Singleton<Toolbox> {
 			return component;
 		}
 	}
-	public Occurrence OccurenceFlag(GameObject spawner, List<OccurrenceData> datas){
-        GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
-        Occurrence occurrence = flag.GetComponent<Occurrence>();
-		foreach (OccurrenceData datum in datas)
-			occurrence.data.Add(datum);
-        return occurrence;
-    }
 	// TODO: fix mispelling
 	public void OccurenceFlag(GameObject spawner, OccurrenceData data){
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
