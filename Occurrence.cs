@@ -102,10 +102,8 @@ public class OccurrenceEat : OccurrenceData {
             data.chaos += 150f;
             data.offensive += 500f;
         }
-        Debug.Log("setting flags");
         if (liquid != null){
             if (liquid.name == "yogurt"){
-                Debug.Log("setting yogurt");
                 flags["yogurt"] = 1f;
                 if (liquid.vomit){
                     flags["yogurt_vomit_eat"] = 1f;

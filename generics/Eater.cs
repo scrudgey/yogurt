@@ -126,22 +126,10 @@ public class Eater : Interactive {
 		reaction = CheckReaction(food);
 		MessageSpeech message = null;
 		if(reaction > 0){
-			// phrase = "Yummy!";
-			// OccurrenceSpeech speech = new OccurrenceSpeech(positive:25f);
-			// Toolbox.Instance.OccurrenceFlag
-			// Toolbox.Instance.DataFlag(gameObject, 0f, 0f, 0f, 0f, 25f);
-			// Toolbox.Instance.SpeechFlag(gameObject, phrase, positive:25f);
-			// message.phrase = phrase;
-			// message.eventData = new EventData(positive:25f);
 			message = new MessageSpeech("Yummy!", eventData:new EventData(positive:25f));
 		}
 		if(reaction < 0){
-			// phrase = "Yuck!";
 			nausea += 30;
-			// Toolbox.Instance.DataFlag(gameObject, 0f, 0f, 0f, 0f, -25f);
-			// Toolbox.Instance.SpeechFlag(gameObject, phrase, positive:-25f);
-			// message.phrase = phrase;
-			// message.eventData = new EventData(positive:-25f);
 			message = new MessageSpeech("Yuck!", eventData:new EventData(positive:-25f));
 		}
 		// if we can speak, say the thing

@@ -73,9 +73,7 @@ public class VideoCamera : Interactive, IMessagable {
 	}
     void ProcessOccurrence(Occurrence oc){
         foreach (OccurrenceData data in oc.data){
-            // Dictionary <string, float> events = data.flags;
             foreach(string key in data.flags.Keys){
-                Debug.Log("key");
                 commercial.IncrementValue(key, data.flags[key]);
             }
             commercial.eventData.Add(data.data);

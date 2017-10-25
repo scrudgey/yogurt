@@ -41,17 +41,15 @@ public class MessageSpeech : Message {
 	public GameObject swearTarget;
 	public bool nimrodKey;
 	public EventData eventData;
-	// public 
 	public MessageSpeech () {}
 	public MessageSpeech (string phrase, string swear=null, EventData eventData = null){
 		this.phrase = phrase;
 		this.swear = swear;
 		this.eventData = eventData;
+		if (eventData != null){
+			Debug.Log(eventData.positive);
+		}
 	}
-	// public MessageSpeech (string phrase, string swear){
-	// 	this.phrase = phrase;
-	// 	this.swear = swear;
-	// }
 }
 public class MessageDamage : Message {
 	public float amount;
