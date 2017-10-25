@@ -228,11 +228,13 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 				}
 			}
 		}
-		throwObject = null;
 		MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.throwing, false);
 		Toolbox.Instance.SendMessage(gameObject, this, anim);
 		GetComponent<AudioSource>().PlayOneShot(Resources.Load("sounds/8bit_throw", typeof(AudioClip)) as AudioClip);
-		Toolbox.Instance.DataFlag(gameObject, 50, 0, 0, 0, 0);
+		OccurrenceMisc data = Toolbox.Instance.DataFlag(gameObject, chaos:50f);
+		data.noun = "throwing";
+		data.whatHappened = Toolbox.Instance.GetName(gameObject)+" threw a "+ Toolbox.Instance.GetName(throwObject);
+		throwObject = null;
 	}
 	void FixedUpdate(){
 		// do the throwing action in fixed update if we have gotten the command to throw

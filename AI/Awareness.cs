@@ -231,7 +231,6 @@ public class Awareness : MonoBehaviour, IMessagable {
 				GameObject attackerObject = Controller.Instance.GetBaseInteractive(dat.attacker.transform);
 				PersonalAssessment attacker = FormPersonalAssessment(attackerObject);
 				PersonalAssessment victim = FormPersonalAssessment(victimObject);
-				// Debug.Log(victimObject);
 				if (possession != null && possession == victimObject){
 					Debug.Log(dat.attacker.name + " attacked my possession!");
 					if (attacker != null){
@@ -268,7 +267,6 @@ public class Awareness : MonoBehaviour, IMessagable {
 					break;
 				}
 			}
-
 		}
 	}
 	// process the list of objects in the field of view.

@@ -28,7 +28,7 @@ public class Damageable: MonoBehaviour, IMessagable{
 		if (phys){
 			phys.DestroyPhysical();
 		}
-        Outfit outfit = GetComponent<Outfit>();
+        // Outfit outfit = GetComponent<Outfit>();
         // if (outfit){
         //     outfit.RemoveUniform();
         // }
