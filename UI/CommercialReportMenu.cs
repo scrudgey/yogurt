@@ -40,6 +40,7 @@ public class CommercialReportMenu : MonoBehaviour {
         }
     }
     public void Report(Commercial activeCommercial, Commercial commercial){
+        commercial.WriteReport();
         SetRefs();
         descriptionText.text = activeCommercial.description;
         

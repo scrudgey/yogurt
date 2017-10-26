@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Serialization;
 using UnityEngine;
+// using System;
+using System.IO;
 
 public enum CommercialComparison{
 		equal, notequal, greater, less, greaterEqual, lessEqual
@@ -86,6 +88,21 @@ public class Commercial {
 		UINew.Instance.PopupCounter(data.desc, initvalue, finalvalue, this);
         properties[data.key].val = finalvalue;
     }
+	public void WriteReport(){
+		string filename = Path.Combine(Application.persistentDataPath, "commercial_history.txt");
+		StreamWriter writer = new StreamWriter(filename, true);
+		foreach(EventData data in eventData){
+			writer.WriteLine(data.whatHappened);
+		}
+		writer.Close();
+		filename = Path.Combine(Application.persistentDataPath, "commercial_events.txt");
+		writer = new StreamWriter(filename, true);
+		foreach(EventData data in eventData){
+			string line = data.noun + " " + data.disturbing.ToString() + " " + data.disgusting.ToString() + " " + data.chaos.ToString() + " " + data.offensive.ToString() + " " + data.positive.ToString();
+			writer.WriteLine(line);
+		}
+		writer.Close();
+	}
 	public bool Evaluate(Commercial other){
 		bool requirementsMet = true;
 		foreach(string key in other.properties.Keys){
