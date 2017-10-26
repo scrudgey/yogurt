@@ -96,17 +96,11 @@ public class Commercial {
         properties.TryGetValue(data.key, out property);
         if (property == null){
             properties[data.key] = new CommercialProperty();
+			properties[data.key].desc = data.desc;
         }
         float initvalue = properties[data.key].val;
         float finalvalue = initvalue + data.val;
-        // string poptext = "default";
-        // Occurrence.KeyDescriptions.TryGetValue(data.key, out poptext);
-        // if (poptext != "default"){
 		UINew.Instance.PopupCounter(data.desc, initvalue, finalvalue, this);
-        // } else {
-        //     // UI check if commercial is complete
-        //     UINew.Instance.UpdateRecordButtons(this);
-        // }
         properties[data.key].val = finalvalue;
     }
 	public bool Evaluate(Commercial other){

@@ -77,9 +77,9 @@ public class VideoCamera : Interactive, IMessagable {
                 commercial.IncrementValue(data);
                 // commercial.IncrementValue(key, data.eventData.flags[key]);
             }
-            commercial.eventData.Add(data.eventData);
-            if (data is OccurrenceSpeech){
-                OccurrenceSpeech speech = (OccurrenceSpeech)data;
+            commercial.eventData.AddRange(occurrence.events);
+            if (occurrence is OccurrenceSpeech){
+                OccurrenceSpeech speech = (OccurrenceSpeech)occurrence;
                 commercial.transcript.Add(speech.line);
             }
             // if (watchForOccurrence != null){
