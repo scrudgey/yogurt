@@ -156,7 +156,8 @@ public class Hurtable : Damageable {
 		}
 		hitState = Controllable.AddHitState(hitState, Controllable.HitState.dead);
 		OccurrenceDeath occurrenceData = new OccurrenceDeath();
-		occurrenceData.nameOfTheDead = Toolbox.Instance.CloneRemover(gameObject.name);
+		// occurrenceData.nameOfTheDead = Toolbox.Instance.CloneRemover(gameObject.name);
+		occurrenceData.dead = gameObject;
 		Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData);
 	}
 	public override void ReceiveMessage(Message incoming){

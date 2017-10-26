@@ -69,15 +69,15 @@ public class Commercial {
         unlockUponCompletion = new List<string>();
 	}
 	public List<string> transcript = new List<string>();
-	public void SetValue( string valname, float val){
-		CommercialProperty property = null;
-        properties.TryGetValue(valname, out property);
-		float incrementval = val;
-        if (property != null){
-            incrementval = val - property.val;
-        }
-		IncrementValue(valname, incrementval);
-	}
+	// public void SetValue( string valname, float val){
+	// 	CommercialProperty property = null;
+    //     properties.TryGetValue(valname, out property);
+	// 	float incrementval = val;
+    //     if (property != null){
+    //         incrementval = val - property.val;
+    //     }
+	// 	IncrementValue(valname, incrementval);
+	// }
 	public EventData Total(){
 		EventData total = new EventData();
 		foreach(EventData data in eventData){
@@ -89,25 +89,19 @@ public class Commercial {
 		}
 		return total;
 	}
-	public void IncrementValue(string valname, float increment){
-		if (increment == 0)
+	public void IncrementValue(EventData data){
+		if (data.val == 0)
 			return;
         CommercialProperty property = null;
-        properties.TryGetValue(valname, out property);
+        properties.TryGetValue(data.key, out property);
         if (property == null){
-            properties[valname] = new CommercialProperty();
+            properties[data.key] = new CommercialProperty();
+			properties[data.key].desc = data.desc;
         }
-        float initvalue = properties[valname].val;
-        float finalvalue = initvalue + increment;
-        string poptext = "default";
-        Occurrence.KeyDescriptions.TryGetValue(valname, out poptext);
-        if (poptext != "default"){
-            UINew.Instance.PopupCounter(poptext, initvalue, finalvalue, this);
-        } else {
-            // UI check if commercial is complete
-            UINew.Instance.UpdateRecordButtons(this);
-        }
-        properties[valname].val = finalvalue;
+        float initvalue = properties[data.key].val;
+        float finalvalue = initvalue + data.val;
+		UINew.Instance.PopupCounter(data.desc, initvalue, finalvalue, this);
+        properties[data.key].val = finalvalue;
     }
 	public bool Evaluate(Commercial other){
 		bool requirementsMet = true;
@@ -152,6 +146,7 @@ public class Commercial {
 [System.Serializable]
 public class CommercialProperty {
 	public float val;
+	public string desc;
 	public CommercialComparison comp;
 	public CommercialProperty(){
 		val = 0;

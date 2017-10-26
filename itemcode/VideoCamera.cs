@@ -72,13 +72,14 @@ public class VideoCamera : Interactive, IMessagable {
         ProcessOccurrence(occurrence);
 	}
     void ProcessOccurrence(Occurrence oc){
-        foreach (OccurrenceData data in oc.data){
-            foreach(string key in data.flags.Keys){
-                commercial.IncrementValue(key, data.flags[key]);
+        foreach (OccurrenceData occurrence in oc.data){
+            foreach(EventData data in occurrence.events){
+                commercial.IncrementValue(data);
+                // commercial.IncrementValue(key, data.eventData.flags[key]);
             }
-            commercial.eventData.Add(data.data);
-            if (data is OccurrenceSpeech){
-                OccurrenceSpeech speech = (OccurrenceSpeech)data;
+            commercial.eventData.AddRange(occurrence.events);
+            if (occurrence is OccurrenceSpeech){
+                OccurrenceSpeech speech = (OccurrenceSpeech)occurrence;
                 commercial.transcript.Add(speech.line);
             }
             // if (watchForOccurrence != null){

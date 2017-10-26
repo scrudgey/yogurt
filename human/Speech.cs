@@ -172,9 +172,12 @@ public class Speech : Interactive, IMessagable {
             return;
         }
         OccurrenceSpeech speechData = new OccurrenceSpeech();
+        EventData eventData = new EventData();
         if (data != null){
-            speechData.data = data;
-        }
+            eventData = data;
+        } 
+        speechData.events.Add(eventData);
+
         if (threat != null){
             speechData.threat = true;
             speechData.target = Toolbox.Instance.GetName(threat);
@@ -184,7 +187,7 @@ public class Speech : Interactive, IMessagable {
             speechData.target = Toolbox.Instance.GetName(insult);
         }
         speechData.speaker = Toolbox.Instance.GetName(gameObject);
-
+        
         string censoredPhrase = phrase;
         if (swear != null){
             StringBuilder builder = new StringBuilder();
@@ -207,8 +210,8 @@ public class Speech : Interactive, IMessagable {
             foreach (int mask in swearMask){
                 extremity += mask;
             }
-            speechData.data.chaos += extremity * 2f;
-            speechData.data.offensive += extremity * 5f;
+            eventData.chaos += extremity * 2f;
+            eventData.offensive += extremity * 5f;
         }
 		words = censoredPhrase;
         speakTime = DoubleSeat(phrase.Length, 2f, 50f, 5f, 2f);
@@ -270,7 +273,8 @@ public class Speech : Interactive, IMessagable {
         }
         if (incoming is MessageOccurrence){
             MessageOccurrence occur = (MessageOccurrence)incoming;
-            ReactToOccurrence(occur.data.data);
+            foreach(EventData data in occur.data.events)
+                ReactToOccurrence(data);
         }
     }
     void ReactToOccurrence(EventData od){
