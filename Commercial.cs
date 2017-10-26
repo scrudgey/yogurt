@@ -152,6 +152,7 @@ public class Commercial {
 [System.Serializable]
 public class CommercialProperty {
 	public float val;
+	public string desc;
 	public CommercialComparison comp;
 	public CommercialProperty(){
 		val = 0;

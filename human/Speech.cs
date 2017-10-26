@@ -173,7 +173,8 @@ public class Speech : Interactive, IMessagable {
         }
         OccurrenceSpeech speechData = new OccurrenceSpeech();
         // if (data != null){
-        speechData.eventData = data;
+        // speechData.events.Add(data);
+        EventData eventData = data;
         // }
         if (threat != null){
             speechData.threat = true;
