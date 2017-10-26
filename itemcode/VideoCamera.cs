@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-// using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.IO;
 using Easings;
@@ -75,13 +74,13 @@ public class VideoCamera : Interactive, IMessagable {
         foreach (OccurrenceData occurrence in oc.data){
             foreach(EventData data in occurrence.events){
                 commercial.IncrementValue(data);
-                // commercial.IncrementValue(key, data.eventData.flags[key]);
             }
             commercial.eventData.AddRange(occurrence.events);
-            if (occurrence is OccurrenceSpeech){
-                OccurrenceSpeech speech = (OccurrenceSpeech)occurrence;
-                commercial.transcript.Add(speech.line);
+            foreach(EventData data in occurrence.events){
+                if (data.transcriptLine != "")
+                    commercial.transcript.Add(data.transcriptLine);
             }
+            // }
             // if (watchForOccurrence != null){
                 //  if (watchForOccurrence.Matches(data)){
                 //     director.OccurrenceHappened();

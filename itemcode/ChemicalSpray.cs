@@ -9,7 +9,7 @@ public class ChemicalSpray: MonoBehaviour {
 				flam.onFire = false;
 				flam.heat = -10f;
 				OccurrenceFire fireData = new OccurrenceFire();
-				fireData.objectName = Toolbox.Instance.CloneRemover(coll.gameObject.name);
+				fireData.flamingObject = coll.gameObject;
 				fireData.extinguished = true;
 				Toolbox.Instance.OccurenceFlag(gameObject, fireData);
 			}

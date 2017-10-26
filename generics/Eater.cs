@@ -173,8 +173,6 @@ public class Eater : Interactive {
                 
         OccurrenceVomit data = new OccurrenceVomit();
 		data.vomiter = gameObject;
-		// data.vomiter = Toolbox.Instance.CloneRemover(gameObject.name);
-        // data.disgusting = 100f;
 		if (eaten){
             data.vomit = eaten.gameObject;
 			eaten.SetActive(true);
@@ -184,7 +182,6 @@ public class Eater : Interactive {
                 GameObject droplet = Toolbox.Instance.SpawnDroplet(transform.position, mono.liquid);
                 mono.liquid.vomit = true;
                 mono.edible.vomit = true;
-                // data.liquid = mono.liquid;
 				if (mono.liquid.name == "yogurt"){
 			        GameManager.Instance.data.achievementStats.yogurtVomit += 1;
 					GameManager.Instance.CheckAchievements();

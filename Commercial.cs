@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Serialization;
-// using System;
 using UnityEngine;
 
 public enum CommercialComparison{
@@ -23,12 +22,6 @@ public class Commercial {
 		string[] lineArray = dataFile.text.Split('\n');
 		System.Array.Reverse(lineArray);
 		Stack<string> lines = new Stack<string>(lineArray);
-		// lines = lines.Reverse;
-		// lines.Reverse();
-		// lines.re
-		// Debug.Log(lines.Peek());
-		// Debug.Log("loading "+filename);
-		// Debug.Log(lines.Peek());
 		c.name = lines.Pop();
 		c.description = lines.Pop();
 		c.cutscene = lines.Pop();
@@ -36,7 +29,6 @@ public class Commercial {
 			CommercialProperty prop = new CommercialProperty();
 			string line = lines.Pop();
 			string[] bits = line.Split(',');
-			// Debug.Log(bits[0]);
 			if (bits[0] == "unlock"){
 				c.unlockUponCompletion.Add(bits[1]);
 			} else {
@@ -69,15 +61,6 @@ public class Commercial {
         unlockUponCompletion = new List<string>();
 	}
 	public List<string> transcript = new List<string>();
-	// public void SetValue( string valname, float val){
-	// 	CommercialProperty property = null;
-    //     properties.TryGetValue(valname, out property);
-	// 	float incrementval = val;
-    //     if (property != null){
-    //         incrementval = val - property.val;
-    //     }
-	// 	IncrementValue(valname, incrementval);
-	// }
 	public EventData Total(){
 		EventData total = new EventData();
 		foreach(EventData data in eventData){

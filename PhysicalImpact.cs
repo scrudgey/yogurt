@@ -26,17 +26,12 @@ public class PhysicalImpact : MonoBehaviour {
 		OccurrenceViolence violence = new OccurrenceViolence();
 		violence.attacker = message.responsibleParty;
 		violence.victim = collider.gameObject;
-		violence.attackerName = Toolbox.Instance.GetName(message.responsibleParty);
-		violence.victimName = Toolbox.Instance.GetName(collider.gameObject);
-		// violence.disturbing = 10f;
-		// violence.chaos = 10f;
 		Toolbox.Instance.OccurenceFlag(gameObject, violence);
 	}
 	public void PlayImpactSound(ImpactResult impactType){
 		if (message.impactSounds != null){
 			impactSounds = message.impactSounds;
 		}
-		// AudioSource source = GetComponent<AudioSource>();
 		switch(impactType){
 			case ImpactResult.normal:
 				if (impactSounds.Length > 0){

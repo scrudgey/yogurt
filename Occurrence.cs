@@ -1,22 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-
 //TODO: not all of these things need static constructors?
 
 public class Occurrence : MonoBehaviour {
+    // An occurrence is a little bit of code that lives on a temporarily persistent flag in the world
+    // that knows how to describe an event in terms of EventData. 
+    // occurrences can also be noticed by perceptive components which use the flag properties to compose 
+    // a stimulus.
     public List<OccurrenceData> data = new List<OccurrenceData>();
-    // public static Dictionary<string, string> KeyDescriptions = new Dictionary<string, string>{
-    //     // {"yogurt", "yogurts eaten"},
-    //     // {"vomit", "vomit events"},
-    //     // {"vomit_eat", "vomit eaten"},
-    //     // {"yogurt_vomit", "yogurt emesis event"},
-    //     // {"yogurt_vomit_eat", "eating yogurt vomit"},
-    //     // {"yogurt_floor", "yogurt eaten off the floor"},
-    //     // {"table_fire", "table set on fire"},
-    //     // {"eggplant", "eggplants eaten"},
-    //     // {"death", "deaths"},
-    //     // {"cannibalism", "acts of cannibalism"}
-	// };
     public static EventData Yogurt(GameObject eater){
         EventData data = new EventData(positive:5f);
         data.key = "yogurt";
@@ -111,11 +102,12 @@ public class Occurrence : MonoBehaviour {
 
 [System.Serializable]
 public class EventData {
-    public Dictionary<string, float> flags = new Dictionary<string, float>();
+    public SerializableDictionary<string, float> flags = new SerializableDictionary<string, float>();
     public string key;
     public float val;
     public string desc;
     public string whatHappened;
+    public string transcriptLine;
     public string noun;
     public float disturbing;
     public float disgusting;
@@ -153,17 +145,16 @@ public class OccurrenceData
     public OccurrenceData(){ }
 }
 public class OccurrenceFire : OccurrenceData {
-    public string objectName;
+    public GameObject flamingObject;
     public bool extinguished;
     public override void CalculateDescriptions(){
         EventData data = new EventData(chaos:100f);
+        string objectName = Toolbox.Instance.GetName(flamingObject);
         data.noun = "fire";
         data.whatHappened = "the "+objectName+" burned";
         events.Add(data);
-
         if (objectName == "table"){
             if (extinguished == false){
-                // eventData.flags["table_fire"] = 1;
                 events.Add(Occurrence.TableFire());
             }
         }
@@ -187,60 +178,38 @@ public class OccurrenceEat : OccurrenceData {
             data.offensive += 500f;
         }
         events.Add(data);
-
         if (edible.vomit){
             events.Add(Occurrence.VomitEat(eater));
 		}
         if (liquid != null){
             if (liquid.name == "yogurt"){
-                // data.flags["yogurt"] = 1f;
                 events.Add(Occurrence.Yogurt(eater));
                 if (liquid.vomit){
-                    // data.flags["yogurt_vomit_eat"] = 1f;
                     events.Add(Occurrence.YogurtVomitEat(eater));
                 }
                 if (edible.gameObject.name == "Puddle(Clone)"){
-                    // data.flags["yogurt_floor"] = 1f;
                     events.Add(Occurrence.YogurtFloor(eater));
                 }
             }
         } 
         if (Toolbox.Instance.GetName(edible.gameObject) == "eggplant"){
-            // data.flags["eggplant"] = 1f;
             events.Add(Occurrence.Eggplant(eater));
         }
         if (edible.human){
-            // data.noun = "cannibalism";
-            // data.flags["cannibalism"] = 1f;
             events.Add(Occurrence.Cannibalism(eater));
 		}
     }
 }
 public class OccurrenceDeath : OccurrenceData {
-    // public string nameOfTheDead;
     public GameObject dead;
     public override void CalculateDescriptions(){
         events.Add(Occurrence.Death(dead));
-        // eventData.flags["death"] = 1f;
-        // eventData.noun = "death";
-        // eventData.whatHappened = nameOfTheDead + " died";
-        // eventData.chaos = 3575f;
-		// eventData.disgusting = 2000f;
-		// eventData.disturbing = 3500f;
-		// eventData.offensive = 8950f;
-		// eventData.positive = -5500f;
     }
 }
 public class OccurrenceVomit : OccurrenceData {
-    // public string vomit;
-    // public string vomiter;
-    // public Liquid liquid;
     public GameObject vomiter;
     public GameObject vomit;
     public override void CalculateDescriptions(){
-        // eventData.noun = "vomiting";
-        // eventData.whatHappened = vomiter + " vomited up (name)";
-        // eventData.flags["vomit"] = 1f;
         events.Add(Occurrence.Vomit(vomiter, vomit));
         MonoLiquid mliquid = vomit.GetComponent<MonoLiquid>();
         if (mliquid.liquid != null){
@@ -251,24 +220,28 @@ public class OccurrenceVomit : OccurrenceData {
 }
 public class OccurrenceSpeech : OccurrenceData {
     // TODO: include disturbingness for swearing;
+    public GameObject speaker;
+    public GameObject target;
     public string line;
-    public string speaker;
-    public string target;
     public bool threat;
     public bool insult;
     public override void CalculateDescriptions(){
+        string speakerName = Toolbox.Instance.GetName(speaker);
+        string targetName = Toolbox.Instance.GetName(target);
+
         EventData data = new EventData();
-        data.whatHappened = speaker + " said " + line;
+        data.whatHappened = speakerName + " said " + line;
         data.noun = "speech act";
+        data.transcriptLine = speakerName + ": "+line;
         // insert bits here for script desc, transcript line
         if (threat){
-            data.whatHappened = speaker + " threatened " + target;
+            data.whatHappened = speakerName + " threatened " + targetName;
             data.chaos += 15f;
             data.offensive = Random.Range(20, 30);
             data.disturbing = 10f;
         }
         if (insult){
-            data.whatHappened = speaker + " insulted " + target;
+            data.whatHappened = speakerName + " insulted " + targetName;
             data.chaos += 15f;
             data.offensive = Random.Range(20, 30);
             data.disgusting = 10f;
@@ -279,9 +252,10 @@ public class OccurrenceSpeech : OccurrenceData {
 public class OccurrenceViolence : OccurrenceData {
     public GameObject attacker;
     public GameObject victim;
-    public string attackerName;
-    public string victimName;
     public override void CalculateDescriptions(){
+        string attackerName = Toolbox.Instance.GetName(attacker);
+        string victimName = Toolbox.Instance.GetName(victim);
+
         EventData data = new EventData(disturbing:10f, chaos:10f);
         data.noun = "violence";
         data.whatHappened = attackerName + " attacked " + victimName;

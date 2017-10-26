@@ -172,21 +172,20 @@ public class Speech : Interactive, IMessagable {
             return;
         }
         OccurrenceSpeech speechData = new OccurrenceSpeech();
+        speechData.speaker = gameObject;
         EventData eventData = new EventData();
         if (data != null){
             eventData = data;
-        } 
+        }
         speechData.events.Add(eventData);
-
         if (threat != null){
             speechData.threat = true;
-            speechData.target = Toolbox.Instance.GetName(threat);
+            speechData.target = threat;
         }
         if (insult != null){
             speechData.insult = true;
-            speechData.target = Toolbox.Instance.GetName(insult);
+            speechData.target = insult;
         }
-        speechData.speaker = Toolbox.Instance.GetName(gameObject);
         
         string censoredPhrase = phrase;
         if (swear != null){

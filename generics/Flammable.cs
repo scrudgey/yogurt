@@ -53,7 +53,6 @@ public class Flammable : MonoBehaviour {
 		fireRadius.name = "fire";
 		fire.gameObject.layer = 13;
 	}
-
 	void Update () {
 		if (fireSource){
 			onFire = true;
@@ -85,8 +84,7 @@ public class Flammable : MonoBehaviour {
 				audioSource.Play();
 			}
 			OccurrenceFire fireData = new OccurrenceFire();
-			fireData.objectName = Toolbox.Instance.CloneRemover(name);
-			// fireData.chaos = 10;
+			fireData.flamingObject = gameObject;
 			Toolbox.Instance.OccurenceFlag(gameObject, fireData);
 		}
 		if (onFire){
@@ -98,8 +96,7 @@ public class Flammable : MonoBehaviour {
 			if (flagTimer > 0.5f){
 				flagTimer = 0;
 				OccurrenceFire fireData = new OccurrenceFire();
-				fireData.objectName = Toolbox.Instance.CloneRemover(name);
-				// fireData.chaos = 100;
+				fireData.flamingObject = gameObject;
 				Toolbox.Instance.OccurenceFlag(gameObject, fireData);
 			}
 			// if i am on fire, i take damage.
