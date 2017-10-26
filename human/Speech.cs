@@ -172,9 +172,9 @@ public class Speech : Interactive, IMessagable {
             return;
         }
         OccurrenceSpeech speechData = new OccurrenceSpeech();
-        if (data != null){
-            speechData.data = data;
-        }
+        // if (data != null){
+        speechData.eventData = data;
+        // }
         if (threat != null){
             speechData.threat = true;
             speechData.target = Toolbox.Instance.GetName(threat);
@@ -207,8 +207,8 @@ public class Speech : Interactive, IMessagable {
             foreach (int mask in swearMask){
                 extremity += mask;
             }
-            speechData.data.chaos += extremity * 2f;
-            speechData.data.offensive += extremity * 5f;
+            speechData.eventData.chaos += extremity * 2f;
+            speechData.eventData.offensive += extremity * 5f;
         }
 		words = censoredPhrase;
         speakTime = DoubleSeat(phrase.Length, 2f, 50f, 5f, 2f);
@@ -270,7 +270,7 @@ public class Speech : Interactive, IMessagable {
         }
         if (incoming is MessageOccurrence){
             MessageOccurrence occur = (MessageOccurrence)incoming;
-            ReactToOccurrence(occur.data.data);
+            ReactToOccurrence(occur.data.eventData);
         }
     }
     void ReactToOccurrence(EventData od){

@@ -41,8 +41,8 @@ public class Toolbox : Singleton<Toolbox> {
 		OccurrenceData data = new OccurrenceData();
 		occurrence.data.Add(data);
 
-		data.data = new EventData(chaos:chaos, disgusting:disgusting, disturbing:disturbing, offensive:offensive, positive:positive);
-        return data.data;
+		data.eventData = new EventData(chaos:chaos, disgusting:disgusting, disturbing:disturbing, offensive:offensive, positive:positive);
+        return data.eventData;
 	}
 	public AudioSource SetUpAudioSource(GameObject g){
 		AudioSource source = g.GetComponent<AudioSource>();

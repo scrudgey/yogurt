@@ -140,10 +140,11 @@ public class Eater : Interactive {
 		
         // set up an occurrence flag for this eating!
         OccurrenceEat eatData = new OccurrenceEat();
+		eatData.eater = gameObject;
 		eatData.edible = food;
         eatData.food = food.name;
         eatData.amount = food.nutrition;
-		eatData.vomit = food.vomit;
+		// eatData.vomit = food.vomit;
 		MonoLiquid mliquid = food.GetComponent<MonoLiquid>();
 		if (mliquid){
 			eatData.liquid = mliquid.liquid;
