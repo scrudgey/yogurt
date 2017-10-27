@@ -186,7 +186,6 @@ public class Speech : Interactive, IMessagable {
             speechData.insult = true;
             speechData.target = insult;
         }
-        
         string censoredPhrase = phrase;
         if (swear != null){
             StringBuilder builder = new StringBuilder();
@@ -224,7 +223,7 @@ public class Speech : Interactive, IMessagable {
         if (incoming is MessageSpeech){
             MessageSpeech message = (MessageSpeech)incoming;
             if (message.swearTarget != null){
-                Swear(message.swearTarget);
+                Swear(target:message.swearTarget);
                 return;
             }
             if (message.randomSwear){
@@ -324,7 +323,7 @@ public class Speech : Interactive, IMessagable {
         }
         GameObject mainTarget = Controller.Instance.GetBaseInteractive(target.transform);
         string targetname = Toolbox.Instance.GetName(mainTarget);
-        Say("that shazbotting "+targetname+"!", "shazbotting");
+        Say("that shazbotting "+targetname+"!", "shazbotting", insult:target);
     }
     public Monologue Insult(GameObject target){
         if (hitState >= Controllable.HitState.stun)

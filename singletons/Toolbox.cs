@@ -198,8 +198,10 @@ public class Toolbox : Singleton<Toolbox> {
 		// possibly also use intrinsics
 		// use player name, speech name
 		string nameOut = "";
-		if (obj == null)
+		if (obj == null){
+			Debug.Log("null name");
 			return nameOut;
+		}
 		Item item = obj.GetComponent<Item>();
 		if (item){
 			nameOut = item.itemName;

@@ -227,9 +227,13 @@ public class OccurrenceSpeech : OccurrenceData {
     public bool insult;
     public override void CalculateDescriptions(){
         string speakerName = Toolbox.Instance.GetName(speaker);
-        string targetName = Toolbox.Instance.GetName(target);
-
+        string targetName = "";
+        if (target != null)
+            targetName = Toolbox.Instance.GetName(target);
         EventData data = new EventData();
+        if (events.Count > 0){
+            data = events[0];
+        }
         data.whatHappened = speakerName + " said " + line;
         data.noun = "speech act";
         data.transcriptLine = speakerName + ": "+line;

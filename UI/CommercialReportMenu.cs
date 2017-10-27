@@ -41,6 +41,8 @@ public class CommercialReportMenu : MonoBehaviour {
     }
     public void Report(Commercial activeCommercial, Commercial commercial){
         commercial.WriteReport();
+        EventSet eventSet = new EventSet(commercial.eventData);
+        
         SetRefs();
         descriptionText.text = activeCommercial.description;
         

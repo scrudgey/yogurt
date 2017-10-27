@@ -11,7 +11,6 @@ public class Eater : Interactive {
 	public preference offalPreference;
 	private AudioSource audioSource;
 	private float _nausea;
-	// private float lastNausea;
 	public float nausea{
 		get { 
 			return _nausea;
@@ -28,37 +27,23 @@ public class Eater : Interactive {
 		//TODO: this is spawning lots of flags
 		if (nausea > 15 && nausea < 30 && lastStatement != nauseaStatement.warning){
 			lastStatement = nauseaStatement.warning;
-			// lastNausea = nausea;
-			// Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I don't feel so good!"));
-
-			// Toolbox.Instance.DataFlag(gameObject, 0f, 5f, 10f, 0f, 0f);
-			// Toolbox.Instance.SpeechFlag(gameObject, "I don't feel so good!", chaos:2f, disturbing:10f, positive:-25f);
 			MessageSpeech message = new MessageSpeech("I don't feel so good!!", eventData: new EventData(chaos:2f, disturbing:10f, positive:-25f));
 			Toolbox.Instance.SendMessage(gameObject, this, message);
 		}
 		if (nausea > 30 && lastStatement != nauseaStatement.imminent){
 			lastStatement = nauseaStatement.imminent;
-			// lastNausea = nausea;
-			// Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I'm gonna puke!"));
-			// Toolbox.Instance.DataFlag(gameObject, 0f, 10f, 10f, 0f, 0f);
-			// Toolbox.Instance.SpeechFlag(gameObject, "I'm gonna puke!", chaos:5f, disturbing:13f, positive:-30f);
 			MessageSpeech message = new MessageSpeech("I don't feel so good!!", eventData: new EventData(chaos:5f, disturbing:13f, positive:-40f));
 			Toolbox.Instance.SendMessage(gameObject, this, message);
 		}
-		// if (nausea < 50){
-		// 	lastNausea = 0;
-		// }
 	}
 	void Start () {
 		if (!LoadInitialized)
 			LoadInit();
 	}
 	public void LoadInit(){
-		// reversibleActions = false;
 		Interaction eatAction = new Interaction(this, "Eat", "Eat");
 		eatAction.defaultPriority = 1;
 		eatAction.dontWipeInterface = false;
-		// eatAction.otherConsent = false;
 		eatAction.otherOnPlayerConsent = false;
 		interactions.Add(eatAction);
 		LoadInitialized = true;

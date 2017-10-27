@@ -1,12 +1,55 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Serialization;
 using UnityEngine;
-// using System;
 using System.IO;
+using System.Linq;
 
 public enum CommercialComparison{
 		equal, notequal, greater, less, greaterEqual, lessEqual
 	}
+public class EventSet{
+	public List<EventData> maxDisturbing = new List<EventData>();
+	public List<EventData> maxDisgusting = new List<EventData>();
+	public List<EventData> maxChaos = new List<EventData>();
+	public List<EventData> maxOffense = new List<EventData>();
+	public List<EventData> maxPositive = new List<EventData>();
+	public List<EventData> notableEvents = new List<EventData>();
+	public List<EventData> outlierEvents = new List<EventData>();
+	public List<string> commonTypes = new List<string>();
+	public EventSet(List<EventData> events){
+		maxDisturbing = events.OrderBy(o=>o.disturbing).ToList();
+		maxDisgusting = events.OrderBy(o=>o.disgusting).ToList();
+		maxChaos = events.OrderBy(o=>o.chaos).ToList();
+		maxOffense = events.OrderBy(o=>o.offensive).ToList();
+		maxPositive = events.OrderBy(o=>o.positive).ToList();
+		Dictionary<EventData,int> occurrencesInTop3 = new Dictionary<EventData,int>();
+		foreach(EventData e in events){
+			occurrencesInTop3[e] = 0;
+		}
+		foreach (List<EventData> list in new List<EventData>[]{maxDisturbing, maxDisgusting, maxChaos, maxOffense, maxPositive}){
+			list.Reverse();
+			for (int i = 0; i<3; i++){
+				occurrencesInTop3[list[i]] += 1;
+			}
+		}
+
+		// calculate the events that most frequently show up in the top 3
+		var sortedFrequency = occurrencesInTop3.ToList();
+		sortedFrequency.Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
+		sortedFrequency.Reverse();
+		foreach(KeyValuePair<EventData, int> kvp in sortedFrequency){
+			// Debug.Log(kvp.Key.whatHappened + " " + kvp.Value.ToString());
+			notableEvents.Add(kvp.Key);
+		}
+
+		// calculate the 3 events with the highest deltas
+		foreach (List<EventData> list in new List<EventData>[]{maxDisturbing, maxDisgusting, maxChaos, maxOffense, maxPositive}){
+			List<float> deltas = new List<float>();
+		}
+
+		// calculate the 3 most common type of event
+	}
+}
 
 [System.Serializable]
 [XmlRoot("Commercial")]
@@ -90,13 +133,13 @@ public class Commercial {
     }
 	public void WriteReport(){
 		string filename = Path.Combine(Application.persistentDataPath, "commercial_history.txt");
-		StreamWriter writer = new StreamWriter(filename, true);
+		StreamWriter writer = new StreamWriter(filename, false);
 		foreach(EventData data in eventData){
 			writer.WriteLine(data.whatHappened);
 		}
 		writer.Close();
 		filename = Path.Combine(Application.persistentDataPath, "commercial_events.txt");
-		writer = new StreamWriter(filename, true);
+		writer = new StreamWriter(filename, false);
 		foreach(EventData data in eventData){
 			string line = data.noun + " " + data.disturbing.ToString() + " " + data.disgusting.ToString() + " " + data.chaos.ToString() + " " + data.offensive.ToString() + " " + data.positive.ToString();
 			writer.WriteLine(line);
@@ -142,6 +185,12 @@ public class Commercial {
 		}
 		return requirementsMet;
 	}
+	// public static List<EventData> NotableEvents(List<EventData> events){
+	// 	List<EventData> notable = new List<EventData>();
+
+
+	// 	return notable;
+	// }
 }
 [System.Serializable]
 public class CommercialProperty {

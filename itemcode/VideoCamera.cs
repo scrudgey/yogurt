@@ -77,7 +77,7 @@ public class VideoCamera : Interactive, IMessagable {
             }
             commercial.eventData.AddRange(occurrence.events);
             foreach(EventData data in occurrence.events){
-                if (data.transcriptLine != "")
+                if (data.transcriptLine != null)
                     commercial.transcript.Add(data.transcriptLine);
             }
             // }
