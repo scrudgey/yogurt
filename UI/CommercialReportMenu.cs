@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 
 public class CommercialReportMenu : MonoBehaviour {
+    // TODO: unique events so that the top 3 aren't all different cases of cannibalism
     Text descriptionText;
     Text positiveScore, chaosScore, disgustingScore, disturbingScore, offensiveScore;
     Text transcript;
@@ -42,7 +43,7 @@ public class CommercialReportMenu : MonoBehaviour {
     public void Report(Commercial activeCommercial, Commercial commercial){
         commercial.WriteReport();
         EventSet eventSet = new EventSet(commercial.eventData);
-        
+
         SetRefs();
         descriptionText.text = activeCommercial.description;
         

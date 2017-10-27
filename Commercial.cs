@@ -13,20 +13,34 @@ public class EventSet{
 	public List<EventData> maxChaos = new List<EventData>();
 	public List<EventData> maxOffense = new List<EventData>();
 	public List<EventData> maxPositive = new List<EventData>();
+
 	public List<EventData> notableEvents = new List<EventData>();
 	public List<EventData> outlierEvents = new List<EventData>();
 	public List<string> commonTypes = new List<string>();
+
 	public EventSet(List<EventData> events){
+		// initialize dataset
 		maxDisturbing = events.OrderBy(o=>o.disturbing).ToList();
 		maxDisgusting = events.OrderBy(o=>o.disgusting).ToList();
 		maxChaos = events.OrderBy(o=>o.chaos).ToList();
 		maxOffense = events.OrderBy(o=>o.offensive).ToList();
 		maxPositive = events.OrderBy(o=>o.positive).ToList();
+
 		Dictionary<EventData,int> occurrencesInTop3 = new Dictionary<EventData,int>();
 		foreach(EventData e in events){
 			occurrencesInTop3[e] = 0;
 		}
-		foreach (List<EventData> list in new List<EventData>[]{maxDisturbing, maxDisgusting, maxChaos, maxOffense, maxPositive}){
+
+		Dictionary<string, List<EventData>> lists = new Dictionary<string, List<EventData>>{
+			{"disturbing", maxDisturbing},
+			{"disgusting", maxDisgusting},
+			{"chaos", maxChaos},
+			{"offensive", maxOffense},
+			{"positive", maxPositive}
+		};
+
+		// calculate frequency of top3s
+		foreach (List<EventData> list in lists.Values){
 			list.Reverse();
 			for (int i = 0; i<3; i++){
 				occurrencesInTop3[list[i]] += 1;
@@ -42,12 +56,65 @@ public class EventSet{
 			notableEvents.Add(kvp.Key);
 		}
 
+		Dictionary<EventData,float> largestDeltas = new Dictionary<EventData,float>();
 		// calculate the 3 events with the highest deltas
-		foreach (List<EventData> list in new List<EventData>[]{maxDisturbing, maxDisgusting, maxChaos, maxOffense, maxPositive}){
-			List<float> deltas = new List<float>();
+		foreach (string key in lists.Keys){
+			List<EventData> list = lists[key];
+			Dictionary<EventData, float> deltas = new Dictionary<EventData, float>();
+			// calc deltas
+			for (int i = 0; i < list.Count-1; i++){
+				float myVal = (float)list[i].GetType().GetField(key).GetValue(list[i]);
+				float theirVal = (float)list[i+1].GetType().GetField(key).GetValue(list[i+1]);
+				float x = myVal - theirVal;
+				deltas[list[i+1]] = x;
+				// Debug.Log(list[i+1].whatHappened + " " + key + " " + x.ToString());
+			}
+			// populate list of event, highest delta
+			foreach(EventData eventData in deltas.Keys){
+				float delta = -1f;
+				if (largestDeltas.TryGetValue(eventData, out delta)){
+					if (delta < deltas[eventData]){
+						largestDeltas[eventData] = deltas[eventData];
+					}
+				} else {
+					largestDeltas[eventData] = deltas[eventData];
+				}
+			}
+		}
+		// reverse list, take highest n
+		var sortedDeltas = largestDeltas.ToList();
+		sortedDeltas.Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
+		sortedDeltas.Reverse();
+		foreach(KeyValuePair<EventData, float> kvp in sortedDeltas){
+			outlierEvents.Add(kvp.Key);
 		}
 
 		// calculate the 3 most common type of event
+		var nouns = events.GroupBy(i => i.noun);
+		Dictionary<string, float> nounCounts = new Dictionary<string, float>();
+		foreach(var grp in nouns){
+			nounCounts[grp.Key] = grp.Count();
+		}
+		var sortedNounCounts = nounCounts.ToList();
+		sortedNounCounts.Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
+		sortedNounCounts.Reverse();
+		foreach(KeyValuePair<string, float> kvp in sortedNounCounts){
+			commonTypes.Add(kvp.Key);
+		}
+		// Debug.Log("top 3 notable");
+		// Debug.Log(notableEvents[0].whatHappened);
+		// Debug.Log(notableEvents[1].whatHappened);
+		// Debug.Log(notableEvents[2].whatHappened);
+
+		// Debug.Log("top 3 outliers");
+		// Debug.Log(outlierEvents[0].whatHappened);
+		// Debug.Log(outlierEvents[1].whatHappened);
+		// Debug.Log(outlierEvents[2].whatHappened);
+
+		// Debug.Log("top 3 most common types");
+		// Debug.Log(commonTypes[0]);
+		// Debug.Log(commonTypes[1]);
+		// Debug.Log(commonTypes[2]);
 	}
 }
 
