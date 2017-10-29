@@ -7,6 +7,8 @@ public class CommercialReportMenu : MonoBehaviour {
     Text positiveScore, chaosScore, disgustingScore, disturbingScore, offensiveScore;
     Text transcript;
     Text eventText;
+    public Commercial commercial;
+    public EventSet eventSet;
     private Canvas canvas;
     public void Start(){
         canvas = GetComponent<Canvas>();
@@ -28,6 +30,11 @@ public class CommercialReportMenu : MonoBehaviour {
 		MySaver.Save();
         GameManager.Instance.BoardRoomCutscene();
     }
+    public void ReviewButton(){
+        GameObject menuObject = Instantiate(Resources.Load("UI/FocusGroupMenu")) as GameObject;
+        FocusGroupMenu menu = menuObject.GetComponent<FocusGroupMenu>();
+        menu.commercial = commercial;
+    }
     private void SetRefs(){
         if (!descriptionText){
             descriptionText = transform.Find("Image/desc/WhatText").GetComponent<Text>();
@@ -40,12 +47,11 @@ public class CommercialReportMenu : MonoBehaviour {
             eventText = transform.Find("Image/Center/RightHalf/EventsPanel/Text").GetComponent<Text>();
         }
     }
-    public void Report(Commercial activeCommercial, Commercial commercial){
+    public void Report(Commercial activeCommercial){
         commercial.WriteReport();
-        EventSet eventSet = new EventSet(commercial.eventData);
-
         SetRefs();
-        descriptionText.text = activeCommercial.description;
+        // descriptionText.text = activeCommercial.description;
+        descriptionText.text = commercial.SentenceReview();
         
         EventData total = commercial.Total();
 

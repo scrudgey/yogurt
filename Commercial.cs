@@ -3,22 +3,38 @@ using System.Xml.Serialization;
 using UnityEngine;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 public enum CommercialComparison{
 		equal, notequal, greater, less, greaterEqual, lessEqual
 	}
 public class EventSet{
+	public List<EventData> allEvents;
 	public List<EventData> maxDisturbing = new List<EventData>();
 	public List<EventData> maxDisgusting = new List<EventData>();
 	public List<EventData> maxChaos = new List<EventData>();
 	public List<EventData> maxOffense = new List<EventData>();
 	public List<EventData> maxPositive = new List<EventData>();
-
 	public List<EventData> notableEvents = new List<EventData>();
 	public List<EventData> outlierEvents = new List<EventData>();
-	public List<string> commonTypes = new List<string>();
-
-	public EventSet(List<EventData> events){
+	public List<string> FrequentNouns(List<EventData> events){
+		List<string> frequentNouns = new List<string>();
+		var nouns = events.GroupBy(i => i.noun);
+		Dictionary<string, float> nounCounts = new Dictionary<string, float>();
+		foreach(var grp in nouns){
+			nounCounts[grp.Key] = grp.Count();
+		}
+		var sortedNounCounts = nounCounts.ToList();
+		sortedNounCounts.Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
+		sortedNounCounts.Reverse();
+		foreach(KeyValuePair<string, float> kvp in sortedNounCounts){
+			frequentNouns.Add(kvp.Key);
+		}
+		return frequentNouns;
+	}
+	public EventSet(List<EventData> inputEvents){
+		allEvents = inputEvents;
+		HashSet<EventData> events = new HashSet<EventData>(inputEvents);
 		// initialize dataset
 		maxDisturbing = events.OrderBy(o=>o.disturbing).ToList();
 		maxDisgusting = events.OrderBy(o=>o.disgusting).ToList();
@@ -88,33 +104,24 @@ public class EventSet{
 		foreach(KeyValuePair<EventData, float> kvp in sortedDeltas){
 			outlierEvents.Add(kvp.Key);
 		}
-
+	}
+	public void DebugLists(){
 		// calculate the 3 most common type of event
-		var nouns = events.GroupBy(i => i.noun);
-		Dictionary<string, float> nounCounts = new Dictionary<string, float>();
-		foreach(var grp in nouns){
-			nounCounts[grp.Key] = grp.Count();
-		}
-		var sortedNounCounts = nounCounts.ToList();
-		sortedNounCounts.Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
-		sortedNounCounts.Reverse();
-		foreach(KeyValuePair<string, float> kvp in sortedNounCounts){
-			commonTypes.Add(kvp.Key);
-		}
-		// Debug.Log("top 3 notable");
-		// Debug.Log(notableEvents[0].whatHappened);
-		// Debug.Log(notableEvents[1].whatHappened);
-		// Debug.Log(notableEvents[2].whatHappened);
+		List<string> commonTypes = FrequentNouns(allEvents);
+		Debug.Log("top 3 notable");
+		Debug.Log(notableEvents[0].whatHappened);
+		Debug.Log(notableEvents[1].whatHappened);
+		Debug.Log(notableEvents[2].whatHappened);
 
-		// Debug.Log("top 3 outliers");
-		// Debug.Log(outlierEvents[0].whatHappened);
-		// Debug.Log(outlierEvents[1].whatHappened);
-		// Debug.Log(outlierEvents[2].whatHappened);
+		Debug.Log("top 3 outliers");
+		Debug.Log(outlierEvents[0].whatHappened);
+		Debug.Log(outlierEvents[1].whatHappened);
+		Debug.Log(outlierEvents[2].whatHappened);
 
-		// Debug.Log("top 3 most common types");
-		// Debug.Log(commonTypes[0]);
-		// Debug.Log(commonTypes[1]);
-		// Debug.Log(commonTypes[2]);
+		Debug.Log("top 3 most common types");
+		Debug.Log(commonTypes[0]);
+		Debug.Log(commonTypes[1]);
+		Debug.Log(commonTypes[2]);
 	}
 }
 
@@ -127,6 +134,8 @@ public class Commercial {
 	public SerializableDictionary<string, CommercialProperty> properties = new SerializableDictionary<string, CommercialProperty>(); 
     public List<string> unlockUponCompletion;
 	public List<EventData> eventData;
+	[XmlIgnore]	// [NonSerialized]
+	public EventSet analysis;
 	// public List<string> outfitsWorn;
 	public static Commercial LoadCommercialByFilename(string filename){
 		Commercial c = new Commercial();
@@ -212,6 +221,7 @@ public class Commercial {
 			writer.WriteLine(line);
 		}
 		writer.Close();
+		analysis = new EventSet(eventData);
 	}
 	public bool Evaluate(Commercial other){
 		bool requirementsMet = true;
@@ -252,12 +262,33 @@ public class Commercial {
 		}
 		return requirementsMet;
 	}
-	// public static List<EventData> NotableEvents(List<EventData> events){
-	// 	List<EventData> notable = new List<EventData>();
+	public string SentenceReview(){
+		StringBuilder builder = new StringBuilder("A commercial that prominently features ");
+		// builder.Append(commonTypes[0]+", ");
+		// builder.Append(commonTypes[1]+", and ");
+		// builder.Append(commonTypes[2]+".");
+		List<string> nouns = new List<string>();
+		foreach(EventData eventd in analysis.outlierEvents){
+			if (!nouns.Contains(eventd.noun))
+				nouns.Add(eventd.noun);
+		}
+		builder.Append(nouns[0] + ", ");
+		builder.Append(nouns[1] + ", and ");
+		builder.Append(nouns[2] + ".");
+		Debug.Log(builder.ToString());
+		return builder.ToString();
+	}
+	public string DescribeEvent(int n=0){
+		// TODO: personality of reviewer
+		// decision of what event to review: outlier, notable, random, n, top rank
+		StringBuilder builder = new StringBuilder();
+		EventData eventd = analysis.outlierEvents[n];
 
-
-	// 	return notable;
-	// }
+		builder.Append("I liked when ");
+		builder.Append(eventd.whatHappened);
+		builder.Append(".");
+		return builder.ToString();
+	}
 }
 [System.Serializable]
 public class CommercialProperty {

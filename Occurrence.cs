@@ -72,7 +72,7 @@ public class Occurrence : MonoBehaviour {
         return data;
     }
     public static EventData Cannibalism(GameObject cannibal){
-        EventData data = new EventData(offensive:100f, disgusting:500f, disturbing:350f, chaos:100f, positive:-300f);
+        EventData data = new EventData(offensive:250f, disgusting:500f, disturbing:350f, chaos:150f, positive:-300f);
         data.key = "cannibalism";
         data.val = 1f;
         data.desc = "acts of cannibalism";
@@ -169,7 +169,7 @@ public class OccurrenceEat : OccurrenceData {
         data.noun = "eating";
         data.whatHappened = Toolbox.Instance.GetName(eater) + " ate "+edible.name;
         if (edible.offal){
-            data.disgusting += 75f;
+            data.disgusting += 45f;
             data.chaos += 50f;
         }
         if (edible.immoral){
@@ -235,17 +235,19 @@ public class OccurrenceSpeech : OccurrenceData {
             data = events[0];
         }
         data.whatHappened = speakerName + " said " + line;
-        data.noun = "speech act";
+        data.noun = "dialogue";
         data.transcriptLine = speakerName + ": "+line;
         // insert bits here for script desc, transcript line
         if (threat){
             data.whatHappened = speakerName + " threatened " + targetName;
+            data.noun = "threats";
             data.chaos += 15f;
             data.offensive = Random.Range(20, 30);
             data.disturbing = 10f;
         }
         if (insult){
             data.whatHappened = speakerName + " insulted " + targetName;
+            data.noun = "insults";
             data.chaos += 15f;
             data.offensive = Random.Range(20, 30);
             data.disgusting = 10f;

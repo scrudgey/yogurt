@@ -67,9 +67,9 @@ public partial class GameManager : Singleton<GameManager> {
             UnlockCommercial(unlock);
         }
         GameObject report = UINew.Instance.ShowMenu(UINew.MenuType.commercialReport);
-        report.GetComponent<CommercialReportMenu>().Report(activeCommercial, commercial);
-        if (activeCommercial.name != "Freestyle")
-            data.completeCommercials.Add(activeCommercial);
+        CommercialReportMenu menu = report.GetComponent<CommercialReportMenu>();
+        menu.commercial = commercial;
+        report.GetComponent<CommercialReportMenu>().Report(activeCommercial);
         if (activeCommercial.name == "Healthy Eggplant Commercial"){
             // send the duplicator email, and deliver duplicator package
             ReceiveEmail("duplicator");

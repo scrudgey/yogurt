@@ -181,13 +181,16 @@ public class Speech : Interactive, IMessagable {
         if (threat != null){
             speechData.threat = true;
             speechData.target = threat;
+            eventData.noun = "threats";
         }
         if (insult != null){
             speechData.insult = true;
             speechData.target = insult;
+            eventData.noun = "insults";
         }
         string censoredPhrase = phrase;
         if (swear != null){
+            eventData.noun = "profanity";
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < swear.Length; i++)
             {
