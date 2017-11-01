@@ -274,17 +274,17 @@ public class Commercial {
 		builder.Append(nouns[2] + ".");
 		return builder.ToString();
 	}
-	public string DescribeEvent(int n){
-		// TODO: personality of reviewer
-		// decision of what event to review: outlier, notable, random, n, top rank
-		StringBuilder builder = new StringBuilder();
-		EventData eventd = analysis.outlierEvents[n];
+	// public string DescribeEvent(int n){
+	// 	// TODO: personality of reviewer
+	// 	// decision of what event to review: outlier, notable, random, n, top rank
+	// 	StringBuilder builder = new StringBuilder();
+	// 	EventData eventd = analysis.outlierEvents[n];
 
-		builder.Append("I liked when ");
-		builder.Append(eventd.whatHappened);
-		builder.Append(".");
-		return builder.ToString();
-	}
+	// 	builder.Append("I liked when ");
+	// 	builder.Append(eventd.whatHappened);
+	// 	builder.Append(".");
+	// 	return builder.ToString();
+	// }
 }
 [System.Serializable]
 public class CommercialProperty {

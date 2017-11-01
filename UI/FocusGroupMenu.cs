@@ -21,53 +21,52 @@ public class FocusGroupMenu : MonoBehaviour {
 			IndexUpdate();
 			}
 	}
-	public List<GameObject> bubbles = new List<GameObject>();
-	public List<Image> heads = new List<Image>();
-	public List<Image> bodies = new List<Image>();
-	public List<bool> mouths = new List<bool>();
+	public Dictionary<FocusGroupPersonality, GameObject> bubbles = new Dictionary<FocusGroupPersonality, GameObject>();
+	public Dictionary<FocusGroupPersonality, Image> heads = new Dictionary<FocusGroupPersonality, Image>();
+	public Dictionary<FocusGroupPersonality, Image> bodies = new Dictionary<FocusGroupPersonality, Image>();
+	public Dictionary<FocusGroupPersonality, bool> mouths = new Dictionary<FocusGroupPersonality, bool>();
 	public List<FocusGroupPersonality> personalities = new List<FocusGroupPersonality>();
 	public float timer;
 	public void Start(){
-		mouths = new List<bool>(){false, false, false};
-
 		Canvas canvas = GetComponent<Canvas>();
 		canvas.worldCamera = GameManager.Instance.cam;
 		reviewText = transform.Find("panel/textbox/Text").GetComponent<Text>();
-		bubbles.Add(transform.Find("panel/graphic/person1/bubble").gameObject);
-		bubbles.Add(transform.Find("panel/graphic/person2/bubble").gameObject);
-		bubbles.Add(transform.Find("panel/graphic/person3/bubble").gameObject);
-
-		heads.Add(transform.Find("panel/graphic/person1/head").GetComponent<Image>());
-		heads.Add(transform.Find("panel/graphic/person2/head").GetComponent<Image>());
-		heads.Add(transform.Find("panel/graphic/person3/head").GetComponent<Image>());
-
-		bodies.Add(transform.Find("panel/graphic/person1").GetComponent<Image>());
-		bodies.Add(transform.Find("panel/graphic/person2").GetComponent<Image>());
-		bodies.Add(transform.Find("panel/graphic/person3").GetComponent<Image>());
+		for (int i = 0; i < 3; i++){
+			int ii = i + 1;
+			FocusGroupPersonality p = personalities[i];
+			mouths[p] = false;
+			bubbles[p] = transform.Find("panel/graphic/person"+ii.ToString()+"/bubble").gameObject;
+			heads[p] = transform.Find("panel/graphic/person"+ii.ToString()+"/head").GetComponent<Image>();
+			bodies[p] = transform.Find("panel/graphic/person"+ii.ToString()).GetComponent<Image>();
+			bodies[p].sprite = p.body;
+		}
 		index = 0;
 	}
 	public void Update(){
 		timer += Time.deltaTime;
 		if (timer > 0.1f){
-			mouths[index] = !mouths[index];
-			if (mouths[index]){
-				heads[index].sprite = personalities[index].head_talking;
+			FocusGroupPersonality p = personalities[index];
+			mouths[p] = !mouths[p];
+			if (mouths[p]){
+				heads[p].sprite = p.head_talking;
 			} else {
-				heads[index].sprite = personalities[index].head_norm;
+				heads[p].sprite = p.head_norm;
 			}
 			timer = 0f;
 		}
 	}
 	public void IndexUpdate(){
-		foreach(GameObject bubble in bubbles)
-			bubble.SetActive(false);
-		for (int i = 0; i < 3; i++){
-			heads[i].sprite = personalities[i].head_norm;
+		FocusGroupPersonality p = personalities[index];
+
+		foreach(FocusGroupPersonality person in personalities){
+			bubbles[person].SetActive(false);
+			heads[person].sprite = person.head_norm;
 		}
-		// foreach(Image head in heads)
-		// 	head.sprite = personalities[index].head_norm;
-		bubbles[index].SetActive(true);
-		mouths[index] = true;
+		// for (int i = 0; i < 3; i++){
+		// 	heads[p].sprite = personalities[i].head_norm;
+		// }
+		bubbles[p].SetActive(true);
+		mouths[p] = true;
 		timer = 1f;
 		reviewText.text = commercial.DescribeEvent(index);
 	}
