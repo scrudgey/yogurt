@@ -264,9 +264,6 @@ public class Commercial {
 	}
 	public string SentenceReview(){
 		StringBuilder builder = new StringBuilder("A commercial that prominently features ");
-		// builder.Append(commonTypes[0]+", ");
-		// builder.Append(commonTypes[1]+", and ");
-		// builder.Append(commonTypes[2]+".");
 		List<string> nouns = new List<string>();
 		foreach(EventData eventd in analysis.outlierEvents){
 			if (!nouns.Contains(eventd.noun))
@@ -275,10 +272,9 @@ public class Commercial {
 		builder.Append(nouns[0] + ", ");
 		builder.Append(nouns[1] + ", and ");
 		builder.Append(nouns[2] + ".");
-		Debug.Log(builder.ToString());
 		return builder.ToString();
 	}
-	public string DescribeEvent(int n=0){
+	public string DescribeEvent(int n){
 		// TODO: personality of reviewer
 		// decision of what event to review: outlier, notable, random, n, top rank
 		StringBuilder builder = new StringBuilder();
