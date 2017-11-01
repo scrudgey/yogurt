@@ -230,9 +230,11 @@ public class OccurrenceSpeech : OccurrenceData {
         string targetName = "";
         if (target != null)
             targetName = Toolbox.Instance.GetName(target);
-        EventData data = new EventData();
+        EventData data = null;
         if (events.Count > 0){
             data = events[0];
+        } else {
+            data = new EventData();
         }
         data.whatHappened = speakerName + " said " + line;
         data.noun = "dialogue";
@@ -252,7 +254,9 @@ public class OccurrenceSpeech : OccurrenceData {
             data.offensive = Random.Range(20, 30);
             data.disgusting = 10f;
         }
-        events.Add(data);
+        if (events.Count == 0){
+            events.Add(data);
+        }
     }
 }
 public class OccurrenceViolence : OccurrenceData {
