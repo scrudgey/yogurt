@@ -8,7 +8,7 @@ using System.Text;
 public enum CommercialComparison{
 		equal, notequal, greater, less, greaterEqual, lessEqual
 	}
-public class EventSet{
+public class CommercialDescription{
 	public List<EventData> allEvents;
 	public List<EventData> maxDisturbing = new List<EventData>();
 	public List<EventData> maxDisgusting = new List<EventData>();
@@ -32,7 +32,7 @@ public class EventSet{
 		}
 		return frequentNouns;
 	}
-	public EventSet(List<EventData> inputEvents){
+	public CommercialDescription(List<EventData> inputEvents){
 		allEvents = inputEvents;
 		HashSet<EventData> events = new HashSet<EventData>(inputEvents);
 		// initialize dataset
@@ -135,7 +135,7 @@ public class Commercial {
     public List<string> unlockUponCompletion;
 	public List<EventData> eventData;
 	[XmlIgnore]	// [NonSerialized]
-	public EventSet analysis;
+	public CommercialDescription analysis;
 	// public List<string> outfitsWorn;
 	public static Commercial LoadCommercialByFilename(string filename){
 		Commercial c = new Commercial();
@@ -221,7 +221,7 @@ public class Commercial {
 			writer.WriteLine(line);
 		}
 		writer.Close();
-		analysis = new EventSet(eventData);
+		analysis = new CommercialDescription(eventData);
 	}
 	public bool Evaluate(Commercial other){
 		bool requirementsMet = true;

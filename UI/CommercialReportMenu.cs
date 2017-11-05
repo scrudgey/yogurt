@@ -8,7 +8,7 @@ public class CommercialReportMenu : MonoBehaviour {
     Text transcript;
     Text eventText;
     public Commercial commercial;
-    public EventSet eventSet;
+    public CommercialDescription eventSet;
     private Canvas canvas;
     public void Start(){
         canvas = GetComponent<Canvas>();
