@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 //TODO: not all of these things need static constructors?
 
 public class Occurrence : MonoBehaviour {
@@ -102,6 +103,7 @@ public class Occurrence : MonoBehaviour {
 
 [System.Serializable]
 public class EventData {
+    public enum Rating{disturbing, disgusting, chaos, offensive, positive};
     public SerializableDictionary<string, float> flags = new SerializableDictionary<string, float>();
     public string key;
     public float val;
@@ -134,6 +136,16 @@ public class EventData {
         match &= offensive == other.offensive;
         match &= positive == other.positive;
         return match;
+    }
+    public Rating Quality(){
+        Dictionary<Rating, float> rates = new Dictionary<Rating, float>(){
+            {Rating.disturbing, Mathf.Abs(disturbing)},
+            {Rating.disgusting, Mathf.Abs(disgusting)},
+            {Rating.offensive, Mathf.Abs(offensive)},
+            {Rating.chaos, Mathf.Abs(chaos)},
+            {Rating.positive, Mathf.Abs(positive)}
+        };
+        return rates.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
     }
 }
 public class OccurrenceData
