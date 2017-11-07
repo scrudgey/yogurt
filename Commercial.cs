@@ -4,6 +4,7 @@ using UnityEngine;
 using System.IO;
 using System.Linq;
 using System.Text;
+// using Nimrod;
 
 public enum CommercialComparison{
 		equal, notequal, greater, less, greaterEqual, lessEqual
@@ -263,6 +264,8 @@ public class Commercial {
 		return requirementsMet;
 	}
 	public string SentenceReview(){
+		
+		// TODO: adjectives to describe the commercial based on key properties of prominent events
 		StringBuilder builder = new StringBuilder("A commercial that prominently features ");
 		List<string> nouns = new List<string>();
 		foreach(EventData eventd in analysis.outlierEvents){
@@ -274,17 +277,6 @@ public class Commercial {
 		builder.Append(nouns[2] + ".");
 		return builder.ToString();
 	}
-	// public string DescribeEvent(int n){
-	// 	// TODO: personality of reviewer
-	// 	// decision of what event to review: outlier, notable, random, n, top rank
-	// 	StringBuilder builder = new StringBuilder();
-	// 	EventData eventd = analysis.outlierEvents[n];
-
-	// 	builder.Append("I liked when ");
-	// 	builder.Append(eventd.whatHappened);
-	// 	builder.Append(".");
-	// 	return builder.ToString();
-	// }
 }
 [System.Serializable]
 public class CommercialProperty {
