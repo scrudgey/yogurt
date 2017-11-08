@@ -104,7 +104,6 @@ public class Occurrence : MonoBehaviour {
 
 [System.Serializable]
 public class EventData {
-    
     public SerializableDictionary<string, float> flags = new SerializableDictionary<string, float>();
     public string key;
     public float val;
@@ -119,13 +118,7 @@ public class EventData {
         {Rating.offensive, 0f},
         {Rating.positive, 0f}
     };
-    // public float disturbing;
-    // public float disgusting;
-    // public float chaos;
-    // public float offensive;
-    // public float positive;
     public EventData(){
-        // required for serialization
     }
     public EventData(float disturbing=0, float disgusting=0, float chaos=0, float offensive=0, float positive=0){
         ratings[Rating.disturbing] = disturbing;
@@ -134,10 +127,6 @@ public class EventData {
         ratings[Rating.offensive] = offensive;
         ratings[Rating.positive] = positive;
         // this.disturbing = disturbing;
-        // this.disgusting = disgusting;
-        // this.chaos = chaos;
-        // this.offensive = offensive;
-        // this.positive = positive;
     }
     public bool MatchSpecific(EventData other){
         // TODO: include descriptions?
@@ -146,21 +135,9 @@ public class EventData {
         foreach(Rating key in ratings.Keys){
             match &= ratings[key] == other.ratings[key];
         }
-        // match &= disturbing == other.disturbing;
-        // match &= disgusting == other.disgusting;
-        // match &= chaos == other.chaos;
-        // match &= offensive == other.offensive;
-        // match &= positive == other.positive;
         return match;
     }
     public Rating Quality(){
-        // Dictionary<Rating, float> rates = new Dictionary<Rating, float>(){
-        //     {Rating.disturbing, Mathf.Abs(disturbing)},
-        //     {Rating.disgusting, Mathf.Abs(disgusting)},
-        //     {Rating.offensive, Mathf.Abs(offensive)},
-        //     {Rating.chaos, Mathf.Abs(chaos)},
-        //     {Rating.positive, Mathf.Abs(positive)}
-        // };
         Dictionary<Rating, float> absRates = new Dictionary<Rating, float>();
         foreach(Rating key in ratings.Keys){
             absRates[key] = Mathf.Abs(ratings[key]);
@@ -212,16 +189,11 @@ public class OccurrenceEat : OccurrenceData {
         if (edible.offal){
             data.ratings[Rating.disgusting] = 2;
             data.ratings[Rating.chaos] = 2;
-            // data.disgusting = 2;
-            // data.chaos = 2;
         }
         if (edible.immoral){
             data.ratings[Rating.disturbing] = 3;
             data.ratings[Rating.offensive] = 3;
             data.ratings[Rating.chaos] = 3;
-            // data.disturbing = 3;
-            // data.chaos = 3;
-            // data.offensive = 3;
         }
         events.Add(data);
         if (edible.vomit){
@@ -292,9 +264,6 @@ public class OccurrenceSpeech : OccurrenceData {
             data.ratings[Rating.chaos] = 1;
             data.ratings[Rating.offensive] = Random.Range(2, 3);
             data.ratings[Rating.disturbing] = 2;
-            // data.chaos = 1;
-            // data.offensive = Random.Range(2, 3);
-            // data.disturbing = 2;
         }
         if (insult){
             data.whatHappened = speakerName + " insulted " + targetName;
@@ -302,9 +271,6 @@ public class OccurrenceSpeech : OccurrenceData {
             data.ratings[Rating.chaos] = 1;
             data.ratings[Rating.offensive] = Random.Range(2, 3);
             data.ratings[Rating.disturbing] = 2;
-            // data.chaos = 1;
-            // data.offensive = Random.Range(2, 3);
-            // data.disgusting = 2;
         }
         if (events.Count == 0){
             events.Add(data);
@@ -317,7 +283,6 @@ public class OccurrenceViolence : OccurrenceData {
     public override void CalculateDescriptions(){
         string attackerName = Toolbox.Instance.GetName(attacker);
         string victimName = Toolbox.Instance.GetName(victim);
-
         EventData data = new EventData(disturbing:2, chaos:2);
         data.noun = "violence";
         data.whatHappened = attackerName + " attacked " + victimName;

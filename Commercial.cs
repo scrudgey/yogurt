@@ -4,7 +4,6 @@ using UnityEngine;
 using System.IO;
 using System.Linq;
 using System.Text;
-// using Nimrod;
 
 public enum CommercialComparison{
 		equal, notequal, greater, less, greaterEqual, lessEqual
@@ -131,9 +130,8 @@ public class Commercial {
 	public SerializableDictionary<string, CommercialProperty> properties = new SerializableDictionary<string, CommercialProperty>(); 
     public List<string> unlockUponCompletion;
 	public List<EventData> eventData;
-	[XmlIgnore]	// [NonSerialized]
+	[XmlIgnore]	
 	public CommercialDescription analysis;
-	// public List<string> outfitsWorn;
 	public static Commercial LoadCommercialByFilename(string filename){
 		Commercial c = new Commercial();
 		TextAsset dataFile = Resources.Load("data/commercials/"+filename) as TextAsset;
@@ -258,7 +256,6 @@ public class Commercial {
 		return requirementsMet;
 	}
 	public string SentenceReview(){
-		
 		// TODO: adjectives to describe the commercial based on key properties of prominent events
 		List<string> adjectives = new List<string>();
 		foreach(EventData eventd in analysis.outlierEvents){

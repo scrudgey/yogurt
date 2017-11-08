@@ -71,22 +71,6 @@ public class FocusGroupMenu : MonoBehaviour {
 			builder.Append(".");
 			return builder.ToString();
 		}
-		// public PreferenceType RatingPreference(EventData.Rating rate){
-		// 	switch(rate){
-		// 		case EventData.Rating.chaos:
-		// 		return chaosPreference;
-		// 		case EventData.Rating.disgusting:
-		// 		return disgustingPreference;
-		// 		case EventData.Rating.disturbing:
-		// 		return disturbingPreference;
-		// 		case EventData.Rating.offensive:
-		// 		return offensivePreference;
-		// 		case EventData.Rating.positive:
-		// 		return positivePreference;
-		// 		default:
-		// 		return chaosPreference;
-		// 	}
-		// }
 	}
 	public Commercial commercial;
 	public Text reviewText;

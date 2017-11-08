@@ -29,10 +29,8 @@ namespace Nimrod{
             int iterations = 0;
             
             while(result != parseText && iterations < 10){
-                // Debug.Log(parseText);
                 iterations += 1;
                 result = parseText;
-
                 // replace symbol instances
                 MatchCollection matches = symbol_hook.Matches(parseText);
                 if (matches.Count > 0){
@@ -44,7 +42,6 @@ namespace Nimrod{
                         parseText = builder.ToString();
                     }
 		        }
-
                 // replace with probability
                 matches = prob_hook.Matches(parseText);
                 if (matches.Count > 0){
