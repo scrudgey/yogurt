@@ -7,9 +7,9 @@ public class FocusGroupMenu : MonoBehaviour {
 	public enum PreferenceType{hates, likes};
 	[System.Serializable]
 	public struct Preference {
-		public EventData.Rating type;
+		public Rating type;
 		public PreferenceType pref;
-		public Preference(EventData.Rating type, PreferenceType pref){
+		public Preference(Rating type, PreferenceType pref){
 			this.type = type;
 			this.pref = pref;
 		}
@@ -22,11 +22,11 @@ public class FocusGroupMenu : MonoBehaviour {
 		public Sprite head_talking;
 		public Sprite body;
 		public List<Preference> preferences = new List<Preference>(){
-			new Preference(EventData.Rating.chaos, PreferenceType.hates),
-			new Preference(EventData.Rating.disturbing, PreferenceType.hates),
-			new Preference(EventData.Rating.disgusting, PreferenceType.hates),
-			new Preference(EventData.Rating.offensive, PreferenceType.hates),
-			new Preference(EventData.Rating.positive, PreferenceType.likes)
+			new Preference(Rating.chaos, PreferenceType.hates),
+			new Preference(Rating.disturbing, PreferenceType.hates),
+			new Preference(Rating.disgusting, PreferenceType.hates),
+			new Preference(Rating.offensive, PreferenceType.hates),
+			new Preference(Rating.positive, PreferenceType.likes)
 		};
 		public EventData SelectEvent(Commercial commercial, int n){
 			if (reviewTypes.Count == 0)
@@ -51,7 +51,7 @@ public class FocusGroupMenu : MonoBehaviour {
 			}
 		}
 		public string ReactToEvent(EventData data){
-			EventData.Rating quality = data.Quality();
+			Rating quality = data.Quality();
 			PreferenceType opinion = PreferenceType.likes;
 			foreach(Preference pref in preferences){
 				if (pref.type == quality)

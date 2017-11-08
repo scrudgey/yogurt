@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using Nimrod;
+using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 //TODO: not all of these things need static constructors?
-
+public enum Rating{disturbing, disgusting, chaos, offensive, positive};
 public class Occurrence : MonoBehaviour {
     // An occurrence is a little bit of code that lives on a temporarily persistent flag in the world
     // that knows how to describe an event in terms of EventData. 
@@ -10,7 +11,7 @@ public class Occurrence : MonoBehaviour {
     // a stimulus.
     public List<OccurrenceData> data = new List<OccurrenceData>();
     public static EventData Yogurt(GameObject eater){
-        EventData data = new EventData(positive:5f);
+        EventData data = new EventData(positive:1);
         data.key = "yogurt";
         data.val = 1f;
         data.desc = "yogurts eaten";
@@ -19,7 +20,7 @@ public class Occurrence : MonoBehaviour {
         return data;
     }
     public static EventData Vomit(GameObject vomiter, GameObject vomited){
-        EventData data = new EventData(disturbing:5f, disgusting:30f, chaos:40f);
+        EventData data = new EventData(disturbing:1, disgusting:2, chaos:1);
         data.key = "vomit";
         data.val = 1f;
         data.desc = "vomit events";
@@ -28,7 +29,7 @@ public class Occurrence : MonoBehaviour {
         return data;
     }
     public static EventData VomitYogurt(GameObject vomiter){
-        EventData data = new EventData(disturbing:5f, disgusting:30f, chaos:40f);
+        EventData data = new EventData(disturbing:1, disgusting:2, chaos:2, positive:-2);
         data.key = "yogurt_vomit";
         data.val = 1f;
         data.desc = "yogurt emesis event";
@@ -37,7 +38,7 @@ public class Occurrence : MonoBehaviour {
         return data;
     }
     public static EventData VomitEat(GameObject eater){
-        EventData data = new EventData(disturbing:15f, disgusting:50f, chaos:40f);
+        EventData data = new EventData(disturbing:2, disgusting:2, chaos:2);
         data.key = "vomit_eat";
         data.val = 1f;
         data.desc = "vomit eaten";
@@ -46,7 +47,7 @@ public class Occurrence : MonoBehaviour {
         return data;
     }
     public static EventData YogurtVomitEat(GameObject eater){
-        EventData data = new EventData(disturbing:10f, disgusting:75f, chaos:50f);
+        EventData data = new EventData(disturbing:2, disgusting:2, chaos:2, positive:-1);
         data.key = "yogurt_vomit_eat";
         data.val = 1f;
         data.desc = "eating yogurt vomit";
@@ -55,7 +56,7 @@ public class Occurrence : MonoBehaviour {
         return data;
     }
     public static EventData YogurtFloor(GameObject eater){
-        EventData data = new EventData(disgusting:35f, chaos:10f);
+        EventData data = new EventData(disgusting:1, chaos:1);
         data.key = "yogurt_floor";
         data.val = 1f;
         data.desc = "yogurt eaten off the floor";
@@ -64,7 +65,7 @@ public class Occurrence : MonoBehaviour {
         return data;
     }
     public static EventData TableFire(){
-        EventData data = new EventData(disturbing:10f, chaos:10f);
+        EventData data = new EventData(disturbing:1, chaos:2);
         data.key = "table_fire";
         data.val = 1f;
         data.desc = "table set on fire";
@@ -73,7 +74,7 @@ public class Occurrence : MonoBehaviour {
         return data;
     }
     public static EventData Cannibalism(GameObject cannibal){
-        EventData data = new EventData(offensive:250f, disgusting:500f, disturbing:350f, chaos:150f, positive:-300f);
+        EventData data = new EventData(offensive:4, disgusting:3, disturbing:3, chaos:3, positive:-3);
         data.key = "cannibalism";
         data.val = 1f;
         data.desc = "acts of cannibalism";
@@ -82,7 +83,7 @@ public class Occurrence : MonoBehaviour {
         return data;
     }
     public static EventData Death(GameObject dead){
-        EventData data = new EventData(offensive:50f, disgusting:130f, disturbing:200f, chaos:525f, positive:-200f);
+        EventData data = new EventData(offensive:4, disgusting:3, disturbing:4, chaos:4, positive:-3);
         data.key = "death";
         data.val = 1f;
         data.desc = "deaths";
@@ -91,7 +92,7 @@ public class Occurrence : MonoBehaviour {
         return data;
     }
     public static EventData Eggplant(GameObject eater){
-        EventData data = new EventData(positive:1f);
+        EventData data = new EventData(positive:1);
         data.key = "eggplant";
         data.val = 1f;
         data.desc = "eggplants eaten";
@@ -103,7 +104,7 @@ public class Occurrence : MonoBehaviour {
 
 [System.Serializable]
 public class EventData {
-    public enum Rating{disturbing, disgusting, chaos, offensive, positive};
+    
     public SerializableDictionary<string, float> flags = new SerializableDictionary<string, float>();
     public string key;
     public float val;
@@ -111,41 +112,69 @@ public class EventData {
     public string whatHappened;
     public string transcriptLine;
     public string noun;
-    public float disturbing;
-    public float disgusting;
-    public float chaos;
-    public float offensive;
-    public float positive;
+    public SerializableDictionary<Rating, float> ratings = new SerializableDictionary<Rating, float>(){
+        {Rating.disgusting, 0f},
+        {Rating.disturbing, 0f},
+        {Rating.chaos, 0f},
+        {Rating.offensive, 0f},
+        {Rating.positive, 0f}
+    };
+    // public float disturbing;
+    // public float disgusting;
+    // public float chaos;
+    // public float offensive;
+    // public float positive;
     public EventData(){
         // required for serialization
     }
     public EventData(float disturbing=0, float disgusting=0, float chaos=0, float offensive=0, float positive=0){
-        this.disturbing = disturbing;
-        this.disgusting = disgusting;
-        this.chaos = chaos;
-        this.offensive = offensive;
-        this.positive = positive;
+        ratings[Rating.disturbing] = disturbing;
+        ratings[Rating.disgusting] = disgusting;
+        ratings[Rating.chaos] = chaos;
+        ratings[Rating.offensive] = offensive;
+        ratings[Rating.positive] = positive;
+        // this.disturbing = disturbing;
+        // this.disgusting = disgusting;
+        // this.chaos = chaos;
+        // this.offensive = offensive;
+        // this.positive = positive;
     }
     public bool MatchSpecific(EventData other){
         // TODO: include descriptions?
         // match on descriptions?
         bool match = true;
-        match &= disturbing == other.disturbing;
-        match &= disgusting == other.disgusting;
-        match &= chaos == other.chaos;
-        match &= offensive == other.offensive;
-        match &= positive == other.positive;
+        foreach(Rating key in ratings.Keys){
+            match &= ratings[key] == other.ratings[key];
+        }
+        // match &= disturbing == other.disturbing;
+        // match &= disgusting == other.disgusting;
+        // match &= chaos == other.chaos;
+        // match &= offensive == other.offensive;
+        // match &= positive == other.positive;
         return match;
     }
     public Rating Quality(){
-        Dictionary<Rating, float> rates = new Dictionary<Rating, float>(){
-            {Rating.disturbing, Mathf.Abs(disturbing)},
-            {Rating.disgusting, Mathf.Abs(disgusting)},
-            {Rating.offensive, Mathf.Abs(offensive)},
-            {Rating.chaos, Mathf.Abs(chaos)},
-            {Rating.positive, Mathf.Abs(positive)}
-        };
-        return rates.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
+        // Dictionary<Rating, float> rates = new Dictionary<Rating, float>(){
+        //     {Rating.disturbing, Mathf.Abs(disturbing)},
+        //     {Rating.disgusting, Mathf.Abs(disgusting)},
+        //     {Rating.offensive, Mathf.Abs(offensive)},
+        //     {Rating.chaos, Mathf.Abs(chaos)},
+        //     {Rating.positive, Mathf.Abs(positive)}
+        // };
+        Dictionary<Rating, float> absRates = new Dictionary<Rating, float>();
+        foreach(Rating key in ratings.Keys){
+            absRates[key] = Mathf.Abs(ratings[key]);
+        }
+        return absRates.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
+    }
+    public string Adjective(){
+        Grammar grammar = new Grammar();
+		grammar.Load("ratings");
+        Rating rate = Quality();
+        if (ratings[rate] == 0)
+            return "none";
+        string key = rate.ToString()+"_"+ratings[rate].ToString();
+        return grammar.Parse("{"+key+"}");
     }
 }
 public class OccurrenceData
@@ -160,7 +189,7 @@ public class OccurrenceFire : OccurrenceData {
     public GameObject flamingObject;
     public bool extinguished;
     public override void CalculateDescriptions(){
-        EventData data = new EventData(chaos:100f);
+        EventData data = new EventData(chaos:2);
         string objectName = Toolbox.Instance.GetName(flamingObject);
         data.noun = "fire";
         data.whatHappened = "the "+objectName+" burned";
@@ -181,13 +210,18 @@ public class OccurrenceEat : OccurrenceData {
         data.noun = "eating";
         data.whatHappened = Toolbox.Instance.GetName(eater) + " ate "+edible.name;
         if (edible.offal){
-            data.disgusting += 45f;
-            data.chaos += 50f;
+            data.ratings[Rating.disgusting] = 2;
+            data.ratings[Rating.chaos] = 2;
+            // data.disgusting = 2;
+            // data.chaos = 2;
         }
         if (edible.immoral){
-            data.disturbing += 100f;
-            data.chaos += 150f;
-            data.offensive += 500f;
+            data.ratings[Rating.disturbing] = 3;
+            data.ratings[Rating.offensive] = 3;
+            data.ratings[Rating.chaos] = 3;
+            // data.disturbing = 3;
+            // data.chaos = 3;
+            // data.offensive = 3;
         }
         events.Add(data);
         if (edible.vomit){
@@ -255,16 +289,22 @@ public class OccurrenceSpeech : OccurrenceData {
         if (threat){
             data.whatHappened = speakerName + " threatened " + targetName;
             data.noun = "threats";
-            data.chaos += 15f;
-            data.offensive = Random.Range(20, 30);
-            data.disturbing = 10f;
+            data.ratings[Rating.chaos] = 1;
+            data.ratings[Rating.offensive] = Random.Range(2, 3);
+            data.ratings[Rating.disturbing] = 2;
+            // data.chaos = 1;
+            // data.offensive = Random.Range(2, 3);
+            // data.disturbing = 2;
         }
         if (insult){
             data.whatHappened = speakerName + " insulted " + targetName;
             data.noun = "insults";
-            data.chaos += 15f;
-            data.offensive = Random.Range(20, 30);
-            data.disgusting = 10f;
+            data.ratings[Rating.chaos] = 1;
+            data.ratings[Rating.offensive] = Random.Range(2, 3);
+            data.ratings[Rating.disturbing] = 2;
+            // data.chaos = 1;
+            // data.offensive = Random.Range(2, 3);
+            // data.disgusting = 2;
         }
         if (events.Count == 0){
             events.Add(data);
@@ -278,7 +318,7 @@ public class OccurrenceViolence : OccurrenceData {
         string attackerName = Toolbox.Instance.GetName(attacker);
         string victimName = Toolbox.Instance.GetName(victim);
 
-        EventData data = new EventData(disturbing:10f, chaos:10f);
+        EventData data = new EventData(disturbing:2, chaos:2);
         data.noun = "violence";
         data.whatHappened = attackerName + " attacked " + victimName;
         events.Add(data);

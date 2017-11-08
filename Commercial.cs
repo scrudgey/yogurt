@@ -4,6 +4,7 @@ using UnityEngine;
 using System.IO;
 using System.Linq;
 using System.Text;
+// using Nimrod;
 
 public enum CommercialComparison{
 		equal, notequal, greater, less, greaterEqual, lessEqual
@@ -36,27 +37,27 @@ public class CommercialDescription{
 		allEvents = inputEvents;
 		HashSet<EventData> events = new HashSet<EventData>(inputEvents);
 		// initialize dataset
-		maxDisturbing = events.OrderBy(o=>o.disturbing).ToList();
-		maxDisgusting = events.OrderBy(o=>o.disgusting).ToList();
-		maxChaos = events.OrderBy(o=>o.chaos).ToList();
-		maxOffense = events.OrderBy(o=>o.offensive).ToList();
-		maxPositive = events.OrderBy(o=>o.positive).ToList();
+		maxDisturbing = events.OrderBy(o=>o.ratings[Rating.disturbing]).ToList();
+		maxDisgusting = events.OrderBy(o=>o.ratings[Rating.disgusting]).ToList();
+		maxChaos = events.OrderBy(o=>o.ratings[Rating.chaos]).ToList();
+		maxOffense = events.OrderBy(o=>o.ratings[Rating.offensive]).ToList();
+		maxPositive = events.OrderBy(o=>o.ratings[Rating.positive]).ToList();
 
 		Dictionary<EventData,int> occurrencesInTop3 = new Dictionary<EventData,int>();
 		foreach(EventData e in events){
 			occurrencesInTop3[e] = 0;
 		}
 
-		Dictionary<string, List<EventData>> lists = new Dictionary<string, List<EventData>>{
-			{"disturbing", maxDisturbing},
-			{"disgusting", maxDisgusting},
-			{"chaos", maxChaos},
-			{"offensive", maxOffense},
-			{"positive", maxPositive}
+		Dictionary<Rating, List<EventData>> maxLists = new Dictionary<Rating, List<EventData>>{
+			{Rating.disturbing, maxDisturbing},
+			{Rating.disgusting, maxDisgusting},
+			{Rating.chaos, maxChaos},
+			{Rating.offensive, maxOffense},
+			{Rating.positive, maxPositive}
 		};
 
 		// calculate frequency of top3s
-		foreach (List<EventData> list in lists.Values){
+		foreach (List<EventData> list in maxLists.Values){
 			list.Reverse();
 			for (int i = 0; i<3; i++){
 				occurrencesInTop3[list[i]] += 1;
@@ -74,16 +75,12 @@ public class CommercialDescription{
 
 		Dictionary<EventData,float> largestDeltas = new Dictionary<EventData,float>();
 		// calculate the 3 events with the highest deltas
-		foreach (string key in lists.Keys){
-			List<EventData> list = lists[key];
+		foreach (Rating key in maxLists.Keys){
+			List<EventData> list = maxLists[key];
 			Dictionary<EventData, float> deltas = new Dictionary<EventData, float>();
 			// calc deltas
 			for (int i = 0; i < list.Count-1; i++){
-				float myVal = (float)list[i].GetType().GetField(key).GetValue(list[i]);
-				float theirVal = (float)list[i+1].GetType().GetField(key).GetValue(list[i+1]);
-				float x = myVal - theirVal;
-				deltas[list[i+1]] = x;
-				// Debug.Log(list[i+1].whatHappened + " " + key + " " + x.ToString());
+				deltas[list[i+1]] = list[i].ratings[key] - list[i+1].ratings[key];
 			}
 			// populate list of event, highest delta
 			foreach(EventData eventData in deltas.Keys){
@@ -185,11 +182,9 @@ public class Commercial {
 	public EventData Total(){
 		EventData total = new EventData();
 		foreach(EventData data in eventData){
-			total.disturbing += data.disturbing;
-			total.disgusting += data.disgusting;
-			total.chaos += data.chaos;
-			total.offensive += data.offensive;
-			total.positive += data.positive;
+			foreach(Rating key in data.ratings.Keys){
+				total.ratings[key] += data.ratings[key];
+			}
 		}
 		return total;
 	}
@@ -217,7 +212,7 @@ public class Commercial {
 		filename = Path.Combine(Application.persistentDataPath, "commercial_events.txt");
 		writer = new StreamWriter(filename, false);
 		foreach(EventData data in eventData){
-			string line = data.noun + " " + data.disturbing.ToString() + " " + data.disgusting.ToString() + " " + data.chaos.ToString() + " " + data.offensive.ToString() + " " + data.positive.ToString();
+			string line = data.noun + " " + data.ratings[Rating.disturbing].ToString() + " " + data.ratings[Rating.disgusting].ToString() + " " + data.ratings[Rating.chaos].ToString() + " " + data.ratings[Rating.offensive].ToString() + " " + data.ratings[Rating.positive].ToString();
 			writer.WriteLine(line);
 		}
 		writer.Close();
@@ -263,28 +258,53 @@ public class Commercial {
 		return requirementsMet;
 	}
 	public string SentenceReview(){
-		StringBuilder builder = new StringBuilder("A commercial that prominently features ");
+		
+		// TODO: adjectives to describe the commercial based on key properties of prominent events
+		List<string> adjectives = new List<string>();
+		foreach(EventData eventd in analysis.outlierEvents){
+			string adj = eventd.Adjective();
+			if (adj != "none")
+				adjectives.Add(adj);
+		}
+		StringBuilder builder = new StringBuilder();
+		builder.Append("A");
+		switch(Mathf.Min(adjectives.Count, 3)){
+			case 3:
+			case 2:
+			builder.Append(" ");
+			builder.Append(adjectives[0]+" and "+adjectives[1]);
+			break;
+			case 1:
+			builder.Append(" ");
+			builder.Append(adjectives[0]);
+			break;
+			case 0:
+			default:
+			break;
+		}
+		builder.Append(" commercial that prominently features ");
 		List<string> nouns = new List<string>();
 		foreach(EventData eventd in analysis.outlierEvents){
 			if (!nouns.Contains(eventd.noun))
 				nouns.Add(eventd.noun);
 		}
-		builder.Append(nouns[0] + ", ");
-		builder.Append(nouns[1] + ", and ");
-		builder.Append(nouns[2] + ".");
+		builder.Append(nouns[0]);
+		switch(nouns.Count){
+			case 3:
+			builder.Append(", ");
+			builder.Append(nouns[1] + ", and " + nouns[2]);
+			break;
+			case 2:
+			builder.Append(" and ");
+			builder.Append(nouns[1]);
+			break;
+			case 1:
+			default:
+			break;
+		}
+		builder.Append(".");
 		return builder.ToString();
 	}
-	// public string DescribeEvent(int n){
-	// 	// TODO: personality of reviewer
-	// 	// decision of what event to review: outlier, notable, random, n, top rank
-	// 	StringBuilder builder = new StringBuilder();
-	// 	EventData eventd = analysis.outlierEvents[n];
-
-	// 	builder.Append("I liked when ");
-	// 	builder.Append(eventd.whatHappened);
-	// 	builder.Append(".");
-	// 	return builder.ToString();
-	// }
 }
 [System.Serializable]
 public class CommercialProperty {

@@ -27,12 +27,12 @@ public class Eater : Interactive {
 		//TODO: this is spawning lots of flags
 		if (nausea > 15 && nausea < 30 && lastStatement != nauseaStatement.warning){
 			lastStatement = nauseaStatement.warning;
-			MessageSpeech message = new MessageSpeech("I don't feel so good!!", eventData: new EventData(chaos:2f, disturbing:10f, positive:-25f));
+			MessageSpeech message = new MessageSpeech("I don't feel so good!!", eventData: new EventData(chaos:1, disturbing:1, positive:-1));
 			Toolbox.Instance.SendMessage(gameObject, this, message);
 		}
 		if (nausea > 30 && lastStatement != nauseaStatement.imminent){
 			lastStatement = nauseaStatement.imminent;
-			MessageSpeech message = new MessageSpeech("I don't feel so good!!", eventData: new EventData(chaos:5f, disturbing:13f, positive:-40f));
+			MessageSpeech message = new MessageSpeech("I'm gonna puke!'", eventData: new EventData(chaos:2, disturbing:1, positive:-2));
 			Toolbox.Instance.SendMessage(gameObject, this, message);
 		}
 	}
@@ -109,11 +109,11 @@ public class Eater : Interactive {
 		//update our status based on our reaction to the food
 		reaction = CheckReaction(food);
 		if(reaction > 0){
-			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I'm full!", eventData:new EventData(positive:25f)));
+			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Yummy!", eventData:new EventData(positive:1)));
 		}
 		if(reaction < 0){
 			nausea += 30;
-			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Yuck", eventData:new EventData(positive:-25f)));
+			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Yuck", eventData:new EventData(positive:-1)));
 		}
 		if (nutrition > 50){
 			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I'm full!"));

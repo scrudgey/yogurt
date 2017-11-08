@@ -211,8 +211,10 @@ public class Speech : Interactive, IMessagable {
             foreach (int mask in swearMask){
                 extremity += mask;
             }
-            eventData.chaos += extremity * 2f;
-            eventData.offensive += extremity * 5f;
+            eventData.ratings[Rating.chaos] += extremity * 2f;
+            eventData.ratings[Rating.offensive] += extremity * 5f;
+            // eventData.chaos += extremity * 2f;
+            // eventData.offensive += extremity * 5f;
         }
 		words = censoredPhrase;
         speakTime = DoubleSeat(phrase.Length, 2f, 50f, 5f, 2f);
@@ -279,7 +281,7 @@ public class Speech : Interactive, IMessagable {
         }
     }
     void ReactToOccurrence(EventData od){
-        if (od.disgusting > 10)
+        if (od.ratings[Rating.disgusting] > 10)
             SayFromNimrod("grossreact");
     }
     public void CompareLastNetIntrinsic(Intrinsic net){
@@ -335,13 +337,13 @@ public class Speech : Interactive, IMessagable {
 		MessageInsult messageInsult = new MessageInsult();
 		Toolbox.Instance.SendMessage(target, this, messageInsult);
 
-        EventData data = new EventData();
-		data.chaos = 20f;
-        data.chaos += 20f;
-        data.offensive += 20f;
-        data.disturbing = 2f;
-        data.positive += -20f;
-        data.offensive = Random.Range(20, 30);
+        EventData data = new EventData(chaos:2, disturbing: 1, positive:-2, offensive:Random.Range(2, 3));
+		// data.chaos = 20f;
+        // data.chaos += 20f;
+        // data.offensive += 20f;
+        // data.disturbing = 2f;
+        // data.positive += -20f;
+        // data.offensive = Random.Range(20, 30);
         Say(content, data:data, insult:target);
 
         List<string> strings = new List<string>(){content};
@@ -357,13 +359,14 @@ public class Speech : Interactive, IMessagable {
         grammar.Load("flavor_"+flavor);
         string content = grammar.Parse("{threat}");
 
-        EventData data = new EventData();
-		data.chaos = 15f;
-        data.chaos += 15f;
-        data.offensive += 10f;
-        data.disturbing = 5f;
-        data.positive += -20f;
-        data.offensive = Random.Range(20, 30);
+        // EventData data = new EventData();
+        EventData data = new EventData(chaos:2, disturbing: 1, positive:-2, offensive:Random.Range(2, 3));
+		// data.chaos = 15f;
+        // data.chaos += 15f;
+        // data.offensive += 10f;
+        // data.disturbing = 5f;
+        // data.positive += -20f;
+        // data.offensive = Random.Range(20, 30);
         Say(content, data:data, threat:target);
 
         List<string> strings = new List<string>(){content};

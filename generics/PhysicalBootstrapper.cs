@@ -162,8 +162,7 @@ public class PhysicalBootstrapper : MonoBehaviour {
 			if (impactSounds.Length > 0){
 				GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
 			}
-			// OccurrenceMisc data = Toolbox.Instance.DataFlag(gameObject, 50f, 0f, 0f, 0f, 0f);
-			EventData data = Toolbox.Instance.DataFlag(gameObject, chaos:50f);
+			EventData data = Toolbox.Instance.DataFlag(gameObject, chaos:1);
 			data.noun = "collision";
 			data.whatHappened = Toolbox.Instance.CloneRemover(coll.gameObject.name)+" collided with "+Toolbox.Instance.CloneRemover(gameObject.name);
 		}
