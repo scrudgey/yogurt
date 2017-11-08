@@ -231,7 +231,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.throwing, false);
 		Toolbox.Instance.SendMessage(gameObject, this, anim);
 		GetComponent<AudioSource>().PlayOneShot(Resources.Load("sounds/8bit_throw", typeof(AudioClip)) as AudioClip);
-		EventData data = Toolbox.Instance.DataFlag(gameObject, chaos:50f);
+		EventData data = Toolbox.Instance.DataFlag(gameObject, chaos:1);
 		data.noun = "throwing";
 		data.whatHappened = Toolbox.Instance.GetName(gameObject)+" threw a "+ Toolbox.Instance.GetName(throwObject);
 		throwObject = null;
