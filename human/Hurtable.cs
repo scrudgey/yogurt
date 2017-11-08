@@ -57,6 +57,9 @@ public class Hurtable : Damageable {
 					if (hitState == Controllable.HitState.dead){
 						if (health <= -0.75 * maxHealth){
 							Destruct();
+							EventData data = Toolbox.Instance.DataFlag(gameObject, chaos:3, disturbing:4, disgusting:4, positive:-2, offensive:-2);
+							data.noun = "corpse desecration";
+							data.whatHappened = "the corpse of "+Toolbox.Instance.GetName(gameObject)+" was desecrated";
 						}
 					}
 				}
