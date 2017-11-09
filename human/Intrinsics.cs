@@ -34,7 +34,7 @@ public class Intrinsics : MonoBehaviour {
 				}
 			}
 		}
-		intrinsicCopy.persistent = true;
+		// intrinsicCopy.persistent = true;
 		intrinsics.Add(intrinsicCopy);
 	}
 	public void RemoveIntrinsic(Intrinsics i){
@@ -92,20 +92,22 @@ public class Intrinsics : MonoBehaviour {
 	public void SetupStatusIcon(){
 		foreach(Intrinsic intrins in intrinsics){
 			foreach(BuffType key in intrins.buffs.Keys){
-				GameObject icon = Instantiate(Resources.Load("UI/StatusIcon")) as GameObject;
-				UIStatusIcon statusIcon = icon.GetComponent<UIStatusIcon>();
-				statusIcon.Initialize(key, intrins.buffs[key]);
-				UINew.Instance.AddStatusIcon(icon);
+				if (intrins.buffs[key].boolValue == true || intrins.buffs[key].floatValue > 0){
+					GameObject icon = Instantiate(Resources.Load("UI/StatusIcon")) as GameObject;
+					UIStatusIcon statusIcon = icon.GetComponent<UIStatusIcon>();
+					statusIcon.Initialize(key, intrins.buffs[key]);
+					UINew.Instance.AddStatusIcon(icon);
+				}
 			}
 		}	
 	}
 }
 [System.Serializable]
 public class Intrinsic {
-	public bool persistent;
+	// public bool persistent;
 	public SerializableDictionary<BuffType, Buff> buffs = new SerializableDictionary<BuffType, Buff>();	public Intrinsic(){	}
 	public Intrinsic(Intrinsic otherIntrinsic){
-		this.persistent = otherIntrinsic.persistent;
+		// this.persistent = otherIntrinsic.persistent;
 		foreach(BuffType key in otherIntrinsic.buffs.Keys){
 			buffs[key] = new Buff(otherIntrinsic.buffs[key]);
 		}
