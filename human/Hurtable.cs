@@ -45,7 +45,11 @@ public class Hurtable : Damageable {
 		if (message.responsibleParty != null){
 				lastAttacker = message.responsibleParty;
 		}
-		if (!myIntrinsic.invulnerable.boolValue){
+		// bool invulnerable = false;
+		// if (myIntrinsic.buffs.ContainsKey(BuffType.invulnerable)){
+		// 	invulnerable = myIntrinsic.buffs[BuffType.invulnerable].boolValue;
+		// }
+		if (myIntrinsic.boolValue(BuffType.invulnerable)){
 			float armor = this.armor;
 			if (message.strength || hitState == Controllable.HitState.dead)
 				armor = 0;
@@ -72,7 +76,7 @@ public class Hurtable : Damageable {
 						message.amount *= 2.5f;
 						message.force *= 10f;
 					}
-					if (!myIntrinsic.noPhysicalDamage.boolValue){
+					if (!myIntrinsic.boolValue(BuffType.noPhysicalDamage)){
 						float netDam = Mathf.Max(message.amount - armor, 0);
 						health -= netDam;
 						impulse += netDam;
@@ -85,7 +89,7 @@ public class Hurtable : Damageable {
 				}
 				break;
 			case damageType.fire:
-				if (!myIntrinsic.fireproof.boolValue){
+				if (!myIntrinsic.boolValue(BuffType.fireproof)){
 					health -= message.amount;
 					tookDamage = true;
 				}
@@ -167,11 +171,11 @@ public class Hurtable : Damageable {
 		if (incoming is MessageNetIntrinsic){
 			MessageNetIntrinsic intrins = (MessageNetIntrinsic)incoming;
 			myIntrinsic = intrins.netIntrinsic;
-			if (intrins.netIntrinsic.bonusHealth.floatValue > bonusHealth){
-				health += intrins.netIntrinsic.bonusHealth.floatValue;
+			if (intrins.netIntrinsic.floatValue(BuffType.bonusHealth) > bonusHealth){
+				health += intrins.netIntrinsic.floatValue(BuffType.bonusHealth);
 			}
-			bonusHealth = intrins.netIntrinsic.bonusHealth.floatValue;
-			armor = intrins.netIntrinsic.armor.floatValue;
+			bonusHealth = intrins.netIntrinsic.floatValue(BuffType.bonusHealth);
+			armor = intrins.netIntrinsic.floatValue(BuffType.armor);
 		}
 	}
 	public void Update(){

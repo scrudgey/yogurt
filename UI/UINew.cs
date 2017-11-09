@@ -547,4 +547,12 @@ public class UINew: Singleton<UINew> {
 		}
 		bounceScript.text = text;
 	}
+	public void ClearStatusIcons(){
+		foreach(Transform child in UICanvas.transform.Find("iconDock")){
+			Destroy(child.gameObject);
+		}
+	}
+	public void AddStatusIcon(GameObject statusIcon){
+		statusIcon.transform.SetParent(UICanvas.transform.Find("iconDock"), false);
+	}
 }

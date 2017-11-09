@@ -113,7 +113,7 @@ public partial class GameManager : Singleton<GameManager> {
 		}
 	} 
 	public void FocusIntrinsicsChanged(Intrinsic intrinsic){
-		if (intrinsic.telepathy.boolValue){
+		if (intrinsic.boolValue(BuffType.telepathy)){
 			Debug.Log("focus telepathic");
 			cam.cullingMask |= 1 << LayerMask.NameToLayer("thoughts");
 		} else {
@@ -124,6 +124,11 @@ public partial class GameManager : Singleton<GameManager> {
 				Debug.Log("Weird telepathy culling mask issue");
 			}
 		}
+		UINew.Instance.ClearStatusIcons();
+		Intrinsics focusIntrinsics = playerObject.GetComponent<Intrinsics>();
+		focusIntrinsics.SetupStatusIcon();
+		// destroy all existing status icons
+		// create new status icons
 	}
 	public void SetFocus(GameObject target){
 		playerObject = target;

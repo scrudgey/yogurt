@@ -304,7 +304,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		}
 		message.force = new Vector2(direction.x * weapon.damage / 100f, direction.y * weapon.damage / 100f);
 		message.responsibleParty = gameObject;
-		message.strength = intrins.NetIntrinsic().strength.boolValue;
+		message.strength = intrins.NetIntrinsic().boolValue(BuffType.strength);
 		message.type = weapon.damageType;
 		message.amount = weapon.damage;
 		s.message = message;
@@ -331,7 +331,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		MessageDamage message = new MessageDamage(10f, damageType.physical);
 		message.force = new Vector2(direction.x * 0.2f, direction.y * 0.2f);
 		message.responsibleParty = gameObject;
-		message.strength = intrins.NetIntrinsic().strength.boolValue;
+		message.strength = intrins.NetIntrinsic().boolValue(BuffType.strength);
 		message.type = damageType.physical;
 		message.amount = 20f;
 		message.responsibleParty = gameObject;
@@ -375,7 +375,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		}
 		if (m is MessageNetIntrinsic){
 			MessageNetIntrinsic intrins = (MessageNetIntrinsic)m;
-			if (intrins.netIntrinsic.strength.boolValue){
+			if (intrins.netIntrinsic.boolValue(BuffType.strength)){
 				if (strengthFX == null){
 					strengthFX = Instantiate(Resources.Load("particles/strength_particles")) as GameObject;
 					strengthFX.transform.SetParent(transform, false);

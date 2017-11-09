@@ -68,8 +68,11 @@ public class Liquid {
 		l.flammable = bool.Parse(data["flammable"]);
 		if (data.ContainsKey("strength")){
 			l.intrinsic = new Intrinsic();
-			l.intrinsic.strength.boolValue = true;
-			l.intrinsic.strength.initLifetime = 25f;
+			l.intrinsic.buffs[BuffType.strength] = new Buff();
+			l.intrinsic.buffs[BuffType.strength].boolValue = true;
+			l.intrinsic.buffs[BuffType.strength].initLifetime = 25f;
+			// l.intrinsic.strength.boolValue = true;
+			// l.intrinsic.strength.initLifetime = 25f;
 		}
 		return l;
 	}
