@@ -45,11 +45,7 @@ public class Hurtable : Damageable {
 		if (message.responsibleParty != null){
 				lastAttacker = message.responsibleParty;
 		}
-		// bool invulnerable = false;
-		// if (myIntrinsic.buffs.ContainsKey(BuffType.invulnerable)){
-		// 	invulnerable = myIntrinsic.buffs[BuffType.invulnerable].boolValue;
-		// }
-		if (myIntrinsic.boolValue(BuffType.invulnerable)){
+		if (!myIntrinsic.boolValue(BuffType.invulnerable)){
 			float armor = this.armor;
 			if (message.strength || hitState == Controllable.HitState.dead)
 				armor = 0;

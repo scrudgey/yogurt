@@ -9,10 +9,16 @@ public class Outfit : Interactive, IMessagable {
 		if (!LoadInitialized)
 			LoadInit();
 		if (initUniform != null){
-			GameObject uniObject = Instantiate(initUniform);
+			GameObject uniObject = initUniform;
+			if (!initUniform.activeInHierarchy){ 
+				uniObject = Instantiate(initUniform);
+			}
 			Uniform uniform = uniObject.GetComponent<Uniform>();
 			GameObject removedUniform = DonUniform(uniform);
 			Destroy(removedUniform);
+			// if (initUniform.activeInHierarchy){
+			// 	Destroy(initUniform);
+			// }
 		}
 	}
 	public void LoadInit(){

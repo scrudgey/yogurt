@@ -112,8 +112,8 @@ public partial class GameManager : Singleton<GameManager> {
 			return true;
 		}
 	} 
-	public void FocusIntrinsicsChanged(Intrinsic intrinsic){
-		if (intrinsic.boolValue(BuffType.telepathy)){
+	public void FocusIntrinsicsChanged(Intrinsics intrinsics){
+		if (intrinsics.NetIntrinsic().boolValue(BuffType.telepathy)){
 			Debug.Log("focus telepathic");
 			cam.cullingMask |= 1 << LayerMask.NameToLayer("thoughts");
 		} else {
@@ -124,6 +124,8 @@ public partial class GameManager : Singleton<GameManager> {
 				Debug.Log("Weird telepathy culling mask issue");
 			}
 		}
+		UINew.Instance.ClearStatusIcons();
+		intrinsics.SetupStatusIcon();
 	}
 	public void SetFocus(GameObject target){
 		playerObject = target;
@@ -132,7 +134,7 @@ public partial class GameManager : Singleton<GameManager> {
 		if (cameraControl)
 			cameraControl.focus = target;
 		Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(target);
-		FocusIntrinsicsChanged(intrinsics.NetIntrinsic());
+		FocusIntrinsicsChanged(intrinsics);
 		// change UI buttons?
 		UINew.Instance.UpdateButtons();
 	}
@@ -231,36 +233,38 @@ public partial class GameManager : Singleton<GameManager> {
 				doorway.Enter(playerObject);
 				// if this is a bed entry, we've got a new day going on!
 				if (data.entryID == -99){
-					Bed bed = GameObject.FindObjectOfType<Bed>();
-					if (bed){
-						bed.SleepCutscene();
-						playerObject.SetActive(false);
-						Outfit outfit = playerObject.GetComponent<Outfit>();
-						AdvancedAnimation advancedAnimation = playerObject.GetComponent<AdvancedAnimation>();
-						if (outfit != null && advancedAnimation != null){
-							advancedAnimation.baseName = "pajamas";
-							outfit.wornUniformName = "pajamas";
-						}
-						Inventory focusInv = playerObject.GetComponent<Inventory>();
-						if (focusInv){
-							focusInv.ClearInventory();
-							UINew.Instance.UpdateInventoryButton(focusInv);
-						}
-						Eater focusEater = playerObject.GetComponent<Eater>();
-						if (focusEater){
-							focusEater.nutrition = 0;
-							focusEater.nausea = 0;
-						}
-						Hurtable playerHurtable = playerObject.GetComponent<Hurtable>();
-						if (playerHurtable){
-							playerHurtable.health = playerHurtable.maxHealth;
-						}
-						MySaver.Save();
-						awaitNewDayPrompt = CheckNewDayPrompt();
-						// TODO: check events related to having completed the last completed commercial
-					}
+					WakeUpInBed();
 				}
 			}
+		}
+	}
+	void WakeUpInBed(){
+		Bed bed = GameObject.FindObjectOfType<Bed>();
+		if (bed){
+			bed.SleepCutscene();
+			playerObject.SetActive(false);
+			Outfit outfit = playerObject.GetComponent<Outfit>();
+			if (outfit != null ){
+				GameObject pajamas = Instantiate(Resources.Load("prefabs/pajamas"), new Vector3(100, 100, 100), Quaternion.identity) as GameObject;
+				outfit.initUniform = pajamas;
+			}
+			Inventory focusInv = playerObject.GetComponent<Inventory>();
+			if (focusInv){
+				focusInv.ClearInventory();
+				UINew.Instance.UpdateInventoryButton(focusInv);
+			}
+			Eater focusEater = playerObject.GetComponent<Eater>();
+			if (focusEater){
+				focusEater.nutrition = 0;
+				focusEater.nausea = 0;
+			}
+			Hurtable playerHurtable = playerObject.GetComponent<Hurtable>();
+			if (playerHurtable){
+				playerHurtable.health = playerHurtable.maxHealth;
+			}
+			MySaver.Save();
+			awaitNewDayPrompt = CheckNewDayPrompt();
+			// TODO: check events related to having completed the last completed commercial
 		}
 	}
 

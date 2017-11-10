@@ -248,6 +248,9 @@ public class UINew: Singleton<UINew> {
 		CloseActiveMenu();
 		ClearWorldButtons();
 		ClearActionButtons();
+		foreach(Transform child in UICanvas.transform.Find("iconDock")){
+			child.gameObject.SetActive(active);
+		}
 		if (active)
 			UpdateButtons();
 	}

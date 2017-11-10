@@ -72,9 +72,7 @@ public class Intrinsics : MonoBehaviour {
 		message.netIntrinsic = net;
 		Toolbox.Instance.SendMessage(gameObject, this, message);
 		if (GameManager.Instance.playerObject == gameObject){
-			GameManager.Instance.FocusIntrinsicsChanged(net);
-			UINew.Instance.ClearStatusIcons();
-			SetupStatusIcon();
+			GameManager.Instance.FocusIntrinsicsChanged(this);
 		}
 	}
 	// TODO: fix the intrinsic update. A smarter way to zero out the intrinsic when it's timed out.
@@ -114,8 +112,14 @@ public class Intrinsic {
 	}
 	public bool Update(){
 		bool val = false;
-		foreach(Buff buff in buffs.Values){
-			val = val || buff.Update();
+		List<BuffType> removeBuffs = new List<BuffType>();
+		foreach(KeyValuePair<BuffType, Buff> kvp in buffs){
+			val = val || kvp.Value.Update();
+			if (kvp.Value.boolValue == false && kvp.Value.floatValue == 0)
+				removeBuffs.Add(kvp.Key);
+		}
+		foreach(BuffType type in removeBuffs){
+			buffs.Remove(type);
 		}
 		return val;
 	}
@@ -155,8 +159,14 @@ public class Buff {
 	public float initLifetime;
 	public float time;
 	public string name;
-	public Buff(){	}
+	public Intrinsic intrinsic;
+	public Buff(){}
+	// public Buff(BuffType type){
+	// 	this.type = type;
+	// }
 	public Buff(Buff otherBuff){
+		// this.intrinsic = intrinsic;
+		// this.type = type;
 		this.boolValue = otherBuff.boolValue;
 		this.floatValue = otherBuff.floatValue;
 		this.lifetime = 0;

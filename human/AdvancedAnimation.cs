@@ -15,6 +15,8 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 	public  string sequence{
 		get{ return _sequence;}
 		set{ 
+			// Debug.Log("setting sequence "+value);
+			// Debug.Log("old value: "+_sequence);
 			if (_sequence != value){
 				_sequence = value;
 				UpdateSequence();
@@ -34,11 +36,13 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 	public string baseName;
 	private int baseFrame;
 	private int frame;
+	public Animation animation;
 	public Controllable.HitState hitState;
 	private bool doubledOver;
-	void Start () {
+	void Awake () {
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		controllable = GetComponent<Controllable>();
+		animation = GetComponent<Animation>();
 		LoadSprites();
 	}
 	public void ReceiveMessage(Message message){
@@ -71,7 +75,6 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 				SetFrame(0);
 			}
 		}
-
 		if (message is MessageHitstun){
 			MessageHitstun hits = (MessageHitstun)message;
 			// hitStun = hits.value;
@@ -85,12 +88,15 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 		sprites = Resources.LoadAll<Sprite>("spritesheets/" + spriteSheet);
 	}
 	public void UpdateSequence(){
-		GetComponent<Animation>().Play(sequence);
+		// Debug.Log("updatesequence "+sequence);
+		animation.Stop();
+		animation.Play(sequence);
+		// Debug.Log(animation.IsPlaying(sequence));
 	}
 
 	public void LateUpdate(){
 		if (controllable == null)
-			Start();
+			Awake();
 		spriteSheet = baseName+"_spritesheet";
 		string updateSequence = "generic3";
 		
@@ -220,12 +226,9 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 		}
 		return updateSequence;
 	}
-
 	public void SetFrame(int animationFrame){
+		// Debug.Log("set frame "+animationFrame.ToString());
 		frame = animationFrame + baseFrame;
 		spriteRenderer.sprite = sprites[frame];
 	}
-
-
-
 }
