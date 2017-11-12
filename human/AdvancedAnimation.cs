@@ -36,13 +36,13 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 	public string baseName;
 	private int baseFrame;
 	private int frame;
-	public Animation animation;
+	public Animation animator;
 	public Controllable.HitState hitState;
 	private bool doubledOver;
 	void Awake () {
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		controllable = GetComponent<Controllable>();
-		animation = GetComponent<Animation>();
+		animator = GetComponent<Animation>();
 		LoadSprites();
 	}
 	public void ReceiveMessage(Message message){
@@ -89,8 +89,8 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 	}
 	public void UpdateSequence(){
 		// Debug.Log("updatesequence "+sequence);
-		animation.Stop();
-		animation.Play(sequence);
+		animator.Stop();
+		animator.Play(sequence);
 		// Debug.Log(animation.IsPlaying(sequence));
 	}
 

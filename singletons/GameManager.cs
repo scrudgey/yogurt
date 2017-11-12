@@ -114,7 +114,7 @@ public partial class GameManager : Singleton<GameManager> {
 	} 
 	public void FocusIntrinsicsChanged(Intrinsics intrinsics){
 		if (intrinsics.NetIntrinsic().boolValue(BuffType.telepathy)){
-			Debug.Log("focus telepathic");
+			// Debug.Log("focus telepathic");
 			cam.cullingMask |= 1 << LayerMask.NameToLayer("thoughts");
 		} else {
 			try {

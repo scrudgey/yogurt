@@ -12,10 +12,12 @@ public class Intrinsics : MonoBehaviour {
 	}
 	public List<initBuff> initialBuffs = new List<initBuff>();
 	void Awake(){
-		Intrinsic initIntrinsic = new Intrinsic();
-		intrinsics.Add(initIntrinsic);
-		foreach(initBuff i in initialBuffs){
-			initIntrinsic.buffs[i.type] = new Buff(i.buff);
+		if (initialBuffs.Count > 0){
+			Intrinsic initIntrinsic = new Intrinsic();
+			intrinsics.Add(initIntrinsic);
+			foreach(initBuff i in initialBuffs){
+				initIntrinsic.buffs[i.type] = new Buff(i.buff);
+			}
 		}
 	}
 	public List<Intrinsic> AddIntrinsic(Intrinsics ins, bool timeout=true){
@@ -27,10 +29,13 @@ public class Intrinsics : MonoBehaviour {
 	}
 	public void AddIntrinsic(Intrinsic i, bool timeout=true){
 		Intrinsic intrinsicCopy = new Intrinsic(i);
+		// foreach(KeyValuePair<BuffType,Buff> kvp in intrinsicCopy.buffs){
+		// 		Debug.Log(name+" adding a buff for "+kvp.Key.ToString());
+		// }
 		if (timeout){
-			foreach(Buff buff in intrinsicCopy.buffs.Values){
-				if (buff.initLifetime != 0){
-					buff.lifetime = buff.initLifetime;
+			foreach(KeyValuePair<BuffType,Buff> kvp in intrinsicCopy.buffs){
+				if (kvp.Value.initLifetime != 0){
+					kvp.Value.lifetime = kvp.Value.initLifetime;
 				}
 			}
 		}
@@ -42,6 +47,7 @@ public class Intrinsics : MonoBehaviour {
 			foreach(Intrinsic intrinsic in intrinsics){
 				if (intrinsic.Equals(removeThis)){
 					intrinsics.Remove(intrinsic);
+					// Debug.Log(this.ToString()+" removing "+intrinsic.ToString());
 					break;
 				}
 			}
@@ -88,6 +94,7 @@ public class Intrinsics : MonoBehaviour {
 		}
 	}
 	public void SetupStatusIcon(){
+		// Debug.Log("setting up status icons: "+intrinsics.Count.ToString());
 		foreach(Intrinsic intrins in intrinsics){
 			foreach(BuffType key in intrins.buffs.Keys){
 				if (intrins.buffs[key].boolValue == true || intrins.buffs[key].floatValue > 0){
@@ -127,9 +134,12 @@ public class Intrinsic {
 		bool match = true;
 		foreach(BuffType key in buffs.Keys){
 			if (other.buffs.ContainsKey(key)){
+				// Debug.Log("comparing "+key);
 				match &= buffs[key].boolValue == other.buffs[key].boolValue;
 				match &= buffs[key].floatValue == other.buffs[key].floatValue;
+				Debug.Log(match);
 			} else {
+				// Debug.Log("other intrinsic does not contain "+key);
 				match = false;
 			}
 		}
