@@ -9,7 +9,6 @@ public class Liquid {
 	public float colorG;
 	public float colorB;
 	public float colorA;
-	public bool poison;
 	public Color color;
 	public float nutrition;
 	public bool vegetable;
@@ -33,7 +32,6 @@ public class Liquid {
 		returnLiquid.meat = l1.meat | l2.meat;
 		returnLiquid.immoral = l1.immoral | l2.immoral;
 		returnLiquid.offal = l1.offal | l2.offal;
-		returnLiquid.poison = l1.poison | l2.poison;
 		returnLiquid.colorR = (l1.colorR + l2.colorR) / 2.0f;
 		returnLiquid.colorG = (l1.colorG + l2.colorG) / 2.0f;
 		returnLiquid.colorB = (l1.colorB + l2.colorB) / 2.0f;
@@ -59,20 +57,23 @@ public class Liquid {
 							float.Parse(data["g"])/255.0F, 
 							float.Parse(data["b"])/255.0F,
 							float.Parse(data["a"])/255.0f);
-		l.poison = bool.Parse(data["poison"]);
+		
 		l.nutrition = float.Parse(data["nutrition"]);
 		l.vegetable = bool.Parse(data["vegetable"]);
 		l.meat = bool.Parse(data["meat"]);
 		l.immoral = bool.Parse(data["immoral"]);
 		l.offal = bool.Parse(data["offal"]);
 		l.flammable = bool.Parse(data["flammable"]);
+		l.intrinsic = new Intrinsic();
 		if (data.ContainsKey("strength")){
-			l.intrinsic = new Intrinsic();
 			l.intrinsic.buffs[BuffType.strength] = new Buff();
 			l.intrinsic.buffs[BuffType.strength].boolValue = true;
 			l.intrinsic.buffs[BuffType.strength].initLifetime = 25f;
-			// l.intrinsic.strength.boolValue = true;
-			// l.intrinsic.strength.initLifetime = 25f;
+		}
+		if (data.ContainsKey("poison")){
+			l.intrinsic.buffs[BuffType.poison] = new Buff();
+			l.intrinsic.buffs[BuffType.poison].boolValue = true;
+			l.intrinsic.buffs[BuffType.poison].initLifetime = 5f;
 		}
 		return l;
 	}
@@ -86,7 +87,7 @@ public class Liquid {
 		monoLiquid.edible.immoral = liquid.immoral;
 		monoLiquid.edible.offal = liquid.offal;
 		monoLiquid.edible.pureeColor = liquid.color;
-        monoLiquid.edible.poison = liquid.poison;
+        // monoLiquid.edible.poison = liquid.poison;
         monoLiquid.edible.vomit = liquid.vomit;
 		if (liquid.flammable){
 			Flammable flam = target.AddComponent<Flammable>();

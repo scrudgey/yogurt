@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Eater : Interactive {
+public class Eater : Interactive, IMessagable {
 	public float nutrition;
 	public enum preference{neutral, likes, dislikes}
 	enum nauseaStatement{none, warning, imminent}
@@ -51,11 +51,10 @@ public class Eater : Interactive {
 	}
 	void Update () {
         if (poisonNausea){
-            nausea += Time.deltaTime * 50f;
+            nausea += Time.deltaTime * 30f;
         }
 		if (nausea > 50){
 			Vomit();
-            poisonNausea = false;
 		}
 		if (nutrition > 100){
 			nausea += Time.deltaTime * 2;
@@ -90,22 +89,22 @@ public class Eater : Interactive {
 	public void Eat (Edible food){
 		int reaction;
 		nutrition += food.nutrition;
-        if (food.poison)
-            poisonNausea = true;
+        // if (food.poison)
+        //     poisonNausea = true;
 		MessageHead head = new MessageHead();
 		head.type = MessageHead.HeadType.eating;
 		head.value = true;
 		head.crumbColor = food.pureeColor;
 		Toolbox.Instance.SendMessage(gameObject, this, head);
 		//randomly store a clone of the object for later vomiting
-        if (!food.poison){
-            if (eaten){
-				ClaimsManager.Instance.WasDestroyed(eaten);
-                Destroy(eaten);
-            }
-            eaten = Instantiate(food.gameObject) as GameObject;
-            eaten.SetActive(false);
-        }
+        // if (!food.poison){
+		if (eaten){
+			ClaimsManager.Instance.WasDestroyed(eaten);
+			Destroy(eaten);
+		}
+		eaten = Instantiate(food.gameObject) as GameObject;
+		eaten.SetActive(false);
+        // }
 		//update our status based on our reaction to the food
 		reaction = CheckReaction(food);
 		if(reaction > 0){
@@ -191,6 +190,16 @@ public class Eater : Interactive {
 		Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Blaaaaargh!"));
 		if (audioSource){
 			audioSource.PlayOneShot(Resources.Load("sounds/vomit", typeof(AudioClip)) as AudioClip);
+		}
+	}
+	public void ReceiveMessage(Message incoming){
+		if (incoming is MessageNetIntrinsic){
+			MessageNetIntrinsic message = (MessageNetIntrinsic)incoming;
+			if (message.netIntrinsic.boolValue(BuffType.poison)){
+				poisonNausea = true;
+			} else {
+				poisonNausea = false;
+			}
 		}
 	}
 }
