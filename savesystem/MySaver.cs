@@ -62,10 +62,12 @@ public class MySaver {
 		FileStream sceneStream = File.Create(scenePath);
 		FileStream playerStream = File.Create(playerPath);
 		// retrieve all persistent objects
-		List<GameObject> objectList = new List<GameObject>();
+		HashSet<GameObject> objectList = new HashSet<GameObject>();
 		List<Persistent> persistents = new List<Persistent>();
 		// add those objects which are disabled and would therefore not be found by our first search
-		objectList.AddRange(disabledPersistents);
+		foreach(GameObject disabledPersistent in disabledPersistents){
+			objectList.Add(disabledPersistent);
+		}
 		foreach (MyMarker mark in GameObject.FindObjectsOfType<MyMarker>()){
 			objectList.Add(mark.gameObject);
 		}

@@ -29,33 +29,34 @@ public class Head : Interactive, IExcludable {
 	}
 	
 	public void DonHat(Hat h){
+		// Debug.Log("donning hat "+h.name);
 		if (hat)
 			RemoveHat();
 		ClaimsManager.Instance.ClaimObject(h.gameObject, this);
 		hat = h;
 
-		PhysicalBootstrapper phys = hat.GetComponent<PhysicalBootstrapper>();
+		PhysicalBootstrapper phys = h.GetComponent<PhysicalBootstrapper>();
 		if (phys)
 			phys.DestroyPhysical();
 		hatPoint.transform.localScale = Vector3.one;
 		transform.localScale = Vector3.one;
-		hat.transform.rotation = Quaternion.identity;
-		if (hat.helmet){
-			hat.transform.position = transform.position;
-			hat.transform.SetParent(transform, true);
+		h.transform.rotation = Quaternion.identity;
+		if (h.helmet){
+			h.transform.position = transform.position;
+			h.transform.SetParent(transform, true);
 			spriteRenderer.enabled = false;
 		} else {
-			hat.transform.position = hatPoint.transform.position;
-			hat.transform.SetParent(hatPoint.transform, true);
+			h.transform.position = hatPoint.transform.position;
+			h.transform.SetParent(hatPoint.transform, true);
 		}
-		hat.transform.rotation = Quaternion.identity;
-		hat.GetComponent<Rigidbody2D>().isKinematic = true;
-		hat.GetComponent<Collider2D>().isTrigger = true;
+		h.transform.rotation = Quaternion.identity;
+		h.GetComponent<Rigidbody2D>().isKinematic = true;
+		h.GetComponent<Collider2D>().isTrigger = true;
 		HatAnimation hatAnimator = hat.GetComponent<HatAnimation>();
 		if (hatAnimator){
 			hatAnimator.RegisterDirectable();
 		}
-		Toolbox.Instance.AddIntrinsic(transform.parent.gameObject, hat.gameObject);
+		Toolbox.Instance.AddIntrinsic(transform.parent.gameObject, h.gameObject, timeout:false);
 		GameManager.Instance.CheckItemCollection(transform.parent.gameObject, h.gameObject);
 	}
 	public string DonHat_desc(Hat h){
@@ -69,7 +70,8 @@ public class Head : Interactive, IExcludable {
 		if (hat.helmet){
 			spriteRenderer.enabled = true;
 		}
-		Toolbox.Instance.RemoveIntrinsic(transform.parent.gameObject, hat.gameObject);
+		// Debug.Log("removing intrinsic");
+		Toolbox.Instance.RemoveIntrinsic(GetComponentInParent<Intrinsics>().gameObject, hat.gameObject);
 		ClaimsManager.Instance.DisclaimObject(hat.gameObject,this);
 		HatAnimation hatAnimator = hat.GetComponent<HatAnimation>();
 		if (hatAnimator){
@@ -77,7 +79,6 @@ public class Head : Interactive, IExcludable {
 		}
 		hat.GetComponent<Rigidbody2D>().isKinematic = false;
 		hat.GetComponent<Collider2D>().isTrigger = false;
-
 		PhysicalBootstrapper phys = hat.GetComponent<PhysicalBootstrapper>();
 		if (phys){
 			phys.InitPhysical(0.2f,Vector2.zero);

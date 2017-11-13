@@ -1,19 +1,27 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+
+public enum BuffType{telepathy, speed, bonusHealth, armor, fireproof, noPhysicalDamage, invulnerable, strength, poison}
+
 public class Intrinsics : MonoBehaviour {
 	public List<Intrinsic> intrinsics = new List<Intrinsic>();
+	[System.Serializable]
+	public struct initBuff{
+		public BuffType type;
+		public Buff buff;
+	}
+	public List<initBuff> initialBuffs = new List<initBuff>();
+	void Awake(){
+		if (initialBuffs.Count > 0){
+			Intrinsic initIntrinsic = new Intrinsic();
+			intrinsics.Add(initIntrinsic);
+			foreach(initBuff i in initialBuffs){
+				initIntrinsic.buffs[i.type] = new Buff(i.buff);
+			}
+		}
+	}
 	public List<Intrinsic> AddIntrinsic(Intrinsics ins, bool timeout=true){
 		foreach(Intrinsic i in ins.intrinsics){
-			// Intrinsic intrinsicCopy = new Intrinsic(i);
-			// if (timeout){
-			// 	foreach(Buff buff in intrinsicCopy.Buffs()){
-			// 		if (buff.initLifetime != 0){
-			// 			buff.lifetime = buff.initLifetime;
-			// 		}
-			// 	}
-			// }
-			// intrinsicCopy.persistent = true;
-			// intrinsics.Add(intrinsicCopy);
 			AddIntrinsic(i, timeout:timeout);
 		}
 		IntrinsicsChanged();
@@ -21,14 +29,17 @@ public class Intrinsics : MonoBehaviour {
 	}
 	public void AddIntrinsic(Intrinsic i, bool timeout=true){
 		Intrinsic intrinsicCopy = new Intrinsic(i);
+		// foreach(KeyValuePair<BuffType,Buff> kvp in intrinsicCopy.buffs){
+		// 		Debug.Log(name+" adding a buff for "+kvp.Key.ToString());
+		// }
 		if (timeout){
-			foreach(Buff buff in intrinsicCopy.Buffs()){
-				if (buff.initLifetime != 0){
-					buff.lifetime = buff.initLifetime;
+			foreach(KeyValuePair<BuffType,Buff> kvp in intrinsicCopy.buffs){
+				if (kvp.Value.initLifetime != 0){
+					kvp.Value.lifetime = kvp.Value.initLifetime;
 				}
 			}
 		}
-		intrinsicCopy.persistent = true;
+		// intrinsicCopy.persistent = true;
 		intrinsics.Add(intrinsicCopy);
 	}
 	public void RemoveIntrinsic(Intrinsics i){
@@ -36,6 +47,7 @@ public class Intrinsics : MonoBehaviour {
 			foreach(Intrinsic intrinsic in intrinsics){
 				if (intrinsic.Equals(removeThis)){
 					intrinsics.Remove(intrinsic);
+					// Debug.Log(this.ToString()+" removing "+intrinsic.ToString());
 					break;
 				}
 			}
@@ -45,13 +57,18 @@ public class Intrinsics : MonoBehaviour {
 	public Intrinsic NetIntrinsic(){
 		Intrinsic netIntrinsic = new Intrinsic();
 		foreach(Intrinsic i in intrinsics){
-			netIntrinsic.telepathy.boolValue = netIntrinsic.telepathy.boolValue || i.telepathy.boolValue;
-			netIntrinsic.fireproof.boolValue = netIntrinsic.fireproof.boolValue || i.fireproof.boolValue;
-			netIntrinsic.noPhysicalDamage.boolValue = netIntrinsic.noPhysicalDamage.boolValue || i.noPhysicalDamage.boolValue;
-			netIntrinsic.strength.boolValue = netIntrinsic.strength.boolValue || i.strength.boolValue;
-			netIntrinsic.armor.floatValue += i.armor.floatValue;
-			netIntrinsic.speed.floatValue += i.speed.floatValue;
-			netIntrinsic.bonusHealth.floatValue += i.bonusHealth.floatValue;
+			foreach(BuffType key in i.buffs.Keys){
+				if (netIntrinsic.buffs.ContainsKey(key)){
+					//sum the values
+					netIntrinsic.buffs[key].boolValue |= i.buffs[key].boolValue;
+					netIntrinsic.buffs[key].floatValue += i.buffs[key].floatValue;
+				} else {
+					//set values to the given buff
+					netIntrinsic.buffs[key] = new Buff();
+					netIntrinsic.buffs[key].boolValue = i.buffs[key].boolValue;
+					netIntrinsic.buffs[key].floatValue = i.buffs[key].floatValue;
+				}
+			}
 		}
 		return netIntrinsic;
 	}
@@ -60,8 +77,9 @@ public class Intrinsics : MonoBehaviour {
 		MessageNetIntrinsic message = new MessageNetIntrinsic();
 		message.netIntrinsic = net;
 		Toolbox.Instance.SendMessage(gameObject, this, message);
-		if (GameManager.Instance.playerObject == gameObject)
-			GameManager.Instance.FocusIntrinsicsChanged(net);
+		if (GameManager.Instance.playerObject == gameObject){
+			GameManager.Instance.FocusIntrinsicsChanged(this);
+		}
 	}
 	// TODO: fix the intrinsic update. A smarter way to zero out the intrinsic when it's timed out.
 	// move the timeout and incrementing logic & etc to the bugg itself, duh
@@ -75,58 +93,71 @@ public class Intrinsics : MonoBehaviour {
 			IntrinsicsChanged();
 		}
 	}
+	public void SetupStatusIcon(){
+		// Debug.Log("setting up status icons: "+intrinsics.Count.ToString());
+		foreach(Intrinsic intrins in intrinsics){
+			foreach(BuffType key in intrins.buffs.Keys){
+				if (intrins.buffs[key].boolValue == true || intrins.buffs[key].floatValue > 0){
+					GameObject icon = Instantiate(Resources.Load("UI/StatusIcon")) as GameObject;
+					UIStatusIcon statusIcon = icon.GetComponent<UIStatusIcon>();
+					statusIcon.Initialize(key, intrins.buffs[key]);
+					UINew.Instance.AddStatusIcon(icon);
+				}
+			}
+		}	
+	}
 }
 [System.Serializable]
 public class Intrinsic {
-	public bool persistent;
-	public Buff telepathy = new Buff();
-	public Buff speed = new Buff();
-	public Buff bonusHealth = new Buff();
-	public Buff armor = new Buff();
-	public Buff fireproof = new Buff();
-	public Buff noPhysicalDamage = new Buff();
-	public Buff invulnerable = new Buff();
-	public Buff strength = new Buff();
-	public Intrinsic(){	}
+	// public bool persistent;
+	public SerializableDictionary<BuffType, Buff> buffs = new SerializableDictionary<BuffType, Buff>();	public Intrinsic(){	}
 	public Intrinsic(Intrinsic otherIntrinsic){
-		this.persistent = otherIntrinsic.persistent;
-		List<Buff> buffCopies = new List<Buff>();
-		foreach(Buff buff in otherIntrinsic.Buffs()){
-			buffCopies.Add(new Buff(buff));
+		// this.persistent = otherIntrinsic.persistent;
+		foreach(BuffType key in otherIntrinsic.buffs.Keys){
+			buffs[key] = new Buff(otherIntrinsic.buffs[key]);
 		}
-		SetBuffs(buffCopies);
-	}
-	public List<Buff> Buffs(){
-		return new List<Buff>(new Buff[]{telepathy, speed, bonusHealth, armor, fireproof, noPhysicalDamage, invulnerable, strength});
-	}
-	public void SetBuffs(List<Buff> buffs){
-		telepathy = buffs[0];
-		speed = buffs[1];
-		bonusHealth = buffs[2];
-		armor = buffs[3];
-		fireproof = buffs[4];
-		noPhysicalDamage = buffs[5];
-		invulnerable = buffs[6];
-		strength = buffs[7];
 	}
 	public bool Update(){
 		bool val = false;
-		foreach(Buff buff in Buffs()){
-			val = val || buff.Update();
+		List<BuffType> removeBuffs = new List<BuffType>();
+		foreach(KeyValuePair<BuffType, Buff> kvp in buffs){
+			val = val || kvp.Value.Update();
+			if (kvp.Value.boolValue == false && kvp.Value.floatValue == 0)
+				removeBuffs.Add(kvp.Key);
+		}
+		foreach(BuffType type in removeBuffs){
+			buffs.Remove(type);
 		}
 		return val;
 	}
 	public bool Equals(Intrinsic other){
 		bool match = true;
-        match &= telepathy.boolValue == other.telepathy.boolValue;
-		match &= fireproof.boolValue == other.fireproof.boolValue;
-		match &= invulnerable.boolValue == other.invulnerable.boolValue;
-		match &= noPhysicalDamage.boolValue == other.noPhysicalDamage.boolValue;
-		
-		match &= speed.floatValue == other.speed.floatValue;
-		match &= bonusHealth.floatValue == other.bonusHealth.floatValue;
-		match &= armor.floatValue == other.armor.floatValue;
+		foreach(BuffType key in buffs.Keys){
+			if (other.buffs.ContainsKey(key)){
+				// Debug.Log("comparing "+key);
+				match &= buffs[key].boolValue == other.buffs[key].boolValue;
+				match &= buffs[key].floatValue == other.buffs[key].floatValue;
+				Debug.Log(match);
+			} else {
+				// Debug.Log("other intrinsic does not contain "+key);
+				match = false;
+			}
+		}
         return match;
+	}
+	public bool boolValue(BuffType type){
+		bool result = false;
+		if (buffs.ContainsKey(type)){
+			result = buffs[type].boolValue;
+		}
+		return result;
+	}
+	public float floatValue(BuffType type){
+		float result = 0f;
+		if (buffs.ContainsKey(type)){
+			result = buffs[type].floatValue;
+		}
+		return result;
 	}
 }
 
@@ -137,8 +168,15 @@ public class Buff {
 	public float lifetime;
 	public float initLifetime;
 	public float time;
+	public string name;
+	public Intrinsic intrinsic;
 	public Buff(){}
+	// public Buff(BuffType type){
+	// 	this.type = type;
+	// }
 	public Buff(Buff otherBuff){
+		// this.intrinsic = intrinsic;
+		// this.type = type;
 		this.boolValue = otherBuff.boolValue;
 		this.floatValue = otherBuff.floatValue;
 		this.lifetime = 0;

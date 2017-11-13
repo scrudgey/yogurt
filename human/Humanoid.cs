@@ -119,8 +119,8 @@ public class Humanoid : Controllable, IMessagable {
 		base.ReceiveMessage(message);
 		if (message is MessageNetIntrinsic){
 			MessageNetIntrinsic intrins = (MessageNetIntrinsic)message;
-			if (intrins.netIntrinsic != null){
-				maxSpeed = baseSpeed + intrins.netIntrinsic.speed.floatValue;
+			if (intrins.netIntrinsic.buffs.ContainsKey(BuffType.speed)){
+				maxSpeed = baseSpeed + intrins.netIntrinsic.buffs[BuffType.speed].floatValue;
 			}
 		}
 	}

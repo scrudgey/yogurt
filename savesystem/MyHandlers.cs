@@ -288,11 +288,12 @@ public class IntrinsicsHandler: SaveHandler<Intrinsics>{
 	public override void SaveData(Intrinsics instance, PersistentComponent data, ReferenceResolver resolver){
 		data.intrinsics = new List<Intrinsic>();
 		foreach(Intrinsic intrinsic in instance.intrinsics){
-			if (intrinsic.persistent)
-				data.intrinsics.Add(intrinsic);
+			// if (intrinsic.persistent)
+			data.intrinsics.Add(intrinsic);
 		}
 	}
 	public override void LoadData(Intrinsics instance, PersistentComponent data){
+		instance.intrinsics = new List<Intrinsic>();
 		foreach(Intrinsic intrinsic in data.intrinsics){
 			instance.intrinsics.Add(intrinsic);
 		}

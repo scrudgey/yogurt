@@ -112,11 +112,18 @@ public class Destructible : Damageable {
 		base.ReceiveMessage(message);
 		if (message is MessageNetIntrinsic){
 			MessageNetIntrinsic intrins = (MessageNetIntrinsic)message;
-			armor = intrins.netIntrinsic.armor.floatValue;
-			if (intrins.netIntrinsic.bonusHealth.floatValue > bonusHealth){
-				health += intrins.netIntrinsic.bonusHealth.floatValue;
+			if (intrins.netIntrinsic.buffs.ContainsKey(BuffType.armor)){
+				armor = intrins.netIntrinsic.buffs[BuffType.armor].floatValue;
+				// armor = intrins.netIntrinsic.armor.floatValue;
 			}
-			bonusHealth = intrins.netIntrinsic.bonusHealth.floatValue;
+			if (intrins.netIntrinsic.buffs.ContainsKey(BuffType.bonusHealth)){
+				// if (intrins.netIntrinsic.bonusHealth.floatValue > bonusHealth){
+				if (intrins.netIntrinsic.buffs[BuffType.bonusHealth].floatValue > bonusHealth){
+					health += intrins.netIntrinsic.buffs[BuffType.bonusHealth].floatValue;
+				}
+				bonusHealth = intrins.netIntrinsic.buffs[BuffType.bonusHealth].floatValue;
+			}
+			
 		}
 	}
 

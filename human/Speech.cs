@@ -287,19 +287,19 @@ public class Speech : Interactive, IMessagable {
     public void CompareLastNetIntrinsic(Intrinsic net){
         if (lastNetIntrinsic == null)
             return;
-        if (lastNetIntrinsic.fireproof.boolValue != net.fireproof.boolValue){
-            if (net.fireproof.boolValue){
+        if (lastNetIntrinsic.boolValue(BuffType.fireproof) != net.boolValue(BuffType.fireproof)){
+            if (net.boolValue(BuffType.fireproof)){
                 Say("I feel fireproof!");
             } else {
                 Say("I no longer feel fireproof!");
             } 
         }
-        if (lastNetIntrinsic.telepathy.boolValue != net.telepathy.boolValue){
-            if (net.telepathy.boolValue)
+        if (lastNetIntrinsic.boolValue(BuffType.telepathy) != net.boolValue(BuffType.telepathy)){
+            if (net.boolValue(BuffType.telepathy))
                 Say("I can hear thoughts!");
         }
-        if (lastNetIntrinsic.strength.boolValue != net.strength.boolValue){
-            if (net.strength.boolValue){
+        if (lastNetIntrinsic.boolValue(BuffType.strength) != net.boolValue(BuffType.strength)){
+            if (net.boolValue(BuffType.strength)){
                 Say("I feel strong!");
             } else {
                 Say("I no longer feel strong!");

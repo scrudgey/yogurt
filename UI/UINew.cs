@@ -248,6 +248,9 @@ public class UINew: Singleton<UINew> {
 		CloseActiveMenu();
 		ClearWorldButtons();
 		ClearActionButtons();
+		foreach(Transform child in UICanvas.transform.Find("iconDock")){
+			child.gameObject.SetActive(active);
+		}
 		if (active)
 			UpdateButtons();
 	}
@@ -546,5 +549,13 @@ public class UINew: Singleton<UINew> {
 			bounceScript.target = target;
 		}
 		bounceScript.text = text;
+	}
+	public void ClearStatusIcons(){
+		foreach(Transform child in UICanvas.transform.Find("iconDock")){
+			Destroy(child.gameObject);
+		}
+	}
+	public void AddStatusIcon(GameObject statusIcon){
+		statusIcon.transform.SetParent(UICanvas.transform.Find("iconDock"), false);
 	}
 }
