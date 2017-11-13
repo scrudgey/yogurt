@@ -138,13 +138,6 @@ public class Interaction {
 	}
 	public bool IsValid(){
 		bool validation = true;
-		// if (duplicator){
-		// 	if (duplicationTarget != parent.gameObject){
-		// 		return true;
-		// 	} else {
-		// 		return false;
-		// 	}
-		// }
 		if (validationFunction){
 			if (validationMethodInfo == null)
 				ConfigureValidator();

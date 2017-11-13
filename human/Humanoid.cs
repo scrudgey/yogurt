@@ -21,7 +21,7 @@ public class Humanoid : Controllable, IMessagable {
 	private Quaternion rightTilt;
 	private Quaternion leftTilt;
 	private Quaternion forward;
-	private float initFriction;
+	// private float initFriction;
 	private Rigidbody2D rigidBody2D;
 	private Vector3 scaleVector{
 		get {
@@ -69,7 +69,7 @@ public class Humanoid : Controllable, IMessagable {
 			ResetInput();
 			return;
 		}
-		rigidBody2D.drag = initFriction;
+		// rigidBody2D.drag = initFriction;
 		// Do the normal controls stuff
 		// set vertical force or damp if neither up nor down is held
 		if (upFlag)

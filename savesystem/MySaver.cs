@@ -37,6 +37,19 @@ public class MySaver {
 		{typeof(Stain),								() => new StainHandler() }, 
 		{typeof(DropDripper),						() => new DropDripperHandler() }
 	};
+	public static List<Type> LoadOrder = new List<Type>{
+		typeof(Intrinsics)
+	};
+	static int CompareComponent(Component x, Component y)
+    {
+		int xIndex = 0;
+		int yIndex = 0;
+		if (LoadOrder.Contains(x.GetType()))
+			xIndex = LoadOrder.IndexOf(x.GetType());
+		if (LoadOrder.Contains(y.GetType()))
+			yIndex = LoadOrder.IndexOf(y.GetType());
+		return xIndex - yIndex;
+    }
 	public static void CleanupSaves(){
 		idIndex = 0;
 		loadedIds = new HashSet<int>();
@@ -154,13 +167,15 @@ public class MySaver {
 	}
 	public static void HandleLoadedPersistents(List<Persistent> persistents){
 		foreach (Persistent persistent in persistents){
-			foreach (Component component in loadedObjects[persistent.id].GetComponents<Component>()){
-				Func<SaveHandler> get;
-				if (MySaver.Handlers.TryGetValue(component.GetType(), out get)){
-					var handler = get();
-					PersistentComponent data = persistent.persistentComponents[component.GetType().ToString()];
-					handler.LoadData(component, data);
-				}	
+			List<Component> loadedComponents = new List<Component>(loadedObjects[persistent.id].GetComponents<Component>());
+			loadedComponents.Sort(CompareComponent);
+			foreach (Component component in loadedComponents){
+				Func<SaveHandler> getHandler;
+				if (MySaver.Handlers.TryGetValue(component.GetType(), out getHandler)){
+					var handler = getHandler();
+					// PersistentComponent data = persistent.persistentComponents[component.GetType().ToString()];
+					handler.LoadData(component, persistent.persistentComponents[component.GetType().ToString()]);
+				}
 			}
 			// handle child objects
 			foreach (PersistentComponent persistentChild in persistent.persistentChildComponents.Values){
