@@ -37,7 +37,7 @@ public class InventoryHandler : SaveHandler<Inventory> {
 		instance.direction = data.vectors["direction"];
 		if (data.ints["holdingID"] != -1){
 			if (MySaver.loadedObjects.ContainsKey(data.ints["holdingID"]) ){
-				instance.GetItem( MySaver.loadedObjects[data.ints["holdingID"]].GetComponent<Pickup>() );
+				instance.GetItem(MySaver.loadedObjects[data.ints["holdingID"]].GetComponent<Pickup>());
 			} else {
 				Debug.Log("tried to get loadedobject " + data.ints["holdingID"].ToString() + " but was not found!");
 			}
@@ -335,6 +335,14 @@ public class HumanoidHandler: SaveHandler<Humanoid>{
 		if (data.bools["fightMode"] && !instance.fightMode){
 			instance.ToggleFightMode();
 		}	
+	}
+}
+public class VideoCameraHandler: SaveHandler<VideoCamera>{
+	public override void SaveData(VideoCamera instance, PersistentComponent data, ReferenceResolver resolver){
+		data.commercials[0] = instance.commercial;
+	}
+	public override void LoadData(VideoCamera instance, PersistentComponent data){
+		instance.commercial = data.commercials[0];
 	}
 }
 public class StainHandler: SaveHandler<Stain>{

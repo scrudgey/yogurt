@@ -15,6 +15,7 @@ public class PersistentComponent {
 	public List<SerializedPersonalAssessment> people;
 	public SerializableDictionary<string, SerializedKnowledge> knowledges = new SerializableDictionary<string, SerializedKnowledge>();
 	public List<Intrinsic> intrinsics;
+	public List<Commercial> commercials;
 	[XmlIgnoreAttribute]	
 	public Persistent persistent;
 	public PersistentComponent(){
