@@ -239,15 +239,15 @@ public class Speech : Interactive, IMessagable {
                 SayRandom();
                 return;
             }
-            if (message.sayLine){
-                ScriptDirector director = FindObjectOfType<ScriptDirector>();
-                if (!director){
-                    Say("What's my line?"); 
-                } else {
-                    Say(director.NextTomLine());
-                }
-                return;
-            }
+            // if (message.sayLine){
+            //     ScriptDirector director = FindObjectOfType<ScriptDirector>();
+            //     if (!director){
+            //         Say("What's my line?"); 
+            //     } else {
+            //         Say(director.NextTomLine());
+            //     }
+            //     return;
+            // }
             if (message.nimrodKey){
                 SayFromNimrod(message.phrase);
                 return;

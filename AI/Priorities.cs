@@ -218,7 +218,7 @@ namespace AI{
 
 	public class PriorityReadScript: Priority {
 		string nextLine;
-		ScriptDirector director;
+		// ScriptDirector director;
 		public PriorityReadScript(GameObject g, Controllable c): base(g, c){
 			priorityName = "readscript";
 			VideoCamera video = GameObject.FindObjectOfType<VideoCamera>();
@@ -240,18 +240,19 @@ namespace AI{
 				return -1;
 			}
 		}
-		public override void ReceiveMessage(Message incoming){
-			if (incoming is MessageScript){
-				MessageScript message = (MessageScript)incoming;
-				director = (ScriptDirector)incoming.messenger;
-				nextLine = message.coStarLine;
-			}
-		}
+		// public override void ReceiveMessage(Message incoming){
+		// 	if (incoming is MessageScript){
+		// 		MessageScript message = (MessageScript)incoming;
+		// 		director = (ScriptDirector)incoming.messenger;
+		// 		nextLine = message.coStarLine;
+		// 	}
+		// }
 		public override void DoAct(){
 			if (goal != null){
 				goal.Update();
 			}
 			if (nextLine != null){
+				VideoCamera director = GameObject.FindObjectOfType<VideoCamera>();
 				Vector3 dif = director.transform.position - gameObject.transform.position;
 				Vector2 direction = (Vector2)dif;
 				control.direction = direction;

@@ -339,10 +339,16 @@ public class HumanoidHandler: SaveHandler<Humanoid>{
 }
 public class VideoCameraHandler: SaveHandler<VideoCamera>{
 	public override void SaveData(VideoCamera instance, PersistentComponent data, ReferenceResolver resolver){
-		data.commercials[0] = instance.commercial;
+		data.commercials = new List<Commercial>();
+		data.commercials.Add(instance.commercial);
+		data.bools["live"] = instance.live;
 	}
 	public override void LoadData(VideoCamera instance, PersistentComponent data){
 		instance.commercial = data.commercials[0];
+		instance.live = data.bools["live"];
+		if (data.bools["live"]){
+			instance.Enable();
+		}
 	}
 }
 public class StainHandler: SaveHandler<Stain>{
@@ -433,8 +439,10 @@ public class AwarenessHandler: SaveHandler<Awareness>{
 		instance.hitState = (Controllable.HitState)data.ints["hitstate"];
 		foreach(SerializedKnowledge knowledge in data.knowledgeBase){
 			Knowledge newKnowledge = LoadKnowledge(knowledge);
-			GameObject subject = MySaver.loadedObjects[knowledge.gameObjectID];
-			instance.knowledgebase[subject] = newKnowledge;
+			if (newKnowledge != null){
+				GameObject subject = MySaver.loadedObjects[knowledge.gameObjectID];
+				instance.knowledgebase[subject] = newKnowledge;
+			}
 		}
 		foreach(SerializedPersonalAssessment pa in data.people){
 			PersonalAssessment assessment = LoadPerson(pa);
@@ -456,13 +464,17 @@ public class AwarenessHandler: SaveHandler<Awareness>{
 		return data;
 	}
 	Knowledge LoadKnowledge(SerializedKnowledge input){
-		Knowledge knowledge = new Knowledge();
-		knowledge.lastSeenPosition = input.lastSeenPosition;
-		knowledge.lastSeenTime = input.lastSeenTime;
-		knowledge.obj = MySaver.loadedObjects[input.gameObjectID];
-		knowledge.transform = knowledge.obj.transform;
-		knowledge.flammable = knowledge.obj.GetComponent<Flammable>();
-		return knowledge;
+		if (MySaver.loadedObjects.ContainsKey(input.gameObjectID)){
+			Knowledge knowledge = new Knowledge();
+			knowledge.lastSeenPosition = input.lastSeenPosition;
+			knowledge.lastSeenTime = input.lastSeenTime;
+			knowledge.obj = MySaver.loadedObjects[input.gameObjectID];
+			knowledge.transform = knowledge.obj.transform;
+			knowledge.flammable = knowledge.obj.GetComponent<Flammable>();
+			return knowledge;
+		} else {
+			return null;
+		}
 	}
 	SerializedPersonalAssessment SavePerson(PersonalAssessment input, ReferenceResolver resolver, Persistent persistent){
 		SerializedPersonalAssessment data = new SerializedPersonalAssessment();

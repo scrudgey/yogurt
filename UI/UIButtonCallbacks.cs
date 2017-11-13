@@ -17,10 +17,10 @@ public class UIButtonCallbacks : MonoBehaviour {
 			GameManager.Instance.EvaluateCommercial(video.commercial);
 		}
 	}
-	public void StopRecButtonClick(){
-		ScriptDirector director = GameObject.FindObjectOfType<ScriptDirector>();
-		director.ResetScript();
-	}
+	// public void StopRecButtonClick(){
+	// 	ScriptDirector director = GameObject.FindObjectOfType<ScriptDirector>();
+	// 	director.ResetScript();
+	// }
 	public void SaveButtonClick(){
 		MySaver.Save();
 		// Debug.Log("save...");

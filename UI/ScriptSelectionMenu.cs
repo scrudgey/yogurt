@@ -45,7 +45,7 @@ public class ScriptSelectionMenu : MonoBehaviour
         Controller.Instance.suspendInput = false;
         if (lastClicked){
             GameManager.Instance.activeCommercial = lastClicked.commercial;
-            ScriptDirector director = GameObject.FindObjectOfType<ScriptDirector>();
+            VideoCamera director = GameObject.FindObjectOfType<VideoCamera>();
             director.Enable();
         }
         Destroy(gameObject);
