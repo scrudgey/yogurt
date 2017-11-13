@@ -5,7 +5,8 @@ using System.Collections.Generic;
 public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 	public List<GameObject> items;
 	public GameObject initHolding;
-	public float strength;
+	// public float strength;
+	public bool strong;
 	public Pickup holding{
 		get {return _holding;}
 		set {
@@ -85,28 +86,28 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 			StashItem(holding.gameObject);
 		}else{
 			// strength check to see if we can pick it up
-			if (strength < pickup.weight){
-				// this.SendMessage("Say", "It's too heavy!");
-				Debug.Log("too heavy say");
-			} else {
-				if (holding){
-					DropItem();
-				}
-				//make the object the current holding.
-				ClaimsManager.Instance.ClaimObject(pickup.gameObject,this);
-				holding = pickup;
-				PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
-				if (phys)
-					phys.DestroyPhysical();
-				holding.transform.position = holdpoint.position;
-				holding.transform.SetParent(holdpoint, false);
-				holding.transform.rotation = Quaternion.identity;
-				holding.GetComponent<Rigidbody2D>().isKinematic = true;
-				holding.GetComponent<Collider2D>().isTrigger = true;
-				holding.holder = this;
-				if (holding.pickupSounds.Length > 0)
-					GetComponent<AudioSource>().PlayOneShot(holding.pickupSounds[Random.Range(0, holding.pickupSounds.Length)]);
+			if (pickup.heavyObject && !strong){
+				MessageSpeech message = new MessageSpeech("It's too heavy!");
+				Toolbox.Instance.SendMessage(gameObject, this, message);
+				return;
+			} 
+			if (holding){
+				DropItem();
 			}
+			//make the object the current holding.
+			ClaimsManager.Instance.ClaimObject(pickup.gameObject,this);
+			holding = pickup;
+			PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
+			if (phys)
+				phys.DestroyPhysical();
+			holding.transform.position = holdpoint.position;
+			holding.transform.SetParent(holdpoint, false);
+			holding.transform.rotation = Quaternion.identity;
+			holding.GetComponent<Rigidbody2D>().isKinematic = true;
+			holding.GetComponent<Collider2D>().isTrigger = true;
+			holding.holder = this;
+			if (holding.pickupSounds.Length > 0)
+				GetComponent<AudioSource>().PlayOneShot(holding.pickupSounds[Random.Range(0, holding.pickupSounds.Length)]);
 		}
 	}
 	public string GetItem_desc(Pickup pickup){
@@ -375,7 +376,8 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		}
 		if (m is MessageNetIntrinsic){
 			MessageNetIntrinsic intrins = (MessageNetIntrinsic)m;
-			if (intrins.netIntrinsic.boolValue(BuffType.strength)){
+			strong = intrins.netIntrinsic.boolValue(BuffType.strength);
+			if (strong){
 				if (strengthFX == null){
 					strengthFX = Instantiate(Resources.Load("particles/strength_particles")) as GameObject;
 					strengthFX.transform.SetParent(transform, false);
