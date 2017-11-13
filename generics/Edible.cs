@@ -6,7 +6,6 @@ public class Edible : Interactive {
 	public bool meat;
 	public bool immoral;
 	public bool offal;
-    // public bool poison;
     public bool vomit;
 	public bool blendable;
 	public string blend_liquid_name;
@@ -33,7 +32,6 @@ public class Edible : Interactive {
 			returnLiquid.nutrition = nutrition / 10;
 			returnLiquid.color = pureeColor;
 			returnLiquid.name = gameObject.name + " juice";
-			// returnLiquid.human = human;
 		}
 		return returnLiquid;
 	}
