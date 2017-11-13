@@ -160,7 +160,6 @@ public class Intrinsic {
 		return result;
 	}
 }
-
 [System.Serializable]
 public class Buff {
 	public bool boolValue;
