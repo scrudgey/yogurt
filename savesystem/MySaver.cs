@@ -35,7 +35,8 @@ public class MySaver {
 		{typeof(Speech),							() => new SpeechHandler() },
 		{typeof(Humanoid),							() => new HumanoidHandler() },
 		{typeof(Stain),								() => new StainHandler() }, 
-		{typeof(DropDripper),						() => new DropDripperHandler() }
+		{typeof(DropDripper),						() => new DropDripperHandler() },
+		{typeof(VideoCamera),						() => new VideoCameraHandler() }
 	};
 	public static List<Type> LoadOrder = new List<Type>{
 		typeof(Intrinsics)

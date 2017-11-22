@@ -17,10 +17,6 @@ public class UIButtonCallbacks : MonoBehaviour {
 			GameManager.Instance.EvaluateCommercial(video.commercial);
 		}
 	}
-	public void StopRecButtonClick(){
-		ScriptDirector director = GameObject.FindObjectOfType<ScriptDirector>();
-		director.ResetScript();
-	}
 	public void SaveButtonClick(){
 		MySaver.Save();
 		// Debug.Log("save...");
@@ -41,5 +37,12 @@ public class UIButtonCallbacks : MonoBehaviour {
 		// g.AddSymbol("hat-name", "hat");
 		// g.AddSymbol("item-name", "eggplant");
 		Debug.Log(g.Parse("{main}"));
+	}
+	public void HypnosisButtonClick(){
+		if (Controller.Instance.currentSelect != Controller.SelectType.hypnosis){
+			Controller.Instance.currentSelect = Controller.SelectType.hypnosis;
+		} else {
+			Controller.Instance.currentSelect = Controller.SelectType.none;
+		}
 	}
 }

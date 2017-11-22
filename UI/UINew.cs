@@ -38,6 +38,7 @@ public class UINew: Singleton<UINew> {
 	private GameObject saveButton;
 	private GameObject loadButton;
 	private GameObject testButton;
+	private GameObject hypnosisButton;
 	private bool init = false;
 	public bool inventoryVisible = false;
 	public Text status;
@@ -100,6 +101,9 @@ public class UINew: Singleton<UINew> {
 					case Controller.SelectType.insultAt:
 					SetActionText("Insult "+Toolbox.Instance.GetName(target));
 					break;
+					case Controller.SelectType.hypnosis:
+					SetActionText("Hypnotize "+Toolbox.Instance.GetName(target));
+					break;
 					default:
 					break;
 				}
@@ -112,7 +116,7 @@ public class UINew: Singleton<UINew> {
 				SetActionText("");
 			}
 		}
-		if (Controller.Instance.currentSelect == Controller.SelectType.swearAt || Controller.Instance.currentSelect == Controller.SelectType.insultAt){
+		if (Controller.Instance.currentSelect == Controller.SelectType.swearAt || Controller.Instance.currentSelect == Controller.SelectType.insultAt || Controller.Instance.currentSelect == Controller.SelectType.hypnosis){
 			if (!cursorText.activeInHierarchy)
 				cursorText.SetActive(true);
 			Vector3 mousePos = Input.mousePosition;
@@ -124,6 +128,8 @@ public class UINew: Singleton<UINew> {
 				cursorTextText.text = "SWEAR\nAT";
 			if (Controller.Instance.currentSelect == Controller.SelectType.insultAt)
 				cursorTextText.text = "INSULT";
+			if (Controller.Instance.currentSelect == Controller.SelectType.hypnosis)
+				cursorTextText.text = "HYPNOTIZE";
 		} else {
 			if (cursorText.activeInHierarchy)
 				cursorText.SetActive(false);
@@ -170,6 +176,7 @@ public class UINew: Singleton<UINew> {
 		saveButton = UICanvas.transform.Find("save").gameObject;
 		loadButton = UICanvas.transform.Find("load").gameObject;
 		testButton = UICanvas.transform.Find("test").gameObject;
+		hypnosisButton = UICanvas.transform.Find("topdock/HypnosisButton").gameObject;
 		bottomDock = UICanvas.transform.Find("bottomdock").gameObject;
 		cursorText = UICanvas.transform.Find("cursorText").gameObject;
 		cursorTextText = cursorText.GetComponent<Text>();
@@ -181,6 +188,7 @@ public class UINew: Singleton<UINew> {
 			lifebarDefaultSize = new Vector2(lifebar.rect.width, lifebar.rect.height);
 		inventoryButton.SetActive(false);
 		fightButton.SetActive(false);
+		hypnosisButton.SetActive(false);
 		speakButton.SetActive(false);
 		topRightBar.SetActive(false);
 		cursorText.SetActive(false);
@@ -239,7 +247,7 @@ public class UINew: Singleton<UINew> {
 		}
 	}
 	public void SetActiveUI(bool active=false){
-		List<GameObject> buttons = new List<GameObject>(){inventoryButton, fightButton, punchButton, speakButton};
+		List<GameObject> buttons = new List<GameObject>(){inventoryButton, fightButton, punchButton, speakButton, hypnosisButton};
 		foreach (GameObject button in buttons){
 			if (button)
 				button.SetActive(active);
@@ -272,6 +280,10 @@ public class UINew: Singleton<UINew> {
 		fightButton.SetActive(true);
 		if (GameManager.Instance.playerObject.GetComponent<Hurtable>()){
 			topRightBar.SetActive(true);
+		}
+		// do we have hypnosis?
+		if (GameManager.Instance.data.hypnosis){
+			hypnosisButton.SetActive(true);
 		}
 	}
 	public void UpdateRecordButtons(Commercial commercial){
