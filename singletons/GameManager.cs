@@ -41,6 +41,7 @@ public class GameData{
 		days = 0;
 		saveDate = System.DateTime.Now.ToString();
 	}
+	public bool hypnosis;
 }
 public partial class GameManager : Singleton<GameManager> {
 	protected GameManager(){}
@@ -370,6 +371,7 @@ public partial class GameManager : Singleton<GameManager> {
        		data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eggplant10"));
        		data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("fireman"));
        		// data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("freestyle"));
+			data.hypnosis = true;
 		}
         data.completeCommercials = new List<Commercial>();
 		// initialize achievements

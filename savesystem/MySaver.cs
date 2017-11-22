@@ -264,6 +264,7 @@ public class ReferenceResolver{
 				refCheck = false;
 				List<Persistent> nextTree = new List<Persistent>(tree);
 				foreach (Persistent persistent in tree){
+					Debug.Log(persistent.name);
 					if (persistent == null){
 						Debug.Log("null object found in persistent tree! did you interact with something that isn't marked?");
 						continue;
