@@ -3,11 +3,10 @@ using System.Collections;
 using System.Xml.Serialization;
 using System.IO;
 using Easings;
-public class VideoCamera : Interactive, IMessagable {
+public class VideoCamera : Interactive {
 	public Commercial commercial = new Commercial();
     public OccurrenceData watchForOccurrence = null;
     public bool live;
-    // private ScriptDirector director;
     public GameObject doneBubble;
     private GameObject regionIndicator;
     
@@ -27,7 +26,6 @@ public class VideoCamera : Interactive, IMessagable {
         Interaction enableAct = new Interaction(this, "Start", "Enable");
         enableAct.validationFunction = true;
         interactions.Add(enableAct);
-        
     }
     public void EnableBubble(){
         doneBubble.SetActive(true);
@@ -99,25 +97,6 @@ public class VideoCamera : Interactive, IMessagable {
                 //  }
             // }
         }
-    }
-    public void ReceiveMessage(Message incoming){
-        // if (incoming is MessageScript){
-        //     MessageScript message = (MessageScript)incoming;
-        //     director = (ScriptDirector)message.messenger;
-        //     if (message.watchForSpeech != ""){
-        //         OccurrenceSpeech data = new OccurrenceSpeech();
-        //         data.line = message.watchForSpeech;
-        //         watchForOccurrence = data;
-        //     }
-        //     if (message.tomAct != MessageScript.TomAction.none){
-        //         OccurrenceEat data = new OccurrenceEat();
-        //         Liquid newLiquid = new Liquid();
-        //         newLiquid.name = "Yogurt";
-        //         data.liquid = newLiquid;
-                
-        //         watchForOccurrence = data;
-        //     }
-        // }
     }
     public void Enable(){
         // improve logic to catch null
