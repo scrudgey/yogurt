@@ -17,11 +17,11 @@ public class PersistentComponent {
 	public List<Intrinsic> intrinsics;
 	public List<Commercial> commercials;
 	[XmlIgnoreAttribute]	
-	public Persistent persistent;
+	public PersistentObject persistent;
 	public PersistentComponent(){
 		// Needed for XML serialization
 	}
-	public PersistentComponent(Persistent owner){
+	public PersistentComponent(PersistentObject owner){
 		persistent = owner;
 	}
 }

@@ -11,32 +11,59 @@ public class MySaver {
 	public static Dictionary<int, GameObject> loadedObjects = new Dictionary<int, GameObject>();
 	// NOTE: this system will not support having more than 2,147,483,648 saved objects.
 	public static HashSet<int> loadedIds = new HashSet<int>();
-	public static Dictionary<Type, Func<SaveHandler> > Handlers = new Dictionary<Type, Func<SaveHandler>>{
-		{typeof(Inventory), 						() => new InventoryHandler() },
-		{typeof(PhysicalBootstrapper), 				() => new PhysicalBootStrapperHandler() },
-		{typeof(Eater),								() => new EaterHandler() },
-		{typeof(AdvancedAnimation),					() => new AdvancedAnimationHandler() },
-		{typeof(Flammable),							() => new FlammableHandler() },
-		{typeof(Destructible),						() => new DestructibleHandler() },
-		{typeof(LiquidContainer),					() => new LiquidContainerHandler() },
-		{typeof(Container),							() => new ContainerHandler()},
-		{typeof(Toilet),							() => new ContainerHandler()},
-		{typeof(Blender),							() => new BlenderHandler()},
-		{typeof(Head),								() => new HeadHandler() },
-		{typeof(Outfit),							() => new OutfitHandler() },
-		{typeof(Cabinet),							() => new CabinetHandler() },
-		{typeof(Intrinsics),						() => new IntrinsicsHandler() },
-		{typeof(Package),							() => new PackageHandler() },
-		{typeof(Trader),							() => new TraderHandler() },
-		{typeof(DecisionMaker),						() => new DecisionMakerHandler() },
-		{typeof(Awareness),							() => new AwarenessHandler() },
-		{typeof(Hurtable),							() => new HurtableHandler() },
-		{typeof(HeadAnimation),						() => new HeadAnimationHandler() },
-		{typeof(Speech),							() => new SpeechHandler() },
-		{typeof(Humanoid),							() => new HumanoidHandler() },
-		{typeof(Stain),								() => new StainHandler() }, 
-		{typeof(DropDripper),						() => new DropDripperHandler() },
-		{typeof(VideoCamera),						() => new VideoCameraHandler() }
+	// public static Dictionary<Type, Func<SaveHandler> > Handlers = new Dictionary<Type, Func<SaveHandler>>{
+	// 	{typeof(Inventory), 						() => new InventoryHandler() },
+	// 	{typeof(PhysicalBootstrapper), 				() => new PhysicalBootStrapperHandler() },
+	// 	{typeof(Eater),								() => new EaterHandler() },
+	// 	{typeof(AdvancedAnimation),					() => new AdvancedAnimationHandler() },
+	// 	{typeof(Flammable),							() => new FlammableHandler() },
+	// 	{typeof(Destructible),						() => new DestructibleHandler() },
+	// 	{typeof(LiquidContainer),					() => new LiquidContainerHandler() },
+	// 	{typeof(Container),							() => new ContainerHandler()},
+	// 	{typeof(Toilet),							() => new ContainerHandler()},
+	// 	{typeof(Blender),							() => new BlenderHandler()},
+	// 	{typeof(Head),								() => new HeadHandler() },
+	// 	{typeof(Outfit),							() => new OutfitHandler() },
+	// 	{typeof(Cabinet),							() => new CabinetHandler() },
+	// 	{typeof(Intrinsics),						() => new IntrinsicsHandler() },
+	// 	{typeof(Package),							() => new PackageHandler() },
+	// 	{typeof(Trader),							() => new TraderHandler() },
+	// 	{typeof(DecisionMaker),						() => new DecisionMakerHandler() },
+	// 	{typeof(Awareness),							() => new AwarenessHandler() },
+	// 	{typeof(Hurtable),							() => new HurtableHandler() },
+	// 	{typeof(HeadAnimation),						() => new HeadAnimationHandler() },
+	// 	{typeof(Speech),							() => new SpeechHandler() },
+	// 	{typeof(Humanoid),							() => new HumanoidHandler() },
+	// 	{typeof(Stain),								() => new StainHandler() }, 
+	// 	{typeof(DropDripper),						() => new DropDripperHandler() },
+	// 	{typeof(VideoCamera),						() => new VideoCameraHandler() }
+	// };
+	public static Dictionary<Type, SaveHandler> Handlers = new Dictionary<Type, SaveHandler>{
+		{typeof(Inventory), new InventoryHandler()},
+		{typeof(PhysicalBootstrapper), 				new PhysicalBootStrapperHandler() },
+		{typeof(Eater),								new EaterHandler() },
+		{typeof(AdvancedAnimation),					new AdvancedAnimationHandler() },
+		{typeof(Flammable),							new FlammableHandler() },
+		{typeof(Destructible),						new DestructibleHandler() },
+		{typeof(LiquidContainer),					new LiquidContainerHandler() },
+		{typeof(Container),							new ContainerHandler()},
+		{typeof(Toilet),							new ContainerHandler()},
+		{typeof(Blender),							new BlenderHandler()},
+		{typeof(Head),								new HeadHandler() },
+		{typeof(Outfit),							new OutfitHandler() },
+		{typeof(Cabinet),							new CabinetHandler() },
+		{typeof(Intrinsics),						new IntrinsicsHandler() },
+		{typeof(Package),							new PackageHandler() },
+		{typeof(Trader),							new TraderHandler() },
+		{typeof(DecisionMaker),						new DecisionMakerHandler() },
+		{typeof(Awareness),							new AwarenessHandler() },
+		{typeof(Hurtable),							new HurtableHandler() },
+		{typeof(HeadAnimation),						new HeadAnimationHandler() },
+		{typeof(Speech),							new SpeechHandler() },
+		{typeof(Humanoid),							new HumanoidHandler() },
+		{typeof(Stain),								new StainHandler() }, 
+		{typeof(DropDripper),						new DropDripperHandler() },
+		{typeof(VideoCamera),						new VideoCameraHandler() }
 	};
 	public static List<Type> LoadOrder = new List<Type>{
 		typeof(Intrinsics)
@@ -77,7 +104,7 @@ public class MySaver {
 		FileStream playerStream = File.Create(playerPath);
 		// retrieve all persistent objects
 		HashSet<GameObject> objectList = new HashSet<GameObject>();
-		List<Persistent> persistents = new List<Persistent>();
+		Dictionary<GameObject, PersistentObject> persistents = new Dictionary<GameObject, PersistentObject>();
 		// add those objects which are disabled and would therefore not be found by our first search
 		foreach(GameObject disabledPersistent in disabledPersistents){
 			objectList.Add(disabledPersistent);
@@ -87,9 +114,10 @@ public class MySaver {
 		}
 		// create a persistent for each gameobject with the appropriate data
 		foreach (GameObject gameObject in objectList){
-			Persistent persistent = new Persistent(gameObject);
+			PersistentObject persistent = new PersistentObject(gameObject);
 			MyMarker marker = gameObject.GetComponent<MyMarker>();
 			if (marker.id != - 1){
+				// TODO: put more logic in here if the index is taken
 				persistent.id = marker.id;
 				loadedIds.Add(marker.id);
 			} else {
@@ -98,20 +126,18 @@ public class MySaver {
 					idIndex++;
 				}
 				persistent.id = idIndex;
-				//TODO: check if next index is taken!
 			}
-			persistents.Add(persistent);
+			persistents[gameObject] = persistent;
 			resolver.objectIDs.Add(gameObject, persistent.id);
 			resolver.persistentObjects.Add(persistent, gameObject);
 		}
 		// invoke the data handling here - this will populate all the component data, and assign a unique id to everything.
-		foreach (Persistent persistent in persistents){
-			persistent.HandleSave(resolver);
+		foreach (KeyValuePair<GameObject, PersistentObject> kvp in persistents){
+			kvp.Value.HandleSave(kvp.Key, resolver);
 		}
-		List<Persistent> playerTree = resolver.RetrieveReferenceTree(GameManager.Instance.playerObject);
-		List<Persistent> sceneTree = persistents.Except(playerTree).ToList();
-		// lastly we need to clean up any references the scene objects have to the player objects
-		// Dictionary<GameObject, int> sceneIDs = new Dictionary<GameObject, int>();
+		// separate lists of persistent objects for the scene and the player
+		List<PersistentObject> playerTree = resolver.RetrieveReferenceTree(GameManager.Instance.playerObject);
+		List<PersistentObject> sceneTree = persistents.Values.Except(playerTree).ToList();
 		PersistentContainer sceneContainer = new PersistentContainer(sceneTree);
 		PersistentContainer playerContainer = new PersistentContainer(playerTree);
 		// save the persistent object container
@@ -166,14 +192,15 @@ public class MySaver {
 			HandleLoadedPersistents(playerContainer.PersistentObjects);	
 		return playerObject;
 	}
-	public static void HandleLoadedPersistents(List<Persistent> persistents){
-		foreach (Persistent persistent in persistents){
+	public static void HandleLoadedPersistents(List<PersistentObject> persistents){
+		foreach (PersistentObject persistent in persistents){
 			List<Component> loadedComponents = new List<Component>(loadedObjects[persistent.id].GetComponents<Component>());
 			loadedComponents.Sort(CompareComponent);
 			foreach (Component component in loadedComponents){
-				Func<SaveHandler> getHandler;
-				if (MySaver.Handlers.TryGetValue(component.GetType(), out getHandler)){
-					var handler = getHandler();
+				// Func<SaveHandler> getHandler;
+				SaveHandler handler;
+				if (MySaver.Handlers.TryGetValue(component.GetType(), out handler)){
+					// var handler = getHandler();
 					// PersistentComponent data = persistent.persistentComponents[component.GetType().ToString()];
 					handler.LoadData(component, persistent.persistentComponents[component.GetType().ToString()]);
 				}
@@ -184,9 +211,10 @@ public class MySaver {
 				Component childComponent = childObject.GetComponent(persistentChild.type);
 				if (childObject && childComponent){
 					// string lastChildComponent = childComponent.GetType().ToString();
-					Func<SaveHandler> get;
-					if (MySaver.Handlers.TryGetValue(childComponent.GetType(), out get)){
-						var handler = get();
+					// Func<SaveHandler> get;
+					SaveHandler handler;
+					if (MySaver.Handlers.TryGetValue(childComponent.GetType(), out handler)){
+						// var handler = get();
 						PersistentComponent data = new PersistentComponent();
 						if (persistent.persistentChildComponents.TryGetValue(childComponent.GetType().ToString(), out data ))
 							handler.LoadData(childComponent, data);
@@ -201,7 +229,7 @@ public class MySaver {
 	public static GameObject LoadPersistentContainer(PersistentContainer container){
 		GameObject rootObject = null;
 		Regex reg =  new Regex("\\s+", RegexOptions.Multiline);
-		foreach(Persistent persistent in container.PersistentObjects){
+		foreach(PersistentObject persistent in container.PersistentObjects){
 			loadedIds.Add(persistent.id);
 			string path = @"prefabs/"+persistent.name;
 			path = reg.Replace(path, "_");
@@ -223,17 +251,17 @@ public class MySaver {
 	}
 }
 public class ReferenceResolver{
-	public  Dictionary<Persistent, GameObject> persistentObjects = new Dictionary<Persistent, GameObject>();
+	public  Dictionary<PersistentObject, GameObject> persistentObjects = new Dictionary<PersistentObject, GameObject>();
 	public  Dictionary<GameObject, int> objectIDs = new Dictionary<GameObject ,int>();
-	private Dictionary<Persistent, List<Persistent>> referenceTree = new Dictionary<Persistent, List<Persistent>>();
-	public int ResolveReference(GameObject referent, Persistent requester){
+	private Dictionary<PersistentObject, List<PersistentObject>> referenceTree = new Dictionary<PersistentObject, List<PersistentObject>>();
+	public int ResolveReference(GameObject referent, PersistentObject requester){
 		int returnID = -1;
 		if (referent == null)
 			return -1;
 		if (objectIDs.ContainsKey(referent))
 			returnID = objectIDs[referent];
 		if (!referenceTree.ContainsKey(requester))
-			referenceTree.Add(requester, new List<Persistent>());
+			referenceTree.Add(requester, new List<PersistentObject>());
 		referenceTree[requester].Add(persistentObjects.FindKeyByValue(referent));
 		// if (returnID == -1){
 		// 	Debug.Log("reference not resolved!");
@@ -241,16 +269,16 @@ public class ReferenceResolver{
 		// }
 		return returnID;
 	}
-	public void AddToReferenceTree(Persistent treeParent, Persistent child){
+	public void AddToReferenceTree(PersistentObject treeParent, PersistentObject child){
 		if (child == null || treeParent == null)
 			return;
 		if (!referenceTree.ContainsKey(treeParent))
-			referenceTree.Add(treeParent, new List<Persistent>());
+			referenceTree.Add(treeParent, new List<PersistentObject>());
 		referenceTree[treeParent].Add(child);
 	}
-	public List<Persistent> RetrieveReferenceTree(GameObject target){
-		Persistent targetPersistent = null;
-		List<Persistent> tree = new List<Persistent>();
+	public List<PersistentObject> RetrieveReferenceTree(GameObject target){
+		PersistentObject targetPersistent = null;
+		List<PersistentObject> tree = new List<PersistentObject>();
 		if (persistentObjects.ContainsValue(target))
 			targetPersistent = persistentObjects.FindKeyByValue(target);
 		if (targetPersistent == null){
@@ -262,9 +290,8 @@ public class ReferenceResolver{
 			int checkIterations = 0;
 			while(refCheck && checkIterations < 7){
 				refCheck = false;
-				List<Persistent> nextTree = new List<Persistent>(tree);
-				foreach (Persistent persistent in tree){
-					Debug.Log(persistent.name);
+				List<PersistentObject> nextTree = new List<PersistentObject>(tree);
+				foreach (PersistentObject persistent in tree){
 					if (persistent == null){
 						Debug.Log("null object found in persistent tree! did you interact with something that isn't marked?");
 						continue;
