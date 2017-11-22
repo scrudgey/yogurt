@@ -28,7 +28,7 @@ public class Controller : Singleton<Controller> {
 	public List<string> forbiddenColliders = new List<string> {"fire", "sightcone", "table", "background", "occurrenceFlag"};
 	public string message = "smoke weed every day";
     public enum SelectType{
-        none, swearAt, insultAt
+        none, swearAt, insultAt, hypnosis
     }
     public SelectType currentSelect = SelectType.none;
 	void Update () {
@@ -199,6 +199,18 @@ public class Controller : Singleton<Controller> {
 				Speech speech = focus.GetComponent<Speech>();
 				if (speech){
 					speech.Insult(target);
+				}
+				UINew.Instance.SetActionText("");
+			}
+		}
+		if (currentSelect == SelectType.hypnosis){
+			currentSelect = SelectType.none;
+			GameObject top = Controller.Instance.GetFrontObject(hits);
+			if (top != null){
+				GameObject target = Controller.Instance.GetBaseInteractive(top.transform);
+				Controllable controllable = focus.GetComponent<Controllable>();
+				if (controllable){
+					GameManager.Instance.SetFocus(target);
 				}
 				UINew.Instance.SetActionText("");
 			}
