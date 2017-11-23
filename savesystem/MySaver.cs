@@ -6,6 +6,10 @@ using System.Xml.Serialization;
 using System.Linq;
 using System.Text.RegularExpressions;
 public class MySaver {
+	// public static ReferenceResolver resolver;
+	private static Dictionary<PersistentObject, List<PersistentObject>> referenceTree = new Dictionary<PersistentObject, List<PersistentObject>>();
+	public static Dictionary<PersistentObject, GameObject> persistentObjects = new Dictionary<PersistentObject, GameObject>();
+	public static Dictionary<GameObject, int> objectIDs = new Dictionary<GameObject ,int>();
 	static int idIndex;
 	public static List<GameObject> disabledPersistents = new List<GameObject>();
 	public static Dictionary<int, GameObject> loadedObjects = new Dictionary<int, GameObject>();
@@ -69,7 +73,10 @@ public class MySaver {
 		}
 	}
 	public static void Save(){
-		ReferenceResolver resolver = new ReferenceResolver();
+		// resolver = new ReferenceResolver();
+		objectIDs = new Dictionary<GameObject, int>();
+		persistentObjects = new Dictionary<PersistentObject, GameObject>();
+
 		var serializer = new XmlSerializer(typeof(PersistentContainer));
 		string scenePath = GameManager.Instance.LevelSavePath();
 		string playerPath = GameManager.Instance.PlayerSavePath();
@@ -101,15 +108,15 @@ public class MySaver {
 				persistent.id = idIndex;
 			}
 			persistents[gameObject] = persistent;
-			resolver.objectIDs.Add(gameObject, persistent.id);
-			resolver.persistentObjects.Add(persistent, gameObject);
+			objectIDs.Add(gameObject, persistent.id);
+			persistentObjects.Add(persistent, gameObject);
 		}
 		// invoke the data handling here - this will populate all the component data, and assign a unique id to everything.
 		foreach (KeyValuePair<GameObject, PersistentObject> kvp in persistents){
-			kvp.Value.HandleSave(kvp.Key, resolver);
+			kvp.Value.HandleSave(kvp.Key);
 		}
 		// separate lists of persistent objects for the scene and the player
-		List<PersistentObject> playerTree = resolver.RetrieveReferenceTree(GameManager.Instance.playerObject);
+		List<PersistentObject> playerTree = RetrieveReferenceTree(GameManager.Instance.playerObject);
 		List<PersistentObject> sceneTree = persistents.Values.Except(playerTree).ToList();
 		PersistentContainer sceneContainer = new PersistentContainer(sceneTree);
 		PersistentContainer playerContainer = new PersistentContainer(playerTree);
@@ -194,24 +201,7 @@ public class MySaver {
 		}
 		return rootObject;
 	}
-}
-public class ReferenceResolver{
-	public  Dictionary<PersistentObject, GameObject> persistentObjects = new Dictionary<PersistentObject, GameObject>();
-	public  Dictionary<GameObject, int> objectIDs = new Dictionary<GameObject ,int>();
-	private Dictionary<PersistentObject, List<PersistentObject>> referenceTree = new Dictionary<PersistentObject, List<PersistentObject>>();
-	public int ResolveReference(GameObject referent){
-		int returnID = -1;
-		if (referent == null)
-			return -1;
-		if (objectIDs.ContainsKey(referent))
-			returnID = objectIDs[referent];
-		// if (returnID == -1){
-		// 	Debug.Log("reference not resolved!");
-		// 	Debug.Log("tried to resolve reference to "+referent.name);
-		// }
-		return returnID;
-	}
-	public void AddToReferenceTree(GameObject treeParent, GameObject child){
+	public static void AddToReferenceTree(GameObject treeParent, GameObject child){
 		if (child == null || treeParent == null)
 			return;
 		PersistentObject parentPersistentObject = persistentObjects.FindKeyByValue(treeParent);
@@ -222,7 +212,7 @@ public class ReferenceResolver{
 			referenceTree.Add(parentPersistentObject, new List<PersistentObject>());
 		referenceTree[parentPersistentObject].Add(childPersistentObject);
 	}
-	public List<PersistentObject> RetrieveReferenceTree(GameObject target){
+	public static List<PersistentObject> RetrieveReferenceTree(GameObject target){
 		PersistentObject targetPersistent = null;
 		HashSet<PersistentObject> tree = new HashSet<PersistentObject>();
 		if (persistentObjects.ContainsValue(target))
@@ -235,7 +225,7 @@ public class ReferenceResolver{
 		tree.Add(targetPersistent);
 		return tree.ToList();
 	}
-	public void RecursivelyAddTree(HashSet<PersistentObject> tree, PersistentObject node){
+	public static void RecursivelyAddTree(HashSet<PersistentObject> tree, PersistentObject node){
 		tree.Add(node);
 		if (referenceTree.ContainsKey(node)){
 			foreach(PersistentObject obj in referenceTree[node]){
@@ -245,4 +235,41 @@ public class ReferenceResolver{
 			}
 		}
 	}
+	public static int GameObjectToID(GameObject referent){
+		int returnID = -1;
+		if (referent == null)
+			return -1;
+		objectIDs.TryGetValue(referent, out returnID);
+		// if (objectIDs.ContainsKey(referent))
+		// 	returnID = objectIDs[referent];
+		// if (returnID == -1){
+		// 	Debug.Log("reference not resolved!");
+		// 	Debug.Log("tried to resolve reference to "+referent.name);
+		// }
+		return returnID;
+	}
+	// public static GameObject IDToGameObject(int id){
+	// 	GameObject returnObj = null;
+	// 	loadedObjects.TryGetValue(id, out returnObj);
+	// 	return returnObj;
+	// 	// if (loadedObjects.ContainsKey(id)){
+	// 	// 	returnObj = loadedObjects[]
+	// 	// }
+	// } 
 }
+// public class ReferenceResolver{
+// 	public  Dictionary<PersistentObject, GameObject> persistentObjects = new Dictionary<PersistentObject, GameObject>();
+// 	public  Dictionary<GameObject, int> objectIDs = new Dictionary<GameObject ,int>();
+// 	public int ResolveReference(GameObject referent){
+// 		int returnID = -1;
+// 		if (referent == null)
+// 			return -1;
+// 		if (objectIDs.ContainsKey(referent))
+// 			returnID = objectIDs[referent];
+// 		// if (returnID == -1){
+// 		// 	Debug.Log("reference not resolved!");
+// 		// 	Debug.Log("tried to resolve reference to "+referent.name);
+// 		// }
+// 		return returnID;
+// 	}
+// }

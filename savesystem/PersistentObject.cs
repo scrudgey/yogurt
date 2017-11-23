@@ -39,7 +39,7 @@ public class PersistentObject {
 		}
 
 	}
-	public void HandleSave(GameObject parentObject, ReferenceResolver resolver){
+	public void HandleSave(GameObject parentObject){
 		foreach (Component component in parentObject.GetComponents<Component>()){
 			SaveHandler handler;
 			if (MySaver.Handlers.TryGetValue(component.GetType(), out handler)){
@@ -48,13 +48,13 @@ public class PersistentObject {
 
 				SaveHandler secondHandler = MySaver.Handlers[component.GetType()];
 				PersistentComponent persistentComponent = persistentComponents[component.GetType().ToString()];
-				secondHandler.SaveData(component, persistentComponent, resolver);
+				secondHandler.SaveData(component, persistentComponent);
 			}
 		}
 		foreach (PersistentObject persistentChild in persistentChildren){
 			if (persistentChild == this)
 					continue;
-			persistentChild.HandleSave(parentObject.transform.Find(persistentChild.parentObject).gameObject, resolver);
+			persistentChild.HandleSave(parentObject.transform.Find(persistentChild.parentObject).gameObject);
 		}
 	}
 	public void HandleLoad(GameObject parentObject){
