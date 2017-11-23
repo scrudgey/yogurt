@@ -224,34 +224,25 @@ public class ReferenceResolver{
 	}
 	public List<PersistentObject> RetrieveReferenceTree(GameObject target){
 		PersistentObject targetPersistent = null;
-		List<PersistentObject> tree = new List<PersistentObject>();
+		HashSet<PersistentObject> tree = new HashSet<PersistentObject>();
 		if (persistentObjects.ContainsValue(target))
 			targetPersistent = persistentObjects.FindKeyByValue(target);
 		if (targetPersistent == null){
 			Debug.Log("no entry in persistentobjects for "+target.name);
+			return tree.ToList();
 		}
+		RecursivelyAddTree(tree, targetPersistent);
 		tree.Add(targetPersistent);
-		if (referenceTree.ContainsKey(targetPersistent)){
-			bool refCheck = true;
-			int checkIterations = 0;
-			while(refCheck && checkIterations < 7){
-				refCheck = false;
-				List<PersistentObject> nextTree = new List<PersistentObject>(tree);
-				foreach (PersistentObject persistent in tree){
-					if (persistent == null){
-						Debug.Log("null object found in persistent tree! did you interact with something that isn't marked?");
-						continue;
-					}
-					if (referenceTree.ContainsKey(persistent))
-						nextTree.AddRange(referenceTree[persistent]);
+		return tree.ToList();
+	}
+	public void RecursivelyAddTree(HashSet<PersistentObject> tree, PersistentObject node){
+		tree.Add(node);
+		if (referenceTree.ContainsKey(node)){
+			foreach(PersistentObject obj in referenceTree[node]){
+				if (!tree.Contains(obj)){
+					RecursivelyAddTree(tree, obj);
 				}
-				nextTree= nextTree.Distinct().ToList();
-				if (nextTree != tree)
-					refCheck = true;
-				tree = nextTree;
-				checkIterations++;
 			}
 		}
-		return tree;
 	}
 }
