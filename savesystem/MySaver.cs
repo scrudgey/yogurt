@@ -6,7 +6,6 @@ using System.Xml.Serialization;
 using System.Linq;
 using System.Text.RegularExpressions;
 public class MySaver {
-	// public static ReferenceResolver resolver;
 	private static Dictionary<PersistentObject, List<PersistentObject>> referenceTree = new Dictionary<PersistentObject, List<PersistentObject>>();
 	public static Dictionary<PersistentObject, GameObject> persistentObjects = new Dictionary<PersistentObject, GameObject>();
 	public static Dictionary<GameObject, int> objectIDs = new Dictionary<GameObject ,int>();
@@ -110,6 +109,9 @@ public class MySaver {
 			persistents[gameObject] = persistent;
 			objectIDs.Add(gameObject, persistent.id);
 			persistentObjects.Add(persistent, gameObject);
+			// foreach(GameObject child in marker.persistentChildren){
+			// 	persistentObjects.Add(persistent, child);
+			// }
 		}
 		// invoke the data handling here - this will populate all the component data, and assign a unique id to everything.
 		foreach (KeyValuePair<GameObject, PersistentObject> kvp in persistents){
@@ -201,16 +203,18 @@ public class MySaver {
 		}
 		return rootObject;
 	}
-	public static void AddToReferenceTree(GameObject treeParent, GameObject child){
+	public static void AddToReferenceTree(PersistentComponent treeParent, GameObject child){
 		if (child == null || treeParent == null)
 			return;
-		PersistentObject parentPersistentObject = persistentObjects.FindKeyByValue(treeParent);
+		PersistentObject parentObj = treeParent.persistent;
+		if (parentObj.parentPersistent != null)
+			parentObj = parentObj.parentPersistent;
 		PersistentObject childPersistentObject = persistentObjects.FindKeyByValue(child);
-		if (parentPersistentObject == null || childPersistentObject == null)
+		if (treeParent == null || childPersistentObject == null)
 			return;
-		if (!referenceTree.ContainsKey(parentPersistentObject))
-			referenceTree.Add(parentPersistentObject, new List<PersistentObject>());
-		referenceTree[parentPersistentObject].Add(childPersistentObject);
+		if (!referenceTree.ContainsKey(parentObj))
+			referenceTree.Add(parentObj, new List<PersistentObject>());
+		referenceTree[parentObj].Add(childPersistentObject);
 	}
 	public static List<PersistentObject> RetrieveReferenceTree(GameObject target){
 		PersistentObject targetPersistent = null;
@@ -240,36 +244,6 @@ public class MySaver {
 		if (referent == null)
 			return -1;
 		objectIDs.TryGetValue(referent, out returnID);
-		// if (objectIDs.ContainsKey(referent))
-		// 	returnID = objectIDs[referent];
-		// if (returnID == -1){
-		// 	Debug.Log("reference not resolved!");
-		// 	Debug.Log("tried to resolve reference to "+referent.name);
-		// }
 		return returnID;
 	}
-	// public static GameObject IDToGameObject(int id){
-	// 	GameObject returnObj = null;
-	// 	loadedObjects.TryGetValue(id, out returnObj);
-	// 	return returnObj;
-	// 	// if (loadedObjects.ContainsKey(id)){
-	// 	// 	returnObj = loadedObjects[]
-	// 	// }
-	// } 
 }
-// public class ReferenceResolver{
-// 	public  Dictionary<PersistentObject, GameObject> persistentObjects = new Dictionary<PersistentObject, GameObject>();
-// 	public  Dictionary<GameObject, int> objectIDs = new Dictionary<GameObject ,int>();
-// 	public int ResolveReference(GameObject referent){
-// 		int returnID = -1;
-// 		if (referent == null)
-// 			return -1;
-// 		if (objectIDs.ContainsKey(referent))
-// 			returnID = objectIDs[referent];
-// 		// if (returnID == -1){
-// 		// 	Debug.Log("reference not resolved!");
-// 		// 	Debug.Log("tried to resolve reference to "+referent.name);
-// 		// }
-// 		return returnID;
-// 	}
-// }

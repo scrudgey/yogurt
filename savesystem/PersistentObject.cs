@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Xml.Serialization;
 
 public class PersistentObject {
 	private Regex rgx = new Regex(@"(.+)\(Clone\)$", RegexOptions.Multiline);
@@ -12,6 +13,9 @@ public class PersistentObject {
 	public SerializableDictionary<string, PersistentComponent> persistentComponents = new SerializableDictionary<string, PersistentComponent>();
 	public List<PersistentObject> persistentChildren = new List<PersistentObject>();
 	public string parentObject;
+	[XmlIgnoreAttribute]	
+	public PersistentObject parentPersistent;
+
 	public PersistentObject(){
 		// needed for XML serialization
 	}
@@ -37,7 +41,6 @@ public class PersistentObject {
 				persistentChildren.Add(persistentChildObject);
 			}
 		}
-
 	}
 	public void HandleSave(GameObject parentObject){
 		foreach (Component component in parentObject.GetComponents<Component>()){
@@ -45,15 +48,18 @@ public class PersistentObject {
 			if (MySaver.Handlers.TryGetValue(component.GetType(), out handler)){
 				PersistentComponent persist = new PersistentComponent(this);
 				persistentComponents.Add(component.GetType().ToString(), persist);
-
-				SaveHandler secondHandler = MySaver.Handlers[component.GetType()];
-				PersistentComponent persistentComponent = persistentComponents[component.GetType().ToString()];
-				secondHandler.SaveData(component, persistentComponent);
+				// Debug.Log(persist.persistent);
+				handler.SaveData(component, persist);
 			}
 		}
 		foreach (PersistentObject persistentChild in persistentChildren){
 			if (persistentChild == this)
-					continue;
+				continue;
+			if (parentPersistent == null){
+				persistentChild.parentPersistent = this;
+			} else {
+				persistentChild.parentPersistent = parentPersistent;
+			}
 			persistentChild.HandleSave(parentObject.transform.Find(persistentChild.parentObject).gameObject);
 		}
 	}

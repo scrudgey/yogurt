@@ -130,11 +130,6 @@ public class Controller : Singleton<Controller> {
 			if (frontRenderer != null)
 				front = frontRenderer.gameObject;
 		}
-		// if (frontRenderer != null){
-		// 	return frontRenderer.gameObject;
-		// }else{
-		// 	return null;
-		// }
 		return front;
 	}
 	public GameObject GetBaseInteractive(Transform target){
