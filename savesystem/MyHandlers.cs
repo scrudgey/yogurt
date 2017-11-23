@@ -22,14 +22,16 @@ public abstract class SaveHandler<T> : SaveHandler where T : Component
 public class InventoryHandler : SaveHandler<Inventory> {
 	public override void SaveSpecificData(Inventory instance, PersistentComponent data, ReferenceResolver resolver){
 		if (instance.holding != null){
-			data.ints["holdingID"] = resolver.ResolveReference(instance.holding.gameObject, data.persistent);
+			data.ints["holdingID"] = resolver.ResolveReference(instance.holding.gameObject);
+			resolver.AddToReferenceTree(instance.gameObject, instance.holding.gameObject);
 		} else {
 			data.ints["holdingID"] = -1;
 		}
 		data.ints["itemCount"] = instance.items.Count;
 		if (instance.items.Count > 0){
 			for (int i = 0; i < instance.items.Count; i++){
-				data.ints["item"+i.ToString()] = resolver.ResolveReference(instance.items[i], data.persistent);
+				data.ints["item"+i.ToString()] = resolver.ResolveReference(instance.items[i]);
+				resolver.AddToReferenceTree(instance.gameObject, instance.items[i]);
 			}
 		} 
 		data.vectors["direction"] = instance.direction;
@@ -66,7 +68,8 @@ public class ContainerHandler: SaveHandler<Container> {
 		data.ints["itemCount"] = instance.items.Count;
 		if (instance.items.Count > 0){
 			for (int i = 0; i < instance.items.Count; i++){
-				data.ints["item"+i.ToString()] = resolver.ResolveReference(instance.items[i].gameObject, data.persistent);
+				data.ints["item"+i.ToString()] = resolver.ResolveReference(instance.items[i].gameObject);
+				resolver.AddToReferenceTree(instance.gameObject, instance.items[i].gameObject);
 			}
 		}
 	}
@@ -99,7 +102,8 @@ public class BlenderHandler: SaveHandler<Blender> {
 public class HeadHandler: SaveHandler<Head> {
 	public override void SaveSpecificData(Head instance,PersistentComponent data, ReferenceResolver resolver){
 		if (instance.hat != null){
-			data.ints["hat"] = resolver.ResolveReference(instance.hat.gameObject, data.persistent);
+			data.ints["hat"] = resolver.ResolveReference(instance.hat.gameObject);
+			resolver.AddToReferenceTree(instance.gameObject, instance.hat.gameObject);
 		} else {
 			data.ints["hat"] = -1;
 		}
@@ -114,7 +118,8 @@ public class HeadHandler: SaveHandler<Head> {
 public class TraderHandler: SaveHandler<Trader>{
 	public override void SaveSpecificData(Trader instance, PersistentComponent data, ReferenceResolver resolver){
 		if (instance.give != null){
-			data.ints["give"] = resolver.ResolveReference(instance.give, data.persistent);
+			data.ints["give"] = resolver.ResolveReference(instance.give);
+			resolver.AddToReferenceTree(instance.gameObject, instance.give);
 		}
 		data.strings["receive"] = instance.receive;
 	}
@@ -348,10 +353,12 @@ public class VideoCameraHandler: SaveHandler<VideoCamera>{
 }
 public class StainHandler: SaveHandler<Stain>{
 	public override void SaveSpecificData(Stain instance, PersistentComponent data, ReferenceResolver resolver){
-		data.ints["parentID"] = resolver.ResolveReference(instance.parent, data.persistent);
+		data.ints["parentID"] = resolver.ResolveReference(instance.parent);
+		resolver.AddToReferenceTree(instance.parent, instance.gameObject);
+
 		PersistentObject stainPersistent = resolver.persistentObjects.FindKeyByValue(instance.gameObject);
 		PersistentObject parentPersistent = resolver.persistentObjects.FindKeyByValue(instance.parent);
-		resolver.AddToReferenceTree(parentPersistent, stainPersistent);
+		// resolver.AddToReferenceTree(parentPersistent, stainPersistent);
 		MonoLiquid stainLiquid = instance.GetComponent<MonoLiquid>();
 		if (stainLiquid != null)
 			data.strings["liquid"] = stainLiquid.liquid.filename;
@@ -411,7 +418,8 @@ public class AwarenessHandler: SaveHandler<Awareness>{
 		data.knowledgeBase = new List<SerializedKnowledge>();
 		data.people = new List<SerializedPersonalAssessment>();
 		if (instance.possession != null)
-			data.ints["possession"] = resolver.ResolveReference(instance.possession, data.persistent);
+			data.ints["possession"] = resolver.ResolveReference(instance.possession);
+			resolver.AddToReferenceTree(instance.gameObject, instance.possession);
 		foreach (KeyValuePair<GameObject, Knowledge> keyVal in instance.knowledgebase){
 			SerializedKnowledge knowledge = SaveKnowledge(keyVal.Value, resolver, data.persistent);
 			if (knowledge.gameObjectID == -1)
@@ -455,7 +463,7 @@ public class AwarenessHandler: SaveHandler<Awareness>{
 		SerializedKnowledge data = new SerializedKnowledge();
 		data.lastSeenPosition = input.lastSeenPosition;
 		data.lastSeenTime = input.lastSeenTime;
-		data.gameObjectID = resolver.ResolveReference(input.obj, persistent);
+		data.gameObjectID = resolver.ResolveReference(input.obj);
 		return data;
 	}
 	Knowledge LoadKnowledge(SerializedKnowledge input){
@@ -475,7 +483,7 @@ public class AwarenessHandler: SaveHandler<Awareness>{
 		SerializedPersonalAssessment data = new SerializedPersonalAssessment();
 		data.status = input.status;
 		data.unconscious = input.unconscious;
-		data.gameObjectID = resolver.ResolveReference(input.knowledge.obj, persistent);
+		data.gameObjectID = resolver.ResolveReference(input.knowledge.obj);
 		return data;
 	}
 	PersonalAssessment LoadPerson(SerializedPersonalAssessment input){

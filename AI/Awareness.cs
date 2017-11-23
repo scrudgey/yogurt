@@ -204,8 +204,9 @@ public class Awareness : MonoBehaviour, IMessagable {
 			// Debug.Log(other.transform.parent.gameObject);
 			if (other.tag == "Physical")
 				fieldOfView.Add(other.gameObject);
-			if (other.gameObject.GetComponentInParent<Controllable>()){
-				fieldOfView.Add(other.gameObject);
+			Controllable baseControllable = other.GetComponentInParent<Controllable>();
+			if (baseControllable != null){
+				fieldOfView.Add(baseControllable.gameObject);
 			}
 		}
 	}

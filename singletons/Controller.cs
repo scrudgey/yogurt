@@ -145,6 +145,10 @@ public class Controller : Singleton<Controller> {
 				return physical.objectBody.gameObject;
 			}
 		}
+		Controllable baseControllable = target.GetComponentInParent<Controllable>();
+		if (baseControllable != null){
+			return baseControllable.gameObject;
+		}
 		while (true){
 			if (currentChild.tag == "Physical"){
 				return currentChild.gameObject;

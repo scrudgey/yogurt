@@ -131,6 +131,10 @@ public partial class GameManager : Singleton<GameManager> {
 	public void SetFocus(GameObject target){
 		playerObject = target;
 		Controller.Instance.focus = target.GetComponent<Controllable>();
+		DecisionMaker decisionMaker = playerObject.GetComponent<DecisionMaker>();
+		if (decisionMaker != null){
+			decisionMaker.enabled = false;
+		}
 		cameraControl = FindObjectOfType<CameraControl>();
 		if (cameraControl)
 			cameraControl.focus = target;
