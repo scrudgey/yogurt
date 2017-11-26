@@ -207,7 +207,7 @@ public class Controller : Singleton<Controller> {
 			GameObject top = Controller.Instance.GetFrontObject(hits);
 			if (top != null){
 				GameObject target = Controller.Instance.GetBaseInteractive(top.transform);
-				Controllable controllable = focus.GetComponent<Controllable>();
+				Controllable controllable = target.GetComponent<Controllable>();
 				if (controllable){
 					GameManager.Instance.SetFocus(target);
 				}
