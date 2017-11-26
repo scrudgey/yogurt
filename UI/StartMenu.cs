@@ -173,7 +173,6 @@ public class StartMenu : MonoBehaviour {
 			"Jiggly",
 			"Ziplock McBaggins",
 			"Questor",
-			"Asa Phelps",
 			"Bigfoot",
 			"Quangle Cringleberry",
 			"Mr. Origami",
@@ -184,12 +183,14 @@ public class StartMenu : MonoBehaviour {
 			"Reverend Wicks Cherrycoke",
 			"Pig Bodine",
 			"Sauncho Smilax",
-			"Rojer Ramjet",
+			"Roger Ramjet",
 			"Moe",
 			"Tyrone Slothrop",
 			"Voorwerp",
 			"Stellar Harbinger",
-			"Scrauncho"
+			"Scrauncho",
+			"Bengis",
+			"Pingy"
 		};
 		return names[UnityEngine.Random.Range( 0, names.Count )];
 	}
