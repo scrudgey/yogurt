@@ -141,13 +141,19 @@ public class MySaver {
 		// otherwise the default unity editor scene should be loaded as is.
 		if (File.Exists(scenePath)){
 			List<MyMarker> marks = new List<MyMarker>(GameObject.FindObjectsOfType<MyMarker>());
+			Stack<GameObject> gameObjectsToDestroy = new Stack<GameObject>();
 			for (int i = 0; i < marks.Count; i++){
 				if (marks[i] != null){
-					GameObject.DestroyImmediate(marks[i].gameObject);
+					// GameObject.DestroyImmediate(marks[i].gameObject);
+					gameObjectsToDestroy.Push(marks[i].gameObject);
 				}
 			}
 			foreach (GameObject disabledPersistent in disabledPersistents){
-				GameObject.DestroyImmediate(disabledPersistent);
+				// GameObject.DestroyImmediate(disabledPersistent);
+				gameObjectsToDestroy.Push(disabledPersistent);
+			}
+			while (gameObjectsToDestroy.Count > 0){
+				GameObject.DestroyImmediate(gameObjectsToDestroy.Pop());
 			}
 		}
 		disabledPersistents = new List<GameObject>();
@@ -245,5 +251,10 @@ public class MySaver {
 			return -1;
 		objectIDs.TryGetValue(referent, out returnID);
 		return returnID;
+	}
+	public static GameObject IDToGameObject(int idn){
+		GameObject returnObject;
+		loadedObjects.TryGetValue(idn, out returnObject);
+		return returnObject;
 	}
 }
