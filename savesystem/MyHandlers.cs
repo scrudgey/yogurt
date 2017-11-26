@@ -296,12 +296,18 @@ public class IntrinsicsHandler: SaveHandler<Intrinsics>{
 		data.intrinsics = new List<Intrinsic>();
 		foreach(Intrinsic intrinsic in instance.intrinsics){
 			data.intrinsics.Add(intrinsic);
+			// foreach(KeyValuePair<BuffType, Buff> kvp in intrinsic.buffs){
+			// 	Debug.Log("saving intrinsic "+kvp.Key.ToString());
+			// }
 		}
 	}
 	public override void LoadSpecificData(Intrinsics instance, PersistentComponent data){
 		instance.intrinsics = new List<Intrinsic>();
 		foreach(Intrinsic intrinsic in data.intrinsics){
 			instance.intrinsics.Add(intrinsic);
+			// foreach(KeyValuePair<BuffType, Buff> kvp in intrinsic.buffs){
+			// 	Debug.Log("loading intrinsic "+kvp.Key.ToString());
+			// }
 		}
 		if (data.intrinsics.Count > 0)
 			instance.IntrinsicsChanged();
@@ -361,9 +367,8 @@ public class StainHandler: SaveHandler<Stain>{
 	public override void SaveSpecificData(Stain instance, PersistentComponent data){
 		data.ints["parentID"] = MySaver.GameObjectToID(instance.parent);
 		MySaver.AddToReferenceTree(data, instance.gameObject);
-
-		PersistentObject stainPersistent = MySaver.persistentObjects.FindKeyByValue(instance.gameObject);
-		PersistentObject parentPersistent = MySaver.persistentObjects.FindKeyByValue(instance.parent);
+		// PersistentObject stainPersistent = MySaver.persistentObjects.FindKeyByValue(instance.gameObject);
+		// PersistentObject parentPersistent = MySaver.persistentObjects.FindKeyByValue(instance.parent);
 		MonoLiquid stainLiquid = instance.GetComponent<MonoLiquid>();
 		if (stainLiquid != null)
 			data.strings["liquid"] = stainLiquid.liquid.filename;
