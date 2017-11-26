@@ -79,7 +79,9 @@ public class Awareness : MonoBehaviour, IMessagable {
 	public Ref<GameObject> nearestEnemy = new Ref<GameObject>(null);
 	public Ref<GameObject> nearestFire = new Ref<GameObject>(null);
 	public SerializableDictionary<GameObject, Knowledge> knowledgebase = new SerializableDictionary<GameObject, Knowledge>();
+	public HashSet<SerializedKnowledge> longTermMemory = new HashSet<SerializedKnowledge>();
 	public SerializableDictionary<GameObject, PersonalAssessment> people = new SerializableDictionary<GameObject, PersonalAssessment>();
+	public HashSet<SerializedPersonalAssessment> longtermPersonalAssessments = new HashSet<SerializedPersonalAssessment>();
 	void Start () {
 		control = gameObject.GetComponent<Controllable>();
 		sightCone = Instantiate( Resources.Load("sightcone1"), gameObject.transform.position, Quaternion.identity ) as GameObject;
@@ -204,8 +206,9 @@ public class Awareness : MonoBehaviour, IMessagable {
 			// Debug.Log(other.transform.parent.gameObject);
 			if (other.tag == "Physical")
 				fieldOfView.Add(other.gameObject);
-			if (other.gameObject.GetComponentInParent<Controllable>()){
-				fieldOfView.Add(other.gameObject);
+			Controllable baseControllable = other.GetComponentInParent<Controllable>();
+			if (baseControllable != null){
+				fieldOfView.Add(baseControllable.gameObject);
 			}
 		}
 	}

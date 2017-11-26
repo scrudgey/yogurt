@@ -130,11 +130,6 @@ public class Controller : Singleton<Controller> {
 			if (frontRenderer != null)
 				front = frontRenderer.gameObject;
 		}
-		// if (frontRenderer != null){
-		// 	return frontRenderer.gameObject;
-		// }else{
-		// 	return null;
-		// }
 		return front;
 	}
 	public GameObject GetBaseInteractive(Transform target){
@@ -144,6 +139,10 @@ public class Controller : Singleton<Controller> {
 			if (physical){
 				return physical.objectBody.gameObject;
 			}
+		}
+		Controllable baseControllable = target.GetComponentInParent<Controllable>();
+		if (baseControllable != null){
+			return baseControllable.gameObject;
 		}
 		while (true){
 			if (currentChild.tag == "Physical"){
@@ -208,7 +207,7 @@ public class Controller : Singleton<Controller> {
 			GameObject top = Controller.Instance.GetFrontObject(hits);
 			if (top != null){
 				GameObject target = Controller.Instance.GetBaseInteractive(top.transform);
-				Controllable controllable = focus.GetComponent<Controllable>();
+				Controllable controllable = target.GetComponent<Controllable>();
 				if (controllable){
 					GameManager.Instance.SetFocus(target);
 				}

@@ -4,32 +4,34 @@ using System.Collections.Generic;
 using AI;
 
 public abstract class SaveHandler{
-	public abstract void SaveData(Component instance, PersistentComponent data, ReferenceResolver resolver);
+	public abstract void SaveData(Component instance, PersistentComponent data);
 	public abstract void LoadData(Component instance, PersistentComponent data);
 }
 public abstract class SaveHandler<T> : SaveHandler where T : Component
 {
-	public sealed override void SaveData(Component instance, PersistentComponent data, ReferenceResolver resolver){
+	public sealed override void SaveData(Component instance, PersistentComponent data){
 		// TODO: handle it better if instance is not T.
-		SaveSpecificData(instance as T, data, resolver);
+		SaveSpecificData(instance as T, data);
 	}
 	public sealed override void LoadData(Component instance, PersistentComponent data){
 		LoadSpecificData(instance as T, data);
 	}
-	public abstract void SaveSpecificData(T instance, PersistentComponent data, ReferenceResolver resolver);
+	public abstract void SaveSpecificData(T instance, PersistentComponent data);
 	public abstract void LoadSpecificData(T instance, PersistentComponent data);
 }
 public class InventoryHandler : SaveHandler<Inventory> {
-	public override void SaveSpecificData(Inventory instance, PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(Inventory instance, PersistentComponent data){
 		if (instance.holding != null){
-			data.ints["holdingID"] = resolver.ResolveReference(instance.holding.gameObject, data.persistent);
+			data.ints["holdingID"] = MySaver.GameObjectToID(instance.holding.gameObject);
+			MySaver.AddToReferenceTree(data, instance.holding.gameObject);
 		} else {
 			data.ints["holdingID"] = -1;
 		}
 		data.ints["itemCount"] = instance.items.Count;
 		if (instance.items.Count > 0){
 			for (int i = 0; i < instance.items.Count; i++){
-				data.ints["item"+i.ToString()] = resolver.ResolveReference(instance.items[i], data.persistent);
+				data.ints["item"+i.ToString()] = MySaver.GameObjectToID(instance.items[i]);
+				MySaver.AddToReferenceTree(data, instance.items[i]);
 			}
 		} 
 		data.vectors["direction"] = instance.direction;
@@ -37,8 +39,9 @@ public class InventoryHandler : SaveHandler<Inventory> {
 	public override void LoadSpecificData(Inventory instance, PersistentComponent data){
 		instance.direction = data.vectors["direction"];
 		if (data.ints["holdingID"] != -1){
-			if (MySaver.loadedObjects.ContainsKey(data.ints["holdingID"]) ){
-				instance.GetItem(MySaver.loadedObjects[data.ints["holdingID"]].GetComponent<Pickup>());
+			GameObject go = MySaver.IDToGameObject(data.ints["holdingID"]);
+			if (go != null){
+				instance.GetItem(go.GetComponent<Pickup>());
 			} else {
 				Debug.Log("tried to get loadedobject " + data.ints["holdingID"].ToString() + " but was not found!");
 			}
@@ -60,13 +63,14 @@ public class InventoryHandler : SaveHandler<Inventory> {
 	}
 }
 public class ContainerHandler: SaveHandler<Container> {
-	public override void SaveSpecificData(Container instance, PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(Container instance, PersistentComponent data){
 		data.ints["maxItems"] = 						instance.maxNumber;
 		data.bools["disableContents"] = 				instance.disableContents;
 		data.ints["itemCount"] = instance.items.Count;
 		if (instance.items.Count > 0){
 			for (int i = 0; i < instance.items.Count; i++){
-				data.ints["item"+i.ToString()] = resolver.ResolveReference(instance.items[i].gameObject, data.persistent);
+				data.ints["item"+i.ToString()] = MySaver.GameObjectToID(instance.items[i].gameObject);
+				MySaver.AddToReferenceTree(data, instance.items[i].gameObject);
 			}
 		}
 	}
@@ -75,19 +79,22 @@ public class ContainerHandler: SaveHandler<Container> {
 		instance.disableContents = 						data.bools["disableContents"];
 		if (data.ints["itemCount"] > 0){
 			for (int i = 0; i < data.ints["itemCount"]; i++){
-				instance.AddItem(MySaver.loadedObjects[data.ints["item"+i.ToString()]].GetComponent<Pickup>());
-				PhysicalBootstrapper phys = instance.items[i].GetComponent<PhysicalBootstrapper>();
-				if (phys)
-					phys.doInit = false;
+				GameObject go = MySaver.IDToGameObject(data.ints["item"+i.ToString()]);
+				if (go != null){
+					instance.AddItem(go.GetComponent<Pickup>());
+					PhysicalBootstrapper phys = go.GetComponent<PhysicalBootstrapper>();
+					if (phys)
+						phys.doInit = false;
+				}
 				// Debug.Log("container containing "+MySaver.loadedObjects[data.ints["item"+i.ToString()]].name);
 			}
 		}
 	}
 }
 public class BlenderHandler: SaveHandler<Blender> {
-	public override void SaveSpecificData(Blender instance, PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(Blender instance, PersistentComponent data){
 		ContainerHandler handler = new ContainerHandler();
-		handler.SaveData((Container)instance, data, resolver);
+		handler.SaveData((Container)instance, data);
 		data.bools["power"] = instance.power;
 	}
 	public override void LoadSpecificData(Blender instance, PersistentComponent data){
@@ -97,36 +104,41 @@ public class BlenderHandler: SaveHandler<Blender> {
 	}
 }
 public class HeadHandler: SaveHandler<Head> {
-	public override void SaveSpecificData(Head instance,PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(Head instance, PersistentComponent data){
 		if (instance.hat != null){
-			data.ints["hat"] = resolver.ResolveReference(instance.hat.gameObject, data.persistent);
+			data.ints["hat"] = MySaver.GameObjectToID(instance.hat.gameObject);
+			MySaver.AddToReferenceTree(data, instance.hat.gameObject);
 		} else {
 			data.ints["hat"] = -1;
 		}
 	}
-	public override void LoadSpecificData(Head instance,PersistentComponent data){
+	public override void LoadSpecificData(Head instance, PersistentComponent data){
 		instance.initHat = null;
 		if (data.ints["hat"] != -1){
-			instance.DonHat(MySaver.loadedObjects[data.ints["hat"]].GetComponent<Hat>());
+			GameObject hat = MySaver.IDToGameObject(data.ints["hat"]);
+			if (hat != null){
+				instance.DonHat(hat.GetComponent<Hat>());
+			}
 		}
 	}
 }
 public class TraderHandler: SaveHandler<Trader>{
-	public override void SaveSpecificData(Trader instance, PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(Trader instance, PersistentComponent data){
 		if (instance.give != null){
-			data.ints["give"] = resolver.ResolveReference(instance.give, data.persistent);
+			data.ints["give"] = MySaver.GameObjectToID(instance.give);
+			MySaver.AddToReferenceTree(data, instance.give);
 		}
 		data.strings["receive"] = instance.receive;
 	}
 	public override void LoadSpecificData(Trader instance, PersistentComponent data){
 		if (data.ints.ContainsKey("give")){
-			instance.give = MySaver.loadedObjects[data.ints["give"]];
+			instance.give = MySaver.IDToGameObject(data.ints["give"]);
 		}
 		instance.receive = data.strings["receive"];
 	}
 }
 public class PackageHandler: SaveHandler<Package> {
-	public override void SaveSpecificData(Package instance, PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(Package instance, PersistentComponent data){
 		data.strings["contents"] = instance.contents;
 	}
 	public override void LoadSpecificData(Package instance, PersistentComponent data){
@@ -134,7 +146,7 @@ public class PackageHandler: SaveHandler<Package> {
 	}
 }
 public class PhysicalBootStrapperHandler: SaveHandler<PhysicalBootstrapper> {
-	public override void SaveSpecificData(PhysicalBootstrapper instance, PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(PhysicalBootstrapper instance, PersistentComponent data){
 		data.bools["doInit"] = instance.doInit;
 		data.bools["physical"] = false;
 		if (instance.physical != null){
@@ -158,7 +170,7 @@ public class PhysicalBootStrapperHandler: SaveHandler<PhysicalBootstrapper> {
 }
 // to add: food preference enums
 public class EaterHandler: SaveHandler<Eater> {
-	public override void SaveSpecificData(Eater instance, PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(Eater instance, PersistentComponent data){
 		data.floats["nutrition"] = instance.nutrition;
 	}
 	public override void LoadSpecificData(Eater instance, PersistentComponent data){
@@ -167,7 +179,7 @@ public class EaterHandler: SaveHandler<Eater> {
 }
 // public class 
 public class AdvancedAnimationHandler: SaveHandler<AdvancedAnimation> {
-	public override void SaveSpecificData(AdvancedAnimation instance, PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(AdvancedAnimation instance, PersistentComponent data){
 		data.strings["baseName"] = instance.baseName;
 		data.ints["hitstate"] = (int)instance.hitState;
 	}
@@ -178,7 +190,7 @@ public class AdvancedAnimationHandler: SaveHandler<AdvancedAnimation> {
 	}
 }
 public class HeadAnimationHandler: SaveHandler<HeadAnimation> {
-	public override void SaveSpecificData(HeadAnimation instance, PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(HeadAnimation instance, PersistentComponent data){
 		data.ints["hitstate"] = (int)instance.hitState;
 		data.strings["baseName"] = instance.baseName;
 	}
@@ -188,7 +200,7 @@ public class HeadAnimationHandler: SaveHandler<HeadAnimation> {
 	}
 }
 public class SpeechHandler: SaveHandler<Speech>{
-	public override void SaveSpecificData(Speech instance, PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(Speech instance, PersistentComponent data){
 		data.bools["speaking"] = instance.speaking;
 		data.ints["hitstate"] = (int)instance.hitState;
 	}
@@ -198,7 +210,7 @@ public class SpeechHandler: SaveHandler<Speech>{
 	}
 }
 public class FlammableHandler: SaveHandler<Flammable> {
-	public override void SaveSpecificData(Flammable instance, PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(Flammable instance, PersistentComponent data){
 		data.floats["heat"] = 				instance.heat;
 		data.floats["flashpoint"] = 		instance.flashpoint;
 		data.bools["onFire"] = 				instance.onFire;
@@ -210,7 +222,7 @@ public class FlammableHandler: SaveHandler<Flammable> {
 	}
 }
 public class DropDripperHandler: SaveHandler<DropDripper> {
-	public override void SaveSpecificData(DropDripper instance, PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(DropDripper instance, PersistentComponent data){
 		data.ints["amount"] = instance.amount;
 	}
 	public override void LoadSpecificData(DropDripper instance, PersistentComponent data){
@@ -218,7 +230,7 @@ public class DropDripperHandler: SaveHandler<DropDripper> {
 	}
 }
 public class DestructibleHandler: SaveHandler<Destructible> {
-	public override void SaveSpecificData(Destructible instance, PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(Destructible instance, PersistentComponent data){
 		data.floats["health"] = 			instance.health;
 		data.bools["invulnerable"] = 		instance.invulnerable;
 		data.bools["fireproof"] = 			instance.fireproof;
@@ -234,7 +246,7 @@ public class DestructibleHandler: SaveHandler<Destructible> {
 	}
 }
 public class OutfitHandler: SaveHandler<Outfit> {
-	public override void SaveSpecificData(Outfit instance, PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(Outfit instance, PersistentComponent data){
 		data.strings["worn"] = 			instance.wornUniformName;
 		data.ints["hitstate"] = (int)instance.hitState;
 	}
@@ -245,7 +257,7 @@ public class OutfitHandler: SaveHandler<Outfit> {
 	}
 }
 public class CabinetHandler: SaveHandler<Cabinet> {
-	public override void SaveSpecificData(Cabinet instance, PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(Cabinet instance, PersistentComponent data){
 		data.bools["opened"] = 			instance.opened;
 	}
 	public override void LoadSpecificData(Cabinet instance, PersistentComponent data){
@@ -256,7 +268,7 @@ public class CabinetHandler: SaveHandler<Cabinet> {
 	}
 }
 public class LiquidContainerHandler: SaveHandler<LiquidContainer>{
-	public override void SaveSpecificData(LiquidContainer instance, PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(LiquidContainer instance, PersistentComponent data){
 		data.floats["fillCapacity"] = 		instance.fillCapacity;
 		data.floats["amount"] = 			instance.amount;
 		data.bools["lid"] = 				instance.lid;
@@ -280,10 +292,9 @@ public class LiquidContainerHandler: SaveHandler<LiquidContainer>{
 	}
 }
 public class IntrinsicsHandler: SaveHandler<Intrinsics>{
-	public override void SaveSpecificData(Intrinsics instance, PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(Intrinsics instance, PersistentComponent data){
 		data.intrinsics = new List<Intrinsic>();
 		foreach(Intrinsic intrinsic in instance.intrinsics){
-			// if (intrinsic.persistent)
 			data.intrinsics.Add(intrinsic);
 		}
 	}
@@ -297,7 +308,7 @@ public class IntrinsicsHandler: SaveHandler<Intrinsics>{
 	}
 }
 public class HurtableHandler: SaveHandler<Hurtable>{
-	public override void SaveSpecificData(Hurtable instance, PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(Hurtable instance, PersistentComponent data){
 		data.floats["health"] = instance.health;
 		data.floats["maxHealth"] = instance.maxHealth;
 		data.floats["bonusHealth"] = instance.bonusHealth;
@@ -315,7 +326,7 @@ public class HurtableHandler: SaveHandler<Hurtable>{
 	}
 }
 public class HumanoidHandler: SaveHandler<Humanoid>{
-	public override void SaveSpecificData(Humanoid instance, PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(Humanoid instance, PersistentComponent data){
 		data.strings["lastPressed"] = instance.lastPressed;
 		data.vectors["direction"] = instance.direction;
 		data.bools["fightMode"] = instance.fightMode;
@@ -333,7 +344,7 @@ public class HumanoidHandler: SaveHandler<Humanoid>{
 	}
 }
 public class VideoCameraHandler: SaveHandler<VideoCamera>{
-	public override void SaveSpecificData(VideoCamera instance, PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(VideoCamera instance, PersistentComponent data){
 		data.commercials = new List<Commercial>();
 		data.commercials.Add(instance.commercial);
 		data.bools["live"] = instance.live;
@@ -347,20 +358,20 @@ public class VideoCameraHandler: SaveHandler<VideoCamera>{
 	}
 }
 public class StainHandler: SaveHandler<Stain>{
-	public override void SaveSpecificData(Stain instance, PersistentComponent data, ReferenceResolver resolver){
-		data.ints["parentID"] = resolver.ResolveReference(instance.parent, data.persistent);
-		PersistentObject stainPersistent = resolver.persistentObjects.FindKeyByValue(instance.gameObject);
-		PersistentObject parentPersistent = resolver.persistentObjects.FindKeyByValue(instance.parent);
-		resolver.AddToReferenceTree(parentPersistent, stainPersistent);
+	public override void SaveSpecificData(Stain instance, PersistentComponent data){
+		data.ints["parentID"] = MySaver.GameObjectToID(instance.parent);
+		MySaver.AddToReferenceTree(data, instance.gameObject);
+
+		PersistentObject stainPersistent = MySaver.persistentObjects.FindKeyByValue(instance.gameObject);
+		PersistentObject parentPersistent = MySaver.persistentObjects.FindKeyByValue(instance.parent);
 		MonoLiquid stainLiquid = instance.GetComponent<MonoLiquid>();
 		if (stainLiquid != null)
 			data.strings["liquid"] = stainLiquid.liquid.filename;
 	}
 	public override void LoadSpecificData(Stain instance, PersistentComponent data){
 		if (data.ints["parentID"] != -1){
-			instance.ConfigureParentObject(MySaver.loadedObjects[data.ints["parentID"]]);
+			instance.ConfigureParentObject(MySaver.IDToGameObject(data.ints["parentID"]));
 			if (data.strings.ContainsKey("liquid")){
-				// string filename = Toolbox.Instance.ReplaceUnderscore(data.strings["liquid"]);
 				Liquid.MonoLiquidify(instance.gameObject, Liquid.LoadLiquid(data.strings["liquid"]));
 			}
 		} else {
@@ -377,10 +388,8 @@ public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
 		{typeof(PriorityRunAway)},
 		{typeof(PriorityWander)}
 	};
-	public override void SaveSpecificData(DecisionMaker instance, PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(DecisionMaker instance, PersistentComponent data){
 		data.ints["hitstate"] = (int)instance.hitState;
-		// if (instance.possession != null)
-		// 	data.ints["possession"] = resolver.ResolveReference(instance.possession, data.persistent);
 		foreach (Type priorityType in priorityTypes){
 			foreach(Priority priority in instance.priorities){
 				if (priority.GetType() == priorityType){
@@ -406,44 +415,57 @@ public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
 	}
 }
 public class AwarenessHandler: SaveHandler<Awareness>{
-	public override void SaveSpecificData(Awareness instance, PersistentComponent data, ReferenceResolver resolver){
+	public override void SaveSpecificData(Awareness instance, PersistentComponent data){
 		data.ints["hitstate"] = (int)instance.hitState;
 		data.knowledgeBase = new List<SerializedKnowledge>();
+		foreach(SerializedKnowledge sk in instance.longTermMemory){
+			data.knowledgeBase.Add(sk);
+		}
 		data.people = new List<SerializedPersonalAssessment>();
+		foreach(SerializedPersonalAssessment spa in instance.longtermPersonalAssessments){
+			data.people.Add(spa);
+		}
 		if (instance.possession != null)
-			data.ints["possession"] = resolver.ResolveReference(instance.possession, data.persistent);
+			data.ints["possession"] = MySaver.GameObjectToID(instance.possession);
+			MySaver.AddToReferenceTree(data, instance.possession);
 		foreach (KeyValuePair<GameObject, Knowledge> keyVal in instance.knowledgebase){
-			SerializedKnowledge knowledge = SaveKnowledge(keyVal.Value, resolver, data.persistent);
+			SerializedKnowledge knowledge = SaveKnowledge(keyVal.Value, data.persistent);
 			if (knowledge.gameObjectID == -1)
 				continue;
 			data.knowledgeBase.Add(knowledge);
 		}
 		foreach (KeyValuePair<GameObject, PersonalAssessment> keyVal in instance.people){
-			data.people.Add(SavePerson(keyVal.Value, resolver, data.persistent));
+			data.people.Add(SavePerson(keyVal.Value, data.persistent));
 		}
 		if (instance.possessionDefaultState != null){
-			SerializedKnowledge knowledge = SaveKnowledge(instance.possessionDefaultState, resolver, data.persistent);
+			SerializedKnowledge knowledge = SaveKnowledge(instance.possessionDefaultState, data.persistent);
 			if (knowledge.gameObjectID != -1)
 				data.knowledges["defaultState"] = knowledge;
 		}
 	}
 	public override void LoadSpecificData(Awareness instance, PersistentComponent data){
 		if (data.ints.ContainsKey("possession")){
-			instance.possession = MySaver.loadedObjects[data.ints["possession"]];
+			instance.possession = MySaver.IDToGameObject(data.ints["possession"]);
 		}
 		instance.hitState = (Controllable.HitState)data.ints["hitstate"];
 		foreach(SerializedKnowledge knowledge in data.knowledgeBase){
 			Knowledge newKnowledge = LoadKnowledge(knowledge);
-			if (newKnowledge != null){
-				GameObject subject = MySaver.loadedObjects[knowledge.gameObjectID];
-				instance.knowledgebase[subject] = newKnowledge;
+			if (newKnowledge.obj != null){
+				instance.knowledgebase[newKnowledge.obj] = newKnowledge;
+			} else {
+				// TODO: how to save the serialized knowledge if it isnt in scene?'
+				instance.longTermMemory.Add(knowledge);
 			}
 		}
 		foreach(SerializedPersonalAssessment pa in data.people){
-			PersonalAssessment assessment = LoadPerson(pa);
-			GameObject subject = MySaver.loadedObjects[pa.gameObjectID];
-			assessment.knowledge = instance.knowledgebase[subject];
-			instance.people[subject] = assessment;
+			GameObject go = MySaver.IDToGameObject(pa.gameObjectID);
+			if (go != null){
+				PersonalAssessment assessment = LoadPerson(pa);
+				assessment.knowledge = instance.knowledgebase[go];
+				instance.people[go] = assessment;
+			} else {
+				instance.longtermPersonalAssessments.Add(pa);
+			}
 		}
 		if (data.knowledges.ContainsKey("defaultState")){
 			instance.possessionDefaultState = LoadKnowledge(data.knowledges["defaultState"]);
@@ -451,31 +473,29 @@ public class AwarenessHandler: SaveHandler<Awareness>{
 		instance.SetNearestEnemy();
 		instance.SetNearestFire();
 	}
-	SerializedKnowledge SaveKnowledge(Knowledge input, ReferenceResolver resolver, PersistentObject persistent){
+	SerializedKnowledge SaveKnowledge(Knowledge input, PersistentObject persistent){
 		SerializedKnowledge data = new SerializedKnowledge();
 		data.lastSeenPosition = input.lastSeenPosition;
 		data.lastSeenTime = input.lastSeenTime;
-		data.gameObjectID = resolver.ResolveReference(input.obj, persistent);
+		data.gameObjectID = MySaver.GameObjectToID(input.obj);
 		return data;
 	}
 	Knowledge LoadKnowledge(SerializedKnowledge input){
-		if (MySaver.loadedObjects.ContainsKey(input.gameObjectID)){
-			Knowledge knowledge = new Knowledge();
-			knowledge.lastSeenPosition = input.lastSeenPosition;
-			knowledge.lastSeenTime = input.lastSeenTime;
-			knowledge.obj = MySaver.loadedObjects[input.gameObjectID];
+		Knowledge knowledge = new Knowledge();
+		knowledge.lastSeenPosition = input.lastSeenPosition;
+		knowledge.lastSeenTime = input.lastSeenTime;
+		knowledge.obj = MySaver.IDToGameObject(input.gameObjectID);
+		if (knowledge.obj != null){
 			knowledge.transform = knowledge.obj.transform;
 			knowledge.flammable = knowledge.obj.GetComponent<Flammable>();
-			return knowledge;
-		} else {
-			return null;
 		}
+		return knowledge;
 	}
-	SerializedPersonalAssessment SavePerson(PersonalAssessment input, ReferenceResolver resolver, PersistentObject persistent){
+	SerializedPersonalAssessment SavePerson(PersonalAssessment input, PersistentObject persistent){
 		SerializedPersonalAssessment data = new SerializedPersonalAssessment();
 		data.status = input.status;
 		data.unconscious = input.unconscious;
-		data.gameObjectID = resolver.ResolveReference(input.knowledge.obj, persistent);
+		data.gameObjectID = MySaver.GameObjectToID(input.knowledge.obj);
 		return data;
 	}
 	PersonalAssessment LoadPerson(SerializedPersonalAssessment input){

@@ -9,8 +9,10 @@ public class FollowGameObject : MonoBehaviour {
 		offset = transform.position - target.transform.position;
 	}
 	public void Update(){
-		if (target == null)
+		if (target == null){
 			Destroy(this);
+			return;
+		}
 		transform.position = target.transform.position + offset;
 	}
 }

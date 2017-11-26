@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
-// using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Xml.Serialization;
 
 public class PersistentObject {
 	private Regex rgx = new Regex(@"(.+)\(Clone\)$", RegexOptions.Multiline);
@@ -10,7 +11,11 @@ public class PersistentObject {
 	public Vector3 transformScale;
 	public Quaternion transformRotation;
 	public SerializableDictionary<string, PersistentComponent> persistentComponents = new SerializableDictionary<string, PersistentComponent>();
-	public SerializableDictionary<string, PersistentComponent> persistentChildComponents = new SerializableDictionary<string, PersistentComponent>();
+	public List<PersistentObject> persistentChildren = new List<PersistentObject>();
+	public string parentObject;
+	[XmlIgnoreAttribute]	
+	public PersistentObject parentPersistent;
+
 	public PersistentObject(){
 		// needed for XML serialization
 	}
@@ -28,57 +33,50 @@ public class PersistentObject {
 		transformPosition = gameObject.transform.position;
 		transformRotation = gameObject.transform.rotation;
 		transformScale = gameObject.transform.localScale;
-		// here i will add a persistentcomponent object for each component that has a handler
-		// foreach (Component component in gameObject.GetComponents<Component>() ){
-		// 	if (MySaver.Handlers.ContainsKey(component.GetType())){
-		// 		PersistentComponent persist = new PersistentComponent(this);
-		// 		persistentComponents.Add(component.GetType().ToString(), persist);
-		// 	}
-		// }
-		// handle marked child objects
 		MyMarker marker = gameObject.GetComponent<MyMarker>();
-		foreach (GameObject childObject in marker.persistentChildren){
-			foreach (Component component in childObject.GetComponents<Component>()){
-				if (MySaver.Handlers.ContainsKey(component.GetType())){
-					PersistentComponent persist = new PersistentComponent(this);
-					persistentChildComponents.Add(component.GetType().ToString(), persist);
-					persist.parentObject = component.gameObject.name;
-					persist.type = component.GetType().ToString();
-				}
+		if (marker != null){
+			foreach (GameObject childObject in marker.persistentChildren){
+				PersistentObject persistentChildObject = new PersistentObject(childObject);
+				persistentChildObject.parentObject = childObject.name;
+				persistentChildren.Add(persistentChildObject);
 			}
 		}
 	}
-	public void HandleSave(GameObject parentObject, ReferenceResolver resolver){
-		foreach (Component component in parentObject.GetComponents<Component>() ){
-			// Func<SaveHandler> getter;
+	public void HandleSave(GameObject parentObject){
+		foreach (Component component in parentObject.GetComponents<Component>()){
 			SaveHandler handler;
-			// if (MySaver.Handlers.TryGetValue(component.GetType(), out getter)){
-			// 	PersistentComponent persistentComponent = persistentComponents[component.GetType().ToString()];
-			// 	var handler = getter();
-			// 	handler.SaveData(component, persistentComponent, resolver);
 			if (MySaver.Handlers.TryGetValue(component.GetType(), out handler)){
 				PersistentComponent persist = new PersistentComponent(this);
 				persistentComponents.Add(component.GetType().ToString(), persist);
-
-				SaveHandler secondHandler = MySaver.Handlers[component.GetType()];
-				PersistentComponent persistentComponent = persistentComponents[component.GetType().ToString()];
-				secondHandler.SaveData(component, persistentComponent, resolver);
+				// Debug.Log(persist.persistent);
+				handler.SaveData(component, persist);
 			}
 		}
-		foreach (PersistentComponent persistentChildComponent in persistentChildComponents.Values){
-			GameObject childObject = parentObject.transform.Find(persistentChildComponent.parentObject).gameObject;
-			Component component = childObject.GetComponent(persistentChildComponent.type);
-			if (childObject && component){
-				// Func<SaveHandler> get;
-				SaveHandler handler;
-				if (MySaver.Handlers.TryGetValue(component.GetType(), out handler)){
-					// var handler = get();
-					handler.SaveData(component, persistentChildComponent, resolver);
-				}
+		foreach (PersistentObject persistentChild in persistentChildren){
+			if (persistentChild == this)
+				continue;
+			if (parentPersistent == null){
+				persistentChild.parentPersistent = this;
 			} else {
-				Debug.Log("couldn't resolve child object and component on save");
-				Debug.Log(persistentChildComponent.type + " " + persistentChildComponent.parentObject);
+				persistentChild.parentPersistent = parentPersistent;
 			}
+			persistentChild.HandleSave(parentObject.transform.Find(persistentChild.parentObject).gameObject);
+		}
+	}
+	public void HandleLoad(GameObject parentObject){
+		List<Component> loadedComponents = new List<Component>(parentObject.GetComponents<Component>());
+		loadedComponents.Sort(MySaver.CompareComponent);
+		foreach (Component component in loadedComponents){
+			SaveHandler handler;
+			if (MySaver.Handlers.TryGetValue(component.GetType(), out handler)){
+				handler.LoadData(component, persistentComponents[component.GetType().ToString()]);
+			}
+		}
+		foreach (PersistentObject persistentChild in persistentChildren){
+			if (persistentChild == this)
+				continue;
+			GameObject childObject = parentObject.transform.Find(persistentChild.parentObject).gameObject;
+			persistentChild.HandleLoad(childObject);
 		}
 	}
 }

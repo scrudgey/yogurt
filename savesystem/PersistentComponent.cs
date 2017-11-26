@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class PersistentComponent {
 	public string type;
-	public string parentObject;
 	public SerializableDictionary<string, string> strings =		 new SerializableDictionary<string, string>();
 	public SerializableDictionary<string, int> ints = 			 new SerializableDictionary<string, int> ();
 	public SerializableDictionary<string, float> floats = 		 new SerializableDictionary<string, float>();
