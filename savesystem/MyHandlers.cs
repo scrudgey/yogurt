@@ -39,11 +39,17 @@ public class InventoryHandler : SaveHandler<Inventory> {
 	public override void LoadSpecificData(Inventory instance, PersistentComponent data){
 		instance.direction = data.vectors["direction"];
 		if (data.ints["holdingID"] != -1){
-			if (MySaver.loadedObjects.ContainsKey(data.ints["holdingID"]) ){
-				instance.GetItem(MySaver.loadedObjects[data.ints["holdingID"]].GetComponent<Pickup>());
+			GameObject go = MySaver.IDToGameObject(data.ints["holdingID"]);
+			if (go != null){
+				instance.GetItem(go.GetComponent<Pickup>());
 			} else {
 				Debug.Log("tried to get loadedobject " + data.ints["holdingID"].ToString() + " but was not found!");
 			}
+			// if (MySaver.loadedObjects.ContainsKey(data.ints["holdingID"]) ){
+			// 	instance.GetItem(MySaver.loadedObjects[data.ints["holdingID"]].GetComponent<Pickup>());
+			// } else {
+			// 	Debug.Log("tried to get loadedobject " + data.ints["holdingID"].ToString() + " but was not found!");
+			// }
 		}
 		// note: trying to reference a key in data.ints that didn't exist here caused a hard crash at runtime
 		// so PROTECT YA NECK!!!
@@ -78,10 +84,13 @@ public class ContainerHandler: SaveHandler<Container> {
 		instance.disableContents = 						data.bools["disableContents"];
 		if (data.ints["itemCount"] > 0){
 			for (int i = 0; i < data.ints["itemCount"]; i++){
-				instance.AddItem(MySaver.loadedObjects[data.ints["item"+i.ToString()]].GetComponent<Pickup>());
-				PhysicalBootstrapper phys = instance.items[i].GetComponent<PhysicalBootstrapper>();
-				if (phys)
-					phys.doInit = false;
+				GameObject go = MySaver.IDToGameObject(data.ints["item"+i.ToString()]);
+				if (go != null){
+					instance.AddItem(go.GetComponent<Pickup>());
+					PhysicalBootstrapper phys = go.GetComponent<PhysicalBootstrapper>();
+					if (phys)
+						phys.doInit = false;
+				}
 				// Debug.Log("container containing "+MySaver.loadedObjects[data.ints["item"+i.ToString()]].name);
 			}
 		}
@@ -111,7 +120,11 @@ public class HeadHandler: SaveHandler<Head> {
 	public override void LoadSpecificData(Head instance, PersistentComponent data){
 		instance.initHat = null;
 		if (data.ints["hat"] != -1){
-			instance.DonHat(MySaver.loadedObjects[data.ints["hat"]].GetComponent<Hat>());
+			// instance.DonHat(MySaver.loadedObjects[data.ints["hat"]].GetComponent<Hat>());
+			GameObject hat = MySaver.IDToGameObject(data.ints["hat"]);
+			if (hat != null){
+				instance.DonHat(hat.GetComponent<Hat>());
+			}
 		}
 	}
 }
@@ -125,7 +138,8 @@ public class TraderHandler: SaveHandler<Trader>{
 	}
 	public override void LoadSpecificData(Trader instance, PersistentComponent data){
 		if (data.ints.ContainsKey("give")){
-			instance.give = MySaver.loadedObjects[data.ints["give"]];
+			// instance.give = MySaver.loadedObjects[data.ints["give"]];
+			instance.give = MySaver.IDToGameObject(data.ints["give"]);
 		}
 		instance.receive = data.strings["receive"];
 	}
@@ -366,7 +380,8 @@ public class StainHandler: SaveHandler<Stain>{
 	public override void LoadSpecificData(Stain instance, PersistentComponent data){
 		if (data.ints["parentID"] != -1){
 			// instance.ConfigureParentObject(MySaver.IDToGameObject(data.ints["parentID"]));
-			instance.ConfigureParentObject(MySaver.loadedObjects[data.ints["parentID"]]);
+			// instance.ConfigureParentObject(MySaver.loadedObjects[data.ints["parentID"]]);
+			instance.ConfigureParentObject(MySaver.IDToGameObject(data.ints["parentID"]));
 			if (data.strings.ContainsKey("liquid")){
 				// string filename = Toolbox.Instance.ReplaceUnderscore(data.strings["liquid"]);
 				Liquid.MonoLiquidify(instance.gameObject, Liquid.LoadLiquid(data.strings["liquid"]));
@@ -444,28 +459,38 @@ public class AwarenessHandler: SaveHandler<Awareness>{
 	}
 	public override void LoadSpecificData(Awareness instance, PersistentComponent data){
 		if (data.ints.ContainsKey("possession")){
-			instance.possession = MySaver.loadedObjects[data.ints["possession"]];
+			// instance.possession = MySaver.loadedObjects[data.ints["possession"]];
+			instance.possession = MySaver.IDToGameObject(data.ints["possession"]);
 		}
 		instance.hitState = (Controllable.HitState)data.ints["hitstate"];
 		foreach(SerializedKnowledge knowledge in data.knowledgeBase){
 			Knowledge newKnowledge = LoadKnowledge(knowledge);
-			if (newKnowledge != null){
-				GameObject subject = MySaver.loadedObjects[knowledge.gameObjectID];
-				instance.knowledgebase[subject] = newKnowledge;
+			if (newKnowledge.obj != null){
+				// GameObject subject = MySaver.loadedObjects[knowledge.gameObjectID];
+				// GameObject subject = MySaver.IDToGameObject(knowledge.gameObjectID);
+				instance.knowledgebase[newKnowledge.obj] = newKnowledge;
 			} else {
 				// TODO: how to save the serialized knowledge if it isnt in scene?'
 				instance.longTermMemory.Add(knowledge);
 			}
 		}
 		foreach(SerializedPersonalAssessment pa in data.people){
-			if (MySaver.loadedObjects.ContainsKey(pa.gameObjectID)){
+			GameObject go = MySaver.IDToGameObject(pa.gameObjectID);
+			if (go != null){
 				PersonalAssessment assessment = LoadPerson(pa);
-				GameObject subject = MySaver.loadedObjects[pa.gameObjectID];
-				assessment.knowledge = instance.knowledgebase[subject];
-				instance.people[subject] = assessment;
+				assessment.knowledge = instance.knowledgebase[go];
+				instance.people[go] = assessment;
 			} else {
 				instance.longtermPersonalAssessments.Add(pa);
 			}
+			// if (MySaver.loadedObjects.ContainsKey(pa.gameObjectID)){
+			// 	// PersonalAssessment assessment = LoadPerson(pa);
+			// 	// GameObject subject = MySaver.loadedObjects[pa.gameObjectID];
+			// 	// assessment.knowledge = instance.knowledgebase[subject];
+			// 	instance.people[subject] = assessment;
+			// } else {
+			// 	instance.longtermPersonalAssessments.Add(pa);
+			// }
 		}
 		if (data.knowledges.ContainsKey("defaultState")){
 			instance.possessionDefaultState = LoadKnowledge(data.knowledges["defaultState"]);
@@ -481,17 +506,20 @@ public class AwarenessHandler: SaveHandler<Awareness>{
 		return data;
 	}
 	Knowledge LoadKnowledge(SerializedKnowledge input){
-		if (MySaver.loadedObjects.ContainsKey(input.gameObjectID)){
-			Knowledge knowledge = new Knowledge();
-			knowledge.lastSeenPosition = input.lastSeenPosition;
-			knowledge.lastSeenTime = input.lastSeenTime;
-			knowledge.obj = MySaver.loadedObjects[input.gameObjectID];
+		// if (MySaver.loadedObjects.ContainsKey(input.gameObjectID)){
+		Knowledge knowledge = new Knowledge();
+		knowledge.lastSeenPosition = input.lastSeenPosition;
+		knowledge.lastSeenTime = input.lastSeenTime;
+		// knowledge.obj = MySaver.loadedObjects[input.gameObjectID];
+		knowledge.obj = MySaver.IDToGameObject(input.gameObjectID);
+		if (knowledge.obj != null){
 			knowledge.transform = knowledge.obj.transform;
 			knowledge.flammable = knowledge.obj.GetComponent<Flammable>();
-			return knowledge;
-		} else {
-			return null;
 		}
+		return knowledge;
+		// } else {
+		// 	return null;
+		// }
 	}
 	SerializedPersonalAssessment SavePerson(PersonalAssessment input, PersistentObject persistent){
 		SerializedPersonalAssessment data = new SerializedPersonalAssessment();
