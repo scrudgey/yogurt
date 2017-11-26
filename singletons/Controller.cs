@@ -208,6 +208,12 @@ public class Controller : Singleton<Controller> {
 			if (top != null){
 				GameObject target = Controller.Instance.GetBaseInteractive(top.transform);
 				Controllable controllable = target.GetComponent<Controllable>();
+
+				GameObject hypnosisEffect = Instantiate(Resources.Load("prefabs/fx/hypnosisEffect"), GameManager.Instance.playerObject.transform.position, Quaternion.identity) as GameObject;
+				HypnosisEffect fx = hypnosisEffect.GetComponent<HypnosisEffect>();
+				fx.target = target;
+				// hypnosisEffect.transform.SetParent(GameManager.Instance.playerObject.transform, true);
+
 				if (controllable){
 					GameManager.Instance.SetFocus(target);
 				}
