@@ -22,6 +22,7 @@ public class Physical : Damageable {
 	private bool doStartTable;
 	private bool doStopTable;
 	private SpriteRenderer spriteRenderer;
+	public SpriteRenderer objectRenderer;
 	public float groundDrag;
 	private float ziptime;
 	public bool suppressLandSound;
@@ -194,6 +195,8 @@ public class Physical : Damageable {
 		}
 		if (spriteRenderer)
 			spriteRenderer.enabled = false;
+		if (objectRenderer)
+			objectRenderer.sortingLayerName = "main";
 	}
 	public void ClearTempColliders(){
 		foreach (Collider2D temporaryCollider in temporaryDisabledColliders){
@@ -228,6 +231,8 @@ public class Physical : Damageable {
 		gameObject.layer = 15;
 		if (spriteRenderer)
 			spriteRenderer.enabled = true;
+		if (objectRenderer)
+			objectRenderer.sortingLayerName = "air";
 	}
 	public void StartZipMode(){
 		doZip = false;
@@ -277,6 +282,8 @@ public class Physical : Damageable {
 		transform.SetParent(table.transform);
 		if (spriteRenderer)
 			spriteRenderer.enabled = false;
+		if (objectRenderer)
+			objectRenderer.sortingLayerName = "main";
 	}
 	void StopTable(){
 		Vector3 objectPosition = hinge.transform.localPosition;

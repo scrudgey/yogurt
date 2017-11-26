@@ -130,6 +130,8 @@ public class PhysicalBootstrapper : MonoBehaviour {
 		groundPhysical.hingeBody = hingeBody;
 		groundPhysical.groundDrag = groundDrag;
 		groundPhysical.groundCollider = groundCollider;
+		groundPhysical.objectRenderer = GetComponent<SpriteRenderer>();
+		// Debug.Log(groundPhysical.objectRenderer);
 
 		//Slider joint
 		sliderJoint2D = groundObject.AddComponent<SliderJoint2D>();
