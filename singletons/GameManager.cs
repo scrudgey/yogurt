@@ -129,12 +129,18 @@ public partial class GameManager : Singleton<GameManager> {
 		intrinsics.SetupStatusIcon();
 	}
 	public void SetFocus(GameObject target){
-		playerObject = target;
-		Controller.Instance.focus = target.GetComponent<Controllable>();
-		DecisionMaker decisionMaker = playerObject.GetComponent<DecisionMaker>();
-		if (decisionMaker != null){
-			decisionMaker.enabled = false;
+		if (playerObject != null){
+			Controllable oldControl = playerObject.GetComponent<Controllable>();
+			oldControl.SetControl(Controllable.ControlType.AI);
 		}
+		playerObject = target;
+		Controllable targetControl = playerObject.GetComponent<Controllable>();
+		Controller.Instance.focus = target.GetComponent<Controllable>();
+		targetControl.SetControl(Controllable.ControlType.player);
+		// DecisionMaker decisionMaker = playerObject.GetComponent<DecisionMaker>();
+		// if (decisionMaker != null){
+		// 	decisionMaker.enabled = false;
+		// }
 		cameraControl = FindObjectOfType<CameraControl>();
 		if (cameraControl)
 			cameraControl.focus = target;

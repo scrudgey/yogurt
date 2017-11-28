@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 public class Controllable : MonoBehaviour, IMessagable {
 	public enum HitState{none, stun, unconscious, dead};
+	public enum ControlType{none, AI, player}
 	static public HitState AddHitState(HitState orig, HitState argument){
 		if (argument > orig){
 			return argument;
@@ -63,6 +64,8 @@ public class Controllable : MonoBehaviour, IMessagable {
 	public HitState hitState;	
 	public GameObject lastRightClicked;
 	private Rigidbody2D rigidBody2d;
+	public ControlType control;
+	private DecisionMaker decisionMaker;
 	public void ResetInput(){
 		upFlag = false;
 		downFlag = false;
@@ -70,6 +73,32 @@ public class Controllable : MonoBehaviour, IMessagable {
 		rightFlag = false;
 		shootPressedFlag = false;
 		shootHeldFlag = false;
+	}
+	public void Awake(){
+		decisionMaker = GetComponent<DecisionMaker>();
+		if (decisionMaker != null){
+			SetControl(ControlType.AI);
+		} else {
+			SetControl(ControlType.none);
+		}
+	}
+	public void SetControl(ControlType type){
+		switch(type){
+			case ControlType.AI:
+			if (decisionMaker)
+				decisionMaker.enabled = true;
+			break;
+			case ControlType.player:
+			if (decisionMaker)
+				decisionMaker.enabled = false;
+			break;
+			case ControlType.none:
+			default:
+			if (decisionMaker)
+				decisionMaker.enabled = false;
+			break;
+		}
+		control = type;
 	}
 	public virtual void Start(){
 		foreach(Component component in gameObject.GetComponentsInChildren<Component>())
