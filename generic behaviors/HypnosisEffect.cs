@@ -6,7 +6,7 @@ public class HypnosisEffect : MonoBehaviour {
 	// code for directing the hypnosis direction and lifetime toward a target
 	public GameObject target;
 	public ParticleSystem psystem;
-	float totalTime = 3f;
+	float totalTime = 1.5f;
 	void Awake(){
 		psystem = GetComponent<ParticleSystem>();
 	}
