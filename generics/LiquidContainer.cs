@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 public class LiquidContainer : Interactive, IMessagable {
-	private SpriteRenderer liquidSprite;
+	public SpriteRenderer liquidSprite;
 	public Liquid liquid;
 	private float _amount;
 	public float amount{
@@ -47,12 +47,12 @@ public class LiquidContainer : Interactive, IMessagable {
 		fillContainer.validationFunction = true;
 		interactions.Add(fillContainer);
 		empty = true;
-		Transform child = transform.Find("liquidSprite");
-		if (child){
-			liquidSprite = child.GetComponent<SpriteRenderer>();
-			if (liquidSprite) 
-				liquidSprite.enabled = false;
-		}
+		// Transform child = transform.Find("liquidSprite");
+		// if (child){
+		// 	liquidSprite = child.GetComponent<SpriteRenderer>();
+		if (liquidSprite) 
+			liquidSprite.enabled = false;
+		// }
 		if (initLiquid != ""){
 			FillByLoad(initLiquid);
 		}
