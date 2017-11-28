@@ -47,12 +47,8 @@ public class LiquidContainer : Interactive, IMessagable {
 		fillContainer.validationFunction = true;
 		interactions.Add(fillContainer);
 		empty = true;
-		// Transform child = transform.Find("liquidSprite");
-		// if (child){
-		// 	liquidSprite = child.GetComponent<SpriteRenderer>();
 		if (liquidSprite) 
 			liquidSprite.enabled = false;
-		// }
 		if (initLiquid != ""){
 			FillByLoad(initLiquid);
 		}
@@ -85,7 +81,6 @@ public class LiquidContainer : Interactive, IMessagable {
 		}
 	}
 	public string FillFromContainer_desc(LiquidContainer l){
-		// string myname = Toolbox.Instance.GetName(gameObject);
 		string resname = Toolbox.Instance.GetName(l.gameObject);
 		return "Fill "+containerName+" with "+l.liquid.name+" from "+resname;
 	}
