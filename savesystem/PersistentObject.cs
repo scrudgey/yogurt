@@ -4,8 +4,11 @@ using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 
 public class PersistentObject {
-	private Regex rgx = new Regex(@"(.+)\(Clone\)$", RegexOptions.Multiline);
+	private static Regex regexClone = new Regex(@"(.+)\(Clone\)$", RegexOptions.Multiline);
+	private static Regex regexSpace =  new Regex("\\s+", RegexOptions.Multiline);
 	public string name;
+	public string prefabPath;
+	public bool noPrefab;
 	public int id;
 	public Vector3 transformPosition;
 	public Vector3 transformScale;
@@ -21,7 +24,7 @@ public class PersistentObject {
 	}
 	public PersistentObject(GameObject gameObject){
 		// name
-		MatchCollection matches = rgx.Matches(gameObject.name);
+		MatchCollection matches = regexClone.Matches(gameObject.name);
 		if (matches.Count > 0){									// the object is a clone, capture just the normal name
 			foreach (Match match in matches){
 				name = match.Groups[1].Value;
@@ -41,6 +44,13 @@ public class PersistentObject {
 				persistentChildren.Add(persistentChildObject);
 			}
 		}
+		prefabPath = @"prefabs/"+name;
+		prefabPath = regexSpace.Replace(prefabPath, "_");
+		if (Resources.Load(prefabPath) == null){
+			// Debug.Log("null prefab path: "+prefabPath);
+			noPrefab = true;
+			name = gameObject.name;
+		}
 	}
 	public void HandleSave(GameObject parentObject){
 		foreach (Component component in parentObject.GetComponents<Component>()){
@@ -48,7 +58,6 @@ public class PersistentObject {
 			if (MySaver.Handlers.TryGetValue(component.GetType(), out handler)){
 				PersistentComponent persist = new PersistentComponent(this);
 				persistentComponents.Add(component.GetType().ToString(), persist);
-				// Debug.Log(persist.persistent);
 				handler.SaveData(component, persist);
 			}
 		}

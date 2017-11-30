@@ -117,6 +117,7 @@ public class HeadHandler: SaveHandler<Head> {
 		if (data.ints["hat"] != -1){
 			GameObject hat = MySaver.IDToGameObject(data.ints["hat"]);
 			if (hat != null){
+				// Debug.Log("donning hat in load");
 				instance.DonHat(hat.GetComponent<Hat>());
 			}
 		}
@@ -296,19 +297,15 @@ public class IntrinsicsHandler: SaveHandler<Intrinsics>{
 		data.intrinsics = new List<Intrinsic>();
 		foreach(Intrinsic intrinsic in instance.intrinsics){
 			data.intrinsics.Add(intrinsic);
-			// foreach(KeyValuePair<BuffType, Buff> kvp in intrinsic.buffs){
-			// 	Debug.Log("saving intrinsic "+kvp.Key.ToString());
-			// }
 		}
+		// Debug.Log(data.intrinsics.Count);
 	}
 	public override void LoadSpecificData(Intrinsics instance, PersistentComponent data){
 		instance.intrinsics = new List<Intrinsic>();
 		foreach(Intrinsic intrinsic in data.intrinsics){
 			instance.intrinsics.Add(intrinsic);
-			// foreach(KeyValuePair<BuffType, Buff> kvp in intrinsic.buffs){
-			// 	Debug.Log("loading intrinsic "+kvp.Key.ToString());
-			// }
 		}
+		// Debug.Log(instance.name + " " + data.intrinsics.Count.ToString());
 		if (data.intrinsics.Count > 0)
 			instance.IntrinsicsChanged();
 	}
@@ -402,10 +399,28 @@ public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
 				}
 			}
 		}
+		if (instance.protectionZone != null)
+			data.ints["protectID"] = MySaver.GameObjectToID(instance.protectionZone.gameObject);
+		if (instance.warnZone != null)
+			data.ints["warnID"] = MySaver.GameObjectToID(instance.warnZone.gameObject);
 	}
 	public override void LoadSpecificData(DecisionMaker instance, PersistentComponent data){
 		instance.hitState = (Controllable.HitState)data.ints["hitstate"];
 		instance.initialAwareness = new List<GameObject>();
+		if (data.ints.ContainsKey("protectID")){
+			GameObject protectObject = MySaver.IDToGameObject(data.ints["protectID"]);
+			if (protectObject != null){
+				instance.awareness.protectZone = protectObject.GetComponent<BoxCollider2D>();
+			}
+		}
+		if (data.ints.ContainsKey("warnID")){
+			GameObject warnObject = MySaver.IDToGameObject(data.ints["warnID"]);
+			Debug.Log(data.ints["warnID"]);
+			Debug.Log(warnObject);
+			if (warnObject != null){
+				instance.awareness.warnZone = warnObject.GetComponent<Collider2D>();
+			}
+		}
 		foreach (Priority priority in instance.priorities){
 			foreach (Type priorityType in priorityTypes){
 				if (priority.GetType() == priorityType){

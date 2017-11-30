@@ -9,6 +9,7 @@ public class Outfit : Interactive, IMessagable {
 		if (!LoadInitialized)
 			LoadInit();
 		if (initUniform != null){
+			Debug.Log("donning init uniform");
 			GameObject uniObject = initUniform;
 			if (!initUniform.activeInHierarchy){ 
 				uniObject = Instantiate(initUniform);

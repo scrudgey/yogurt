@@ -72,7 +72,6 @@ public class MySaver {
 		}
 	}
 	public static void Save(){
-		// resolver = new ReferenceResolver();
 		objectIDs = new Dictionary<GameObject, int>();
 		persistentObjects = new Dictionary<PersistentObject, GameObject>();
 
@@ -109,9 +108,6 @@ public class MySaver {
 			persistents[gameObject] = persistent;
 			objectIDs.Add(gameObject, persistent.id);
 			persistentObjects.Add(persistent, gameObject);
-			// foreach(GameObject child in marker.persistentChildren){
-			// 	persistentObjects.Add(persistent, child);
-			// }
 		}
 		// invoke the data handling here - this will populate all the component data, and assign a unique id to everything.
 		foreach (KeyValuePair<GameObject, PersistentObject> kvp in persistents){
@@ -131,6 +127,7 @@ public class MySaver {
 		GameManager.Instance.SaveGameData();
 	}
 	public static GameObject LoadScene(){
+		Regex reg =  new Regex("\\s+", RegexOptions.Multiline);
 		UINew.Instance.ClearWorldButtons();
 		GameObject playerObject = null;
 		string scenePath = GameManager.Instance.LevelSavePath();
@@ -144,12 +141,12 @@ public class MySaver {
 			Stack<GameObject> gameObjectsToDestroy = new Stack<GameObject>();
 			for (int i = 0; i < marks.Count; i++){
 				if (marks[i] != null){
-					// GameObject.DestroyImmediate(marks[i].gameObject);
+					if (marks[i].staticObject)
+						continue;
 					gameObjectsToDestroy.Push(marks[i].gameObject);
 				}
 			}
 			foreach (GameObject disabledPersistent in disabledPersistents){
-				// GameObject.DestroyImmediate(disabledPersistent);
 				gameObjectsToDestroy.Push(disabledPersistent);
 			}
 			while (gameObjectsToDestroy.Count > 0){
@@ -190,13 +187,19 @@ public class MySaver {
 		GameObject rootObject = null;
 		Regex reg =  new Regex("\\s+", RegexOptions.Multiline);
 		foreach(PersistentObject persistent in container.PersistentObjects){
-			loadedIds.Add(persistent.id);
-			string path = @"prefabs/"+persistent.name;
-			path = reg.Replace(path, "_");
-			GameObject go = GameObject.Instantiate(
-				Resources.Load(path),
+			GameObject go = null;
+			if (persistent.noPrefab){
+				// Debug.Log("finding object with name "+persistent.name);
+				go = GameObject.Find(persistent.name);
+			} else {
+				go = GameObject.Instantiate(
+				Resources.Load(persistent.prefabPath),
 				persistent.transformPosition,
 				persistent.transformRotation) as GameObject;
+			}
+			if (go == null)
+				continue;
+			loadedIds.Add(persistent.id);
 			loadedObjects.Add(persistent.id, go);
 			go.BroadcastMessage("LoadInit", SendMessageOptions.DontRequireReceiver);
 			go.name = Toolbox.Instance.ScrubText(go.name);
@@ -253,6 +256,8 @@ public class MySaver {
 		return returnID;
 	}
 	public static GameObject IDToGameObject(int idn){
+		if (idn == -1)
+			return null;
 		GameObject returnObject;
 		loadedObjects.TryGetValue(idn, out returnObject);
 		return returnObject;

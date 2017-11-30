@@ -26,8 +26,8 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 	public GameObject possession;
 	public Controllable.HitState hitState;
 	public Awareness awareness;
-	public BoxCollider2D protectionZone;
-	public Collider2D warnZone;
+	public BoxCollider2D protectionZone = null;
+	public Collider2D warnZone = null;
 	public Vector3 guardPoint;
 	public bool initialized = false;
 	void Awake() {
@@ -73,6 +73,12 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 			priorities.Add(new PriorityWander(gameObject, control));
 		}
 	}
+	// public void LoadInit(){
+	// 	awareness.initialAwareness = initialAwareness;
+	// 	awareness.protectZone = protectionZone;
+	// 	awareness.warnZone = warnZone;
+	// 	Debug.Log(awareness.warnZone);;
+	// }
 	public void ReceiveMessage(Message message){
 		if (message is MessageHitstun){
 			MessageHitstun hits = (MessageHitstun)message;

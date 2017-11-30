@@ -9,6 +9,7 @@ public class Head : Interactive, IExcludable {
 		if (!LoadInitialized)
 			LoadInit();
 		if (initHat){
+			Debug.Log("donning init hat");
 			if (initHat.isActiveAndEnabled){
 				DonHat(initHat);
 			} else {

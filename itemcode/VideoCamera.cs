@@ -89,13 +89,6 @@ public class VideoCamera : Interactive {
                     commercial.transcript.Add(data.transcriptLine);
                 }
             }
-            // }
-            // if (watchForOccurrence != null){
-                //  if (watchForOccurrence.Matches(data)){
-                //     director.OccurrenceHappened();
-                //     watchForOccurrence = null;
-                //  }
-            // }
         }
     }
     public void Enable(){

@@ -155,6 +155,8 @@ public class Controller : Singleton<Controller> {
 		}
 	}
     void LeftClick(){
+		if (focus == null)
+			return;
 		if (focus.hitState >= Controllable.HitState.stun)
 			return;
         RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero).OrderBy(h=>h.collider.gameObject.name).ToArray();

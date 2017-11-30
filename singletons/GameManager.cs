@@ -65,7 +65,7 @@ public partial class GameManager : Singleton<GameManager> {
 	private float intervalTimer;
 	public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
 	public AudioSource publicAudio;
-	public bool debug = true;
+	public bool debug = false;
     void Start(){
 		if (data == null){
 			data = InitializedGameData();

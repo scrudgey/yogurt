@@ -3,6 +3,7 @@ using System.Collections.Generic;
 public class MyMarker : MonoBehaviour, IExcludable {
 	public int id = -1;
 	public List<GameObject> persistentChildren;
+	public bool staticObject;
 	void OnDisable(){
 		MySaver.disabledPersistents.Add(gameObject);
 	}
