@@ -24,7 +24,7 @@ public class Speech : Interactive, IMessagable {
     private AudioSource audioSource;
 	private bool LoadInitialized = false;
     public string flavor = "test";
-    private Intrinsic lastNetIntrinsic;
+    private Dictionary<BuffType, Buff> lastNetIntrinsic;
     public Controllable.HitState hitState;
     public Sprite portrait;
     public string defaultMonologue;
@@ -265,8 +265,8 @@ public class Speech : Interactive, IMessagable {
         if (incoming is MessageNetIntrinsic){
             MessageNetIntrinsic message = (MessageNetIntrinsic)incoming;
             if (GameManager.Instance.playerObject == gameObject)
-                CompareLastNetIntrinsic(message.netIntrinsic);
-            lastNetIntrinsic = message.netIntrinsic;
+                CompareLastNetIntrinsic(message.netBuffs);
+            lastNetIntrinsic = message.netBuffs;
         }
         if (incoming is MessageAnimation){
             MessageAnimation message = (MessageAnimation)incoming;
@@ -284,22 +284,22 @@ public class Speech : Interactive, IMessagable {
         if (od.ratings[Rating.disgusting] > 10)
             SayFromNimrod("grossreact");
     }
-    public void CompareLastNetIntrinsic(Intrinsic net){
+    public void CompareLastNetIntrinsic(Dictionary<BuffType, Buff> net){
         if (lastNetIntrinsic == null)
             return;
-        if (lastNetIntrinsic.boolValue(BuffType.fireproof) != net.boolValue(BuffType.fireproof)){
-            if (net.boolValue(BuffType.fireproof)){
+        if (lastNetIntrinsic[BuffType.fireproof].boolValue != net[BuffType.fireproof].boolValue){
+            if (net[BuffType.fireproof].boolValue){
                 Say("I feel fireproof!");
             } else {
                 Say("I no longer feel fireproof!");
             } 
         }
-        if (lastNetIntrinsic.boolValue(BuffType.telepathy) != net.boolValue(BuffType.telepathy)){
-            if (net.boolValue(BuffType.telepathy))
+        if (lastNetIntrinsic[BuffType.telepathy].boolValue != net[BuffType.telepathy].boolValue){
+            if (net[BuffType.telepathy].boolValue)
                 Say("I can hear thoughts!");
         }
-        if (lastNetIntrinsic.boolValue(BuffType.strength) != net.boolValue(BuffType.strength)){
-            if (net.boolValue(BuffType.strength)){
+        if (lastNetIntrinsic[BuffType.strength].boolValue != net[BuffType.strength].boolValue){
+            if (net[BuffType.strength].boolValue){
                 Say("I feel strong!");
             } else {
                 Say("I no longer feel strong!");

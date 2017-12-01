@@ -9,7 +9,7 @@ public class Head : Interactive, IExcludable {
 		if (!LoadInitialized)
 			LoadInit();
 		if (initHat){
-			Debug.Log("donning init hat");
+			// Debug.Log("donning init hat");
 			if (initHat.isActiveAndEnabled){
 				DonHat(initHat);
 			} else {
@@ -28,9 +28,7 @@ public class Head : Interactive, IExcludable {
 		LoadInitialized = true;
 		spriteRenderer = GetComponent<SpriteRenderer>();
 	}
-	
 	public void DonHat(Hat h){
-		// Debug.Log("donning hat "+h.name);
 		if (hat)
 			RemoveHat();
 		ClaimsManager.Instance.ClaimObject(h.gameObject, this);
@@ -57,22 +55,20 @@ public class Head : Interactive, IExcludable {
 		if (hatAnimator){
 			hatAnimator.RegisterDirectable();
 		}
-		Toolbox.Instance.AddIntrinsic(transform.parent.gameObject, h.gameObject, timeout:false);
+		Toolbox.Instance.AddChildIntrinsics(transform.parent.gameObject, h.gameObject);
 		GameManager.Instance.CheckItemCollection(transform.parent.gameObject, h.gameObject);
 	}
 	public string DonHat_desc(Hat h){
 		return "Wear "+Toolbox.Instance.GetName(h.gameObject);
 	}
 	public bool DonHat_Validation(Hat h){
-		// Debug.Log(Messenger.Instance.claimedItems.ContainsKey(h.gameObject));
 		return !ClaimsManager.Instance.claimedItems.ContainsKey(h.gameObject);
 	}
 	void RemoveHat(){
 		if (hat.helmet){
 			spriteRenderer.enabled = true;
 		}
-		// Debug.Log("removing intrinsic");
-		Toolbox.Instance.RemoveIntrinsic(GetComponentInParent<Intrinsics>().gameObject, hat.gameObject);
+		Toolbox.Instance.RemoveChildIntrinsics(GetComponentInParent<Intrinsics>().gameObject, hat.gameObject);
 		ClaimsManager.Instance.DisclaimObject(hat.gameObject,this);
 		HatAnimation hatAnimator = hat.GetComponent<HatAnimation>();
 		if (hatAnimator){

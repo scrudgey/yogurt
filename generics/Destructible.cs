@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 public enum damageType{physical, fire, any, cutting, piercing}
 
 public class Destructible : Damageable {
@@ -13,6 +14,7 @@ public class Destructible : Damageable {
 	public bool no_physical_damage;
 	public float physicalMultiplier = 1f;
 	public float fireMultiplier = 1f;
+	public Dictionary<BuffType, Buff> currentBuffs;
 
 	void Update () {
 		if (health < 0){
@@ -112,17 +114,17 @@ public class Destructible : Damageable {
 		base.ReceiveMessage(message);
 		if (message is MessageNetIntrinsic){
 			MessageNetIntrinsic intrins = (MessageNetIntrinsic)message;
-			if (intrins.netIntrinsic.buffs.ContainsKey(BuffType.armor)){
-				armor = intrins.netIntrinsic.buffs[BuffType.armor].floatValue;
+			// if (intrins.netBuffs.ContainsKey(BuffType.armor)){
+			armor = intrins.netBuffs[BuffType.armor].floatValue;
 				// armor = intrins.netIntrinsic.armor.floatValue;
-			}
-			if (intrins.netIntrinsic.buffs.ContainsKey(BuffType.bonusHealth)){
+			// }
+			// if (intrins.netIntrinsic.buffs.ContainsKey(BuffType.bonusHealth)){
 				// if (intrins.netIntrinsic.bonusHealth.floatValue > bonusHealth){
-				if (intrins.netIntrinsic.buffs[BuffType.bonusHealth].floatValue > bonusHealth){
-					health += intrins.netIntrinsic.buffs[BuffType.bonusHealth].floatValue;
-				}
-				bonusHealth = intrins.netIntrinsic.buffs[BuffType.bonusHealth].floatValue;
+			if (intrins.netBuffs[BuffType.bonusHealth].floatValue > bonusHealth){
+				health += intrins.netBuffs[BuffType.bonusHealth].floatValue;
 			}
+			bonusHealth = intrins.netBuffs[BuffType.bonusHealth].floatValue;
+			// }
 			
 		}
 	}

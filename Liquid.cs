@@ -17,9 +17,10 @@ public class Liquid {
 	public bool offal;
 	public bool flammable;
     public bool vomit;
-	public Intrinsic intrinsic;
-	// needed for serialization
-    public Liquid(){ }
+	public List<Buff> buffs = new List<Buff>();
+    public Liquid(){
+		// needed for serialization
+	 }
     public Liquid(float r, float g, float b){
         color = new Color(r/255.0F, g/255.0F, b/255.0F);
         vegetable = true;
@@ -64,16 +65,19 @@ public class Liquid {
 		l.immoral = bool.Parse(data["immoral"]);
 		l.offal = bool.Parse(data["offal"]);
 		l.flammable = bool.Parse(data["flammable"]);
-		l.intrinsic = new Intrinsic();
 		if (data.ContainsKey("strength")){
-			l.intrinsic.buffs[BuffType.strength] = new Buff();
-			l.intrinsic.buffs[BuffType.strength].boolValue = true;
-			l.intrinsic.buffs[BuffType.strength].initLifetime = 25f;
+			Buff buff = new Buff();
+			buff.type = BuffType.strength;
+			buff.boolValue = true;
+			buff.lifetime = 25f;
+			l.buffs.Add(buff);
 		}
 		if (data.ContainsKey("poison")){
-			l.intrinsic.buffs[BuffType.poison] = new Buff();
-			l.intrinsic.buffs[BuffType.poison].boolValue = true;
-			l.intrinsic.buffs[BuffType.poison].initLifetime = 5f;
+			Buff buff = new Buff();
+			buff.type = BuffType.poison;
+			buff.boolValue = true;
+			buff.lifetime = 5f;
+			l.buffs.Add(buff);
 		}
 		return l;
 	}
@@ -93,9 +97,10 @@ public class Liquid {
 			Flammable flam = target.AddComponent<Flammable>();
 			flam.flashpoint = 0.1f;
 		}
-		if (liquid.intrinsic != null){
+		if (liquid.buffs.Count > 0){
 			Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(target);
-			intrinsics.AddIntrinsic(liquid.intrinsic, timeout:timeout);
+			// intrinsics.CreateLiveBuffs(liquid.intrinsic, timeout:timeout);
+			intrinsics.buffs.AddRange(liquid.buffs);
 		}
 	}
 }

@@ -65,7 +65,7 @@ public partial class GameManager : Singleton<GameManager> {
 	private float intervalTimer;
 	public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
 	public AudioSource publicAudio;
-	public bool debug = false;
+	public bool debug = true;
     void Start(){
 		if (data == null){
 			data = InitializedGameData();
@@ -114,7 +114,8 @@ public partial class GameManager : Singleton<GameManager> {
 		}
 	} 
 	public void FocusIntrinsicsChanged(Intrinsics intrinsics){
-		if (intrinsics.NetIntrinsic().boolValue(BuffType.telepathy)){
+		Dictionary<BuffType, Buff> netBuffs = intrinsics.NetBuffs();
+		if (netBuffs[BuffType.telepathy].boolValue){
 			// Debug.Log("focus telepathic");
 			cam.cullingMask |= 1 << LayerMask.NameToLayer("thoughts");
 		} else {
@@ -126,8 +127,13 @@ public partial class GameManager : Singleton<GameManager> {
 			}
 		}
 		UINew.Instance.ClearStatusIcons();
-		intrinsics.SetupStatusIcon();
+		foreach(Buff buff in intrinsics.AllBuffs()){
+			if (buff.boolValue == true || buff.floatValue > 0){
+				UINew.Instance.AddStatusIcon(buff);
+			}
+		}
 	}
+	
 	public void SetFocus(GameObject target){
 		if (playerObject != null){
 			Controllable oldControl = playerObject.GetComponent<Controllable>();

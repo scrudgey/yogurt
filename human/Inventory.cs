@@ -288,9 +288,11 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 	void StartSwing(){
 		if (holding == null)
 			return;
+		Dictionary<BuffType, Buff> netBuffs = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject).NetBuffs();
+
 		GameObject slash = Instantiate(Resources.Load("Slash2"), transform.position, transform.rotation) as GameObject;
 		MeleeWeapon weapon = holding.GetComponent<MeleeWeapon>();
-		Intrinsics intrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
+		// Intrinsics intrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
 
 		slash.transform.SetParent(transform);
 		slash.transform.localScale = Vector3.one;
@@ -305,7 +307,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		}
 		message.force = new Vector2(direction.x * weapon.damage / 100f, direction.y * weapon.damage / 100f);
 		message.responsibleParty = gameObject;
-		message.strength = intrins.NetIntrinsic().boolValue(BuffType.strength);
+		message.strength = netBuffs[BuffType.strength].boolValue;
 		message.type = weapon.damageType;
 		message.amount = weapon.damage;
 		s.message = message;
@@ -323,16 +325,18 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		Toolbox.Instance.SendMessage(gameObject, this, anim);
 	}
 	public void PunchImpact(){
+		Dictionary<BuffType, Buff> netBuffs = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject).NetBuffs();
+
 		Vector3 startPoint = transform.position;
 		startPoint.x += direction.normalized.x / 6f;
 		startPoint.y += direction.normalized.y / 6f + 0.02f;
 		GameObject slash = Instantiate(Resources.Load("PhysicalImpact"), startPoint, holdpoint.rotation) as GameObject;
 		PhysicalImpact impact = slash.GetComponent<PhysicalImpact>();
-		Intrinsics intrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
+		// Intrinsics intrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
 		MessageDamage message = new MessageDamage(10f, damageType.physical);
 		message.force = new Vector2(direction.x * 0.2f, direction.y * 0.2f);
 		message.responsibleParty = gameObject;
-		message.strength = intrins.NetIntrinsic().boolValue(BuffType.strength);
+		message.strength = netBuffs[BuffType.strength].boolValue;
 		message.type = damageType.physical;
 		message.amount = 20f;
 		message.responsibleParty = gameObject;
@@ -376,7 +380,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		}
 		if (m is MessageNetIntrinsic){
 			MessageNetIntrinsic intrins = (MessageNetIntrinsic)m;
-			strong = intrins.netIntrinsic.boolValue(BuffType.strength);
+			strong = intrins.netBuffs[BuffType.strength].boolValue;
 			if (strong){
 				if (strengthFX == null){
 					strengthFX = Instantiate(Resources.Load("particles/strength_particles")) as GameObject;
