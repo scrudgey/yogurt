@@ -362,9 +362,8 @@ public class VideoCameraHandler: SaveHandler<VideoCamera>{
 public class StainHandler: SaveHandler<Stain>{
 	public override void SaveSpecificData(Stain instance, PersistentComponent data){
 		data.ints["parentID"] = MySaver.GameObjectToID(instance.parent);
-		MySaver.AddToReferenceTree(data, instance.gameObject);
-		// PersistentObject stainPersistent = MySaver.persistentObjects.FindKeyByValue(instance.gameObject);
-		// PersistentObject parentPersistent = MySaver.persistentObjects.FindKeyByValue(instance.parent);
+		// MySaver.AddToReferenceTree(data, instance.gameObject);
+		MySaver.AddToReferenceTree(instance.parent, instance.gameObject);
 		MonoLiquid stainLiquid = instance.GetComponent<MonoLiquid>();
 		if (stainLiquid != null)
 			data.strings["liquid"] = stainLiquid.liquid.filename;

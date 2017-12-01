@@ -42,7 +42,8 @@ public class MySaver {
 		{typeof(VideoCamera),						new VideoCameraHandler()}
 	};
 	public static List<Type> LoadOrder = new List<Type>{
-		typeof(Intrinsics)
+		typeof(Intrinsics),
+		typeof(Outfit)
 	};
 	public static int CompareComponent(Component x, Component y)
     {
@@ -212,6 +213,13 @@ public class MySaver {
 		}
 		return rootObject;
 	}
+	public static void AddToReferenceTree(GameObject parent, GameObject child){
+		if (child == null || parent == null)
+			return;
+		PersistentObject childPersistentObject = persistentObjects.FindKeyByValue(child);
+		PersistentObject parentObj = persistentObjects.FindKeyByValue(parent);
+		AddToReferenceTree(parentObj, childPersistentObject);
+	}
 	public static void AddToReferenceTree(PersistentComponent treeParent, GameObject child){
 		if (child == null || treeParent == null)
 			return;
@@ -219,11 +227,14 @@ public class MySaver {
 		if (parentObj.parentPersistent != null)
 			parentObj = parentObj.parentPersistent;
 		PersistentObject childPersistentObject = persistentObjects.FindKeyByValue(child);
-		if (treeParent == null || childPersistentObject == null)
+		AddToReferenceTree(parentObj, childPersistentObject);
+	}
+	public static void AddToReferenceTree(PersistentObject parent, PersistentObject child){
+		if (parent == null || child == null)
 			return;
-		if (!referenceTree.ContainsKey(parentObj))
-			referenceTree.Add(parentObj, new List<PersistentObject>());
-		referenceTree[parentObj].Add(childPersistentObject);
+		if (!referenceTree.ContainsKey(parent))
+			referenceTree.Add(parent, new List<PersistentObject>());
+		referenceTree[parent].Add(child);
 	}
 	public static List<PersistentObject> RetrieveReferenceTree(GameObject target){
 		PersistentObject targetPersistent = null;

@@ -351,6 +351,9 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 		Toolbox.Instance.SendMessage(gameObject, this, anim);
 	}
 	public void ClearInventory(){
+		foreach(GameObject item in items){
+			Destroy(item);
+		}
 		items = new List<GameObject>();
 	}
 	public void ReceiveMessage(Message m){

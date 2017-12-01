@@ -92,9 +92,7 @@ public class VideoCamera : Interactive {
         }
     }
     public void Enable(){
-        // improve logic to catch null
         if (GameManager.Instance.activeCommercial != null){
-            // script = Resources.Load("data/scripts/script1") as TextAsset;
             live = true;
             regionIndicator.SetActive(true);
             UINew.Instance.UpdateRecordButtons(commercial);
@@ -110,7 +108,12 @@ public class VideoCamera : Interactive {
     }
     public IEnumerator WaitAndStartScript(float waitTime){
          yield return new WaitForSeconds(waitTime);
-        //  ParseLine();
         // prompt the actor to say line
+        MessageSpeech prompt = new MessageSpeech("Bob Yogurt is so good, we bet a passer-by will really like it!");
+        foreach(DecisionMaker ai in GameManager.FindObjectsOfType<DecisionMaker>()){
+            if (ai.personality.actor == Personality.Actor.yes){
+                Toolbox.Instance.SendMessage(ai.gameObject, this, prompt);
+            }
+        }
     }
 }

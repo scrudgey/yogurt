@@ -16,14 +16,14 @@ public class Outfit : Interactive, IMessagable {
 				uniObject = Instantiate(initUniform);
 			}
 			Uniform uniform = uniObject.GetComponent<Uniform>();
-			GameObject removedUniform = DonUniform(uniform);
+			GameObject removedUniform = DonUniform(uniform, cleanStains:false);
 			Destroy(removedUniform);
 		}
 	}
 	public void LoadInit(){
 		if (LoadInitialized)	
 			return;
-		Interaction wearInteraction = new Interaction(this, "Wear", "DonUniform");
+		Interaction wearInteraction = new Interaction(this, "Wear", "DonUniformWrapper");
 		wearInteraction.dontWipeInterface = false;
 		interactions.Add(wearInteraction);
 
@@ -56,7 +56,10 @@ public class Outfit : Interactive, IMessagable {
 	public string StealUniform_desc(Outfit otherOutfit){
 		return "Take "+wornUniformName;
 	}
-	public GameObject DonUniform(Uniform uniform){
+	public void DonUniformWrapper(Uniform uniform){
+		DonUniform(uniform);
+	}
+	public GameObject DonUniform(Uniform uniform, bool cleanStains=true){
 		GameObject removedUniform = RemoveUniform();
 		PhysicalBootstrapper phys = uniform.GetComponent<PhysicalBootstrapper>();
 		if (phys)
@@ -71,8 +74,10 @@ public class Outfit : Interactive, IMessagable {
 		GameManager.Instance.CheckItemCollection(uniform.gameObject, gameObject);
 		ClaimsManager.Instance.WasDestroyed(uniform.gameObject);
 		Destroy(uniform.gameObject);
-		foreach(Stain stain in GetComponentsInChildren<Stain>()){
-			Destroy(stain.gameObject);
+		if (cleanStains){
+			foreach(Stain stain in GetComponentsInChildren<Stain>()){
+				Destroy(stain.gameObject);
+			}
 		}
 		return removedUniform;
 	}

@@ -65,7 +65,7 @@ public partial class GameManager : Singleton<GameManager> {
 	private float intervalTimer;
 	public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
 	public AudioSource publicAudio;
-	public bool debug = false;
+	public bool debug = true;
     void Start(){
 		if (data == null){
 			data = InitializedGameData();
@@ -311,7 +311,6 @@ public partial class GameManager : Singleton<GameManager> {
 		data.firstTimeLeavingHouse = true;
 		activeCommercial = null;
     }
-
 	public void DetermineClosetNews(){
 		closetHasNew[HomeCloset.ClosetType.items] = false;
 		closetHasNew[HomeCloset.ClosetType.all] = false;
@@ -334,7 +333,6 @@ public partial class GameManager : Singleton<GameManager> {
 			}
 		}
 	}
-
 	public void NewDayCutscene(){
 		data.days += 1;
 		SceneManager.LoadScene("morning_cutscene");
