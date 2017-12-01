@@ -16,14 +16,6 @@ public class CommercialReportMenu : MonoBehaviour {
         SetRefs();
         Controller.Instance.suspendInput = true;
     }
-    // public void ContinueButton(){
-    //     Controller.Instance.suspendInput = false;
-    //     Destroy(gameObject);
-    //     ScriptDirector director = GameObject.FindObjectOfType<ScriptDirector>();
-    //     if (director){
-    //         director.ResetScript();
-    //     }
-    // }
     public void NewDayButton(){
         UINew.Instance.CloseActiveMenu();
         Controller.Instance.suspendInput = false;

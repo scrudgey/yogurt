@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-
 public class ScriptSelectionMenu : MonoBehaviour
 {
     Text descriptionText;
@@ -16,16 +15,27 @@ public class ScriptSelectionMenu : MonoBehaviour
         GameObject firstEntry = null;
         foreach (Commercial script in GameManager.Instance.data.unlockedCommercials)
         {
-            if (GameManager.Instance.data.completeCommercials.Contains(script))
+            bool complete = false;
+            foreach(Commercial completed in GameManager.Instance.data.completeCommercials){
+                if (completed.name == script.name)
+                    complete = true;
+            }
+            if (complete)
                 continue;
-            GameObject newEntry = CreateScriptButton(script, false);
+            GameObject newEntry = CreateScriptButton(script);
             if (firstEntry == null){
                 firstEntry = newEntry;
             }
         }
-        foreach (Commercial script in GameManager.Instance.data.completeCommercials)
-        {
-            GameObject newEntry = CreateScriptButton(script, true);
+        foreach(Commercial script in GameManager.Instance.data.unlockedCommercials){
+            bool complete = false;
+            foreach(Commercial completed in GameManager.Instance.data.completeCommercials){
+                if (completed.name == script.name)
+                    complete = true;
+            }
+            if (!complete)
+                continue;
+            GameObject newEntry = CreateScriptButton(script);
             if (firstEntry == null){
                 firstEntry = newEntry;
             }
@@ -33,11 +43,11 @@ public class ScriptSelectionMenu : MonoBehaviour
         EventSystem.current.SetSelectedGameObject(firstEntry);
         ClickedScript(firstEntry.GetComponent<ScriptListEntry>());
     }
-    GameObject CreateScriptButton(Commercial script, bool complete){
+    GameObject CreateScriptButton(Commercial script){
         GameObject newEntry = Instantiate(Resources.Load("UI/ScriptListEntry")) as GameObject;
         newEntry.transform.SetParent(scrollContent.transform, false);
         ScriptListEntry scriptEntry = newEntry.GetComponent<ScriptListEntry>();
-        scriptEntry.Configure(script, this, complete);
+        scriptEntry.Configure(script, this);
         return newEntry;
     }
     public void ClickedOkay()

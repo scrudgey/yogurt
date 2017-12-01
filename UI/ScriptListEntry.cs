@@ -23,12 +23,16 @@ public class ScriptListEntry : MonoBehaviour {
         }
         button.colors = block;
     }
-    public void Configure(Commercial c, ScriptSelectionMenu scriptMenu, bool completeVal){
+    public void Configure(Commercial c, ScriptSelectionMenu scriptMenu){
         Text entryText = transform.Find("ScriptName").GetComponent<Text>();
         commercial = c;
         entryText.text = c.name;
         menu = scriptMenu;
-        complete = completeVal;
+        complete = false;
+        foreach(Commercial completed in GameManager.Instance.data.completeCommercials){
+            if (completed.name == c.name)
+                complete = true;
+        }
     }
     public void Clicked(){
         if (menu){

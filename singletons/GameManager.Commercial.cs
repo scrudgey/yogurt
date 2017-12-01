@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Xml.Serialization;
-// using System;
+
 public partial class GameManager : Singleton<GameManager> {
     
     public List<Commercial> listAllCommercials(){
@@ -19,19 +19,6 @@ public partial class GameManager : Singleton<GameManager> {
         }
         return passList;
     }
-    // public Commercial LoadCommercialByName(string filename){
-    //     try{
-    //         Commercial commercial = null;
-    //         TextAsset xml = Resources.Load("data/commercials/"+filename) as TextAsset;
-    //         var serializer = new XmlSerializer(typeof(Commercial));
-    //         var reader = new System.IO.StringReader(xml.text);
-    //         commercial = serializer.Deserialize(reader) as Commercial;
-    //         return commercial;
-    //     } catch(Exception e){
-    //         Debug.Log(e.Message);
-    //         return null;
-    //     }
-    // }
 
     public void UnlockCommercial(string filename){
         //TODO: do not unlock same commercial twice
@@ -53,7 +40,8 @@ public partial class GameManager : Singleton<GameManager> {
         }
         if (success){
             //process reward
-           CommercialCompleted(commercial);
+            commercial.name = activeCommercial.name;
+            CommercialCompleted(commercial);
         } else {
             // do something to display why the commercial is not done yet
             Debug.Log("commercial did not pass.");
@@ -62,7 +50,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
     }
     public void CommercialCompleted(Commercial commercial){
-        // data.money += activeCommercial.reward;
+        data.completeCommercials.Add(commercial);
         foreach (string unlock in activeCommercial.unlockUponCompletion){
             UnlockCommercial(unlock);
         }

@@ -27,9 +27,9 @@ public class GameData{
 	public int days;
 	public int deaths;
 	public int deathCutscenesPlayed;
-    public List<Commercial> unlockedCommercials;
-    public List<Commercial> completeCommercials;
-	public List<Commercial> newUnlockedCommercials;
+    public HashSet<Commercial> unlockedCommercials;
+    public HashSet<Commercial> completeCommercials;
+	public HashSet<Commercial> newUnlockedCommercials;
 	public int entryID;
 	public List<Achievement> achievements;
 	public AchievementStats achievementStats = new AchievementStats();
@@ -65,7 +65,7 @@ public partial class GameManager : Singleton<GameManager> {
 	private float intervalTimer;
 	public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
 	public AudioSource publicAudio;
-	public bool debug = true;
+	public bool debug = false;
     void Start(){
 		if (data == null){
 			data = InitializedGameData();
@@ -116,7 +116,6 @@ public partial class GameManager : Singleton<GameManager> {
 	public void FocusIntrinsicsChanged(Intrinsics intrinsics){
 		Dictionary<BuffType, Buff> netBuffs = intrinsics.NetBuffs();
 		if (netBuffs[BuffType.telepathy].boolValue){
-			// Debug.Log("focus telepathic");
 			cam.cullingMask |= 1 << LayerMask.NameToLayer("thoughts");
 		} else {
 			try {
@@ -224,11 +223,6 @@ public partial class GameManager : Singleton<GameManager> {
 			CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.fall);
 		}
 		PlayerEnter();
-		// foreach(GameObject go in FindObjectsOfType<GameObject>()){
-		// 	if (go.layer == 9){
-		// 		Debug.Log(go);
-		// 	}
-		// }
 	}
 	public void InitializeNonPlayableLevel(){
 		string sceneName = SceneManager.GetActiveScene().name;
@@ -377,8 +371,8 @@ public partial class GameManager : Singleton<GameManager> {
 		data.firstTimeLeavingHouse = true;
 		// initialize commercials
 		// TODO: change this temporary hack into something more correct.
-        data.unlockedCommercials = new List<Commercial>();
-		data.newUnlockedCommercials = new List<Commercial>();
+        data.unlockedCommercials = new HashSet<Commercial>();
+		data.newUnlockedCommercials = new HashSet<Commercial>();
         data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eat1"));
 		if (debug){
 			data.days = 1;
@@ -386,10 +380,9 @@ public partial class GameManager : Singleton<GameManager> {
        		data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eggplant1"));
        		data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eggplant10"));
        		data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("fireman"));
-       		// data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("freestyle"));
 			data.hypnosis = true;
 		}
-        data.completeCommercials = new List<Commercial>();
+        data.completeCommercials = new HashSet<Commercial>();
 		// initialize achievements
 		data.achievements = new List<Achievement>();
 		GameObject[] achievementPrefabs = Resources.LoadAll("achievements/", typeof(GameObject))
