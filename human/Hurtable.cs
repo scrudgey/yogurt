@@ -20,7 +20,7 @@ public class Hurtable : Damageable {
 	public float bonusHealth;
 	public float armor;
 	
-	public Intrinsic myIntrinsic = new Intrinsic();
+	// public Intrinsic myIntrinsic = new Intrinsic();
 	private float hitStunCounter;
 	private bool doubledOver;
 	public float impulse;
@@ -29,7 +29,8 @@ public class Hurtable : Damageable {
 	public GameObject dizzyEffect;
 	public GameObject lastAttacker;
 	public List<Collider2D> backgroundColliders = new List<Collider2D>();
-
+	public Dictionary<BuffType, Buff> netBuffs = new Dictionary<BuffType, Buff>();
+	// public Intrinsics intrinsics;
 	public override void Start(){
 		base.Start();
 		backgroundColliders = new List<Collider2D>();
@@ -41,11 +42,13 @@ public class Hurtable : Damageable {
 		}
 	}
 	public override ImpactResult CalculateDamage(MessageDamage message){
+		// Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
+		Dictionary<BuffType, Buff> netBuffs = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject).NetBuffs();
 		bool tookDamage = false;
 		if (message.responsibleParty != null){
 				lastAttacker = message.responsibleParty;
 		}
-		if (!myIntrinsic.boolValue(BuffType.invulnerable)){
+		if (!netBuffs[BuffType.invulnerable].boolValue){
 			float armor = this.armor;
 			if (message.strength || hitState == Controllable.HitState.dead)
 				armor = 0;
@@ -72,7 +75,7 @@ public class Hurtable : Damageable {
 						message.amount *= 2.5f;
 						message.force *= 10f;
 					}
-					if (!myIntrinsic.boolValue(BuffType.noPhysicalDamage)){
+					if (!netBuffs[BuffType.noPhysicalDamage].boolValue){
 						float netDam = Mathf.Max(message.amount - armor, 0);
 						health -= netDam;
 						impulse += netDam;
@@ -85,7 +88,7 @@ public class Hurtable : Damageable {
 				}
 				break;
 			case damageType.fire:
-				if (!myIntrinsic.boolValue(BuffType.fireproof)){
+				if (!netBuffs[BuffType.fireproof].boolValue){
 					health -= message.amount;
 					tookDamage = true;
 				}
@@ -166,12 +169,13 @@ public class Hurtable : Damageable {
 		base.ReceiveMessage(incoming);
 		if (incoming is MessageNetIntrinsic){
 			MessageNetIntrinsic intrins = (MessageNetIntrinsic)incoming;
-			myIntrinsic = intrins.netIntrinsic;
-			if (intrins.netIntrinsic.floatValue(BuffType.bonusHealth) > bonusHealth){
-				health += intrins.netIntrinsic.floatValue(BuffType.bonusHealth);
+			// myIntrinsic = intrins.netIntrinsic;
+			// intrinsics = intrins.intrinsics;
+			if (intrins.netBuffs[BuffType.bonusHealth].floatValue > bonusHealth){
+				health += intrins.netBuffs[BuffType.bonusHealth].floatValue;
 			}
-			bonusHealth = intrins.netIntrinsic.floatValue(BuffType.bonusHealth);
-			armor = intrins.netIntrinsic.floatValue(BuffType.armor);
+			bonusHealth = intrins.netBuffs[BuffType.bonusHealth].floatValue;
+			armor = intrins.netBuffs[BuffType.armor].floatValue;
 		}
 	}
 	public void Update(){

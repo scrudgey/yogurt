@@ -120,7 +120,10 @@ public class Eater : Interactive, IMessagable {
 		if (nutrition > 75){
 			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I can't eat another bite!"));
 		}
-		Toolbox.Instance.AddIntrinsic(gameObject, food.gameObject);
+		// Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
+		// Intrinsics foodIntrinsics = 
+		// intrinsics.CreateLiveBuffs(foo)
+		Toolbox.Instance.AddLiveBuffs(gameObject, food.gameObject);
 		
         // set up an occurrence flag for this eating!
         OccurrenceEat eatData = new OccurrenceEat();
@@ -195,7 +198,7 @@ public class Eater : Interactive, IMessagable {
 	public void ReceiveMessage(Message incoming){
 		if (incoming is MessageNetIntrinsic){
 			MessageNetIntrinsic message = (MessageNetIntrinsic)incoming;
-			if (message.netIntrinsic.boolValue(BuffType.poison)){
+			if (message.netBuffs[BuffType.poison].boolValue){
 				poisonNausea = true;
 			} else {
 				poisonNausea = false;

@@ -234,21 +234,20 @@ public class Toolbox : Singleton<Toolbox> {
 			receiver.ReceiveMessage(message);
 		}
 	}
-	public List<Intrinsic> AddIntrinsic(GameObject host, GameObject donor, bool timeout=true){
-		Intrinsics intrinsics = GetOrCreateComponent<Intrinsics>(host);
-		Intrinsics donorIntrinsics = GetOrCreateComponent<Intrinsics>(donor);
-		return intrinsics.AddIntrinsic(donorIntrinsics, timeout:timeout);
+	public void AddLiveBuffs(GameObject host, GameObject donor){
+		Intrinsics hostIntrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(host);
+		Intrinsics donorIntrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(donor);
+		hostIntrins.CreateLiveBuffs(donorIntrins.buffs);
 	}
-	public void AddIntrinsic(GameObject host, Intrinsic intrinsic){
-		if (intrinsic == null)
-			return;
-		Intrinsics intrinsics = GetOrCreateComponent<Intrinsics>(host);
-		intrinsics.AddIntrinsic(intrinsic);
+	public void AddChildIntrinsics(GameObject host, GameObject donor){
+		Intrinsics hostIntrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(host);
+		Intrinsics donorIntrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(donor);
+		hostIntrins.AddChild(donorIntrins);
 	}
-	public void RemoveIntrinsic(GameObject host, GameObject donor){
-		Intrinsics intrinsics = GetOrCreateComponent<Intrinsics>(host);
-		Intrinsics donorIntrinsics = GetOrCreateComponent<Intrinsics>(donor);
-		intrinsics.RemoveIntrinsic(donorIntrinsics);
+	public void RemoveChildIntrinsics(GameObject host, GameObject donor){
+		Intrinsics hostIntrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(host);
+		Intrinsics donorIntrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(donor);
+		hostIntrins.RemoveChild(donorIntrins);
 	}
 	public string DirectionToString(Vector2 direction){
 		float angle = Toolbox.Instance.ProperAngle(direction.x, direction.y);

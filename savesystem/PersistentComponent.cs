@@ -13,7 +13,8 @@ public class PersistentComponent {
 	public List<SerializedKnowledge> knowledgeBase;
 	public List<SerializedPersonalAssessment> people;
 	public SerializableDictionary<string, SerializedKnowledge> knowledges = new SerializableDictionary<string, SerializedKnowledge>();
-	public List<Intrinsic> intrinsics;
+	// public List<Intrinsic> intrinsics;
+	public List<Buff> buffs;
 	public List<Commercial> commercials;
 	[XmlIgnoreAttribute]	
 	public PersistentObject persistent;

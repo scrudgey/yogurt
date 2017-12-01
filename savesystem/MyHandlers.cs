@@ -253,7 +253,8 @@ public class OutfitHandler: SaveHandler<Outfit> {
 	}
 	public override void LoadSpecificData(Outfit instance, PersistentComponent data){
 		instance.wornUniformName = 		data.strings["worn"];
-		instance.initUniform = null;
+		// instance.initUniform = null;
+		instance.initUniform = Resources.Load("prefabs/"+data.strings["worn"]) as GameObject;
 		instance.hitState = (Controllable.HitState)data.ints["hitstate"];
 	}
 }
@@ -294,19 +295,17 @@ public class LiquidContainerHandler: SaveHandler<LiquidContainer>{
 }
 public class IntrinsicsHandler: SaveHandler<Intrinsics>{
 	public override void SaveSpecificData(Intrinsics instance, PersistentComponent data){
-		data.intrinsics = new List<Intrinsic>();
-		foreach(Intrinsic intrinsic in instance.intrinsics){
-			data.intrinsics.Add(intrinsic);
+		data.buffs = new List<Buff>();
+		foreach(Buff b in instance.liveBuffs){
+			data.buffs.Add(b);
 		}
-		// Debug.Log(data.intrinsics.Count);
 	}
 	public override void LoadSpecificData(Intrinsics instance, PersistentComponent data){
-		instance.intrinsics = new List<Intrinsic>();
-		foreach(Intrinsic intrinsic in data.intrinsics){
-			instance.intrinsics.Add(intrinsic);
+		instance.liveBuffs = new List<Buff>();
+		foreach(Buff b in data.buffs){
+			instance.liveBuffs.Add(b);
 		}
-		// Debug.Log(instance.name + " " + data.intrinsics.Count.ToString());
-		if (data.intrinsics.Count > 0)
+		if (data.buffs.Count > 0)
 			instance.IntrinsicsChanged();
 	}
 }

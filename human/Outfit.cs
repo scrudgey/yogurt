@@ -5,11 +5,12 @@ public class Outfit : Interactive, IMessagable {
 	public string wornUniformName;
 	public GameObject initUniform;
     public Controllable.HitState hitState;
+	public Intrinsics uniformIntrinsics;
 	void Start(){
 		if (!LoadInitialized)
 			LoadInit();
 		if (initUniform != null){
-			Debug.Log("donning init uniform");
+			// Debug.Log("donning init uniform");
 			GameObject uniObject = initUniform;
 			if (!initUniform.activeInHierarchy){ 
 				uniObject = Instantiate(initUniform);
@@ -17,9 +18,6 @@ public class Outfit : Interactive, IMessagable {
 			Uniform uniform = uniObject.GetComponent<Uniform>();
 			GameObject removedUniform = DonUniform(uniform);
 			Destroy(removedUniform);
-			// if (initUniform.activeInHierarchy){
-			// 	Destroy(initUniform);
-			// }
 		}
 	}
 	public void LoadInit(){
@@ -66,7 +64,9 @@ public class Outfit : Interactive, IMessagable {
 		MessageAnimation anim = new MessageAnimation();
 		anim.outfitName = uniform.baseName;
 		Toolbox.Instance.SendMessage(gameObject, this, anim);
-		Toolbox.Instance.AddIntrinsic(gameObject, uniform.gameObject);
+		uniformIntrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(uniform.gameObject);
+		Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
+		intrinsics.AddChild(uniformIntrinsics);
 		wornUniformName = Toolbox.Instance.CloneRemover(uniform.gameObject.name);
 		GameManager.Instance.CheckItemCollection(uniform.gameObject, gameObject);
 		ClaimsManager.Instance.WasDestroyed(uniform.gameObject);
@@ -85,7 +85,8 @@ public class Outfit : Interactive, IMessagable {
 		// something has to change here if we're going to standardize name usage
 		string prefabName = Toolbox.Instance.ReplaceUnderscore(wornUniformName);
 		GameObject uniform = Instantiate(Resources.Load("prefabs/"+prefabName)) as GameObject;
-		Toolbox.Instance.RemoveIntrinsic(gameObject, uniform.gameObject);
+		Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
+		intrinsics.RemoveChild(uniformIntrinsics);
 		uniform.transform.position = transform.position;
 		SpriteRenderer sprite = uniform.GetComponent<SpriteRenderer>();
 		sprite.sortingLayerName = "ground";

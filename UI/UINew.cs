@@ -567,7 +567,10 @@ public class UINew: Singleton<UINew> {
 			Destroy(child.gameObject);
 		}
 	}
-	public void AddStatusIcon(GameObject statusIcon){
+	public void AddStatusIcon(Buff buff){
+		GameObject icon = Instantiate(Resources.Load("UI/StatusIcon")) as GameObject;
+		UIStatusIcon statusIcon = icon.GetComponent<UIStatusIcon>();
+		statusIcon.Initialize(buff.type, buff);
 		statusIcon.transform.SetParent(UICanvas.transform.Find("iconDock"), false);
 	}
 }

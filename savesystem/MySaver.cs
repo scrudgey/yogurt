@@ -4,7 +4,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.Linq;
-using System.Text.RegularExpressions;
+// using System.Text.RegularExpressions;
 public class MySaver {
 	private static Dictionary<PersistentObject, List<PersistentObject>> referenceTree = new Dictionary<PersistentObject, List<PersistentObject>>();
 	public static Dictionary<PersistentObject, GameObject> persistentObjects = new Dictionary<PersistentObject, GameObject>();
@@ -127,7 +127,7 @@ public class MySaver {
 		GameManager.Instance.SaveGameData();
 	}
 	public static GameObject LoadScene(){
-		Regex reg =  new Regex("\\s+", RegexOptions.Multiline);
+		// Regex reg =  new Regex("\\s+", RegexOptions.Multiline);
 		UINew.Instance.ClearWorldButtons();
 		GameObject playerObject = null;
 		string scenePath = GameManager.Instance.LevelSavePath();
@@ -185,7 +185,7 @@ public class MySaver {
 	}
 	public static GameObject LoadPersistentContainer(PersistentContainer container){
 		GameObject rootObject = null;
-		Regex reg =  new Regex("\\s+", RegexOptions.Multiline);
+		// Regex reg =  new Regex("\\s+", RegexOptions.Multiline);
 		foreach(PersistentObject persistent in container.PersistentObjects){
 			GameObject go = null;
 			if (persistent.noPrefab){

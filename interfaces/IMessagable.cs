@@ -1,5 +1,5 @@
 using UnityEngine;
-// using System.Collections.Generic;
+using System.Collections.Generic;
 
 public interface IMessagable
 {
@@ -24,7 +24,12 @@ public class MessageDirectable: Message{
 	public IDirectable removeDirectable;
 }
 public class MessageNetIntrinsic: Message {
-	public Intrinsic netIntrinsic;
+	public Intrinsics intrinsics;
+	public Dictionary<BuffType, Buff> netBuffs;
+	public MessageNetIntrinsic(Intrinsics intrinsics){
+		this.intrinsics = intrinsics;
+		this.netBuffs = intrinsics.NetBuffs();
+	}
 }
 public class MessageHead : Message {
 	public enum HeadType {none, eating, vomiting, speaking};
