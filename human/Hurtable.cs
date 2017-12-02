@@ -19,8 +19,6 @@ public class Hurtable : Damageable {
 	public float maxHealth;
 	public float bonusHealth;
 	public float armor;
-	
-	// public Intrinsic myIntrinsic = new Intrinsic();
 	private float hitStunCounter;
 	private bool doubledOver;
 	public float impulse;
@@ -30,7 +28,6 @@ public class Hurtable : Damageable {
 	public GameObject lastAttacker;
 	public List<Collider2D> backgroundColliders = new List<Collider2D>();
 	public Dictionary<BuffType, Buff> netBuffs = new Dictionary<BuffType, Buff>();
-	// public Intrinsics intrinsics;
 	public override void Start(){
 		base.Start();
 		backgroundColliders = new List<Collider2D>();
@@ -168,8 +165,6 @@ public class Hurtable : Damageable {
 		base.ReceiveMessage(incoming);
 		if (incoming is MessageNetIntrinsic){
 			MessageNetIntrinsic intrins = (MessageNetIntrinsic)incoming;
-			// myIntrinsic = intrins.netIntrinsic;
-			// intrinsics = intrins.intrinsics;
 			if (intrins.netBuffs[BuffType.bonusHealth].floatValue > bonusHealth){
 				health += intrins.netBuffs[BuffType.bonusHealth].floatValue;
 			}
@@ -236,10 +231,6 @@ public class Hurtable : Damageable {
 		FollowGameObject dizzyFollower = dizzyEffect.GetComponent<FollowGameObject>();
 		dizzyFollower.target = gameObject;
 		dizzyFollower.Init();
-
-		// foreach(Collider2D collider in backgroundColliders){
-		// 	collider.enabled = false;
-		// }
 	}
 	public void GetUp(){
 		hitState = Controllable.RemoveHitState(hitState, Controllable.HitState.unconscious);
@@ -251,9 +242,6 @@ public class Hurtable : Damageable {
 			ClaimsManager.Instance.WasDestroyed(dizzyEffect);
 			Destroy(dizzyEffect);
 		}
-		// foreach(Collider2D collider in backgroundColliders){
-		// 	collider.enabled = true;
-		// }
 	}
 	public void DoubleOver(bool val){
 		if (val){

@@ -116,7 +116,7 @@ public class LiquidContainer : Interactive, IMessagable {
 		}
 	}
     public void Spill(){
-        Spill(0.2f);
+        Spill(0.02f);
     }
 	public void Spill(float severity){
 		doSpill = true;
