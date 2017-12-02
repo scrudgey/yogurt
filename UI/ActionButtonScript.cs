@@ -18,7 +18,8 @@ public class ActionButtonScript: MonoBehaviour {
 				action.DoAction();
 				if (!action.dontWipeInterface){
 					UINew.Instance.ClearWorldButtons();
-					Controller.Instance.focus.UpdateActions();
+					// Controller.Instance.focus.UpdateActions();
+					UINew.Instance.UpdateButtons();
 					Controller.Instance.ResetLastLeftClicked();
 				}
 			}

@@ -269,7 +269,8 @@ public class UINew: Singleton<UINew> {
 		}
 		Inventory inv = GameManager.Instance.playerObject.GetComponent<Inventory>();
 		if (inv){
-			Controller.Instance.focus.UpdateActions(inv);
+			// Controller.Instance.focus.UpdateActions(inv);
+			inv.UpdateActions();
 			UpdateInventoryButton(inv);
 		}
 		if (Controller.Instance.focus.fightMode){

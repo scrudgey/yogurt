@@ -25,6 +25,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 			Toolbox.Instance.SendMessage(gameObject, this, invMessage);
 			if (value != null)
 				GameManager.Instance.CheckItemCollection(value.gameObject, gameObject);
+			UpdateActions();
 		}
 	}
 	private Pickup _holding;
@@ -393,6 +394,22 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 				if (strengthFX != null){
 					Destroy(strengthFX);
 				}
+			}
+		}
+	}
+
+	public void UpdateActions(){
+		Controllable controllable = GetComponent<Controllable>();
+		if (holding) {
+			List<Interaction> manualActions = Interactor.ReportManualActions(holding.gameObject, gameObject);
+			controllable.defaultInteraction = Interactor.GetDefaultAction(manualActions);
+			if (GameManager.Instance.playerObject == gameObject)
+				UINew.Instance.CreateActionButtons(manualActions, controllable.defaultInteraction);
+		} else {
+			controllable.defaultInteraction = null;
+			if (GameManager.Instance.playerObject == gameObject){
+				UINew.Instance.ClearActionButtons();
+				UINew.Instance.ClearWorldButtons();
 			}
 		}
 	}

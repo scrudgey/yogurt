@@ -205,7 +205,7 @@ public class Controllable : MonoBehaviour, IMessagable {
 					}
 				}
 			}
-			UpdateActions(inv);
+			// inv.UpdateActions();
 		}
 		if (incoming is MessageDirectable){
 			MessageDirectable message = (MessageDirectable)incoming;
@@ -213,27 +213,6 @@ public class Controllable : MonoBehaviour, IMessagable {
 				directables.Add(message.addDirectable);
 			if (message.removeDirectable != null)
 				directables.Remove(message.removeDirectable);
-		}
-	}
-	public void UpdateActions(){
-		Inventory inv = GetComponent<Inventory>();
-		if (inv != null)
-			UpdateActions(inv);
-	}
-	public void UpdateActions(Inventory inv){
-		if (inv == null)
-			return;
-		if (inv.holding){
-			List<Interaction> manualActions = Interactor.ReportManualActions(inv.holding.gameObject, gameObject);
-			defaultInteraction = Interactor.GetDefaultAction(manualActions);
-			if (Controller.Instance.focus == this)
-				UINew.Instance.CreateActionButtons(manualActions, defaultInteraction);
-		} else {
-			defaultInteraction = null;
-			if (Controller.Instance.focus == this){
-				UINew.Instance.ClearActionButtons();
-				UINew.Instance.ClearWorldButtons();
-			}
 		}
 	}
 }
