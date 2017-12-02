@@ -397,7 +397,6 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 			}
 		}
 	}
-
 	public void UpdateActions(){
 		Controllable controllable = GetComponent<Controllable>();
 		if (holding) {
