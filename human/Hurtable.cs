@@ -42,7 +42,6 @@ public class Hurtable : Damageable {
 		}
 	}
 	public override ImpactResult CalculateDamage(MessageDamage message){
-		// Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
 		Dictionary<BuffType, Buff> netBuffs = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject).NetBuffs();
 		bool tookDamage = false;
 		if (message.responsibleParty != null){
