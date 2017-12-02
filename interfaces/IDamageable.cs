@@ -1,16 +1,14 @@
 using UnityEngine;
 
 public enum ImpactResult {normal, repel, strong}
-public class Damageable: MonoBehaviour, IMessagable{
+public abstract class Damageable: MonoBehaviour, IMessagable{
     public damageType lastDamage;
     public GameObject gibsContainerPrefab;
     public ImpactResult TakeDamage(MessageDamage message){
         lastDamage = message.type;
         return CalculateDamage(message);
     }
-    public virtual ImpactResult CalculateDamage(MessageDamage message){
-        return ImpactResult.normal;
-    }
+    public abstract ImpactResult CalculateDamage(MessageDamage message);
     public virtual void Start(){
         if (gibsContainerPrefab != null){
             GameObject gibsContainer = Instantiate(gibsContainerPrefab) as GameObject;
