@@ -88,7 +88,8 @@ public class Physical : Damageable {
 			if (height < 0){
 				Vector2 hingePosition = hinge.transform.localPosition;
 				// hingePosition.y = 0.1f + groundCollider.size.y / 2f - groundCollider.offset.y;
-				hingePosition.y = 0.1f - horizonCollider.offset.y;
+				hingePosition.y += horizonCollider.offset.y;
+				hingePosition.y += horizonCollider.bounds.extents.y;
 				hinge.transform.localPosition = hingePosition;
 			}
 			if (height < 0.1){
