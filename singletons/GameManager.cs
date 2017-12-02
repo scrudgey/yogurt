@@ -147,19 +147,26 @@ public partial class GameManager : Singleton<GameManager> {
 			cameraControl.focus = target;
 		Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(target);
 		FocusIntrinsicsChanged(intrinsics);
-		// change UI buttons?
-		UINew.Instance.UpdateButtons();
-
-		// TODO: 
-		// Outfit playerOutfit = target.GetComponent<Outfit>();
-		// if (playerOutfit){
-		// 	CheckItemCollection(playerOutfit.wornUniformName, target);
-		// }
+		// check collections for new focus outfit, holding, and hat
+		Outfit playerOutfit = target.GetComponent<Outfit>();
+		if (playerOutfit){
+			string prefabName = Toolbox.Instance.ReplaceUnderscore(playerOutfit.wornUniformName);
+			GameObject uniform = Instantiate(Resources.Load("prefabs/"+prefabName)) as GameObject;
+			CheckItemCollection(uniform, playerObject);
+			DestroyImmediate(uniform);
+		}
 		Head playerHead = target.GetComponentInChildren<Head>();
 		if (playerHead){
 			if (playerHead.hat != null)
-				CheckItemCollection(playerHead.hat.gameObject, target);
+				CheckItemCollection(playerHead.hat.gameObject, playerObject);
 		}
+		Inventory playerInv = target.GetComponent<Inventory>();
+		if (playerInv){
+			if (playerInv.holding)
+				CheckItemCollection(playerInv.holding.gameObject, playerObject);
+		}
+		// change UI buttons?
+		UINew.Instance.UpdateButtons();
 	}
 	public void LeaveScene(string toSceneName, int toEntryNumber){
 		MySaver.Save();
