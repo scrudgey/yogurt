@@ -145,9 +145,7 @@ public class Controllable : MonoBehaviour, IMessagable {
 		direction = d;
 	}
 	public void ShootPressed(){
-		// if (fightMode){
 		Toolbox.Instance.SendMessage(gameObject, this, new MessagePunch());
-		// }
 		if (defaultInteraction != null)
 			defaultInteraction.DoAction();
 	}
@@ -205,7 +203,6 @@ public class Controllable : MonoBehaviour, IMessagable {
 					}
 				}
 			}
-			// inv.UpdateActions();
 		}
 		if (incoming is MessageDirectable){
 			MessageDirectable message = (MessageDirectable)incoming;
