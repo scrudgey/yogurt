@@ -142,10 +142,6 @@ public partial class GameManager : Singleton<GameManager> {
 		Controllable targetControl = playerObject.GetComponent<Controllable>();
 		Controller.Instance.focus = target.GetComponent<Controllable>();
 		targetControl.SetControl(Controllable.ControlType.player);
-		// DecisionMaker decisionMaker = playerObject.GetComponent<DecisionMaker>();
-		// if (decisionMaker != null){
-		// 	decisionMaker.enabled = false;
-		// }
 		cameraControl = FindObjectOfType<CameraControl>();
 		if (cameraControl)
 			cameraControl.focus = target;
@@ -153,6 +149,17 @@ public partial class GameManager : Singleton<GameManager> {
 		FocusIntrinsicsChanged(intrinsics);
 		// change UI buttons?
 		UINew.Instance.UpdateButtons();
+
+		// TODO: 
+		// Outfit playerOutfit = target.GetComponent<Outfit>();
+		// if (playerOutfit){
+		// 	CheckItemCollection(playerOutfit.wornUniformName, target);
+		// }
+		Head playerHead = target.GetComponentInChildren<Head>();
+		if (playerHead){
+			if (playerHead.hat != null)
+				CheckItemCollection(playerHead.hat.gameObject, target);
+		}
 	}
 	public void LeaveScene(string toSceneName, int toEntryNumber){
 		MySaver.Save();
