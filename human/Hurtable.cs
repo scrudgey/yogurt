@@ -46,7 +46,7 @@ public class Hurtable : Damageable {
 		Dictionary<BuffType, Buff> netBuffs = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject).NetBuffs();
 		bool tookDamage = false;
 		if (message.responsibleParty != null){
-				lastAttacker = message.responsibleParty;
+			lastAttacker = message.responsibleParty;
 		}
 		if (!netBuffs[BuffType.invulnerable].boolValue){
 			float armor = this.armor;
