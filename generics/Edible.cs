@@ -12,12 +12,16 @@ public class Edible : Interactive {
 	public bool human;
 	public Color pureeColor;
 	public AudioClip eatSound;
+	public GameObject refuse;
 	virtual public void BeEaten(){
 		PhysicalBootstrapper pb = GetComponent<PhysicalBootstrapper>();
 		if (pb){
 			pb.DestroyPhysical();
 		}
 		ClaimsManager.Instance.WasDestroyed(gameObject);
+		if (refuse != null){
+			Instantiate(refuse, transform.position, transform.rotation);
+		}
 		Destroy(gameObject);
 	}
 	public Liquid Liquify(){
