@@ -48,12 +48,11 @@ public class MonoLiquid : MonoBehaviour {
 			}
 	}
 	public void LoadLiquid(string type){
-		// TODO: make this fancier: retrieve liquid in buffer, only change variable
-		// if liquid was returned
+		// TODO: check for null return
 		liquid = Liquid.LoadLiquid(type);
-		// add things here for changing edible properties according to liquid properties
+		// add things here for changing edible properties according to liquid properties (?)
 	}
-	void OnGroundImpact(Physical phys){
+	void GroundModeStart(Physical phys){
 		EventData data = Toolbox.Instance.DataFlag(gameObject, chaos:1, disgusting:1);
 		data.whatHappened = liquid.name+" was spilled";
 		data.noun = "spilling";

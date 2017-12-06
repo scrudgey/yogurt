@@ -198,6 +198,7 @@ public class Physical : Damageable {
 			spriteRenderer.enabled = false;
 		if (objectRenderer)
 			objectRenderer.sortingLayerName = "main";
+		bootstrapper.BroadcastMessage("GroundModeStart", this, SendMessageOptions.DontRequireReceiver);
 	}
 	public void ClearTempColliders(){
 		foreach (Collider2D temporaryCollider in temporaryDisabledColliders){
