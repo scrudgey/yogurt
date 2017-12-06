@@ -186,8 +186,6 @@ public class PhysicalBootstrapper : MonoBehaviour {
 			if (physical.currentMode == Physical.mode.zip){
 				// Debug.Log("physical bootstrapper collision: "+gameObject.name+" + "+coll.gameObject.name);
 				MessageDamage message = new MessageDamage();
-				// message.responsibleParty = new List<GameObject>();
-				// message.responsibleParty.Add(thrownBy);
 				message.responsibleParty = thrownBy;
 				message.force = physical.objectBody.velocity;
 				message.amount = 20f;
@@ -241,7 +239,6 @@ public class PhysicalBootstrapper : MonoBehaviour {
 				physical.hinge.transform.localPosition = loadData.vectors["objectPosition"];
 				Vector2 offset = new Vector2(loadData.floats["horizonOffsetX"], loadData.floats["horizonOffsetY"]);
 				physical.horizonCollider.offset = offset;
-
 				if (physical.currentMode == Physical.mode.fly){
 					physical.StartFlyMode();
 				}
