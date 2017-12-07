@@ -18,12 +18,10 @@ public class PersistentObject {
 	public string parentObject;
 	[XmlIgnoreAttribute]	
 	public PersistentObject parentPersistent;
-
 	public PersistentObject(){
 		// needed for XML serialization
 	}
 	public PersistentObject(GameObject gameObject){
-		// name
 		MatchCollection matches = regexClone.Matches(gameObject.name);
 		if (matches.Count > 0){									// the object is a clone, capture just the normal name
 			foreach (Match match in matches){
@@ -51,14 +49,19 @@ public class PersistentObject {
 			noPrefab = true;
 			name = gameObject.name;
 		}
+		foreach (Component component in gameObject.GetComponents<Component>()){
+			if (MySaver.Handlers.ContainsKey(component.GetType())){
+				PersistentComponent persist = new PersistentComponent(this);
+				persistentComponents.Add(component.GetType().ToString(), persist);
+			}
+		}
 	}
 	public void HandleSave(GameObject parentObject){
 		foreach (Component component in parentObject.GetComponents<Component>()){
 			SaveHandler handler;
 			if (MySaver.Handlers.TryGetValue(component.GetType(), out handler)){
-				PersistentComponent persist = new PersistentComponent(this);
-				persistentComponents.Add(component.GetType().ToString(), persist);
-				handler.SaveData(component, persist);
+				// TODO: update each component, don't override.
+				handler.SaveData(component, persistentComponents[component.GetType().ToString()]);
 			}
 		}
 		foreach (PersistentObject persistentChild in persistentChildren){

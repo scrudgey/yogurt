@@ -79,9 +79,9 @@ public class Awareness : MonoBehaviour, IMessagable {
 	public Ref<GameObject> nearestEnemy = new Ref<GameObject>(null);
 	public Ref<GameObject> nearestFire = new Ref<GameObject>(null);
 	public SerializableDictionary<GameObject, Knowledge> knowledgebase = new SerializableDictionary<GameObject, Knowledge>();
-	public HashSet<SerializedKnowledge> longTermMemory = new HashSet<SerializedKnowledge>();
+	// public HashSet<SerializedKnowledge> longTermMemory = new HashSet<SerializedKnowledge>();
 	public SerializableDictionary<GameObject, PersonalAssessment> people = new SerializableDictionary<GameObject, PersonalAssessment>();
-	public HashSet<SerializedPersonalAssessment> longtermPersonalAssessments = new HashSet<SerializedPersonalAssessment>();
+	// public HashSet<SerializedPersonalAssessment> longtermPersonalAssessments = new HashSet<SerializedPersonalAssessment>();
 	void Start () {
 		control = gameObject.GetComponent<Controllable>();
 		sightCone = Instantiate( Resources.Load("sightcone1"), gameObject.transform.position, Quaternion.identity ) as GameObject;

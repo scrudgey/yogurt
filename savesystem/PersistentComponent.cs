@@ -17,12 +17,12 @@ public class PersistentComponent {
 	public List<Buff> buffs;
 	public List<Commercial> commercials;
 	[XmlIgnoreAttribute]	
-	public PersistentObject persistent;
+	public int id;
 	public PersistentComponent(){
 		// Needed for XML serialization
 	}
 	public PersistentComponent(PersistentObject owner){
-		persistent = owner;
+		id = owner.id;
 	}
 }
 [System.Serializable]

@@ -20,7 +20,7 @@ public class GameData{
 	public SerializableDictionary<string, bool> itemCheckedOut;
 	public string lastSavedPlayerPath;
 	public string lastSavedScenePath;
-	public string lastPlayerName;
+	// public string lastPlayerName;
 	public string saveDate;
 	public float secondsPlayed;
 	public string lastScene;
@@ -413,6 +413,15 @@ public partial class GameManager : Singleton<GameManager> {
 	}
 
 // SAVING AND LOADING
+	public string ObjectsSavePath(){
+		string path = "";
+		path = Path.Combine(Application.persistentDataPath, saveGameName);
+		if (!Directory.Exists(path))
+		  Directory.CreateDirectory(path);
+		path = Path.Combine(path, saveGameName +".xml");
+		data.lastSavedScenePath = path;
+		return path;
+	}
     public string LevelSavePath(){
 		string path = "";
 		path = Path.Combine(Application.persistentDataPath, saveGameName);
@@ -427,9 +436,10 @@ public partial class GameManager : Singleton<GameManager> {
 		path = Path.Combine(Application.persistentDataPath, saveGameName);
 		if (!Directory.Exists(path))
 		  Directory.CreateDirectory(path);
-		path = Path.Combine(path, "player_"+GameManager.Instance.playerObject.name+"_state.xml");
+		string playerName = Toolbox.Instance.GetName(GameManager.Instance.playerObject);
+		path = Path.Combine(path, "player_"+playerName+"_state.xml");
 		data.lastSavedPlayerPath = path;
-		data.lastPlayerName = GameManager.Instance.playerObject.name;
+		// data.lastPlayerName = GameManager.Instance.playerObject.name;
 		return path;
 	}
 	public void SaveGameData(){

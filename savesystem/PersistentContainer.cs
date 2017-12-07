@@ -1,13 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
-[XmlRoot("PersistentContainer")]
+// [XmlRoot("PersistentContainer")]
 public class PersistentContainer{
-	[XmlArray("PersistentObjects"), XmlArrayItem("Persistent")]
-	public List<PersistentObject> PersistentObjects = new List<PersistentObject>();
+	// [XmlArray("PersistentObjects"), XmlArrayItem("Persistent")]
+	public SerializableDictionary<int, PersistentObject> PersistentObjects = new SerializableDictionary<int, PersistentObject>();
 	public PersistentContainer(){
 	}
-	public PersistentContainer(List<PersistentObject> persistents){
+	public PersistentContainer(SerializableDictionary<int, PersistentObject> persistents){
 		PersistentObjects = persistents;
 	}
 }
+
