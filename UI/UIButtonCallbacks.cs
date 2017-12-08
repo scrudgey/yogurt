@@ -20,12 +20,9 @@ public class UIButtonCallbacks : MonoBehaviour {
 	public void SaveButtonClick(){
 		MySaver.Save();
 		MySaver.SaveObjectDatabase();
-		// Debug.Log("save...");
 	}
 	public void LoadButtonClick(){
 		GameManager.Instance.SetFocus(MySaver.LoadScene()); 
-		// Debug.Log("load...");
-		// Debug.Break();
 	}
 	public void TestButtonClick(){
 		Debug.Log("test");

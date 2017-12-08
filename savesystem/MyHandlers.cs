@@ -406,9 +406,9 @@ public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
 			}
 		}
 		if (instance.protectionZone != null)
-			MySaver.UpdateGameObjectReference(instance.protectionZone.gameObject, data, "protectID");
+			MySaver.UpdateGameObjectReference(instance.protectionZone.gameObject, data, "protectID", overWriteWithNull: false);
 		if (instance.warnZone != null)
-			MySaver.UpdateGameObjectReference(instance.warnZone.gameObject, data, "warnID");
+			MySaver.UpdateGameObjectReference(instance.warnZone.gameObject, data, "warnID", overWriteWithNull: false);
 	}
 	public override void LoadSpecificData(DecisionMaker instance, PersistentComponent data){
 		instance.hitState = (Controllable.HitState)data.ints["hitstate"];
@@ -448,7 +448,7 @@ public class AwarenessHandler: SaveHandler<Awareness>{
 		data.knowledgeBase = new List<SerializedKnowledge>();
 		data.people = new List<SerializedPersonalAssessment>();
 		if (instance.possession != null){
-			MySaver.UpdateGameObjectReference(instance.possession, data, "possession");
+			MySaver.UpdateGameObjectReference(instance.possession, data, "possession", overWriteWithNull: false);
 			MySaver.AddToReferenceTree(data.id, instance.possession);
 		}
 		foreach (KeyValuePair<GameObject, Knowledge> keyVal in instance.knowledgebase){
@@ -496,8 +496,9 @@ public class AwarenessHandler: SaveHandler<Awareness>{
 		SerializedKnowledge data = new SerializedKnowledge();
 		data.lastSeenPosition = input.lastSeenPosition;
 		data.lastSeenTime = input.lastSeenTime;
-		if (!MySaver.savedObjects.TryGetValue(input.obj, out data.gameObjectID)){
-			data.gameObjectID = -1;
+		data.gameObjectID = -1;
+		if (input.obj != null){
+			MySaver.savedObjects.TryGetValue(input.obj, out data.gameObjectID);
 		}
 		return data;
 	}

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
+using UnityEngine.SceneManagement;
 
 public class PersistentObject {
 	private static Regex regexClone = new Regex(@"(.+)\(Clone\)$", RegexOptions.Multiline);
@@ -16,6 +17,7 @@ public class PersistentObject {
 	public SerializableDictionary<string, PersistentComponent> persistentComponents = new SerializableDictionary<string, PersistentComponent>();
 	public List<PersistentObject> persistentChildren = new List<PersistentObject>();
 	public string parentObject;
+	public string sceneName;
 	[XmlIgnoreAttribute]	
 	public PersistentObject parentPersistent;
 	public PersistentObject(){
@@ -25,10 +27,12 @@ public class PersistentObject {
 		transformPosition = gameObject.transform.position;
 		transformRotation = gameObject.transform.rotation;
 		transformScale = gameObject.transform.localScale;
+		sceneName = SceneManager.GetActiveScene().name;
 	}
 	public PersistentObject(GameObject gameObject){
-		id = MySaver.objectDataBase.PersistentObjects.Count+1;
-		MySaver.objectDataBase.PersistentObjects[id] = this;
+		// id = MySaver.objectDataBase.Count+1;
+		id = MySaver.NextIDNumber();
+		MySaver.objectDataBase[id] = this;
 
 		MatchCollection matches = regexClone.Matches(gameObject.name);
 		if (matches.Count > 0){									// the object is a clone, capture just the normal name
@@ -39,9 +43,7 @@ public class PersistentObject {
 			name = gameObject.name;
 		}
 		// set up the persistent transform
-		transformPosition = gameObject.transform.position;
-		transformRotation = gameObject.transform.rotation;
-		transformScale = gameObject.transform.localScale;
+		Update(gameObject);
 		MyMarker marker = gameObject.GetComponent<MyMarker>();
 		if (marker != null){
 			foreach (GameObject childObject in marker.persistentChildren){

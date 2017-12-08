@@ -313,8 +313,8 @@ public partial class GameManager : Singleton<GameManager> {
 	}
     public void NewDay(){
 		Debug.Log("New day");
-		MySaver.SaveObjectDatabase();
         MySaver.CleanupSaves();
+		MySaver.SaveObjectDatabase();
 		List<string> keys = new List<string>(data.itemCheckedOut.Keys);
 		foreach (string key in keys){
 			data.itemCheckedOut[key] = false;
