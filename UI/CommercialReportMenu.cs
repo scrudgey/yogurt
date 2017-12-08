@@ -20,6 +20,7 @@ public class CommercialReportMenu : MonoBehaviour {
         UINew.Instance.CloseActiveMenu();
         Controller.Instance.suspendInput = false;
 		MySaver.Save();
+		MySaver.SaveObjectDatabase();
         GameManager.Instance.BoardRoomCutscene();
     }
     public void ReviewButton(){

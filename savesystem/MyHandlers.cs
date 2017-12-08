@@ -22,7 +22,6 @@ public abstract class SaveHandler<T> : SaveHandler where T : Component
 public class InventoryHandler : SaveHandler<Inventory> {
 	public override void SaveSpecificData(Inventory instance, PersistentComponent data){
 		if (instance.holding != null){
-			// data.ints["holdingID"] = MySaver.GameObjectToID(instance.holding.gameObject);
 			MySaver.UpdateGameObjectReference(instance.holding.gameObject, data, "holdingID");
 			MySaver.AddToReferenceTree(data.id, instance.holding.gameObject);
 		} else {
@@ -31,7 +30,6 @@ public class InventoryHandler : SaveHandler<Inventory> {
 		data.ints["itemCount"] = instance.items.Count;
 		if (instance.items.Count > 0){
 			for (int i = 0; i < instance.items.Count; i++){
-				// data.ints["item"+i.ToString()] = MySaver.GameObjectToID(instance.items[i]);
 				MySaver.UpdateGameObjectReference(instance.items[i], data, "item"+i.ToString());
 				MySaver.AddToReferenceTree(data.id, instance.items[i]);
 			}
@@ -423,8 +421,8 @@ public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
 		}
 		if (data.ints.ContainsKey("warnID")){
 			GameObject warnObject = MySaver.IDToGameObject(data.ints["warnID"]);
-			Debug.Log(data.ints["warnID"]);
-			Debug.Log(warnObject);
+			// Debug.Log(data.ints["warnID"]);
+			// Debug.Log(warnObject);
 			if (warnObject != null){
 				instance.awareness.warnZone = warnObject.GetComponent<Collider2D>();
 			}
@@ -445,6 +443,7 @@ public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
 public class AwarenessHandler: SaveHandler<Awareness>{
 	public override void SaveSpecificData(Awareness instance, PersistentComponent data){
 		// TODO: don't overrwrite existing saved knowledges
+		// TODO: check that it is working as intended, index knowledge and P.A. with id numbers
 		data.ints["hitstate"] = (int)instance.hitState;
 		data.knowledgeBase = new List<SerializedKnowledge>();
 		data.people = new List<SerializedPersonalAssessment>();

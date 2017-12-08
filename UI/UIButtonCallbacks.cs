@@ -19,6 +19,7 @@ public class UIButtonCallbacks : MonoBehaviour {
 	}
 	public void SaveButtonClick(){
 		MySaver.Save();
+		MySaver.SaveObjectDatabase();
 		// Debug.Log("save...");
 	}
 	public void LoadButtonClick(){

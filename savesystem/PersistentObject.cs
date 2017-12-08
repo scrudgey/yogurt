@@ -21,7 +21,15 @@ public class PersistentObject {
 	public PersistentObject(){
 		// needed for XML serialization
 	}
+	public void Update(GameObject gameObject){
+		transformPosition = gameObject.transform.position;
+		transformRotation = gameObject.transform.rotation;
+		transformScale = gameObject.transform.localScale;
+	}
 	public PersistentObject(GameObject gameObject){
+		id = MySaver.objectDataBase.PersistentObjects.Count+1;
+		MySaver.objectDataBase.PersistentObjects[id] = this;
+
 		MatchCollection matches = regexClone.Matches(gameObject.name);
 		if (matches.Count > 0){									// the object is a clone, capture just the normal name
 			foreach (Match match in matches){
@@ -52,7 +60,7 @@ public class PersistentObject {
 		foreach (Component component in gameObject.GetComponents<Component>()){
 			if (MySaver.Handlers.ContainsKey(component.GetType())){
 				PersistentComponent persist = new PersistentComponent(this);
-				persistentComponents.Add(component.GetType().ToString(), persist);
+				persistentComponents[component.GetType().ToString()] = persist;
 			}
 		}
 	}

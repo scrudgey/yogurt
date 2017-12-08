@@ -20,7 +20,6 @@ public class GameData{
 	public SerializableDictionary<string, bool> itemCheckedOut;
 	public string lastSavedPlayerPath;
 	public string lastSavedScenePath;
-	// public string lastPlayerName;
 	public string saveDate;
 	public float secondsPlayed;
 	public string lastScene;
@@ -288,6 +287,7 @@ public partial class GameManager : Singleton<GameManager> {
 				playerHurtable.health = playerHurtable.maxHealth;
 			}
 			MySaver.Save();
+			// MySaver.SaveObjectDatabase();
 			awaitNewDayPrompt = CheckNewDayPrompt();
 			// TODO: check events related to having completed the last completed commercial
 		}
@@ -313,6 +313,7 @@ public partial class GameManager : Singleton<GameManager> {
 	}
     public void NewDay(){
 		Debug.Log("New day");
+		MySaver.SaveObjectDatabase();
         MySaver.CleanupSaves();
 		List<string> keys = new List<string>(data.itemCheckedOut.Keys);
 		foreach (string key in keys){
@@ -448,7 +449,7 @@ public partial class GameManager : Singleton<GameManager> {
 
 		var serializer = new XmlSerializer(typeof(GameData));
 		string path = Path.Combine(Application.persistentDataPath, saveGameName);
-		path = Path.Combine(path, "game.xml");
+		path = Path.Combine(path, "gameData.xml");
 		FileStream sceneStream = File.Create(path);
 		serializer.Serialize(sceneStream, data);
 		sceneStream.Close();
@@ -458,7 +459,7 @@ public partial class GameManager : Singleton<GameManager> {
 		GameData data = null;
 		var serializer = new XmlSerializer(typeof(GameData));
 		string path = Path.Combine(Application.persistentDataPath, gameName);
-		path = Path.Combine(path, "game.xml");
+		path = Path.Combine(path, "gameData.xml");
 		if (File.Exists(path)){
 			try {
 				var dataStream = new FileStream(path, FileMode.Open);

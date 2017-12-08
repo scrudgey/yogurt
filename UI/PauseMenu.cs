@@ -6,6 +6,7 @@ public class PauseMenu : MonoBehaviour {
 	}
 	public void SaveClick(){
 		MySaver.Save();
+		MySaver.SaveObjectDatabase();
 		GameManager.Instance.TitleScreen();
 	}
 	public void QuitClick(){
