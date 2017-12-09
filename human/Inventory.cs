@@ -2,7 +2,7 @@
 using UnityEngine.Rendering;
 using System.Collections.Generic;
 
-public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
+public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISaveable {
 	public List<GameObject> items;
 	public GameObject initHolding;
 	// public float strength;
@@ -411,5 +411,48 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable {
 				UINew.Instance.ClearWorldButtons();
 			}
 		}
+	}
+	public void SaveData(PersistentComponent data){
+		if (holding != null){
+			MySaver.UpdateGameObjectReference(holding.gameObject, data, "holdingID");
+			MySaver.AddToReferenceTree(data.id, holding.gameObject);
+		} else {
+			data.ints["holdingID"] = -1;
+		}
+		data.ints["itemCount"] = items.Count;
+		if (items.Count > 0){
+			for (int i = 0; i < items.Count; i++){
+				MySaver.UpdateGameObjectReference(items[i], data, "item"+i.ToString());
+				MySaver.AddToReferenceTree(data.id, items[i]);
+			}
+		} 
+		data.vectors["direction"] = direction;
+	}
+	public void LoadData(PersistentComponent data){
+		direction = data.vectors["direction"];
+		if (data.ints["holdingID"] != -1){
+			GameObject go = MySaver.IDToGameObject(data.ints["holdingID"]);
+			if (go != null){
+				GetItem(go.GetComponent<Pickup>());
+			} else {
+				Debug.Log("tried to get loadedobject " + data.ints["holdingID"].ToString() + " but was not found!");
+			}
+		}
+		// note: trying to reference a key in data.ints that didn't exist here caused a hard crash at runtime
+		// so PROTECT YA NECK!!!
+		if (data.ints["itemCount"] > 0){
+			for (int i = 0; i < data.ints["itemCount"]; i++){
+				GameObject theItem = MySaver.IDToGameObject(data.ints["item"+i.ToString()]);
+				if (theItem == null)
+					continue;
+				items.Add(theItem);
+				theItem.SetActive(false);
+				PhysicalBootstrapper testBoot = theItem.GetComponent<PhysicalBootstrapper>();
+				if (testBoot){
+					testBoot.DestroyPhysical();
+				}
+			}
+		}
+		initHolding = null;
 	}
 }

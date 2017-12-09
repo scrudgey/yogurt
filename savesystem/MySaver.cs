@@ -13,33 +13,33 @@ public class MySaver {
 	public static Dictionary<int, GameObject> loadedObjects = new Dictionary<int, GameObject>();
 	public static Dictionary<GameObject, int> savedObjects = new Dictionary<GameObject, int>();
 	public static List<GameObject> disabledPersistents = new List<GameObject>();
-	public static Dictionary<Type, SaveHandler> Handlers = new Dictionary<Type, SaveHandler>{
-		{typeof(Inventory), 						new InventoryHandler()},
-		{typeof(PhysicalBootstrapper), 				new PhysicalBootStrapperHandler()},
-		{typeof(Eater),								new EaterHandler()},
-		{typeof(AdvancedAnimation),					new AdvancedAnimationHandler()},
-		{typeof(Flammable),							new FlammableHandler()},
-		{typeof(Destructible),						new DestructibleHandler()},
-		{typeof(LiquidContainer),					new LiquidContainerHandler()},
-		{typeof(Container),							new ContainerHandler()},
-		{typeof(Toilet),							new ContainerHandler()},
-		{typeof(Blender),							new BlenderHandler()},
-		{typeof(Head),								new HeadHandler()},
-		{typeof(Outfit),							new OutfitHandler()},
-		{typeof(Cabinet),							new CabinetHandler()},
-		{typeof(Intrinsics),						new IntrinsicsHandler()},
-		{typeof(Package),							new PackageHandler()},
-		{typeof(Trader),							new TraderHandler()},
-		{typeof(DecisionMaker),						new DecisionMakerHandler()},
-		{typeof(Awareness),							new AwarenessHandler()},
-		{typeof(Hurtable),							new HurtableHandler()},
-		{typeof(HeadAnimation),						new HeadAnimationHandler()},
-		{typeof(Speech),							new SpeechHandler()},
-		{typeof(Humanoid),							new HumanoidHandler()},
-		{typeof(Stain),								new StainHandler()}, 
-		{typeof(DropDripper),						new DropDripperHandler()},
-		{typeof(VideoCamera),						new VideoCameraHandler()}
-	};
+	// public static Dictionary<Type, SaveHandler> Handlers = new Dictionary<Type, SaveHandler>{
+	// 	{typeof(Inventory), 						new InventoryHandler()},
+	// 	{typeof(PhysicalBootstrapper), 				new PhysicalBootStrapperHandler()},
+	// 	{typeof(Eater),								new EaterHandler()},
+	// 	{typeof(AdvancedAnimation),					new AdvancedAnimationHandler()},
+	// 	{typeof(Flammable),							new FlammableHandler()},
+	// 	{typeof(Destructible),						new DestructibleHandler()},
+	// 	{typeof(LiquidContainer),					new LiquidContainerHandler()},
+	// 	{typeof(Container),							new ContainerHandler()},
+	// 	{typeof(Toilet),							new ContainerHandler()},
+	// 	{typeof(Blender),							new BlenderHandler()},
+	// 	{typeof(Head),								new HeadHandler()},
+	// 	{typeof(Outfit),							new OutfitHandler()},
+	// 	{typeof(Cabinet),							new CabinetHandler()},
+	// 	{typeof(Intrinsics),						new IntrinsicsHandler()},
+	// 	{typeof(Package),							new PackageHandler()},
+	// 	{typeof(Trader),							new TraderHandler()},
+	// 	{typeof(DecisionMaker),						new DecisionMakerHandler()},
+	// 	{typeof(Awareness),							new AwarenessHandler()},
+	// 	{typeof(Hurtable),							new HurtableHandler()},
+	// 	{typeof(HeadAnimation),						new HeadAnimationHandler()},
+	// 	{typeof(Speech),							new SpeechHandler()},
+	// 	{typeof(Humanoid),							new HumanoidHandler()},
+	// 	{typeof(Stain),								new StainHandler()}, 
+	// 	{typeof(DropDripper),						new DropDripperHandler()},
+	// 	{typeof(VideoCamera),						new VideoCameraHandler()}
+	// };
 	public static List<Type> LoadOrder = new List<Type>{
 		typeof(Intrinsics),
 		typeof(Outfit)

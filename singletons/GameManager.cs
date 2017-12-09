@@ -287,9 +287,7 @@ public partial class GameManager : Singleton<GameManager> {
 				playerHurtable.health = playerHurtable.maxHealth;
 			}
 			MySaver.Save();
-			// MySaver.SaveObjectDatabase();
 			awaitNewDayPrompt = CheckNewDayPrompt();
-			// TODO: check events related to having completed the last completed commercial
 		}
 	}
 

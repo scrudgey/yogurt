@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Blender : Container {
+public class Blender : Container, ISaveable {
 	public bool power;
 	private bool vibrate;
 	public Sprite[] spriteSheet;
@@ -102,5 +102,13 @@ public class Blender : Container {
 		if (edible && edible.blendable){
 			liquidContainer.FillWithLiquid(edible.Liquify());
 		}
+	}
+	public override void SaveData(PersistentComponent data){
+		base.SaveData(data);
+		data.bools["power"] = power;
+	}
+	public override void LoadData(PersistentComponent data){
+		base.LoadData(data);
+		power = data.bools["power"];
 	}
 }

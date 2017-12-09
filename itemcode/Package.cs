@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Package : Interactive {
+public class Package : Interactive, ISaveable {
 	public string contents;
 	void Start () {
 		if (contents == "none")
@@ -18,5 +18,11 @@ public class Package : Interactive {
 	}
 	public string Open_desc(){
 		return "Open package";
+	}
+	public void SaveData(PersistentComponent data){
+		data.strings["contents"] = contents;
+	}
+	public void LoadData(PersistentComponent data){
+		contents = data.strings["contents"];
 	}
 }

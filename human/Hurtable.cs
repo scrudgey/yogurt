@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class Hurtable : Damageable {
+public class Hurtable : Damageable, ISaveable {
 	private Controllable.HitState _hitState;
 	public Controllable.HitState hitState{
 		get {return _hitState;}
@@ -266,5 +266,21 @@ public class Hurtable : Damageable {
 		GameObject drop = Toolbox.Instance.SpawnDroplet(blood, 0.3f, gameObject, initHeight);
 		Edible edible = drop.GetComponent<Edible>();
 		edible.human = true;
+	}
+	public void SaveData(PersistentComponent data){
+		data.floats["health"] = health;
+		data.floats["maxHealth"] = maxHealth;
+		data.floats["bonusHealth"] = bonusHealth;
+		data.floats["impulse"] = impulse;
+		data.floats["downed_timer"] = downedTimer;
+		data.ints["hitstate"] = (int)hitState;
+	}
+	public void LoadData(PersistentComponent data){
+		health = data.floats["health"];
+		maxHealth = data.floats["maxHealth"];
+		bonusHealth = data.floats["bonusHealth"];
+		impulse = data.floats["impulse"];
+		downedTimer = data.floats["downed_timer"];
+		hitState = (Controllable.HitState)data.ints["hitstate"];
 	}
 }

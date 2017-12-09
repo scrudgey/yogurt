@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System;
 
-public class Container : Interactive, IExcludable {
+public class Container : Interactive, IExcludable, ISaveable {
 	public List<Pickup> items = new List<Pickup>();
 	public int maxNumber;
 	public bool disableContents = true;
@@ -201,5 +201,32 @@ public class Container : Interactive, IExcludable {
 			Dump(items[0]);
 		}
 	}
-
+	public virtual void SaveData(PersistentComponent data){
+		data.ints["maxItems"] = maxNumber;
+		data.bools["disableContents"] = disableContents;
+		data.ints["itemCount"] = items.Count;
+		if (items.Count > 0){
+			for (int i = 0; i < items.Count; i++){
+				// data.ints["item"+i.ToString()] = MySaver.GameObjectToID(instance.items[i].gameObject);
+				MySaver.UpdateGameObjectReference(items[i].gameObject, data, "item"+i.ToString());
+				MySaver.AddToReferenceTree(data.id, items[i].gameObject);
+			}
+		}
+	}
+	public virtual void LoadData(PersistentComponent data){
+		maxNumber = data.ints["maxItems"];
+		disableContents = data.bools["disableContents"];
+		if (data.ints["itemCount"] > 0){
+			for (int i = 0; i < data.ints["itemCount"]; i++){
+				GameObject go = MySaver.IDToGameObject(data.ints["item"+i.ToString()]);
+				if (go != null){
+					AddItem(go.GetComponent<Pickup>());
+					PhysicalBootstrapper phys = go.GetComponent<PhysicalBootstrapper>();
+					if (phys)
+						phys.doInit = false;
+				}
+				// Debug.Log("container containing "+MySaver.loadedObjects[data.ints["item"+i.ToString()]].name);
+			}
+		}
+	}
 }

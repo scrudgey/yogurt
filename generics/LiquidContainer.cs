@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class LiquidContainer : Interactive, IMessagable {
+public class LiquidContainer : Interactive, IMessagable, ISaveable {
 	public SpriteRenderer liquidSprite;
 	public Liquid liquid;
 	private float _amount;
@@ -171,5 +171,27 @@ public class LiquidContainer : Interactive, IMessagable {
 					Spill();
 			}
 		}
+	}
+	public void SaveData(PersistentComponent data){
+		data.floats["fillCapacity"] = fillCapacity;
+		data.floats["amount"] = amount;
+		data.bools["lid"] = lid;
+		if (liquid != null){
+			data.strings["liquid"] = liquid.filename;
+		} else {
+			data.strings["liquid"] = "";
+		}
+	}
+	// TODO: if i had some nicer methods to handle loading an amount of liquid 
+	// i think this would be a little better.
+	public void LoadData(PersistentComponent data){
+		if (data.strings["liquid"] != ""){
+			FillByLoad(data.strings["liquid"]);
+		} else {
+			FillByLoad("water");
+		}
+		fillCapacity = data.floats["fillCapacity"];
+		amount = data.floats["amount"];
+		lid = data.bools["lid"];
 	}
 }

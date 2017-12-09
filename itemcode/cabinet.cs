@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
-// using System.Collections;
 using System.Collections.Generic;
 
-public class Cabinet : Interactive {
+public class Cabinet : Interactive, ISaveable {
 	public bool open = false;
 	public bool opened = false;
 	public Sprite closedSprite;
@@ -12,7 +11,6 @@ public class Cabinet : Interactive {
 	public List<GameObject> contained;
 	private AudioSource audioSource;
 	void Start () {
-		// Interaction openAct = n
 		Interaction openAct = new Interaction(this, "Open", "Open");
 		Interaction closeAct = new Interaction(this, "Close", "Close");
 		openAct.validationFunction = true;
@@ -55,5 +53,14 @@ public class Cabinet : Interactive {
 	}
 	public bool Close_Validation(){
 		return open;
+	}
+	public void SaveData(PersistentComponent data){
+		data.bools["opened"] = opened;
+	}
+	public void LoadData(PersistentComponent data){
+		opened = data.bools["opened"];
+		if (opened){
+			contained = new List<GameObject>();
+		}
 	}
 }

@@ -60,7 +60,7 @@ public class PersistentObject {
 			name = gameObject.name;
 		}
 		foreach (Component component in gameObject.GetComponents<Component>()){
-			if (MySaver.Handlers.ContainsKey(component.GetType())){
+			if (component is ISaveable){
 				PersistentComponent persist = new PersistentComponent(this);
 				persistentComponents[component.GetType().ToString()] = persist;
 			}
@@ -68,10 +68,11 @@ public class PersistentObject {
 	}
 	public void HandleSave(GameObject parentObject){
 		foreach (Component component in parentObject.GetComponents<Component>()){
-			SaveHandler handler;
-			if (MySaver.Handlers.TryGetValue(component.GetType(), out handler)){
+			ISaveable saveable = component as ISaveable;
+			if (saveable != null){
 				// TODO: update each component, don't override.
-				handler.SaveData(component, persistentComponents[component.GetType().ToString()]);
+				// handler.SaveData(component, persistentComponents[component.GetType().ToString()]);
+				saveable.SaveData(persistentComponents[component.GetType().ToString()]);
 			}
 		}
 		foreach (PersistentObject persistentChild in persistentChildren){
@@ -89,9 +90,10 @@ public class PersistentObject {
 		List<Component> loadedComponents = new List<Component>(parentObject.GetComponents<Component>());
 		loadedComponents.Sort(MySaver.CompareComponent);
 		foreach (Component component in loadedComponents){
-			SaveHandler handler;
-			if (MySaver.Handlers.TryGetValue(component.GetType(), out handler)){
-				handler.LoadData(component, persistentComponents[component.GetType().ToString()]);
+			ISaveable saveable = component as ISaveable;
+			if (saveable != null){
+				saveable.LoadData(persistentComponents[component.GetType().ToString()]);
+				// handler.LoadData(component, persistentComponents[component.GetType().ToString()]);
 			}
 		}
 		foreach (PersistentObject persistentChild in persistentChildren){
