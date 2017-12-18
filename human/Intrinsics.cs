@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public enum BuffType{telepathy, speed, bonusHealth, armor, fireproof, noPhysicalDamage, invulnerable, strength, poison}
 
-public class Intrinsics : MonoBehaviour {
+public class Intrinsics : MonoBehaviour, ISaveable {
 	public List<Buff> buffs = new List<Buff>();
 	public List<Buff> liveBuffs = new List<Buff>();
 	public HashSet<Intrinsics> childIntrinsics = new HashSet<Intrinsics>();
@@ -83,6 +83,20 @@ public class Intrinsics : MonoBehaviour {
 		if (GameManager.Instance.playerObject == gameObject){
 			GameManager.Instance.FocusIntrinsicsChanged(this);
 		}
+	}
+	public void SaveData(PersistentComponent data){
+		data.buffs = new List<Buff>();
+		foreach(Buff b in liveBuffs){
+			data.buffs.Add(b);
+		}
+	}
+	public void LoadData(PersistentComponent data){
+		liveBuffs = new List<Buff>();
+		foreach(Buff b in data.buffs){
+			liveBuffs.Add(b);
+		}
+		if (data.buffs.Count > 0)
+			IntrinsicsChanged();
 	}
 }
 [System.Serializable]

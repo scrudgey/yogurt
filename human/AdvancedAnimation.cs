@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class AdvancedAnimation : MonoBehaviour, IMessagable {
+public class AdvancedAnimation : MonoBehaviour, IMessagable, ISaveable {
 	private string _spriteSheet;
 	private string spriteSheet{
 		get { return _spriteSheet;}
@@ -230,5 +230,14 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable {
 		// Debug.Log("set frame "+animationFrame.ToString());
 		frame = animationFrame + baseFrame;
 		spriteRenderer.sprite = sprites[frame];
+	}
+	public void SaveData(PersistentComponent data){
+		data.strings["baseName"] = baseName;
+		data.ints["hitstate"] = (int)hitState;
+	}
+	public void LoadData(PersistentComponent data){
+		hitState = (Controllable.HitState)data.ints["hitstate"];
+		baseName = data.strings["baseName"];
+		LoadSprites();
 	}
 }

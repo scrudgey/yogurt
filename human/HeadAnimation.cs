@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
+public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable, ISaveable {
 	private bool speaking;
 	private string _spriteSheet;
 	private string spriteSheet{
@@ -152,5 +152,13 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
 	}
 	public void DirectionChange(Vector2 newdir){
 		lastPressed = Toolbox.Instance.DirectionToString(newdir);
+	}
+	public void SaveData(PersistentComponent data){
+		data.ints["hitstate"] = (int)hitState;
+		data.strings["baseName"] = baseName;
+	}
+	public void LoadData(PersistentComponent data){
+		hitState = (Controllable.HitState)data.ints["hitstate"];
+		baseName = data.strings["baseName"];
 	}
 }

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Outfit : Interactive, IMessagable {
+public class Outfit : Interactive, IMessagable, ISaveable {
 	private bool LoadInitialized = false;
 	public string wornUniformName;
 	public GameObject initUniform;
@@ -103,5 +103,13 @@ public class Outfit : Interactive, IMessagable {
             hitState = hits.hitState;
 		}
     }
-
+	public void SaveData(PersistentComponent data){
+		data.strings["worn"] = wornUniformName;
+		data.ints["hitstate"] = (int)hitState;
+	}
+	public void LoadData(PersistentComponent data){
+		wornUniformName = data.strings["worn"];
+		initUniform = Resources.Load("prefabs/"+data.strings["worn"]) as GameObject;
+		hitState = (Controllable.HitState)data.ints["hitstate"];
+	}
 }

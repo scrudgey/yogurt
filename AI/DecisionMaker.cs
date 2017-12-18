@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using System.Collections.Generic;
 using AI;
+using System;
 
 [System.Serializable]
 public class Personality {
@@ -15,7 +16,15 @@ public class Personality {
 	public BattleStyle battleStyle;
 }
 
-public class DecisionMaker : MonoBehaviour, IMessagable {
+public class DecisionMaker : MonoBehaviour, IMessagable, ISaveable {
+	static List<Type> priorityTypes = new List<Type>(){
+		{typeof(PriorityAttack)},
+		{typeof(PriorityFightFire)},
+		{typeof(PriorityProtectPossessions)},
+		{typeof(PriorityReadScript)},
+		{typeof(PriorityRunAway)},
+		{typeof(PriorityWander)}
+	};
 	public Controllable control;
 	public GameObject thought;
 	public Text thoughtText;
@@ -73,12 +82,6 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 			priorities.Add(new PriorityWander(gameObject, control));
 		}
 	}
-	// public void LoadInit(){
-	// 	awareness.initialAwareness = initialAwareness;
-	// 	awareness.protectZone = protectionZone;
-	// 	awareness.warnZone = warnZone;
-	// 	Debug.Log(awareness.warnZone);;
-	// }
 	public void ReceiveMessage(Message message){
 		if (message is MessageHitstun){
 			MessageHitstun hits = (MessageHitstun)message;
@@ -119,6 +122,46 @@ public class DecisionMaker : MonoBehaviour, IMessagable {
 	void OnDestroy(){
 		if (thought){
 			Destroy(thought);
+		}
+	}
+	public void SaveData(PersistentComponent data){
+		data.ints["hitstate"] = (int)hitState;
+		foreach (Type priorityType in priorityTypes){
+			foreach(Priority priority in priorities){
+				if (priority.GetType() == priorityType){
+					data.floats[priorityType.ToString()] = priority.urgency;
+				}
+			}
+		}
+		if (protectionZone != null)
+			MySaver.UpdateGameObjectReference(protectionZone.gameObject, data, "protectID", overWriteWithNull: false);
+		if (warnZone != null)
+			MySaver.UpdateGameObjectReference(warnZone.gameObject, data, "warnID", overWriteWithNull: false);
+	}
+	public void LoadData(PersistentComponent data){
+		hitState = (Controllable.HitState)data.ints["hitstate"];
+		initialAwareness = new List<GameObject>();
+		if (data.ints.ContainsKey("protectID")){
+			GameObject protectObject = MySaver.IDToGameObject(data.ints["protectID"]);
+			if (protectObject != null){
+				awareness.protectZone = protectObject.GetComponent<BoxCollider2D>();
+			}
+		}
+		if (data.ints.ContainsKey("warnID")){
+			GameObject warnObject = MySaver.IDToGameObject(data.ints["warnID"]);
+			if (warnObject != null){
+			awareness.warnZone = warnObject.GetComponent<Collider2D>();
+			}
+		}
+		foreach (Priority priority in priorities){
+			foreach (Type priorityType in priorityTypes){
+				if (priority.GetType() == priorityType){
+					string priorityName = priorityType.ToString();
+					if (data.floats.ContainsKey(priorityName)){
+						priority.urgency = data.floats[priorityName];
+					}
+				}
+			}
 		}
 	}
 }

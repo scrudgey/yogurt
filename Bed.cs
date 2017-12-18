@@ -1,23 +1,18 @@
 ﻿using UnityEngine;
 
 public class Bed : Doorway {
-
 	bool unmade = true;
 	public Sprite[] bedSprites;
 	public Sprite[] headSprites;
 	public Sprite[] bubbleSprites;
 	public AudioClip snoreSound;
-
 	private SpriteRenderer head;
 	private SpriteRenderer bubble;
-
 	private float animationTimer;
 	SpriteRenderer spriteRenderer;
 	private bool sleeping;
 	private bool frame;
-
 	public AudioClip beddingSound;
-	// private AudioSource audioSource;
 	public override void Start(){
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 		audioSource.spatialBlend = 0;
@@ -54,6 +49,7 @@ public class Bed : Doorway {
 	}
 	public void Sleep(){
 		MySaver.Save();
+		// MySaver.SaveObjectDatabase();
 		GameManager.Instance.NewDayCutscene();
 	}
 	public void SleepCutscene(){
@@ -74,7 +70,6 @@ public class Bed : Doorway {
 					audioSource.PlayOneShot(snoreSound);
 				}
 			}
-
 			if (Input.anyKey && GameObject.Find("NewDayReport(Clone)") == null){
 				sleeping = false;
 				unmade = true;	

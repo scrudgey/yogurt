@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Xml.Serialization;
 using UnityEngine;
 
 public class PersistentComponent {
@@ -13,16 +12,14 @@ public class PersistentComponent {
 	public List<SerializedKnowledge> knowledgeBase;
 	public List<SerializedPersonalAssessment> people;
 	public SerializableDictionary<string, SerializedKnowledge> knowledges = new SerializableDictionary<string, SerializedKnowledge>();
-	// public List<Intrinsic> intrinsics;
 	public List<Buff> buffs;
 	public List<Commercial> commercials;
-	[XmlIgnoreAttribute]	
-	public PersistentObject persistent;
+	public int id;
 	public PersistentComponent(){
 		// Needed for XML serialization
 	}
 	public PersistentComponent(PersistentObject owner){
-		persistent = owner;
+		id = owner.id;
 	}
 }
 [System.Serializable]
