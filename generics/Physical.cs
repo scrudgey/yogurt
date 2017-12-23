@@ -90,6 +90,7 @@ public class Physical : Damageable {
 				// hingePosition.y = 0.1f + groundCollider.size.y / 2f - groundCollider.offset.y;
 				hingePosition.y += horizonCollider.offset.y;
 				hingePosition.y += horizonCollider.bounds.extents.y;
+				// hingePosition.y += 0.05f;x
 				hinge.transform.localPosition = hingePosition;
 			}
 			if (height < 0.1){
