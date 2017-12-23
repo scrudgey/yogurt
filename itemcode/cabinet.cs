@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-// using System.Collections;
 using System.Collections.Generic;
 
 public class Cabinet : Interactive {
@@ -12,7 +11,6 @@ public class Cabinet : Interactive {
 	public List<GameObject> contained;
 	private AudioSource audioSource;
 	void Start () {
-		// Interaction openAct = n
 		Interaction openAct = new Interaction(this, "Open", "Open");
 		Interaction closeAct = new Interaction(this, "Close", "Close");
 		openAct.validationFunction = true;
