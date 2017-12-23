@@ -413,8 +413,6 @@ public class DecisionMakerHandler: SaveHandler<DecisionMaker>{
 		}
 		if (data.ints.ContainsKey("warnID")){
 			GameObject warnObject = MySaver.IDToGameObject(data.ints["warnID"]);
-			Debug.Log(data.ints["warnID"]);
-			Debug.Log(warnObject);
 			if (warnObject != null){
 				instance.awareness.warnZone = warnObject.GetComponent<Collider2D>();
 			}
