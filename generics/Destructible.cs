@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-public enum damageType{physical, fire, any, cutting, piercing}
 
-public class Destructible : Damageable {
+public enum damageType{physical, fire, any, cutting, piercing}
+public class Destructible : Damageable, ISaveable {
 	public float maxHealth;
 	public float health;
 	public float bonusHealth;
@@ -24,7 +24,6 @@ public class Destructible : Damageable {
 			health = maxHealth + bonusHealth;
 		}
 	}
-
 	public override ImpactResult CalculateDamage(MessageDamage message){
 		if (!invulnerable){
 			switch (message.type)
@@ -53,10 +52,8 @@ public class Destructible : Damageable {
 		}
 		return ImpactResult.repel;
 	}
-
 	//TODO: make destruction chaos somehow proportional to object
 	public void Die(){
-		// Debug.Log(gameObject.name + " die");
 		Destruct();
 		if (destroySound.Length > 0){
 			GameObject speaker = Instantiate(Resources.Load("Speaker"),transform.position,Quaternion.identity) as GameObject;
@@ -69,7 +66,6 @@ public class Destructible : Damageable {
 			Toolbox.Instance.SpawnDroplet(transform.position, container.liquid);
 			Toolbox.Instance.SpawnDroplet(transform.position, container.liquid);
 		}
-		// Toolbox.Instance.DataFlag(gameObject, 175f, 0f, 0f, 0f, 0f);
 		EventData data = Toolbox.Instance.DataFlag(gameObject, chaos:Random.Range(1, 2));
 		data.noun = "destruction";
 		data.whatHappened = Toolbox.Instance.CloneRemover(gameObject.name)+" was destroyed";
@@ -80,12 +76,11 @@ public class Destructible : Damageable {
 			}
 		}
 	}
-
 	void OnCollisionEnter2D(Collision2D col){
 		float vel = col.relativeVelocity.magnitude;
 		if (vel > 1){
 			//if we were hit hard, take a splatter damage
-			//i should fix this to be more physical
+			//TODO: i should fix this to be more physical
 			if (col.rigidbody){
 				float damage = col.rigidbody.mass * vel / 5.0f;
 				MessageDamage message = new MessageDamage();
@@ -109,24 +104,29 @@ public class Destructible : Damageable {
 			GetComponent<AudioSource>().PlayOneShot(hitSound[Random.Range(0, hitSound.Length)]);
 		}
 	}
-
 	public override void ReceiveMessage(Message message){
 		base.ReceiveMessage(message);
 		if (message is MessageNetIntrinsic){
 			MessageNetIntrinsic intrins = (MessageNetIntrinsic)message;
-			// if (intrins.netBuffs.ContainsKey(BuffType.armor)){
 			armor = intrins.netBuffs[BuffType.armor].floatValue;
-				// armor = intrins.netIntrinsic.armor.floatValue;
-			// }
-			// if (intrins.netIntrinsic.buffs.ContainsKey(BuffType.bonusHealth)){
-				// if (intrins.netIntrinsic.bonusHealth.floatValue > bonusHealth){
 			if (intrins.netBuffs[BuffType.bonusHealth].floatValue > bonusHealth){
 				health += intrins.netBuffs[BuffType.bonusHealth].floatValue;
 			}
 			bonusHealth = intrins.netBuffs[BuffType.bonusHealth].floatValue;
-			// }
-			
 		}
 	}
-
+	public void SaveData(PersistentComponent data){
+		data.floats["health"] = health;
+		data.bools["invulnerable"] = invulnerable;
+		data.bools["fireproof"] = fireproof;
+		data.bools["noPhysDam"] = no_physical_damage;
+		data.ints["lastDamage"] = (int)lastDamage;
+	}
+	public void LoadData(PersistentComponent data){
+		health = data.floats["health"];
+		invulnerable = data.bools["invulnerable"];
+		fireproof = data.bools["fireproof"];
+		no_physical_damage = data.bools["noPhysDam"];
+		lastDamage = (damageType)data.ints["lastDamage"];
+	}
 }

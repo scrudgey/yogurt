@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using System.Text;
 using Nimrod;
 
-public class Speech : Interactive, IMessagable {
+public class Speech : Interactive, IMessagable, ISaveable {
 	private string words;
 	public bool speaking = false;
 	public string[] randomPhrases;
@@ -338,12 +338,6 @@ public class Speech : Interactive, IMessagable {
 		Toolbox.Instance.SendMessage(target, this, messageInsult);
 
         EventData data = new EventData(chaos:2, disturbing: 1, positive:-2, offensive:Random.Range(2, 3));
-		// data.chaos = 20f;
-        // data.chaos += 20f;
-        // data.offensive += 20f;
-        // data.disturbing = 2f;
-        // data.positive += -20f;
-        // data.offensive = Random.Range(20, 30);
         Say(content, data:data, insult:target);
 
         List<string> strings = new List<string>(){content};
@@ -359,14 +353,7 @@ public class Speech : Interactive, IMessagable {
         grammar.Load("flavor_"+flavor);
         string content = grammar.Parse("{threat}");
 
-        // EventData data = new EventData();
         EventData data = new EventData(chaos:2, disturbing: 1, positive:-2, offensive:Random.Range(2, 3));
-		// data.chaos = 15f;
-        // data.chaos += 15f;
-        // data.offensive += 10f;
-        // data.disturbing = 5f;
-        // data.positive += -20f;
-        // data.offensive = Random.Range(20, 30);
         Say(content, data:data, threat:target);
 
         List<string> strings = new List<string>(){content};
@@ -395,6 +382,13 @@ public class Speech : Interactive, IMessagable {
         grammar.Load("flavor_"+flavor);
         Say(grammar.Parse("{"+key+"}"));
     }
-
+    public void SaveData(PersistentComponent data){
+		data.bools["speaking"] = speaking;
+		data.ints["hitstate"] = (int)hitState;
+	}
+	public void LoadData(PersistentComponent data){
+		speaking = data.bools["speaking"];
+		hitState = (Controllable.HitState)data.ints["hitstate"];
+	}
 }
 

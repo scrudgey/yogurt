@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Trader : Interactive {
+public class Trader : Interactive, ISaveable {
 	public GameObject give;
 	public string receive;
 	private Inventory inv;
@@ -83,5 +83,18 @@ public class Trader : Interactive {
 			aware.possession = other.gameObject;
 		}
 		give = null;
+	}
+	public void SaveData(PersistentComponent data){
+		if (give != null){
+			MySaver.UpdateGameObjectReference(give, data, "give");
+			MySaver.AddToReferenceTree(data.id, give);
+		}
+		data.strings["receive"] = receive;
+	}
+	public void LoadData(PersistentComponent data){
+		if (data.ints.ContainsKey("give")){
+			give = MySaver.IDToGameObject(data.ints["give"]);
+		}
+		receive = data.strings["receive"];
 	}
 }

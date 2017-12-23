@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Eater : Interactive, IMessagable {
+public class Eater : Interactive, IMessagable, ISaveable {
 	public float nutrition;
 	public enum preference{neutral, likes, dislikes}
 	enum nauseaStatement{none, warning, imminent}
@@ -204,5 +204,11 @@ public class Eater : Interactive, IMessagable {
 				poisonNausea = false;
 			}
 		}
+	}
+	public void SaveData(PersistentComponent data){
+		data.floats["nutrition"] = nutrition;
+	}
+	public void LoadData(PersistentComponent data){
+		nutrition = data.floats["nutrition"];
 	}
 }

@@ -268,13 +268,13 @@ public class Toolbox : Singleton<Toolbox> {
 		StartCoroutine(EnableAfterSeconds(target, 1f));
 	}
 	public IEnumerator EnableAfterSeconds (MonoBehaviour target, float time){
+		if (target == null)
+			yield break;
         target.enabled = false;
-		// Debug.Log("disabling "+target.ToString()+" on "+target.gameObject.name);
-		// Debug.Log(Time.time);
         yield return new WaitForSeconds(time);
-		// Debug.Log("enabling "+target.ToString()+" on "+target.gameObject.name);
-        target.enabled = true;
-		// Debug.Log(Time.time);
+        if (target == null)
+			yield break;
+		target.enabled = true;
 		yield return null;
     }
 }

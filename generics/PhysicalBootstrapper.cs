@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-public class PhysicalBootstrapper : MonoBehaviour {
+public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
 	public AudioClip[] impactSounds;
 	public AudioClip[] landSounds;
 	public AudioClip[] scrapeSounds;
@@ -262,5 +262,26 @@ public class PhysicalBootstrapper : MonoBehaviour {
 			ClaimsManager.Instance.WasDestroyed(physical.gameObject);
 			Destroy(physical.gameObject);
 		}
+	}
+	public void SaveData(PersistentComponent data){
+		data.bools["doInit"] = doInit;
+		data.bools["physical"] = false;
+		if (physical != null){
+			if (!physical.isActiveAndEnabled)
+				return;
+			data.bools["physical"] = true;
+			data.ints["mode"] = (int)physical.currentMode;
+			data.vectors["groundPosition"] = physical.transform.position;
+			data.vectors["objectPosition"] = physical.hinge.transform.localPosition;
+
+			data.floats["horizonOffsetX"] = physical.horizonCollider.offset.x;
+			data.floats["horizonOffsetY"] = physical.horizonCollider.offset.y;
+		}
+	}
+	public void LoadData(PersistentComponent data){
+		if (data.bools["physical"]){
+			loadData = data;
+		}
+		doLoad = true;
 	}
 }

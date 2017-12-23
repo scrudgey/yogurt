@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Humanoid : Controllable, IMessagable {
+public class Humanoid : Controllable, IMessagable, ISaveable {
 	Transform cachedTransform;
 	public new Transform transform
 		{
@@ -146,5 +146,21 @@ public class Humanoid : Controllable, IMessagable {
 	public override void SetDirection(Vector2 d){
 		base.SetDirection(d);
 		UpdateDirection();
+	}
+	public void SaveData(PersistentComponent data){
+		data.strings["lastPressed"] = lastPressed;
+		data.vectors["direction"] = direction;
+		data.bools["fightMode"] = fightMode;
+		data.bools["disabled"] = disabled;
+		data.ints["hitstate"] = (int)hitState;
+	}
+	public void LoadData(PersistentComponent data){
+		lastPressed = data.strings["lastPressed"];
+		SetDirection(data.vectors["direction"]);
+		disabled = data.bools["disabled"];
+		hitState = (Controllable.HitState)data.ints["hitstate"];
+		if (data.bools["fightMode"] && !fightMode){
+			ToggleFightMode();
+		}	
 	}
 }

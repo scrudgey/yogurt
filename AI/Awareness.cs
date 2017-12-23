@@ -46,7 +46,7 @@ public class PersonalAssessment{
 	}
 }
 
-public class Awareness : MonoBehaviour, IMessagable {
+public class Awareness : MonoBehaviour, IMessagable, ISaveable {
 	public DecisionMaker decisionMaker;
 	public List<GameObject> initialAwareness;
 	public GameObject possession;
@@ -79,9 +79,7 @@ public class Awareness : MonoBehaviour, IMessagable {
 	public Ref<GameObject> nearestEnemy = new Ref<GameObject>(null);
 	public Ref<GameObject> nearestFire = new Ref<GameObject>(null);
 	public SerializableDictionary<GameObject, Knowledge> knowledgebase = new SerializableDictionary<GameObject, Knowledge>();
-	public HashSet<SerializedKnowledge> longTermMemory = new HashSet<SerializedKnowledge>();
 	public SerializableDictionary<GameObject, PersonalAssessment> people = new SerializableDictionary<GameObject, PersonalAssessment>();
-	public HashSet<SerializedPersonalAssessment> longtermPersonalAssessments = new HashSet<SerializedPersonalAssessment>();
 	void Start () {
 		control = gameObject.GetComponent<Controllable>();
 		sightCone = Instantiate( Resources.Load("sightcone1"), gameObject.transform.position, Quaternion.identity ) as GameObject;
@@ -138,7 +136,6 @@ public class Awareness : MonoBehaviour, IMessagable {
 			SetNearestFire();
 		}
 	}
-
 	public void SetNearestEnemy(){
 		nearestEnemy.val = null;
         float closestDistanceSqr = Mathf.Infinity;
@@ -417,7 +414,6 @@ public class Awareness : MonoBehaviour, IMessagable {
 			}
 		}
 	}
-
 	public void ProcessInsult(MessageInsult message){
 		// TODO: make the reaction to insults more sophisticated
 		PersonalAssessment assessment = FormPersonalAssessment(message.messenger.gameObject);
@@ -425,21 +421,6 @@ public class Awareness : MonoBehaviour, IMessagable {
 		assessment.numberOfTimesInsulted += 1;
 
 		// process hurt feelings
-		// switch(assessment.status){
-		// 	case PersonalAssessment.friendStatus.friend:
-		// 	if (assessment.numberOfTimesInsulted > 3){
-		// 		assessment.status = PersonalAssessment.friendStatus.enemy;
-		// 	}
-		// 	break;
-		// 	case PersonalAssessment.friendStatus.neutral:
-		// 	if (assessment.numberOfTimesInsulted > 2){
-		// 		assessment.status = PersonalAssessment.friendStatus.enemy;
-		// 	}
-		// 	break;
-		// 	case PersonalAssessment.friendStatus.enemy:
-		// 	break;
-		// }
-		//speech reaction
 		if (mySpeech != null){
 			switch(assessment.status){
 				case PersonalAssessment.friendStatus.friend:
@@ -452,5 +433,92 @@ public class Awareness : MonoBehaviour, IMessagable {
 				break;
 			}
 		}
+	}
+	public void SaveData(PersistentComponent data){
+		// TODO: don't overrwrite existing saved knowledges
+		// TODO: check that it is working as intended, index knowledge and P.A. with id numbers
+		data.ints["hitstate"] = (int)hitState;
+		data.knowledgeBase = new List<SerializedKnowledge>();
+		data.people = new List<SerializedPersonalAssessment>();
+		if (possession != null){
+			MySaver.UpdateGameObjectReference(possession, data, "possession", overWriteWithNull: false);
+			MySaver.AddToReferenceTree(data.id, possession);
+		}
+		foreach (KeyValuePair<GameObject, Knowledge> keyVal in knowledgebase){
+			SerializedKnowledge knowledge = SaveKnowledge(keyVal.Value);
+			if (knowledge.gameObjectID == -1)
+				continue;
+			data.knowledgeBase.Add(knowledge);
+		}
+		if (possessionDefaultState != null){
+			SerializedKnowledge knowledge = SaveKnowledge(possessionDefaultState);
+			if (knowledge.gameObjectID != -1)
+				data.knowledges["defaultState"] = knowledge;
+		}
+		foreach (KeyValuePair<GameObject, PersonalAssessment> keyVal in people){
+			data.people.Add(SavePerson(keyVal.Value));
+		}
+		
+	}
+	public void LoadData(PersistentComponent data){
+		if (data.ints.ContainsKey("possession")){
+			possession = MySaver.IDToGameObject(data.ints["possession"]);
+		}
+		hitState = (Controllable.HitState)data.ints["hitstate"];
+		foreach(SerializedKnowledge knowledge in data.knowledgeBase){
+			Knowledge newKnowledge = LoadKnowledge(knowledge);
+			if (newKnowledge.obj != null){
+				knowledgebase[newKnowledge.obj] = newKnowledge;
+			} 
+		}
+		foreach(SerializedPersonalAssessment pa in data.people){
+			GameObject go = MySaver.IDToGameObject(pa.gameObjectID);
+			if (go != null){
+				PersonalAssessment assessment = LoadPerson(pa);
+				assessment.knowledge = knowledgebase[go];
+				people[go] = assessment;
+			} 
+		}
+		if (data.knowledges.ContainsKey("defaultState")){
+			possessionDefaultState = LoadKnowledge(data.knowledges["defaultState"]);
+		}
+		SetNearestEnemy();
+		SetNearestFire();
+	}
+	SerializedKnowledge SaveKnowledge(Knowledge input){
+		SerializedKnowledge data = new SerializedKnowledge();
+		data.lastSeenPosition = input.lastSeenPosition;
+		data.lastSeenTime = input.lastSeenTime;
+		data.gameObjectID = -1;
+		if (input.obj != null){
+			MySaver.savedObjects.TryGetValue(input.obj, out data.gameObjectID);
+		}
+		return data;
+	}
+	Knowledge LoadKnowledge(SerializedKnowledge input){
+		Knowledge knowledge = new Knowledge();
+		knowledge.lastSeenPosition = input.lastSeenPosition;
+		knowledge.lastSeenTime = input.lastSeenTime;
+		knowledge.obj = MySaver.IDToGameObject(input.gameObjectID);
+		if (knowledge.obj != null){
+			knowledge.transform = knowledge.obj.transform;
+			knowledge.flammable = knowledge.obj.GetComponent<Flammable>();
+		}
+		return knowledge;
+	}
+	SerializedPersonalAssessment SavePerson(PersonalAssessment input){
+		SerializedPersonalAssessment data = new SerializedPersonalAssessment();
+		data.status = input.status;
+		data.unconscious = input.unconscious;
+		if (!MySaver.savedObjects.TryGetValue(input.knowledge.obj, out data.gameObjectID)){
+			data.gameObjectID = -1;
+		}
+		return data;
+	}
+	PersonalAssessment LoadPerson(SerializedPersonalAssessment input){
+		PersonalAssessment assessment = new PersonalAssessment();
+		assessment.status = input.status;
+		assessment.unconscious = input.unconscious;
+		return assessment;
 	}
 }

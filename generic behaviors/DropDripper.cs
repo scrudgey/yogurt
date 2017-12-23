@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class DropDripper : MonoBehaviour {
+public class DropDripper : MonoBehaviour, ISaveable {
 	public string liquidType;
 	public Liquid liquid;
 	private PhysicalBootstrapper pBoot;
@@ -57,5 +57,11 @@ public class DropDripper : MonoBehaviour {
 				}
 			}
 		}
+	}
+	public void SaveData(PersistentComponent data){
+		data.ints["amount"] = amount;
+	}
+	public void LoadData(PersistentComponent data){
+		amount = data.ints["amount"];
 	}
 }

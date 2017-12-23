@@ -20,7 +20,6 @@ public class GameData{
 	public SerializableDictionary<string, bool> itemCheckedOut;
 	public string lastSavedPlayerPath;
 	public string lastSavedScenePath;
-	public string lastPlayerName;
 	public string saveDate;
 	public float secondsPlayed;
 	public string lastScene;
@@ -289,7 +288,6 @@ public partial class GameManager : Singleton<GameManager> {
 			}
 			MySaver.Save();
 			awaitNewDayPrompt = CheckNewDayPrompt();
-			// TODO: check events related to having completed the last completed commercial
 		}
 	}
 
@@ -314,6 +312,7 @@ public partial class GameManager : Singleton<GameManager> {
     public void NewDay(){
 		Debug.Log("New day");
         MySaver.CleanupSaves();
+		MySaver.SaveObjectDatabase();
 		List<string> keys = new List<string>(data.itemCheckedOut.Keys);
 		foreach (string key in keys){
 			data.itemCheckedOut[key] = false;
@@ -413,6 +412,15 @@ public partial class GameManager : Singleton<GameManager> {
 	}
 
 // SAVING AND LOADING
+	public string ObjectsSavePath(){
+		string path = "";
+		path = Path.Combine(Application.persistentDataPath, saveGameName);
+		if (!Directory.Exists(path))
+		  Directory.CreateDirectory(path);
+		path = Path.Combine(path, saveGameName +".xml");
+		data.lastSavedScenePath = path;
+		return path;
+	}
     public string LevelSavePath(){
 		string path = "";
 		path = Path.Combine(Application.persistentDataPath, saveGameName);
@@ -427,9 +435,10 @@ public partial class GameManager : Singleton<GameManager> {
 		path = Path.Combine(Application.persistentDataPath, saveGameName);
 		if (!Directory.Exists(path))
 		  Directory.CreateDirectory(path);
-		path = Path.Combine(path, "player_"+GameManager.Instance.playerObject.name+"_state.xml");
+		string playerName = Toolbox.Instance.GetName(GameManager.Instance.playerObject);
+		path = Path.Combine(path, "player_"+playerName+"_state.xml");
 		data.lastSavedPlayerPath = path;
-		data.lastPlayerName = GameManager.Instance.playerObject.name;
+		// data.lastPlayerName = GameManager.Instance.playerObject.name;
 		return path;
 	}
 	public void SaveGameData(){
@@ -438,7 +447,7 @@ public partial class GameManager : Singleton<GameManager> {
 
 		var serializer = new XmlSerializer(typeof(GameData));
 		string path = Path.Combine(Application.persistentDataPath, saveGameName);
-		path = Path.Combine(path, "game.xml");
+		path = Path.Combine(path, "gameData.xml");
 		FileStream sceneStream = File.Create(path);
 		serializer.Serialize(sceneStream, data);
 		sceneStream.Close();
@@ -448,7 +457,7 @@ public partial class GameManager : Singleton<GameManager> {
 		GameData data = null;
 		var serializer = new XmlSerializer(typeof(GameData));
 		string path = Path.Combine(Application.persistentDataPath, gameName);
-		path = Path.Combine(path, "game.xml");
+		path = Path.Combine(path, "gameData.xml");
 		if (File.Exists(path)){
 			try {
 				var dataStream = new FileStream(path, FileMode.Open);

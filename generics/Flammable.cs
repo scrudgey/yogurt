@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-public class Flammable : MonoBehaviour {
+public class Flammable : MonoBehaviour, ISaveable {
 	public float heat;
 	public float flashpoint;
 	public bool onFire;
@@ -109,5 +109,14 @@ public class Flammable : MonoBehaviour {
 			}
 		}
 	}
-
+	public void SaveData(PersistentComponent data){
+		data.floats["heat"] = heat;
+		data.floats["flashpoint"] = flashpoint;
+		data.bools["onFire"] = onFire;
+	}
+	public void LoadData(PersistentComponent data){
+		heat = data.floats["heat"];
+		flashpoint = data.floats["flashpoint"];
+		onFire = data.bools["onFire"];
+	}
 }

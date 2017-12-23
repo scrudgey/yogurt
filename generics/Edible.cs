@@ -35,6 +35,7 @@ public class Edible : Interactive {
 			returnLiquid.immoral = immoral;
 			returnLiquid.nutrition = nutrition / 10;
 			returnLiquid.color = pureeColor;
+			returnLiquid.color.a = 255f;
 			returnLiquid.name = gameObject.name + " juice";
 		}
 		return returnLiquid;

@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-public class Head : Interactive, IExcludable {
+public class Head : Interactive, IExcludable, ISaveable {
 	private GameObject hatPoint;
 	public Hat hat;
 	public Hat initHat;
@@ -94,6 +94,23 @@ public class Head : Interactive, IExcludable {
 	public void WasDestroyed(GameObject obj){
 		if (obj == hat.gameObject){
 			hat = null;
+		}
+	}
+	public void SaveData(PersistentComponent data){
+		if (hat != null){
+			MySaver.UpdateGameObjectReference(hat.gameObject, data, "hat");
+			MySaver.AddToReferenceTree(data.id, hat.gameObject);
+		} else {
+			data.ints["hat"] = -1;
+		}
+	}
+	public void LoadData(PersistentComponent data){
+		initHat = null;
+		if (data.ints["hat"] != -1){
+			GameObject hat = MySaver.IDToGameObject(data.ints["hat"]);
+			if (hat != null){
+				DonHat(hat.GetComponent<Hat>());
+			}
 		}
 	}
 }

@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.IO;
 using Easings;
-public class VideoCamera : Interactive {
+public class VideoCamera : Interactive, ISaveable {
 	public Commercial commercial = new Commercial();
     public OccurrenceData watchForOccurrence = null;
     public bool live;
@@ -116,4 +117,16 @@ public class VideoCamera : Interactive {
             }
         }
     }
+    public void SaveData(PersistentComponent data){
+		data.commercials = new List<Commercial>();
+		data.commercials.Add(commercial);
+		data.bools["live"] = live;
+	}
+	public void LoadData(PersistentComponent data){
+		commercial = data.commercials[0];
+		live = data.bools["live"];
+		if (data.bools["live"]){
+			Enable();
+		}
+	}
 }

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class LiquidContainer : Interactive, IMessagable {
+public class LiquidContainer : Interactive, IMessagable, ISaveable {
 	public SpriteRenderer liquidSprite;
 	public Liquid liquid;
 	private float _amount;
@@ -126,15 +126,15 @@ public class LiquidContainer : Interactive, IMessagable {
 		if (doSpill){
 			doSpill = false;
 			if (amount > 0 && spillTimeout <= 0){
-                GameObject droplet = Toolbox.Instance.SpawnDroplet(liquid, spillSeverity, gameObject);
+                GameObject droplet = Toolbox.Instance.SpawnDroplet(liquid, spillSeverity, gameObject, 0.075f);
 				Collider2D projectileCollider = droplet.GetComponent<Collider2D>();
-				Physics2D.IgnoreCollision(GetComponent<Collider2D>(), projectileCollider, true);
-				if (transform.parent != null){
-					Collider2D[] parentColliders = transform.root.GetComponentsInChildren<Collider2D>();
-					foreach (Collider2D collider in parentColliders){
-						Physics2D.IgnoreCollision(collider, projectileCollider, true);
-					}
+				// Physics2D.IgnoreCollision(GetComponent<Collider2D>(), projectileCollider, true);
+				// if (transform.parent != null){
+				// Collider2D[] parentColliders = transform.root.GetComponentsInChildren<Collider2D>();
+				foreach (Collider2D collider in transform.root.GetComponentsInChildren<Collider2D>()){
+					Physics2D.IgnoreCollision(collider, projectileCollider, true);
 				}
+				// }
 				amount -= 0.25f;
 				spillTimeout = 0.075f;
 			}
@@ -171,5 +171,27 @@ public class LiquidContainer : Interactive, IMessagable {
 					Spill();
 			}
 		}
+	}
+	public void SaveData(PersistentComponent data){
+		data.floats["fillCapacity"] = fillCapacity;
+		data.floats["amount"] = amount;
+		data.bools["lid"] = lid;
+		if (liquid != null){
+			data.strings["liquid"] = liquid.filename;
+		} else {
+			data.strings["liquid"] = "";
+		}
+	}
+	// TODO: if i had some nicer methods to handle loading an amount of liquid 
+	// i think this would be a little better.
+	public void LoadData(PersistentComponent data){
+		if (data.strings["liquid"] != ""){
+			FillByLoad(data.strings["liquid"]);
+		} else {
+			FillByLoad("water");
+		}
+		fillCapacity = data.floats["fillCapacity"];
+		amount = data.floats["amount"];
+		lid = data.bools["lid"];
 	}
 }
