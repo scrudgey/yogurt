@@ -68,7 +68,7 @@ public class MySaver {
 	}
 	public static void Save(){
 		referenceTree = new Dictionary<int, List<int>>();
-		savedObjects = new Dictionary<GameObject,int>();
+		savedObjects = new Dictionary<GameObject, int>();
 		var listSerializer = new XmlSerializer(typeof(List<int>));
 		string objectsPath = GameManager.Instance.ObjectsSavePath();
 		string scenePath = GameManager.Instance.LevelSavePath();
@@ -76,11 +76,11 @@ public class MySaver {
 		if (File.Exists(objectsPath)){
 			if (objectDataBase == null){
 				var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<int, PersistentObject>));
-				Debug.Log("loading existing "+objectsPath+" ...");
+				// Debug.Log("loading existing "+objectsPath+" ...");
 				System.IO.Stream objectsStream = new FileStream(objectsPath, FileMode.Open);
 				objectDataBase = persistentSerializer.Deserialize(objectsStream) as SerializableDictionary<int, PersistentObject>;
 				objectsStream.Close();
-				Debug.Log(objectDataBase.Count.ToString() +" entries found");
+				// Debug.Log(objectDataBase.Count.ToString() +" entries found");
 			}
 		} else {
 			Debug.Log("NOTE: creating new object database!");
@@ -117,6 +117,13 @@ public class MySaver {
 			savedIDs.Add(persistent.id);
 			savedObjects[gameObject] = persistent.id;
 		}
+		// make sure children are referenced under their parents in the referencetree
+		foreach (KeyValuePair<GameObject, PersistentObject> kvp in persistents){
+			foreach(PersistentObject childObject in kvp.Value.persistentChildren){
+				// Debug.Log("child "+childObject.parentObject+ " "+childObject.id);
+				AddToReferenceTree(kvp.Key, childObject.id);
+			}
+		}
 		// invoke the data handling here - this will populate all the component data, and assign a unique id to everything.
 		foreach (KeyValuePair<GameObject, PersistentObject> kvp in persistents){
 			kvp.Value.HandleSave(kvp.Key);
@@ -125,6 +132,15 @@ public class MySaver {
 		HashSet<int> playerTree = new HashSet<int>();
 		RecursivelyAddTree(playerTree, objectIDs[GameManager.Instance.playerObject]);
 		listSerializer.Serialize(sceneStream, savedIDs.ToList().Except(playerTree.ToList()).ToList());
+		// remove all children objects from player tree. they are included in prefab.
+		Stack<int> playerChildObjects = new Stack<int>();
+		foreach(int idn in playerTree){
+			if (objectDataBase[idn].childObject)
+				playerChildObjects.Push(idn);
+		}
+		while(playerChildObjects.Count > 0){
+			playerTree.Remove(playerChildObjects.Pop());
+		}
 		listSerializer.Serialize(playerStream, playerTree.ToList());
 		// close the XML serialization stream
 		sceneStream.Close();
@@ -138,8 +154,8 @@ public class MySaver {
 		var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<int, PersistentObject>));
 		string objectsPath = GameManager.Instance.ObjectsSavePath();
 		FileStream objectStream = File.Create(objectsPath);
-		Debug.Log("saving "+objectsPath+" ...");
-		Debug.Log(objectDataBase.Count);
+		// Debug.Log("saving "+objectsPath+" ...");
+		// Debug.Log(objectDataBase.Count);
 		persistentSerializer.Serialize(objectStream, objectDataBase);
 		objectStream.Close();
 	}
@@ -222,6 +238,9 @@ public class MySaver {
 		foreach(int idn in ids){
 			PersistentObject persistent = null;
 			if (objectDataBase.TryGetValue(idn, out persistent)){
+				// TODO: do something smarter to find the child object
+				// if (persistent.childObject)
+				// 	continue;
 				GameObject go = null;
 				if (persistent.noPrefab){
 					go = GameObject.Find(persistent.name);
@@ -274,7 +293,6 @@ public class MySaver {
 			return;
 		if (!referenceTree.ContainsKey(parent))
 			referenceTree[parent] = new List<int>();
-		// Debug.Log("adding "+child.ToString()+" under "+parent.ToString());
 		referenceTree[parent].Add(child);
 	}
 	public static void RecursivelyAddTree(HashSet<int> tree, int node){

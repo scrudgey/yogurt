@@ -10,6 +10,7 @@ public class PersistentObject {
 	public string name;
 	public string prefabPath;
 	public bool noPrefab;
+	public bool childObject;
 	public int id;
 	public Vector3 transformPosition;
 	public Vector3 transformScale;
@@ -50,12 +51,12 @@ public class PersistentObject {
 				PersistentObject persistentChildObject = new PersistentObject(childObject);
 				persistentChildObject.parentObject = childObject.name;
 				persistentChildren.Add(persistentChildObject);
+				persistentChildObject.childObject = true;
 			}
 		}
 		prefabPath = @"prefabs/"+name;
 		prefabPath = regexSpace.Replace(prefabPath, "_");
 		if (Resources.Load(prefabPath) == null){
-			// Debug.Log("null prefab path: "+prefabPath);
 			noPrefab = true;
 			name = gameObject.name;
 		}
@@ -93,7 +94,6 @@ public class PersistentObject {
 			ISaveable saveable = component as ISaveable;
 			if (saveable != null){
 				saveable.LoadData(persistentComponents[component.GetType().ToString()]);
-				// handler.LoadData(component, persistentComponents[component.GetType().ToString()]);
 			}
 		}
 		foreach (PersistentObject persistentChild in persistentChildren){
