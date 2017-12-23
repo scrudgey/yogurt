@@ -48,21 +48,15 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable {
 		directableMessage.addDirectable = (IDirectable)this;
 		Toolbox.Instance.SendMessage(gameObject, this, directableMessage);
 
-		ParticleSystem[] ps = GetComponentsInChildren<ParticleSystem>();
-		foreach (ParticleSystem p in ps){
-			switch (p.name){
-			case "crumbs":
-				crumbs = p;
-				break;
-			case "vom":
-				vomit = p;
-				break;
-			default:
-				break;
-			}
-			p.GetComponent<Renderer>().sortingLayerName="air";
-		}
-		crumbs = GetComponentInChildren<ParticleSystem>();
+		GameObject vomObject = Instantiate(Resources.Load("particles/vom"), transform.position, Quaternion.identity) as GameObject;
+		vomit = vomObject.GetComponent<ParticleSystem>();
+		vomObject.transform.SetParent(transform, false);
+		vomObject.transform.localPosition = new Vector3(-0.009f, 0.0292f, 0);
+
+		GameObject crumbObject = Instantiate(Resources.Load("particles/crumbs"), transform.position, Quaternion.identity) as GameObject;
+		crumbs = crumbObject.GetComponent<ParticleSystem>();
+		crumbObject.transform.SetParent(transform, false);
+		crumbObject.transform.localPosition = new Vector3(0.0121f, 0.0250f, 0);
 	}
 	public void ReceiveMessage(Message incoming){
 		if (incoming is MessageHead){
