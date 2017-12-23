@@ -133,6 +133,7 @@ public class MySaver {
 		RecursivelyAddTree(playerTree, objectIDs[GameManager.Instance.playerObject]);
 		listSerializer.Serialize(sceneStream, savedIDs.ToList().Except(playerTree.ToList()).ToList());
 		// remove all children objects from player tree. they are included in prefab.
+		// note: the order of operations here means that child objects aren't in the scene or player trees.
 		Stack<int> playerChildObjects = new Stack<int>();
 		foreach(int idn in playerTree){
 			if (objectDataBase[idn].childObject)
