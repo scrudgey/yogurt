@@ -171,6 +171,15 @@ public class Hurtable : Damageable {
 			bonusHealth = intrins.netBuffs[BuffType.bonusHealth].floatValue;
 			armor = intrins.netBuffs[BuffType.armor].floatValue;
 		}
+		if (incoming is MessageHead){
+			MessageHead head = (MessageHead)incoming;
+			if (head.type == MessageHead.HeadType.vomiting){
+				DoubleOver(head.value);
+				if (head.value){
+					impulse = 35f;
+				}
+			}
+		}
 	}
 	public void Update(){
 		if (impulse > 0){
