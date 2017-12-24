@@ -212,7 +212,16 @@ public class Eater : Interactive, IMessagable, ISaveable {
 				poisonNausea = false;
 			}
 		}
+		if (incoming is MessageOccurrence){
+            MessageOccurrence occur = (MessageOccurrence)incoming;
+            foreach(EventData data in occur.data.events)
+                ReactToOccurrence(data);
+        }
 	}
+	void ReactToOccurrence(EventData od){
+        if (od.ratings[Rating.disgusting] > 1)
+            nausea += 10f;
+    }
 	public void SaveData(PersistentComponent data){
 		data.floats["nutrition"] = nutrition;
 		int index = 0;
