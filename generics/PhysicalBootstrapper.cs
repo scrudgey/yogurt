@@ -113,7 +113,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
 		// Debug.Log(name + " " + height.ToString());
 		// height += 0.005f;
 		// if (objectCollider.offset.y > height)
-		// height += 0.1f;
+		height += 0.025f;
 		tempPos.y = height;
 		groundPos.y -= height;
 		hingeObject.transform.localPosition = tempPos;
