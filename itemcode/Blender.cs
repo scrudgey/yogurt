@@ -93,7 +93,7 @@ public class Blender : Container, ISaveable {
 		if (liquidContainer.lid){
 			Toolbox.Instance.SendMessage(inv.gameObject, this, new MessageSpeech("The lid is on!"));
 		} else {
-			base.Store (inv);
+			base.Store(inv);
 		}
 	}
 	public override void WasDestroyed(GameObject obj){
@@ -106,9 +106,15 @@ public class Blender : Container, ISaveable {
 	public override void SaveData(PersistentComponent data){
 		base.SaveData(data);
 		data.bools["power"] = power;
+		data.bools["lid"] = liquidContainer.lid;
 	}
 	public override void LoadData(PersistentComponent data){
 		base.LoadData(data);
 		power = data.bools["power"];
+		if (data.bools["lid"]){
+			spriteRenderer.sprite = spriteSheet[0];
+		}else{
+			spriteRenderer.sprite = spriteSheet[1];
+		}
 	}
 }
