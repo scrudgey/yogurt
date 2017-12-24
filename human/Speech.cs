@@ -281,7 +281,7 @@ public class Speech : Interactive, IMessagable, ISaveable {
         }
     }
     void ReactToOccurrence(EventData od){
-        if (od.ratings[Rating.disgusting] > 10)
+        if (od.ratings[Rating.disgusting] > 1)
             SayFromNimrod("grossreact");
     }
     public void CompareLastNetIntrinsic(Dictionary<BuffType, Buff> net){
