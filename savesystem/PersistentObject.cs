@@ -18,6 +18,7 @@ public class PersistentObject {
 	public SerializableDictionary<string, PersistentComponent> persistentComponents = new SerializableDictionary<string, PersistentComponent>();
 	public List<PersistentObject> persistentChildren = new List<PersistentObject>();
 	public string parentObject;
+	public int creationDate;
 	public string sceneName;
 	[XmlIgnoreAttribute]	
 	public PersistentObject parentPersistent;
@@ -31,9 +32,9 @@ public class PersistentObject {
 		sceneName = SceneManager.GetActiveScene().name;
 	}
 	public PersistentObject(GameObject gameObject){
-		// id = MySaver.objectDataBase.Count+1;
 		id = MySaver.NextIDNumber();
 		MySaver.objectDataBase[id] = this;
+		creationDate = GameManager.Instance.data.days;
 
 		MatchCollection matches = regexClone.Matches(gameObject.name);
 		if (matches.Count > 0){									// the object is a clone, capture just the normal name
