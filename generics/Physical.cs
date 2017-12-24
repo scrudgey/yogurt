@@ -81,8 +81,6 @@ public class Physical : Damageable {
 			Destroy(this);
 			return;
 		}
-		// if (doFixSlider)
-		// 	FixSliderLimits();
 		height = horizonCollider.offset.y + hinge.transform.localPosition.y;
 		if (currentMode == mode.fly){
 			if (height < 0){
@@ -90,7 +88,7 @@ public class Physical : Damageable {
 				// hingePosition.y = 0.1f + groundCollider.size.y / 2f - groundCollider.offset.y;
 				hingePosition.y += horizonCollider.offset.y;
 				hingePosition.y += horizonCollider.bounds.extents.y;
-				// hingePosition.y += 0.05f;x
+				// hingePosition.y += 0.05f;
 				hinge.transform.localPosition = hingePosition;
 			}
 			if (height < 0.1){
