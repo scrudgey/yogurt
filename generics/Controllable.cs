@@ -57,7 +57,7 @@ public class Controllable : MonoBehaviour, IMessagable {
 	}
 	public float directionAngle = 0;
 	public List<IDirectable> directables = new List<IDirectable>();
-	public GameObject lastLeftClicked;
+	// public GameObject lastLeftClicked;
 	public Interaction defaultInteraction;
 	public bool fightMode;
 	public bool disabled = false;
@@ -75,6 +75,8 @@ public class Controllable : MonoBehaviour, IMessagable {
 		shootHeldFlag = false;
 	}
 	public void Awake(){
+		// TODO: more sophisticated AI detecting here: there will be a whole class
+		// of components that can control controllables
 		decisionMaker = GetComponent<DecisionMaker>();
 		if (decisionMaker != null){
 			SetControl(ControlType.AI);
