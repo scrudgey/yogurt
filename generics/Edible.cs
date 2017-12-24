@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Edible : Interactive {
+public class Edible : Interactive, ISaveable {
 	public float nutrition;
 	public bool vegetable;
 	public bool meat;
@@ -39,5 +39,11 @@ public class Edible : Interactive {
 			returnLiquid.name = gameObject.name + " juice";
 		}
 		return returnLiquid;
+	}
+	public void SaveData(PersistentComponent data){
+		data.bools["vomit"] = vomit;
+	}
+	public void LoadData(PersistentComponent data){
+		vomit = data.bools["vomit"];
 	}
 }
