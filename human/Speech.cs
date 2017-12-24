@@ -274,7 +274,6 @@ public class Speech : Interactive, IMessagable, ISaveable {
 			MessageHead message = (MessageHead)incoming;
 			if (message.type == MessageHead.HeadType.vomiting){
 				vomiting = message.value;
-                Debug.Log(vomiting);
                 if (vomiting){
                     audioSource.Stop();
                 }

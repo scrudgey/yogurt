@@ -98,7 +98,7 @@ public class Eater : Interactive, IMessagable, ISaveable {
 		string foodname = Toolbox.Instance.GetName(food.gameObject);
 		return "Eat "+foodname;
 	}
-	public void Eat (Edible food){
+	public void Eat(Edible food){
 		int reaction;
 		nutrition += food.nutrition;
 		MessageHead head = new MessageHead();
@@ -172,7 +172,7 @@ public class Eater : Interactive, IMessagable, ISaveable {
 			eaten.transform.position = transform.position;
             MonoLiquid mono = eaten.GetComponent<MonoLiquid>();
             if (mono){
-                GameObject droplet = Toolbox.Instance.SpawnDroplet(transform.position, mono.liquid);
+                GameObject droplet = Toolbox.Instance.SpawnDroplet(mono.liquid, 0f, gameObject, 0.15f);
                 mono.liquid.vomit = true;
                 mono.edible.vomit = true;
 				if (mono.liquid.name == "yogurt"){
@@ -199,6 +199,9 @@ public class Eater : Interactive, IMessagable, ISaveable {
 		if (audioSource){
 			audioSource.PlayOneShot(Resources.Load("sounds/vomit", typeof(AudioClip)) as AudioClip);
 		}
+		Liquid vomitLiquid = Liquid.LoadLiquid("vomit");
+		vomitLiquid.vomit = true;
+		Toolbox.Instance.SpawnDroplet(vomitLiquid, 0f, gameObject, 0.15f);
 	}
 	public void ReceiveMessage(Message incoming){
 		if (incoming is MessageNetIntrinsic){
