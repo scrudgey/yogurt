@@ -64,7 +64,6 @@ public class Physical : Damageable {
 		if (message.type == damageType.fire)
 			return ImpactResult.normal;
 		Vector2 force = message.force / (objectBody.mass / Time.deltaTime);
-		// Vector2 force = message.force * 10f;
 		if (currentMode != mode.fly)
 			FlyMode();
 		if (impactSounds.Length > 0)
@@ -279,7 +278,6 @@ public class Physical : Damageable {
 		tempLimits.min = 0;
 		tempLimits.max = hinge.transform.localPosition.y;
 		slider.limits = tempLimits;
-
 		transform.SetParent(table.transform);
 		if (spriteRenderer)
 			spriteRenderer.enabled = false;
@@ -301,7 +299,6 @@ public class Physical : Damageable {
 		if (spriteRenderer)
 			spriteRenderer.enabled = true;
 	}
-	
 	public override void ReceiveMessage(Message message){
 		// TODO: change this?
 		if (message is MessageDamage && !impactsMiss){
