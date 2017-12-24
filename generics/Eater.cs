@@ -221,6 +221,8 @@ public class Eater : Interactive, IMessagable, ISaveable {
 	void ReactToOccurrence(EventData od){
         if (od.ratings[Rating.disgusting] > 1)
             nausea += 10f;
+		if (od.ratings[Rating.disgusting] > 2)
+			nausea += 10f;
     }
 	public void SaveData(PersistentComponent data){
 		data.floats["nutrition"] = nutrition;
@@ -244,6 +246,5 @@ public class Eater : Interactive, IMessagable, ISaveable {
 			eatenQueue.Enqueue(eaten);
 			eaten.SetActive(false);
 		}
-		Debug.Log(eatenQueue.Count);
 	}
 }
