@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public class Eater : Interactive, IMessagable, ISaveable {
 	public float nutrition;
@@ -21,8 +22,9 @@ public class Eater : Interactive, IMessagable, ISaveable {
 			}
 	}
     private bool poisonNausea;
-	private GameObject eaten;
+	private Queue<GameObject> eatenQueue;
 	private bool LoadInitialized = false;
+	public float vomitCountDown;
 	private void CheckNausea(){
 		//TODO: this is spawning lots of flags
 		if (nausea > 15 && nausea < 30 && lastStatement != nauseaStatement.warning){
@@ -46,6 +48,7 @@ public class Eater : Interactive, IMessagable, ISaveable {
 		eatAction.dontWipeInterface = false;
 		eatAction.otherOnPlayerConsent = false;
 		interactions.Add(eatAction);
+		eatenQueue = new Queue<GameObject>();
 		LoadInitialized = true;
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 	}
@@ -58,6 +61,15 @@ public class Eater : Interactive, IMessagable, ISaveable {
 		}
 		if (nutrition > 100){
 			nausea += Time.deltaTime * 2;
+		}
+		if (vomitCountDown > 0){
+			vomitCountDown -= Time.deltaTime;
+			if (vomitCountDown <= 0){
+				MessageHead head = new MessageHead();
+				head.type = MessageHead.HeadType.vomiting;
+				head.value = false;
+				Toolbox.Instance.SendMessage(gameObject, this, head);
+			}
 		}
 	}
 	public int CheckReaction(Edible food){
@@ -89,22 +101,21 @@ public class Eater : Interactive, IMessagable, ISaveable {
 	public void Eat (Edible food){
 		int reaction;
 		nutrition += food.nutrition;
-        // if (food.poison)
-        //     poisonNausea = true;
 		MessageHead head = new MessageHead();
 		head.type = MessageHead.HeadType.eating;
 		head.value = true;
 		head.crumbColor = food.pureeColor;
 		Toolbox.Instance.SendMessage(gameObject, this, head);
 		//randomly store a clone of the object for later vomiting
-        // if (!food.poison){
-		if (eaten){
-			ClaimsManager.Instance.WasDestroyed(eaten);
-			Destroy(eaten);
-		}
-		eaten = Instantiate(food.gameObject) as GameObject;
+		GameObject eaten = Instantiate(food.gameObject) as GameObject;
+		eaten.name = Toolbox.Instance.CloneRemover(eaten.name);
+		eatenQueue.Enqueue(eaten);
 		eaten.SetActive(false);
-        // }
+		if (eatenQueue.Count > 2){
+			GameObject oldEaten = eatenQueue.Dequeue();
+			ClaimsManager.Instance.WasDestroyed(oldEaten);
+			Destroy(oldEaten);
+		}
 		//update our status based on our reaction to the food
 		reaction = CheckReaction(food);
 		if(reaction > 0){
@@ -120,18 +131,11 @@ public class Eater : Interactive, IMessagable, ISaveable {
 		if (nutrition > 75){
 			Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I can't eat another bite!"));
 		}
-		// Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
-		// Intrinsics foodIntrinsics = 
-		// intrinsics.CreateLiveBuffs(foo)
 		Toolbox.Instance.AddLiveBuffs(gameObject, food.gameObject);
-		
         // set up an occurrence flag for this eating!
         OccurrenceEat eatData = new OccurrenceEat();
 		eatData.eater = gameObject;
 		eatData.edible = food;
-        // eatData.food = food.name;
-        // eatData.amount = food.nutrition;
-		// eatData.vomit = food.vomit;
 		MonoLiquid mliquid = food.GetComponent<MonoLiquid>();
 		if (mliquid){
 			eatData.liquid = mliquid.liquid;
@@ -143,7 +147,6 @@ public class Eater : Interactive, IMessagable, ISaveable {
 			}
 		}
 		Toolbox.Instance.OccurenceFlag(gameObject, eatData);
-
 		// play eat sound
 		if (food.eatSound != null){
 			Toolbox.Instance.AudioSpeaker(food.eatSound, transform.position);
@@ -152,6 +155,8 @@ public class Eater : Interactive, IMessagable, ISaveable {
 		food.BeEaten();
 	}
 	void Vomit(){
+		vomitCountDown = 1.5f;
+
         GameManager.Instance.data.achievementStats.vomit += 1;
 		GameManager.Instance.CheckAchievements();
 
@@ -160,7 +165,8 @@ public class Eater : Interactive, IMessagable, ISaveable {
                 
         OccurrenceVomit data = new OccurrenceVomit();
 		data.vomiter = gameObject;
-		if (eaten){
+		if (eatenQueue.Count > 0){
+			GameObject eaten = eatenQueue.Dequeue();
             data.vomit = eaten.gameObject;
 			eaten.SetActive(true);
 			eaten.transform.position = transform.position;
@@ -185,7 +191,6 @@ public class Eater : Interactive, IMessagable, ISaveable {
 			eaten = null;
 		}
 		Toolbox.Instance.OccurenceFlag(gameObject, data);
-
 		MessageHead head = new MessageHead();
 		head.type = MessageHead.HeadType.vomiting;
 		head.value = true;
@@ -207,8 +212,26 @@ public class Eater : Interactive, IMessagable, ISaveable {
 	}
 	public void SaveData(PersistentComponent data){
 		data.floats["nutrition"] = nutrition;
+		int index = 0;
+		while (eatenQueue.Count > 0){
+			GameObject eaten = eatenQueue.Dequeue();
+			MySaver.UpdateGameObjectReference(eaten, data, "eaten"+index.ToString());
+			MySaver.AddToReferenceTree(gameObject, eaten);
+			index ++;
+		}
 	}
 	public void LoadData(PersistentComponent data){
 		nutrition = data.floats["nutrition"];
+		if (data.ints.ContainsKey("eaten1")){
+			GameObject eaten = MySaver.IDToGameObject(data.ints["eaten1"]);
+			eatenQueue.Enqueue(eaten);
+			eaten.SetActive(false);
+		}
+		if (data.ints.ContainsKey("eaten0")){
+			GameObject eaten = MySaver.IDToGameObject(data.ints["eaten0"]);
+			eatenQueue.Enqueue(eaten);
+			eaten.SetActive(false);
+		}
+		Debug.Log(eatenQueue.Count);
 	}
 }
