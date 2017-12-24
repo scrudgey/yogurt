@@ -33,7 +33,7 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable, ISaveable 
 	private bool vomiting;
 	public Color crumbColor = Color.white;
 	private float eatingCountDown;
-	private float vomitCountDown;
+	// private float vomitCountDown;
 	public Controllable.HitState hitState;
 	private string lastPressed;
 	void LoadSprites(){
@@ -80,9 +80,10 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable, ISaveable 
 				mainModule = crumbs.main;
 				mainModule.startColor = crumbColor;
 				if (vomiting){
-					vomitCountDown = 1.5f;
 					if (!vomit.isPlaying)
 						vomit.Play();
+				} else {
+					vomit.Stop();
 				}
 				break;
 
@@ -102,8 +103,7 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable, ISaveable 
 	void Update () {
 		string updateSheet = baseName;
 		string updateSequence = "generic";
-
-		if (speaking || eating){
+		if ( (speaking || eating) && !vomiting){
 			updateSequence = updateSequence + "_speak";
 		}else{
 			updateSequence = updateSequence + "_idle";
@@ -113,13 +113,6 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable, ISaveable 
 			if (eatingCountDown < 0){
 				eating = false;
 				crumbs.Stop();
-			}
-		}
-		if (vomitCountDown > 0){
-			vomitCountDown -= Time.deltaTime;
-			if (vomitCountDown < 0){
-				vomiting = false;
-				vomit.Stop();
 			}
 		}
 		updateSheet = updateSheet + "_head";
@@ -134,8 +127,8 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable, ISaveable 
 			baseFrame = 0;
 			break;
 		}
-		if (hitState > Controllable.HitState.none && !speaking && !eating){
-			baseFrame +=1 ;
+		if ( (hitState > Controllable.HitState.none && !speaking && !eating) || vomiting){
+			baseFrame +=1;
 		}
 		spriteSheet = updateSheet;
 		sequence = updateSequence;

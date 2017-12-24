@@ -18,7 +18,7 @@ public class Speech : Interactive, IMessagable, ISaveable {
     private float speakSpeed;
     private char[] chars;
     private int[] swearMask;
-    
+    public bool vomiting;
     public AudioClip speakSound;
     public AudioClip bleepSound;
     private AudioSource audioSource;
@@ -131,7 +131,7 @@ public class Speech : Interactive, IMessagable, ISaveable {
                     if (audioSource.clip != bleepSound)
                         audioSource.clip = bleepSound;
                 }
-                if (!audioSource.isPlaying){
+                if (!audioSource.isPlaying && !vomiting){
                     audioSource.Play();
                 }
             }
@@ -239,15 +239,6 @@ public class Speech : Interactive, IMessagable, ISaveable {
                 SayRandom();
                 return;
             }
-            // if (message.sayLine){
-            //     ScriptDirector director = FindObjectOfType<ScriptDirector>();
-            //     if (!director){
-            //         Say("What's my line?"); 
-            //     } else {
-            //         Say(director.NextTomLine());
-            //     }
-            //     return;
-            // }
             if (message.nimrodKey){
                 SayFromNimrod(message.phrase);
                 return;
@@ -278,6 +269,16 @@ public class Speech : Interactive, IMessagable, ISaveable {
             MessageOccurrence occur = (MessageOccurrence)incoming;
             foreach(EventData data in occur.data.events)
                 ReactToOccurrence(data);
+        }
+		if (incoming is MessageHead){
+			MessageHead message = (MessageHead)incoming;
+			if (message.type == MessageHead.HeadType.vomiting){
+				vomiting = message.value;
+                Debug.Log(vomiting);
+                if (vomiting){
+                    audioSource.Stop();
+                }
+            }
         }
     }
     void ReactToOccurrence(EventData od){
