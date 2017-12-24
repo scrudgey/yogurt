@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using Nimrod;
+using System.IO;
 public class UIButtonCallbacks : MonoBehaviour {
 	public void FightButtonClick(){
 		Controller.Instance.focus.ToggleFightMode();
@@ -25,16 +26,13 @@ public class UIButtonCallbacks : MonoBehaviour {
 		GameManager.Instance.SetFocus(MySaver.LoadScene()); 
 	}
 	public void TestButtonClick(){
-		Debug.Log("test");
-		Grammar g = new Grammar();
-		g.Load("insult");
-		// g.Load("insult_item");
-		// g.Load("insult_clothes");
-		// g.Load("insult_hat");
-		// g.AddSymbol("clothes-name", "suit");
-		// g.AddSymbol("hat-name", "hat");
-		// g.AddSymbol("item-name", "eggplant");
-		Debug.Log(g.Parse("{main}"));
+		string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
+		DirectoryInfo dataDir = new DirectoryInfo(path);
+ 		dataDir.Delete(true);
+		// Debug.Log("test");
+		// Grammar g = new Grammar();
+		// g.Load("insult");
+		// Debug.Log(g.Parse("{main}"));
 	}
 	public void HypnosisButtonClick(){
 		if (Controller.Instance.currentSelect != Controller.SelectType.hypnosis){
