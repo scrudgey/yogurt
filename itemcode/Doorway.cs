@@ -9,7 +9,6 @@ public class Doorway : Interactive {
 	protected AudioSource audioSource;
 	public string leaveDesc;
 	public string actionDesc = "Exit";
-
 	public virtual void Start () {
 		Interaction leaveaction = new Interaction(this, actionDesc, "Leave");
 		interactions.Add(leaveaction);
@@ -33,7 +32,14 @@ public class Doorway : Interactive {
 			audioSource.PlayOneShot(enterSound);
 		}
 	}
-
+	public void PlayExitSound(){
+		if (audioSource == null){
+			audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
+		}
+		if (enterSound != null){
+			audioSource.PlayOneShot(leaveSound);
+		}
+	}
 	public string Leave_desc(){
 		if (leaveDesc != ""){
 			return leaveDesc;
