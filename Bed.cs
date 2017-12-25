@@ -54,6 +54,14 @@ public class Bed : Doorway {
 	}
 	public void SleepCutscene(){
 		sleeping = true;
+		// TODO: peter picklebottom cutscene threshhold
+		int collectible = 0;
+		foreach(Pickup pickup in GameObject.FindObjectsOfType<Pickup>()){
+            if (GameManager.Instance.IsItemCollected(pickup.gameObject))
+                collectible++;
+        }
+		if (collectible > 1)
+			CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.pickelbottom);
 	}
 	void Update(){
 		if (sleeping){

@@ -4,7 +4,7 @@ using Easings;
 using UnityEngine.SceneManagement;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
-public class Cutscene {
+public abstract class Cutscene {
     public virtual void Update(){}
     public virtual void Configure(){}
     public virtual void EscapePressed(){}
@@ -12,7 +12,64 @@ public class Cutscene {
     public bool complete;
     public bool configured;
 }
+public class CutscenePickleBottom : Cutscene {
+    CameraControl camControl;
+    GameObject peter;
+    PeterPicklebottom peterAI;
+    GameObject nightShade;
+    public override void Configure(){
+        Doorway doorway = null;
+        foreach(Doorway door in GameObject.FindObjectsOfType<Doorway>()){
+            if (door.entryID == 0 && !door.spawnPoint){
+                doorway = door;
+            }
+        }
+        peter = GameObject.Instantiate(Resources.Load("prefabs/peter_picklebottom")) as GameObject;
+        doorway.Enter(peter);
 
+        camControl = GameObject.FindObjectOfType<CameraControl>();
+        camControl.focus = peter;
+
+        Controller.Instance.suspendInput = true;
+
+        UINew.Instance.SetActiveUI();
+
+        nightShade = GameObject.Instantiate(Resources.Load("UI/nightShade")) as GameObject;
+        nightShade.GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
+
+        peterAI = peter.GetComponent<PeterPicklebottom>();
+        peterAI.door = doorway;
+        peterAI.PlayThemeSong();
+
+        // TODO
+        // populate picklebottom 
+        // older things first?
+        // only things in collection so PPB doesn't remove items from the game
+        peterAI.targets = new Stack<Pickup>();
+        foreach(Pickup pickup in GameObject.FindObjectsOfType<Pickup>()){
+            if (GameManager.Instance.IsItemCollected(pickup.gameObject))
+                peterAI.targets.Push(pickup);
+        }
+        // Debug.
+
+        UINew.Instance.SetActionText("You have been visited by Peter Picklebottom");
+
+        configured = true;
+    }
+    public override void Update(){
+        if (peterAI.targets.Count == 0 && peterAI.target.val == null){
+            complete = true;
+        }
+    }
+    public override void CleanUp(){
+        Controller.Instance.suspendInput = false;
+        camControl.focus = GameManager.Instance.playerObject;
+        UINew.Instance.SetActiveUI(active:true);
+        GameObject.Destroy(nightShade);
+        peterAI.state = PeterPicklebottom.AIState.leave;
+        UINew.Instance.SetActionText("");
+    }
+}
 public class CutsceneBoardroom : Cutscene {
     Regex ampersandHook = new Regex(@"\&\r?$");
     Regex numberHook = new Regex(@"^([\d.]+)");
@@ -149,7 +206,6 @@ public class CutsceneFall : Cutscene {
     public override void Configure(){
         Debug.Log("configuring");
         player = GameManager.Instance.playerObject;
-        // Debug.Log(player);
         playerAnimation = player.GetComponent<AdvancedAnimation>();
         playerCollider = player.GetComponent<Collider2D>();
         playerBody = player.GetComponent<Rigidbody2D>();
@@ -289,15 +345,13 @@ public class CutsceneNewDay : Cutscene {
 }
 
 public class CutsceneManager : Singleton<CutsceneManager> {
-    public enum CutsceneType {newDay, mayorTalk, boardRoom, fall}
+    public enum CutsceneType {newDay, mayorTalk, boardRoom, fall, pickelbottom}
     public Cutscene cutscene;
-    // public string MOTD = "smoke weed everyday";
     void Start (){
         SceneManager.sceneLoaded += LevelWasLoaded;
     }
     public void InitializeCutscene(CutsceneType scene){
-        switch (scene)
-        {
+        switch (scene){
             case CutsceneType.newDay:
             cutscene = new CutsceneNewDay();
             break;
@@ -310,6 +364,10 @@ public class CutsceneManager : Singleton<CutsceneManager> {
             break;
             case CutsceneType.fall:
             cutscene = new CutsceneFall();
+            cutscene.Configure();
+            break;
+            case CutsceneType.pickelbottom:
+            cutscene = new CutscenePickleBottom();
             cutscene.Configure();
             break;
             default:
@@ -333,7 +391,6 @@ public class CutsceneManager : Singleton<CutsceneManager> {
         //     cutscene.CleanUp();
         //     cutscene = null;
         // }
-        
     }
     void Update(){
         if (cutscene == null){
@@ -351,7 +408,6 @@ public class CutsceneManager : Singleton<CutsceneManager> {
         }
     }
     public void EscapePressed(){
-        // Debug.Log("escape pressed");    
         if (cutscene != null)
             cutscene.EscapePressed();
     }
