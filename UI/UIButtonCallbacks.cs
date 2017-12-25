@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using Nimrod;
+// using Nimrod;
 using System.IO;
 public class UIButtonCallbacks : MonoBehaviour {
 	public void FightButtonClick(){
