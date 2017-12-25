@@ -57,13 +57,12 @@ public class Controllable : MonoBehaviour, IMessagable {
 	}
 	public float directionAngle = 0;
 	public List<IDirectable> directables = new List<IDirectable>();
-	// public GameObject lastLeftClicked;
 	public Interaction defaultInteraction;
 	public bool fightMode;
 	public bool disabled = false;
 	public HitState hitState;	
 	public GameObject lastRightClicked;
-	private Rigidbody2D rigidBody2d;
+	public Rigidbody2D rigidBody2D;
 	public ControlType control;
 	private DecisionMaker decisionMaker;
 	public void ResetInput(){
@@ -109,7 +108,7 @@ public class Controllable : MonoBehaviour, IMessagable {
 				directables.Add((IDirectable)component);
 			}
 		}
-		rigidBody2d = GetComponent<Rigidbody2D>();
+		rigidBody2D = GetComponent<Rigidbody2D>();
 	}
 	void Update(){
 		if (hitState > 0){
@@ -127,7 +126,7 @@ public class Controllable : MonoBehaviour, IMessagable {
 			lastPressed = "up";
 		// update direction vector if speed is above a certain value
 		if(GetComponent<Rigidbody2D>().velocity.normalized.magnitude > 0.1){// && (upFlag || downFlag || leftFlag || rightFlag) ){
-			SetDirection(rigidBody2d.velocity.normalized);
+			SetDirection(rigidBody2D.velocity.normalized);
 			directionAngle = Toolbox.Instance.ProperAngle(direction.x, direction.y);
 		}
 		if (!shootPressedFlag && shootPressedDone)
@@ -157,19 +156,8 @@ public class Controllable : MonoBehaviour, IMessagable {
 				defaultInteraction.DoAction();
 		}
 	}
-	public void ToggleFightMode(){
+	public virtual void ToggleFightMode(){
 		fightMode = !fightMode;
-		if (fightMode){
-			MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.fighting, true);
-			Toolbox.Instance.SendMessage(gameObject, this, anim);
-			if (GameManager.Instance.playerObject == gameObject)	
-				UINew.Instance.ShowPunchButton();
-		} else {
-			MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.fighting, false);
-			Toolbox.Instance.SendMessage(gameObject, this, anim);
-			if (GameManager.Instance.playerObject == gameObject)
-				UINew.Instance.HidePunchButton();
-		}
 	}
 	public virtual void ReceiveMessage(Message incoming){
 		if (incoming is MessageDamage){
@@ -179,32 +167,6 @@ public class Controllable : MonoBehaviour, IMessagable {
 		if (incoming is MessageHitstun){
 			MessageHitstun hits = (MessageHitstun)incoming;
 			hitState = hits.hitState;
-		}
-		if (incoming is MessageInventoryChanged){
-			Inventory inv = (Inventory)incoming.messenger;
-			MessageInventoryChanged invMessage = (MessageInventoryChanged)incoming;
-			if (inv.holding){
-				if (fightMode)
-					ToggleFightMode();
-				MonoBehaviour[] list = inv.holding.gameObject.GetComponents<MonoBehaviour>();
-				foreach(MonoBehaviour mb in list)
-				{
-					if (mb is IDirectable){
-						IDirectable idir = (IDirectable)mb;
-						directables.Add(idir);
-						idir.DirectionChange(direction);
-					}
-				}
-			}
-			if (invMessage.dropped){
-				MonoBehaviour[] list = invMessage.dropped.GetComponents<MonoBehaviour>();
-				foreach(MonoBehaviour mb in list)
-				{
-					if (mb is IDirectable){
-						directables.Remove((IDirectable)mb);
-					}
-				}
-			}
 		}
 		if (incoming is MessageDirectable){
 			MessageDirectable message = (MessageDirectable)incoming;
