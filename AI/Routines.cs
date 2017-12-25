@@ -355,6 +355,7 @@ namespace AI{
 		public Ref<GameObject> target;
 		private Transform cachedTransform;
 		private GameObject cachedGameObject;
+		public float minDistance = 0.2f;
 		public Transform targetTransform{
 			get {
 				if (cachedGameObject == target.val){
@@ -380,7 +381,7 @@ namespace AI{
 			if (target.val){
 				float distToTarget = Vector2.Distance(transform.position, targetTransform.position);
 				control.leftFlag = control.rightFlag = control.upFlag = control.downFlag = false;
-				if (distToTarget < 0.2f){
+				if (distToTarget < minDistance){
 					return status.success;
 				} else {
 					if ( Math.Abs(transform.position.x - targetTransform.position.x) > 0.1f ){
