@@ -5,7 +5,6 @@ using System.Collections.Generic;
 public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISaveable {
 	public List<GameObject> items;
 	public GameObject initHolding;
-	// public float strength;
 	public bool strong;
 	public Pickup holding{
 		get {return _holding;}
@@ -41,6 +40,9 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
 	private float directionAngle;
 	private SortingGroup holdSortGroup;
 	private GameObject strengthFX;
+	public bool normalPunchSounds = true;
+	public List<AudioClip> punchSounds;
+	private AudioSource audioSource;
 	void Start(){
 		if (!LoadInitialized)
 			LoadInit();
@@ -57,8 +59,13 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
 			}
 		}
 		direction = Vector2.right;
+		if (normalPunchSounds){
+			AudioClip[] punches = Resources.LoadAll<AudioClip>("sounds/swoosh/");
+			punchSounds = new List<AudioClip>(punches);
+		}
 	}
 	public void LoadInit(){
+		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 		holdpoint = transform.Find("holdpoint");
 		holdSortGroup = holdpoint.GetComponent<SortingGroup>();
 		Interaction getAction = new Interaction(this, "Get", "GetItem", true, false);
@@ -324,6 +331,9 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
 	public void StartPunch(){
 		MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.punching, true);
 		Toolbox.Instance.SendMessage(gameObject, this, anim);
+		if (punchSounds.Count > 0){
+			audioSource.PlayOneShot(punchSounds[Random.Range(0, punchSounds.Count)]);
+		}
 	}
 	public void PunchImpact(){
 		Dictionary<BuffType, Buff> netBuffs = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject).NetBuffs();
