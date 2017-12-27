@@ -35,7 +35,9 @@ public class SimpleControl : Controllable, IMessagable, ISaveable {
             rigidBody2D.drag = 10f;
             ResetInput();
             return;
-        }
+        } else {
+			rigidBody2D.drag = 1f;
+		}
         // Do the normal controls stuff
         // set vertical force or damp if neither up nor down is held
         if (upFlag)

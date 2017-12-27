@@ -34,6 +34,13 @@ public class Humanoid : SimpleControl, IMessagable {
 		forward = Quaternion.LookRotation(Vector3.forward, -1 * Vector3.forward);
 	}
 	public override void FixedUpdate(){
+		if (hitState > Controllable.HitState.none){
+            rigidBody2D.drag = 10f;
+            ResetInput();
+            return;
+        } else {
+			rigidBody2D.drag = 1f;
+		}
 		base.FixedUpdate();
 		if (leftFlag){
 			transform.rotation = Quaternion.Lerp (transform.rotation, leftTilt, 0.1f);
