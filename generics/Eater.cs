@@ -34,7 +34,7 @@ public class Eater : Interactive, IMessagable, ISaveable {
 		}
 		if (nausea > 30 && lastStatement != nauseaStatement.imminent){
 			lastStatement = nauseaStatement.imminent;
-			MessageSpeech message = new MessageSpeech("I'm gonna puke!'", eventData: new EventData(chaos:2, disturbing:1, positive:-2));
+			MessageSpeech message = new MessageSpeech("I'm gonna puke!", eventData: new EventData(chaos:2, disturbing:1, positive:-2));
 			Toolbox.Instance.SendMessage(gameObject, this, message);
 		}
 	}
@@ -238,13 +238,22 @@ public class Eater : Interactive, IMessagable, ISaveable {
 		nutrition = data.floats["nutrition"];
 		if (data.ints.ContainsKey("eaten1")){
 			GameObject eaten = MySaver.IDToGameObject(data.ints["eaten1"]);
-			eatenQueue.Enqueue(eaten);
-			eaten.SetActive(false);
+			if (eaten != null){
+				eatenQueue.Enqueue(eaten);
+				eaten.SetActive(false);
+			} else {
+				// Debug.Log("eaten1 is null");
+			}
 		}
 		if (data.ints.ContainsKey("eaten0")){
 			GameObject eaten = MySaver.IDToGameObject(data.ints["eaten0"]);
-			eatenQueue.Enqueue(eaten);
-			eaten.SetActive(false);
+			if (eaten != null){
+				eatenQueue.Enqueue(eaten);
+				eaten.SetActive(false);
+			} else {
+				// Debug.Log("eaten0 is null");
+			}
+			
 		}
 	}
 }
