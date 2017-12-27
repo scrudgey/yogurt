@@ -532,7 +532,6 @@ public partial class GameManager : Singleton<GameManager> {
 			}
 		}
 	}
-
 	public void ReceiveEmail(string emailName){
 		// Debug.Log("receiving email "+emailName);
 		foreach(Email email in data.emails){
