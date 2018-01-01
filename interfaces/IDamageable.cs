@@ -1,5 +1,6 @@
 using UnityEngine;
 
+public enum damageType{physical, fire, any, cutting, piercing, cosmic}
 public enum ImpactResult {normal, repel, strong}
 public abstract class Damageable: MonoBehaviour, IMessagable{
     public damageType lastDamage;
