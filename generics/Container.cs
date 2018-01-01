@@ -31,8 +31,6 @@ public class Container : Interactive, IExcludable, ISaveable {
 			}
 		}
 	}
-	
-
 	protected void RemoveRetrieveAction(Pickup pickup){
 		Interaction removeThis = null;
 		foreach (Interaction interaction in interactions)
