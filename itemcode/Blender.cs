@@ -19,6 +19,7 @@ public class Blender : Container, ISaveable {
 			LoadInit();
 	}
 	public void LoadInit(){
+		Debug.Log("blender load init");
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		liquidContainer = GetComponent<LiquidContainer>();
 		interactions.Add( new Interaction(this, "Power", "Power"));
@@ -26,7 +27,7 @@ public class Blender : Container, ISaveable {
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 		LoadInitialized = true;
 	}
-	void Update () {
+	void Update (){
 		if(power){
 			if(!audioSource.isPlaying){
 				audioSource.clip = blendNoise;
@@ -105,11 +106,15 @@ public class Blender : Container, ISaveable {
 	}
 	public override void SaveData(PersistentComponent data){
 		base.SaveData(data);
+		if (!LoadInitialized)
+			LoadInit();
 		data.bools["power"] = power;
 		data.bools["lid"] = liquidContainer.lid;
 	}
 	public override void LoadData(PersistentComponent data){
 		base.LoadData(data);
+		if (!LoadInitialized)
+			LoadInit();
 		power = data.bools["power"];
 		if (data.bools["lid"]){
 			spriteRenderer.sprite = spriteSheet[0];
