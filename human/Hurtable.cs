@@ -54,7 +54,7 @@ public class Hurtable : Damageable, ISaveable {
 				if (armor <= message.amount){
 					Bleed(transform.position);
 					if (hitState == Controllable.HitState.dead){
-						if (health <= -0.75 * maxHealth){
+						if (health <= -0.75 * maxHealth && message.type == damageType.cutting){
 							Destruct();
 							EventData data = Toolbox.Instance.DataFlag(gameObject, chaos:3, disturbing:4, disgusting:4, positive:-2, offensive:-2);
 							data.noun = "corpse desecration";
@@ -89,8 +89,18 @@ public class Hurtable : Damageable, ISaveable {
 					tookDamage = true;
 				}
 				break;
-			default:
+			case damageType.cosmic:
+				health -= message.amount;
+				if (health <= -0.75 * maxHealth){
+					// TODO: cosmic vaporization effect
+					Destruct();
+					EventData data = Toolbox.Instance.DataFlag(gameObject, chaos:3, disturbing:4, disgusting:4, positive:-2, offensive:-2);
+					data.noun = "vaporization";
+					data.whatHappened = "the corpse of "+Toolbox.Instance.GetName(gameObject)+" was vaporized";
+				}
 				break;
+			default:
+			break;
 			}
 		}
 		if (health <= 0 && (message.type == damageType.fire || message.type == damageType.cutting) && hitState != Controllable.HitState.dead){
@@ -99,7 +109,7 @@ public class Hurtable : Damageable, ISaveable {
 		if (health <= -0.5 * maxHealth && hitState != Controllable.HitState.dead){
 			Die(message.type);
 		}
-		if (message.type != damageType.fire){
+		if (message.type != damageType.fire && message.type != damageType.cosmic){
 			hitState = Controllable.AddHitState(hitState, Controllable.HitState.stun);
 			hitStunCounter = 0.25f;
 		}
@@ -130,7 +140,7 @@ public class Hurtable : Damageable, ISaveable {
 		}
 	}
 	public void Die(damageType type){
-		if (type == damageType.fire){
+		if (type == damageType.cosmic || type == damageType.fire){
 			Inventory inv = GetComponent<Inventory>();
 			if (inv){
 				inv.DropItem();
@@ -139,6 +149,8 @@ public class Hurtable : Damageable, ISaveable {
 			Toolbox.Instance.AudioSpeaker("Flash Fire Ignite 01", transform.position);
 			ClaimsManager.Instance.WasDestroyed(gameObject);
 			Destroy(gameObject);
+		}
+		if (type == damageType.fire){
 			if (lastAttacker == gameObject){
 				GameManager.Instance.data.achievementStats.selfImmolations += 1;
 				GameManager.Instance.CheckAchievements();
