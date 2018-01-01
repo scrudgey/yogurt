@@ -7,8 +7,12 @@ public class DamageZone : MonoBehaviour {
 	public MessageDamage message;
 	public float timerInterval=0.5f;
 	private Dictionary<GameObject, float> hitTimeouts = new Dictionary<GameObject, float>();
+	public AudioClip[] damageSound;
 	void Start(){
 		message = new MessageDamage(amount, type);
+		if (damageSound.Length > 0){
+			message.impactSounds = damageSound;
+		}
 	}
 	void OnTriggerStay2D(Collider2D other){
 		float timerVal = 0;
@@ -25,5 +29,7 @@ public class DamageZone : MonoBehaviour {
 		} else {
 			hitTimeouts[other.gameObject] = 0;
 		}
+	}
+	void OnTriggerExit2D(){
 	}
 }
