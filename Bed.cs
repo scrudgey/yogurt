@@ -6,6 +6,7 @@ public class Bed : Doorway {
 	public Sprite[] headSprites;
 	public Sprite[] bubbleSprites;
 	public AudioClip snoreSound;
+	public AudioListener listener;
 	private SpriteRenderer head;
 	private SpriteRenderer bubble;
 	private float animationTimer;
@@ -53,6 +54,8 @@ public class Bed : Doorway {
 		GameManager.Instance.NewDayCutscene();
 	}
 	public void SleepCutscene(){
+		listener = Toolbox.Instance.GetOrCreateComponent<AudioListener>(gameObject);
+		listener.enabled = true;
 		sleeping = true;
 		// TODO: peter picklebottom cutscene threshhold
 		int collectible = 0;
@@ -85,6 +88,7 @@ public class Bed : Doorway {
 				head.gameObject.SetActive(false);
 				bubble.gameObject.SetActive(false);
 				GameManager.Instance.playerObject.SetActive(true);
+				listener.enabled = false;
 				audioSource.PlayOneShot(beddingSound);
 				if (GameManager.Instance.data.days == 1){
 					GameManager.Instance.ShowDiaryEntry("diaryNew");
