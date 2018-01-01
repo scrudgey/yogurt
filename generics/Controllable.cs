@@ -1,9 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 public class Controllable : MonoBehaviour, IMessagable {
 	public enum HitState{none, stun, unconscious, dead};
 	public enum ControlType{none, AI, player}
+	public static List<Type> AIComponents = new List<Type>(){
+		typeof(DecisionMaker),
+		typeof(PeterPicklebottom)
+	};
 	static public HitState AddHitState(HitState orig, HitState argument){
 		if (argument > orig){
 			return argument;
@@ -75,7 +80,8 @@ public class Controllable : MonoBehaviour, IMessagable {
 	}
 	public void Awake(){
 		// TODO: more sophisticated AI detecting here: there will be a whole class
-		// of components that can control controllables
+		// of components that can control controllables.
+		// plus, the player will eventually have attached AI that will have to be overridden
 		decisionMaker = GetComponent<DecisionMaker>();
 		if (decisionMaker != null){
 			SetControl(ControlType.AI);
