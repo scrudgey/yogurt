@@ -53,6 +53,10 @@ public class CutscenePickleBottom : Cutscene {
         // Debug.
 
         UINew.Instance.SetActionText("You have been visited by Peter Picklebottom");
+		foreach(AudioListener listener in GameObject.FindObjectsOfType<AudioListener>()){
+			listener.enabled = false;
+		}
+        GameObject.Find("Main Camera").GetComponent<AudioListener>().enabled = true;
 
         configured = true;
     }
@@ -204,7 +208,7 @@ public class CutsceneFall : Cutscene {
     Hurtable playerHurtable;
     float initDrag;
     public override void Configure(){
-        Debug.Log("configuring");
+        // Debug.Log("configuring");
         player = GameManager.Instance.playerObject;
         playerAnimation = player.GetComponent<AdvancedAnimation>();
         playerCollider = player.GetComponent<Collider2D>();
