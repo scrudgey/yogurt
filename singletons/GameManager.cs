@@ -18,6 +18,7 @@ public class GameData{
 	public List<string> collectedClothes;
 	public List<string> newCollectedClothes;
 	public SerializableDictionary<string, bool> itemCheckedOut;
+	public SerializableDictionary<string, bool> perks;
 	public string lastSavedPlayerPath;
 	public string lastSavedScenePath;
 	public string saveDate;
@@ -137,6 +138,11 @@ public partial class GameManager : Singleton<GameManager> {
 			Controllable oldControl = playerObject.GetComponent<Controllable>();
 			oldControl.SetControl(Controllable.ControlType.AI);
 		}
+		foreach(AudioListener listener in FindObjectsOfType<AudioListener>()){
+			listener.enabled = false;
+		}
+		AudioListener playerListener = Toolbox.Instance.GetOrCreateComponent<AudioListener>(target);
+		playerListener.enabled = true;
 		playerObject = target;
 		Controllable targetControl = playerObject.GetComponent<Controllable>();
 		Controller.Instance.focus = target.GetComponent<Controllable>();
@@ -232,7 +238,7 @@ public partial class GameManager : Singleton<GameManager> {
 			}
 			data.firstTimeLeavingHouse = false;
 		}
-		if (sceneName == "cave1"){
+		if (sceneName == "cave1" || sceneName == "cave2"){
 			CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.fall);
 		}
 		PlayerEnter();
@@ -240,6 +246,7 @@ public partial class GameManager : Singleton<GameManager> {
 	public void InitializeNonPlayableLevel(){
 		string sceneName = SceneManager.GetActiveScene().name;
 		UINew.Instance.SetActiveUI();
+		GameObject.Find("Main Camera").GetComponent<AudioListener>().enabled = true;
 		if (sceneName == "morning_cutscene"){
 			CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.newDay);
 		}
@@ -263,6 +270,7 @@ public partial class GameManager : Singleton<GameManager> {
 		}
 	}
 	void WakeUpInBed(){
+		// TODO: reset hitstate
 		Bed bed = GameObject.FindObjectOfType<Bed>();
 		if (bed){
 			bed.SleepCutscene();
@@ -373,6 +381,10 @@ public partial class GameManager : Singleton<GameManager> {
 		data.packages = new List<string>();
 		data.emails = new List<Email>();
 		data.itemCheckedOut = new SerializableDictionary<string, bool>();
+		data.perks = new SerializableDictionary<string, bool>(){
+			{"vomit", false},
+			{"eat all", false}
+		};
 		data.collectedClothes.Add("blue_shirt");
 		data.collectedObjects.Add("blue_shirt");
 		data.itemCheckedOut["blue_shirt"] = false;
@@ -562,8 +574,17 @@ public partial class GameManager : Singleton<GameManager> {
 	}
 	public void PlayerDeath(){
 		data.deaths += 1;
+		// MySaver.Save();
 		UINew.Instance.SetActiveUI(active:false);
 		Instantiate(Resources.Load("UI/deathMenu"));
+
+		CameraControl camControl = FindObjectOfType<CameraControl>();
+		camControl.audioSource.PlayOneShot(Resources.Load("sounds/xylophone/x4") as AudioClip);
+
+		GameObject.Find("Main Camera").GetComponent<AudioListener>().enabled = true;
+		// foreach(AudioListener listener in FindObjectsOfType<AudioListener>()){
+		// 	listener.enabled = false;
+		// }
 	}
 }
 
