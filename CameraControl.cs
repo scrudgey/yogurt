@@ -13,8 +13,10 @@ public class CameraControl : MonoBehaviour {
 	public Vector2 maxXY;
 	public Vector2 minXY;
 	private Camera mainCamera;
+	public AudioSource audioSource;
 	void Start () {
 		mainCamera = GetComponent<Camera>();
+		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 	}
 	public void Shake(float intensity){
 		StartCoroutine(screenShake(intensity));
