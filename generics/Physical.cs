@@ -61,7 +61,7 @@ public class Physical : Damageable {
 		spriteRenderer = GetComponent<SpriteRenderer>();
 	}
 	public override ImpactResult CalculateDamage(MessageDamage message){
-		if (message.type == damageType.fire)
+		if (message.type == damageType.fire || message.type == damageType.cosmic)
 			return ImpactResult.normal;
 		Vector2 force = message.force / (objectBody.mass / Time.deltaTime);
 		if (currentMode != mode.fly)
