@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public enum damageType{physical, fire, any, cutting, piercing}
 public class Destructible : Damageable, ISaveable {
 	public float maxHealth;
 	public float health;
@@ -26,22 +25,24 @@ public class Destructible : Damageable, ISaveable {
 	}
 	public override ImpactResult CalculateDamage(MessageDamage message){
 		if (!invulnerable){
-			switch (message.type)
-			{
+			switch (message.type){
 			case damageType.piercing:
 			case damageType.cutting:
 			case damageType.physical:
 				if (!no_physical_damage){
 					health -= message.amount * physicalMultiplier;
 				}
-				break;
+			break;
 			case damageType.fire:
 				if (!fireproof){
 					health -= message.amount * fireMultiplier;
 				}
-				break;
+			break;
+			case damageType.cosmic:
+				health -= message.amount;
+			break;
 			default:
-				break;
+			break;
 			}
 			lastDamage = message.type;
 			if (message.strength){
