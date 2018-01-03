@@ -76,7 +76,7 @@ public class MySaver {
 		if (File.Exists(objectsPath)){
 			if (objectDataBase == null){
 				var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<int, PersistentObject>));
-				// Debug.Log("loading existing "+objectsPath+" ...");
+				Debug.Log("loading existing "+objectsPath+" ...");
 				System.IO.Stream objectsStream = new FileStream(objectsPath, FileMode.Open);
 				objectDataBase = persistentSerializer.Deserialize(objectsStream) as SerializableDictionary<int, PersistentObject>;
 				objectsStream.Close();
@@ -118,12 +118,12 @@ public class MySaver {
 			savedObjects[gameObject] = persistent.id;
 		}
 		// make sure children are referenced under their parents in the referencetree
-		foreach (KeyValuePair<GameObject, PersistentObject> kvp in persistents){
-			foreach(PersistentObject childObject in kvp.Value.persistentChildren){
-				// Debug.Log("child "+childObject.parentObject+ " "+childObject.id);
-				AddToReferenceTree(kvp.Key, childObject.id);
-			}
-		}
+		// foreach (KeyValuePair<GameObject, PersistentObject> kvp in persistents){
+		// 	foreach(PersistentObject childObject in kvp.Value.persistentChildren){
+		// 		// Debug.Log("child "+childObject.parentObject+ " "+childObject.id);
+		// 		AddToReferenceTree(kvp.Key, childObject.id);
+		// 	}
+		// }
 		// invoke the data handling here - this will populate all the component data, and assign a unique id to everything.
 		foreach (KeyValuePair<GameObject, PersistentObject> kvp in persistents){
 			kvp.Value.HandleSave(kvp.Key);
@@ -135,9 +135,16 @@ public class MySaver {
 		// remove all children objects from player tree. they are included in prefab.
 		// note: the order of operations here means that child objects aren't in the scene or player trees.
 		Stack<int> playerChildObjects = new Stack<int>();
+		if (playerTree == null)
+			Debug.Log("null player tree! wtf");
 		foreach(int idn in playerTree){
-			if (objectDataBase[idn].childObject)
-				playerChildObjects.Push(idn);
+			if (objectDataBase.ContainsKey(idn)){
+				if (objectDataBase[idn].childObject){
+					playerChildObjects.Push(idn);
+				} 
+			} else {
+				Debug.Log("couldn't find "+idn.ToString()+" in objectdatabase??");
+			}
 		}
 		while(playerChildObjects.Count > 0){
 			playerTree.Remove(playerChildObjects.Pop());
@@ -292,6 +299,7 @@ public class MySaver {
 	public static void AddToReferenceTree(int parent, int child){
 		if (child == -1 || parent == -1)
 			return;
+		// Debug.Log("adding "+child.ToString()+" under "+parent.ToString());
 		if (!referenceTree.ContainsKey(parent))
 			referenceTree[parent] = new List<int>();
 		referenceTree[parent].Add(child);
