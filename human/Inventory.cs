@@ -39,7 +39,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
 	public Vector2 direction = Vector2.right;
 	private float directionAngle;
 	private SortingGroup holdSortGroup;
-	private GameObject strengthFX;
+	// private GameObject strengthFX;
 	public bool normalPunchSounds = true;
 	public List<AudioClip> punchSounds;
 	private AudioSource audioSource;
@@ -395,16 +395,16 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
 		if (m is MessageNetIntrinsic){
 			MessageNetIntrinsic intrins = (MessageNetIntrinsic)m;
 			strong = intrins.netBuffs[BuffType.strength].boolValue;
-			if (strong){
-				if (strengthFX == null){
-					strengthFX = Instantiate(Resources.Load("particles/strength_particles")) as GameObject;
-					strengthFX.transform.SetParent(transform, false);
-				}
-			} else {
-				if (strengthFX != null){
-					Destroy(strengthFX);
-				}
-			}
+			// if (strong){
+			// 	if (strengthFX == null){
+			// 		strengthFX = Instantiate(Resources.Load("particles/strength_particles")) as GameObject;
+			// 		strengthFX.transform.SetParent(transform, false);
+			// 	}
+			// } else {
+			// 	if (strengthFX != null){
+			// 		Destroy(strengthFX);
+			// 	}
+			// }
 		}
 	}
 	public void UpdateActions(){
