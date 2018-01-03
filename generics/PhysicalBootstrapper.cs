@@ -258,7 +258,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
 	void OnDestroy(){
 		if (isQuitting)
 			return;
-		if (physical){
+		if (physical && physical.gameObject){
 			ClaimsManager.Instance.WasDestroyed(physical.gameObject);
 			Destroy(physical.gameObject);
 		}
