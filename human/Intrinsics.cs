@@ -1,12 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public enum BuffType{telepathy, speed, bonusHealth, armor, fireproof, noPhysicalDamage, invulnerable, strength, poison, vampirism}
+public enum BuffType{telepathy, speed, bonusHealth, armor, fireproof, noPhysicalDamage, invulnerable, strength, poison, vampirism, ethereal}
 
 public class Intrinsics : MonoBehaviour, ISaveable {
 	public List<Buff> buffs = new List<Buff>();
 	public List<Buff> liveBuffs = new List<Buff>();
 	public HashSet<Intrinsics> childIntrinsics = new HashSet<Intrinsics>();
+	public GameObject vampireFX;
+	public Dictionary<BuffType, GameObject> intrinsicFX;
 	public void AddChild(Intrinsics child){
 		childIntrinsics.Add(child);
 		IntrinsicsChanged();
@@ -35,6 +37,55 @@ public class Intrinsics : MonoBehaviour, ISaveable {
 		}
 		if (changed){
 			IntrinsicsChanged();
+		}
+	}
+	public void Start(){
+		intrinsicFX = new Dictionary<BuffType, GameObject>();
+		foreach(BuffType type in System.Enum.GetValues(typeof(BuffType))){
+			intrinsicFX[type] = null;
+		}
+		SetBuffFX();
+	}
+	public void SetBuffFX(){
+		foreach(KeyValuePair<BuffType, Buff> kvp in NetBuffs()){
+			switch(kvp.Key){
+				case BuffType.vampirism:
+				UpdateBuffEffect(kvp.Value, "particles/vampire_particles");
+				break;
+				case BuffType.strength:
+				UpdateBuffEffect(kvp.Value, "particles/strength_particles");
+				break;
+				case BuffType.ethereal:
+				if (kvp.Value.boolValue || kvp.Value.floatValue > 0){
+					FadeAlpha fader = Toolbox.Instance.GetOrCreateComponent<FadeAlpha>(gameObject);
+					Transform head = transform.Find("head");
+					if (head){
+						fader.spriteRenderers.Add(head.GetComponent<SpriteRenderer>());
+					}
+				} else {
+					
+				}
+				break;
+				default:
+				break;
+			}
+		}
+		
+	}
+	public void UpdateBuffEffect(Buff buff, string prefabPath){
+		if (intrinsicFX == null)
+			return;
+		if (buff.boolValue ||  buff.floatValue > 0){
+			if (intrinsicFX[buff.type] == null){
+				intrinsicFX[buff.type] = Instantiate(Resources.Load(prefabPath), transform.position, Quaternion.identity) as GameObject;
+				intrinsicFX[buff.type].transform.SetParent(transform, false);
+				intrinsicFX[buff.type].transform.localPosition = Vector3.zero;
+			}
+		} else {
+			if (intrinsicFX.ContainsKey(buff.type))
+				if (intrinsicFX[buff.type] != null){
+					Destroy(intrinsicFX[buff.type]);
+				}
 		}
 	}
 	public bool boolValue(BuffType type){
@@ -83,6 +134,7 @@ public class Intrinsics : MonoBehaviour, ISaveable {
 		if (GameManager.Instance.playerObject == gameObject){
 			GameManager.Instance.FocusIntrinsicsChanged(this);
 		}
+		SetBuffFX();
 	}
 	public void SaveData(PersistentComponent data){
 		data.buffs = new List<Buff>();
@@ -117,7 +169,7 @@ public class Buff {
 	public bool Update(){
 		bool changed = false;
 		time += Time.deltaTime;
-		if (time > lifetime){
+		if (time > lifetime && lifetime > 0){
 			boolValue = false;
 			floatValue = 0;
 			changed = true;
