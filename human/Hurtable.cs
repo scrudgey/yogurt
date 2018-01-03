@@ -19,6 +19,7 @@ public class Hurtable : Damageable, ISaveable {
 	public float maxHealth;
 	public float bonusHealth;
 	public float armor;
+	public bool ethereal;
 	private float hitStunCounter;
 	private bool doubledOver;
 	public float impulse;
@@ -37,6 +38,7 @@ public class Hurtable : Damageable, ISaveable {
 				backgroundColliders.AddRange(colliders);
 			}
 		}
+		Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
 	}
 	public override ImpactResult CalculateDamage(MessageDamage message){
 		Dictionary<BuffType, Buff> netBuffs = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject).NetBuffs();
@@ -98,6 +100,7 @@ public class Hurtable : Damageable, ISaveable {
 					data.noun = "vaporization";
 					data.whatHappened = "the corpse of "+Toolbox.Instance.GetName(gameObject)+" was vaporized";
 				}
+				tookDamage = true;
 				break;
 			default:
 			break;

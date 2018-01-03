@@ -1,8 +1,15 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public enum damageType{physical, fire, any, cutting, piercing, cosmic}
 public enum ImpactResult {normal, repel, strong}
 public abstract class Damageable: MonoBehaviour, IMessagable{
+    public static Dictionary<damageType, List<BuffType>> defeatedBy = new Dictionary<damageType, List<BuffType>>(){
+        {damageType.fire, new List<BuffType>(){BuffType.ethereal, BuffType.fireproof, BuffType.invulnerable}},
+        {damageType.cosmic, new List<BuffType>(){}},
+        {damageType.cutting, new List<BuffType>(){BuffType.ethereal, BuffType.invulnerable}},
+        
+    };
     public damageType lastDamage;
     public GameObject gibsContainerPrefab;
     public ImpactResult TakeDamage(MessageDamage message){
@@ -27,10 +34,9 @@ public abstract class Damageable: MonoBehaviour, IMessagable{
 		if (phys){
 			phys.DestroyPhysical();
 		}
-        // Outfit outfit = GetComponent<Outfit>();
-        // if (outfit){
-        //     outfit.RemoveUniform();
-        // }
+        if (GameManager.Instance.playerObject == gameObject){
+			GameManager.Instance.PlayerDeath();
+		}
         ClaimsManager.Instance.WasDestroyed(gameObject);
         Destroy(gameObject);
     }
@@ -41,6 +47,21 @@ public abstract class Damageable: MonoBehaviour, IMessagable{
             if (dam.impactor){
 			    dam.impactor.PlayImpactSound(result);
 		    }
+            message.messenger.SendMessage("ImpactReceived", result, SendMessageOptions.DontRequireReceiver);
         }
 	}
+    public static bool Damages(damageType type, Dictionary<BuffType, Buff> netBuffs){
+        if (!defeatedBy.ContainsKey(type)){
+            return true;
+        }
+        foreach(KeyValuePair<BuffType, Buff> kvp in netBuffs){
+            if (!kvp.Value.boolValue && kvp.Value.floatValue <= 0){
+                continue;
+            }
+            if (defeatedBy[type].Contains(kvp.Key)){
+                return false;
+            }
+        }
+        return true;
+    }
 }
