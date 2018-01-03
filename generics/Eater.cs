@@ -73,9 +73,8 @@ public class Eater : Interactive, IMessagable, ISaveable {
 		}
 	}
 	public int CheckReaction(Edible food){
+		// TODO: better code here
 		int reaction = 0;
-		//i can clean this section up with reflection-
-		// might be necessary if food types get out of control
 		bool[] types = new bool[] {food.vegetable, food.meat, food.immoral, food.offal};
 		preference[] prefs = new preference[] {vegetablePreference, meatPreference, immoralPreference, 	offalPreference};
 		for (int i =0; i< prefs.Length; i++){
@@ -210,6 +209,12 @@ public class Eater : Interactive, IMessagable, ISaveable {
 				poisonNausea = true;
 			} else {
 				poisonNausea = false;
+			}
+			if (message.netBuffs[BuffType.vampirism].boolValue){
+				vegetablePreference = preference.dislikes;
+				meatPreference = preference.dislikes;
+				offalPreference = preference.dislikes;
+				immoralPreference = preference.likes;
 			}
 		}
 		if (incoming is MessageOccurrence){
