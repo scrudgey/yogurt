@@ -1,8 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public interface IMessagable
-{
+public interface IMessagable{
 	void ReceiveMessage(Message message);
 }
 public class Message {
@@ -78,12 +77,6 @@ public class MessageInventoryChanged : Message {
 }
 public class MessagePunch : Message {
 }
-// public class MessageScript : Message {
-// 	public enum TomAction {none, yogurt}
-// 	public string watchForSpeech;
-// 	public string coStarLine;
-// 	public TomAction tomAct;
-// }
 public class MessageInsult : Message {
 }
 public class MessageThreaten : Message {	
