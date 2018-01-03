@@ -19,7 +19,6 @@ public class Blender : Container, ISaveable {
 			LoadInit();
 	}
 	public void LoadInit(){
-		Debug.Log("blender load init");
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		liquidContainer = GetComponent<LiquidContainer>();
 		interactions.Add( new Interaction(this, "Power", "Power"));
