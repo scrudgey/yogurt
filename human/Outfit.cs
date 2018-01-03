@@ -81,8 +81,7 @@ public class Outfit : Interactive, IMessagable, ISaveable {
 		}
 		return removedUniform;
 	}
-
-	public string DonUniform_desc(Uniform uniform){
+	public string DonUniformWrapper_desc(Uniform uniform){
 		string uniformName = Toolbox.Instance.GetName(uniform.gameObject);
 		return "Wear "+uniformName;
 	}
