@@ -53,6 +53,7 @@ public class PersistentObject {
 				persistentChildObject.parentObject = childObject.name;
 				persistentChildren.Add(persistentChildObject);
 				persistentChildObject.childObject = true;
+				MySaver.AddToReferenceTree(id, persistentChildObject.id);
 			}
 		}
 		prefabPath = @"prefabs/"+name;
