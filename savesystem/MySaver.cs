@@ -117,13 +117,6 @@ public class MySaver {
 			savedIDs.Add(persistent.id);
 			savedObjects[gameObject] = persistent.id;
 		}
-		// make sure children are referenced under their parents in the referencetree
-		// foreach (KeyValuePair<GameObject, PersistentObject> kvp in persistents){
-		// 	foreach(PersistentObject childObject in kvp.Value.persistentChildren){
-		// 		// Debug.Log("child "+childObject.parentObject+ " "+childObject.id);
-		// 		AddToReferenceTree(kvp.Key, childObject.id);
-		// 	}
-		// }
 		// invoke the data handling here - this will populate all the component data, and assign a unique id to everything.
 		foreach (KeyValuePair<GameObject, PersistentObject> kvp in persistents){
 			kvp.Value.HandleSave(kvp.Key);
