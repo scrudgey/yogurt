@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-// using System.Xml.Serialization;
 using UnityEngine.SceneManagement;
 
 public class PersistentObject {
@@ -20,8 +19,6 @@ public class PersistentObject {
 	public string parentObject;
 	public int creationDate;
 	public string sceneName;
-	// [XmlIgnoreAttribute]	
-	// public PersistentObject parentPersistent;
 	public PersistentObject(){
 		// needed for XML serialization
 	}
@@ -73,18 +70,12 @@ public class PersistentObject {
 			ISaveable saveable = component as ISaveable;
 			if (saveable != null){
 				// TODO: update each component, don't override.
-				// handler.SaveData(component, persistentComponents[component.GetType().ToString()]);
 				saveable.SaveData(persistentComponents[component.GetType().ToString()]);
 			}
 		}
 		foreach (KeyValuePair<string, PersistentObject> kvp in persistentChildren){
 			if (kvp.Value == this)
 				continue;
-			// if (parentPersistent == null){
-			// 	kvp.Value.parentPersistent = this;
-			// } else {
-				// kvp.Value.parentPersistent = parentPersistent;
-			// }
 			GameObject childObject = parentObject.transform.Find(kvp.Key).gameObject;
 			kvp.Value.HandleSave(parentObject.transform.Find(kvp.Key).gameObject);
 		}
