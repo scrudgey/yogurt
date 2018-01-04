@@ -18,16 +18,15 @@ public abstract class Damageable: MonoBehaviour, IMessagable{
     public GameObject gibsContainerPrefab;
     public Dictionary<BuffType, Buff> netBuffs;
     new public Rigidbody2D rigidbody2D;
+    public Controllable controllable;
     public static bool Damages(damageType type, Dictionary<BuffType, Buff> netBuffs){
         // no buffs means no immunities
         if (netBuffs == null)
             return true;
-
         // is this type of damage described in terms of immunities?
         if (!defeatedBy.ContainsKey(type)){
             return true;
         }
-        
         // check each buff for providing immunity
         foreach(KeyValuePair<BuffType, Buff> kvp in netBuffs){
             if (!kvp.Value.boolValue && kvp.Value.floatValue <= 0){
@@ -37,7 +36,6 @@ public abstract class Damageable: MonoBehaviour, IMessagable{
                 return false;
             }
         }
-
         // by default, we take damage
         return true;
     }
@@ -61,13 +59,15 @@ public abstract class Damageable: MonoBehaviour, IMessagable{
             if (strongImpactSounds.Length == 0)
                 strongImpactSounds = Resources.LoadAll<AudioClip>("sounds/impact_strong/");
         rigidbody2D = Toolbox.Instance.GetOrCreateComponent<Rigidbody2D>(gameObject);
+        controllable = GetComponent<Controllable>();
     }
     public void TakeDamage(MessageDamage message){
         lastDamage = message.type;
         bool vulnerable = Damages(message.type, netBuffs);
         ImpactResult result = ImpactResult.normal;
+        float damage = 0f;
         if (vulnerable){
-            float damage = CalculateDamage(message);
+            damage = CalculateDamage(message);
             if (damage > 0){
                 if (message.strength){
                     result = ImpactResult.strong;
@@ -86,10 +86,15 @@ public abstract class Damageable: MonoBehaviour, IMessagable{
 			// do we play a repel sound here? or no?
 		}
         // apply force
+        if (damage <= 0)
+            return;
         if (message.type == damageType.fire || message.type == damageType.cosmic)
             return;
         if (rigidbody2D){
             rigidbody2D.AddForce(message.force);
+        }
+        if (controllable){
+            controllable.direction = -1f * message.force;
         }
     }
     public abstract float CalculateDamage(MessageDamage message);
