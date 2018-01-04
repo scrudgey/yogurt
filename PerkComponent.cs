@@ -1,16 +1,22 @@
-﻿// using System.Collections;
-// using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PerkComponent : MonoBehaviour {
+	public Perk perk;
+}
 
-	// Use this for initialization
-	void Start () {
-		
+[System.Serializable]
+public class Perk {
+	public string name;
+	public string title;
+	public string desc;
+	public Sprite perkImage;
+	public Perk(){
+
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		
+	public Perk(Perk otherPerk){
+		this.name = otherPerk.name;
+		this.title = otherPerk.title;
+		this.desc = otherPerk.desc;
+		this.perkImage = otherPerk.perkImage;
 	}
 }
