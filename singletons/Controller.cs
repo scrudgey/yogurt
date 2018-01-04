@@ -137,7 +137,8 @@ public class Controller : Singleton<Controller> {
 		if (currentChild.tag == "footprint"){
 			Physical physical = target.GetComponent<Physical>();
 			if (physical){
-				return physical.objectBody.gameObject;
+				if (physical.objectBody != null)
+					return physical.objectBody.gameObject;
 			}
 		}
 		Controllable baseControllable = target.GetComponentInParent<Controllable>();
@@ -214,7 +215,6 @@ public class Controller : Singleton<Controller> {
 				GameObject hypnosisEffect = Instantiate(Resources.Load("prefabs/fx/hypnosisEffect"), GameManager.Instance.playerObject.transform.position, Quaternion.identity) as GameObject;
 				HypnosisEffect fx = hypnosisEffect.GetComponent<HypnosisEffect>();
 				fx.target = target;
-				// hypnosisEffect.transform.SetParent(GameManager.Instance.playerObject.transform, true);
 
 				if (controllable){
 					GameManager.Instance.SetFocus(target);
