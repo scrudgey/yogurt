@@ -1,20 +1,13 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
 
 public class Destructible : Damageable, ISaveable {
 	public float maxHealth;
 	public float health;
 	public float bonusHealth;
-	public float armor;
 	public AudioClip[] hitSound;
 	public AudioClip[] destroySound;
-	public bool invulnerable;
-	public bool fireproof;
-	public bool no_physical_damage;
 	public float physicalMultiplier = 1f;
 	public float fireMultiplier = 1f;
-	public Dictionary<BuffType, Buff> currentBuffs;
-
 	void Update () {
 		if (health < 0){
 			Die();
@@ -23,35 +16,25 @@ public class Destructible : Damageable, ISaveable {
 			health = maxHealth + bonusHealth;
 		}
 	}
-	public override ImpactResult CalculateDamage(MessageDamage message){
-		if (!invulnerable){
-			switch (message.type){
-			case damageType.piercing:
-			case damageType.cutting:
-			case damageType.physical:
-				if (!no_physical_damage){
-					health -= message.amount * physicalMultiplier;
-				}
-			break;
-			case damageType.fire:
-				if (!fireproof){
-					health -= message.amount * fireMultiplier;
-				}
-			break;
-			case damageType.cosmic:
-				health -= message.amount;
-			break;
-			default:
-			break;
-			}
-			lastDamage = message.type;
-			if (message.strength){
-				return ImpactResult.strong;
-			} else {
-				return ImpactResult.normal;
-			}
+	public override float CalculateDamage(MessageDamage message){
+		float damage = 0f;
+		switch (message.type){
+		case damageType.piercing:
+		case damageType.cutting:
+		case damageType.physical:
+		damage = message.amount * physicalMultiplier;
+		break;
+		case damageType.fire:
+		damage = message.amount * fireMultiplier;
+		break;
+		case damageType.cosmic:
+		damage = message.amount;
+		break;
+		default:
+		break;
 		}
-		return ImpactResult.repel;
+		health -= damage;
+		return damage;
 	}
 	//TODO: make destruction chaos somehow proportional to object
 	public void Die(){
@@ -109,7 +92,7 @@ public class Destructible : Damageable, ISaveable {
 		base.ReceiveMessage(message);
 		if (message is MessageNetIntrinsic){
 			MessageNetIntrinsic intrins = (MessageNetIntrinsic)message;
-			armor = intrins.netBuffs[BuffType.armor].floatValue;
+			// armor = intrins.netBuffs[BuffType.armor].floatValue;
 			if (intrins.netBuffs[BuffType.bonusHealth].floatValue > bonusHealth){
 				health += intrins.netBuffs[BuffType.bonusHealth].floatValue;
 			}
@@ -118,16 +101,10 @@ public class Destructible : Damageable, ISaveable {
 	}
 	public void SaveData(PersistentComponent data){
 		data.floats["health"] = health;
-		data.bools["invulnerable"] = invulnerable;
-		data.bools["fireproof"] = fireproof;
-		data.bools["noPhysDam"] = no_physical_damage;
 		data.ints["lastDamage"] = (int)lastDamage;
 	}
 	public void LoadData(PersistentComponent data){
 		health = data.floats["health"];
-		invulnerable = data.bools["invulnerable"];
-		fireproof = data.bools["fireproof"];
-		no_physical_damage = data.bools["noPhysDam"];
 		lastDamage = (damageType)data.ints["lastDamage"];
 	}
 }
