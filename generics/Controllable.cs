@@ -166,10 +166,10 @@ public class Controllable : MonoBehaviour, IMessagable {
 		fightMode = !fightMode;
 	}
 	public virtual void ReceiveMessage(Message incoming){
-		if (incoming is MessageDamage){
-			MessageDamage message = (MessageDamage)incoming;
-			direction = -1f * message.force;
-		}
+		// if (incoming is MessageDamage){
+		// 	MessageDamage message = (MessageDamage)incoming;
+		// 	direction = -1f * message.force;
+		// }
 		if (incoming is MessageHitstun){
 			MessageHitstun hits = (MessageHitstun)incoming;
 			hitState = hits.hitState;
