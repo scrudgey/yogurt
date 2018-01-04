@@ -153,7 +153,7 @@ public class Eater : Interactive, IMessagable, ISaveable {
 		GameManager.Instance.CheckItemCollection(food.gameObject, gameObject);
 		food.BeEaten();
 	}
-	void Vomit(){
+	public void Vomit(){
 		vomitCountDown = 1.5f;
 
         GameManager.Instance.data.achievementStats.vomit += 1;
