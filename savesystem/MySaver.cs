@@ -131,6 +131,11 @@ public class MySaver {
 		// separate lists of persistent objects for the scene and the player
 		HashSet<int> playerTree = new HashSet<int>();
 		RecursivelyAddTree(playerTree, objectIDs[GameManager.Instance.playerObject]);
+		foreach(PersistentObject childPersistent in persistents[GameManager.Instance.playerObject].persistentChildren.Values){
+			// add the child object's referents to tree
+			RecursivelyAddTree(playerTree, childPersistent.id);
+			playerTree.Remove(childPersistent.id);
+		}
 		listSerializer.Serialize(sceneStream, savedIDs.ToList().Except(playerTree.ToList()).ToList());
 		// remove all children objects from player tree. they are included in prefab.
 		// note: the order of operations here means that child objects aren't in the scene or player trees.
