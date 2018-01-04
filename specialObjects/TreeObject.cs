@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class TreeObject : Destructible {
+public class TreeObject : Damageable {
 	HingeJoint2D hinge;
 	public float timer;
 	JointMotor2D motor;
@@ -26,7 +26,7 @@ public class TreeObject : Destructible {
 			}
 		}
 	}
-	public override ImpactResult CalculateDamage(MessageDamage message){
+	public override float CalculateDamage(MessageDamage message){
 		hinge.useMotor = true;
 		timer = 0;
 		doShake = true;
@@ -34,10 +34,6 @@ public class TreeObject : Destructible {
 		GameObject newLeaf = Instantiate(leaf, leafSpawnPoint.position + randomBump, Quaternion.identity) as GameObject;
 		FallingLeaf newLeafScript = newLeaf.GetComponent<FallingLeaf>();
 		newLeafScript.height = 0.9f;
-		if (message.strength){
-			return ImpactResult.strong;
-		} else {
-			return ImpactResult.normal;
-		}
+		return 1f;
 	}
 }

@@ -28,7 +28,6 @@ public class Hurtable : Damageable, ISaveable {
 	public GameObject dizzyEffect;
 	public GameObject lastAttacker;
 	public List<Collider2D> backgroundColliders = new List<Collider2D>();
-	public Dictionary<BuffType, Buff> netBuffs = new Dictionary<BuffType, Buff>();
 	public override void Start(){
 		base.Start();
 		backgroundColliders = new List<Collider2D>();
@@ -38,85 +37,68 @@ public class Hurtable : Damageable, ISaveable {
 				backgroundColliders.AddRange(colliders);
 			}
 		}
-		Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
 	}
-	public override ImpactResult CalculateDamage(MessageDamage message){
-		Dictionary<BuffType, Buff> netBuffs = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject).NetBuffs();
-		bool tookDamage = false;
+	public override float CalculateDamage(MessageDamage message){
 		if (message.responsibleParty != null){
 			lastAttacker = message.responsibleParty;
 		}
-		if (!netBuffs[BuffType.invulnerable].boolValue){
-			float armor = this.armor;
-			if (message.strength || hitState == Controllable.HitState.dead)
-				armor = 0;
-			switch (message.type){
+		float damage = 0;
+		float armor = this.armor;
+		if (message.strength || hitState == Controllable.HitState.dead)
+			armor = 0;
+
+		switch (message.type){
 			case damageType.piercing:
 			case damageType.cutting:
-				if (armor <= message.amount){
+				damage = Mathf.Max(message.amount - armor, 0);
+				if (damage > 0){
 					Bleed(transform.position);
-					if (hitState == Controllable.HitState.dead){
-						if (health <= -0.75 * maxHealth && message.type == damageType.cutting){
-							Destruct();
-							EventData data = Toolbox.Instance.DataFlag(gameObject, chaos:3, disturbing:4, disgusting:4, positive:-2, offensive:-2);
-							data.noun = "corpse desecration";
-							data.whatHappened = "the corpse of "+Toolbox.Instance.GetName(gameObject)+" was desecrated";
-						}
-					}
 				}
 				goto case damageType.physical;
 			case damageType.physical:
-				if (armor > message.amount){
-					tookDamage = false;
-				} else {
-					if (message.strength){
-						message.amount *= 2.5f;
-						message.force *= 10f;
-					}
-					if (!netBuffs[BuffType.noPhysicalDamage].boolValue){
-						float netDam = Mathf.Max(message.amount - armor, 0);
-						health -= netDam;
-						impulse += netDam;
-						tookDamage = true;
-					}
+				damage = Mathf.Max(message.amount - armor, 0);
+				if (message.strength){
+					damage *= 2.5f;
+					message.force *= 10f;
 				}
-				Rigidbody2D body = GetComponent<Rigidbody2D>();
-				if (body){
-					body.AddForce(message.force * 100f);
-				}
+				health -= damage;
+				impulse += damage;
 				break;
 			case damageType.fire:
-				if (!netBuffs[BuffType.fireproof].boolValue){
-					health -= message.amount;
-					tookDamage = true;
-				}
+				damage = message.amount;
 				break;
 			case damageType.cosmic:
-				health -= message.amount;
-				if (health <= -0.75 * maxHealth){
-					// TODO: cosmic vaporization effect
-					Destruct();
-					EventData data = Toolbox.Instance.DataFlag(gameObject, chaos:3, disturbing:4, disgusting:4, positive:-2, offensive:-2);
-					data.noun = "vaporization";
-					data.whatHappened = "the corpse of "+Toolbox.Instance.GetName(gameObject)+" was vaporized";
-				}
-				tookDamage = true;
+				damage = message.amount;
 				break;
 			default:
 			break;
-			}
 		}
+		health -= damage;
+
 		if (health <= 0 && (message.type == damageType.fire || message.type == damageType.cutting) && hitState != Controllable.HitState.dead){
 			Die(message.type);
 		}
 		if (health <= -0.5 * maxHealth && hitState != Controllable.HitState.dead){
 			Die(message.type);
 		}
+		if (health <= -0.75 * maxHealth && message.type == damageType.cosmic){
+				// TODO: cosmic vaporization effect
+			Destruct();
+			EventData data = Toolbox.Instance.DataFlag(gameObject, chaos:3, disturbing:4, disgusting:4, positive:-2, offensive:-2);
+			data.noun = "vaporization";
+			data.whatHappened = "the corpse of "+Toolbox.Instance.GetName(gameObject)+" was vaporized";
+		}
+		if (health <= -0.75 * maxHealth && message.type == damageType.cutting){
+			Destruct();
+			EventData data = Toolbox.Instance.DataFlag(gameObject, chaos:3, disturbing:4, disgusting:4, positive:-2, offensive:-2);
+			data.noun = "corpse desecration";
+			data.whatHappened = "the corpse of "+Toolbox.Instance.GetName(gameObject)+" was desecrated";
+		}
 		if (message.type != damageType.fire && message.type != damageType.cosmic){
 			hitState = Controllable.AddHitState(hitState, Controllable.HitState.stun);
 			hitStunCounter = 0.25f;
 		}
-		if (tookDamage && Random.Range(0.0f, 1.0f) < ouchFrequency){
+		if (damage > 0 && Random.Range(0.0f, 1.0f) < ouchFrequency){
 			MessageSpeech speechMessage = new MessageSpeech();
 			speechMessage.nimrodKey = true;
 			switch(message.type){
@@ -132,15 +114,7 @@ public class Hurtable : Damageable, ISaveable {
 			}
 			Toolbox.Instance.SendMessage(gameObject, this, speechMessage);
 		}
-		if (tookDamage){
-			if (message.strength){
-				return ImpactResult.strong;
-			} else {
-				return ImpactResult.normal;
-			}
-		} else {
-			return ImpactResult.repel;
-		}
+		return damage;
 	}
 	public void Die(damageType type){
 		if (type == damageType.cosmic || type == damageType.fire){

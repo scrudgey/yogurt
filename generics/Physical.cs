@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-public class Physical : Damageable {
+public class Physical : MonoBehaviour, IMessagable {
 	public enum mode{none, fly, ground, zip}
 	public AudioClip[] impactSounds;
 	public AudioClip[] landSounds;
@@ -33,9 +33,7 @@ public class Physical : Damageable {
 	void Awake(){
 		InitValues();
 	}
-	public override void Start() {
-		base.Start();
-		// Debug.Log(name + " physical start");
+	public void Start() {
 		// ignore collisions between ground and all other objects
 		foreach(Physical phys in GameObject.FindObjectsOfType<Physical>()){
 			if (phys == this)
@@ -60,22 +58,17 @@ public class Physical : Damageable {
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 		spriteRenderer = GetComponent<SpriteRenderer>();
 	}
-	public override ImpactResult CalculateDamage(MessageDamage message){
-		if (message.type == damageType.fire || message.type == damageType.cosmic)
-			return ImpactResult.normal;
+	public void Impact(MessageDamage message){
+		// if (message.type == damageType.fire || message.type == damageType.cosmic)
+		// 	return ImpactResult.normal;
 		Vector2 force = message.force / (objectBody.mass / Time.deltaTime);
 		if (currentMode != mode.fly)
 			FlyMode();
 		if (impactSounds.Length > 0)
 			audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
 		bootstrapper.Set3Motion(new Vector3(force.x, force.y, force.y + 0.5f));
-		if (message.strength){
-			return ImpactResult.strong;
-		} else {
-			return ImpactResult.normal;
-		}
 	}
-	void FixedUpdate() {
+	void FixedUpdate(){
 		if (trueObject == null){
 			Destroy(this);
 			return;
@@ -299,10 +292,10 @@ public class Physical : Damageable {
 		if (spriteRenderer)
 			spriteRenderer.enabled = true;
 	}
-	public override void ReceiveMessage(Message message){
+	public void ReceiveMessage(Message message){
 		// TODO: change this?
 		if (message is MessageDamage && !impactsMiss){
-			base.ReceiveMessage(message);
+			Impact((MessageDamage)message);
 		}
 	}
 }
