@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using Easings;
 
 public class UINew: Singleton<UINew> {
-	public enum MenuType{none, escape, inventory, speech, closet, scriptSelect, commercialReport, newDayReport, email, diary, dialogue, phone}
+	public enum MenuType{none, escape, inventory, speech, closet, scriptSelect, commercialReport, newDayReport, email, diary, dialogue, phone, perk}
 	private Dictionary<MenuType, string> menuPrefabs = new Dictionary<MenuType, string>{
 		{MenuType.escape, 					"UI/PauseMenu"},
 		{MenuType.inventory, 				"UI/InventoryScreen"},
@@ -16,9 +16,10 @@ public class UINew: Singleton<UINew> {
 		{MenuType.email, 					"UI/EmailUI"},
 		{MenuType.diary,					"UI/Diary"},
 		{MenuType.dialogue,					"UI/DialogueMenu"},
-		{MenuType.phone,					"UI/PhoneMenu"}
+		{MenuType.phone,					"UI/PhoneMenu"},
+		{MenuType.perk,						"UI/PerkMenu"}
 	};
-	private static List<MenuType> actionRequired = new List<MenuType>{MenuType.commercialReport, MenuType.diary};
+	private static List<MenuType> actionRequired = new List<MenuType>{MenuType.commercialReport, MenuType.diary, MenuType.perk};
 	private GameObject activeMenu;
 	private MenuType activeMenuType;
 	private bool menuRequiresAction;
@@ -39,6 +40,7 @@ public class UINew: Singleton<UINew> {
 	private GameObject loadButton;
 	private GameObject testButton;
 	private GameObject hypnosisButton;
+	private GameObject vomitButton;
 	private bool init = false;
 	public bool inventoryVisible = false;
 	public Text status;
@@ -177,6 +179,7 @@ public class UINew: Singleton<UINew> {
 		loadButton = UICanvas.transform.Find("load").gameObject;
 		testButton = UICanvas.transform.Find("test").gameObject;
 		hypnosisButton = UICanvas.transform.Find("topdock/HypnosisButton").gameObject;
+		vomitButton = UICanvas.transform.Find("topdock/VomitButton").gameObject;
 		bottomDock = UICanvas.transform.Find("bottomdock").gameObject;
 		cursorText = UICanvas.transform.Find("cursorText").gameObject;
 		cursorTextText = cursorText.GetComponent<Text>();
@@ -247,7 +250,7 @@ public class UINew: Singleton<UINew> {
 		}
 	}
 	public void SetActiveUI(bool active=false){
-		List<GameObject> buttons = new List<GameObject>(){inventoryButton, fightButton, punchButton, speakButton, hypnosisButton};
+		List<GameObject> buttons = new List<GameObject>(){inventoryButton, fightButton, punchButton, speakButton, hypnosisButton, vomitButton};
 		foreach (GameObject button in buttons){
 			if (button)
 				button.SetActive(active);
@@ -284,6 +287,10 @@ public class UINew: Singleton<UINew> {
 		// do we have hypnosis?
 		if (GameManager.Instance.data.hypnosis){
 			hypnosisButton.SetActive(true);
+		}
+		// do we have elective vomiting?
+		if (GameManager.Instance.playerObject.GetComponent<Eater>()){
+			vomitButton.SetActive(GameManager.Instance.data.perks["vomit"]);
 		}
 	}
 	public void UpdateRecordButtons(Commercial commercial){
@@ -572,5 +579,9 @@ public class UINew: Singleton<UINew> {
 		UIStatusIcon statusIcon = icon.GetComponent<UIStatusIcon>();
 		statusIcon.Initialize(buff.type, buff);
 		statusIcon.transform.SetParent(UICanvas.transform.Find("iconDock"), false);
+	}
+	public void PlayUISound(string path){
+		CameraControl camControl = FindObjectOfType<CameraControl>();
+		camControl.audioSource.PlayOneShot(Resources.Load(path) as AudioClip);
 	}
 }
