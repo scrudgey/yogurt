@@ -41,4 +41,8 @@ public class UIButtonCallbacks : MonoBehaviour {
 			Controller.Instance.currentSelect = Controller.SelectType.none;
 		}
 	}
+	public void VomitButtonClick(){
+		Eater eater = GameManager.Instance.playerObject.GetComponent<Eater>();
+		eater.Vomit();
+	}
 }
