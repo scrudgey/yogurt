@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System.Xml.Serialization;
+// using System.Xml.Serialization;
 using UnityEngine.SceneManagement;
 
 public class PersistentObject {
@@ -16,12 +16,12 @@ public class PersistentObject {
 	public Vector3 transformScale;
 	public Quaternion transformRotation;
 	public SerializableDictionary<string, PersistentComponent> persistentComponents = new SerializableDictionary<string, PersistentComponent>();
-	public List<PersistentObject> persistentChildren = new List<PersistentObject>();
+	public SerializableDictionary<string, PersistentObject> persistentChildren = new SerializableDictionary<string, PersistentObject>();
 	public string parentObject;
 	public int creationDate;
 	public string sceneName;
-	[XmlIgnoreAttribute]	
-	public PersistentObject parentPersistent;
+	// [XmlIgnoreAttribute]	
+	// public PersistentObject parentPersistent;
 	public PersistentObject(){
 		// needed for XML serialization
 	}
@@ -51,9 +51,8 @@ public class PersistentObject {
 			foreach (GameObject childObject in marker.persistentChildren){
 				PersistentObject persistentChildObject = new PersistentObject(childObject);
 				persistentChildObject.parentObject = childObject.name;
-				persistentChildren.Add(persistentChildObject);
+				persistentChildren[childObject.name] = persistentChildObject;
 				persistentChildObject.childObject = true;
-				MySaver.AddToReferenceTree(id, persistentChildObject.id);
 			}
 		}
 		prefabPath = @"prefabs/"+name;
@@ -78,15 +77,16 @@ public class PersistentObject {
 				saveable.SaveData(persistentComponents[component.GetType().ToString()]);
 			}
 		}
-		foreach (PersistentObject persistentChild in persistentChildren){
-			if (persistentChild == this)
+		foreach (KeyValuePair<string, PersistentObject> kvp in persistentChildren){
+			if (kvp.Value == this)
 				continue;
-			if (parentPersistent == null){
-				persistentChild.parentPersistent = this;
-			} else {
-				persistentChild.parentPersistent = parentPersistent;
-			}
-			persistentChild.HandleSave(parentObject.transform.Find(persistentChild.parentObject).gameObject);
+			// if (parentPersistent == null){
+			// 	kvp.Value.parentPersistent = this;
+			// } else {
+				// kvp.Value.parentPersistent = parentPersistent;
+			// }
+			GameObject childObject = parentObject.transform.Find(kvp.Key).gameObject;
+			kvp.Value.HandleSave(parentObject.transform.Find(kvp.Key).gameObject);
 		}
 	}
 	public void HandleLoad(GameObject parentObject){
@@ -98,11 +98,11 @@ public class PersistentObject {
 				saveable.LoadData(persistentComponents[component.GetType().ToString()]);
 			}
 		}
-		foreach (PersistentObject persistentChild in persistentChildren){
-			if (persistentChild == this)
+		foreach (KeyValuePair<string, PersistentObject> kvp in persistentChildren){
+			if (kvp.Value == this)
 				continue;
-			GameObject childObject = parentObject.transform.Find(persistentChild.parentObject).gameObject;
-			persistentChild.HandleLoad(childObject);
+			GameObject childObject = parentObject.transform.Find(kvp.Key).gameObject;
+			kvp.Value.HandleLoad(childObject);
 		}
 	}
 }
