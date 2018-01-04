@@ -383,7 +383,7 @@ public partial class GameManager : Singleton<GameManager> {
 		data.itemCheckedOut = new SerializableDictionary<string, bool>();
 		data.perks = new SerializableDictionary<string, bool>(){
 			{"vomit", false},
-			{"eat all", false}
+			{"eat_all", false}
 		};
 		data.collectedClothes.Add("blue_shirt");
 		data.collectedObjects.Add("blue_shirt");
