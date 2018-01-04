@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 
 public class PhysicalImpact : MonoBehaviour {
-	public AudioClip[] impactSounds;
-	public AudioClip[] repelSounds;
-	public AudioClip[] strongImpactSounds;
 	public List<Transform> impactedObjects = new List<Transform>();
 	public float size = 0.08f;
 	public MessageDamage message;
@@ -27,30 +24,5 @@ public class PhysicalImpact : MonoBehaviour {
 		violence.attacker = message.responsibleParty;
 		violence.victim = collider.gameObject;
 		Toolbox.Instance.OccurenceFlag(gameObject, violence);
-	}
-	public void PlayImpactSound(ImpactResult impactType){
-		if (message.impactSounds != null){
-			impactSounds = message.impactSounds;
-		}
-		switch(impactType){
-			case ImpactResult.normal:
-				if (impactSounds.Length > 0){
-					Toolbox.Instance.AudioSpeaker(impactSounds[Random.Range(0, impactSounds.Length)], transform.position);
-				}
-			break;
-			case ImpactResult.repel:
-				if (repelSounds.Length > 0){
-					Toolbox.Instance.AudioSpeaker(repelSounds[Random.Range(0, repelSounds.Length)], transform.position);
-				}
-			break;
-			case ImpactResult.strong:
-				if (strongImpactSounds.Length > 0){
-					Toolbox.Instance.AudioSpeaker(strongImpactSounds[Random.Range(0, strongImpactSounds.Length)], transform.position);
-				}
-				Instantiate(Resources.Load("particles/explosion1"), transform.position, Quaternion.identity);
-			break;
-			default:
-			break;
-		}
 	}
 }
