@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
 using System.Linq;
 
 public class PerkMenu : MonoBehaviour {
@@ -52,9 +51,7 @@ public class PerkMenu : MonoBehaviour {
 		selectedPerk = buttonScript;
 		perkDescText.text = buttonScript.perk.desc;
 		perkTitleText.text = buttonScript.perk.title;
-		// change image
 		perkImage.sprite = buttonScript.perk.perkImage;
-		// perkImage.color = new Color(1f, 1f, 1f, 0f);
 
 		if (!doneButton.interactable)
 			acceptButton.interactable = true;
@@ -67,7 +64,7 @@ public class PerkMenu : MonoBehaviour {
 		GameManager.Instance.data.perks[selectedPerk.perk.name] = true;
 		selectedPerk.GetComponent<Button>().interactable = false;
 		UINew.Instance.UpdateButtons();
-		// play sfx?
+		
 		UINew.Instance.PlayUISound("sounds/8-bit/BOUNCE3");
 	}
 	public void DoneButtonClick(){
