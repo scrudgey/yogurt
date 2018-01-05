@@ -10,9 +10,7 @@ public class Perk {
 	public string title;
 	public string desc;
 	public Sprite perkImage;
-	public Perk(){
-
-	}
+	public Perk(){ } // required for serialization 
 	public Perk(Perk otherPerk){
 		this.name = otherPerk.name;
 		this.title = otherPerk.title;
