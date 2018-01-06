@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
 public class Edible : Interactive, ISaveable {
+	public bool inedible;
 	public float nutrition;
 	public bool vegetable;
 	public bool meat;

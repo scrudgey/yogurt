@@ -47,6 +47,7 @@ public class Eater : Interactive, IMessagable, ISaveable {
 		eatAction.defaultPriority = 1;
 		eatAction.dontWipeInterface = false;
 		eatAction.otherOnPlayerConsent = false;
+		eatAction.validationFunction = true;
 		interactions.Add(eatAction);
 		eatenQueue = new Queue<GameObject>();
 		LoadInitialized = true;
@@ -152,6 +153,16 @@ public class Eater : Interactive, IMessagable, ISaveable {
 		}
 		GameManager.Instance.CheckItemCollection(food.gameObject, gameObject);
 		food.BeEaten();
+	}
+	public bool Eat_Validation(Edible food){
+		if (food.inedible){
+			if (GameManager.Instance.data.perks["eat_all"]){
+				return true;
+			} else {
+				return false;
+			}
+		}
+		return true;
 	}
 	public void Vomit(){
 		vomitCountDown = 1.5f;
