@@ -56,7 +56,7 @@ public class Head : Interactive, IExcludable, ISaveable {
 			hatAnimator.RegisterDirectable();
 		}
 		Toolbox.Instance.AddChildIntrinsics(transform.parent.gameObject, h.gameObject);
-		GameManager.Instance.CheckItemCollection(transform.root.gameObject, h.gameObject);
+		GameManager.Instance.CheckItemCollection(h.gameObject, transform.root.gameObject);
 	}
 	public string DonHat_desc(Hat h){
 		return "Wear "+Toolbox.Instance.GetName(h.gameObject);
