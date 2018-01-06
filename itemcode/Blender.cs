@@ -11,20 +11,14 @@ public class Blender : Container, ISaveable {
 	public AudioClip lidOn;
 	public AudioClip lidOff;
 	private LiquidContainer liquidContainer;
-	private bool LoadInitialized = false;
 	private AudioSource audioSource;
-	protected override void Start () {
-		base.Start();
-		if (!LoadInitialized)
-			LoadInit();
-	}
-	public void LoadInit(){
+	protected override void Awake(){
+		base.Awake();
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		liquidContainer = GetComponent<LiquidContainer>();
 		interactions.Add( new Interaction(this, "Power", "Power"));
 		interactions.Add( new Interaction(this, "Lid", "Lid"));
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
-		LoadInitialized = true;
 	}
 	void Update (){
 		if(power){
@@ -105,15 +99,11 @@ public class Blender : Container, ISaveable {
 	}
 	public override void SaveData(PersistentComponent data){
 		base.SaveData(data);
-		if (!LoadInitialized)
-			LoadInit();
 		data.bools["power"] = power;
 		data.bools["lid"] = liquidContainer.lid;
 	}
 	public override void LoadData(PersistentComponent data){
 		base.LoadData(data);
-		if (!LoadInitialized)
-			LoadInit();
 		power = data.bools["power"];
 		if (data.bools["lid"]){
 			spriteRenderer.sprite = spriteSheet[0];

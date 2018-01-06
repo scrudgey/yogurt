@@ -39,11 +39,13 @@ public class Intrinsics : MonoBehaviour, ISaveable {
 			IntrinsicsChanged();
 		}
 	}
-	public void Start(){
+	public void Awake(){
 		intrinsicFX = new Dictionary<BuffType, GameObject>();
 		foreach(BuffType type in System.Enum.GetValues(typeof(BuffType))){
 			intrinsicFX[type] = null;
 		}
+	}
+	public void Start(){
 		SetBuffFX();
 		IntrinsicsChanged();
 	}

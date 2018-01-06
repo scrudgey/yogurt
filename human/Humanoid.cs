@@ -14,8 +14,8 @@ public class Humanoid : SimpleControl, IMessagable {
 	private Quaternion rightTilt;
 	private Quaternion leftTilt;
 	private Quaternion forward;
-	public override void Start () {
-		base.Start();
+	public override void Awake(){
+		base.Awake();
 		// this messy nonsense is just to fix the quaternions that indicate
 		// direction tilt when running. there's probably a nicer way to do
 		// this but I was learning unity's vectors / rotations / quaternions / 2D

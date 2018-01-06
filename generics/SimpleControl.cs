@@ -7,7 +7,6 @@ public class SimpleControl : Controllable, IMessagable, ISaveable {
     public float maxAcceleration;
 	public float friction;
     private Vector3 _scaleVector;
-	private bool LoadInitialized = false;
 	private Vector3 scaleVector{
 		get {
 			return _scaleVector;
@@ -19,15 +18,11 @@ public class SimpleControl : Controllable, IMessagable, ISaveable {
 			_scaleVector = value;
 		}
 	}
-    void LoadInit(){
+    public override void Awake(){
+		base.Awake();
 		baseSpeed = maxSpeed;
 		rigidBody2D = GetComponent<Rigidbody2D>();
 	}
-    public override void Start () {
-		base.Start();
-		if (!LoadInitialized)
-			LoadInit();
-    }
     public virtual void FixedUpdate(){
         Vector2 acceleration = Vector2.zero;
         Vector2 deceleration = Vector2.zero;
@@ -77,8 +72,6 @@ public class SimpleControl : Controllable, IMessagable, ISaveable {
         }
 	}
     public override void ReceiveMessage(Message message){
-		if (!LoadInitialized)
-			LoadInit();
 		base.ReceiveMessage(message);
 		if (message is MessageNetIntrinsic){
 			MessageNetIntrinsic intrins = (MessageNetIntrinsic)message;

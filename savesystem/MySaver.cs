@@ -245,8 +245,6 @@ public class MySaver {
 			PersistentObject persistent = null;
 			if (objectDataBase.TryGetValue(idn, out persistent)){
 				// TODO: do something smarter to find the child object
-				// if (persistent.childObject)
-				// 	continue;
 				GameObject go = null;
 				if (persistent.noPrefab){
 					go = GameObject.Find(persistent.name);
@@ -259,7 +257,7 @@ public class MySaver {
 				if (go == null)
 					continue;
 				loadedObjects[persistent.id] = go;
-				go.BroadcastMessage("LoadInit", SendMessageOptions.DontRequireReceiver);
+				// go.BroadcastMessage("LoadInit", SendMessageOptions.DontRequireReceiver);
 				go.name = Toolbox.Instance.ScrubText(go.name);
 				if (!rootObject)
 					rootObject = go;

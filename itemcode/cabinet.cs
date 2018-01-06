@@ -10,7 +10,7 @@ public class Cabinet : Interactive, ISaveable {
 	public AudioClip closeSound;
 	public List<GameObject> contained;
 	private AudioSource audioSource;
-	void Start () {
+	void Awake(){
 		Interaction openAct = new Interaction(this, "Open", "Open");
 		Interaction closeAct = new Interaction(this, "Close", "Close");
 		openAct.validationFunction = true;

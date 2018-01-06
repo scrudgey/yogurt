@@ -17,7 +17,6 @@ public class LiquidContainer : Interactive, IMessagable, ISaveable {
 	private float spillTimeout = 0.075f;
 	private bool empty;
 	public bool lid;
-	private bool LoadInitialized = false;
 	private bool doSpill = false;
     private float spillSeverity;
 	public string initLiquid;
@@ -32,12 +31,6 @@ public class LiquidContainer : Interactive, IMessagable, ISaveable {
 		}
 	}
 	void Awake(){
-		if (!LoadInitialized)
-			LoadInit();
-	}
-	public void LoadInit(){
-		if (LoadInitialized)	
-			return;
 		interactions.Add(new Interaction(this, "Fill", "FillFromReservoir"));
 		Interaction fillContainer = new Interaction(this, "Fill", "FillFromContainer");
 		Interaction drinker = new Interaction(this, "Drink", "Drink");
@@ -52,7 +45,6 @@ public class LiquidContainer : Interactive, IMessagable, ISaveable {
 		if (initLiquid != ""){
 			FillByLoad(initLiquid);
 		}
-		LoadInitialized = true;
 	}
 	public void FillFromReservoir(LiquidResevoir l){
 		FillWithLiquid(l.liquid);

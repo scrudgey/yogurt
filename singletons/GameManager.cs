@@ -270,15 +270,17 @@ public partial class GameManager : Singleton<GameManager> {
 		}
 	}
 	void WakeUpInBed(){
-		// TODO: reset hitstate
 		Bed bed = GameObject.FindObjectOfType<Bed>();
 		if (bed){
 			bed.SleepCutscene();
 			playerObject.SetActive(false);
 			Outfit outfit = playerObject.GetComponent<Outfit>();
-			if (outfit != null ){
+			if (outfit != null){
 				GameObject pajamas = Instantiate(Resources.Load("prefabs/pajamas"), new Vector3(100, 100, 100), Quaternion.identity) as GameObject;
 				outfit.initUniform = pajamas;
+				// Uniform pjs = pajamas.GetComponent<Uniform>();
+				// GameObject removed = outfit.DonUniform(pjs);
+				// Destroy(removed);
 			}
 			Inventory focusInv = playerObject.GetComponent<Inventory>();
 			if (focusInv){
@@ -293,6 +295,8 @@ public partial class GameManager : Singleton<GameManager> {
 			Hurtable playerHurtable = playerObject.GetComponent<Hurtable>();
 			if (playerHurtable){
 				playerHurtable.health = playerHurtable.maxHealth;
+				// TODO: reset hitstate ?
+				// playerHurtable.hitState
 			}
 			MySaver.Save();
 			awaitNewDayPrompt = CheckNewDayPrompt();

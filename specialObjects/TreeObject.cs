@@ -7,8 +7,8 @@ public class TreeObject : Damageable {
 	private bool doShake;
 	public GameObject leaf;
 	private Transform leafSpawnPoint;
-	public override void Start() {
-		base.Start();
+	public override void Awake(){
+		base.Awake();
 		hinge = GetComponent<HingeJoint2D>();
 		motor = hinge.motor;
 		leafSpawnPoint = transform.Find("leafSpawnPoint");

@@ -28,8 +28,8 @@ public class Hurtable : Damageable, ISaveable {
 	public GameObject dizzyEffect;
 	public GameObject lastAttacker;
 	public List<Collider2D> backgroundColliders = new List<Collider2D>();
-	public override void Start(){
-		base.Start();
+	public override void Awake(){
+		base.Awake();
 		backgroundColliders = new List<Collider2D>();
 		foreach(Transform transform in transform.root.GetComponentsInChildren<Transform>()){
 			if (transform.gameObject.layer == 8){

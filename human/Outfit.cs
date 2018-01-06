@@ -1,14 +1,20 @@
 ﻿using UnityEngine;
 
 public class Outfit : Interactive, IMessagable, ISaveable {
-	private bool LoadInitialized = false;
 	public string wornUniformName;
 	public GameObject initUniform;
     public Controllable.HitState hitState;
 	public Intrinsics uniformIntrinsics;
+	void Awake(){
+		Interaction wearInteraction = new Interaction(this, "Wear", "DonUniformWrapper");
+		wearInteraction.dontWipeInterface = false;
+		interactions.Add(wearInteraction);
+
+		Interaction stealInteraction = new Interaction(this, "Take Outfit", "StealUniform");
+		stealInteraction.validationFunction = true;
+		interactions.Add(stealInteraction);
+	}
 	void Start(){
-		if (!LoadInitialized)
-			LoadInit();
 		if (initUniform != null){
 			// Debug.Log("donning init uniform");
 			GameObject uniObject = initUniform;
@@ -19,19 +25,6 @@ public class Outfit : Interactive, IMessagable, ISaveable {
 			GameObject removedUniform = DonUniform(uniform, cleanStains:false);
 			Destroy(removedUniform);
 		}
-	}
-	public void LoadInit(){
-		if (LoadInitialized)	
-			return;
-		Interaction wearInteraction = new Interaction(this, "Wear", "DonUniformWrapper");
-		wearInteraction.dontWipeInterface = false;
-		interactions.Add(wearInteraction);
-
-		Interaction stealInteraction = new Interaction(this, "Take Outfit", "StealUniform");
-		stealInteraction.validationFunction = true;
-		interactions.Add(stealInteraction);
-
-		LoadInitialized = true;
 	}
 	public void StealUniform(Outfit otherOutfit){
 		// TODO: add naked outfit

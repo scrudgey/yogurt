@@ -22,20 +22,13 @@ public class Speech : Interactive, IMessagable, ISaveable {
     public AudioClip speakSound;
     public AudioClip bleepSound;
     private AudioSource audioSource;
-	private bool LoadInitialized = false;
     public string flavor = "test";
     private Dictionary<BuffType, Buff> lastNetIntrinsic;
     public Controllable.HitState hitState;
     public Sprite portrait;
     public string defaultMonologue;
     public bool disableSpeakWith;
-    // OccurrenceSpeech speechData = new OccurrenceSpeech();
-	void Start () {
-        if (!LoadInitialized)
-			LoadInit();
-	}
-    void LoadInit(){
-        LoadInitialized = true;
+	void Awake(){
         Interaction speak = new Interaction(this, "Look", "Describe", true, false);
 		speak.limitless = true;
         speak.otherOnPlayerConsent = false;
@@ -50,7 +43,6 @@ public class Speech : Interactive, IMessagable, ISaveable {
             interactions.Add(speakWith);
         }
         GameObject speechFramework = Instantiate(Resources.Load("UI/SpeechChild"), transform.position, Quaternion.identity) as GameObject;
-        
         speechFramework.name = "SpeechChild";
         speechFramework.transform.SetParent(transform, false);
         flipper = transform.Find("SpeechChild").gameObject;
@@ -58,7 +50,6 @@ public class Speech : Interactive, IMessagable, ISaveable {
 		bubbleText = bubbleParent.transform.Find("Text").gameObject.GetComponent<Text>();
         follower = bubbleText.GetComponent<FollowGameObjectInCamera>();
         follower.target = gameObject;
-        // follower = bubbleParent.GetComponentInChildren<FollowGameObjectInCamera>();
         audioSource = GetComponent<AudioSource>();
         if (flipper.transform.localScale != transform.localScale){
                 Vector3 tempscale = transform.localScale;
@@ -71,11 +62,10 @@ public class Speech : Interactive, IMessagable, ISaveable {
         if (bubbleParent){
             Canvas bubbleCanvas = bubbleParent.GetComponent<Canvas>();
             if (bubbleCanvas){
-                // bubbleCanvas.worldCamera = GameManager.Instance.cam;
                 bubbleCanvas.worldCamera = Camera.main;
             }
         }
-    }
+	}
     public DialogueMenu SpeakWith(){
         DialogueMenu menu = UINew.Instance.ShowMenu(UINew.MenuType.dialogue).GetComponent<DialogueMenu>();
         menu.Configure(GameManager.Instance.playerObject.GetComponent<Speech>(), this);

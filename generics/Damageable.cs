@@ -40,7 +40,7 @@ public abstract class Damageable: MonoBehaviour, IMessagable{
         return true;
     }
 
-    public virtual void Start(){
+    public virtual void Awake(){
         if (gibsContainerPrefab != null){
             GameObject gibsContainer = Instantiate(gibsContainerPrefab) as GameObject;
             foreach(Gibs gib in gibsContainer.GetComponents<Gibs>()){
@@ -98,7 +98,6 @@ public abstract class Damageable: MonoBehaviour, IMessagable{
         }
     }
     public abstract float CalculateDamage(MessageDamage message);
-
     public virtual void Destruct(){
         foreach (Gibs gib in GetComponents<Gibs>())
             gib.Emit(lastDamage);

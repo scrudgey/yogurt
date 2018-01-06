@@ -33,7 +33,6 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
 	public GameObject slasher;
 	private string slashFlag;
 	private List<Interaction> manualActionDictionary;
-	private bool LoadInitialized = false;
 	private GameObject throwObject;
 	public float dropHeight = 0.18f;
 	public Vector2 direction = Vector2.right;
@@ -43,28 +42,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
 	public bool normalPunchSounds = true;
 	public List<AudioClip> punchSounds;
 	private AudioSource audioSource;
-	void Start(){
-		if (!LoadInitialized)
-			LoadInit();
-		if (initHolding){
-			if (initHolding.activeInHierarchy){
-				initHolding.BroadcastMessage("LoadInit", SendMessageOptions.DontRequireReceiver);
-				Pickup pickup = initHolding.GetComponent<Pickup>();
-				GetItem(pickup);
-			} else {
-				GameObject instance = Instantiate(initHolding) as GameObject;
-				instance.BroadcastMessage("LoadInit", SendMessageOptions.DontRequireReceiver);
-				Pickup pickup = instance.GetComponent<Pickup>();
-				GetItem(pickup);
-			}
-		}
-		direction = Vector2.right;
-		if (normalPunchSounds){
-			AudioClip[] punches = Resources.LoadAll<AudioClip>("sounds/swoosh/");
-			punchSounds = new List<AudioClip>(punches);
-		}
-	}
-	public void LoadInit(){
+	void Awake(){
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 		holdpoint = transform.Find("holdpoint");
 		holdSortGroup = holdpoint.GetComponent<SortingGroup>();
@@ -77,7 +55,23 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
 		Interaction swingAction = new Interaction(this, "Swing", "SwingItem", false, true);
 		swingAction.defaultPriority = 5;
 		interactions.Add(swingAction);
-		LoadInitialized = true;
+		direction = Vector2.right;
+		if (normalPunchSounds){
+			AudioClip[] punches = Resources.LoadAll<AudioClip>("sounds/swoosh/");
+			punchSounds = new List<AudioClip>(punches);
+		}
+	}
+	public void Start(){
+		if (initHolding){
+			if (initHolding.activeInHierarchy){
+				Pickup pickup = initHolding.GetComponent<Pickup>();
+				GetItem(pickup);
+			} else {
+				GameObject instance = Instantiate(initHolding) as GameObject;
+				Pickup pickup = instance.GetComponent<Pickup>();
+				GetItem(pickup);
+			}
+		}
 	}
 	public void DirectionChange(Vector2 dir){
 		direction = dir;

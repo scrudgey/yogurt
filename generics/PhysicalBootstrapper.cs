@@ -24,7 +24,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
 	private bool isQuitting = false;
 	public bool impactsMiss;
 	public bool noCollisions;
-	public void Start () {
+	public void Start(){
 		tag = "Physical";
 		GetComponent<Renderer>().sortingLayerName="main";
 		if (doInit)
@@ -32,9 +32,6 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
 		if (impactSounds.Length > 0){
 			Toolbox.Instance.SetUpAudioSource(gameObject);
 		}
-	}
-	void LoadInit(){
-		Start();
 	}
 	public void DestroyPhysical(){
 		transform.SetParent(null);

@@ -70,6 +70,7 @@ public class PersistentObject {
 			ISaveable saveable = component as ISaveable;
 			if (saveable != null){
 				// TODO: update each component, don't override.
+				// saveable.LoadInit();
 				saveable.SaveData(persistentComponents[component.GetType().ToString()]);
 			}
 		}
@@ -86,6 +87,7 @@ public class PersistentObject {
 		foreach (Component component in loadedComponents){
 			ISaveable saveable = component as ISaveable;
 			if (saveable != null){
+				// saveable.LoadInit();
 				saveable.LoadData(persistentComponents[component.GetType().ToString()]);
 			}
 		}

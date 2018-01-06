@@ -7,19 +7,13 @@ public class Lighter : Interactive {
 	private bool flameon;
 	private Collider2D flameRadius;
 	private Dictionary<GameObject, Flammable> flammables = new Dictionary<GameObject, Flammable>();
-	private bool LoadInitialized = false;
-	void Start () {
-		if (!LoadInitialized)
-			LoadInit();
-	}
-	public void LoadInit(){
+	void Start(){
 		pickup = GetComponent<Pickup>();
 		Interaction f = new Interaction(this, "Fire", "Fire", false, true);
 		f.defaultPriority = 1;
 		interactions.Add(f);
 		flameRadius = transform.Find("flameRadius").GetComponent<Collider2D>();
 		flameRadius.enabled = false;
-		LoadInitialized = true;
 	}
 	public void Fire(){
 		flameon = !flameon;
@@ -48,5 +42,4 @@ public class Lighter : Interactive {
 			}
 		}
 	}
-
 }

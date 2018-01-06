@@ -5,14 +5,7 @@ public class CosmicNullifier : Pickup {
 	public AudioSource audioSource;
 	public AudioClip[] nullifySound;
 	public GameObject nullifyParticleEffect;
-	public bool LoadInitialized = false;
-	void Start () {
-		if (!LoadInitialized)
-			LoadInit();
-	}
-	public void LoadInit(){
-		LoadInitialized = true;
-		// if (nullify == null){
+	void Start(){
 		nullify = new Interaction(this, "Nullify", "Nullify");
 		nullify.limitless = true;
 		nullify.duplicator = true;
@@ -20,10 +13,8 @@ public class CosmicNullifier : Pickup {
 		nullify.inertOnPlayerConsent = false;
 		nullify.otherOnPlayerConsent = false;
 		interactions.Add(nullify);
-		// }
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 	}
-	
 	public void Nullify(){
 		if (nullifySound.Length > 0){
 			Toolbox.Instance.AudioSpeaker(nullifySound[Random.Range(0, nullifySound.Length)], nullify.duplicationTarget.transform.position);

@@ -23,7 +23,6 @@ public class Eater : Interactive, IMessagable, ISaveable {
 	}
     private bool poisonNausea;
 	private Queue<GameObject> eatenQueue;
-	private bool LoadInitialized = false;
 	public float vomitCountDown;
 	private void CheckNausea(){
 		//TODO: this is spawning lots of flags
@@ -38,19 +37,14 @@ public class Eater : Interactive, IMessagable, ISaveable {
 			Toolbox.Instance.SendMessage(gameObject, this, message);
 		}
 	}
-	void Start () {
-		if (!LoadInitialized)
-			LoadInit();
-	}
-	public void LoadInit(){
+	void Awake () {
+		eatenQueue = new Queue<GameObject>();
 		Interaction eatAction = new Interaction(this, "Eat", "Eat");
 		eatAction.defaultPriority = 1;
 		eatAction.dontWipeInterface = false;
 		eatAction.otherOnPlayerConsent = false;
 		eatAction.validationFunction = true;
 		interactions.Add(eatAction);
-		eatenQueue = new Queue<GameObject>();
-		LoadInitialized = true;
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 	}
 	void Update () {

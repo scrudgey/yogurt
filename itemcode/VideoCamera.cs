@@ -11,19 +11,15 @@ public class VideoCamera : Interactive, ISaveable {
     public GameObject doneBubble;
     private GameObject regionIndicator;
     
-	void Awake () {
-        live = false;
+    void Awake(){
         doneBubble = transform.Find("doneBubble").gameObject;
         doneBubble.SetActive(false);
-
         regionIndicator = transform.Find("Graphic").gameObject;
         regionIndicator.SetActive(false);
-	}
-    void Start(){
+        live = false;
         Interaction stasher = new Interaction(this, "Finish", "FinishButtonClick");
 		stasher.validationFunction = true;
 		interactions.Add(stasher);
-
         Interaction enableAct = new Interaction(this, "Start", "Enable");
         enableAct.validationFunction = true;
         interactions.Add(enableAct);

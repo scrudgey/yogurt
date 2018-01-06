@@ -14,7 +14,8 @@ public class Bed : Doorway {
 	private bool sleeping;
 	private bool frame;
 	public AudioClip beddingSound;
-	public override void Start(){
+	public override void Awake(){
+		// base.Awake();
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 		audioSource.spatialBlend = 0;
 		spriteRenderer = GetComponent<SpriteRenderer>();
@@ -27,16 +28,8 @@ public class Bed : Doorway {
 		sleep.descString = "Go to bed";
 		interactions.Add(sleep);
 		interactions.Add(makeBed);
-		if (!sleeping){
-			head.gameObject.SetActive(false);
-			bubble.gameObject.SetActive(false);
-		} else {
-			frame = true;
-			animationTimer = 0f;
-			spriteRenderer.sprite = bedSprites[0];
-			head.gameObject.SetActive(true);
-			bubble.gameObject.SetActive(true);
-		}
+		head.gameObject.SetActive(false);
+		bubble.gameObject.SetActive(false);
 	}
 	public void MakeBed(){
 		unmade = false;
@@ -54,6 +47,11 @@ public class Bed : Doorway {
 		GameManager.Instance.NewDayCutscene();
 	}
 	public void SleepCutscene(){
+		frame = true;
+		animationTimer = 0f;
+		spriteRenderer.sprite = bedSprites[0];
+		head.gameObject.SetActive(true);
+		bubble.gameObject.SetActive(true);
 		listener = Toolbox.Instance.GetOrCreateComponent<AudioListener>(gameObject);
 		listener.enabled = true;
 		sleeping = true;

@@ -3,11 +3,17 @@ public class Head : Interactive, IExcludable, ISaveable {
 	private GameObject hatPoint;
 	public Hat hat;
 	public Hat initHat;
-	private bool LoadInitialized = false;
 	private SpriteRenderer spriteRenderer;
-	void Start(){
-		if (!LoadInitialized)
-			LoadInit();
+	void Awake(){
+		hatPoint = transform.Find("hatPoint").gameObject;
+		spriteRenderer = GetComponent<SpriteRenderer>();
+		Interaction wearAct = new Interaction(this, "Wear", "DonHat");
+		wearAct.dontWipeInterface = false;
+		wearAct.validationFunction = true;
+		wearAct.playerOnOtherConsent = false;
+		interactions.Add(wearAct);
+	}
+	public void Start(){
 		if (initHat){
 			// Debug.Log("donning init hat");
 			if (initHat.isActiveAndEnabled){
@@ -17,16 +23,6 @@ public class Head : Interactive, IExcludable, ISaveable {
 				DonHat(instance);
 			}
 		}
-	}
-	void LoadInit(){
-		Interaction wearAct = new Interaction(this, "Wear", "DonHat");
-		wearAct.dontWipeInterface = false;
-		wearAct.validationFunction = true;
-		wearAct.playerOnOtherConsent = false;
-		interactions.Add(wearAct);
-		hatPoint = transform.Find("hatPoint").gameObject;
-		LoadInitialized = true;
-		spriteRenderer = GetComponent<SpriteRenderer>();
 	}
 	public void DonHat(Hat h){
 		if (hat)

@@ -33,7 +33,6 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable, ISaveable 
 	private bool vomiting;
 	public Color crumbColor = Color.white;
 	private float eatingCountDown;
-	// private float vomitCountDown;
 	public Controllable.HitState hitState;
 	private string lastPressed;
 	void LoadSprites(){
@@ -42,7 +41,7 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable, ISaveable 
 	public void UpdateSequence(){
 		GetComponent<Animation>().Play(sequence);
 	}
-	void Awake () {
+	void Awake(){
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		MessageDirectable directableMessage = new MessageDirectable();
 		directableMessage.addDirectable = (IDirectable)this;

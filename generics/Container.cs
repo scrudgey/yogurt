@@ -7,8 +7,7 @@ public class Container : Interactive, IExcludable, ISaveable {
 	public int maxNumber;
 	public bool disableContents = true;
 	private bool isQuitting;
-
-	virtual protected void Start() {
+	virtual protected void Awake(){
 		Interaction stasher = new Interaction(this, "Stash", "Store");
 		stasher.validationFunction = true;
 		interactions.Add(stasher);

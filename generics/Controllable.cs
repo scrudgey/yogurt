@@ -78,7 +78,7 @@ public class Controllable : MonoBehaviour, IMessagable {
 		shootPressedFlag = false;
 		shootHeldFlag = false;
 	}
-	public void Awake(){
+	public virtual void Awake(){
 		// TODO: more sophisticated AI detecting here: there will be a whole class
 		// of components that can control controllables.
 		// plus, the player will eventually have attached AI that will have to be overridden

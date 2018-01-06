@@ -39,7 +39,7 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable, ISaveable {
 	public Animation animator;
 	public Controllable.HitState hitState;
 	private bool doubledOver;
-	void Awake () {
+	void Awake(){
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		controllable = GetComponent<Controllable>();
 		animator = GetComponent<Animation>();
@@ -93,7 +93,6 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable, ISaveable {
 		animator.Play(sequence);
 		// Debug.Log(animation.IsPlaying(sequence));
 	}
-
 	public void LateUpdate(){
 		if (controllable == null)
 			Awake();
@@ -115,18 +114,15 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable, ISaveable {
 			if (oldHolding != holding)
 				SetFrame(0);
 		}
-
 		if (hitState > Controllable.HitState.none){
 			updateSequence = GetHitStunState("generic3");
 			if (sequence == null)
 				return;
 			GetComponent<Animation>().Play(sequence);
 		}
-
 		sequence = updateSequence;
 		oldHolding = holding;
 	}
-
 	string GetSwingState(string updateSequence){
 		updateSequence = updateSequence+"_swing_"+controllable.lastPressed;
 		switch (controllable.lastPressed){
@@ -142,7 +138,6 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable, ISaveable {
 		}
 		return updateSequence;
 	}
-	
 	string GetThrowState(string updateSequence){
 		updateSequence = updateSequence+"_throw_"+controllable.lastPressed;
 		switch (controllable.lastPressed){
@@ -158,17 +153,14 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable, ISaveable {
 		}
 		return updateSequence;
 	}
-
 	string GetWalkState(string updateSequence){
 		switch (controllable.lastPressed){
 			case "down":
 			baseFrame = 7;
 			break;
-
 			case "up":
 			baseFrame = 14;
 			break;
-
 			default:
 			baseFrame = 0;
 			break;
@@ -185,7 +177,6 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable, ISaveable {
 		}
 		return updateSequence;
 	}
-
 	string GetFightState(string updateSequence){
 		switch (controllable.lastPressed){
 			case "down":
@@ -205,7 +196,6 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable, ISaveable {
 		}
 		return updateSequence;
 	}
-
 	string GetHitStunState(string updateSequence){
 		switch (controllable.lastPressed){
 			case "down":
@@ -229,7 +219,11 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable, ISaveable {
 	public void SetFrame(int animationFrame){
 		// Debug.Log("set frame "+animationFrame.ToString());
 		frame = animationFrame + baseFrame;
-		spriteRenderer.sprite = sprites[frame];
+		if (frame >= sprites.Length){
+			Debug.Log("coud not set frame");
+		} else {
+			spriteRenderer.sprite = sprites[frame];
+		}
 	}
 	public void SaveData(PersistentComponent data){
 		data.strings["baseName"] = baseName;

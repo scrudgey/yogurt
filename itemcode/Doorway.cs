@@ -9,7 +9,7 @@ public class Doorway : Interactive {
 	protected AudioSource audioSource;
 	public string leaveDesc;
 	public string actionDesc = "Exit";
-	public virtual void Start () {
+	public virtual void Awake(){
 		Interaction leaveaction = new Interaction(this, actionDesc, "Leave");
 		interactions.Add(leaveaction);
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);

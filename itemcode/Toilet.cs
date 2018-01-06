@@ -7,8 +7,8 @@ public class Toilet : Container {
 	public AudioClip flushSound;
 	private float timeout;
 	public float refractoryPeriod;
-	protected override void Start () {
-		base.Start();
+	protected override void Awake(){
+		base.Awake();
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 		Interaction flushAct = new Interaction(this, "Flush", "Flush");
 		interactions.Add(flushAct);
