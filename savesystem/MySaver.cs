@@ -257,7 +257,6 @@ public class MySaver {
 				if (go == null)
 					continue;
 				loadedObjects[persistent.id] = go;
-				// go.BroadcastMessage("LoadInit", SendMessageOptions.DontRequireReceiver);
 				go.name = Toolbox.Instance.ScrubText(go.name);
 				if (!rootObject)
 					rootObject = go;
