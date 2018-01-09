@@ -3,10 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-public static class IDictionaryExtensions
+public static class ExtensionMethods
 {
-	public static TKey FindKeyByValue<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TValue value)
-	{
+	public static TKey FindKeyByValue<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TValue value){
 		TKey returnkey = default (TKey);
 		foreach (KeyValuePair<TKey, TValue> pair in dictionary)
 			if (value.Equals(pair.Value)) returnkey = pair.Key;
@@ -107,11 +106,8 @@ public class Toolbox : Singleton<Toolbox> {
         Vector2 initpos = spiller.transform.position;
         Physical pb = spiller.GetComponentInParent<Physical>();
         if (pb != null){ 
-            initHeight = pb.height; 
-        } 
-		// else {
-		// 	initHeight = 0.05f;
-		// }
+            initHeight += pb.height; 
+        }
         droplet.transform.position = initpos;
         phys.doInit = false;
         phys.InitPhysical(initHeight, initialVelocity);
@@ -130,8 +126,7 @@ public class Toolbox : Singleton<Toolbox> {
 		Component copy = destination.AddComponent(type);
 		// Copied fields can be restricted with BindingFlags
 		System.Reflection.FieldInfo[] fields = type.GetFields(); 
-		foreach (System.Reflection.FieldInfo field in fields)
-		{
+		foreach (System.Reflection.FieldInfo field in fields){
 			field.SetValue(copy, field.GetValue(original));
 		}
 		return copy;
