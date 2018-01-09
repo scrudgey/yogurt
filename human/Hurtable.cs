@@ -231,6 +231,9 @@ public class Hurtable : Damageable, ISaveable {
 		dizzyFollower.Init();
 	}
 	public void GetUp(){
+		// Debug.Log(health);
+		if (health < 0.25f * maxHealth)
+			health = 0.25f * maxHealth;
 		hitState = Controllable.RemoveHitState(hitState, Controllable.HitState.unconscious);
 		doubledOver = false;
 		Vector3 pivot = transform.position;
