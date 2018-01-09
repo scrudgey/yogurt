@@ -97,7 +97,6 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
 		horizon.transform.SetParent(groundObject.transform);
 		shadowBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 		objectCollider = GetComponent<Collider2D>();
-		// GetComponent<Rigidbody2D>().collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
 		hingeObject.transform.SetParent(groundObject.transform);
 		Vector2 tempPos = Vector2.zero;
@@ -105,12 +104,6 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
 		// float offset = objectCollider.bounds.extents.y - objectCollider.offset.x * Mathf.Sin(theta) + objectCollider.offset.y * Mathf.Cos(theta);
 		// height = Mathf.Max(height, offset);
 
-		
-		// height = height - offset;
-		// Debug.Log(name + " " + height.ToString());
-		// height += 0.005f;
-		// if (objectCollider.offset.y > height)
-		// height += 0.025f;
 		tempPos.y = height;
 		groundPos.y -= height;
 		hingeObject.transform.localPosition = tempPos;
