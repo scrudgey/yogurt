@@ -33,7 +33,7 @@ public class Physical : MonoBehaviour, IMessagable {
 	void Awake(){
 		InitValues();
 	}
-	public void Start() {
+	public void Start(){
 		// ignore collisions between ground and all other objects
 		foreach(Physical phys in GameObject.FindObjectsOfType<Physical>()){
 			if (phys == this)
@@ -59,8 +59,6 @@ public class Physical : MonoBehaviour, IMessagable {
 		spriteRenderer = GetComponent<SpriteRenderer>();
 	}
 	public void Impact(MessageDamage message){
-		// if (message.type == damageType.fire || message.type == damageType.cosmic)
-		// 	return ImpactResult.normal;
 		Vector2 force = message.force / (objectBody.mass / Time.deltaTime);
 		if (currentMode != mode.fly)
 			FlyMode();
@@ -77,13 +75,11 @@ public class Physical : MonoBehaviour, IMessagable {
 		if (currentMode == mode.fly){
 			if (height < 0){
 				Vector2 hingePosition = hinge.transform.localPosition;
-				// hingePosition.y = 0.1f + groundCollider.size.y / 2f - groundCollider.offset.y;
 				hingePosition.y += horizonCollider.offset.y;
 				hingePosition.y += horizonCollider.bounds.extents.y;
-				// hingePosition.y += 0.05f;
 				hinge.transform.localPosition = hingePosition;
 			}
-			if (height < 0.1){
+			if (height < 0.1 && height > 0){
 				GetComponent<Rigidbody2D>().drag = 5;
 				GetComponent<Rigidbody2D>().mass = objectBody.mass;
 			} else {
