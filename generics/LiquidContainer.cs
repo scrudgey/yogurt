@@ -118,15 +118,11 @@ public class LiquidContainer : Interactive, IMessagable, ISaveable {
 		if (doSpill){
 			doSpill = false;
 			if (amount > 0 && spillTimeout <= 0){
-                GameObject droplet = Toolbox.Instance.SpawnDroplet(liquid, spillSeverity, gameObject, 0.075f);
+                GameObject droplet = Toolbox.Instance.SpawnDroplet(liquid, spillSeverity, gameObject, 0.02f);
 				Collider2D projectileCollider = droplet.GetComponent<Collider2D>();
-				// Physics2D.IgnoreCollision(GetComponent<Collider2D>(), projectileCollider, true);
-				// if (transform.parent != null){
-				// Collider2D[] parentColliders = transform.root.GetComponentsInChildren<Collider2D>();
 				foreach (Collider2D collider in transform.root.GetComponentsInChildren<Collider2D>()){
 					Physics2D.IgnoreCollision(collider, projectileCollider, true);
 				}
-				// }
 				amount -= 0.25f;
 				spillTimeout = 0.075f;
 			}
