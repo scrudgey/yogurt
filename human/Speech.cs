@@ -45,6 +45,7 @@ public class Speech : Interactive, IMessagable, ISaveable {
         GameObject speechFramework = Instantiate(Resources.Load("UI/SpeechChild"), transform.position, Quaternion.identity) as GameObject;
         speechFramework.name = "SpeechChild";
         speechFramework.transform.SetParent(transform, false);
+        speechFramework.transform.localPosition = Vector3.zero;
         flipper = transform.Find("SpeechChild").gameObject;
 		bubbleParent = transform.Find("SpeechChild/Speechbubble").gameObject;
 		bubbleText = bubbleParent.transform.Find("Text").gameObject.GetComponent<Text>();
