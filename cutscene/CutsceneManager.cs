@@ -45,12 +45,12 @@ public class CutscenePickleBottom : Cutscene {
         // populate picklebottom 
         // older things first?
         // only things in collection so PPB doesn't remove items from the game
+        // random 2 / 3 items.
         peterAI.targets = new Stack<Pickup>();
         foreach(Pickup pickup in GameObject.FindObjectsOfType<Pickup>()){
             if (GameManager.Instance.IsItemCollected(pickup.gameObject))
                 peterAI.targets.Push(pickup);
         }
-        // Debug.
 
         UINew.Instance.SetActionText("You have been visited by Peter Picklebottom");
 		foreach(AudioListener listener in GameObject.FindObjectsOfType<AudioListener>()){
@@ -129,7 +129,7 @@ public class CutsceneBoardroom : Cutscene {
                 timer = 0;
                 globalTimer = 0;
                 if (GameManager.Instance.activeCommercial == null){
-                    LoadScript("eggplant1");
+                    LoadScript("eat1");
                 } else {
                     if (!LoadScript(GameManager.Instance.activeCommercial.cutscene))
                         LoadScript("test");
