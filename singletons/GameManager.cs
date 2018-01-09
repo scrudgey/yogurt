@@ -132,7 +132,6 @@ public partial class GameManager : Singleton<GameManager> {
 			}
 		}
 	}
-	
 	public void SetFocus(GameObject target){
 		if (playerObject != null){
 			Controllable oldControl = playerObject.GetComponent<Controllable>();
@@ -577,18 +576,15 @@ public partial class GameManager : Singleton<GameManager> {
 		diary.loadDiaryName = diaryName;
 	}
 	public void PlayerDeath(){
+		AudioListener listener = playerObject.GetComponent<AudioListener>();
+		listener.enabled = false;
 		data.deaths += 1;
 		// MySaver.Save();
 		UINew.Instance.SetActiveUI(active:false);
 		Instantiate(Resources.Load("UI/deathMenu"));
-
 		CameraControl camControl = FindObjectOfType<CameraControl>();
 		camControl.audioSource.PlayOneShot(Resources.Load("sounds/xylophone/x4") as AudioClip);
-
 		GameObject.Find("Main Camera").GetComponent<AudioListener>().enabled = true;
-		// foreach(AudioListener listener in FindObjectsOfType<AudioListener>()){
-		// 	listener.enabled = false;
-		// }
 	}
 }
 
