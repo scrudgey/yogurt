@@ -16,8 +16,8 @@ public class Blender : Container, ISaveable {
 		base.Awake();
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		liquidContainer = GetComponent<LiquidContainer>();
-		interactions.Add( new Interaction(this, "Power", "Power"));
-		interactions.Add( new Interaction(this, "Lid", "Lid"));
+		interactions.Add(new Interaction(this, "Power", "Power"));
+		interactions.Add(new Interaction(this, "Lid", "Lid"));
 		audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 	}
 	void Update (){
