@@ -80,7 +80,8 @@ public class Outfit : Interactive, IMessagable, ISaveable {
 	}
 	public GameObject RemoveUniform(){
 		// something has to change here if we're going to standardize name usage
-		string prefabName = Toolbox.Instance.ReplaceUnderscore(wornUniformName);
+		// string prefabName = Toolbox.Instance.ReplaceUnderscore(wornUniformName);
+		string prefabName = wornUniformName;
 		GameObject uniform = Instantiate(Resources.Load("prefabs/"+prefabName)) as GameObject;
 		Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
 		intrinsics.RemoveChild(uniformIntrinsics);
