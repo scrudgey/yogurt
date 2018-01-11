@@ -149,6 +149,8 @@ public class Eater : Interactive, IMessagable, ISaveable {
 		food.BeEaten();
 	}
 	public bool Eat_Validation(Edible food){
+		if (GameManager.Instance.data == null)
+			return false;
 		if (food.inedible){
 			if (GameManager.Instance.data.perks["eat_all"]){
 				return true;
