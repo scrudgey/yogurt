@@ -8,7 +8,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
 	private HingeJoint2D hingeJoint2D;
 	private GameObject groundObject;
 	private Rigidbody2D groundBody;
-	public BoxCollider2D groundCollider;
+	public CapsuleCollider2D groundCollider;
 	private GameObject horizon;
 	private SliderJoint2D sliderJoint2D;
 	public Physical physical;
@@ -79,10 +79,15 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
 		groundBody.angularDrag = 0.05f;
 		groundBody.gravityScale = 0;
 		groundBody.freezeRotation = true;
+		groundBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 		//box collider
-		groundCollider = groundObject.AddComponent<BoxCollider2D>();
-		groundCollider.size = new Vector2(0.07f, 0.05f);
+		// groundCollider = groundObject.AddComponent<BoxCollider2D>();
+		// groundCollider.size = new Vector2(0.07f, 0.05f);
+		// groundCollider.sharedMaterial = Resources.Load<PhysicsMaterial2D>("ground"); 
+		groundCollider = groundObject.AddComponent<CapsuleCollider2D>();
+		groundCollider.direction = CapsuleDirection2D.Horizontal;
 		groundCollider.sharedMaterial = Resources.Load<PhysicsMaterial2D>("ground"); 
+		groundCollider.size = new Vector2(0.07f, 0.02f);
 		foreach (Table table in Object.FindObjectsOfType<Table>()){
 			Collider2D tableCollider = table.transform.parent.GetComponent<Collider2D>();
 			Physics2D.IgnoreCollision(groundCollider, tableCollider, true);
