@@ -14,6 +14,17 @@ public class Edible : Interactive, ISaveable {
 	public Color pureeColor;
 	public AudioClip eatSound;
 	public GameObject refuse;
+	void Start(){
+		if (eatSound == null){
+			eatSound = Resources.Load("sounds/eating/bite") as AudioClip;
+		}
+		if (nutrition == 0){
+			nutrition = 1;
+		}
+		if (vegetable || meat || immoral || offal || vomit == false){
+			vegetable = true;
+		}
+	}
 	virtual public void BeEaten(){
 		PhysicalBootstrapper pb = GetComponent<PhysicalBootstrapper>();
 		if (pb){
