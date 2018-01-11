@@ -291,7 +291,10 @@ public class Physical : MonoBehaviour, IMessagable {
 	public void ReceiveMessage(Message message){
 		// TODO: change this?
 		if (message is MessageDamage && !impactsMiss){
-			Impact((MessageDamage)message);
+			MessageDamage dam = (MessageDamage)message;
+			if (dam.type == damageType.fire || dam.type == damageType.cosmic)
+				return;
+			Impact(dam);
 		}
 	}
 }
