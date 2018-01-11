@@ -154,7 +154,8 @@ public partial class GameManager : Singleton<GameManager> {
 		// check collections for new focus outfit, holding, and hat
 		Outfit playerOutfit = target.GetComponent<Outfit>();
 		if (playerOutfit){
-			string prefabName = Toolbox.Instance.ReplaceUnderscore(playerOutfit.wornUniformName);
+			// string prefabName = Toolbox.Instance.ReplaceUnderscore(playerOutfit.wornUniformName);
+			string prefabName = playerOutfit.wornUniformName;
 			GameObject uniform = Instantiate(Resources.Load("prefabs/"+prefabName)) as GameObject;
 			CheckItemCollection(uniform, playerObject);
 			DestroyImmediate(uniform);
@@ -499,7 +500,7 @@ public partial class GameManager : Singleton<GameManager> {
 		if (owner != playerObject)
 			return;
 		string filename = Toolbox.Instance.CloneRemover(obj.name);
-		filename = Toolbox.Instance.ReplaceUnderscore(filename);
+		// filename = Toolbox.Instance.ReplaceUnderscore(filename);
 		if (data.collectedObjects.Contains(filename))
 			return;
 		UnityEngine.Object testPrefab = Resources.Load("prefabs/"+filename);
@@ -523,7 +524,7 @@ public partial class GameManager : Singleton<GameManager> {
 	}
 	public bool IsItemCollected(GameObject obj){
 		string filename = Toolbox.Instance.CloneRemover(obj.name);
-		filename = Toolbox.Instance.ReplaceUnderscore(filename);
+		// filename = Toolbox.Instance.ReplaceUnderscore(filename);
 		return data.collectedObjects.Contains(filename);
 	}
 	public void RetrieveCollectedItem(string name){
