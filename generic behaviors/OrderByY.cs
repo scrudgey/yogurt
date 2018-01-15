@@ -13,14 +13,27 @@ public class OrderByY : MonoBehaviour {
 	}
 	SpriteRenderer spriteRenderer;
 	SortingGroup sortGroup;
-	public float offset;
-	void Start () {
+	PhysicalBootstrapper bootstrapper;
+	public Transform footPoint;
+	void Start(){
 		spriteRenderer = GetComponentInParent<SpriteRenderer>();
 		sortGroup = GetComponent<SortingGroup>();
+		footPoint = transform.Find("footPoint");
+		bootstrapper = GetComponent<PhysicalBootstrapper>();
 	}
-	void Update () {
+	void Update(){
 		if (spriteRenderer.isVisible){
-			int pos = Mathf.RoundToInt((transform.position.y + offset) * 25f);
+			Vector3 position = transform.position;
+			if (bootstrapper != null){
+				if (bootstrapper.physical != null){
+					position = bootstrapper.physical.transform.position;
+				}
+			} else {
+				if (footPoint){
+					position = footPoint.position;
+				}
+			}
+			int pos = Mathf.RoundToInt(position.y * 100f);
 			if (sortGroup != null){
 				sortGroup.sortingOrder = (pos * -1);
 			} else {
