@@ -87,7 +87,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
 		groundCollider = groundObject.AddComponent<CapsuleCollider2D>();
 		groundCollider.direction = CapsuleDirection2D.Horizontal;
 		groundCollider.sharedMaterial = Resources.Load<PhysicsMaterial2D>("ground"); 
-		groundCollider.size = new Vector2(0.07f, 0.02f);
+		groundCollider.size = new Vector2(0.07f, 0.04f);
 		foreach (Table table in Object.FindObjectsOfType<Table>()){
 			Collider2D tableCollider = table.transform.parent.GetComponent<Collider2D>();
 			Physics2D.IgnoreCollision(groundCollider, tableCollider, true);
