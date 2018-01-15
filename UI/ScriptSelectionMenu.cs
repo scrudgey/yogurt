@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-public class ScriptSelectionMenu : MonoBehaviour
-{
+public class ScriptSelectionMenu : MonoBehaviour{
     Text descriptionText;
     GameObject scrollContent;
     ScriptListEntry lastClicked;
@@ -50,8 +49,7 @@ public class ScriptSelectionMenu : MonoBehaviour
         scriptEntry.Configure(script, this);
         return newEntry;
     }
-    public void ClickedOkay()
-    {
+    public void ClickedOkay(){
         Controller.Instance.suspendInput = false;
         if (lastClicked){
             GameManager.Instance.activeCommercial = lastClicked.commercial;
@@ -60,13 +58,11 @@ public class ScriptSelectionMenu : MonoBehaviour
         }
         Destroy(gameObject);
     }
-    public void ClickedCancel()
-    {
+    public void ClickedCancel(){
         Controller.Instance.suspendInput = false;
         Destroy(gameObject);
     }
-    public void ClickedScript(ScriptListEntry entry)
-    {
+    public void ClickedScript(ScriptListEntry entry){
         if (lastClicked){
             lastClicked.highlight = false;
             lastClicked.ResetColors();
