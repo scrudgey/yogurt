@@ -12,6 +12,178 @@ public abstract class Cutscene {
     public bool complete;
     public bool configured;
 }
+public class CutsceneMoonLanding : Cutscene {
+    private float timer;
+    public Dictionary<Collider2D, PhysicsMaterial2D> materials;
+    public override void Configure(){
+        materials = new Dictionary<Collider2D, PhysicsMaterial2D>();
+        Transform spawnPoint = GameObject.Find("cannonEntryPoint").transform;
+        GameObject player = GameManager.Instance.playerObject;
+        Controller.Instance.suspendInput = true;
+        configured = true;
+        player.transform.localScale = new Vector3(-1f, 1f, 1f);
+        player.transform.position = spawnPoint.position;
+        player.transform.rotation = spawnPoint.rotation;
+        Controllable playerControllable = GameManager.Instance.playerObject.GetComponent<Controllable>();
+        if (playerControllable != null){
+            playerControllable.enabled = false;
+        }
+        AdvancedAnimation playerAnimation = GameManager.Instance.playerObject.GetComponent<AdvancedAnimation>();
+        if (playerAnimation != null){
+            playerAnimation.enabled = false;
+        }
+        HeadAnimation playerHeadAnimation = GameManager.Instance.playerObject.GetComponent<HeadAnimation>();
+        if (playerHeadAnimation != null){
+            playerHeadAnimation.enabled = false;
+        }
+        Rigidbody2D body = player.GetComponent<Rigidbody2D>();
+        body.gravityScale = GameManager.Instance.gravity;
+        body.drag = 0f;
+        body.AddForce(8000f * spawnPoint.up, ForceMode2D.Force);
+        PhysicsMaterial2D moonMaterial = Resources.Load("moonlanding") as PhysicsMaterial2D;
+        foreach (Collider2D collider in player.GetComponentsInChildren<Collider2D>()){
+            materials[collider] = collider.sharedMaterial;
+            collider.sharedMaterial = moonMaterial;
+        }
+        AudioSource playerAudio = Toolbox.Instance.GetOrCreateComponent<AudioSource>(GameManager.Instance.playerObject);
+        AudioClip charlierAugh = Resources.Load("sounds/auugh") as AudioClip;
+        playerAudio.PlayOneShot(charlierAugh);
+    }
+    public override void Update(){
+        if (timer == 0){
+            UINew.Instance.SetActiveUI();
+        }
+        timer += Time.deltaTime;
+        if (timer > 3f){
+            complete = true;
+        }
+    }
+    public override void CleanUp(){
+        Controller.Instance.suspendInput = false;
+        UINew.Instance.SetActiveUI(active:true);
+        Controllable playerControllable = GameManager.Instance.playerObject.GetComponent<Controllable>();
+        if (playerControllable != null){
+            playerControllable.enabled = true;
+        }
+        AdvancedAnimation playerAnimation = GameManager.Instance.playerObject.GetComponent<AdvancedAnimation>();
+        if (playerAnimation != null){
+            playerAnimation.enabled = true;
+        }
+        HeadAnimation playerHeadAnimation = GameManager.Instance.playerObject.GetComponent<HeadAnimation>();
+        if (playerHeadAnimation != null){
+            playerHeadAnimation.enabled = true;
+        }
+        Rigidbody2D body = GameManager.Instance.playerObject.GetComponent<Rigidbody2D>();
+        body.gravityScale = 0f;
+        foreach(KeyValuePair<Collider2D, PhysicsMaterial2D> kvp in materials){
+            kvp.Key.sharedMaterial = kvp.Value;
+        }
+        Hurtable playerHurable = GameManager.Instance.playerObject.GetComponent<Hurtable>();
+        if (playerHurable){
+            playerHurable.KnockDown();
+        }
+        GameObject landingStrip = GameObject.Find("landingStrip");
+        landingStrip.GetComponent<BoxCollider2D>().enabled = false;
+        landingStrip.GetComponentInChildren<ParticleSystem>().Stop();
+    }
+}
+public class CutsceneSpace : Cutscene {
+    private float timer;
+    public override void Configure(){
+        GameObject player = GameManager.Instance.playerObject;
+        Controller.Instance.suspendInput = true;
+        configured = true;
+        player.transform.localScale = new Vector3(-1f, 1f, 1f);
+        player.transform.RotateAround(player.transform.position, new Vector3(0f, 0f, 1f), 90f);
+        Controllable playerControllable = GameManager.Instance.playerObject.GetComponent<Controllable>();
+        if (playerControllable != null){
+            playerControllable.enabled = false;
+        }
+    }
+    public override void Update(){
+        if (timer == 0){
+            UINew.Instance.SetActiveUI();
+        }
+        timer += Time.deltaTime;
+        if (timer > 3.0f){
+            complete = true;
+            SceneManager.LoadScene("moon1");
+            GameManager.Instance.data.entryID = 420;
+        }
+    }
+    public override void CleanUp(){
+        Controller.Instance.suspendInput = false;
+    }
+}
+public class CutsceneCannon : Cutscene {
+    public Cannon cannon;
+    public CameraControl camControl;
+    public Transform ejectionPoint;
+    private float timer;
+    private bool shot;
+    public override void Configure(){
+        cannon = GameObject.FindObjectOfType<Cannon>();
+        cannon.GetComponent<AudioListener>().enabled = true;
+        ejectionPoint = cannon.transform.Find("ejectionPoint");
+        GameManager.Instance.playerObject.GetComponent<AudioListener>().enabled = false;
+        GameManager.Instance.playerObject.SetActive(false);
+        camControl = GameObject.FindObjectOfType<CameraControl>();
+        camControl.focus = cannon.gameObject;
+        Controller.Instance.suspendInput = true;
+        configured = true;
+    }
+    public override void Update(){
+        if (timer == 0){
+            UINew.Instance.SetActiveUI();
+        }
+        timer += Time.deltaTime;
+        if (timer > 2.5f && !shot){
+            shot = true;
+            cannon.Shoot();
+            cannon.GetComponent<AudioListener>().enabled = false;
+            GameManager.Instance.playerObject.GetComponent<AudioListener>().enabled = true;
+            GameManager.Instance.playerObject.SetActive(true);
+            RotateTowardMotion rot =  GameManager.Instance.playerObject.AddComponent<RotateTowardMotion>();
+            rot.angleOffset = 270f;
+            camControl.focus = GameManager.Instance.playerObject;
+            foreach (Collider2D collider in GameManager.Instance.playerObject.GetComponentsInChildren<Collider2D>()){
+                collider.enabled = false;
+            }
+            GameManager.Instance.playerObject.transform.position = ejectionPoint.position;
+            GameManager.Instance.playerObject.transform.rotation = ejectionPoint.rotation;
+            AdvancedAnimation playerAnimation = GameManager.Instance.playerObject.GetComponent<AdvancedAnimation>();
+            if (playerAnimation != null){
+                playerAnimation.SetFrame(14);
+                playerAnimation.enabled = false;
+            }
+            HeadAnimation playerHeadAnimation = GameManager.Instance.playerObject.GetComponent<HeadAnimation>();
+            if (playerHeadAnimation != null){
+                playerHeadAnimation.SetFrame(4);
+                playerHeadAnimation.enabled = false;
+            }
+            Controllable playerControllable = GameManager.Instance.playerObject.GetComponent<Controllable>();
+            if (playerControllable != null){
+                playerControllable.enabled = false;
+            }
+            Rigidbody2D playerBody = GameManager.Instance.playerObject.GetComponent<Rigidbody2D>();
+            playerBody.gravityScale = GameManager.Instance.gravity;
+            AudioSource playerAudio = Toolbox.Instance.GetOrCreateComponent<AudioSource>(GameManager.Instance.playerObject);
+            AudioClip charlierAugh = Resources.Load("sounds/auugh") as AudioClip;
+            playerAudio.PlayOneShot(charlierAugh);
+
+            playerBody.AddForce(10000f * ejectionPoint.up, ForceMode2D.Force);
+            camControl.Shake(0.25f);
+        }
+        if (timer > 4f){
+            // switch scenes
+            complete = true;
+            SceneManager.LoadScene("space");
+        }
+    }
+    public override void CleanUp(){
+        Controller.Instance.suspendInput = false;
+    }
+}
 public class CutscenePickleBottom : Cutscene {
     CameraControl camControl;
     GameObject peter;
@@ -349,7 +521,7 @@ public class CutsceneNewDay : Cutscene {
 }
 
 public class CutsceneManager : Singleton<CutsceneManager> {
-    public enum CutsceneType {newDay, mayorTalk, boardRoom, fall, pickelbottom}
+    public enum CutsceneType {newDay, mayorTalk, boardRoom, fall, pickelbottom, cannon, space, moonLanding}
     public Cutscene cutscene;
     void Start (){
         SceneManager.sceneLoaded += LevelWasLoaded;
@@ -372,6 +544,18 @@ public class CutsceneManager : Singleton<CutsceneManager> {
             break;
             case CutsceneType.pickelbottom:
             cutscene = new CutscenePickleBottom();
+            cutscene.Configure();
+            break;
+            case CutsceneType.cannon:
+            cutscene = new CutsceneCannon();
+            cutscene.Configure();
+            break;
+            case CutsceneType.space:
+            cutscene = new CutsceneSpace();
+            cutscene.Configure();
+            break;
+            case CutsceneType.moonLanding:
+            cutscene = new CutsceneMoonLanding();
             cutscene.Configure();
             break;
             default:
