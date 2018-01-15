@@ -130,7 +130,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
 		holding.transform.position = place;
 		PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
 		if (phys){
-			phys.InitPhysical(0.01f, Vector3.zero);
+			phys.InitPhysical(0.03f, Vector3.zero);
 		}
 		SpriteRenderer sprite = holding.GetComponent<SpriteRenderer>();
 		sprite.sortingLayerName = "main";
