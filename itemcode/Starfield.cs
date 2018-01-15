@@ -7,19 +7,13 @@ public class Starfield : MonoBehaviour {
     public float maxTime = 10f;
     public int maxStars = 100;
     private GameObject star;
-    
     public List<Color> colors = new List<Color>()  {
         Color.green,
         Color.blue,
         Color.cyan
-    }; 
-    // {
-    //     Color.red,
-    //     Color.white,
-    //     Color.yellow
-    // }; 
-    
-	void Start () {
+    };
+
+	void Start(){
        BoxCollider2D collider = GetComponent<BoxCollider2D>();
        extents = collider.bounds.extents;
        star = Resources.Load("star_pixel") as GameObject;
@@ -27,11 +21,9 @@ public class Starfield : MonoBehaviour {
            NewStar(true);
        }
 	}
-	
     void NewStar(){
         NewStar(false);
     }
-    
     void NewStar(bool init){
         Vector3 position = new Vector3();
         position.x = Random.Range(-1.0f * extents.x, extents.x);
@@ -48,7 +40,6 @@ public class Starfield : MonoBehaviour {
             Destroy(newStar, Random.Range(minTime, maxTime));
         }
     }
-
     void Update(){
         if (transform.childCount < maxStars){
             NewStar();
