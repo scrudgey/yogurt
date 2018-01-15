@@ -30,6 +30,7 @@ public class GameData{
     public HashSet<Commercial> unlockedCommercials;
     public HashSet<Commercial> completeCommercials;
 	public HashSet<Commercial> newUnlockedCommercials;
+	public HashSet<string> unlockedScenes;
 	public int entryID;
 	public List<Achievement> achievements;
 	public AchievementStats achievementStats = new AchievementStats();
@@ -220,6 +221,8 @@ public partial class GameManager : Singleton<GameManager> {
 		}
 		SetFocus(playerObject);
 		string sceneName = SceneManager.GetActiveScene().name;
+		data.unlockedScenes.Add(sceneName);
+		// TODO: notice upon visiting new scene
 		if (sceneName == "krazy1"){
 			GameObject packageSpawnPoint = GameObject.Find("packageSpawnPoint");
 			if (data.firstTimeLeavingHouse){
@@ -240,6 +243,12 @@ public partial class GameManager : Singleton<GameManager> {
 		}
 		if (sceneName == "cave1" || sceneName == "cave2"){
 			CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.fall);
+		}
+		if (sceneName == "space"){
+			CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.space);
+		}
+		if (sceneName == "moon1" && (data.entryID == 420 || data.entryID == 99)){
+			CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.moonLanding);
 		}
 		PlayerEnter();
 	}
@@ -400,6 +409,7 @@ public partial class GameManager : Singleton<GameManager> {
 		// TODO: change this temporary hack into something more correct.
         data.unlockedCommercials = new HashSet<Commercial>();
 		data.newUnlockedCommercials = new HashSet<Commercial>();
+		data.unlockedScenes = new HashSet<string>();
         data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eat1"));
 		if (debug){
 			data.days = 1;
@@ -408,6 +418,7 @@ public partial class GameManager : Singleton<GameManager> {
        		data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eggplant10"));
        		data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("fireman"));
 			data.hypnosis = true;
+			data.unlockedScenes.Add("moon1");
 		}
         data.completeCommercials = new HashSet<Commercial>();
 		// initialize achievements
