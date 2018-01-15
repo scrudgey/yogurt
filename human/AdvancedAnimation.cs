@@ -23,7 +23,6 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable, ISaveable {
 			}
 		}
 	}
-	
 	private SpriteRenderer spriteRenderer;
 	private Controllable controllable;
 	private bool swinging;
