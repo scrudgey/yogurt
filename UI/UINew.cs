@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using Easings;
 
 public class UINew: Singleton<UINew> {
-	public enum MenuType{none, escape, inventory, speech, closet, scriptSelect, commercialReport, newDayReport, email, diary, dialogue, phone, perk}
+	public enum MenuType{none, escape, inventory, speech, closet, scriptSelect, commercialReport, newDayReport, email, diary, dialogue, phone, perk, teleport}
 	private Dictionary<MenuType, string> menuPrefabs = new Dictionary<MenuType, string>{
 		{MenuType.escape, 					"UI/PauseMenu"},
 		{MenuType.inventory, 				"UI/InventoryScreen"},
@@ -17,7 +17,8 @@ public class UINew: Singleton<UINew> {
 		{MenuType.diary,					"UI/Diary"},
 		{MenuType.dialogue,					"UI/DialogueMenu"},
 		{MenuType.phone,					"UI/PhoneMenu"},
-		{MenuType.perk,						"UI/PerkMenu"}
+		{MenuType.perk,						"UI/PerkMenu"},
+		{MenuType.teleport,					"UI/TeleportMenu"}
 	};
 	private static List<MenuType> actionRequired = new List<MenuType>{MenuType.commercialReport, MenuType.diary, MenuType.perk};
 	private GameObject activeMenu;
@@ -521,7 +522,8 @@ public class UINew: Singleton<UINew> {
 			priorBody = button.gameobject.GetComponent<Rigidbody2D>();
 			angle += incrementAngle;
 		}
-		buttonAnchor.transform.position = target.transform.position;
+		// buttonAnchor.transform.position = target.transform.position;
+		buttonAnchor.transform.position = renderingCamera.ScreenToWorldPoint(Input.mousePosition);
 		buttonAnchor.transform.SetParent(target.transform);
 		// Debug.Log("anchor screen point: "+renderingCamera.WorldToScreenPoint(target.transform.position).ToString());
 		bottomDock.transform.SetAsLastSibling();
