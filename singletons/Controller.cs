@@ -178,7 +178,6 @@ public class Controller : Singleton<Controller> {
 			GameObject top = GetFrontObject(hits);
 			if (top != null){
 				// Debug.Log(top);
-				// focus.lastLeftClicked = top;
 				Clicked(GetBaseInteractive(top.transform), top);
 			}
         }
