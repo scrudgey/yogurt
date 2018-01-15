@@ -15,6 +15,7 @@ public class Flammable : MonoBehaviour, ISaveable {
 	public GameObject responsibleParty;
 	public bool playSounds = true;
 	public Pickup pickup;
+	public float fireRetardantBuffer = 2f;
 	void Start () {
 		pickup = GetComponent<Pickup>();
 
@@ -58,17 +59,17 @@ public class Flammable : MonoBehaviour, ISaveable {
 			onFire = true;
 			heat = 100;
 		}
-		if (heat > -2 && !onFire){
+		if (heat > (-1f * fireRetardantBuffer) && !onFire){
 			heat -= Time.deltaTime;
 		}
-		if (heat < -3){
+		if (heat < (-1f * fireRetardantBuffer - 1f)){
 			heat += Time.deltaTime;
 		}
 		if (!onFire && fireParticles.isPlaying){
 			fireParticles.Stop();
 			audioSource.Stop();
 		}
-		if (heat <= -2 && smoke.isPlaying){
+		if (heat <= (-1f * fireRetardantBuffer) && smoke.isPlaying){
 			smoke.Stop();
 		}
 		if (heat > 1 && smoke.isStopped){
