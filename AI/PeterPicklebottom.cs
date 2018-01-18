@@ -6,9 +6,10 @@ public class PeterPicklebottom : MonoBehaviour {
     public enum AIState{none, walkToTarget, slewAtTarget, leave}
     public AIState state;
     public Controllable controllable;
-    public Ref<GameObject> target;
+    public Ref<Duplicatable> target;
+    public Ref<GameObject> objRef;
     public float timer;
-    public Stack<Pickup> targets;
+    public Stack<Duplicatable> targets;
     private RoutineWalkToGameobject routine;
     public Doorway door;
     public AudioClip theme;
@@ -16,18 +17,20 @@ public class PeterPicklebottom : MonoBehaviour {
     private AudioSource audioSource;
     public void Start(){
         controllable = GetComponent<Controllable>();
-        target = new Ref<GameObject>(null);
+        target = new Ref<Duplicatable>(null);
+        objRef = new Ref<GameObject>(null);
         if (targets == null){
-            targets = new Stack<Pickup>();
-             foreach(Pickup pickup in FindObjectsOfType<Pickup>()){
-                targets.Push(pickup);
+            targets = new Stack<Duplicatable>();
+            foreach(Duplicatable dup in FindObjectsOfType<Duplicatable>()){
+                targets.Push(dup);
             }
         }
         if (targets.Count > 0){
-            target.val = targets.Pop().gameObject;
+            target.val = targets.Pop();
+            objRef.val = target.val.gameObject;
         }
         state = AIState.walkToTarget;
-        routine = new RoutineWalkToGameobject(gameObject, controllable, target);
+        routine = new RoutineWalkToGameobject(gameObject, controllable, objRef);
         routine.minDistance = 0.1f;
         timer = -2f;
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
@@ -56,19 +59,20 @@ public class PeterPicklebottom : MonoBehaviour {
             break;
             case AIState.slewAtTarget:
             if (timer > 1f && target.val != null){
-                Destroy(target.val);
-                ClaimsManager.Instance.WasDestroyed(target.val);
+                target.val.Nullify();
+                ClaimsManager.Instance.WasDestroyed(target.val.gameObject);
                 audioSource.PlayOneShot(takeSound[Random.Range(0, takeSound.Length)]);
             }
             if (timer > 2f){
                 state = AIState.walkToTarget;
-                target.val = targets.Pop().gameObject;
+                target.val = targets.Pop();
+                objRef.val = target.val.gameObject;
                 timer = 0f;
             }
             break;
             case AIState.leave:
-            target.val = door.gameObject;
-            float doorDistance = Vector2.Distance(transform.position, target.val.transform.position);
+            objRef.val = door.gameObject;
+            float doorDistance = Vector2.Distance(transform.position, objRef.val.transform.position);
             if (doorDistance > 0.1f){
                 routine.Update();
             } else {
