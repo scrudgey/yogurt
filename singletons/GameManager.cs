@@ -46,6 +46,16 @@ public class GameData{
 }
 public partial class GameManager : Singleton<GameManager> {
 	protected GameManager(){}
+	static public Dictionary<string, string> sceneNames = new Dictionary<string, string>(){
+		{"cave1", "deathtrap cave"},
+		{"cave2", "deathtrap cave II"},
+		{"forest", "forest"},
+		{"house", "house"},
+		{"krazy1", "outdoors"},
+		{"moon1", "moon"},
+		{"studio", "yogurt commercial studio"},
+		{"volcano", "volcano"}
+	};
 	public GameData data;
 	public string saveGameName = "test";
 	public string message = "smoke weed every day";	
@@ -82,21 +92,20 @@ public partial class GameManager : Singleton<GameManager> {
 		}
 		publicAudio = Toolbox.Instance.SetUpAudioSource(gameObject);
 		SceneManager.sceneLoaded += LevelWasLoaded;
-
 		// these bits are for debug!
 		if (SceneManager.GetActiveScene().name == "boardroom_cutscene"){
 			CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.boardRoom);
 			CutsceneManager.Instance.cutscene.Configure();
 		}
-		// if (SceneManager.GetActiveScene().name == "boardroom_cutscene"){
-		// 	CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.fall);
-		// 	CutsceneManager.Instance.cutscene.Configure();
-		// }
 	}
 	void Update(){
 		timeSinceLastSave += Time.deltaTime;
-        sceneTime += Time.deltaTime;
 		intervalTimer += Time.deltaTime;
+		if (!InCutscene()){
+			if (CutsceneManager.Instance.cutscene == null){
+	        	sceneTime += Time.deltaTime;
+			}
+		}
 		if (intervalTimer > 3f){
 			data.achievementStats.secondsPlayed = timeSinceLastSave;
 			CheckAchievements();
@@ -105,6 +114,11 @@ public partial class GameManager : Singleton<GameManager> {
 		if (awaitNewDayPrompt && sceneTime > 2f){
 			awaitNewDayPrompt = false;
 			UINew.Instance.ShowMenu(UINew.MenuType.newDayReport);
+		}
+		string sceneName = SceneManager.GetActiveScene().name;
+		if (sceneTime > 0.1f && !data.unlockedScenes.Contains(sceneName) && !InCutscene()){
+			data.unlockedScenes.Add(sceneName);
+			UINew.Instance.ShowSceneText("-"+GameManager.sceneNames[sceneName]+"-");
 		}
 	}
 	public bool InCutscene(){
@@ -221,8 +235,6 @@ public partial class GameManager : Singleton<GameManager> {
 		}
 		SetFocus(playerObject);
 		string sceneName = SceneManager.GetActiveScene().name;
-		data.unlockedScenes.Add(sceneName);
-		// TODO: notice upon visiting new scene
 		if (sceneName == "krazy1"){
 			GameObject packageSpawnPoint = GameObject.Find("packageSpawnPoint");
 			if (data.firstTimeLeavingHouse){
@@ -287,9 +299,6 @@ public partial class GameManager : Singleton<GameManager> {
 			if (outfit != null){
 				GameObject pajamas = Instantiate(Resources.Load("prefabs/pajamas"), new Vector3(100, 100, 100), Quaternion.identity) as GameObject;
 				outfit.initUniform = pajamas;
-				// Uniform pjs = pajamas.GetComponent<Uniform>();
-				// GameObject removed = outfit.DonUniform(pjs);
-				// Destroy(removed);
 			}
 			Inventory focusInv = playerObject.GetComponent<Inventory>();
 			if (focusInv){
@@ -305,7 +314,6 @@ public partial class GameManager : Singleton<GameManager> {
 			if (playerHurtable){
 				playerHurtable.health = playerHurtable.maxHealth;
 				// TODO: reset hitstate ?
-				// playerHurtable.hitState
 			}
 			MySaver.Save();
 			awaitNewDayPrompt = CheckNewDayPrompt();
@@ -412,7 +420,7 @@ public partial class GameManager : Singleton<GameManager> {
 		data.unlockedScenes = new HashSet<string>();
         data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eat1"));
 		if (debug){
-			data.days = 1;
+			data.days = 5;
        		data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eat2"));
        		data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eggplant1"));
        		data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eggplant10"));
