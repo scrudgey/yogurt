@@ -214,14 +214,11 @@ public class CutscenePickleBottom : Cutscene {
         peterAI.PlayThemeSong();
 
         // TODO
-        // populate picklebottom 
-        // older things first?
-        // only things in collection so PPB doesn't remove items from the game
-        // random 2 / 3 items.
-        peterAI.targets = new Stack<Pickup>();
-        foreach(Pickup pickup in GameObject.FindObjectsOfType<Pickup>()){
-            if (GameManager.Instance.IsItemCollected(pickup.gameObject))
-                peterAI.targets.Push(pickup);
+        // random 2 / 3 items?
+        peterAI.targets = new Stack<Duplicatable>();
+        foreach(Duplicatable dup in GameObject.FindObjectsOfType<Duplicatable>()){
+            if (dup.Nullifiable())
+                peterAI.targets.Push(dup);
         }
 
         UINew.Instance.SetActionText("You have been visited by Peter Picklebottom");
@@ -523,7 +520,7 @@ public class CutsceneNewDay : Cutscene {
 public class CutsceneManager : Singleton<CutsceneManager> {
     public enum CutsceneType {newDay, mayorTalk, boardRoom, fall, pickelbottom, cannon, space, moonLanding}
     public Cutscene cutscene;
-    void Start (){
+    void Start(){
         SceneManager.sceneLoaded += LevelWasLoaded;
     }
     public void InitializeCutscene(CutsceneType scene){
