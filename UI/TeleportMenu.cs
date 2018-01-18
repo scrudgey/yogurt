@@ -5,6 +5,7 @@ public class TeleportMenu : MonoBehaviour {
 	public Transform buttonList;
 	public Button teleportButton;
 	public SceneButton selectedButton;
+	public Teleporter teleporter;
 	void Start(){
 		GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
 	}
@@ -30,7 +31,9 @@ public class TeleportMenu : MonoBehaviour {
 	public void TeleportButtonCallback(){
 		// teleport to selected scene
 		if (selectedButton != null){
-			GameManager.Instance.LeaveScene(selectedButton.scene_name, 420);
+			teleporter.DoTeleport(selectedButton.scene_name);
+			UINew.Instance.CloseActiveMenu();
+			Controller.Instance.suspendInput = true;
 		}
 	}
 	public void CancelButtonCallback(){
