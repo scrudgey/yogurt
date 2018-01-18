@@ -46,6 +46,7 @@ public class UINew: Singleton<UINew> {
 	public bool inventoryVisible = false;
 	public Text status;
 	public Text actionTextObject;
+	public Text sceneNameText;
 	public string actionTextString;
 	private GameObject bottomDock;
 	private Stack<AchievementPopup.CollectedInfo> collectedStack = new Stack<AchievementPopup.CollectedInfo>();
@@ -163,7 +164,7 @@ public class UINew: Singleton<UINew> {
 			}
 		}
 	}
-	public void ConfigureUIElements() {
+	public void ConfigureUIElements(){
 		init = true;
 		UICanvas = GameObject.Find("NeoUICanvas");
 		if (UICanvas == null){
@@ -185,6 +186,8 @@ public class UINew: Singleton<UINew> {
 		cursorText = UICanvas.transform.Find("cursorText").gameObject;
 		cursorTextText = cursorText.GetComponent<Text>();
 		actionTextObject = UICanvas.transform.Find("bottomdock/ActionText").GetComponent<Text>();
+		sceneNameText = UICanvas.transform.Find("sceneText").GetComponent<Text>();
+		sceneNameText.enabled = false;
 		lifebar = UICanvas.transform.Find("topright/lifebar/mask/fill").GetComponent<RectTransform>();
 		topRightBar = UICanvas.transform.Find("topright").gameObject;
 		topRightRectTransform = topRightBar.GetComponent<RectTransform>();
@@ -221,6 +224,13 @@ public class UINew: Singleton<UINew> {
 				healthBarEasingDirection = EasingDirection.up;
 			}
 		}
+	}
+	public void ShowSceneText(string content){
+		// reset alpha visibility here
+		sceneNameText.GetComponent<FadeInText>().Reset();
+		sceneNameText.enabled = true;
+		sceneNameText.gameObject.SetActive(true);
+		sceneNameText.text = content;
 	}
 	public GameObject ShowMenu(MenuType typeMenu){
 		if (activeMenu == null){
