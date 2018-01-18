@@ -9,7 +9,7 @@ public class Star : MonoBehaviour {
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		transform.localScale = (float)size/2.5f * Vector3.one;
 		Rigidbody2D body = GetComponent<Rigidbody2D>();
-		body.AddForce(Vector2.right * 25f / size);
+		body.AddForce(Vector2.right * 25f * size);
 	}
 	void Update(){
 		if (transform.position.x > maxXY.x){
