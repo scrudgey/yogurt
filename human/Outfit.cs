@@ -60,9 +60,7 @@ public class Outfit : Interactive, IMessagable, ISaveable {
 		MessageAnimation anim = new MessageAnimation();
 		anim.outfitName = uniform.baseName;
 		Toolbox.Instance.SendMessage(gameObject, this, anim);
-		uniformIntrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(uniform.gameObject);
-		Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
-		intrinsics.AddChild(uniformIntrinsics);
+		Toolbox.Instance.AddChildIntrinsics(gameObject, this, uniform.gameObject);
 		wornUniformName = Toolbox.Instance.CloneRemover(uniform.gameObject.name);
 		GameManager.Instance.CheckItemCollection(uniform.gameObject, gameObject);
 		ClaimsManager.Instance.WasDestroyed(uniform.gameObject);
@@ -79,12 +77,9 @@ public class Outfit : Interactive, IMessagable, ISaveable {
 		return "Wear "+uniformName;
 	}
 	public GameObject RemoveUniform(){
-		// something has to change here if we're going to standardize name usage
-		// string prefabName = Toolbox.Instance.ReplaceUnderscore(wornUniformName);
 		string prefabName = wornUniformName;
 		GameObject uniform = Instantiate(Resources.Load("prefabs/"+prefabName)) as GameObject;
-		Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
-		intrinsics.RemoveChild(uniformIntrinsics);
+		Toolbox.Instance.RemoveChildIntrinsics(gameObject, this);
 		uniform.transform.position = transform.position;
 		SpriteRenderer sprite = uniform.GetComponent<SpriteRenderer>();
 		sprite.sortingLayerName = "ground";
