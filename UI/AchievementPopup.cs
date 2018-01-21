@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-// using System.Collections.Generic;
 using UnityEngine.UI;
 using Easings;
 public class AchievementPopup : MonoBehaviour {
@@ -34,14 +33,12 @@ public class AchievementPopup : MonoBehaviour {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         audioSource.volume = 0.25f;
         audioSource.spatialBlend = 0;
-
 		titleText.text = "Collected";
         bodyText.text = info.name;
         image.sprite = info.sprite;
         audioSource.PlayOneShot(collectedSound);
         StartCoroutine(Display());
 	}
-
     public void Achievement(Achievement achieve){
         titleText = transform.Find("Panel/TextPanel/Title").GetComponent<Text>();
         bodyText = transform.Find("Panel/TextPanel/Body").GetComponent<Text>();
@@ -49,21 +46,18 @@ public class AchievementPopup : MonoBehaviour {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         audioSource.volume = 0.25f;
         audioSource.spatialBlend = 0;
-
         titleText.text = "Achievement Unlocked!";
         bodyText.text = achieve.title;
-        image.sprite = Resources.Load<Sprite>("sprites/"+achieve.iconName);
+        image.sprite = achieve.icon;
         audioSource.PlayOneShot(collectedSound);
         StartCoroutine(Display());
     }
-
-	IEnumerator Display (){
+	IEnumerator Display(){
         RectTransform rectTransform = transform.Find("Panel").GetComponent<RectTransform>();
         Vector3 tempPos = rectTransform.anchoredPosition;
         float intime = 0.75f;
         float outtime = 0.75f;
         float hangtime = 1.55f;
-        
         float t = 0f;
         float y0 = -100f;
         while (t < intime){
@@ -85,5 +79,4 @@ public class AchievementPopup : MonoBehaviour {
         UINew.Instance.achievementPopupInProgress = false;
         yield return null;
     }
-
 }
