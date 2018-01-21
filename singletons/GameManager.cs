@@ -38,11 +38,11 @@ public class GameData{
 	public List<string> packages;
 	public bool firstTimeLeavingHouse;
 	public bool mayorCutsceneHappened;
+	public bool teleporterUnlocked;
 	public GameData(){
 		days = 0;
 		saveDate = System.DateTime.Now.ToString();
 	}
-	public bool hypnosis;
 }
 public partial class GameManager : Singleton<GameManager> {
 	protected GameManager(){}
@@ -54,7 +54,8 @@ public partial class GameManager : Singleton<GameManager> {
 		{"krazy1", "outdoors"},
 		{"moon1", "moon"},
 		{"studio", "yogurt commercial studio"},
-		{"volcano", "volcano"}
+		{"volcano", "volcano"},
+		{"room2", "item room"}
 	};
 	public GameData data;
 	public string saveGameName = "test";
@@ -76,7 +77,8 @@ public partial class GameManager : Singleton<GameManager> {
 	private float intervalTimer;
 	public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
 	public AudioSource publicAudio;
-	public bool debug = true;
+	public bool playerIsDead;
+	public bool debug = false;
     void Start(){
 		if (data == null){
 			data = InitializedGameData();
@@ -118,7 +120,7 @@ public partial class GameManager : Singleton<GameManager> {
 		string sceneName = SceneManager.GetActiveScene().name;
 		if (sceneTime > 0.1f && !data.unlockedScenes.Contains(sceneName) && !InCutscene()){
 			data.unlockedScenes.Add(sceneName);
-			UINew.Instance.ShowSceneText("-"+GameManager.sceneNames[sceneName]+"-");
+			UINew.Instance.ShowSceneText("- "+GameManager.sceneNames[sceneName]+" -");
 		}
 	}
 	public bool InCutscene(){
@@ -152,11 +154,7 @@ public partial class GameManager : Singleton<GameManager> {
 			Controllable oldControl = playerObject.GetComponent<Controllable>();
 			oldControl.SetControl(Controllable.ControlType.AI);
 		}
-		foreach(AudioListener listener in FindObjectsOfType<AudioListener>()){
-			listener.enabled = false;
-		}
-		AudioListener playerListener = Toolbox.Instance.GetOrCreateComponent<AudioListener>(target);
-		playerListener.enabled = true;
+		Toolbox.Instance.SwitchAudioListener(target);
 		playerObject = target;
 		Controllable targetControl = playerObject.GetComponent<Controllable>();
 		Controller.Instance.focus = target.GetComponent<Controllable>();
@@ -210,7 +208,7 @@ public partial class GameManager : Singleton<GameManager> {
 			if (!go){
 				string path = @"required/"+requirement;
 				GameObject newgo = GameObject.Instantiate(Resources.Load(path)) as GameObject;
-				newgo.name = Toolbox.Instance.ScrubText(newgo.name);
+				newgo.name = Toolbox.Instance.CloneRemover(newgo.name);
 			}
 		}
 		cam = GameObject.FindObjectOfType<Camera>();
@@ -262,12 +260,15 @@ public partial class GameManager : Singleton<GameManager> {
 		if (sceneName == "moon1" && (data.entryID == 420 || data.entryID == 99)){
 			CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.moonLanding);
 		}
+		if (sceneName == "house" && !data.teleporterUnlocked){
+			GameObject.FindObjectOfType<Teleporter>().gameObject.SetActive(false);
+		}
 		PlayerEnter();
 	}
 	public void InitializeNonPlayableLevel(){
 		string sceneName = SceneManager.GetActiveScene().name;
 		UINew.Instance.SetActiveUI();
-		GameObject.Find("Main Camera").GetComponent<AudioListener>().enabled = true;
+		Toolbox.Instance.SwitchAudioListener(GameObject.Find("Main Camera"));
 		if (sceneName == "morning_cutscene"){
 			CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.newDay);
 		}
@@ -293,12 +294,10 @@ public partial class GameManager : Singleton<GameManager> {
 	void WakeUpInBed(){
 		Bed bed = GameObject.FindObjectOfType<Bed>();
 		if (bed){
-			bed.SleepCutscene();
 			playerObject.SetActive(false);
 			Outfit outfit = playerObject.GetComponent<Outfit>();
 			if (outfit != null){
-				GameObject pajamas = Instantiate(Resources.Load("prefabs/pajamas"), new Vector3(100, 100, 100), Quaternion.identity) as GameObject;
-				outfit.initUniform = pajamas;
+				outfit.initUniform = Resources.Load("prefabs/pajamas") as GameObject;
 			}
 			Inventory focusInv = playerObject.GetComponent<Inventory>();
 			if (focusInv){
@@ -317,6 +316,7 @@ public partial class GameManager : Singleton<GameManager> {
 			}
 			MySaver.Save();
 			awaitNewDayPrompt = CheckNewDayPrompt();
+			bed.SleepCutscene();
 		}
 	}
 
@@ -376,6 +376,7 @@ public partial class GameManager : Singleton<GameManager> {
 		}
 	}
 	public void NewDayCutscene(){
+		playerIsDead = false;
 		data.days += 1;
 		SceneManager.LoadScene("morning_cutscene");
         sceneTime = 0f;
@@ -404,7 +405,8 @@ public partial class GameManager : Singleton<GameManager> {
 		data.itemCheckedOut = new SerializableDictionary<string, bool>();
 		data.perks = new SerializableDictionary<string, bool>(){
 			{"vomit", false},
-			{"eat_all", false}
+			{"eat_all", false},
+			{"hypnosis", false}
 		};
 		data.collectedClothes.Add("blue_shirt");
 		data.collectedObjects.Add("blue_shirt");
@@ -425,8 +427,9 @@ public partial class GameManager : Singleton<GameManager> {
        		data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eggplant1"));
        		data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eggplant10"));
        		data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("fireman"));
-			data.hypnosis = true;
-			data.unlockedScenes.Add("moon1");
+			data.perks["hypnosis"] = true;
+			// data.unlockedScenes.Add("moon1");
+			data.teleporterUnlocked = true;
 		}
         data.completeCommercials = new HashSet<Commercial>();
 		// initialize achievements
@@ -596,15 +599,16 @@ public partial class GameManager : Singleton<GameManager> {
 		diary.loadDiaryName = diaryName;
 	}
 	public void PlayerDeath(){
-		AudioListener listener = playerObject.GetComponent<AudioListener>();
-		listener.enabled = false;
+		if (playerIsDead)
+			return;
+		playerIsDead = true;
 		data.deaths += 1;
 		// MySaver.Save();
 		UINew.Instance.SetActiveUI(active:false);
 		Instantiate(Resources.Load("UI/deathMenu"));
 		CameraControl camControl = FindObjectOfType<CameraControl>();
 		camControl.audioSource.PlayOneShot(Resources.Load("sounds/xylophone/x4") as AudioClip);
-		GameObject.Find("Main Camera").GetComponent<AudioListener>().enabled = true;
+		Toolbox.Instance.SwitchAudioListener(GameObject.Find("Main Camera"));
 	}
 }
 
