@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public enum damageType{physical, fire, any, cutting, piercing, cosmic}
+public enum damageType{physical, fire, any, cutting, piercing, cosmic, asphyxiation}
 public enum ImpactResult {normal, repel, strong}
 public abstract class Damageable: MonoBehaviour, IMessagable{
     public static Dictionary<damageType, List<BuffType>> defeatedBy = new Dictionary<damageType, List<BuffType>>(){
@@ -10,6 +10,7 @@ public abstract class Damageable: MonoBehaviour, IMessagable{
         {damageType.cutting, new List<BuffType>(){BuffType.noPhysicalDamage, BuffType.ethereal, BuffType.invulnerable}},
         {damageType.piercing, new List<BuffType>(){BuffType.noPhysicalDamage, BuffType.ethereal, BuffType.invulnerable}},
         {damageType.cosmic, new List<BuffType>(){BuffType.invulnerable}},
+        {damageType.asphyxiation, new List<BuffType>(){BuffType.vampirism}}
     };
     public AudioClip[] impactSounds;
 	public AudioClip[] repelSounds;
@@ -39,7 +40,6 @@ public abstract class Damageable: MonoBehaviour, IMessagable{
         // by default, we take damage
         return true;
     }
-
     public virtual void Awake(){
         if (gibsContainerPrefab != null){
             GameObject gibsContainer = Instantiate(gibsContainerPrefab) as GameObject;
@@ -78,7 +78,7 @@ public abstract class Damageable: MonoBehaviour, IMessagable{
                 result = ImpactResult.repel;
             }
             // play impact sounds
-            if (message.type != damageType.fire)    
+            if (message.type != damageType.fire && message.type != damageType.asphyxiation)    
                 PlayImpactSound(result, message);
             if (message.messenger != null)
                 message.messenger.SendMessage("ImpactReceived", result, SendMessageOptions.DontRequireReceiver);
@@ -104,9 +104,6 @@ public abstract class Damageable: MonoBehaviour, IMessagable{
         PhysicalBootstrapper phys = GetComponent<PhysicalBootstrapper>();
 		if (phys){
 			phys.DestroyPhysical();
-		}
-        if (GameManager.Instance.playerObject == gameObject){
-			GameManager.Instance.PlayerDeath();
 		}
         ClaimsManager.Instance.WasDestroyed(gameObject);
         Destroy(gameObject);
