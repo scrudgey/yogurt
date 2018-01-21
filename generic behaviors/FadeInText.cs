@@ -11,8 +11,7 @@ public class FadeInText : MonoBehaviour {
 	public bool fadeOut;
 	public float fadeOutTimer;
 	public float timeTillFadeOut;
-	// Use this for initialization
-	void Start () {
+	void Start(){
 	   text = GetComponent<Text>();
 	   outlines = new List<Outline>(GetComponents<Outline>());
 	   color = HSBColor.FromColor(text.color);
@@ -34,7 +33,7 @@ public class FadeInText : MonoBehaviour {
 	   color = HSBColor.FromColor(text.color);
 	   color.a = 0f;
     }
-    void Update () {
+    void Update(){
 		if (fadeOut){
 			fadeOutTimer += Time.deltaTime;
 		}
@@ -49,8 +48,6 @@ public class FadeInText : MonoBehaviour {
 				gameObject.SetActive(false);
 			}
 		}
-		// if (color.a > 1)
-		// 	color.a = 1f;
 		text.color = color.ToColor();
 		foreach(Outline outline in outlines){
 			outline.effectColor = outlineColor.ToColor();
