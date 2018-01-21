@@ -140,6 +140,14 @@ public class Eater : Interactive, IMessagable, ISaveable {
 				}
 			}
 		}
+		if (Toolbox.Instance.CloneRemover(food.name) == "sword"){
+			GameManager.Instance.data.achievementStats.swordsEaten += 1;
+			GameManager.Instance.CheckAchievements();
+		}
+		if (food.GetComponent<Hat>() != null){
+			GameManager.Instance.data.achievementStats.hatsEaten += 1;
+			GameManager.Instance.CheckAchievements();
+		}
 		Toolbox.Instance.OccurenceFlag(gameObject, eatData);
 		// play eat sound
 		if (food.eatSound != null){
