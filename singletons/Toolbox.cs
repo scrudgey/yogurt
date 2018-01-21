@@ -151,31 +151,6 @@ public class Toolbox : Singleton<Toolbox> {
 			angle += 360;
 		return angle ;
 	}
-	public string ScrubText(string input){
-		string output = "";
-		if (input != null){
-			Regex cloneFinder = new Regex(@"(.+)\(Clone\)$", RegexOptions.Multiline);
-			// Regex underscoreFinder = new Regex(@"_", RegexOptions.Multiline);
-			string name = input;
-			MatchCollection matches = cloneFinder.Matches(input);
-			if (matches.Count > 0){									// the object is a clone, capture just the normal name
-				foreach (Match match in matches){
-					name = match.Groups[1].Value;
-				}
-			}
-			output = name;
-			// output = underscoreFinder.Replace(name, " ");
-		}
-		return output;
-	}
-	// public string ReplaceUnderscore(string input){
-	// 	string output = "";
-	// 	if (input != null){
-	// 		Regex spaceFinder = new Regex(@" ", RegexOptions.Multiline);
-	// 		output = spaceFinder.Replace(input, "_");
-	// 	}
-	// 	return output;
-	// }
 	public string CloneRemover(string input){
 		string output = input;
 		if (input != null){
@@ -213,7 +188,7 @@ public class Toolbox : Singleton<Toolbox> {
 		if (speech){
 			nameOut = speech.name;
 		}
-		nameOut = ScrubText(nameOut);
+		nameOut = CloneRemover(nameOut);
 		return nameOut;
 	}
 	public void SendMessage(GameObject host, Component messenger, Message message, bool sendUpwards = true){
@@ -235,15 +210,14 @@ public class Toolbox : Singleton<Toolbox> {
 		Intrinsics donorIntrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(donor);
 		hostIntrins.CreateLiveBuffs(donorIntrins.buffs);
 	}
-	public void AddChildIntrinsics(GameObject host, GameObject donor){
+	public void AddChildIntrinsics(GameObject host, Component component, GameObject donor){
 		Intrinsics hostIntrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(host);
 		Intrinsics donorIntrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(donor);
-		hostIntrins.AddChild(donorIntrins);
+		hostIntrins.AddChild(component, donorIntrins);
 	}
-	public void RemoveChildIntrinsics(GameObject host, GameObject donor){
+	public void RemoveChildIntrinsics(GameObject host, Component component){
 		Intrinsics hostIntrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(host);
-		Intrinsics donorIntrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(donor);
-		hostIntrins.RemoveChild(donorIntrins);
+		hostIntrins.RemoveChild(component);
 	}
 	public string DirectionToString(Vector2 direction){
 		float angle = Toolbox.Instance.ProperAngle(direction.x, direction.y);
@@ -273,4 +247,11 @@ public class Toolbox : Singleton<Toolbox> {
 		target.enabled = true;
 		yield return null;
     }
+	public void SwitchAudioListener(GameObject target){
+		foreach(AudioListener listener in GameObject.FindObjectsOfType<AudioListener>()){
+			listener.enabled = false;
+		}
+		AudioListener targetListener = GetOrCreateComponent<AudioListener>(target);
+		targetListener.enabled = true;
+	}
 }
