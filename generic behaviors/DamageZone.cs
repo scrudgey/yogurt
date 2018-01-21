@@ -23,7 +23,7 @@ public class DamageZone : MonoBehaviour {
 			timerVal -= Time.deltaTime;
 			if (timerVal <= 0){
 				timerVal = timerInterval;
-				message.responsibleParty = other.transform.root.gameObject;
+				message.responsibleParty = gameObject;
 				Toolbox.Instance.SendMessage(other.gameObject, this, message, sendUpwards: true);
 			}
 			hitTimeouts[other.gameObject] = timerVal;
