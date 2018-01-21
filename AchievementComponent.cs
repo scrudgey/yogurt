@@ -6,7 +6,7 @@ public class AchievementComponent : MonoBehaviour {
 
 [System.Serializable]
 public class Achievement {
-	public string iconName;
+	public Sprite icon;
 	public bool complete;
 	public string title;
 	public string description;
@@ -29,12 +29,21 @@ public class Achievement {
 			pass = pass && otherStats.immolations >= stats.immolations;
 		if (stats.selfImmolations > 0)
 			pass = pass && otherStats.selfImmolations >= stats.selfImmolations;
-
+		if (stats.swordsEaten > 0)
+			pass = pass && otherStats.swordsEaten >= stats.swordsEaten;
+		if (stats.hatsEaten > 0)
+			pass = pass && otherStats.hatsEaten >= stats.hatsEaten;
+		if (stats.deathByCombat > 0)
+			pass = pass && otherStats.deathByCombat >= stats.deathByCombat;
+		if (stats.deathByMisadventure > 0)
+			pass = pass && otherStats.deathByMisadventure >= stats.deathByMisadventure;
+		if (stats.deathByAsphyxiation > 0)
+			pass = pass && otherStats.deathByAsphyxiation >= stats.deathByAsphyxiation;
 		return pass;
 	}
 	public Achievement(){ }
 	public Achievement(Achievement source){
-		iconName = source.iconName;
+		icon = source.icon;
 		complete = source.complete;
 		title = source.title;
 		description = source.description;
@@ -51,8 +60,13 @@ public class AchievementStats {
 	public float dollarsFlushed;
 	public float dollarsDuplicated;
 	public float dollarsBurned;
+	public int swordsEaten;
+	public int hatsEaten;
 	public int immolations;
 	public int selfImmolations;
+	public int deathByCombat;
+	public int deathByMisadventure;
+	public int deathByAsphyxiation;
 	public AchievementStats(){ }
 	public AchievementStats(AchievementStats source){
 		secondsPlayed = source.secondsPlayed;
@@ -64,6 +78,10 @@ public class AchievementStats {
 		dollarsFlushed = source.dollarsFlushed;
 		immolations = source.immolations;
 		selfImmolations = source.selfImmolations;
+		swordsEaten = source.swordsEaten;
+		hatsEaten = source.hatsEaten;
+		deathByCombat = source.deathByCombat;
+		deathByMisadventure = source.deathByMisadventure;
+		deathByAsphyxiation = source.deathByAsphyxiation;
 	}
-
 }
