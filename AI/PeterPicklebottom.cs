@@ -59,6 +59,7 @@ public class PeterPicklebottom : MonoBehaviour {
             break;
             case AIState.slewAtTarget:
             if (timer > 1f && target.val != null){
+                target.val.nullifyFX = null;
                 target.val.Nullify();
                 ClaimsManager.Instance.WasDestroyed(target.val.gameObject);
                 audioSource.PlayOneShot(takeSound[Random.Range(0, takeSound.Length)]);
