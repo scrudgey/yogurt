@@ -45,7 +45,7 @@ public class ClosetButtonHandler : MonoBehaviour {
 			entryScript.itemName = name;
 			entryScript.enableItem = !GameManager.Instance.data.itemCheckedOut[name];
 			Text entryText = newEntry.GetComponent<Text>();
-			entryText.text = Toolbox.Instance.ScrubText(name);
+			entryText.text = Toolbox.Instance.CloneRemover(name);
 			if (type == HomeCloset.ClosetType.all || type == HomeCloset.ClosetType.items){
 				if (GameManager.Instance.data.newCollectedItems.Contains(name)){
 					if (!GameManager.Instance.data.itemCheckedOut[name]){
