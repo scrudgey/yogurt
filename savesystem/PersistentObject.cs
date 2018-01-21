@@ -82,12 +82,13 @@ public class PersistentObject {
 		}
 	}
 	public void HandleLoad(GameObject parentObject){
+		parentObject.transform.rotation = transformRotation;
+		parentObject.transform.localScale = transformScale;
 		List<Component> loadedComponents = new List<Component>(parentObject.GetComponents<Component>());
 		loadedComponents.Sort(MySaver.CompareComponent);
 		foreach (Component component in loadedComponents){
 			ISaveable saveable = component as ISaveable;
 			if (saveable != null){
-				// saveable.LoadInit();
 				saveable.LoadData(persistentComponents[component.GetType().ToString()]);
 			}
 		}
