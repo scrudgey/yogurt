@@ -17,6 +17,8 @@ public class Hurtable : Damageable, ISaveable {
 	}
 	public float health;
 	public float maxHealth;
+	public float oxygen;
+	public float maxOxygen = 100f;
 	public float bonusHealth;
 	public float armor;
 	public bool ethereal;
@@ -37,10 +39,18 @@ public class Hurtable : Damageable, ISaveable {
 				backgroundColliders.AddRange(colliders);
 			}
 		}
+		oxygen = maxOxygen;
 	}
 	public override float CalculateDamage(MessageDamage message){
 		if (message.responsibleParty != null){
 			lastAttacker = message.responsibleParty;
+		}
+		if (message.type == damageType.asphyxiation){
+			oxygen -= message.amount;
+			if (oxygen <= 0){
+				Die(damageType.asphyxiation);
+			}
+			return 0;
 		}
 		float damage = 0;
 		float armor = this.armor;
@@ -75,12 +85,15 @@ public class Hurtable : Damageable, ISaveable {
 		}
 		health -= damage;
 
-		if (health <= 0 && (message.type == damageType.fire || message.type == damageType.cutting) && hitState != Controllable.HitState.dead){
+		// if the damage is fire or cutting, we die at health 0
+		if (health <= 0 && (message.type == damageType.fire || message.type == damageType.cutting)){
 			Die(message.type);
 		}
-		if (health <= -0.5 * maxHealth && hitState != Controllable.HitState.dead){
+		// otherwise, we die at health -50%
+		if (health <= -0.5 * maxHealth){
 			Die(message.type);
 		}
+		// the corpse can still be destroyed after that
 		if (health <= -0.75 * maxHealth && message.type == damageType.cosmic){
 				// TODO: cosmic vaporization effect
 			Destruct();
@@ -117,6 +130,8 @@ public class Hurtable : Damageable, ISaveable {
 		return damage;
 	}
 	public void Die(damageType type){
+		if (hitState == Controllable.HitState.dead)
+			return;
 		if (type == damageType.cosmic || type == damageType.fire){
 			Inventory inv = GetComponent<Inventory>();
 			if (inv){
@@ -126,29 +141,57 @@ public class Hurtable : Damageable, ISaveable {
 			Toolbox.Instance.AudioSpeaker("Flash Fire Ignite 01", transform.position);
 			ClaimsManager.Instance.WasDestroyed(gameObject);
 			Destroy(gameObject);
-		}
-		if (type == damageType.fire){
-			if (lastAttacker == gameObject){
-				GameManager.Instance.data.achievementStats.selfImmolations += 1;
-				GameManager.Instance.CheckAchievements();
-			} else {
-				GameManager.Instance.data.achievementStats.immolations += 1;
-				GameManager.Instance.CheckAchievements();
-			}
 		} else {
 			KnockDown();
+		}
+		// todo: categorize death
+		if (GameManager.Instance.playerObject == gameObject){
+			TypeOfDeath(type);
+			GameManager.Instance.PlayerDeath();
 		}
 		if (dizzyEffect != null){
 			ClaimsManager.Instance.WasDestroyed(dizzyEffect);
 			Destroy(dizzyEffect);
 		}
-		if (GameManager.Instance.playerObject == gameObject){
-			GameManager.Instance.PlayerDeath();
-		}
 		hitState = Controllable.AddHitState(hitState, Controllable.HitState.dead);
 		OccurrenceDeath occurrenceData = new OccurrenceDeath();
 		occurrenceData.dead = gameObject;
 		Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData);
+	}
+	public void TypeOfDeath(damageType type){
+		bool suicide = false;
+		bool damageZone = false;
+		bool assailant = false;
+		if (lastAttacker == null)
+			return;
+		if (lastAttacker == gameObject){
+			suicide = true;
+		} else {
+			if (lastAttacker.GetComponent<DamageZone>() != null)
+				damageZone = true;
+			if (lastAttacker.GetComponent<Inventory>() != null)
+				assailant = true;
+		}
+		if (type == damageType.fire){
+			if (suicide){
+				GameManager.Instance.data.achievementStats.selfImmolations += 1;
+				Debug.Log("self immolation");
+			}
+			GameManager.Instance.data.achievementStats.immolations += 1;
+			Debug.Log("immolation");
+		}
+		if (type == damageType.asphyxiation){
+			GameManager.Instance.data.achievementStats.deathByAsphyxiation += 1;
+		}
+		if (damageZone){
+			GameManager.Instance.data.achievementStats.deathByMisadventure += 1;
+			Debug.Log("death by misadventure");
+		}
+		if (assailant){
+			GameManager.Instance.data.achievementStats.deathByCombat += 1;
+			Debug.Log("death by combat");
+		}
+		GameManager.Instance.CheckAchievements();
 	}
 	public override void ReceiveMessage(Message incoming){
 		base.ReceiveMessage(incoming);
