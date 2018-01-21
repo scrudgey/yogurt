@@ -257,7 +257,7 @@ public class MySaver {
 				if (go == null)
 					continue;
 				loadedObjects[persistent.id] = go;
-				go.name = Toolbox.Instance.ScrubText(go.name);
+				go.name = Toolbox.Instance.CloneRemover(go.name);
 				if (!rootObject)
 					rootObject = go;
 				MyMarker marker = go.GetComponent<MyMarker>();
