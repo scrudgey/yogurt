@@ -6,15 +6,16 @@ public enum BuffType{telepathy, speed, bonusHealth, armor, fireproof, noPhysical
 public class Intrinsics : MonoBehaviour, ISaveable {
 	public List<Buff> buffs = new List<Buff>();
 	public List<Buff> liveBuffs = new List<Buff>();
-	public HashSet<Intrinsics> childIntrinsics = new HashSet<Intrinsics>();
-	public GameObject vampireFX;
+	// TODO: if we ever need to, we can extend "childBuffs" to be keyed on strings; 
+	// think of it as accessible slots
+	public Dictionary<Component, List<Buff>> childBuffs = new Dictionary<Component, List<Buff>>();
 	public Dictionary<BuffType, GameObject> intrinsicFX;
-	public void AddChild(Intrinsics child){
-		childIntrinsics.Add(child);
+	public void AddChild(Component owner, Intrinsics donor){
+		childBuffs[owner] = donor.buffs;
 		IntrinsicsChanged();
 	}
-	public void RemoveChild(Intrinsics child){
-		childIntrinsics.Remove(child);
+	public void RemoveChild(Component owner){
+		childBuffs.Remove(owner);
 		IntrinsicsChanged();
 	}
 	public void CreateLiveBuffs(List<Buff> newBuffs){
@@ -47,7 +48,7 @@ public class Intrinsics : MonoBehaviour, ISaveable {
 	}
 	public void Start(){
 		SetBuffFX();
-		IntrinsicsChanged();
+		// IntrinsicsChanged();
 	}
 	public void SetBuffFX(){
 		foreach(KeyValuePair<BuffType, Buff> kvp in NetBuffs()){
@@ -111,8 +112,8 @@ public class Intrinsics : MonoBehaviour, ISaveable {
 		List<Buff> returnBuffs = new List<Buff>();
 		returnBuffs.AddRange(buffs);
 		returnBuffs.AddRange(liveBuffs);
-		foreach(Intrinsics child in childIntrinsics){
-			returnBuffs.AddRange(child.AllBuffs());
+		foreach(KeyValuePair<Component, List<Buff>> kvp in childBuffs){
+			returnBuffs.AddRange(kvp.Value);
 		}
 		return returnBuffs;
 	}
@@ -142,13 +143,13 @@ public class Intrinsics : MonoBehaviour, ISaveable {
 	public void SaveData(PersistentComponent data){
 		data.buffs = new List<Buff>();
 		foreach(Buff b in liveBuffs){
-			data.buffs.Add(b);
+			data.buffs.Add(new Buff(b));
 		}
 	}
 	public void LoadData(PersistentComponent data){
 		liveBuffs = new List<Buff>();
 		foreach(Buff b in data.buffs){
-			liveBuffs.Add(b);
+			liveBuffs.Add(new Buff(b));
 		}
 		if (data.buffs.Count > 0)
 			IntrinsicsChanged();
@@ -167,7 +168,7 @@ public class Buff {
 		this.boolValue = otherBuff.boolValue;
 		this.floatValue = otherBuff.floatValue;
 		this.lifetime = otherBuff.lifetime;
-		this.time = 0;
+		this.time = otherBuff.time;
 	}
 	public bool Update(){
 		bool changed = false;
