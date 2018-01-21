@@ -123,9 +123,8 @@ public class CutsceneCannon : Cutscene {
     private bool shot;
     public override void Configure(){
         cannon = GameObject.FindObjectOfType<Cannon>();
-        cannon.GetComponent<AudioListener>().enabled = true;
+        Toolbox.Instance.SwitchAudioListener(cannon.gameObject);
         ejectionPoint = cannon.transform.Find("ejectionPoint");
-        GameManager.Instance.playerObject.GetComponent<AudioListener>().enabled = false;
         GameManager.Instance.playerObject.SetActive(false);
         camControl = GameObject.FindObjectOfType<CameraControl>();
         camControl.focus = cannon.gameObject;
@@ -140,8 +139,7 @@ public class CutsceneCannon : Cutscene {
         if (timer > 2.5f && !shot){
             shot = true;
             cannon.Shoot();
-            cannon.GetComponent<AudioListener>().enabled = false;
-            GameManager.Instance.playerObject.GetComponent<AudioListener>().enabled = true;
+            Toolbox.Instance.SwitchAudioListener(GameManager.Instance.playerObject);
             GameManager.Instance.playerObject.SetActive(true);
             RotateTowardMotion rot =  GameManager.Instance.playerObject.AddComponent<RotateTowardMotion>();
             rot.angleOffset = 270f;
@@ -198,17 +196,12 @@ public class CutscenePickleBottom : Cutscene {
         }
         peter = GameObject.Instantiate(Resources.Load("prefabs/peter_picklebottom")) as GameObject;
         doorway.Enter(peter);
-
         camControl = GameObject.FindObjectOfType<CameraControl>();
         camControl.focus = peter;
-
         Controller.Instance.suspendInput = true;
-
         UINew.Instance.SetActiveUI();
-
         nightShade = GameObject.Instantiate(Resources.Load("UI/nightShade")) as GameObject;
         nightShade.GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
-
         peterAI = peter.GetComponent<PeterPicklebottom>();
         peterAI.door = doorway;
         peterAI.PlayThemeSong();
@@ -217,16 +210,12 @@ public class CutscenePickleBottom : Cutscene {
         // random 2 / 3 items?
         peterAI.targets = new Stack<Duplicatable>();
         foreach(Duplicatable dup in GameObject.FindObjectsOfType<Duplicatable>()){
-            if (dup.Nullifiable())
+            if (dup.Nullifiable()){
                 peterAI.targets.Push(dup);
+            }
         }
-
         UINew.Instance.SetActionText("You have been visited by Peter Picklebottom");
-		foreach(AudioListener listener in GameObject.FindObjectsOfType<AudioListener>()){
-			listener.enabled = false;
-		}
-        GameObject.Find("Main Camera").GetComponent<AudioListener>().enabled = true;
-
+        Toolbox.Instance.SwitchAudioListener(GameObject.Find("Main Camera"));
         configured = true;
     }
     public override void Update(){
