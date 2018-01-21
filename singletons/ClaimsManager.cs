@@ -30,6 +30,7 @@ public class ClaimsManager : Singleton<ClaimsManager> {
 			return;
 		if (claimedItems.ContainsKey(obj)){
 			claimedItems[obj].WasDestroyed(obj);
+			claimedItems.Remove(obj);
 		}
 	}
 }
