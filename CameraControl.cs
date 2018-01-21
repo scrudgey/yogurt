@@ -28,7 +28,7 @@ public class CameraControl : MonoBehaviour {
 			yield return null;
 		}
 	}
-	void FixedUpdate () {
+	void FixedUpdate(){
 		if (focus == null)
 			return;
 		Vector3 lowerLeftWorld;
@@ -47,11 +47,11 @@ public class CameraControl : MonoBehaviour {
 			mainCamera.orthographicSize = maxSize;
 		}
 		// update camera world coordinates.
-		lowerLeftWorld = GetComponent<Camera>().ScreenToWorldPoint( Vector2.zero);
-		upperRightWorld = GetComponent<Camera>().ScreenToWorldPoint ( new Vector2(GetComponent<Camera>().pixelWidth,GetComponent<Camera>().pixelHeight) );
+		lowerLeftWorld = GetComponent<Camera>().ScreenToWorldPoint(Vector2.zero);
+		upperRightWorld = GetComponent<Camera>().ScreenToWorldPoint(new Vector2(GetComponent<Camera>().pixelWidth, GetComponent<Camera>().pixelHeight));
 		screenWidthWorld = upperRightWorld.x - lowerLeftWorld.x;
 		screenHeightWorld = upperRightWorld.y - lowerLeftWorld.y;
-		tempVector = Vector3.SmoothDamp(transform.position , focus.transform.position + focusVelocity* focusLead,ref smoothVelocity, 0.1f);
+		tempVector = Vector3.SmoothDamp(transform.position, focus.transform.position + focusVelocity * focusLead, ref smoothVelocity, 0.1f);
 		//check for edge of level
 		if (tempVector.x - screenWidthWorld/2 < minXY.x){
 			tempVector.x = minXY.x + screenWidthWorld/2;
