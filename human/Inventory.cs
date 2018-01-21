@@ -130,7 +130,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
 		holding.transform.position = place;
 		PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
 		if (phys){
-			phys.InitPhysical(0.03f, Vector3.zero);
+			phys.InitPhysical(0.05f, Vector3.zero);
 		}
 		SpriteRenderer sprite = holding.GetComponent<SpriteRenderer>();
 		sprite.sortingLayerName = "main";
@@ -256,7 +256,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
 			if (holdpoint_angle != 0){
 				string dirString = Toolbox.Instance.DirectionToString(direction);
 				if (dirString == "left" || dirString == "right"){
-					holdpoint.rotation = Quaternion.AngleAxis(holdpoint_angle * transform.localScale.x, new Vector3(0, 0, 1f));
+					holding.transform.rotation = Quaternion.AngleAxis(holdpoint_angle * transform.localScale.x, new Vector3(0, 0, 1f));
 				}
 			}
 		}
