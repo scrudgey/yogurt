@@ -29,7 +29,6 @@ public class Head : Interactive, IExcludable, ISaveable {
 			RemoveHat();
 		ClaimsManager.Instance.ClaimObject(h.gameObject, this);
 		hat = h;
-
 		PhysicalBootstrapper phys = h.GetComponent<PhysicalBootstrapper>();
 		if (phys)
 			phys.DestroyPhysical();
@@ -51,7 +50,7 @@ public class Head : Interactive, IExcludable, ISaveable {
 		if (hatAnimator){
 			hatAnimator.RegisterDirectable();
 		}
-		Toolbox.Instance.AddChildIntrinsics(transform.parent.gameObject, h.gameObject);
+		Toolbox.Instance.AddChildIntrinsics(transform.parent.gameObject, this, h.gameObject);
 		GameManager.Instance.CheckItemCollection(h.gameObject, transform.root.gameObject);
 	}
 	public string DonHat_desc(Hat h){
@@ -64,7 +63,7 @@ public class Head : Interactive, IExcludable, ISaveable {
 		if (hat.helmet){
 			spriteRenderer.enabled = true;
 		}
-		Toolbox.Instance.RemoveChildIntrinsics(GetComponentInParent<Intrinsics>().gameObject, hat.gameObject);
+		Toolbox.Instance.RemoveChildIntrinsics(GetComponentInParent<Intrinsics>().gameObject, this);
 		ClaimsManager.Instance.DisclaimObject(hat.gameObject,this);
 		HatAnimation hatAnimator = hat.GetComponent<HatAnimation>();
 		if (hatAnimator){
@@ -89,7 +88,7 @@ public class Head : Interactive, IExcludable, ISaveable {
 	}
 	public void WasDestroyed(GameObject obj){
 		if (obj == hat.gameObject){
-			hat = null;
+			RemoveHat();
 		}
 	}
 	public void SaveData(PersistentComponent data){
