@@ -216,7 +216,6 @@ public class Physical : MonoBehaviour, IMessagable {
 				Physics2D.IgnoreCollision(objectCollider, phys.horizonCollider, true);
 			}
 		}
-		// groundCollider.enabled = false;
 		gameObject.layer = 15;
 		if (spriteRenderer)
 			spriteRenderer.enabled = true;
