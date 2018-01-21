@@ -30,6 +30,7 @@ public class Destructible : Damageable, ISaveable {
 		case damageType.cosmic:
 		damage = message.amount;
 		break;
+		case damageType.asphyxiation:
 		default:
 		break;
 		}
