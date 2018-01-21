@@ -5,6 +5,7 @@ using Easings;
 
 public class UINew: Singleton<UINew> {
 	public enum MenuType{none, escape, inventory, speech, closet, scriptSelect, commercialReport, newDayReport, email, diary, dialogue, phone, perk, teleport}
+	private enum EasingDirection{none, up, down}
 	private Dictionary<MenuType, string> menuPrefabs = new Dictionary<MenuType, string>{
 		{MenuType.escape, 					"UI/PauseMenu"},
 		{MenuType.inventory, 				"UI/InventoryScreen"},
@@ -48,7 +49,6 @@ public class UINew: Singleton<UINew> {
 	public Text actionTextObject;
 	public Text sceneNameText;
 	public string actionTextString;
-	private GameObject bottomDock;
 	private Stack<AchievementPopup.CollectedInfo> collectedStack = new Stack<AchievementPopup.CollectedInfo>();
 	private Stack<Achievement> achievementStack = new Stack<Achievement>();
 	public bool achievementPopupInProgress;
@@ -56,14 +56,17 @@ public class UINew: Singleton<UINew> {
 	public Texture2D cursorHighlight;
 	public Texture2D cursorTarget;
 	public RectTransform lifebar;
+	public RectTransform oxygenbar;
 	private Vector2 lifebarDefaultSize;
+	private Vector2 oxygenbarDefaultSize;
 	public GameObject topRightBar;
 	public GameObject cursorText;
 	public Text cursorTextText;
 	private RectTransform topRightRectTransform;
 	private float healthBarEasingTimer;
-	private enum EasingDirection{none, up, down};
+	private float oxygenBarEasingTimer;
 	private EasingDirection healthBarEasingDirection;
+	private EasingDirection oxygenBarEasingDirection;
 	public void Start(){
 		if (!init){
 			ConfigureUIElements();
@@ -82,7 +85,6 @@ public class UINew: Singleton<UINew> {
 		}
 		actionTextObject.text = actionTextString;
 		bool highlight = false;
-		// GameObject 
 		RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
         foreach (RaycastHit2D hit in hits){
             if (hit.collider != null && !Controller.Instance.forbiddenColliders.Contains(hit.collider.tag)){
@@ -91,8 +93,6 @@ public class UINew: Singleton<UINew> {
         }
 		if (highlight){
 			GameObject top = Controller.Instance.GetFrontObject(hits);
-			// GameObject target = null;
-			// if (target != null)
 			GameObject target = Controller.Instance.GetBaseInteractive(top.transform);
 			if (target != null){
 				switch (Controller.Instance.currentSelect){
@@ -141,10 +141,17 @@ public class UINew: Singleton<UINew> {
 		if (Controller.Instance.focusHurtable != null){
 			float width = (Controller.Instance.focusHurtable.health / Controller.Instance.focusHurtable.maxHealth) * lifebarDefaultSize.x;
 			lifebar.sizeDelta = new Vector2(width, lifebarDefaultSize.y);
+			width = (Controller.Instance.focusHurtable.oxygen / Controller.Instance.focusHurtable.maxOxygen) * oxygenbarDefaultSize.x;
+			oxygenbar.sizeDelta = new Vector2(width, oxygenbarDefaultSize.y);
 			if (Controller.Instance.focusHurtable.health < Controller.Instance.focusHurtable.maxHealth){
 				HealthBarOn();
 			} else {
 				HealthBarOff();
+			}
+			if (Controller.Instance.focusHurtable.oxygen < Controller.Instance.focusHurtable.maxOxygen){
+				OxygenBarOn();
+			} else {
+				OxygenBarOff();
 			}
 		}
 		if (healthBarEasingDirection != EasingDirection.none){
@@ -156,11 +163,27 @@ public class UINew: Singleton<UINew> {
 			}
 			if (healthBarEasingDirection == EasingDirection.up){
 				tempPos.y = (float)PennerDoubleAnimation.ExpoEaseOut(healthBarEasingTimer, 0, 50, 1f);
-            	topRightRectTransform.anchoredPosition = tempPos;
+				topRightRectTransform.anchoredPosition = tempPos;
 			}
 			if (healthBarEasingDirection == EasingDirection.down){
 				tempPos.y = (float)PennerDoubleAnimation.ExpoEaseOut(healthBarEasingTimer, 50, -50f, 1f);
-            	topRightRectTransform.anchoredPosition = tempPos;
+				topRightRectTransform.anchoredPosition = tempPos;
+			}
+		}
+		if (oxygenBarEasingDirection != EasingDirection.none){
+			oxygenBarEasingTimer += Time.deltaTime;
+			Vector3 tempPos = topRightRectTransform.anchoredPosition;
+			if (oxygenBarEasingTimer >= 1f){
+				oxygenBarEasingDirection = EasingDirection.none;
+				oxygenBarEasingTimer = 0f;
+			}
+			if (oxygenBarEasingDirection == EasingDirection.up){
+				tempPos.y = (float)PennerDoubleAnimation.ExpoEaseOut(oxygenBarEasingTimer, -50, 100, 1f);
+				topRightRectTransform.anchoredPosition = tempPos;
+			}
+			if (oxygenBarEasingDirection == EasingDirection.down){
+				tempPos.y = (float)PennerDoubleAnimation.ExpoEaseOut(oxygenBarEasingTimer, 50, -100f, 1f);
+				topRightRectTransform.anchoredPosition = tempPos;
 			}
 		}
 	}
@@ -182,17 +205,19 @@ public class UINew: Singleton<UINew> {
 		testButton = UICanvas.transform.Find("test").gameObject;
 		hypnosisButton = UICanvas.transform.Find("topdock/HypnosisButton").gameObject;
 		vomitButton = UICanvas.transform.Find("topdock/VomitButton").gameObject;
-		bottomDock = UICanvas.transform.Find("bottomdock").gameObject;
 		cursorText = UICanvas.transform.Find("cursorText").gameObject;
 		cursorTextText = cursorText.GetComponent<Text>();
-		actionTextObject = UICanvas.transform.Find("bottomdock/ActionText").GetComponent<Text>();
+		actionTextObject = UICanvas.transform.Find("ActionText").GetComponent<Text>();
 		sceneNameText = UICanvas.transform.Find("sceneText").GetComponent<Text>();
 		sceneNameText.enabled = false;
 		lifebar = UICanvas.transform.Find("topright/lifebar/mask/fill").GetComponent<RectTransform>();
+		oxygenbar = UICanvas.transform.Find("topright/oxygenbar/mask/fill").GetComponent<RectTransform>();
 		topRightBar = UICanvas.transform.Find("topright").gameObject;
 		topRightRectTransform = topRightBar.GetComponent<RectTransform>();
 		if (lifebarDefaultSize == Vector2.zero)
 			lifebarDefaultSize = new Vector2(lifebar.rect.width, lifebar.rect.height);
+		if (oxygenbarDefaultSize == Vector2.zero)
+			oxygenbarDefaultSize = new Vector2(oxygenbar.rect.width, oxygenbar.rect.height);
 		inventoryButton.SetActive(false);
 		fightButton.SetActive(false);
 		hypnosisButton.SetActive(false);
@@ -210,18 +235,40 @@ public class UINew: Singleton<UINew> {
 		}
 	}
 	public void HealthBarOn(){
-		if (healthBarEasingDirection == EasingDirection.none){
-			if (topRightRectTransform.anchoredPosition.y > 10f){
-				healthBarEasingTimer = 0f;
-				healthBarEasingDirection = EasingDirection.down;
+		if (Controller.Instance.focusHurtable.oxygen >= Controller.Instance.focusHurtable.maxOxygen){
+			if (healthBarEasingDirection == EasingDirection.none){
+				if (topRightRectTransform.anchoredPosition.y > 10f){
+					healthBarEasingTimer = 0f;
+					healthBarEasingDirection = EasingDirection.down;
+				}
 			}
 		}
-	}	
+	}
 	public void HealthBarOff(){
-		if (healthBarEasingDirection == EasingDirection.none){
-			if (topRightRectTransform.anchoredPosition.y < 40f){
-				healthBarEasingTimer = 0f;
-				healthBarEasingDirection = EasingDirection.up;
+		if (Controller.Instance.focusHurtable.oxygen >= Controller.Instance.focusHurtable.maxOxygen){
+			if (healthBarEasingDirection == EasingDirection.none){
+				if (topRightRectTransform.anchoredPosition.y < 40f){
+					healthBarEasingTimer = 0f;
+					healthBarEasingDirection = EasingDirection.up;
+				}
+			}
+		}
+	}
+	public void OxygenBarOn(){
+		if (oxygenBarEasingDirection == EasingDirection.none){
+			if (topRightRectTransform.anchoredPosition.y > -40f){
+				oxygenBarEasingTimer = 0f;
+				oxygenBarEasingDirection = EasingDirection.down;
+			}
+		}
+	}
+	public void OxygenBarOff(){
+		if (Controller.Instance.focusHurtable.health >= Controller.Instance.focusHurtable.maxHealth){
+			if (oxygenBarEasingDirection == EasingDirection.none){
+				if (topRightRectTransform.anchoredPosition.y < 40f){
+					oxygenBarEasingTimer = 0f;
+					oxygenBarEasingDirection = EasingDirection.up;
+				}
 			}
 		}
 	}
@@ -296,9 +343,7 @@ public class UINew: Singleton<UINew> {
 			topRightBar.SetActive(true);
 		}
 		// do we have hypnosis?
-		if (GameManager.Instance.data.hypnosis){
-			hypnosisButton.SetActive(true);
-		}
+		hypnosisButton.SetActive(GameManager.Instance.data.perks["hypnosis"]);
 		// do we have elective vomiting?
 		if (GameManager.Instance.playerObject.GetComponent<Eater>()){
 			vomitButton.SetActive(GameManager.Instance.data.perks["vomit"]);
@@ -483,14 +528,12 @@ public class UINew: Singleton<UINew> {
 		Rigidbody2D priorBody = null;
 		int n = 0;
 		Vector2 centerPosition = new Vector2(renderingCamera.pixelWidth/2f, renderingCamera.pixelHeight/2f);
-		// Debug.Log("center position: "+centerPosition.ToString());
 		foreach(actionButton button in buttons){
 			Vector2 initLocation = (Vector2)target.transform.position + Toolbox.Instance.RotateZ(Vector2.right/4, angle);
 			Vector2 initPosition = renderingCamera.WorldToScreenPoint(initLocation);
 			n++;
 			button.gameobject.transform.SetParent(UICanvas.transform, false);
 			initPosition = (initPosition - centerPosition) / (renderingCamera.pixelWidth / 800f);
-			// Debug.Log("initial position screenpoint: "+initPosition.ToString());
 			if (initPosition.y > canvasRect.rect.height / 2f){
 				initPosition.y = canvasRect.rect.height / 2f - 50f;
 			}
@@ -504,7 +547,6 @@ public class UINew: Singleton<UINew> {
 				initPosition.x = canvasRect.rect.width / -2f + 50f;
 			}
 			button.gameobject.transform.localPosition = initPosition;
-			// Debug.Log("local canvas position: "+button.gameobject.transform.localPosition.ToString());
 			if (priorBody){
 				SpringJoint2D spring = button.gameobject.AddComponent<SpringJoint2D>();
 				spring.autoConfigureDistance = false;
@@ -532,11 +574,9 @@ public class UINew: Singleton<UINew> {
 			priorBody = button.gameobject.GetComponent<Rigidbody2D>();
 			angle += incrementAngle;
 		}
-		// buttonAnchor.transform.position = target.transform.position;
 		buttonAnchor.transform.position = renderingCamera.ScreenToWorldPoint(Input.mousePosition);
 		buttonAnchor.transform.SetParent(target.transform);
-		// Debug.Log("anchor screen point: "+renderingCamera.WorldToScreenPoint(target.transform.position).ToString());
-		bottomDock.transform.SetAsLastSibling();
+		// bottomDock.transform.SetAsLastSibling();
 		return buttonAnchor;
 	}
 	private void ArrangeButtonsOnScreenTop(List<actionButton> buttons){
