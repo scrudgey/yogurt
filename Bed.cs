@@ -76,7 +76,7 @@ public class Bed : Doorway {
 					audioSource.PlayOneShot(snoreSound);
 				}
 			}
-			if (Input.anyKey && GameObject.Find("NewDayReport(Clone)") == null){
+			if (Input.anyKey && !Controller.Instance.suspendInput && GameObject.Find("NewDayReport(Clone)") == null){
 				sleeping = false;
 				unmade = true;	
 				spriteRenderer.sprite = bedSprites[1];
