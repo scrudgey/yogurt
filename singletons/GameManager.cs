@@ -55,7 +55,8 @@ public partial class GameManager : Singleton<GameManager> {
 		{"moon1", "moon"},
 		{"studio", "yogurt commercial studio"},
 		{"volcano", "volcano"},
-		{"room2", "item room"}
+		{"room2", "item room"},
+		{"moon_cave", "moon cave"}
 	};
 	public GameData data;
 	public string saveGameName = "test";
@@ -78,7 +79,7 @@ public partial class GameManager : Singleton<GameManager> {
 	public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
 	public AudioSource publicAudio;
 	public bool playerIsDead;
-	public bool debug = false;
+	public bool debug = true;
     void Start(){
 		if (data == null){
 			data = InitializedGameData();
@@ -312,6 +313,7 @@ public partial class GameManager : Singleton<GameManager> {
 			Hurtable playerHurtable = playerObject.GetComponent<Hurtable>();
 			if (playerHurtable){
 				playerHurtable.health = playerHurtable.maxHealth;
+				playerHurtable.oxygen = playerHurtable.maxOxygen;
 				// TODO: reset hitstate ?
 			}
 			MySaver.Save();
@@ -428,7 +430,7 @@ public partial class GameManager : Singleton<GameManager> {
        		data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eggplant10"));
        		data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("fireman"));
 			data.perks["hypnosis"] = true;
-			// data.unlockedScenes.Add("moon1");
+			data.unlockedScenes.Add("moon_cave");
 			data.teleporterUnlocked = true;
 		}
         data.completeCommercials = new HashSet<Commercial>();
