@@ -11,7 +11,6 @@ public class StartMenu : MonoBehaviour {
 	private GameObject loadGameMenu;
 	private GameObject prompt;
 	private GameObject alert;
-	
 	private enum menuState{anykey, main, startNew, load}
 	private menuState state;
 	
@@ -121,9 +120,6 @@ public class StartMenu : MonoBehaviour {
 	public void QuitButton(){
 		Application.Quit();
 	}
-	
-
-	
 	public void AlertOK(){
 		alert.SetActive(false);
 		switch (state)
@@ -139,7 +135,6 @@ public class StartMenu : MonoBehaviour {
 			break;
 		}
 	}
-	
 	public void NewGameOK(){
 		InputField field = newGameMenu.transform.Find("InputField").gameObject.GetComponent<InputField>();
 		string newName = field.text;
@@ -159,7 +154,6 @@ public class StartMenu : MonoBehaviour {
 		Text alertText = alert.transform.Find("Text").GetComponent<Text>();
 		alertText.text = text;
 	}
-
 	public string SuggestANAme(){
 		List<string> names = new List<string>(){
 			"Shemp",
