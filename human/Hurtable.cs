@@ -233,6 +233,9 @@ public class Hurtable : Damageable, ISaveable {
 				health += Time.deltaTime;
 			}
 		}
+		if (oxygen <= maxOxygen){
+			oxygen += 5f*Time.deltaTime;
+		}
 		if (health <= 0 && hitState < Controllable.HitState.unconscious){
 			KnockDown();
 		}
@@ -248,6 +251,7 @@ public class Hurtable : Damageable, ISaveable {
 		if (impulse <= 0f && doubledOver && hitState < Controllable.HitState.unconscious){
 			DoubleOver(false);
 		}
+		
 	}
 	public void KnockDown(){
 		if (hitState >= Controllable.HitState.unconscious)
@@ -318,6 +322,7 @@ public class Hurtable : Damageable, ISaveable {
 		data.floats["impulse"] = impulse;
 		data.floats["downed_timer"] = downedTimer;
 		data.ints["hitstate"] = (int)hitState;
+		data.floats["oxygen"] = oxygen;
 	}
 	public void LoadData(PersistentComponent data){
 		health = data.floats["health"];
@@ -326,5 +331,6 @@ public class Hurtable : Damageable, ISaveable {
 		impulse = data.floats["impulse"];
 		downedTimer = data.floats["downed_timer"];
 		hitState = (Controllable.HitState)data.ints["hitstate"];
+		oxygen = data.floats["oxygen"];
 	}
 }
