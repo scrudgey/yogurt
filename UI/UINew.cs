@@ -224,6 +224,7 @@ public class UINew: Singleton<UINew> {
 		speakButton.SetActive(false);
 		topRightBar.SetActive(false);
 		cursorText.SetActive(false);
+		vomitButton.SetActive(false);
 		HidePunchButton();
 		if (!GameManager.Instance.debug){
 			if (saveButton)
