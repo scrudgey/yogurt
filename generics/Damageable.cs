@@ -88,7 +88,7 @@ public abstract class Damageable: MonoBehaviour, IMessagable{
         // apply force
         if (damage <= 0)
             return;
-        if (message.type == damageType.fire || message.type == damageType.cosmic)
+        if (message.type == damageType.fire || message.type == damageType.cosmic || message.type == damageType.asphyxiation)
             return;
         if (rigidbody2D){
             rigidbody2D.AddForce(message.force);
