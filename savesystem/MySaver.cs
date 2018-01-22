@@ -176,9 +176,8 @@ public class MySaver {
 		string scenePath = GameManager.Instance.LevelSavePath();
 		string playerPath = GameManager.Instance.data.lastSavedPlayerPath;
 
-		Debug.Log("loading "+objectsPath+" ...");
 		if (File.Exists(objectsPath)){
-			Debug.Log(objectsPath+" exists ...");
+			// Debug.Log("loading "+objectsPath+" ...");
 			if (objectDataBase == null){
 				var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<int, PersistentObject>));
 				System.IO.Stream objectsStream = new FileStream(objectsPath, FileMode.Open);
