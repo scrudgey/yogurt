@@ -14,6 +14,7 @@ public class Cannon : Interactive {
 		audioSource.PlayOneShot(shootSound);
 	}
 	public void StartCannon(){
+		MySaver.Save();
 		CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.cannon);
 	}
 }
