@@ -157,6 +157,8 @@ public class MySaver {
 		}
 	}
 	public static void SaveObjectDatabase(){
+		if (objectDataBase == null)
+			return;
 		var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<int, PersistentObject>));
 		string objectsPath = GameManager.Instance.ObjectsSavePath();
 		FileStream objectStream = File.Create(objectsPath);
@@ -174,9 +176,10 @@ public class MySaver {
 		string scenePath = GameManager.Instance.LevelSavePath();
 		string playerPath = GameManager.Instance.data.lastSavedPlayerPath;
 
+		Debug.Log("loading "+objectsPath+" ...");
 		if (File.Exists(objectsPath)){
+			Debug.Log(objectsPath+" exists ...");
 			if (objectDataBase == null){
-				Debug.Log("loading "+objectsPath+" ...");
 				var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<int, PersistentObject>));
 				System.IO.Stream objectsStream = new FileStream(objectsPath, FileMode.Open);
 				objectDataBase = persistentSerializer.Deserialize(objectsStream) as SerializableDictionary<int, PersistentObject>;
