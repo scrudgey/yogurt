@@ -44,7 +44,6 @@ public class CameraControl : MonoBehaviour {
 		tempVector = Vector3.SmoothDamp(transform.position, focus.transform.position, ref smoothVelocity, 0.1f);
 
 		//check for edge of level
-		// TODO: if I am bigger than the maximum sizes, handle it gracefully
 		if (screenWidthWorld > maxXY.x - minXY.x){
 			tempVector.x = (maxXY.x + minXY.x)/2f;
 		} else {
