@@ -17,9 +17,15 @@ public class NewDayDiaryMenu : MonoBehaviour {
 		foodNum = transform.Find("main/bottom/itemPanel/food/value").GetComponent<Text>();
 		commercialsPanel = transform.Find("main/bottom/rightPanel/panel").gameObject;
 		
-		itemNum.text = GameManager.Instance.data.newCollectedItems.Count.ToString();
-		foodNum.text = GameManager.Instance.data.newCollectedFood.Count.ToString();
-		clothingNum.text = GameManager.Instance.data.newCollectedClothes.Count.ToString();
+		// itemNum.text = GameManager.Instance.data.newCollectedItems.Count.ToString();
+		// foodNum.text = GameManager.Instance.data.newCollectedFood.Count.ToString();
+		// clothingNum.text = GameManager.Instance.data.newCollectedClothes.Count.ToString();
+		itemNum.text = GameManager.Instance.data.itemsCollectedToday.ToString();
+		foodNum.text = GameManager.Instance.data.foodCollectedToday.ToString();
+		clothingNum.text = GameManager.Instance.data.clothesCollectedToday.ToString();
+		GameManager.Instance.data.itemsCollectedToday = 0;
+		GameManager.Instance.data.foodCollectedToday = 0;
+		GameManager.Instance.data.clothesCollectedToday = 0;
 		foreach (Commercial commercial in GameManager.Instance.data.newUnlockedCommercials){
 			GameObject newPanel = GameObject.Instantiate(Resources.Load("UI/panelText")) as GameObject;
 			newPanel.GetComponent<Text>().text = commercial.name;

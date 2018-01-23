@@ -17,6 +17,9 @@ public class GameData{
 	public List<string> newCollectedFood;
 	public List<string> collectedClothes;
 	public List<string> newCollectedClothes;
+	public int itemsCollectedToday;
+	public int clothesCollectedToday;
+	public int foodCollectedToday;
 	public SerializableDictionary<string, bool> itemCheckedOut;
 	public SerializableDictionary<string, bool> perks;
 	public string lastSavedPlayerPath;
@@ -325,7 +328,8 @@ public partial class GameManager : Singleton<GameManager> {
 	public bool CheckNewDayPrompt(){
 		if (data.days <= 1)
 			return false;
-		return data.newCollectedClothes.Count + data.newCollectedFood.Count + data.newCollectedItems.Count + data.newUnlockedCommercials.Count > 0;
+		// return data.newCollectedClothes.Count + data.newCollectedFood.Count + data.newCollectedItems.Count + data.newUnlockedCommercials.Count > 0;
+		return data.itemsCollectedToday + data.foodCollectedToday + data.clothesCollectedToday + data.newUnlockedCommercials.Count > 0;
 	}
 
 	public void NewGame(bool switchlevel=true){
@@ -532,17 +536,23 @@ public partial class GameManager : Singleton<GameManager> {
 			data.collectedObjects.Add(filename);
 			data.itemCheckedOut[filename] = true;
 			UINew.Instance.PopupCollected(obj);
-			if (obj.GetComponent<Edible>()){
-				data.collectedFood.Add(filename);
-				data.newCollectedFood.Add(filename);
+			Edible objectEdible = obj.GetComponent<Edible>();
+			if (objectEdible != null){
+				if (!objectEdible.inedible){
+					data.collectedFood.Add(filename);
+					data.newCollectedFood.Add(filename);
+					data.foodCollectedToday += 1;
+				}
 			}
 			if (obj.GetComponent<Uniform>() || obj.GetComponent<Hat>()){
 				data.collectedClothes.Add(filename);
 				data.newCollectedClothes.Add(filename);
+				data.clothesCollectedToday += 1;
 			}
 			if (obj.GetComponent<Pickup>()){
 				data.collectedItems.Add(filename);
 				data.newCollectedItems.Add(filename);
+				data.itemsCollectedToday += 1;
 			}
 		}
 	}
