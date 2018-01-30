@@ -48,7 +48,7 @@ public class Intrinsics : MonoBehaviour, ISaveable {
 	}
 	public void Start(){
 		SetBuffFX();
-		// IntrinsicsChanged();
+		IntrinsicsChanged();
 	}
 	public void SetBuffFX(){
 		foreach(KeyValuePair<BuffType, Buff> kvp in NetBuffs()){
