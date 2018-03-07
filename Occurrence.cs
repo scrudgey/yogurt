@@ -3,15 +3,15 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 //TODO: not all of these things need static constructors?
-public enum Rating{disturbing, disgusting, chaos, offensive, positive};
+public enum Rating { disturbing, disgusting, chaos, offensive, positive };
 public class Occurrence : MonoBehaviour {
     // An occurrence is a little bit of code that lives on a temporarily persistent flag in the world
     // that knows how to describe an event in terms of EventData. 
     // occurrences can also be noticed by perceptive components which use the flag properties to compose 
     // a stimulus.
     public List<OccurrenceData> data = new List<OccurrenceData>();
-    public static EventData Yogurt(GameObject eater){
-        EventData data = new EventData(positive:1);
+    public static EventData Yogurt(GameObject eater) {
+        EventData data = new EventData(positive: 1);
         data.key = "yogurt";
         data.val = 1f;
         data.desc = "yogurts eaten";
@@ -19,17 +19,17 @@ public class Occurrence : MonoBehaviour {
         data.whatHappened = Toolbox.Instance.GetName(eater) + " ate yogurt";
         return data;
     }
-    public static EventData Vomit(GameObject vomiter, GameObject vomited){
-        EventData data = new EventData(disturbing:1, disgusting:2, chaos:1);
+    public static EventData Vomit(GameObject vomiter, GameObject vomited) {
+        EventData data = new EventData(disturbing: 1, disgusting: 2, chaos: 1);
         data.key = "vomit";
         data.val = 1f;
         data.desc = "vomit events";
         data.noun = "vomiting";
-        data.whatHappened = Toolbox.Instance.GetName(vomiter) + " vomited up "+Toolbox.Instance.GetName(vomited);
+        data.whatHappened = Toolbox.Instance.GetName(vomiter) + " vomited up " + Toolbox.Instance.GetName(vomited);
         return data;
     }
-    public static EventData VomitYogurt(GameObject vomiter){
-        EventData data = new EventData(disturbing:1, disgusting:2, chaos:2, positive:-2);
+    public static EventData VomitYogurt(GameObject vomiter) {
+        EventData data = new EventData(disturbing: 1, disgusting: 2, chaos: 2, positive: -2);
         data.key = "yogurt_vomit";
         data.val = 1f;
         data.desc = "yogurt emesis event";
@@ -37,8 +37,8 @@ public class Occurrence : MonoBehaviour {
         data.whatHappened = Toolbox.Instance.GetName(vomiter) + " vomited up yogurt";
         return data;
     }
-    public static EventData VomitEat(GameObject eater){
-        EventData data = new EventData(disturbing:2, disgusting:2, chaos:2);
+    public static EventData VomitEat(GameObject eater) {
+        EventData data = new EventData(disturbing: 2, disgusting: 2, chaos: 2);
         data.key = "vomit_eat";
         data.val = 1f;
         data.desc = "vomit eaten";
@@ -46,8 +46,8 @@ public class Occurrence : MonoBehaviour {
         data.whatHappened = Toolbox.Instance.GetName(eater) + " ate vomit";
         return data;
     }
-    public static EventData YogurtVomitEat(GameObject eater){
-        EventData data = new EventData(disturbing:2, disgusting:2, chaos:2, positive:-1);
+    public static EventData YogurtVomitEat(GameObject eater) {
+        EventData data = new EventData(disturbing: 2, disgusting: 2, chaos: 2, positive: -1);
         data.key = "yogurt_vomit_eat";
         data.val = 1f;
         data.desc = "eating yogurt vomit";
@@ -55,8 +55,8 @@ public class Occurrence : MonoBehaviour {
         data.whatHappened = Toolbox.Instance.GetName(eater) + " ate vomited-up yogurt";
         return data;
     }
-    public static EventData YogurtFloor(GameObject eater){
-        EventData data = new EventData(disgusting:1, chaos:1);
+    public static EventData YogurtFloor(GameObject eater) {
+        EventData data = new EventData(disgusting: 1, chaos: 1);
         data.key = "yogurt_floor";
         data.val = 1f;
         data.desc = "yogurt eaten off the floor";
@@ -64,8 +64,8 @@ public class Occurrence : MonoBehaviour {
         data.whatHappened = Toolbox.Instance.GetName(eater) + " ate yogurt off the floor";
         return data;
     }
-    public static EventData TableFire(){
-        EventData data = new EventData(disturbing:1, chaos:2);
+    public static EventData TableFire() {
+        EventData data = new EventData(disturbing: 1, chaos: 2);
         data.key = "table_fire";
         data.val = 1f;
         data.desc = "table set on fire";
@@ -73,8 +73,8 @@ public class Occurrence : MonoBehaviour {
         data.whatHappened = "the table was set on fire";
         return data;
     }
-    public static EventData Cannibalism(GameObject cannibal){
-        EventData data = new EventData(offensive:4, disgusting:3, disturbing:3, chaos:3, positive:-3);
+    public static EventData Cannibalism(GameObject cannibal) {
+        EventData data = new EventData(offensive: 4, disgusting: 3, disturbing: 3, chaos: 3, positive: -3);
         data.key = "cannibalism";
         data.val = 1f;
         data.desc = "acts of cannibalism";
@@ -82,8 +82,8 @@ public class Occurrence : MonoBehaviour {
         data.whatHappened = Toolbox.Instance.GetName(cannibal) + " commited cannibalism";
         return data;
     }
-    public static EventData Death(GameObject dead){
-        EventData data = new EventData(offensive:4, disgusting:3, disturbing:4, chaos:4, positive:-3);
+    public static EventData Death(GameObject dead) {
+        EventData data = new EventData(offensive: 4, disgusting: 3, disturbing: 4, chaos: 4, positive: -3);
         data.key = "death";
         data.val = 1f;
         data.desc = "deaths";
@@ -91,8 +91,8 @@ public class Occurrence : MonoBehaviour {
         data.whatHappened = Toolbox.Instance.GetName(dead) + " died";
         return data;
     }
-    public static EventData Eggplant(GameObject eater){
-        EventData data = new EventData(positive:1);
+    public static EventData Eggplant(GameObject eater) {
+        EventData data = new EventData(positive: 1);
         data.key = "eggplant";
         data.val = 1f;
         data.desc = "eggplants eaten";
@@ -118,9 +118,9 @@ public class EventData {
         {Rating.offensive, 0f},
         {Rating.positive, 0f}
     };
-    public EventData(){
+    public EventData() {
     }
-    public EventData(float disturbing=0, float disgusting=0, float chaos=0, float offensive=0, float positive=0){
+    public EventData(float disturbing = 0, float disgusting = 0, float chaos = 0, float offensive = 0, float positive = 0) {
         ratings[Rating.disturbing] = disturbing;
         ratings[Rating.disgusting] = disgusting;
         ratings[Rating.chaos] = chaos;
@@ -128,51 +128,50 @@ public class EventData {
         ratings[Rating.positive] = positive;
         // this.disturbing = disturbing;
     }
-    public bool MatchSpecific(EventData other){
+    public bool MatchSpecific(EventData other) {
         // TODO: include descriptions?
         // match on descriptions?
         bool match = true;
-        foreach(Rating key in ratings.Keys){
+        foreach (Rating key in ratings.Keys) {
             match &= ratings[key] == other.ratings[key];
         }
         return match;
     }
-    public Rating Quality(){
+    public Rating Quality() {
         Dictionary<Rating, float> absRates = new Dictionary<Rating, float>();
-        foreach(Rating key in ratings.Keys){
+        foreach (Rating key in ratings.Keys) {
             absRates[key] = Mathf.Abs(ratings[key]);
         }
         return absRates.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
     }
-    public string Adjective(){
+    public string Adjective() {
         Grammar grammar = new Grammar();
-		grammar.Load("ratings");
+        grammar.Load("ratings");
         Rating rate = Quality();
         if (ratings[rate] == 0)
             return "none";
-        string key = rate.ToString()+"_"+ratings[rate].ToString();
-        return grammar.Parse("{"+key+"}");
+        string key = rate.ToString() + "_" + ratings[rate].ToString();
+        return grammar.Parse("{" + key + "}");
     }
 }
-public class OccurrenceData
-{
+public class OccurrenceData {
     public List<EventData> events = new List<EventData>();
-    public virtual void CalculateDescriptions(){
+    public virtual void CalculateDescriptions() {
         Debug.Log("base calculatedescriptions was called.");
     }
-    public OccurrenceData(){ }
+    public OccurrenceData() { }
 }
 public class OccurrenceFire : OccurrenceData {
     public GameObject flamingObject;
     public bool extinguished;
-    public override void CalculateDescriptions(){
-        EventData data = new EventData(chaos:2);
+    public override void CalculateDescriptions() {
+        EventData data = new EventData(chaos: 2);
         string objectName = Toolbox.Instance.GetName(flamingObject);
         data.noun = "fire";
-        data.whatHappened = "the "+objectName+" burned";
+        data.whatHappened = "the " + objectName + " burned";
         events.Add(data);
-        if (objectName == "table"){
-            if (extinguished == false){
+        if (objectName == "table") {
+            if (extinguished == false) {
                 events.Add(Occurrence.TableFire());
             }
         }
@@ -185,59 +184,59 @@ public class OccurrenceEat : OccurrenceData {
     public override void CalculateDescriptions() {
         EventData data = new EventData();
         data.noun = "eating";
-        data.whatHappened = Toolbox.Instance.GetName(eater) + " ate "+edible.name;
-        if (edible.offal){
+        data.whatHappened = Toolbox.Instance.GetName(eater) + " ate " + edible.name;
+        if (edible.offal) {
             data.ratings[Rating.disgusting] = 2;
             data.ratings[Rating.chaos] = 2;
         }
-        if (edible.immoral){
+        if (edible.immoral) {
             data.ratings[Rating.disturbing] = 3;
             data.ratings[Rating.offensive] = 3;
             data.ratings[Rating.chaos] = 3;
         }
         events.Add(data);
-        if (edible.vomit){
+        if (edible.vomit) {
             events.Add(Occurrence.VomitEat(eater));
-		}
-        if (liquid != null){
-            if (liquid.name == "yogurt"){
+        }
+        if (liquid != null) {
+            if (liquid.name == "yogurt") {
                 events.Add(Occurrence.Yogurt(eater));
-                if (liquid.vomit){
+                if (liquid.vomit) {
                     events.Add(Occurrence.YogurtVomitEat(eater));
                 }
-                if (edible.gameObject.name == "Puddle(Clone)"){
+                if (edible.gameObject.name == "Puddle(Clone)") {
                     events.Add(Occurrence.YogurtFloor(eater));
                 }
             }
-        } 
-        if (Toolbox.Instance.GetName(edible.gameObject) == "eggplant"){
+        }
+        if (Toolbox.Instance.GetName(edible.gameObject) == "eggplant") {
             events.Add(Occurrence.Eggplant(eater));
         }
-        if (edible.human){
+        if (edible.human) {
             events.Add(Occurrence.Cannibalism(eater));
-		}
+        }
     }
 }
 public class OccurrenceDeath : OccurrenceData {
     public GameObject dead;
-    public override void CalculateDescriptions(){
+    public override void CalculateDescriptions() {
         events.Add(Occurrence.Death(dead));
     }
 }
 public class OccurrenceVomit : OccurrenceData {
     public GameObject vomiter;
     public GameObject vomit;
-    public override void CalculateDescriptions(){
+    public override void CalculateDescriptions() {
         if (vomit == null | vomiter == null)
             return;
         events.Add(Occurrence.Vomit(vomiter, vomit));
         MonoLiquid mliquid = vomit.GetComponent<MonoLiquid>();
         if (mliquid == null)
             return;
-        if (mliquid.liquid != null){
+        if (mliquid.liquid != null) {
             if (mliquid.liquid.name == "yogurt")
                 events.Add(Occurrence.VomitYogurt(vomiter));
-        } 
+        }
     }
 }
 public class OccurrenceSpeech : OccurrenceData {
@@ -247,36 +246,36 @@ public class OccurrenceSpeech : OccurrenceData {
     public string line;
     public bool threat;
     public bool insult;
-    public override void CalculateDescriptions(){
+    public override void CalculateDescriptions() {
         string speakerName = Toolbox.Instance.GetName(speaker);
         string targetName = "";
         if (target != null)
             targetName = Toolbox.Instance.GetName(target);
         EventData data = null;
-        if (events.Count > 0){
+        if (events.Count > 0) {
             data = events[0];
         } else {
             data = new EventData();
         }
         data.whatHappened = speakerName + " said " + line;
         data.noun = "dialogue";
-        data.transcriptLine = speakerName + ": "+line;
+        data.transcriptLine = speakerName + ": " + line;
         // insert bits here for script desc, transcript line
-        if (threat){
+        if (threat) {
             data.whatHappened = speakerName + " threatened " + targetName;
             data.noun = "threats";
             data.ratings[Rating.chaos] = 1;
             data.ratings[Rating.offensive] = Random.Range(2, 3);
             data.ratings[Rating.disturbing] = 2;
         }
-        if (insult){
+        if (insult) {
             data.whatHappened = speakerName + " insulted " + targetName;
             data.noun = "insults";
             data.ratings[Rating.chaos] = 1;
             data.ratings[Rating.offensive] = Random.Range(2, 3);
             data.ratings[Rating.disturbing] = 2;
         }
-        if (events.Count == 0){
+        if (events.Count == 0) {
             events.Add(data);
         }
     }
@@ -284,10 +283,10 @@ public class OccurrenceSpeech : OccurrenceData {
 public class OccurrenceViolence : OccurrenceData {
     public GameObject attacker;
     public GameObject victim;
-    public override void CalculateDescriptions(){
+    public override void CalculateDescriptions() {
         string attackerName = Toolbox.Instance.GetName(attacker);
         string victimName = Toolbox.Instance.GetName(victim);
-        EventData data = new EventData(disturbing:2, chaos:2);
+        EventData data = new EventData(disturbing: 2, chaos: 2);
         data.noun = "violence";
         data.whatHappened = attackerName + " attacked " + victimName;
         events.Add(data);

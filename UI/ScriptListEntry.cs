@@ -10,45 +10,45 @@ public class ScriptListEntry : MonoBehaviour {
     Color normColor;
     Color completeColor = Color.black;
     public bool highlight = false;
-    void Start(){
+    void Start() {
         button = GetComponent<Button>();
         highColor = button.colors.highlightedColor;
         normColor = button.colors.normalColor;
 
         ColorBlock block = button.colors;
-        if (complete){
+        if (complete) {
             block.normalColor = completeColor;
         } else {
             block.normalColor = normColor;
         }
         button.colors = block;
     }
-    public void Configure(Commercial c, ScriptSelectionMenu scriptMenu){
+    public void Configure(Commercial c, ScriptSelectionMenu scriptMenu) {
         Text entryText = transform.Find("ScriptName").GetComponent<Text>();
         commercial = c;
         entryText.text = c.name;
         menu = scriptMenu;
         complete = false;
-        foreach(Commercial completed in GameManager.Instance.data.completeCommercials){
+        foreach (Commercial completed in GameManager.Instance.data.completeCommercials) {
             if (completed.name == c.name)
                 complete = true;
         }
     }
-    public void Clicked(){
-        if (menu){
+    public void Clicked() {
+        if (menu) {
             menu.ClickedScript(this);
         }
     }
-    void Update(){
-        if (highlight){
+    void Update() {
+        if (highlight) {
             ColorBlock block = button.colors;
             block.normalColor = highColor;
             button.colors = block;
-        } 
+        }
     }
-    public void ResetColors(){
+    public void ResetColors() {
         ColorBlock block = button.colors;
-        if (complete){
+        if (complete) {
             block.normalColor = completeColor;
         } else {
             block.normalColor = normColor;

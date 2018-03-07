@@ -29,8 +29,7 @@ using System;
 // using System.ComponentModel;
 // using System.Globalization;
 
-namespace Easings
-{
+namespace Easings {
     /// <summary>
     /// Animates the value of a double property between two target values using 
     /// Robert Penner's easing equations for interpolation over a specified Duration.
@@ -62,8 +61,7 @@ namespace Easings
     /// </Control.Triggers>
     /// </code>
     /// </example>
-    public class PennerDoubleAnimation 
-    {
+    public class PennerDoubleAnimation {
 
         #region Equations
 
@@ -79,8 +77,7 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double Linear( double t, double b, double c, double d )
-        {
+        public static double Linear(double t, double b, double c, double d) {
             return c * t / d + b;
         }
 
@@ -97,9 +94,8 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double ExpoEaseOut( double t, double b, double c, double d )
-        {
-            return ( t == d ) ? b + c : c * ( -Math.Pow( 2, -10 * t / d ) + 1 ) + b;
+        public static double ExpoEaseOut(double t, double b, double c, double d) {
+            return (t == d) ? b + c : c * (-Math.Pow(2, -10 * t / d) + 1) + b;
         }
 
         /// <summary>
@@ -111,9 +107,8 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double ExpoEaseIn( double t, double b, double c, double d )
-        {
-            return ( t == 0 ) ? b : c * Math.Pow( 2, 10 * ( t / d - 1 ) ) + b;
+        public static double ExpoEaseIn(double t, double b, double c, double d) {
+            return (t == 0) ? b : c * Math.Pow(2, 10 * (t / d - 1)) + b;
         }
 
         /// <summary>
@@ -125,18 +120,17 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double ExpoEaseInOut( double t, double b, double c, double d )
-        {
-            if ( t == 0 )
+        public static double ExpoEaseInOut(double t, double b, double c, double d) {
+            if (t == 0)
                 return b;
 
-            if ( t == d )
+            if (t == d)
                 return b + c;
 
-            if ( ( t /= d / 2 ) < 1 )
-                return c / 2 * Math.Pow( 2, 10 * ( t - 1 ) ) + b;
+            if ((t /= d / 2) < 1)
+                return c / 2 * Math.Pow(2, 10 * (t - 1)) + b;
 
-            return c / 2 * ( -Math.Pow( 2, -10 * --t ) + 2 ) + b;
+            return c / 2 * (-Math.Pow(2, -10 * --t) + 2) + b;
         }
 
         /// <summary>
@@ -148,12 +142,11 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double ExpoEaseOutIn( double t, double b, double c, double d )
-        {
-            if ( t < d / 2 )
-                return ExpoEaseOut( t * 2, b, c / 2, d );
+        public static double ExpoEaseOutIn(double t, double b, double c, double d) {
+            if (t < d / 2)
+                return ExpoEaseOut(t * 2, b, c / 2, d);
 
-            return ExpoEaseIn( ( t * 2 ) - d, b + c / 2, c / 2, d );
+            return ExpoEaseIn((t * 2) - d, b + c / 2, c / 2, d);
         }
 
         #endregion
@@ -169,9 +162,8 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double CircEaseOut( double t, double b, double c, double d )
-        {
-            return c * Math.Sqrt( 1 - ( t = t / d - 1 ) * t ) + b;
+        public static double CircEaseOut(double t, double b, double c, double d) {
+            return c * Math.Sqrt(1 - (t = t / d - 1) * t) + b;
         }
 
         /// <summary>
@@ -183,9 +175,8 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double CircEaseIn( double t, double b, double c, double d )
-        {
-            return -c * ( Math.Sqrt( 1 - ( t /= d ) * t ) - 1 ) + b;
+        public static double CircEaseIn(double t, double b, double c, double d) {
+            return -c * (Math.Sqrt(1 - (t /= d) * t) - 1) + b;
         }
 
         /// <summary>
@@ -197,12 +188,11 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double CircEaseInOut( double t, double b, double c, double d )
-        {
-            if ( ( t /= d / 2 ) < 1 )
-                return -c / 2 * ( Math.Sqrt( 1 - t * t ) - 1 ) + b;
+        public static double CircEaseInOut(double t, double b, double c, double d) {
+            if ((t /= d / 2) < 1)
+                return -c / 2 * (Math.Sqrt(1 - t * t) - 1) + b;
 
-            return c / 2 * ( Math.Sqrt( 1 - ( t -= 2 ) * t ) + 1 ) + b;
+            return c / 2 * (Math.Sqrt(1 - (t -= 2) * t) + 1) + b;
         }
 
         /// <summary>
@@ -214,12 +204,11 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double CircEaseOutIn( double t, double b, double c, double d )
-        {
-            if ( t < d / 2 )
-                return CircEaseOut( t * 2, b, c / 2, d );
+        public static double CircEaseOutIn(double t, double b, double c, double d) {
+            if (t < d / 2)
+                return CircEaseOut(t * 2, b, c / 2, d);
 
-            return CircEaseIn( ( t * 2 ) - d, b + c / 2, c / 2, d );
+            return CircEaseIn((t * 2) - d, b + c / 2, c / 2, d);
         }
 
         #endregion
@@ -235,9 +224,8 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double QuadEaseOut( double t, double b, double c, double d )
-        {
-            return -c * ( t /= d ) * ( t - 2 ) + b;
+        public static double QuadEaseOut(double t, double b, double c, double d) {
+            return -c * (t /= d) * (t - 2) + b;
         }
 
         /// <summary>
@@ -249,9 +237,8 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double QuadEaseIn( double t, double b, double c, double d )
-        {
-            return c * ( t /= d ) * t + b;
+        public static double QuadEaseIn(double t, double b, double c, double d) {
+            return c * (t /= d) * t + b;
         }
 
         /// <summary>
@@ -263,12 +250,11 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double QuadEaseInOut( double t, double b, double c, double d )
-        {
-            if ( ( t /= d / 2 ) < 1 )
+        public static double QuadEaseInOut(double t, double b, double c, double d) {
+            if ((t /= d / 2) < 1)
                 return c / 2 * t * t + b;
 
-            return -c / 2 * ( ( --t ) * ( t - 2 ) - 1 ) + b;
+            return -c / 2 * ((--t) * (t - 2) - 1) + b;
         }
 
         /// <summary>
@@ -280,12 +266,11 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double QuadEaseOutIn( double t, double b, double c, double d )
-        {
-            if ( t < d / 2 )
-                return QuadEaseOut( t * 2, b, c / 2, d );
+        public static double QuadEaseOutIn(double t, double b, double c, double d) {
+            if (t < d / 2)
+                return QuadEaseOut(t * 2, b, c / 2, d);
 
-            return QuadEaseIn( ( t * 2 ) - d, b + c / 2, c / 2, d );
+            return QuadEaseIn((t * 2) - d, b + c / 2, c / 2, d);
         }
 
         #endregion
@@ -301,9 +286,8 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double SineEaseOut( double t, double b, double c, double d )
-        {
-            return c * Math.Sin( t / d * ( Math.PI / 2 ) ) + b;
+        public static double SineEaseOut(double t, double b, double c, double d) {
+            return c * Math.Sin(t / d * (Math.PI / 2)) + b;
         }
 
         /// <summary>
@@ -315,9 +299,8 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double SineEaseIn( double t, double b, double c, double d )
-        {
-            return -c * Math.Cos( t / d * ( Math.PI / 2 ) ) + c + b;
+        public static double SineEaseIn(double t, double b, double c, double d) {
+            return -c * Math.Cos(t / d * (Math.PI / 2)) + c + b;
         }
 
         /// <summary>
@@ -329,12 +312,11 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double SineEaseInOut( double t, double b, double c, double d )
-        {
-            if ( ( t /= d / 2 ) < 1 )
-                return c / 2 * ( Math.Sin( Math.PI * t / 2 ) ) + b;
+        public static double SineEaseInOut(double t, double b, double c, double d) {
+            if ((t /= d / 2) < 1)
+                return c / 2 * (Math.Sin(Math.PI * t / 2)) + b;
 
-            return -c / 2 * ( Math.Cos( Math.PI * --t / 2 ) - 2 ) + b;
+            return -c / 2 * (Math.Cos(Math.PI * --t / 2) - 2) + b;
         }
 
         /// <summary>
@@ -346,12 +328,11 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double SineEaseOutIn( double t, double b, double c, double d )
-        {
-            if ( t < d / 2 )
-                return SineEaseOut( t * 2, b, c / 2, d );
+        public static double SineEaseOutIn(double t, double b, double c, double d) {
+            if (t < d / 2)
+                return SineEaseOut(t * 2, b, c / 2, d);
 
-            return SineEaseIn( ( t * 2 ) - d, b + c / 2, c / 2, d );
+            return SineEaseIn((t * 2) - d, b + c / 2, c / 2, d);
         }
 
         #endregion
@@ -367,9 +348,8 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double CubicEaseOut( double t, double b, double c, double d )
-        {
-            return c * ( ( t = t / d - 1 ) * t * t + 1 ) + b;
+        public static double CubicEaseOut(double t, double b, double c, double d) {
+            return c * ((t = t / d - 1) * t * t + 1) + b;
         }
 
         /// <summary>
@@ -381,9 +361,8 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double CubicEaseIn( double t, double b, double c, double d )
-        {
-            return c * ( t /= d ) * t * t + b;
+        public static double CubicEaseIn(double t, double b, double c, double d) {
+            return c * (t /= d) * t * t + b;
         }
 
         /// <summary>
@@ -395,12 +374,11 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double CubicEaseInOut( double t, double b, double c, double d )
-        {
-            if ( ( t /= d / 2 ) < 1 )
+        public static double CubicEaseInOut(double t, double b, double c, double d) {
+            if ((t /= d / 2) < 1)
                 return c / 2 * t * t * t + b;
 
-            return c / 2 * ( ( t -= 2 ) * t * t + 2 ) + b;
+            return c / 2 * ((t -= 2) * t * t + 2) + b;
         }
 
         /// <summary>
@@ -412,12 +390,11 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double CubicEaseOutIn( double t, double b, double c, double d )
-        {
-            if ( t < d / 2 )
-                return CubicEaseOut( t * 2, b, c / 2, d );
+        public static double CubicEaseOutIn(double t, double b, double c, double d) {
+            if (t < d / 2)
+                return CubicEaseOut(t * 2, b, c / 2, d);
 
-            return CubicEaseIn( ( t * 2 ) - d, b + c / 2, c / 2, d );
+            return CubicEaseIn((t * 2) - d, b + c / 2, c / 2, d);
         }
 
         #endregion
@@ -433,9 +410,8 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double QuartEaseOut( double t, double b, double c, double d )
-        {
-            return -c * ( ( t = t / d - 1 ) * t * t * t - 1 ) + b;
+        public static double QuartEaseOut(double t, double b, double c, double d) {
+            return -c * ((t = t / d - 1) * t * t * t - 1) + b;
         }
 
         /// <summary>
@@ -447,9 +423,8 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double QuartEaseIn( double t, double b, double c, double d )
-        {
-            return c * ( t /= d ) * t * t * t + b;
+        public static double QuartEaseIn(double t, double b, double c, double d) {
+            return c * (t /= d) * t * t * t + b;
         }
 
         /// <summary>
@@ -461,12 +436,11 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double QuartEaseInOut( double t, double b, double c, double d )
-        {
-            if ( ( t /= d / 2 ) < 1 )
+        public static double QuartEaseInOut(double t, double b, double c, double d) {
+            if ((t /= d / 2) < 1)
                 return c / 2 * t * t * t * t + b;
 
-            return -c / 2 * ( ( t -= 2 ) * t * t * t - 2 ) + b;
+            return -c / 2 * ((t -= 2) * t * t * t - 2) + b;
         }
 
         /// <summary>
@@ -478,12 +452,11 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double QuartEaseOutIn( double t, double b, double c, double d )
-        {
-            if ( t < d / 2 )
-                return QuartEaseOut( t * 2, b, c / 2, d );
+        public static double QuartEaseOutIn(double t, double b, double c, double d) {
+            if (t < d / 2)
+                return QuartEaseOut(t * 2, b, c / 2, d);
 
-            return QuartEaseIn( ( t * 2 ) - d, b + c / 2, c / 2, d );
+            return QuartEaseIn((t * 2) - d, b + c / 2, c / 2, d);
         }
 
         #endregion
@@ -499,9 +472,8 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double QuintEaseOut( double t, double b, double c, double d )
-        {
-            return c * ( ( t = t / d - 1 ) * t * t * t * t + 1 ) + b;
+        public static double QuintEaseOut(double t, double b, double c, double d) {
+            return c * ((t = t / d - 1) * t * t * t * t + 1) + b;
         }
 
         /// <summary>
@@ -513,9 +485,8 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double QuintEaseIn( double t, double b, double c, double d )
-        {
-            return c * ( t /= d ) * t * t * t * t + b;
+        public static double QuintEaseIn(double t, double b, double c, double d) {
+            return c * (t /= d) * t * t * t * t + b;
         }
 
         /// <summary>
@@ -527,11 +498,10 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double QuintEaseInOut( double t, double b, double c, double d )
-        {
-            if ( ( t /= d / 2 ) < 1 )
+        public static double QuintEaseInOut(double t, double b, double c, double d) {
+            if ((t /= d / 2) < 1)
                 return c / 2 * t * t * t * t * t + b;
-            return c / 2 * ( ( t -= 2 ) * t * t * t * t + 2 ) + b;
+            return c / 2 * ((t -= 2) * t * t * t * t + 2) + b;
         }
 
         /// <summary>
@@ -543,11 +513,10 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double QuintEaseOutIn( double t, double b, double c, double d )
-        {
-            if ( t < d / 2 )
-                return QuintEaseOut( t * 2, b, c / 2, d );
-            return QuintEaseIn( ( t * 2 ) - d, b + c / 2, c / 2, d );
+        public static double QuintEaseOutIn(double t, double b, double c, double d) {
+            if (t < d / 2)
+                return QuintEaseOut(t * 2, b, c / 2, d);
+            return QuintEaseIn((t * 2) - d, b + c / 2, c / 2, d);
         }
 
         #endregion
@@ -563,15 +532,14 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double ElasticEaseOut( double t, double b, double c, double d )
-        {
-            if ( ( t /= d ) == 1 )
+        public static double ElasticEaseOut(double t, double b, double c, double d) {
+            if ((t /= d) == 1)
                 return b + c;
 
             double p = d * .3;
             double s = p / 4;
 
-            return ( c * Math.Pow( 2, -10 * t ) * Math.Sin( ( t * d - s ) * ( 2 * Math.PI ) / p ) + c + b );
+            return (c * Math.Pow(2, -10 * t) * Math.Sin((t * d - s) * (2 * Math.PI) / p) + c + b);
         }
 
         /// <summary>
@@ -583,15 +551,14 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double ElasticEaseIn( double t, double b, double c, double d )
-        {
-            if ( ( t /= d ) == 1 )
+        public static double ElasticEaseIn(double t, double b, double c, double d) {
+            if ((t /= d) == 1)
                 return b + c;
 
             double p = d * .3;
             double s = p / 4;
 
-            return -( c * Math.Pow( 2, 10 * ( t -= 1 ) ) * Math.Sin( ( t * d - s ) * ( 2 * Math.PI ) / p ) ) + b;
+            return -(c * Math.Pow(2, 10 * (t -= 1)) * Math.Sin((t * d - s) * (2 * Math.PI) / p)) + b;
         }
 
         /// <summary>
@@ -603,17 +570,16 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double ElasticEaseInOut( double t, double b, double c, double d )
-        {
-            if ( ( t /= d / 2 ) == 2 )
+        public static double ElasticEaseInOut(double t, double b, double c, double d) {
+            if ((t /= d / 2) == 2)
                 return b + c;
 
-            double p = d * ( .3 * 1.5 );
+            double p = d * (.3 * 1.5);
             double s = p / 4;
 
-            if ( t < 1 )
-                return -.5 * ( c * Math.Pow( 2, 10 * ( t -= 1 ) ) * Math.Sin( ( t * d - s ) * ( 2 * Math.PI ) / p ) ) + b;
-            return c * Math.Pow( 2, -10 * ( t -= 1 ) ) * Math.Sin( ( t * d - s ) * ( 2 * Math.PI ) / p ) * .5 + c + b;
+            if (t < 1)
+                return -.5 * (c * Math.Pow(2, 10 * (t -= 1)) * Math.Sin((t * d - s) * (2 * Math.PI) / p)) + b;
+            return c * Math.Pow(2, -10 * (t -= 1)) * Math.Sin((t * d - s) * (2 * Math.PI) / p) * .5 + c + b;
         }
 
         /// <summary>
@@ -625,11 +591,10 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double ElasticEaseOutIn( double t, double b, double c, double d )
-        {
-            if ( t < d / 2 )
-                return ElasticEaseOut( t * 2, b, c / 2, d );
-            return ElasticEaseIn( ( t * 2 ) - d, b + c / 2, c / 2, d );
+        public static double ElasticEaseOutIn(double t, double b, double c, double d) {
+            if (t < d / 2)
+                return ElasticEaseOut(t * 2, b, c / 2, d);
+            return ElasticEaseIn((t * 2) - d, b + c / 2, c / 2, d);
         }
 
         #endregion
@@ -645,16 +610,15 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double BounceEaseOut( double t, double b, double c, double d )
-        {
-            if ( ( t /= d ) < ( 1 / 2.75 ) )
-                return c * ( 7.5625 * t * t ) + b;
-            else if ( t < ( 2 / 2.75 ) )
-                return c * ( 7.5625 * ( t -= ( 1.5 / 2.75 ) ) * t + .75 ) + b;
-            else if ( t < ( 2.5 / 2.75 ) )
-                return c * ( 7.5625 * ( t -= ( 2.25 / 2.75 ) ) * t + .9375 ) + b;
+        public static double BounceEaseOut(double t, double b, double c, double d) {
+            if ((t /= d) < (1 / 2.75))
+                return c * (7.5625 * t * t) + b;
+            else if (t < (2 / 2.75))
+                return c * (7.5625 * (t -= (1.5 / 2.75)) * t + .75) + b;
+            else if (t < (2.5 / 2.75))
+                return c * (7.5625 * (t -= (2.25 / 2.75)) * t + .9375) + b;
             else
-                return c * ( 7.5625 * ( t -= ( 2.625 / 2.75 ) ) * t + .984375 ) + b;
+                return c * (7.5625 * (t -= (2.625 / 2.75)) * t + .984375) + b;
         }
 
         /// <summary>
@@ -666,9 +630,8 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double BounceEaseIn( double t, double b, double c, double d )
-        {
-            return c - BounceEaseOut( d - t, 0, c, d ) + b;
+        public static double BounceEaseIn(double t, double b, double c, double d) {
+            return c - BounceEaseOut(d - t, 0, c, d) + b;
         }
 
         /// <summary>
@@ -680,12 +643,11 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double BounceEaseInOut( double t, double b, double c, double d )
-        {
-            if ( t < d / 2 )
-                return BounceEaseIn( t * 2, 0, c, d ) * .5 + b;
+        public static double BounceEaseInOut(double t, double b, double c, double d) {
+            if (t < d / 2)
+                return BounceEaseIn(t * 2, 0, c, d) * .5 + b;
             else
-                return BounceEaseOut( t * 2 - d, 0, c, d ) * .5 + c * .5 + b;
+                return BounceEaseOut(t * 2 - d, 0, c, d) * .5 + c * .5 + b;
         }
 
         /// <summary>
@@ -697,11 +659,10 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double BounceEaseOutIn( double t, double b, double c, double d )
-        {
-            if ( t < d / 2 )
-                return BounceEaseOut( t * 2, b, c / 2, d );
-            return BounceEaseIn( ( t * 2 ) - d, b + c / 2, c / 2, d );
+        public static double BounceEaseOutIn(double t, double b, double c, double d) {
+            if (t < d / 2)
+                return BounceEaseOut(t * 2, b, c / 2, d);
+            return BounceEaseIn((t * 2) - d, b + c / 2, c / 2, d);
         }
 
         #endregion
@@ -717,9 +678,8 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double BackEaseOut( double t, double b, double c, double d )
-        {
-            return c * ( ( t = t / d - 1 ) * t * ( ( 1.70158 + 1 ) * t + 1.70158 ) + 1 ) + b;
+        public static double BackEaseOut(double t, double b, double c, double d) {
+            return c * ((t = t / d - 1) * t * ((1.70158 + 1) * t + 1.70158) + 1) + b;
         }
 
         /// <summary>
@@ -731,9 +691,8 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double BackEaseIn( double t, double b, double c, double d )
-        {
-            return c * ( t /= d ) * t * ( ( 1.70158 + 1 ) * t - 1.70158 ) + b;
+        public static double BackEaseIn(double t, double b, double c, double d) {
+            return c * (t /= d) * t * ((1.70158 + 1) * t - 1.70158) + b;
         }
 
         /// <summary>
@@ -745,12 +704,11 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double BackEaseInOut( double t, double b, double c, double d )
-        {
+        public static double BackEaseInOut(double t, double b, double c, double d) {
             double s = 1.70158;
-            if ( ( t /= d / 2 ) < 1 )
-                return c / 2 * ( t * t * ( ( ( s *= ( 1.525 ) ) + 1 ) * t - s ) ) + b;
-            return c / 2 * ( ( t -= 2 ) * t * ( ( ( s *= ( 1.525 ) ) + 1 ) * t + s ) + 2 ) + b;
+            if ((t /= d / 2) < 1)
+                return c / 2 * (t * t * (((s *= (1.525)) + 1) * t - s)) + b;
+            return c / 2 * ((t -= 2) * t * (((s *= (1.525)) + 1) * t + s) + 2) + b;
         }
 
         /// <summary>
@@ -762,11 +720,10 @@ namespace Easings
         /// <param name="c">Final value.</param>
         /// <param name="d">Duration of animation.</param>
         /// <returns>The correct value.</returns>
-        public static double BackEaseOutIn( double t, double b, double c, double d )
-        {
-            if ( t < d / 2 )
-                return BackEaseOut( t * 2, b, c / 2, d );
-            return BackEaseIn( ( t * 2 ) - d, b + c / 2, c / 2, d );
+        public static double BackEaseOutIn(double t, double b, double c, double d) {
+            if (t < d / 2)
+                return BackEaseOut(t * 2, b, c / 2, d);
+            return BackEaseIn((t * 2) - d, b + c / 2, c / 2, d);
         }
 
         #endregion

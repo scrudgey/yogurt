@@ -10,26 +10,26 @@ public class CommercialReportMenu : MonoBehaviour {
     public Commercial commercial;
     public CommercialDescription eventSet;
     private Canvas canvas;
-    public void Start(){
+    public void Start() {
         canvas = GetComponent<Canvas>();
         canvas.worldCamera = GameManager.Instance.cam;
         SetRefs();
         Controller.Instance.suspendInput = true;
     }
-    public void NewDayButton(){
+    public void NewDayButton() {
         UINew.Instance.CloseActiveMenu();
         Controller.Instance.suspendInput = false;
-		MySaver.Save();
-		// MySaver.SaveObjectDatabase();
+        MySaver.Save();
+        // MySaver.SaveObjectDatabase();
         GameManager.Instance.BoardRoomCutscene();
     }
-    public void ReviewButton(){
+    public void ReviewButton() {
         GameObject menuObject = Instantiate(Resources.Load("UI/FocusGroupMenu")) as GameObject;
         FocusGroupMenu menu = menuObject.GetComponent<FocusGroupMenu>();
         menu.commercial = commercial;
     }
-    private void SetRefs(){
-        if (!descriptionText){
+    private void SetRefs() {
+        if (!descriptionText) {
             descriptionText = transform.Find("Image/desc/WhatText").GetComponent<Text>();
             positiveScore = transform.Find("Image/Center/RightHalf/RatingsPanel/Positive/Amount").GetComponent<Text>();
             chaosScore = transform.Find("Image/Center/RightHalf/RatingsPanel/Chaos/Amount").GetComponent<Text>();
@@ -40,11 +40,11 @@ public class CommercialReportMenu : MonoBehaviour {
             eventText = transform.Find("Image/Center/RightHalf/EventsPanel/Text").GetComponent<Text>();
         }
     }
-    public void Report(Commercial activeCommercial){
+    public void Report(Commercial activeCommercial) {
         commercial.WriteReport();
         SetRefs();
         descriptionText.text = commercial.SentenceReview();
-        
+
         EventData total = commercial.Total();
 
         positiveScore.text = total.ratings[Rating.positive].ToString();
@@ -53,11 +53,11 @@ public class CommercialReportMenu : MonoBehaviour {
         disturbingScore.text = total.ratings[Rating.disturbing].ToString();
         offensiveScore.text = total.ratings[Rating.offensive].ToString();
 
-        foreach (string line in commercial.transcript){
+        foreach (string line in commercial.transcript) {
             transcript.text = transcript.text + line + "\n";
         }
         eventText.text = "";
-        foreach (string key in commercial.properties.Keys){
+        foreach (string key in commercial.properties.Keys) {
             CommercialProperty prop = commercial.properties[key];
             string line = prop.desc + ": " + prop.val.ToString() + "\n";
             eventText.text = eventText.text + line;

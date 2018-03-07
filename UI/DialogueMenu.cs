@@ -112,7 +112,7 @@ public class DialogueMenu : MonoBehaviour {
         endButton = transform.Find("base/buttons/End").GetComponent<Button>();
         // buyButton = transform.Find("base/buttons/Buy").GetComponent<Button>();
         // buttons.AddRange(new Button[] { giveButton, demandButton, insultButton, threatenButton, suggestButton, followButton, endButton, buyButton });
-        buttons.AddRange(new Button[] { giveButton, insultButton, threatenButton, suggestButton, followButton, endButton});
+        buttons.AddRange(new Button[] { giveButton, insultButton, threatenButton, suggestButton, followButton, endButton });
 
         promptText.text = "";
         choicePanel.SetActive(false);
@@ -135,7 +135,7 @@ public class DialogueMenu : MonoBehaviour {
             // demandButton.interactable = false;
         }
         // if (targetTrade == null) {
-            // buyButton.interactable = false;
+        // buyButton.interactable = false;
         // }
         portrait.sprite = target.portrait;
         speechText.text = instigator.name + " " + target.name;

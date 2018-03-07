@@ -13,18 +13,18 @@ public class Starfield : MonoBehaviour {
         Color.cyan
     };
 
-	void Start(){
-       BoxCollider2D collider = GetComponent<BoxCollider2D>();
-       extents = collider.bounds.extents;
-       star = Resources.Load("star_pixel") as GameObject;
-       for (int i = 0; i < maxStars; i++){
-           NewStar(true);
-       }
-	}
-    void NewStar(){
+    void Start() {
+        BoxCollider2D collider = GetComponent<BoxCollider2D>();
+        extents = collider.bounds.extents;
+        star = Resources.Load("star_pixel") as GameObject;
+        for (int i = 0; i < maxStars; i++) {
+            NewStar(true);
+        }
+    }
+    void NewStar() {
         NewStar(false);
     }
-    void NewStar(bool init){
+    void NewStar(bool init) {
         Vector3 position = new Vector3();
         position.x = Random.Range(-1.0f * extents.x, extents.x);
         position.y = Random.Range(-1.0f * extents.y, extents.y);
@@ -34,14 +34,14 @@ public class Starfield : MonoBehaviour {
         SpriteRenderer starRenderer = newStar.GetComponent<SpriteRenderer>();
         starRenderer.sortingLayerName = "background";
         starRenderer.color = colors[Random.Range(0, colors.Count)];
-        if (init){
+        if (init) {
             Destroy(newStar, Random.Range(0f, maxTime));
         } else {
             Destroy(newStar, Random.Range(minTime, maxTime));
         }
     }
-    void Update(){
-        if (transform.childCount < maxStars){
+    void Update() {
+        if (transform.childCount < maxStars) {
             NewStar();
         }
     }

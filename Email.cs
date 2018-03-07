@@ -21,7 +21,8 @@ public class Email {
             newEmail = serializer.Deserialize(reader) as Email;
             newEmail.filename = filename;
             return newEmail;
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             Debug.Log(e.Message);
             return null;
         }

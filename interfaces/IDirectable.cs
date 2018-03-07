@@ -1,4 +1,4 @@
 ﻿using UnityEngine;
 public interface IDirectable {
-	 void DirectionChange(Vector2 direction);
+    void DirectionChange(Vector2 direction);
 }

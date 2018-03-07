@@ -1,5 +1,5 @@
 ﻿
-public interface ISaveable{
-	void SaveData(PersistentComponent data);
-	void LoadData(PersistentComponent data);
+public interface ISaveable {
+    void SaveData(PersistentComponent data);
+    void LoadData(PersistentComponent data);
 }

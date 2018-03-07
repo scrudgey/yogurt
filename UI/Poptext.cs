@@ -18,7 +18,7 @@ public class Poptext : MonoBehaviour {
     public AudioClip incrementSound;
     public AudioClip decrementSound;
     public Commercial commercial;
-	public void Start () {
+    public void Start() {
         descriptionText = transform.Find("dock/Text").GetComponent<Text>();
         valueText = transform.Find("dock/value").GetComponent<Text>();
         hueShifter = transform.Find("dock/value").GetComponent<HueShiftText>();
@@ -28,30 +28,30 @@ public class Poptext : MonoBehaviour {
         audioSource.spatialBlend = 0;
         hueShifter.enabled = false;
         hueShifter.speedConst = 0.3f;
-        if (description.Count > 0){
+        if (description.Count > 0) {
             descriptionText.text = description[0] + ":";
             valueText.text = initValueList[0].ToString();
         }
-       StartCoroutine(Display());
-	}
-    IEnumerator Display (){
+        StartCoroutine(Display());
+    }
+    IEnumerator Display() {
         RectTransform rectTransform = dock.GetComponent<RectTransform>();
         Vector3 tempPos = rectTransform.anchoredPosition;
         float intime = 1f;
         float outtime = 1f;
         float hangtime = 0.55f;
-        
+
         float t = 0f;
         float y0 = tempPos.y;
-        while (t < intime){
+        while (t < intime) {
             t += Time.deltaTime;
             tempPos.y = easing(t, y0, 70.0f, intime);
             rectTransform.anchoredPosition = tempPos;
             yield return null;
         }
         yield return new WaitForSeconds(0.25f);
-        
-        while (finalValueList.Count > 0){
+
+        while (finalValueList.Count > 0) {
             descriptionText.text = description[0] + ":";
             description.Remove(description[0]);
 
@@ -59,53 +59,53 @@ public class Poptext : MonoBehaviour {
             float initValue = initValueList[0];
             finalValueList.RemoveAt(0);
             initValueList.RemoveAt(0);
-            if (description.Count > 0){
+            if (description.Count > 0) {
                 hangtime = 1.2f;
             }
 
             valueText.text = finalValue.ToString();
-            if (finalValue > initValue){
+            if (finalValue > initValue) {
                 audioSource.PlayOneShot(incrementSound);
             } else {
                 audioSource.PlayOneShot(decrementSound);
             }
-            if (colorFX){
+            if (colorFX) {
                 valueText.color = Color.red;
                 hueShifter.enabled = true;
             }
-            if (commercial != null){
+            if (commercial != null) {
                 // UI check if commercial is complete      
                 UINew.Instance.UpdateRecordButtons(commercial);
             }
-            
+
             yield return new WaitForSeconds(hangtime);
         }
-        
+
         hueShifter.enabled = false;
         valueText.color = Color.white;
-        
+
         t = 0f;
         y0 = tempPos.y;
-        while (t < outtime){
+        while (t < outtime) {
             t += Time.deltaTime;
             tempPos.y = easing(t, 35, -70.0f, outtime);
             rectTransform.anchoredPosition = tempPos;
             yield return null;
-        } 
-        if (finalValueList.Count > 0){
+        }
+        if (finalValueList.Count > 0) {
             yield return StartCoroutine(Display());
         } else {
             Destroy(gameObject);
             yield return null;
         }
     }
-    float easing(float t, float b, float c, float d){
-        t /= d/2;
-        if (t < 1){
-            return c/2 * t * t + b;
+    float easing(float t, float b, float c, float d) {
+        t /= d / 2;
+        if (t < 1) {
+            return c / 2 * t * t + b;
         } else {
             t -= 1;
-            return -c/2 * (t*(t-2) - 1) +b;
+            return -c / 2 * (t * (t - 2) - 1) + b;
         }
     }
 }
