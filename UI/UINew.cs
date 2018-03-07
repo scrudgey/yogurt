@@ -96,6 +96,7 @@ public class UINew: Singleton<UINew> {
 			GameObject target = Controller.Instance.GetBaseInteractive(top.transform);
 			if (target != null){
 				switch (Controller.Instance.currentSelect){
+                    case Controller.SelectType.command:
 					case Controller.SelectType.none:
 					Cursor.SetCursor(cursorHighlight, new Vector2(28, 16), CursorMode.Auto);
 					break;
@@ -120,7 +121,7 @@ public class UINew: Singleton<UINew> {
 				SetActionText("");
 			}
 		}
-		if (Controller.Instance.currentSelect == Controller.SelectType.swearAt || Controller.Instance.currentSelect == Controller.SelectType.insultAt || Controller.Instance.currentSelect == Controller.SelectType.hypnosis){
+		if (Controller.Instance.currentSelect != Controller.SelectType.none){
 			if (!cursorText.activeInHierarchy)
 				cursorText.SetActive(true);
 			Vector3 mousePos = Input.mousePosition;
@@ -134,6 +135,8 @@ public class UINew: Singleton<UINew> {
 				cursorTextText.text = "INSULT";
 			if (Controller.Instance.currentSelect == Controller.SelectType.hypnosis)
 				cursorTextText.text = "HYPNOTIZE";
+            if (Controller.Instance.currentSelect == Controller.SelectType.command)
+				cursorTextText.text = "COMMAND";
 		} else {
 			if (cursorText.activeInHierarchy)
 				cursorText.SetActive(false);
