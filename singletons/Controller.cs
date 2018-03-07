@@ -28,7 +28,7 @@ public class Controller : Singleton<Controller> {
 	public List<string> forbiddenColliders = new List<string> {"fire", "sightcone", "table", "background", "occurrenceFlag"};
 	public string message = "smoke weed every day";
     public enum SelectType{
-        none, swearAt, insultAt, hypnosis
+        none, swearAt, insultAt, hypnosis, command
     }
     public SelectType currentSelect = SelectType.none;
 	void Update () {
