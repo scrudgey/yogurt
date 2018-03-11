@@ -15,6 +15,7 @@ public class Intrinsics : MonoBehaviour, ISaveable {
         IntrinsicsChanged();
     }
     public void RemoveChild(Component owner) {
+        // Debug.Log(gameObject.name+"> removing "+owner.ToString());
         childBuffs.Remove(owner);
         IntrinsicsChanged();
     }
@@ -114,6 +115,10 @@ public class Intrinsics : MonoBehaviour, ISaveable {
         returnBuffs.AddRange(liveBuffs);
         foreach (KeyValuePair<Component, List<Buff>> kvp in childBuffs) {
             returnBuffs.AddRange(kvp.Value);
+            if (kvp.Value.Count > 0){
+                Buff b = kvp.Value[0];
+                // Debug.Log(gameObject.name + "> " + kvp.Key.ToString()+" : "+b.floatValue.ToString());
+            }
         }
         return returnBuffs;
     }
@@ -133,8 +138,9 @@ public class Intrinsics : MonoBehaviour, ISaveable {
         return netBuffs;
     }
     public void IntrinsicsChanged() {
+        // Debug.Log(gameObject.name+"> livebuffs: "+liveBuffs.Count.ToString()+", childs: "+childBuffs.Count.ToString());
         MessageNetIntrinsic message = new MessageNetIntrinsic(this);
-        Toolbox.Instance.SendMessage(gameObject, this, message);
+        Toolbox.Instance.SendMessage(gameObject, this, message, sendUpwards:false);
         if (GameManager.Instance.playerObject == gameObject) {
             GameManager.Instance.FocusIntrinsicsChanged(this);
         }
