@@ -80,7 +80,7 @@ public class DialogueMenu : MonoBehaviour {
     public int nextNode = -1;
     public bool waitForKeyPress;
     public bool advancedKeyPressed;
-    public float blitInterval = 0.01f;
+    public float blitInterval = 0.005f;
     public float blitTimer;
 
     public delegate void MyDelegate();
@@ -228,9 +228,21 @@ public class DialogueMenu : MonoBehaviour {
                 // Debug.Log("buying");
                 AttemptTrade();
                 break;
+            case "command":
+                Command();
+                break;
             default:
                 break;
         }
+    }
+    public void Command(){
+        // target;
+        // instigator;
+        Destroy(gameObject);
+        Controller.Instance.commandTarget = target.gameObject;
+        Controller.Instance.currentSelect = Controller.SelectType.command;
+        UINew.Instance.SetActiveUI();
+        Controller.Instance.suspendInput = true;
     }
     public void AttemptTrade() {
         switch (targetTrade.CheckTradeStatus(instigatorInv)) {

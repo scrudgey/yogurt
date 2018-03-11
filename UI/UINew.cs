@@ -96,7 +96,6 @@ public class UINew : Singleton<UINew> {
             GameObject target = Controller.Instance.GetBaseInteractive(top.transform);
             if (target != null) {
                 switch (Controller.Instance.currentSelect) {
-                    case Controller.SelectType.command:
                     case Controller.SelectType.none:
                         Cursor.SetCursor(cursorHighlight, new Vector2(28, 16), CursorMode.Auto);
                         break;
@@ -118,7 +117,8 @@ public class UINew : Singleton<UINew> {
                 Cursor.SetCursor(cursorDefault, new Vector2(28, 16), CursorMode.Auto);
             } else {
                 Cursor.SetCursor(cursorTarget, new Vector2(16, 16), CursorMode.Auto);
-                SetActionText("");
+                if (Controller.Instance.currentSelect != Controller.SelectType.command)
+                    SetActionText("");
             }
         }
         if (Controller.Instance.currentSelect != Controller.SelectType.none) {
@@ -485,7 +485,12 @@ public class UINew : Singleton<UINew> {
     public void SetClickedActions(GameObject clickedOn, GameObject clickSite) {
         ClearWorldButtons();
         activeElements = new List<GameObject>();
-        List<Interaction> clickedActions = Interactor.GetInteractions(GameManager.Instance.playerObject, clickedOn);
+        List<Interaction> clickedActions = new List<Interaction>();
+        if (Controller.Instance.commandTarget != null){
+            clickedActions = Interactor.GetInteractions(Controller.Instance.commandTarget, clickedOn);
+        } else {
+            clickedActions = Interactor.GetInteractions(GameManager.Instance.playerObject, clickedOn);
+        }
         List<actionButton> actionButtons = CreateButtonsFromActions(clickedActions); ;
         foreach (actionButton button in actionButtons)
             activeElements.Add(button.gameobject);

@@ -242,15 +242,25 @@ public class Interactive : MonoBehaviour {
     }
     public enum targetType { inert, player, other };
     static public Interactive.targetType TypeOfTarget(GameObject target) {
+        targetType returnType = targetType.inert;
         if (GameManager.Instance.playerObject != null)
             if (target.transform.IsChildOf(GameManager.Instance.playerObject.transform)) {
-                return targetType.player;
+                returnType = targetType.player;
             }
         List<DecisionMaker> AIs = new List<DecisionMaker>(target.GetComponentsInParent<DecisionMaker>());
         if (AIs.Count() > 0) {
-            return targetType.other;
+            returnType = targetType.other;
         }
-        return targetType.inert;
+        // if we're commanding someone, then categories flip
+        if (Controller.Instance.commandTarget != null){
+            if (returnType == targetType.player){
+                returnType = targetType.other;
+            } else {
+                if (returnType == targetType.other)
+                    returnType = targetType.player;
+            }
+        }
+        return returnType;
     }
     public void targetUpdate(List<Interactive> components, GameObject targ, GameObject source) {
         Interactive.targetType targType = TypeOfTarget(targ);

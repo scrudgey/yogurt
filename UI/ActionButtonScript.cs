@@ -20,15 +20,25 @@ public class ActionButtonScript : MonoBehaviour {
                     UINew.Instance.ClearWorldButtons();
                     UINew.Instance.UpdateButtons();
                     Controller.Instance.ResetLastLeftClicked();
+                    if (Controller.Instance.currentSelect == Controller.SelectType.command)
+                        ResetCommandState();
                 }
             }
-            UINew.Instance.SetActionText("");
         } else {
             HandAction();
-            UINew.Instance.SetActionText("");
             Controller.Instance.ResetLastLeftClicked();
+            if (Controller.Instance.currentSelect == Controller.SelectType.command)
+                ResetCommandState();
         }
+        UINew.Instance.SetActionText("");
         GUI.FocusControl("none");
+    }
+    void ResetCommandState(){
+        Controller.Instance.currentSelect = Controller.SelectType.none;
+        Controller.Instance.commandTarget = null;
+        // reset command state
+        Controller.Instance.suspendInput = false;
+        UINew.Instance.SetActiveUI(active:true);
     }
     void Update() {
         if (mouseHeld && bType == buttonType.Action) {
@@ -56,9 +66,19 @@ public class ActionButtonScript : MonoBehaviour {
     }
     public void MouseOver() {
         if (bType == buttonType.Action) {
-            UINew.Instance.SetActionText(action.Description());
+            if (Controller.Instance.commandTarget != null){
+                string targetName = Toolbox.Instance.GetName(Controller.Instance.commandTarget);
+                UINew.Instance.SetActionText("Command " + targetName + " to " + action.Description());
+            } else {
+                UINew.Instance.SetActionText(action.Description());
+            }
         } else {
-            UINew.Instance.SetActionText(HandActionDescription());
+            if (Controller.Instance.commandTarget != null){
+                string targetName = Toolbox.Instance.GetName(Controller.Instance.commandTarget);
+                UINew.Instance.SetActionText("Command " + targetName + " to " + HandActionDescription());
+            } else {
+                UINew.Instance.SetActionText(HandActionDescription());
+            }
         }
     }
     public void MouseExit() {

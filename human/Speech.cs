@@ -39,7 +39,7 @@ public class Speech : Interactive, IMessagable, ISaveable {
         if (!disableSpeakWith) {
             Interaction speakWith = new Interaction(this, "Talk...", "SpeakWith");
             speakWith.limitless = true;
-            speakWith.validationFunction = true;
+            // speakWith.validationFunction = true;
             interactions.Add(speakWith);
         }
         GameObject speechFramework = Instantiate(Resources.Load("UI/SpeechChild"), transform.position, Quaternion.identity) as GameObject;
@@ -68,8 +68,13 @@ public class Speech : Interactive, IMessagable, ISaveable {
         }
     }
     public DialogueMenu SpeakWith() {
+        // TODO: fix commanding someone to speak with player
         DialogueMenu menu = UINew.Instance.ShowMenu(UINew.MenuType.dialogue).GetComponent<DialogueMenu>();
-        menu.Configure(GameManager.Instance.playerObject.GetComponent<Speech>(), this);
+        if (Controller.Instance.commandTarget == null){ 
+            menu.Configure(GameManager.Instance.playerObject.GetComponent<Speech>(), this);
+        } else {
+            menu.Configure(Controller.Instance.commandTarget.GetComponent<Speech>(), this);
+        }
         return menu;
     }
     public string SpeakWith_desc() {
@@ -77,6 +82,7 @@ public class Speech : Interactive, IMessagable, ISaveable {
         return "Speak with " + otherName;
     }
     public bool SpeakWith_Validation() {
+        // if (Controller.Instance.)
         return GameManager.Instance.playerObject != gameObject;
     }
     // TODO: allow liquids and things to self-describe; add modifiers etc.

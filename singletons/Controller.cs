@@ -31,6 +31,7 @@ public class Controller : Singleton<Controller> {
         none, swearAt, insultAt, hypnosis, command
     }
     public SelectType currentSelect = SelectType.none;
+    public GameObject commandTarget;
     void Update() {
         if (focus != null & !suspendInput) {
             focus.ResetInput();
@@ -165,7 +166,7 @@ public class Controller : Singleton<Controller> {
         // this may or may not cause problems down the road, but I'm unsure how else to do this.
         // NOTE: if an overlapping UI is causing problems, add a layout group and uncheck "blocks raycast"
 
-        if (currentSelect == SelectType.none && !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) {
+        if ((currentSelect == SelectType.none || currentSelect == SelectType.command) && !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) {
             // if (currentSelect == SelectType.none){
             // foreach (RaycastHit2D hit in hits){
             //     if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)){
@@ -230,8 +231,12 @@ public class Controller : Singleton<Controller> {
             lastLeftClicked = null;
         } else {
             lastLeftClicked = clicked;
-            Inventory inventory = focus.GetComponent<Inventory>();
-            if (clicked.transform.IsChildOf(focus.transform) || clicked == focus.gameObject) {
+            GameObject actor = focus.gameObject;
+            if (commandTarget != null)
+                actor = commandTarget;
+
+            if (clicked.transform.IsChildOf(actor.transform) || clicked == actor) {
+                Inventory inventory = actor.GetComponent<Inventory>();
                 if (inventory)
                     if (inventory.holding)
                         UINew.Instance.DisplayHandActions(inventory);
