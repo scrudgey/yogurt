@@ -198,6 +198,14 @@ public class Awareness : MonoBehaviour, IMessagable, ISaveable {
             if (baseControllable != null) {
                 fieldOfView.Add(baseControllable.gameObject);
             }
+            Inventory otherInv = other.GetComponentInParent<Inventory>();
+            if (otherInv != null)
+                if (otherInv.holding)
+                    fieldOfView.Add(otherInv.holding.gameObject);
+            Head otherHead = other.GetComponentInChildren<Head>();
+            if (otherHead != null)
+                if (otherHead.hat != null)
+                    fieldOfView.Add(otherHead.hat.gameObject);
         }
     }
     void OnTriggerEnter2D(Collider2D other) {
@@ -313,12 +321,12 @@ public class Awareness : MonoBehaviour, IMessagable, ISaveable {
         }
         Knowledge knowledge = null;
         if (!knowledgebase.TryGetValue(possession, out knowledge)) {
-            return true;
+            return false;
         }
         if (possessionDefaultState == null) {
-            return true;
+            return false;
         }
-        if (Time.time - knowledge.lastSeenTime > 2) {
+        if (Time.time - knowledge.lastSeenTime > 1) {
             return false;
         }
         if (Vector2.Distance(knowledge.lastSeenPosition, possessionDefaultState.lastSeenPosition) > 0.1) {
