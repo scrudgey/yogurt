@@ -163,8 +163,6 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
             data.noun = "collision";
             data.whatHappened = Toolbox.Instance.CloneRemover(coll.gameObject.name) + " collided with " + Toolbox.Instance.CloneRemover(gameObject.name);
         }
-        // if (ignoreCollisions)
-        // 	return;
         if (coll.gameObject == groundObject) {
             // Debug.Log("I collided with the ground.");
         } else if (coll.gameObject == horizon) {
@@ -183,10 +181,9 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
                 MessageDamage message = new MessageDamage();
                 message.responsibleParty = thrownBy;
                 message.force = physical.objectBody.velocity;
-                message.amount = 20f;
+                message.amount = 25f;
                 message.type = damageType.physical;
-                Toolbox.Instance.SendMessage(coll.gameObject, this, message);
-
+                Toolbox.Instance.SendMessage(gameObject, this, message);
                 physical.FlyMode();
                 GameObject speaker = Instantiate(Resources.Load("Speaker"), transform.position, Quaternion.identity) as GameObject;
                 speaker.GetComponent<AudioSource>().clip = Resources.Load("sounds/8bit_impact1", typeof(AudioClip)) as AudioClip;

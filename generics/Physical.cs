@@ -231,11 +231,16 @@ public class Physical : MonoBehaviour, IMessagable {
         currentMode = mode.zip;
     }
     void OnCollisionEnter2D(Collision2D coll) {
-        // Debug.Log("ground collision between "+gameObject.name+" "+coll.gameObject.name);
-        if (coll.relativeVelocity.magnitude > 0.5) {
+        if (coll.relativeVelocity.magnitude > 0.25) {
             if (impactSounds.Length > 0) {
                 audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
             }
+            MessageDamage message = new MessageDamage();
+            message.responsibleParty = bootstrapper.thrownBy;
+            message.force = objectBody.velocity;
+            message.amount = 25f;
+            message.type = damageType.physical;
+            Toolbox.Instance.SendMessage(bootstrapper.gameObject, this, message);
         }
     }
     void OnTriggerEnter2D(Collider2D coll) {
