@@ -407,6 +407,10 @@ public class Awareness : MonoBehaviour, IMessagable, ISaveable {
         PersonalAssessment assessment = FormPersonalAssessment(message.messenger.gameObject);
         Speech mySpeech = GetComponent<Speech>();
         assessment.numberOfTimesInsulted += 1;
+        // TODO: make the insult trigger personality-dependent
+        if (assessment.numberOfTimesInsulted >= 2){
+            assessment.status = PersonalAssessment.friendStatus.enemy;
+        }
         // process hurt feelings
         if (mySpeech != null) {
             switch (assessment.status) {
