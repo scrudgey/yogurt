@@ -95,6 +95,7 @@ public class Interaction {
                     parameterMatched = true;
                     parameterMatches++;
                     parameters.Add(component);
+                    break;
                 }
             }
             if (parameterMatched == false) {
