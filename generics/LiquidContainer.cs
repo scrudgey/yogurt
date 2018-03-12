@@ -20,7 +20,7 @@ public class LiquidContainer : Interactive, IMessagable, ISaveable {
     private bool doSpill = false;
     private float spillSeverity;
     public string initLiquid;
-    public string containerName;
+    public string descriptionName;
     public AudioClip[] drinkSounds;
     void Update() {
         if (spillTimeout > 0) {
@@ -54,7 +54,12 @@ public class LiquidContainer : Interactive, IMessagable, ISaveable {
     }
     public string FillFromReservoir_desc(LiquidResevoir l) {
         string myname = Toolbox.Instance.GetName(gameObject);
-        string resname = Toolbox.Instance.GetName(l.gameObject);
+        string resname = "reservoir";
+        if (l.genericName != "") {
+            resname = l.genericName;
+        } else {
+            resname = Toolbox.Instance.GetName(l.gameObject);
+        }
         return "Fill " + myname + " with " + l.liquid.name + " from " + resname;
     }
     public void FillFromContainer(LiquidContainer l) {
@@ -73,8 +78,9 @@ public class LiquidContainer : Interactive, IMessagable, ISaveable {
         }
     }
     public string FillFromContainer_desc(LiquidContainer l) {
+        string myname = Toolbox.Instance.GetName(gameObject);
         string resname = Toolbox.Instance.GetName(l.gameObject);
-        return "Fill " + containerName + " with " + l.liquid.name + " from " + resname;
+        return "Fill " + myname + " with " + l.liquid.name + " from " + resname;
     }
     public void FillWithLiquid(Liquid l) {
         if (amount > 0) {
@@ -145,7 +151,8 @@ public class LiquidContainer : Interactive, IMessagable, ISaveable {
         return amount > 0;
     }
     public string Drink_desc(Eater eater) {
-        return "Drink " + liquid.name + " from " + containerName;
+        string myname = Toolbox.Instance.GetName(gameObject);
+        return "Drink " + liquid.name + " from " + myname;
     }
     void OnGroundImpact(Physical phys) {
         if (!lid)

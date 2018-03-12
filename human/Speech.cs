@@ -39,7 +39,7 @@ public class Speech : Interactive, IMessagable, ISaveable {
         if (!disableSpeakWith) {
             Interaction speakWith = new Interaction(this, "Talk...", "SpeakWith");
             speakWith.limitless = true;
-            // speakWith.validationFunction = true;
+            speakWith.validationFunction = true;
             interactions.Add(speakWith);
         }
         GameObject speechFramework = Instantiate(Resources.Load("UI/SpeechChild"), transform.position, Quaternion.identity) as GameObject;
@@ -91,8 +91,8 @@ public class Speech : Interactive, IMessagable, ISaveable {
         LiquidContainer container = obj.GetComponent<LiquidContainer>();
         MonoLiquid mono = obj.GetComponent<MonoLiquid>();
         if (container) {
-            if (container.amount > 0 && container.containerName != "") {
-                Say("It's a " + container.containerName + " of " + container.liquid.name + ".");
+            if (container.amount > 0 && container.descriptionName != "") {
+                Say("It's a " + container.descriptionName + " of " + container.liquid.name + ".");
             } else {
                 Say(obj.description);
             }
@@ -370,12 +370,16 @@ public class Speech : Interactive, IMessagable, ISaveable {
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
         Monologue mono = new Monologue(this, new string[] { "How dare you!" });
+        EventData data = new EventData(chaos: 1, disturbing: 0, positive: -1, offensive:0);
+        Say("how dare you!", data: data);
         return mono;
     }
     public Monologue RespondToThreat() {
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
         Monologue mono = new Monologue(this, new string[] { "Mercy!" });
+        EventData data = new EventData(chaos: 1, disturbing: 0, positive: -1, offensive:0);
+        Say("Mercy!", data: data);
         return mono;
     }
     public void SayFromNimrod(string key) {
