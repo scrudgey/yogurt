@@ -48,7 +48,7 @@ public class Edible : Interactive, ISaveable {
             returnLiquid.nutrition = nutrition / 10;
             returnLiquid.color = pureeColor;
             returnLiquid.color.a = 255f;
-            returnLiquid.name = gameObject.name + " juice";
+            returnLiquid.name = Toolbox.Instance.GetName(gameObject) + " juice";
         }
         return returnLiquid;
     }
