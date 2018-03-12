@@ -236,8 +236,6 @@ public class DialogueMenu : MonoBehaviour {
         }
     }
     public void Command(){
-        // target;
-        // instigator;
         Destroy(gameObject);
         Controller.Instance.commandTarget = target.gameObject;
         Controller.Instance.currentSelect = Controller.SelectType.command;
