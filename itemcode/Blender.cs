@@ -42,7 +42,6 @@ public class Blender : Container, ISaveable {
                 message.force = Vector2.zero;
                 message.type = damageType.physical;
                 Toolbox.Instance.SendMessage(items[0].gameObject, this, message, false);
-
             }
             if (liquidContainer.amount > 0 && !liquidContainer.lid) {
                 liquidContainer.Spill(1f);
