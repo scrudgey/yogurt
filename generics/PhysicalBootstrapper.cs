@@ -108,7 +108,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         // float theta = Vector3.Angle(transform.up, Vector2.up) * (6.28f / 360.0f);
         // float offset = objectCollider.bounds.extents.y - objectCollider.offset.x * Mathf.Sin(theta) + objectCollider.offset.y * Mathf.Cos(theta);
         // height = Mathf.Max(height, offset);
-
+        height += 0.01f;
         tempPos.y = height;
         groundPos.y -= height;
         hingeObject.transform.localPosition = tempPos;
@@ -166,6 +166,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         if (coll.gameObject == groundObject) {
             // Debug.Log("I collided with the ground.");
         } else if (coll.gameObject == horizon) {
+            // Debug.Log(gameObject.name+" collided with the horizon.");
             if (coll.relativeVelocity.magnitude > 0.1) {
                 physical.GroundMode();
                 physical.BroadcastMessage("OnGroundImpact", physical, SendMessageOptions.DontRequireReceiver);
@@ -180,7 +181,8 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
                 // Debug.Log("physical bootstrapper collision: "+gameObject.name+" + "+coll.gameObject.name);
                 MessageDamage message = new MessageDamage();
                 message.responsibleParty = thrownBy;
-                message.force = physical.objectBody.velocity;
+                ContactPoint2D contact = coll.contacts[0];
+                message.force = contact.normal;
                 message.amount = 25f;
                 message.type = damageType.physical;
                 Toolbox.Instance.SendMessage(gameObject, this, message);

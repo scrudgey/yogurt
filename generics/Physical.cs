@@ -237,7 +237,8 @@ public class Physical : MonoBehaviour, IMessagable {
             }
             MessageDamage message = new MessageDamage();
             message.responsibleParty = bootstrapper.thrownBy;
-            message.force = objectBody.velocity;
+            ContactPoint2D contact = coll.contacts[0];
+            message.force = contact.normal;
             message.amount = 25f;
             message.type = damageType.physical;
             Toolbox.Instance.SendMessage(bootstrapper.gameObject, this, message);

@@ -16,6 +16,7 @@ public abstract class Damageable : MonoBehaviour, IMessagable {
     public AudioClip[] repelSounds;
     public AudioClip[] strongImpactSounds;
     public damageType lastDamage;
+    public MessageDamage lastMessage;
     public GameObject gibsContainerPrefab;
     public Dictionary<BuffType, Buff> netBuffs;
     new public Rigidbody2D rigidbody2D;
@@ -62,6 +63,7 @@ public abstract class Damageable : MonoBehaviour, IMessagable {
         controllable = GetComponent<Controllable>();
     }
     public void TakeDamage(MessageDamage message) {
+        lastMessage = message;
         lastDamage = message.type;
         bool vulnerable = Damages(message.type, netBuffs);
         ImpactResult result = ImpactResult.normal;
@@ -99,10 +101,8 @@ public abstract class Damageable : MonoBehaviour, IMessagable {
     }
     public abstract float CalculateDamage(MessageDamage message);
     public virtual void Destruct() {
-        Rigidbody2D body = GetComponent<Rigidbody2D>();
-        Debug.Log(body.velocity);
         foreach (Gibs gib in GetComponents<Gibs>())
-            gib.Emit(lastDamage, body.velocity);
+            gib.Emit(lastDamage, lastMessage.force);
         PhysicalBootstrapper phys = GetComponent<PhysicalBootstrapper>();
         if (phys) {
             phys.DestroyPhysical();

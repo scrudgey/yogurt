@@ -17,8 +17,8 @@ public class Gibs : MonoBehaviour {
             bit.transform.position = transform.position + randomWalk;
             Rigidbody2D bitPhys = bit.GetComponent<Rigidbody2D>();
             if (bitPhys) {
-                Vector2 force = Toolbox.Instance.RandomVector(baseDir, 30f).normalized;
-                force = force * (forceMax * Random.value + forceMin);
+                Vector2 force = Toolbox.Instance.RandomVector(baseDir, 45f).normalized;
+                force = force * ((forceMax * Random.value) + forceMin);
                 bitPhys.AddForce(force);
             }
             SpriteRenderer sprite = bit.GetComponent<SpriteRenderer>();
