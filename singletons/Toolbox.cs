@@ -129,6 +129,12 @@ public class Toolbox : Singleton<Toolbox> {
         }
         return copy;
     }
+    public Vector2 RandomVector(Vector2 baseDir, float angleSpread) {
+        float baseAngle = (float)Mathf.Atan2(baseDir.y, baseDir.x);
+        float spreadRads = angleSpread * Mathf.Deg2Rad;
+        float newAngle = baseAngle + Random.Range(-1f * spreadRads, 1f * spreadRads);
+        return new Vector2(baseDir.magnitude * Mathf.Cos(newAngle), baseDir.magnitude * Mathf.Sin(newAngle));
+    }
     public Vector2 RotateZ(Vector2 v, float angle) {
         float sin = Mathf.Sin(angle);
         float cos = Mathf.Cos(angle);
