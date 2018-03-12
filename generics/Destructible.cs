@@ -34,6 +34,7 @@ public class Destructible : Damageable, ISaveable {
             default:
                 break;
         }
+        // Debug.Log(gameObject.name+ "> " + health.ToString()+ " taking damage: "+damage.ToString());
         health -= damage;
         return damage;
     }
