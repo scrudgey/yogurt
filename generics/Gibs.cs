@@ -7,17 +7,17 @@ public class Gibs : MonoBehaviour {
     public float forceMin;
     public float forceMax;
     public Color color = Color.white;
-    public void Emit(damageType dam) {
+    public void Emit(damageType dam, Vector2 baseDir) {
         if (!DamageTypeMatch(damageCondition, dam))
             return;
         for (int i = 0; i < number; i++) {
             GameObject bit = Instantiate(particle) as GameObject;
-            Vector3 randomWalk = 0.1f * Random.insideUnitCircle.normalized;
+            Vector3 randomWalk = 0.05f * Random.insideUnitCircle.normalized;
             randomWalk.z = 0;
             bit.transform.position = transform.position + randomWalk;
             Rigidbody2D bitPhys = bit.GetComponent<Rigidbody2D>();
             if (bitPhys) {
-                Vector2 force = Random.insideUnitCircle;
+                Vector2 force = Toolbox.Instance.RandomVector(baseDir, 30f).normalized;
                 force = force * (forceMax * Random.value + forceMin);
                 bitPhys.AddForce(force);
             }

@@ -99,8 +99,10 @@ public abstract class Damageable : MonoBehaviour, IMessagable {
     }
     public abstract float CalculateDamage(MessageDamage message);
     public virtual void Destruct() {
+        Rigidbody2D body = GetComponent<Rigidbody2D>();
+        Debug.Log(body.velocity);
         foreach (Gibs gib in GetComponents<Gibs>())
-            gib.Emit(lastDamage);
+            gib.Emit(lastDamage, body.velocity);
         PhysicalBootstrapper phys = GetComponent<PhysicalBootstrapper>();
         if (phys) {
             phys.DestroyPhysical();
