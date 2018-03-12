@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Rendering;
 using System.Collections.Generic;
+using System.Linq;
 
 public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISaveable {
     public List<GameObject> items;
@@ -185,6 +186,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
                 ClaimsManager.Instance.ClaimObject(items[i].gameObject, this);
                 holding = items[i].GetComponent<Pickup>();
                 items.RemoveAt(i);
+                break;
             }
         }
     }
@@ -394,10 +396,13 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
     public void UpdateActions() {
         Controllable controllable = GetComponent<Controllable>();
         if (holding) {
-            List<Interaction> manualActions = Interactor.ReportManualActions(holding.gameObject, gameObject);
-            controllable.defaultInteraction = Interactor.GetDefaultAction(manualActions);
+            HashSet<Interaction> manualActions = new HashSet<Interaction>(Interactor.ReportManualActions(holding.gameObject, gameObject));
+            foreach (Interaction inter in Interactor.ReportManualActions(gameObject, holding.gameObject))
+                manualActions.Add(inter);
+            List<Interaction> actionList = manualActions.ToList();
+            controllable.defaultInteraction = Interactor.GetDefaultAction(actionList);
             if (GameManager.Instance.playerObject == gameObject)
-                UINew.Instance.CreateActionButtons(manualActions, controllable.defaultInteraction);
+                UINew.Instance.CreateActionButtons(actionList, controllable.defaultInteraction);
         } else {
             controllable.defaultInteraction = null;
             if (GameManager.Instance.playerObject == gameObject) {
