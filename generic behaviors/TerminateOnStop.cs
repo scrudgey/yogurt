@@ -7,10 +7,17 @@ public class TerminateOnStop : MonoBehaviour {
                 Destroy(GetComponent<Rigidbody2D>());
             if (GetComponent<Collider2D>())
                 Destroy(GetComponent<Collider2D>());
+            PhysicalBootstrapper pb = GetComponent<PhysicalBootstrapper>();
+            if (pb){
+                pb.DestroyPhysical();
+                Destroy(pb);
+            }
+                // Destroy(GetComponent<PhysicalBootstrapper>());
             SpriteRenderer renderer = GetComponent<SpriteRenderer>();
             renderer.sortingLayerName = "background";
-            renderer.sortingOrder = 20;
+            renderer.sortingOrder = 50;
             Destroy(this);
         }
     }
 }
+
