@@ -17,6 +17,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
     public Vector2 initVelocity;
     public bool doInit = true;
     private Vector3 setV;
+    private Vector3 addV;
     public GameObject thrownBy;
     public Collider2D objectCollider;
     public PersistentComponent loadData;
@@ -29,7 +30,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         GetComponent<Renderer>().sortingLayerName = "main";
         if (doInit)
             InitPhysical(initHeight, initVelocity);
-        if (impactSounds.Length > 0) {
+        if (impactSounds!= null && impactSounds.Length > 0) {
             Toolbox.Instance.SetUpAudioSource(gameObject);
         }
     }
@@ -57,7 +58,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         hingeBody = hingeObject.AddComponent<Rigidbody2D>();
         hingeJoint2D = hingeObject.AddComponent<HingeJoint2D>();
         hingeBody.mass = 1;
-        hingeBody.drag = 1;
+        hingeBody.drag = 0;
         hingeBody.angularDrag = 1;
         hingeBody.gravityScale = 0;
         hingeJoint2D.connectedBody = GetComponent<Rigidbody2D>();
@@ -178,6 +179,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
             if (physical == null)
                 return;
             if (physical.currentMode == Physical.mode.zip) {
+                Rebound();
                 // Debug.Log("physical bootstrapper collision: "+gameObject.name+" + "+coll.gameObject.name);
                 MessageDamage message = new MessageDamage();
                 message.responsibleParty = thrownBy;
@@ -190,12 +192,14 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
                 GameObject speaker = Instantiate(Resources.Load("Speaker"), transform.position, Quaternion.identity) as GameObject;
                 speaker.GetComponent<AudioSource>().clip = Resources.Load("sounds/8bit_impact1", typeof(AudioClip)) as AudioClip;
                 speaker.GetComponent<AudioSource>().Play();
-                Rebound();
             }
         }
     }
     public void Set3Motion(Vector3 velocity) {
         setV = velocity;
+    }
+    public void Add3Motion(Vector3 velocity) {
+        addV = velocity;
     }
     public void Set3MotionImmediate(Vector3 velocity) {
         Vector2 groundVelocity = new Vector2(velocity.x, velocity.y);
@@ -219,6 +223,18 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
             physical.objectBody.velocity = objectVelocity;
             groundBody.velocity = groundVelocity;
             setV = Vector3.zero;
+        }
+        if (addV != Vector3.zero){
+            Vector2 objectVelocity = physical.objectBody.velocity;
+            Vector2 groundVelocity = groundBody.velocity;
+            groundVelocity.x += addV.x;
+            groundVelocity.y += addV.y;
+            objectVelocity.x += addV.x;
+            objectVelocity.y += addV.y;
+            objectVelocity.y += addV.z;
+            physical.objectBody.velocity = objectVelocity;
+            groundBody.velocity = groundVelocity;
+            addV = Vector3.zero;
         }
         if (doLoad) {
             doLoad = false;

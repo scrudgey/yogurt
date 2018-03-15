@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 public class Physical : MonoBehaviour, IMessagable {
     public enum mode { none, fly, ground, zip }
-    public AudioClip[] impactSounds;
-    public AudioClip[] landSounds;
+    public AudioClip[] impactSounds = new AudioClip[0];
+    public AudioClip[] landSounds = new AudioClip[0];
     public AudioSource audioSource;
     public PhysicalBootstrapper bootstrapper;
     private GameObject trueObject;
+    public Rigidbody2D body;
     public Rigidbody2D objectBody;
     public Collider2D objectCollider;
     public Collider2D groundCollider;
@@ -34,6 +35,7 @@ public class Physical : MonoBehaviour, IMessagable {
         InitValues();
     }
     public void Start() {
+        body = Toolbox.Instance.GetOrCreateComponent<Rigidbody2D>(gameObject);
         // ignore collisions between ground and all other objects
         foreach (Physical phys in GameObject.FindObjectsOfType<Physical>()) {
             if (phys == this)
@@ -59,12 +61,13 @@ public class Physical : MonoBehaviour, IMessagable {
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
     public void Impact(MessageDamage message) {
-        Vector2 force = message.force / (objectBody.mass / Time.deltaTime);
+        // Debug.Log(name + " physical impact");
+        Vector2 force = message.force;// / (objectBody.mass / Time.deltaTime);
         if (currentMode != mode.fly)
             FlyMode();
-        if (impactSounds.Length > 0)
+        if (impactSounds != null && impactSounds.Length > 0)
             audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
-        bootstrapper.Set3Motion(new Vector3(force.x, force.y, force.y + 0.5f));
+        bootstrapper.Add3Motion(new Vector3(force.x, force.y, 0.40f));
     }
     void FixedUpdate() {
         if (trueObject == null) {
@@ -80,11 +83,11 @@ public class Physical : MonoBehaviour, IMessagable {
                 hinge.transform.localPosition = hingePosition;
             }
             if (height < 0.1 && height > 0) {
-                GetComponent<Rigidbody2D>().drag = 5;
-                GetComponent<Rigidbody2D>().mass = objectBody.mass;
+                body.drag = 5;
+                body.mass = objectBody.mass;
             } else {
-                GetComponent<Rigidbody2D>().drag = 0;
-                GetComponent<Rigidbody2D>().mass = 1;
+                body.drag = 0;
+                body.mass = 1;
             }
         }
         if (ziptime > 0) {
