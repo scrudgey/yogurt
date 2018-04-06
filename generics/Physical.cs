@@ -61,12 +61,12 @@ public class Physical : MonoBehaviour, IMessagable {
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
     public void Impact(MessageDamage message) {
-        // Debug.Log(name + " physical impact");
         Vector2 force = message.force;// / (objectBody.mass / Time.deltaTime);
         if (currentMode != mode.fly)
             FlyMode();
         if (impactSounds != null && impactSounds.Length > 0)
             audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
+        // TODO: fix z impact?
         bootstrapper.Add3Motion(new Vector3(force.x, force.y, 0.40f));
     }
     void FixedUpdate() {
@@ -75,13 +75,24 @@ public class Physical : MonoBehaviour, IMessagable {
             return;
         }
         height = horizonCollider.offset.y + hinge.transform.localPosition.y;
+        if (height < 0) {
+            float angle = Vector2.Angle(Vector2.right, trueObject.transform.right) * Mathf.Deg2Rad;
+            Vector2 hingePosition = Vector2.zero;
+            hingePosition.y += Mathf.Cos(angle) * objectCollider.offset.y + Mathf.Sin(angle) * objectCollider.offset.x;
+            hingePosition.y += Mathf.Cos(angle) * objectCollider.bounds.extents.y + Mathf.Sin(angle) * objectCollider.bounds.extents.x;
+            hinge.transform.localPosition = hingePosition;
+            trueObject.transform.localPosition = Vector2.zero;
+            Vector3 objectV = objectBody.velocity;
+            Vector3 bodyV = body.velocity;
+            Vector3 hingeV = hingeBody.velocity;
+            objectV.y = 0f;
+            bodyV.y = 0f;
+            hingeV.y = 0f;
+            objectBody.velocity = objectV;
+            body.velocity = bodyV;
+            hingeBody.velocity = hingeV;
+        }
         if (currentMode == mode.fly) {
-            if (height < 0) {
-                Vector2 hingePosition = hinge.transform.localPosition;
-                hingePosition.y += horizonCollider.offset.y;
-                hingePosition.y += horizonCollider.bounds.extents.y;
-                hinge.transform.localPosition = hingePosition;
-            }
             if (height < 0.1 && height > 0) {
                 body.drag = 5;
                 body.mass = objectBody.mass;
@@ -152,7 +163,6 @@ public class Physical : MonoBehaviour, IMessagable {
         JointTranslationLimits2D tempLimits = slider.limits;
         tempLimits.min = 0;
         tempLimits.max = hinge.transform.localPosition.y + offset;
-        // tempLimits.max = hinge.transform.localPosition.y + 0.005f;
         slider.limits = tempLimits;
         slider.useLimits = true;
     }
@@ -174,8 +184,9 @@ public class Physical : MonoBehaviour, IMessagable {
                 Physics2D.IgnoreCollision(horizonCollider, phys.objectCollider, true);
             }
         }
-        if (landSounds.Length > 0 && !suppressLandSound)
-            audioSource.PlayOneShot(landSounds[Random.Range(0, landSounds.Length)]);
+        if (landSounds != null)
+            if (landSounds.Length > 0 && !suppressLandSound)
+                audioSource.PlayOneShot(landSounds[Random.Range(0, landSounds.Length)]);
         suppressLandSound = false;
         SetSliderLimit(1f * objectCollider.Distance(horizonCollider).distance);
         // groundCollider.enabled = true;
@@ -214,7 +225,7 @@ public class Physical : MonoBehaviour, IMessagable {
         GetComponent<Rigidbody2D>().drag = 0;
         GetComponent<Rigidbody2D>().mass = 1;
         foreach (Physical phys in FindObjectsOfType<Physical>()) {
-            if (phys.gameObject != gameObject) {
+            if (phys != this) {
                 Physics2D.IgnoreCollision(horizonCollider, phys.objectCollider, true);
                 Physics2D.IgnoreCollision(objectCollider, phys.horizonCollider, true);
             }
@@ -235,12 +246,16 @@ public class Physical : MonoBehaviour, IMessagable {
     }
     void OnCollisionEnter2D(Collision2D coll) {
         if (coll.relativeVelocity.magnitude > 0.25) {
-            if (impactSounds.Length > 0) {
-                audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
-            }
+            // Debug.Log("physical collision: "+gameObject.name+" + "+coll.gameObject.name);
+            if (impactSounds != null)
+                if (impactSounds.Length > 0) {
+                    audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
+                }
             MessageDamage message = new MessageDamage();
             message.responsibleParty = bootstrapper.thrownBy;
+            // the force is normal to the surface we impacted.
             ContactPoint2D contact = coll.contacts[0];
+            // TODO: fix magnitude? z? amount?
             message.force = contact.normal;
             message.amount = 25f;
             message.type = damageType.physical;
@@ -265,9 +280,7 @@ public class Physical : MonoBehaviour, IMessagable {
         Vector2 newOffset = new Vector2(0f, table.height);
         horizonCollider.offset = newOffset;
         Vector3 objectPosition = hinge.transform.localPosition;
-        if (objectPosition.y > table.height) {
-            // objectPosition.y -= table.height;
-        } else {
+        if (objectPosition.y < table.height) {
             objectPosition.y += table.height + 0.02f;
         }
         hinge.transform.localPosition = objectPosition;
@@ -282,11 +295,7 @@ public class Physical : MonoBehaviour, IMessagable {
             objectRenderer.sortingLayerName = "main";
     }
     void StopTable() {
-        Vector3 objectPosition = hinge.transform.localPosition;
-
-        Vector2 newOffset = new Vector2(0f, 0.0f);
-        horizonCollider.offset = newOffset;
-        hinge.transform.localPosition = objectPosition;
+        horizonCollider.offset = Vector2.zero;
 
         JointTranslationLimits2D tempLimits = slider.limits;
         tempLimits.min = 0;
