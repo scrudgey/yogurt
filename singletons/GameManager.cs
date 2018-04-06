@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 using System.Linq;
 using System;
 
-[XmlRoot("GameData")]
+// [XmlRoot("GameData")]
 [System.Serializable]
 public class GameData {
     public float money;
@@ -69,7 +69,7 @@ public partial class GameManager : Singleton<GameManager> {
     private CameraControl cameraControl;
     public Camera cam;
     public GameObject playerObject;
-    public float gravity = 1.6f;
+    public float gravity = 3.0f;
     private Commercial _activeCommercial;
     public Commercial activeCommercial {
         get { return _activeCommercial; }
@@ -496,7 +496,15 @@ public partial class GameManager : Singleton<GameManager> {
         string path = Path.Combine(Application.persistentDataPath, saveGameName);
         path = Path.Combine(path, "gameData.xml");
         FileStream sceneStream = File.Create(path);
-        serializer.Serialize(sceneStream, data);
+        Debug.Log("seriailizing scenestream");
+        try{    
+            serializer.Serialize(sceneStream, data);
+        } catch(Exception e) {
+            Debug.Log(e.ToString());
+            Debug.Log(e.Source);
+            Debug.Log(e.StackTrace);
+            Debug.Log(e.Message);
+        }
         sceneStream.Close();
         timeSinceLastSave = 0f;
     }
