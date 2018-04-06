@@ -103,6 +103,7 @@ public abstract class Damageable : MonoBehaviour, IMessagable {
     public virtual void Destruct() {
         foreach (Gibs gib in GetComponents<Gibs>())
             gib.Emit(lastDamage, lastMessage.force);
+        // Debug.Break();
         PhysicalBootstrapper phys = GetComponent<PhysicalBootstrapper>();
         if (phys) {
             phys.DestroyPhysical();
@@ -112,6 +113,8 @@ public abstract class Damageable : MonoBehaviour, IMessagable {
     }
     public virtual void ReceiveMessage(Message incoming) {
         if (incoming is MessageDamage) {
+            if (enabled == false)
+                return;
             MessageDamage message = (MessageDamage)incoming;
             TakeDamage(message);
         }
