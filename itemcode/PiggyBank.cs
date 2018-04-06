@@ -19,6 +19,9 @@ public class PiggyBank : Interactive {
     }
     public void Open() {
         Destructible destructo = GetComponent<Destructible>();
+        destructo.lastDamage = damageType.physical;
+        destructo.lastMessage = new MessageDamage();
+        destructo.lastMessage.force = new Vector3(Random.Range(0, 0.1f), Random.Range(0, 0.1f), 0.2f);
         destructo.Die();
     }
 }
