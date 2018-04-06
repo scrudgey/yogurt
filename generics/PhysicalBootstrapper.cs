@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
+    public enum shadowSize {normal, medium, small};
     public AudioClip[] impactSounds;
     public AudioClip[] landSounds;
     public AudioClip[] scrapeSounds;
@@ -25,6 +26,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
     private bool isQuitting = false;
     public bool impactsMiss;
     public bool noCollisions;
+    public shadowSize size;
     public void Start() {
         tag = "Physical";
         GetComponent<Renderer>().sortingLayerName = "main";
@@ -41,6 +43,9 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         Rigidbody2D body = GetComponent<Rigidbody2D>();
         body.gravityScale = 0;
         body.velocity = Vector2.zero;
+        // RigidbodyConstraints2D constraints = new RigidbodyConstraints2D();
+        // constraints.freezepos
+        // body.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezePositionY;
         physical = null;
         doInit = false;
     }
@@ -62,6 +67,8 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         hingeBody.angularDrag = 1;
         hingeBody.gravityScale = 0;
         hingeJoint2D.connectedBody = GetComponent<Rigidbody2D>();
+        hingeJoint2D.autoConfigureConnectedAnchor = false;
+        hingeJoint2D.connectedAnchor = Vector2.zero;
 
         // Set up ground object
         groundObject = new GameObject(name + " Ground");
@@ -81,6 +88,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         groundBody.gravityScale = 0;
         groundBody.freezeRotation = true;
         groundBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        groundBody.interpolation = RigidbodyInterpolation2D.Interpolate;
         //box collider
         // groundCollider = groundObject.AddComponent<BoxCollider2D>();
         // groundCollider.size = new Vector2(0.07f, 0.05f);
@@ -102,6 +110,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         horizon.transform.position = initPos;
         horizon.transform.SetParent(groundObject.transform);
         shadowBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        shadowBody.interpolation = RigidbodyInterpolation2D.Interpolate;
         objectCollider = GetComponent<Collider2D>();
 
         hingeObject.transform.SetParent(groundObject.transform);
@@ -117,7 +126,8 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
 
         //sprite renderer
         SpriteRenderer groundSprite = groundObject.AddComponent<SpriteRenderer>();
-        groundSprite.sprite = Resources.Load<Sprite>("shadow");
+        Sprite[] sprites = Resources.LoadAll<Sprite>("shadow-sheet") as Sprite[];
+        groundSprite.sprite = (Sprite)sprites[(int)size];
         groundSprite.sortingLayerName = "ground";
 
         //Physical
@@ -127,12 +137,17 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         groundPhysical.groundDrag = groundDrag;
         groundPhysical.groundCollider = groundCollider;
         groundPhysical.objectRenderer = GetComponent<SpriteRenderer>();
+        groundPhysical.objectBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        groundPhysical.objectBody.interpolation = RigidbodyInterpolation2D.Interpolate;
         // Debug.Log(groundPhysical.objectRenderer);
 
         //Slider joint
         sliderJoint2D = groundObject.AddComponent<SliderJoint2D>();
         sliderJoint2D.autoConfigureAngle = false;
         sliderJoint2D.autoConfigureConnectedAnchor = false;
+        AnchoredJoint2D zeroAnchor = new AnchoredJoint2D();
+        sliderJoint2D.anchor = Vector2.zero;
+        sliderJoint2D.connectedAnchor = Vector2.zero;
         sliderJoint2D.enableCollision = false;
         sliderJoint2D.angle = 90f;
         sliderJoint2D.connectedBody = hingeBody;
@@ -145,6 +160,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         physical.noCollisions = noCollisions;
         physical.impactsMiss = impactsMiss;
         groundPhysical.bootstrapper = this;
+        transform.localPosition = Vector2.zero;
         Set3Motion(new Vector3(initialVelocity.x, initialVelocity.y, initialVelocity.z));
     }
     void OnCollisionStay2D(Collision2D coll) {
@@ -157,9 +173,10 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
     }
     void OnCollisionEnter2D(Collision2D coll) {
         if (coll.relativeVelocity.magnitude > 0.5) {
-            if (impactSounds.Length > 0) {
-                GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
-            }
+            if (impactSounds != null)
+                if (impactSounds.Length > 0) {
+                    GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
+                }
             EventData data = Toolbox.Instance.DataFlag(gameObject, chaos: 1);
             data.noun = "collision";
             data.whatHappened = Toolbox.Instance.CloneRemover(coll.gameObject.name) + " collided with " + Toolbox.Instance.CloneRemover(gameObject.name);
@@ -169,6 +186,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         } else if (coll.gameObject == horizon) {
             // Debug.Log(gameObject.name+" collided with the horizon.");
             if (coll.relativeVelocity.magnitude > 0.1) {
+                // TODO: bounce
                 physical.GroundMode();
                 physical.BroadcastMessage("OnGroundImpact", physical, SendMessageOptions.DontRequireReceiver);
             } else {
