@@ -180,7 +180,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         } else if (coll.gameObject == horizon) {
             // Debug.Log(gameObject.name+" collided with the horizon.");
             if (coll.relativeVelocity.magnitude > 0.1) {
-                Debug.Log(name + " bounced");
+                // Debug.Log(name + " bounced");
                 Vector3 vel = previousVelocity;
                 // Vector3  physical.objectBody.velocity = objectVelocity;
                 // Vector3 groundVelocity = groundBody.velocity;
