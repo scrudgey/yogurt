@@ -5,6 +5,8 @@ using UnityEngine;
 public class FlipSpriteRandom : MonoBehaviour {
     public bool flipX = true;
     public bool flipY = true;
+    public float dutyCycle = 0;
+    public float timer;
     public void Start() {
         Vector3 rot = transform.localScale;
         if (flipX) {
@@ -18,5 +20,14 @@ public class FlipSpriteRandom : MonoBehaviour {
             }
         }
         transform.localScale = rot;
+    }
+    public void Update(){
+        if (dutyCycle <= 0)
+            return;
+        timer += Time.deltaTime;
+        if (timer > dutyCycle){
+            timer = 0;
+            Start();
+        }
     }
 }
