@@ -52,7 +52,7 @@ public class MonoLiquid : MonoBehaviour {
         liquid = Liquid.LoadLiquid(type);
         // add things here for changing edible properties according to liquid properties (?)
     }
-    void GroundModeStart(Physical phys) {
+    void OnGroundImpact(Physical phys) {
         EventData data = Toolbox.Instance.DataFlag(gameObject, chaos: 1, disgusting: 1);
         data.whatHappened = liquid.name + " was spilled";
         data.noun = "spilling";
