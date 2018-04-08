@@ -60,6 +60,7 @@ public abstract class Damageable : MonoBehaviour, IMessagable {
             if (strongImpactSounds.Length == 0)
                 strongImpactSounds = Resources.LoadAll<AudioClip>("sounds/impact_strong/");
         rigidbody2D = Toolbox.Instance.GetOrCreateComponent<Rigidbody2D>(gameObject);
+        rigidbody2D.gravityScale = 0;
         controllable = GetComponent<Controllable>();
     }
     public void TakeDamage(MessageDamage message) {
@@ -87,6 +88,7 @@ public abstract class Damageable : MonoBehaviour, IMessagable {
         } else {
             // do we play a repel sound here? or no?
         }
+        // Debug.Log(name + " taking damage "+damage.ToString());
         // apply force
         if (damage <= 0)
             return;
@@ -113,6 +115,7 @@ public abstract class Damageable : MonoBehaviour, IMessagable {
     }
     public virtual void ReceiveMessage(Message incoming) {
         if (incoming is MessageDamage) {
+            // Debug.Log(name + " receiving damage message");
             if (enabled == false)
                 return;
             MessageDamage message = (MessageDamage)incoming;
