@@ -60,15 +60,7 @@ public class Physical : MonoBehaviour, IMessagable {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
-    public void Impact(MessageDamage message) {
-        Vector2 force = message.force;// / (objectBody.mass / Time.deltaTime);
-        if (currentMode != mode.fly)
-            FlyMode();
-        if (impactSounds != null && impactSounds.Length > 0)
-            audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
-        // TODO: fix z impact?
-        bootstrapper.Add3Motion(new Vector3(force.x, force.y, 0.40f));
-    }
+
     void FixedUpdate() {
         if (trueObject == null) {
             Destroy(this);
@@ -76,6 +68,7 @@ public class Physical : MonoBehaviour, IMessagable {
         }
         height = horizonCollider.offset.y + hinge.transform.localPosition.y;
         if (height < 0) {
+            Debug.Log(name + " under horizon");
             float angle = Vector2.Angle(Vector2.right, trueObject.transform.right) * Mathf.Deg2Rad;
             Vector2 hingePosition = Vector2.zero;
             hingePosition.y += Mathf.Cos(angle) * objectCollider.offset.y + Mathf.Sin(angle) * objectCollider.offset.x;
@@ -94,10 +87,10 @@ public class Physical : MonoBehaviour, IMessagable {
         }
         if (currentMode == mode.fly) {
             if (height < 0.1 && height > 0) {
-                body.drag = 5;
+                // body.drag = 5;
                 body.mass = objectBody.mass;
             } else {
-                body.drag = 0;
+                // body.drag = 0;
                 body.mass = 1;
             }
         }
@@ -138,10 +131,8 @@ public class Physical : MonoBehaviour, IMessagable {
         if (currentMode == mode.ground) {
             if (objectCollider.Distance(horizonCollider).isOverlapped) {
                 slider.useLimits = false;
-                // Debug.Log("horizon overlap, undo limits "+name);
             } else {
                 if (slider.useLimits == false) {
-                    // Debug.Log("non overlap, reseting limit "+name);
                     SetSliderLimit(0);
                 }
             }
@@ -173,8 +164,8 @@ public class Physical : MonoBehaviour, IMessagable {
         doZip = false;
         ziptime = 0f;
         ClearTempColliders();
-        GetComponent<Rigidbody2D>().drag = groundDrag;
-        GetComponent<Rigidbody2D>().mass = objectBody.mass;
+        body.drag = groundDrag;
+        body.mass = objectBody.mass;
         currentMode = mode.ground;
         foreach (Physical phys in FindObjectsOfType<Physical>()) {
             if (phys == this)
@@ -189,7 +180,6 @@ public class Physical : MonoBehaviour, IMessagable {
                 audioSource.PlayOneShot(landSounds[Random.Range(0, landSounds.Length)]);
         suppressLandSound = false;
         SetSliderLimit(1f * objectCollider.Distance(horizonCollider).distance);
-        // groundCollider.enabled = true;
         if (noCollisions) {
             gameObject.layer = 15;
         } else {
@@ -219,11 +209,14 @@ public class Physical : MonoBehaviour, IMessagable {
         objectBody.gravityScale = GameManager.Instance.gravity;
         slider = GetComponent<SliderJoint2D>();
         slider.useLimits = false;
+        body = GetComponent<Rigidbody2D>();
+        body.drag = 0;
         //update mode
         currentMode = mode.fly;
         // set ground friction
-        GetComponent<Rigidbody2D>().drag = 0;
-        GetComponent<Rigidbody2D>().mass = 1;
+        body = GetComponent<Rigidbody2D>();
+        body.drag = 0;
+        body.mass = 1;
         foreach (Physical phys in FindObjectsOfType<Physical>()) {
             if (phys != this) {
                 Physics2D.IgnoreCollision(horizonCollider, phys.objectCollider, true);
@@ -243,24 +236,6 @@ public class Physical : MonoBehaviour, IMessagable {
         objectBody.gravityScale = 0;
         ziptime = 0.5f;
         currentMode = mode.zip;
-    }
-    void OnCollisionEnter2D(Collision2D coll) {
-        if (coll.relativeVelocity.magnitude > 0.25) {
-            // Debug.Log("physical collision: "+gameObject.name+" + "+coll.gameObject.name);
-            if (impactSounds != null)
-                if (impactSounds.Length > 0) {
-                    audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
-                }
-            MessageDamage message = new MessageDamage();
-            message.responsibleParty = bootstrapper.thrownBy;
-            // the force is normal to the surface we impacted.
-            ContactPoint2D contact = coll.contacts[0];
-            // TODO: fix magnitude? z? amount?
-            message.force = contact.normal;
-            message.amount = 25f;
-            message.type = damageType.physical;
-            Toolbox.Instance.SendMessage(bootstrapper.gameObject, this, message);
-        }
     }
     void OnTriggerEnter2D(Collider2D coll) {
         if (coll.tag == "table" && coll.gameObject != gameObject) {
@@ -305,6 +280,24 @@ public class Physical : MonoBehaviour, IMessagable {
         if (spriteRenderer)
             spriteRenderer.enabled = true;
     }
+    void OnCollisionEnter2D(Collision2D coll) {
+        if (coll.relativeVelocity.magnitude > 0.25) {
+            Debug.Log("physical collision: "+gameObject.name+" + "+coll.gameObject.name);
+            if (impactSounds != null)
+                if (impactSounds.Length > 0) {
+                    audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
+                }
+            MessageDamage message = new MessageDamage();
+            message.responsibleParty = bootstrapper.thrownBy;
+            // the force is normal to the surface we impacted.
+            ContactPoint2D contact = coll.contacts[0];
+            // TODO: fix magnitude? z? amount?
+            message.force = contact.normal;
+            message.amount = 25f;
+            message.type = damageType.physical;
+            Toolbox.Instance.SendMessage(bootstrapper.gameObject, this, message);
+        }
+    }
     public void ReceiveMessage(Message message) {
         // TODO: change this?
         if (message is MessageDamage && !impactsMiss) {
@@ -313,5 +306,17 @@ public class Physical : MonoBehaviour, IMessagable {
                 return;
             Impact(dam);
         }
+    }
+    public void Impact(MessageDamage message) {
+        Debug.Log(name + " physical impact");
+        Vector2 force = message.force;
+        // Debug.Log(force.magnitude / objectBody.mass);
+        if (message.force.magnitude / objectBody.mass > 0.1f)
+            if (currentMode != mode.fly)
+                FlyMode();
+        if (impactSounds != null && impactSounds.Length > 0)
+            audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
+        // TODO: make this smarter
+        bootstrapper.Add3Motion(new Vector3(force.x/objectBody.mass, force.y/objectBody.mass, 0.40f/objectBody.mass));
     }
 }

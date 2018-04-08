@@ -9,6 +9,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
     private HingeJoint2D hingeJoint2D;
     private GameObject groundObject;
     private Rigidbody2D groundBody;
+    private Rigidbody2D body;
     public CapsuleCollider2D groundCollider;
     private GameObject horizon;
     private SliderJoint2D sliderJoint2D;
@@ -27,6 +28,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
     public bool impactsMiss;
     public bool noCollisions;
     public shadowSize size;
+    private Vector3 previousVelocity;
     public void Start() {
         tag = "Physical";
         GetComponent<Renderer>().sortingLayerName = "main";
@@ -40,12 +42,13 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         transform.SetParent(null);
         ClaimsManager.Instance.WasDestroyed(groundObject);
         Destroy(groundObject);
-        Rigidbody2D body = GetComponent<Rigidbody2D>();
-        body.gravityScale = 0;
-        body.velocity = Vector2.zero;
-        // RigidbodyConstraints2D constraints = new RigidbodyConstraints2D();
-        // constraints.freezepos
-        // body.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezePositionY;
+        body = GetComponent<Rigidbody2D>();
+        if (body){
+            body.gravityScale = 0;
+            body.velocity = Vector2.zero;
+            if (body.drag != 0)
+                groundDrag = body.drag;
+        }
         physical = null;
         doInit = false;
     }
@@ -54,6 +57,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         doInit = false;
         Vector2 initPos = transform.position;
         Vector2 groundPos = transform.position;
+        body = GetComponent<Rigidbody2D>();
 
         // Set up hinge
         hingeObject = new GameObject("hinge");
@@ -90,9 +94,6 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         groundBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         groundBody.interpolation = RigidbodyInterpolation2D.Interpolate;
         //box collider
-        // groundCollider = groundObject.AddComponent<BoxCollider2D>();
-        // groundCollider.size = new Vector2(0.07f, 0.05f);
-        // groundCollider.sharedMaterial = Resources.Load<PhysicsMaterial2D>("ground"); 
         groundCollider = groundObject.AddComponent<CapsuleCollider2D>();
         groundCollider.direction = CapsuleDirection2D.Horizontal;
         groundCollider.sharedMaterial = Resources.Load<PhysicsMaterial2D>("ground");
@@ -115,9 +116,6 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
 
         hingeObject.transform.SetParent(groundObject.transform);
         Vector2 tempPos = Vector2.zero;
-        // float theta = Vector3.Angle(transform.up, Vector2.up) * (6.28f / 360.0f);
-        // float offset = objectCollider.bounds.extents.y - objectCollider.offset.x * Mathf.Sin(theta) + objectCollider.offset.y * Mathf.Cos(theta);
-        // height = Mathf.Max(height, offset);
         height += 0.01f;
         tempPos.y = height;
         groundPos.y -= height;
@@ -132,14 +130,13 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
 
         //Physical
         Physical groundPhysical = groundObject.AddComponent<Physical>();
-        groundPhysical.objectBody = GetComponent<Rigidbody2D>();
+        groundPhysical.objectBody = body;
         groundPhysical.hingeBody = hingeBody;
         groundPhysical.groundDrag = groundDrag;
         groundPhysical.groundCollider = groundCollider;
         groundPhysical.objectRenderer = GetComponent<SpriteRenderer>();
         groundPhysical.objectBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         groundPhysical.objectBody.interpolation = RigidbodyInterpolation2D.Interpolate;
-        // Debug.Log(groundPhysical.objectRenderer);
 
         //Slider joint
         sliderJoint2D = groundObject.AddComponent<SliderJoint2D>();
@@ -164,15 +161,12 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         Set3Motion(new Vector3(initialVelocity.x, initialVelocity.y, initialVelocity.z));
     }
     void OnCollisionStay2D(Collision2D coll) {
-        if (coll.gameObject != horizon)
-            return;
-        // if (physical.slider.useLimits == false){
-        // 	float dist = coll.collider.Distance(objectCollider).distance;
-        // 	physical.SetSliderLimit(Mathf.Abs(-2f * dist));
-        // }
+        if (coll.gameObject == horizon){
+            physical.StartGroundMode();
+        }
     }
     void OnCollisionEnter2D(Collision2D coll) {
-        if (coll.relativeVelocity.magnitude > 0.5) {
+        if (coll.relativeVelocity.magnitude > 0.1) {
             if (impactSounds != null)
                 if (impactSounds.Length > 0) {
                     GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
@@ -186,8 +180,14 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         } else if (coll.gameObject == horizon) {
             // Debug.Log(gameObject.name+" collided with the horizon.");
             if (coll.relativeVelocity.magnitude > 0.1) {
-                // TODO: bounce
-                physical.GroundMode();
+                Debug.Log(name + " bounced");
+                Vector3 vel = previousVelocity;
+                // Vector3  physical.objectBody.velocity = objectVelocity;
+                // Vector3 groundVelocity = groundBody.velocity;
+                // float z = previousVelocity.y - groundVelocity.y;
+                // vel.y = groundVelocity.y + -0.5f * z;
+                vel.y = -0.5f * vel.y;
+                body.velocity = vel;
                 physical.BroadcastMessage("OnGroundImpact", physical, SendMessageOptions.DontRequireReceiver);
             } else {
                 physical.suppressLandSound = true;
@@ -198,7 +198,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
                 return;
             if (physical.currentMode == Physical.mode.zip) {
                 Rebound();
-                // Debug.Log("physical bootstrapper collision: "+gameObject.name+" + "+coll.gameObject.name);
+                Debug.Log("physical bootstrapper collision: "+gameObject.name+" + "+coll.gameObject.name);
                 MessageDamage message = new MessageDamage();
                 message.responsibleParty = thrownBy;
                 ContactPoint2D contact = coll.contacts[0];
@@ -226,6 +226,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         groundBody.velocity = groundVelocity;
     }
     public void Rebound() {
+        // TODO: set angular velocity appropriately
         Vector2 objectVelocity = physical.objectBody.velocity;
         objectVelocity.y = Random.Range(0.5f, 0.8f);
         physical.objectBody.velocity = objectVelocity;
@@ -279,6 +280,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
                 physical.objectBody.velocity = Vector3.zero;
             }
         }
+        previousVelocity = body.velocity;
     }
     void OnApplicationQuit() {
         isQuitting = true;
