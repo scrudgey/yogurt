@@ -35,8 +35,12 @@ public class Gibs : MonoBehaviour {
             randomWalk.z = 0;
             bit.transform.position = transform.position + randomWalk;
 
-            Vector3 force = 2f * Toolbox.Instance.RandomVector(baseDir, 45f);
-            force.z = Random.Range(0.42f, 1.05f);
+            Vector3 force = 0.5f * Toolbox.Instance.RandomVector(baseDir.normalized, 45f);
+            float phi = Random.Range(0.1f, 0.77f);
+            force.x = force.x * Mathf.Cos(phi);
+            force.y = force.y * Mathf.Cos(phi);
+            force.z = Mathf.Sin(phi);
+            // force.z = Random.Range(0.42f, 1.05f);
             bitPhys.Add3Motion(force);
         }
     }
