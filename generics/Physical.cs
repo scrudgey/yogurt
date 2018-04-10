@@ -282,7 +282,7 @@ public class Physical : MonoBehaviour, IMessagable {
     }
     void OnCollisionEnter2D(Collision2D coll) {
         if (coll.relativeVelocity.magnitude > 0.25) {
-            Debug.Log("physical collision: "+gameObject.name+" + "+coll.gameObject.name);
+            // Debug.Log("physical collision: "+gameObject.name+" + "+coll.gameObject.name);
             if (impactSounds != null)
                 if (impactSounds.Length > 0) {
                     audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
@@ -293,7 +293,12 @@ public class Physical : MonoBehaviour, IMessagable {
             ContactPoint2D contact = coll.contacts[0];
             // TODO: fix magnitude? z? amount?
             message.force = contact.normal;
-            message.amount = 25f;
+            if (currentMode == mode.zip){
+                message.amount = 25f;
+            } else {
+                message.amount = coll.relativeVelocity.magnitude;
+                // Debug.Log(message.amount);
+            }
             message.type = damageType.physical;
             Toolbox.Instance.SendMessage(bootstrapper.gameObject, this, message);
         }
@@ -308,7 +313,6 @@ public class Physical : MonoBehaviour, IMessagable {
         }
     }
     public void Impact(MessageDamage message) {
-        Debug.Log(name + " physical impact");
         Vector2 force = message.force;
         // Debug.Log(force.magnitude / objectBody.mass);
         if (message.force.magnitude / objectBody.mass > 0.1f)
@@ -317,6 +321,22 @@ public class Physical : MonoBehaviour, IMessagable {
         if (impactSounds != null && impactSounds.Length > 0)
             audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
         // TODO: make this smarter
-        bootstrapper.Add3Motion(new Vector3(force.x/objectBody.mass, force.y/objectBody.mass, 0.40f/objectBody.mass));
+        Vector3 impulse = new Vector3(force.x/objectBody.mass, force.y/objectBody.mass, 0);
+        if (currentMode == mode.ground || height < 0.1f){
+            impulse.z = 0.40f/objectBody.mass;
+        }
+        impulse = impulse * (bootstrapper.bounceCoefficient / 0.5f);
+        bootstrapper.Add3Motion(impulse);
+    }
+    public void Rebound() {
+        // TODO: set angular velocity appropriately
+        Vector2 objectVelocity = objectBody.velocity;
+        // TODO: set y velocity appropriately
+        objectVelocity.y = Random.Range(0.5f, 0.8f);
+        objectBody.velocity = objectVelocity;
+        objectBody.angularVelocity = Random.Range(360, 800);
+        ClearTempColliders();
+        // Debug.Log("angular vel:" + physical.objectBody.angularVelocity.ToString());
+        // Debug.Log("y vel:" + objectVelocity.y.ToString());
     }
 }

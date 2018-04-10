@@ -29,6 +29,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
     public bool noCollisions;
     public shadowSize size;
     private Vector3 previousVelocity;
+    public float bounceCoefficient = 0.5f;
     public void Start() {
         tag = "Physical";
         GetComponent<Renderer>().sortingLayerName = "main";
@@ -176,18 +177,18 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
             data.whatHappened = Toolbox.Instance.CloneRemover(coll.gameObject.name) + " collided with " + Toolbox.Instance.CloneRemover(gameObject.name);
         }
         if (coll.gameObject == groundObject) {
-            // Debug.Log("I collided with the ground.");
+
         } else if (coll.gameObject == horizon) {
-            // Debug.Log(gameObject.name+" collided with the horizon.");
             if (coll.relativeVelocity.magnitude > 0.1) {
                 // Debug.Log(name + " bounced");
                 Vector3 vel = previousVelocity;
-                // Vector3  physical.objectBody.velocity = objectVelocity;
-                // Vector3 groundVelocity = groundBody.velocity;
-                // float z = previousVelocity.y - groundVelocity.y;
-                // vel.y = groundVelocity.y + -0.5f * z;
-                vel.y = -0.5f * vel.y;
+                Vector3 groundVelocity = groundBody.velocity;
+                float z = vel.y - groundVelocity.y;
+                vel.y = groundVelocity.y + (-1f * bounceCoefficient * z);
+                groundVelocity.y = 0.9f * groundVelocity.y;
+                // vel.y = -0.5f * vel.y;
                 body.velocity = vel;
+                groundBody.velocity = groundVelocity;
                 physical.BroadcastMessage("OnGroundImpact", physical, SendMessageOptions.DontRequireReceiver);
             } else {
                 physical.suppressLandSound = true;
@@ -197,13 +198,18 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
             if (physical == null)
                 return;
             if (physical.currentMode == Physical.mode.zip) {
-                Rebound();
-                Debug.Log("physical bootstrapper collision: "+gameObject.name+" + "+coll.gameObject.name);
+                physical.Rebound();
+                // Debug.Log("physical bootstrapper collision: "+gameObject.name+" + "+coll.gameObject.name);
                 MessageDamage message = new MessageDamage();
                 message.responsibleParty = thrownBy;
                 ContactPoint2D contact = coll.contacts[0];
                 message.force = contact.normal;
-                message.amount = 25f;
+                if (physical.currentMode == Physical.mode.zip){
+                    message.amount = 25f;
+                } else {
+                    message.amount = coll.relativeVelocity.magnitude;
+                    Debug.Log(message.amount);
+                }
                 message.type = damageType.physical;
                 Toolbox.Instance.SendMessage(gameObject, this, message);
                 physical.FlyMode();
@@ -225,16 +231,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         physical.objectBody.velocity = objectVelocity;
         groundBody.velocity = groundVelocity;
     }
-    public void Rebound() {
-        // TODO: set angular velocity appropriately
-        Vector2 objectVelocity = physical.objectBody.velocity;
-        objectVelocity.y = Random.Range(0.5f, 0.8f);
-        physical.objectBody.velocity = objectVelocity;
-        physical.objectBody.angularVelocity = Random.Range(360, 800);
-        physical.ClearTempColliders();
-        // Debug.Log("angular vel:" + physical.objectBody.angularVelocity.ToString());
-        // Debug.Log("y vel:" + objectVelocity.y.ToString());
-    }
+
     void FixedUpdate() {
         if (setV != Vector3.zero) {
             Vector2 groundVelocity = new Vector2(setV.x, setV.y);
