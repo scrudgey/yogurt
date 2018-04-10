@@ -341,7 +341,11 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
         PhysicalImpact impact = slash.GetComponent<PhysicalImpact>();
         // Intrinsics intrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
         MessageDamage message = new MessageDamage(10f, damageType.physical);
-        message.force = new Vector2(direction.x*15f, direction.y*15f);
+        if (netBuffs[BuffType.strength].boolValue){
+            message.force = new Vector2(direction.x*35f, direction.y*35f);
+        }else {
+            message.force = new Vector2(direction.x*15f, direction.y*15f);
+        }
         message.responsibleParty = gameObject;
         message.strength = netBuffs[BuffType.strength].boolValue;
         message.type = damageType.physical;
