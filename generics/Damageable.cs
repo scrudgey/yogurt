@@ -94,9 +94,9 @@ public abstract class Damageable : MonoBehaviour, IMessagable {
             return;
         if (message.type == damageType.fire || message.type == damageType.cosmic || message.type == damageType.asphyxiation)
             return;
-        if (rigidbody2D) {
-            rigidbody2D.AddForce(message.force);
-        }
+        // if (rigidbody2D) {
+            // rigidbody2D.AddForce(message.force);
+        // }
         if (controllable) {
             controllable.direction = -1f * message.force;
         }
