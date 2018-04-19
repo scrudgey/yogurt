@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
-public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
-    public enum shadowSize {normal, medium, small};
+public class PhysicalBootstrapper : MonoBehaviour, ISaveable, IMessagable {
+    public enum shadowSize { normal, medium, small };
     public AudioClip[] impactSounds;
     public AudioClip[] landSounds;
     public AudioClip[] scrapeSounds;
@@ -30,21 +30,23 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
     public shadowSize size;
     private Vector3 previousVelocity;
     public float bounceCoefficient = 0.5f;
+    public AudioSource audioSource;
     public void Start() {
         tag = "Physical";
         GetComponent<Renderer>().sortingLayerName = "main";
         if (doInit)
             InitPhysical(initHeight, initVelocity);
-        if (impactSounds!= null && impactSounds.Length > 0) {
-            Toolbox.Instance.SetUpAudioSource(gameObject);
-        }
+        // if (impactSounds!= null && impactSounds.Length > 0) {
+        Toolbox.Instance.SetUpAudioSource(gameObject);
+        // }
+        audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
     }
     public void DestroyPhysical() {
         transform.SetParent(null);
         ClaimsManager.Instance.WasDestroyed(groundObject);
         Destroy(groundObject);
         body = GetComponent<Rigidbody2D>();
-        if (body){
+        if (body) {
             body.gravityScale = 0;
             body.velocity = Vector2.zero;
             if (body.drag != 0)
@@ -159,10 +161,19 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         physical.impactsMiss = impactsMiss;
         groundPhysical.bootstrapper = this;
         transform.localPosition = Vector2.zero;
-        Set3Motion(new Vector3(initialVelocity.x, initialVelocity.y, initialVelocity.z));
+        // Set3Motion(new Vector3(initialVelocity.x, initialVelocity.y, initialVelocity.z));
+        Vector2 objectVelocity = physical.objectBody.velocity;
+        Vector2 groundVelocity = groundBody.velocity;
+        groundVelocity.x = initialVelocity.x;
+        groundVelocity.y = initialVelocity.y;
+        objectVelocity.x = initialVelocity.x;
+        objectVelocity.y = initialVelocity.y;
+        objectVelocity.y = initialVelocity.z;
+        physical.objectBody.velocity = objectVelocity;
+        groundBody.velocity = groundVelocity;
     }
     void OnCollisionStay2D(Collision2D coll) {
-        if (coll.gameObject == horizon){
+        if (coll.gameObject == horizon && physical.currentMode != Physical.mode.ground) {
             physical.StartGroundMode();
         }
     }
@@ -180,16 +191,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
 
         } else if (coll.gameObject == horizon) {
             if (coll.relativeVelocity.magnitude > 0.1) {
-                // Debug.Log(name + " bounced");
-                Vector3 vel = previousVelocity;
-                Vector3 groundVelocity = groundBody.velocity;
-                float z = vel.y - groundVelocity.y;
-                vel.y = groundVelocity.y + (-1f * bounceCoefficient * z);
-                groundVelocity.y = 0.9f * groundVelocity.y;
-                // vel.y = -0.5f * vel.y;
-                body.velocity = vel;
-                groundBody.velocity = groundVelocity;
-                physical.BroadcastMessage("OnGroundImpact", physical, SendMessageOptions.DontRequireReceiver);
+                Bounce();
             } else {
                 physical.suppressLandSound = true;
                 physical.GroundMode();
@@ -198,24 +200,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
             if (physical == null)
                 return;
             if (physical.currentMode == Physical.mode.zip) {
-                physical.Rebound();
-                // Debug.Log("physical bootstrapper collision: "+gameObject.name+" + "+coll.gameObject.name);
-                MessageDamage message = new MessageDamage();
-                message.responsibleParty = thrownBy;
-                ContactPoint2D contact = coll.contacts[0];
-                message.force = contact.normal;
-                if (physical.currentMode == Physical.mode.zip){
-                    message.amount = 25f;
-                } else {
-                    message.amount = coll.relativeVelocity.magnitude;
-                    Debug.Log(message.amount);
-                }
-                message.type = damageType.physical;
-                Toolbox.Instance.SendMessage(gameObject, this, message);
-                physical.FlyMode();
-                GameObject speaker = Instantiate(Resources.Load("Speaker"), transform.position, Quaternion.identity) as GameObject;
-                speaker.GetComponent<AudioSource>().clip = Resources.Load("sounds/8bit_impact1", typeof(AudioClip)) as AudioClip;
-                speaker.GetComponent<AudioSource>().Play();
+                Collision(coll);
             }
         }
     }
@@ -233,25 +218,29 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
     }
 
     void FixedUpdate() {
-        if (setV != Vector3.zero) {
-            Vector2 groundVelocity = new Vector2(setV.x, setV.y);
-            Vector2 objectVelocity = new Vector2(setV.x, setV.z + setV.y);
-            physical.objectBody.velocity = objectVelocity;
-            groundBody.velocity = groundVelocity;
-            setV = Vector3.zero;
-        }
-        if (addV != Vector3.zero){
+        if (setV != Vector3.zero || addV != Vector3.zero){
             Vector2 objectVelocity = physical.objectBody.velocity;
             Vector2 groundVelocity = groundBody.velocity;
-            groundVelocity.x += addV.x;
-            groundVelocity.y += addV.y;
-            objectVelocity.x += addV.x;
-            objectVelocity.y += addV.y;
-            objectVelocity.y += addV.z;
+            if (setV != Vector3.zero) {
+                groundVelocity.x = setV.x;
+                groundVelocity.y = setV.y;
+                objectVelocity.x = setV.x;
+                objectVelocity.y = setV.y;
+                objectVelocity.y = setV.z;
+                setV = Vector3.zero;
+            }
+            if (addV != Vector3.zero) {
+                groundVelocity.x += addV.x;
+                groundVelocity.y += addV.y;
+                objectVelocity.x += addV.x;
+                objectVelocity.y += addV.y;
+                objectVelocity.y += addV.z;
+                addV = Vector3.zero;
+            }
             physical.objectBody.velocity = objectVelocity;
             groundBody.velocity = groundVelocity;
-            addV = Vector3.zero;
         }
+        
         if (doLoad) {
             doLoad = false;
             initHeight = 0;
@@ -290,6 +279,94 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
             Destroy(physical.gameObject);
         }
     }
+    public void Collision(Collision2D collision) {
+        // Debug.Log("physical collision: "+gameObject.name+" + "+collision.gameObject.name);
+        MessageDamage message = new MessageDamage();
+        message.responsibleParty = thrownBy;
+        // the force is normal to the surface we impacted.
+        ContactPoint2D contact = collision.contacts[0];
+        // TODO: fix magnitude? z? amount?
+        message.force = contact.normal;
+        if (physical.currentMode == Physical.mode.zip) {
+            message.amount = 25f;
+        } else {
+            message.amount = collision.relativeVelocity.magnitude;
+        }
+        message.type = damageType.physical;
+        Toolbox.Instance.SendMessage(gameObject, this, message);
+        Impact(message);
+        AudioClip impactSound = null;
+        if (impactSounds != null) {
+            if (impactSounds.Length > 0) {
+                impactSound = impactSounds[Random.Range(0, impactSounds.Length)];
+            } else {
+                impactSound = Resources.Load("sounds/8bit_impact1", typeof(AudioClip)) as AudioClip;
+            }
+         } else {
+            impactSound = Resources.Load("sounds/8bit_impact1", typeof(AudioClip)) as AudioClip;
+        }
+        Toolbox.Instance.AudioSpeaker(impactSound, transform.position);
+    }
+    public void ReceiveMessage(Message message) {
+        // TODO: change this?
+        if (message is MessageDamage && !impactsMiss) {
+            MessageDamage dam = (MessageDamage)message;
+            if (dam.type == damageType.fire || dam.type == damageType.cosmic || dam.type == damageType.asphyxiation)
+                return;
+            if (message.messenger != this)
+                Impact(dam);
+        }
+    }
+    public void Impact(MessageDamage message) {
+        if (physical.currentMode == Physical.mode.zip) {
+            Rebound();
+        } else {
+            Debug.Log(name+ " impact");
+            Vector2 force = message.force * message.amount;
+            // Debug.Log(force);
+            if (force.magnitude / body.mass > 0.1f)
+                if (physical.currentMode != Physical.mode.fly)
+                    physical.FlyMode();
+            if (impactSounds != null && impactSounds.Length > 0)
+                audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
+            // TODO: make this smarter
+            Vector3 impulse = new Vector3(force.x / body.mass, force.y / body.mass, 0);
+            if (physical.currentMode == Physical.mode.ground || physical.height < 0.1f) {
+                impulse.z = Random.Range(0.01f, 0.40f) / body.mass;
+            }
+            impulse = impulse * (bounceCoefficient / 0.5f);
+            Add3Motion(impulse);
+        }
+    }
+    public void Rebound() {
+        // TODO: rebound according to direction
+        // TODO: set angular velocity appropriately
+        // TODO: set y velocity appropriately
+        // Debug.Log(name + " rebound");
+        Vector2 objectVelocity = body.velocity;
+        objectVelocity.x = -1f * bounceCoefficient * objectVelocity.x;
+        groundBody.velocity = objectVelocity;
+
+        objectVelocity.y = Random.Range(0.5f, 0.8f);
+        body.velocity = objectVelocity;
+        body.angularVelocity = Random.Range(360, 800);
+        physical.ClearTempColliders();
+        physical.FlyMode();
+        // Debug.Log("angular vel:" + physical.objectBody.angularVelocity.ToString());
+        // Debug.Log("y vel:" + objectVelocity.y.ToString());
+    }
+    public void Bounce() {
+        // Debug.Log(name + " bounced");
+        Vector3 vel = previousVelocity;
+        Vector3 groundVelocity = groundBody.velocity;
+        float z = vel.y - groundVelocity.y;
+        vel.y = groundVelocity.y + (-1f * bounceCoefficient * z);
+        groundVelocity.y = 0.9f * groundVelocity.y;
+        body.velocity = vel;
+        groundBody.velocity = groundVelocity;
+        physical.BroadcastMessage("OnGroundImpact", physical, SendMessageOptions.DontRequireReceiver);
+    }
+
     public void SaveData(PersistentComponent data) {
         data.bools["doInit"] = doInit;
         data.bools["physical"] = false;

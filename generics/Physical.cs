@@ -1,10 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-public class Physical : MonoBehaviour, IMessagable {
+public class Physical : MonoBehaviour {
     public enum mode { none, fly, ground, zip }
     public AudioClip[] impactSounds = new AudioClip[0];
     public AudioClip[] landSounds = new AudioClip[0];
-    public AudioSource audioSource;
     public PhysicalBootstrapper bootstrapper;
     private GameObject trueObject;
     public Rigidbody2D body;
@@ -31,6 +30,7 @@ public class Physical : MonoBehaviour, IMessagable {
     public List<Collider2D> temporaryDisabledColliders = new List<Collider2D>();
     public bool impactsMiss;
     public bool noCollisions;
+    public AudioSource audioSource;
     void Awake() {
         InitValues();
     }
@@ -68,7 +68,7 @@ public class Physical : MonoBehaviour, IMessagable {
         }
         height = horizonCollider.offset.y + hinge.transform.localPosition.y;
         if (height < 0) {
-            Debug.Log(name + " under horizon");
+            // Debug.Log(name + " under horizon");
             float angle = Vector2.Angle(Vector2.right, trueObject.transform.right) * Mathf.Deg2Rad;
             Vector2 hingePosition = Vector2.zero;
             hingePosition.y += Mathf.Cos(angle) * objectCollider.offset.y + Mathf.Sin(angle) * objectCollider.offset.x;
@@ -239,13 +239,16 @@ public class Physical : MonoBehaviour, IMessagable {
     }
     void OnTriggerEnter2D(Collider2D coll) {
         if (coll.tag == "table" && coll.gameObject != gameObject) {
+            // START TABLE
             // Debug.Log(name + " table collision detected, dostarttable true");
             table = coll.GetComponentInParent<Table>();
             doStartTable = true;
+            // Debug.Break();
         }
     }
     void OnTriggerExit2D(Collider2D coll) {
         if (coll.tag == "table" && coll.gameObject != gameObject) {
+            // STOP TABLE
             table = coll.GetComponentInParent<Table>();
             doStopTable = true;
         }
@@ -271,7 +274,7 @@ public class Physical : MonoBehaviour, IMessagable {
     }
     void StopTable() {
         horizonCollider.offset = Vector2.zero;
-
+        // Debug.Break();
         JointTranslationLimits2D tempLimits = slider.limits;
         tempLimits.min = 0;
         tempLimits.max = hinge.transform.localPosition.y;
@@ -279,64 +282,9 @@ public class Physical : MonoBehaviour, IMessagable {
         transform.SetParent(null);
         if (spriteRenderer)
             spriteRenderer.enabled = true;
+        // FlyMode();
     }
-    void OnCollisionEnter2D(Collision2D coll) {
-        if (coll.relativeVelocity.magnitude > 0.25) {
-            // Debug.Log("physical collision: "+gameObject.name+" + "+coll.gameObject.name);
-            if (impactSounds != null)
-                if (impactSounds.Length > 0) {
-                    audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
-                }
-            MessageDamage message = new MessageDamage();
-            message.responsibleParty = bootstrapper.thrownBy;
-            // the force is normal to the surface we impacted.
-            ContactPoint2D contact = coll.contacts[0];
-            // TODO: fix magnitude? z? amount?
-            message.force = contact.normal;
-            if (currentMode == mode.zip){
-                message.amount = 25f;
-            } else {
-                message.amount = coll.relativeVelocity.magnitude;
-                // Debug.Log(message.amount);
-            }
-            message.type = damageType.physical;
-            Toolbox.Instance.SendMessage(bootstrapper.gameObject, this, message);
-        }
-    }
-    public void ReceiveMessage(Message message) {
-        // TODO: change this?
-        if (message is MessageDamage && !impactsMiss) {
-            MessageDamage dam = (MessageDamage)message;
-            if (dam.type == damageType.fire || dam.type == damageType.cosmic || dam.type == damageType.asphyxiation)
-                return;
-            Impact(dam);
-        }
-    }
-    public void Impact(MessageDamage message) {
-        Vector2 force = message.force;
-        // Debug.Log(force.magnitude / objectBody.mass);
-        if (message.force.magnitude / objectBody.mass > 0.1f)
-            if (currentMode != mode.fly)
-                FlyMode();
-        if (impactSounds != null && impactSounds.Length > 0)
-            audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
-        // TODO: make this smarter
-        Vector3 impulse = new Vector3(force.x/objectBody.mass, force.y/objectBody.mass, 0);
-        if (currentMode == mode.ground || height < 0.1f){
-            impulse.z = 0.40f/objectBody.mass;
-        }
-        impulse = impulse * (bootstrapper.bounceCoefficient / 0.5f);
-        bootstrapper.Add3Motion(impulse);
-    }
-    public void Rebound() {
-        // TODO: set angular velocity appropriately
-        Vector2 objectVelocity = objectBody.velocity;
-        // TODO: set y velocity appropriately
-        objectVelocity.y = Random.Range(0.5f, 0.8f);
-        objectBody.velocity = objectVelocity;
-        objectBody.angularVelocity = Random.Range(360, 800);
-        ClearTempColliders();
-        // Debug.Log("angular vel:" + physical.objectBody.angularVelocity.ToString());
-        // Debug.Log("y vel:" + objectVelocity.y.ToString());
+    void OnCollisionEnter2D(Collision2D collision) {
+        bootstrapper.Collision(collision);
     }
 }

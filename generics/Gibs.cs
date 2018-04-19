@@ -1,11 +1,24 @@
 ﻿using UnityEngine;
 
 public class Gibs : MonoBehaviour {
+    [System.Serializable]
+    public class LoHi {
+        public float low;
+        public float high;
+        public LoHi(): this(0.025f, 0.075f) { }
+        public LoHi(float low, float high){
+            this.low = low;
+            this.high = high;
+        }
+    }
     public damageType damageCondition;
     public int number;
     public GameObject particle;
     public Color color = Color.white;
     public bool notPhysical;
+    public LoHi initHeight = new LoHi(0.025f, 0.075f);
+    public LoHi initVelocity = new LoHi(0.5f, 0.5f);
+    public LoHi initAngleFromHorizontal = new LoHi(0.1f, 0.9f);
     public void Emit(damageType dam, Vector2 baseDir) {
         if (!DamageTypeMatch(damageCondition, dam))
             return;
@@ -23,9 +36,10 @@ public class Gibs : MonoBehaviour {
             PhysicalBootstrapper bitPhys = Toolbox.Instance.GetOrCreateComponent<PhysicalBootstrapper>(bit);
             PhysicalBootstrapper myBoot = GetComponent<PhysicalBootstrapper>();
             bitPhys.impactsMiss = true;
+            bitPhys.noCollisions = true;
             if (bitPhys.size == PhysicalBootstrapper.shadowSize.normal)
                 bitPhys.size = PhysicalBootstrapper.shadowSize.medium;
-            bitPhys.initHeight = Random.Range(0.025f, 0.075f);
+            bitPhys.initHeight = Random.Range(initHeight.low, initHeight.high);
             if (myBoot) {
                 if (myBoot.physical != null) {
                     bitPhys.initHeight = myBoot.physical.height;
@@ -35,14 +49,16 @@ public class Gibs : MonoBehaviour {
             randomWalk.z = 0;
             bit.transform.position = transform.position + randomWalk;
 
-            Vector3 force = 0.5f * Toolbox.Instance.RandomVector(baseDir.normalized, 45f);
-            float phi = Random.Range(0.1f, 0.77f);
+            // TODO: figure this out
+             float magnitude = Random.Range(initVelocity.low, initVelocity.high);
+            Vector3 force = magnitude * Toolbox.Instance.RandomVector(baseDir.normalized, 45f);
+            float phi = Random.Range(initAngleFromHorizontal.low, initAngleFromHorizontal.high);
             force.x = force.x * Mathf.Cos(phi);
             force.y = force.y * Mathf.Cos(phi);
-            force.z = Mathf.Sin(phi);
-            // force.z = Random.Range(0.42f, 1.05f);
-            bitPhys.Add3Motion(force);
+            force.z = magnitude * Mathf.Sin(phi);
+            bitPhys.Set3Motion(force);
         }
+        // Debug.Break();
     }
     public static bool DamageTypeMatch(damageType dam1, damageType dam2) {
         if (dam1 == dam2)
