@@ -8,26 +8,29 @@ public class FlipSpriteRandom : MonoBehaviour {
     public float dutyCycle = 0;
     public float timer;
     public void Start() {
+        Flip();
+    }
+    public void Flip() {
         Vector3 rot = transform.localScale;
         if (flipX) {
-            if (Random.value >= 0.5){
-                rot.x = -1f;
+            if (Random.value >= 0.5) {
+                rot.x = rot.x * -1f;
             }
         }
         if (flipY) {
-            if (Random.value >= 0.5){
-                rot.y = -1f;
+            if (Random.value >= 0.5) {
+                rot.y = rot.y * -1f;
             }
         }
         transform.localScale = rot;
     }
-    public void Update(){
+    public void Update() {
         if (dutyCycle <= 0)
             return;
         timer += Time.deltaTime;
-        if (timer > dutyCycle){
+        if (timer > dutyCycle) {
             timer = 0;
-            Start();
+            Flip();
         }
     }
 }
