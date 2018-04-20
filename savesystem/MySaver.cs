@@ -236,6 +236,7 @@ public class MySaver {
             PersistentObject persistent = null;
             if (objectDataBase.TryGetValue(idn, out persistent)) {
                 // TODO: handle update instead of replacement
+                // TODO: alert on load if instantiation fails
                 persistent.HandleLoad(loadedObjects[idn]);
             }
         }
