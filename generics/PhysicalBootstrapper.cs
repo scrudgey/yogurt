@@ -321,7 +321,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable, IMessagable {
         if (physical.currentMode == Physical.mode.zip) {
             Rebound();
         } else {
-            Debug.Log(name+ " impact");
+            // Debug.Log(name+ " impact");
             Vector2 force = message.force * message.amount;
             // Debug.Log(force);
             if (force.magnitude / body.mass > 0.1f)

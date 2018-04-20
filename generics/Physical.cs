@@ -159,6 +159,8 @@ public class Physical : MonoBehaviour {
     }
     public void StartGroundMode() {
         // Debug.Log(name + " start ground mode");
+        if (body == null)
+            Start();
         doGround = false;
         doFly = false;
         doZip = false;
