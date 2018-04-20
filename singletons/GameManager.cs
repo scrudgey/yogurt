@@ -496,7 +496,6 @@ public partial class GameManager : Singleton<GameManager> {
         string path = Path.Combine(Application.persistentDataPath, saveGameName);
         path = Path.Combine(path, "gameData.xml");
         FileStream sceneStream = File.Create(path);
-        Debug.Log("seriailizing scenestream");
         try{    
             serializer.Serialize(sceneStream, data);
         } catch(Exception e) {
