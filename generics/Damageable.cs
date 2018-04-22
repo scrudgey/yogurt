@@ -89,14 +89,10 @@ public abstract class Damageable : MonoBehaviour, IMessagable {
             // do we play a repel sound here? or no?
         }
         // Debug.Log(name + " taking damage "+damage.ToString());
-        // apply force
         if (damage <= 0)
             return;
         if (message.type == damageType.fire || message.type == damageType.cosmic || message.type == damageType.asphyxiation)
             return;
-        // if (rigidbody2D) {
-            // rigidbody2D.AddForce(message.force);
-        // }
         if (controllable) {
             controllable.direction = -1f * message.force;
         }
@@ -105,7 +101,6 @@ public abstract class Damageable : MonoBehaviour, IMessagable {
     public virtual void Destruct() {
         foreach (Gibs gib in GetComponents<Gibs>())
             gib.Emit(lastDamage, lastMessage.force);
-        // Debug.Break();
         PhysicalBootstrapper phys = GetComponent<PhysicalBootstrapper>();
         if (phys) {
             phys.DestroyPhysical();
