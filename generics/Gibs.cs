@@ -50,7 +50,8 @@ public class Gibs : MonoBehaviour {
             bit.transform.position = transform.position + randomWalk;
 
             // TODO: figure this out
-             float magnitude = Random.Range(initVelocity.low, initVelocity.high);
+            float magnitude = Random.Range(initVelocity.low, initVelocity.high);
+            // Debug.Log(baseDir.magnitude);
             Vector3 force = magnitude * Toolbox.Instance.RandomVector(baseDir.normalized, 45f);
             float phi = Random.Range(initAngleFromHorizontal.low, initAngleFromHorizontal.high);
             force.x = force.x * Mathf.Cos(phi);
