@@ -26,7 +26,8 @@ public class PhoneMenu : MonoBehaviour {
         selectedButton = null;
     }
     public void CloseButton() {
-        Destroy(gameObject);
+        // Destroy(gameObject);
+        UINew.Instance.CloseActiveMenu();
         if (phoneDown != null)
             Toolbox.Instance.AudioSpeaker(phoneDown, telephone.transform.position);
     }

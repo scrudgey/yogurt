@@ -217,7 +217,8 @@ public class DialogueMenu : MonoBehaviour {
     public void ActionCallback(string callType) {
         switch (callType) {
             case "end":
-                Destroy(gameObject);
+                // Destroy(gameObject);
+                UINew.Instance.CloseActiveMenu();
                 break;
             case "insult":
                 Say(instigator.Insult(target.gameObject));
@@ -245,7 +246,8 @@ public class DialogueMenu : MonoBehaviour {
         }
     }
     public void Command(){
-        Destroy(gameObject);
+        // Destroy(gameObject);
+        UINew.Instance.CloseActiveMenu();
         Controller.Instance.commandTarget = target.gameObject;
         Controller.Instance.currentSelect = Controller.SelectType.command;
         UINew.Instance.SetActiveUI();
@@ -303,7 +305,8 @@ public class DialogueMenu : MonoBehaviour {
         }
         // portrait1.sprite = monologue.speaker.portrait;
         if (monologue.text.Peek() == "END")
-            Destroy(gameObject);
+            UINew.Instance.CloseActiveMenu();
+            // Destroy(gameObject);
     }
     public void EnableButtons() {
         foreach (Button button in buttons)

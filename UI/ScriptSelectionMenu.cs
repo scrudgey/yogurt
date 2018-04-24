@@ -55,11 +55,13 @@ public class ScriptSelectionMenu : MonoBehaviour {
             VideoCamera director = GameObject.FindObjectOfType<VideoCamera>();
             director.Enable();
         }
-        Destroy(gameObject);
+        // Destroy(gameObject);
+        UINew.Instance.CloseActiveMenu();
     }
     public void ClickedCancel() {
         Controller.Instance.suspendInput = false;
-        Destroy(gameObject);
+        // Destroy(gameObject);
+        UINew.Instance.CloseActiveMenu();
     }
     public void ClickedScript(ScriptListEntry entry) {
         if (lastClicked) {

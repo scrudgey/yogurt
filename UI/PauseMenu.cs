@@ -13,6 +13,7 @@ public class PauseMenu : MonoBehaviour {
         GameManager.Instance.TitleScreen();
     }
     public void ContinueClick() {
-        Destroy(gameObject);
+        // Destroy(gameObject);
+        UINew.Instance.CloseActiveMenu();
     }
 }

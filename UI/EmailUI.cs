@@ -54,7 +54,8 @@ public class EmailUI : MonoBehaviour {
     }
 
     public void OKButtonCallback() {
-        Destroy(gameObject);
+        // Destroy(gameObject);
+        UINew.Instance.CloseActiveMenu();
         computer.CheckBubble();
     }
 }

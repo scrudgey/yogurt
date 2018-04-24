@@ -312,6 +312,7 @@ public class UINew : Singleton<UINew> {
         }
     }
     public void SetActiveUI(bool active = false) {
+        Debug.Log(active);
         List<GameObject> buttons = new List<GameObject>() { inventoryButton, fightButton, punchButton, speakButton, hypnosisButton, vomitButton };
         foreach (GameObject button in buttons) {
             if (button)
@@ -328,6 +329,8 @@ public class UINew : Singleton<UINew> {
             UpdateButtons();
     }
     public void UpdateButtons() {
+        Debug.Log("update buttons");
+        Debug.Log(UINew.Instance.activeMenuType);
         // TODO: this is why the buttons are active but not the health bar
         if (UINew.Instance.activeMenuType != UINew.MenuType.none)
             return;

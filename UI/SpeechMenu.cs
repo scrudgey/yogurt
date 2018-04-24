@@ -8,29 +8,35 @@ public class SpeechMenu : MonoBehaviour {
         MessageSpeech message = new MessageSpeech();
         message.sayLine = true;
         Toolbox.Instance.SendMessage(GameManager.Instance.playerObject, this, message);
-        Destroy(gameObject);
+        // Destroy(gameObject);
+        UINew.Instance.CloseActiveMenu();
     }
     public void SwearButton() {
         MessageSpeech message = new MessageSpeech();
         message.randomSwear = true;
         Toolbox.Instance.SendMessage(GameManager.Instance.playerObject, this, message);
-        Destroy(gameObject);
+        // Destroy(gameObject);
+        UINew.Instance.CloseActiveMenu();
     }
     public void SwearAtButton() {
         Controller.Instance.currentSelect = Controller.SelectType.swearAt;
-        Destroy(gameObject);
+        // Destroy(gameObject);
+        UINew.Instance.CloseActiveMenu();
     }
     public void InsultButton() {
         Controller.Instance.currentSelect = Controller.SelectType.insultAt;
-        Destroy(gameObject);
+        // Destroy(gameObject);
+        UINew.Instance.CloseActiveMenu();
     }
     public void RandomButton() {
         MessageSpeech message = new MessageSpeech();
         message.randomSpeech = true;
         Toolbox.Instance.SendMessage(GameManager.Instance.playerObject, this, message);
-        Destroy(gameObject);
+        // Destroy(gameObject);
+        UINew.Instance.CloseActiveMenu();
     }
     public void CancelButton() {
-        Destroy(gameObject);
+        // Destroy(gameObject);
+        UINew.Instance.CloseActiveMenu();
     }
 }
