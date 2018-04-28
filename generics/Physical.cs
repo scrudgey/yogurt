@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 public class Physical : MonoBehaviour {
     public enum mode { none, fly, ground, zip }
-    public AudioClip[] impactSounds = new AudioClip[0];
+    // public AudioClip[] impactSounds = new AudioClip[0];
     public AudioClip[] landSounds = new AudioClip[0];
     public PhysicalBootstrapper bootstrapper;
     private GameObject trueObject;
@@ -197,6 +197,7 @@ public class Physical : MonoBehaviour {
         foreach (Collider2D temporaryCollider in temporaryDisabledColliders) {
             Physics2D.IgnoreCollision(temporaryCollider, objectCollider, false);
             Physics2D.IgnoreCollision(temporaryCollider, horizonCollider, false);
+            Physics2D.IgnoreCollision(temporaryCollider, groundCollider, false);
         }
         temporaryDisabledColliders = new List<Collider2D>();
     }
@@ -276,7 +277,6 @@ public class Physical : MonoBehaviour {
     }
     void StopTable() {
         horizonCollider.offset = Vector2.zero;
-        // Debug.Break();
         JointTranslationLimits2D tempLimits = slider.limits;
         tempLimits.min = 0;
         tempLimits.max = hinge.transform.localPosition.y;
