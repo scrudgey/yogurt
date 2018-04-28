@@ -89,7 +89,7 @@ public class Toolbox : Singleton<Toolbox> {
     public GameObject SpawnDroplet(Liquid l, float severity, GameObject spiller) {
         return SpawnDroplet(l, severity, spiller, 0.01f);
     }
-    public GameObject SpawnDroplet(Liquid l, float severity, GameObject spiller, float initHeight) {
+    public GameObject SpawnDroplet(Liquid l, float severity, GameObject spiller, float initHeight, bool noCollision=true) {
         Vector3 initialVelocity = Vector2.zero;
         Vector3 randomVelocity = Vector2.zero;
         randomVelocity = spiller.transform.right * Random.Range(-0.2f, 0.2f);
@@ -106,8 +106,14 @@ public class Toolbox : Singleton<Toolbox> {
         Physical pb = spiller.GetComponentInParent<Physical>();
         if (pb != null) {
             initHeight += pb.height;
+        } else {
+            Inventory holderInv = spiller.GetComponentInParent<Inventory>();
+            if (holderInv){
+                initHeight += holderInv.dropHeight;
+            }
         }
         droplet.transform.position = initpos;
+        phys.noCollisions = noCollision;
         phys.doInit = false;
         phys.InitPhysical(initHeight, initialVelocity);
         phys.physical.StartFlyMode();
