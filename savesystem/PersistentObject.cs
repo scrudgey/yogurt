@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class PersistentObject {
     private static Regex regexClone = new Regex(@"(.+)\(Clone\)$", RegexOptions.Multiline);
+    private static Regex regexNumber = new Regex(@"(.+)\(\d+\)$", RegexOptions.Multiline);
     private static Regex regexSpace = new Regex("\\s+", RegexOptions.Multiline);
     public string name;
     public string prefabPath;
@@ -33,14 +34,17 @@ public class PersistentObject {
         MySaver.objectDataBase[id] = this;
         creationDate = GameManager.Instance.data.days;
 
-        MatchCollection matches = regexClone.Matches(gameObject.name);
+        name = gameObject.name;
+        MatchCollection matches = regexClone.Matches(name);
         if (matches.Count > 0) {                                    // the object is a clone, capture just the normal name
-            foreach (Match match in matches) {
-                name = match.Groups[1].Value;
-            }
-        } else {                                                // not a clone
-            name = gameObject.name;
+            name = matches[0].Groups[1].Value;
         }
+        matches = regexNumber.Matches(name);
+        if (matches.Count > 0) {
+            name = matches[0].Groups[1].Value;
+        }
+        // Debug.Log(name);
+        name = name.Trim();
         // set up the persistent transform
         Update(gameObject);
         MyMarker marker = gameObject.GetComponent<MyMarker>();

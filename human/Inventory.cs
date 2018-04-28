@@ -39,7 +39,6 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
     public Vector2 direction = Vector2.right;
     private float directionAngle;
     private SortingGroup holdSortGroup;
-    // private GameObject strengthFX;
     public bool normalPunchSounds = true;
     public List<AudioClip> punchSounds;
     private AudioSource audioSource;
@@ -106,6 +105,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
             holding.transform.position = holdpoint.position;
             holding.transform.SetParent(holdpoint, false);
             holding.transform.rotation = Quaternion.identity;
+            holding.transform.localPosition = Vector3.zero;
             holding.GetComponent<Rigidbody2D>().isKinematic = true;
             holding.GetComponent<Collider2D>().isTrigger = true;
             holding.holder = this;
@@ -229,6 +229,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
                 if (!collider.isTrigger) {
                     Physics2D.IgnoreCollision(collider, phys.physical.objectCollider);
                     Physics2D.IgnoreCollision(collider, phys.physical.horizonCollider);
+                    Physics2D.IgnoreCollision(collider, phys.physical.groundCollider);
                     phys.physical.temporaryDisabledColliders.Add(collider);
                 }
             }

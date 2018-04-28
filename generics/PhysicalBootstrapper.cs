@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 public class PhysicalBootstrapper : MonoBehaviour, ISaveable, IMessagable {
     public enum shadowSize { normal, medium, small };
+    public bool silentImpact;
     public AudioClip[] impactSounds;
     public AudioClip[] landSounds;
     public AudioClip[] scrapeSounds;
@@ -56,7 +57,6 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable, IMessagable {
         doInit = false;
     }
     public void InitPhysical(float height, Vector3 initialVelocity) {
-        // Debug.Log(name + " init physical");
         doInit = false;
         Vector2 initPos = transform.position;
         Vector2 groundPos = transform.position;
@@ -152,7 +152,6 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable, IMessagable {
         sliderJoint2D.angle = 90f;
         sliderJoint2D.connectedBody = hingeBody;
 
-        groundPhysical.impactSounds = impactSounds;
         groundPhysical.landSounds = landSounds;
 
         physical = groundPhysical;
@@ -200,6 +199,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable, IMessagable {
             if (physical == null)
                 return;
             if (physical.currentMode == Physical.mode.zip) {
+                Debug.Log(name+" Collision");
                 Collision(coll);
             }
         }
@@ -296,7 +296,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable, IMessagable {
         Toolbox.Instance.SendMessage(gameObject, this, message);
         Impact(message);
         AudioClip impactSound = null;
-        if (impactSounds != null) {
+        if (impactSounds != null && !silentImpact) {
             if (impactSounds.Length > 0) {
                 impactSound = impactSounds[Random.Range(0, impactSounds.Length)];
             } else {
@@ -305,7 +305,11 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable, IMessagable {
          } else {
             impactSound = Resources.Load("sounds/8bit_impact1", typeof(AudioClip)) as AudioClip;
         }
-        Toolbox.Instance.AudioSpeaker(impactSound, transform.position);
+        if (impactSound)
+            Toolbox.Instance.AudioSpeaker(impactSound, transform.position);
+        // Collider2D mycollider = GetComponent<Collider2D>();
+        // Debug.Log("Collision: "+mycollider.name+" collided with "+collision.collider.name);
+        // Debug.Log(Physics2D.GetIgnoreCollision(mycollider, collision.collider));
     }
     public void ReceiveMessage(Message message) {
         // TODO: change this?
@@ -318,17 +322,18 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable, IMessagable {
         }
     }
     public void Impact(MessageDamage message) {
+        if (physical == null)
+            return;
         if (physical.currentMode == Physical.mode.zip) {
             Rebound();
         } else {
-            // Debug.Log(name+ " impact");
             Vector2 force = message.force * message.amount;
-            // Debug.Log(force);
             if (force.magnitude / body.mass > 0.1f)
                 if (physical.currentMode != Physical.mode.fly)
                     physical.FlyMode();
-            if (impactSounds != null && impactSounds.Length > 0)
+            if (impactSounds != null && impactSounds.Length > 0) {
                 audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
+            }
             // TODO: make this smarter
             Vector3 impulse = new Vector3(force.x / body.mass, force.y / body.mass, 0);
             if (physical.currentMode == Physical.mode.ground || physical.height < 0.1f) {

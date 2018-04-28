@@ -92,6 +92,7 @@ public class Bed : Doorway {
                     GameManager.Instance.data.deathCutscenesPlayed = 1;
                     GameManager.Instance.ShowDiaryEntry("death1");
                 }
+                UINew.Instance.SetActiveUI(active:true);
             }
         }
     }

@@ -12,6 +12,8 @@ public abstract class Damageable : MonoBehaviour, IMessagable {
         {damageType.cosmic, new List<BuffType>(){BuffType.invulnerable}},
         {damageType.asphyxiation, new List<BuffType>(){BuffType.vampirism}}
     };
+    public bool immuneToFire;
+    public bool immuneToPhysical;
     public AudioClip[] impactSounds;
     public AudioClip[] repelSounds;
     public AudioClip[] strongImpactSounds;
@@ -21,7 +23,7 @@ public abstract class Damageable : MonoBehaviour, IMessagable {
     public Dictionary<BuffType, Buff> netBuffs;
     new public Rigidbody2D rigidbody2D;
     public Controllable controllable;
-    public static bool Damages(damageType type, Dictionary<BuffType, Buff> netBuffs) {
+    public static bool Damages(Damageable damageable, damageType type, Dictionary<BuffType, Buff> netBuffs) {
         // no buffs means no immunities
         if (netBuffs == null)
             return true;
@@ -66,10 +68,14 @@ public abstract class Damageable : MonoBehaviour, IMessagable {
     public void TakeDamage(MessageDamage message) {
         lastMessage = message;
         lastDamage = message.type;
-        bool vulnerable = Damages(message.type, netBuffs);
+        bool vulnerable = Damages(this, message.type, netBuffs);
         ImpactResult result = ImpactResult.normal;
         float damage = 0f;
         if (vulnerable) {
+            if (message.type == damageType.physical && immuneToPhysical)
+                return;
+            if (message.type == damageType.fire && immuneToFire)
+                return;
             damage = CalculateDamage(message);
             if (damage > 0) {
                 if (message.strength) {
@@ -88,7 +94,6 @@ public abstract class Damageable : MonoBehaviour, IMessagable {
         } else {
             // do we play a repel sound here? or no?
         }
-        // Debug.Log(name + " taking damage "+damage.ToString());
         if (damage <= 0)
             return;
         if (message.type == damageType.fire || message.type == damageType.cosmic || message.type == damageType.asphyxiation)

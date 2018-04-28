@@ -72,11 +72,13 @@ public class ClosetButtonHandler : MonoBehaviour {
         }
     }
     public void CloseButtonClick() {
-        Destroy(gameObject);
+        // Destroy(gameObject);
+        UINew.Instance.CloseActiveMenu();
     }
     public void ItemClick(ItemEntryScript itemScript) {
         GameManager.Instance.RetrieveCollectedItem(itemScript.itemName);
-        Destroy(gameObject);
+        // Destroy(gameObject);
+        UINew.Instance.CloseActiveMenu();
     }
     public void ItemMouseover(ItemEntryScript itemScript) {
         GameObject tempObject = Instantiate(Resources.Load("prefabs/" + itemScript.itemName)) as GameObject;

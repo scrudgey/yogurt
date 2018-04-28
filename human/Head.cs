@@ -32,19 +32,18 @@ public class Head : Interactive, IExcludable, ISaveable {
         PhysicalBootstrapper phys = h.GetComponent<PhysicalBootstrapper>();
         if (phys)
             phys.DestroyPhysical();
-        hatPoint.transform.localScale = Vector3.one;
-        transform.localScale = Vector3.one;
-        h.transform.rotation = Quaternion.identity;
         if (h.helmet) {
             h.transform.position = transform.position;
-            h.transform.SetParent(transform, true);
             spriteRenderer.enabled = false;
         } else {
             h.transform.position = hatPoint.transform.position;
-            h.transform.SetParent(hatPoint.transform, true);
         }
+        h.transform.SetParent(transform, true);
+        hatPoint.transform.localScale = Vector3.one;
+        transform.localScale = Vector3.one;
         h.transform.rotation = Quaternion.identity;
-        h.GetComponent<Rigidbody2D>().isKinematic = true;
+        // h.GetComponent<Rigidbody2D>().isKinematic = true;
+        h.GetComponent<Rigidbody2D>().simulated = false;
         h.GetComponent<Collider2D>().isTrigger = true;
         HatAnimation hatAnimator = hat.GetComponent<HatAnimation>();
         if (hatAnimator) {

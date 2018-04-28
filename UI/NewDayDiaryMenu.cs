@@ -38,6 +38,7 @@ public class NewDayDiaryMenu : MonoBehaviour {
 
     public void OkayButtonCallback() {
         Time.timeScale = 1f;
-        Destroy(gameObject);
+        // Destroy(gameObject);
+        UINew.Instance.CloseActiveMenu();
     }
 }

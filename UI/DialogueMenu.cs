@@ -25,7 +25,8 @@ public class Monologue {
     public string GetString() {
         currentString = text.Peek().Substring(0, index);
         index += 1;
-        return Toolbox.Instance.CloneRemover(speaker.name) + ": " + currentString;
+        return currentString;
+        // return Toolbox.Instance.CloneRemover(speaker.name) + ": " + currentString;
     }
     public bool MoreToSay() {
         return currentString != text.Peek();
@@ -54,7 +55,10 @@ public class DialogueMenu : MonoBehaviour {
     public Trader targetTrade;
     private Controllable instigatorControl;
     private Controllable targetControl;
-    public Image portrait;
+    public Image portrait1;
+    public Image portrait2;
+    public GameObject portraitContainer1;
+    public GameObject portraitContainer2;
     public Text speechText;
     public Text choice1Text;
     public Text choice2Text;
@@ -92,16 +96,20 @@ public class DialogueMenu : MonoBehaviour {
         configured = true;
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         audioSource.spatialBlend = 0;
-        portrait = transform.Find("base/main/portrait").GetComponent<Image>();
-        speechText = transform.Find("base/main/speechPanel/speechText").GetComponent<Text>();
-        promptText = transform.Find("base/main/speechPanel/textPrompt").GetComponent<Text>();
-        choice1Text = transform.Find("base/choiceBase/choicePanel/choice1/Text").GetComponent<Text>();
-        choice2Text = transform.Find("base/choiceBase/choicePanel/choice2/Text").GetComponent<Text>();
-        choice3Text = transform.Find("base/choiceBase/choicePanel/choice3/Text").GetComponent<Text>();
-        choice1Object = transform.Find("base/choiceBase/choicePanel/choice1/").gameObject;
-        choice2Object = transform.Find("base/choiceBase/choicePanel/choice2/").gameObject;
-        choice3Object = transform.Find("base/choiceBase/choicePanel/choice3/").gameObject;
-        choicePanel = transform.Find("base/choiceBase/choicePanel").gameObject;
+        portrait1 = transform.Find("base/dialogueElements/main/portrait1/Image").GetComponent<Image>();
+        portrait2 = transform.Find("base/dialogueElements/main/portrait2/Image").GetComponent<Image>();
+        portraitContainer1 = transform.Find("base/dialogueElements/main/portrait1").gameObject;
+        portraitContainer2 = transform.Find("base/dialogueElements/main/portrait2").gameObject;
+
+        speechText = transform.Find("base/dialogueElements/main/speechPanel/speechText").GetComponent<Text>();
+        promptText = transform.Find("base/dialogueElements/main/speechPanel/textPrompt").GetComponent<Text>();
+        choice1Text = transform.Find("base/dialogueElements/choicePanel/choice1/Text").GetComponent<Text>();
+        choice2Text = transform.Find("base/dialogueElements/choicePanel/choice2/Text").GetComponent<Text>();
+        choice3Text = transform.Find("base/dialogueElements/choicePanel/choice3/Text").GetComponent<Text>();
+        choice1Object = transform.Find("base/dialogueElements/choicePanel/choice1/").gameObject;
+        choice2Object = transform.Find("base/dialogueElements/choicePanel/choice2/").gameObject;
+        choice3Object = transform.Find("base/dialogueElements/choicePanel/choice3/").gameObject;
+        choicePanel = transform.Find("base/dialogueElements/choicePanel").gameObject;
 
         giveButton = transform.Find("base/buttons/Give").GetComponent<Button>();
         // demandButton = transform.Find("base/buttons/Demand").GetComponent<Button>();
@@ -115,10 +123,10 @@ public class DialogueMenu : MonoBehaviour {
         buttons.AddRange(new Button[] { giveButton, insultButton, threatenButton, suggestButton, followButton, endButton });
 
         promptText.text = "";
-        choicePanel.SetActive(false);
-        choice1Object.SetActive(false);
-        choice2Object.SetActive(false);
-        choice3Object.SetActive(false);
+        // choicePanel.SetActive(false);
+        // choice1Object.SetActive(false);
+        // choice2Object.SetActive(false);
+        // choice3Object.SetActive(false);
         promptText.text = "[A]";
     }
 
@@ -137,7 +145,8 @@ public class DialogueMenu : MonoBehaviour {
         // if (targetTrade == null) {
         // buyButton.interactable = false;
         // }
-        portrait.sprite = target.portrait;
+        portrait2.sprite = target.portrait;
+        portrait1.sprite = instigator.portrait;
         speechText.text = instigator.name + " " + target.name;
         targetControl = target.GetComponent<Controllable>();
         instigatorControl = instigator.GetComponent<Controllable>();
@@ -208,7 +217,8 @@ public class DialogueMenu : MonoBehaviour {
     public void ActionCallback(string callType) {
         switch (callType) {
             case "end":
-                Destroy(gameObject);
+                // Destroy(gameObject);
+                UINew.Instance.CloseActiveMenu();
                 break;
             case "insult":
                 Say(instigator.Insult(target.gameObject));
@@ -236,7 +246,8 @@ public class DialogueMenu : MonoBehaviour {
         }
     }
     public void Command(){
-        Destroy(gameObject);
+        // Destroy(gameObject);
+        UINew.Instance.CloseActiveMenu();
         Controller.Instance.commandTarget = target.gameObject;
         Controller.Instance.currentSelect = Controller.SelectType.command;
         UINew.Instance.SetActiveUI();
@@ -285,9 +296,17 @@ public class DialogueMenu : MonoBehaviour {
     }
     public void SetMonologue(Monologue newMonologue) {
         monologue = newMonologue;
-        portrait.sprite = monologue.speaker.portrait;
+        if (monologue.speaker == target){
+            portraitContainer1.SetActive(false);
+            portraitContainer2.SetActive(true);
+        } else if (monologue.speaker == instigator){
+            portraitContainer2.SetActive(false);
+            portraitContainer1.SetActive(true);
+        }
+        // portrait1.sprite = monologue.speaker.portrait;
         if (monologue.text.Peek() == "END")
-            Destroy(gameObject);
+            UINew.Instance.CloseActiveMenu();
+            // Destroy(gameObject);
     }
     public void EnableButtons() {
         foreach (Button button in buttons)
@@ -296,9 +315,6 @@ public class DialogueMenu : MonoBehaviour {
             giveButton.gameObject.SetActive(false);
             // demandButton.gameObject.SetActive(false);
         }
-        // if (targetTrade == null) {
-        //     buyButton.interactable = false;
-        // }
         if (choice1Text.gameObject.activeSelf) {
             choicePanel.SetActive(true);
         }
