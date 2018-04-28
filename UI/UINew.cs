@@ -329,8 +329,6 @@ public class UINew : Singleton<UINew> {
             UpdateButtons();
     }
     public void UpdateButtons() {
-        Debug.Log("update buttons");
-        Debug.Log(UINew.Instance.activeMenuType);
         // TODO: this is why the buttons are active but not the health bar
         if (UINew.Instance.activeMenuType != UINew.MenuType.none)
             return;
