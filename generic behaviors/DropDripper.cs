@@ -10,7 +10,6 @@ public class DropDripper : MonoBehaviour, ISaveable {
     private float timer;
     public int amount = 5;
     void Start() {
-        // timer = -0.5f;
         liquid = Liquid.LoadLiquid(liquidType);
         pBoot = GetComponent<PhysicalBootstrapper>();
         pickup = GetComponent<Pickup>();
@@ -34,11 +33,12 @@ public class DropDripper : MonoBehaviour, ISaveable {
             }
             if (pickup != null) {
                 if (pickup.holder != null) {
-                    Drip(pickup.holder.dropHeight);
                     dripFX.SetActive(true);
+                    Drip(pickup.holder.dropHeight);
                 }
                 return;
             }
+            timer = 0;
         }
     }
     void Drip(float height) {
