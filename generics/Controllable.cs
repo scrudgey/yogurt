@@ -151,7 +151,8 @@ public class Controllable : MonoBehaviour, IMessagable {
         direction = d;
     }
     public void ShootPressed() {
-        Toolbox.Instance.SendMessage(gameObject, this, new MessagePunch());
+        if (fightMode)
+            Toolbox.Instance.SendMessage(gameObject, this, new MessagePunch());
         if (defaultInteraction != null)
             defaultInteraction.DoAction();
     }
