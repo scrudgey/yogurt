@@ -234,7 +234,6 @@ public class Controller : Singleton<Controller> {
             GameObject actor = focus.gameObject;
             if (commandTarget != null)
                 actor = commandTarget;
-
             if (clicked.transform.IsChildOf(actor.transform) || clicked == actor) {
                 Inventory inventory = actor.GetComponent<Inventory>();
                 if (inventory)
