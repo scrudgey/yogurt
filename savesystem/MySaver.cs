@@ -256,8 +256,10 @@ public class MySaver {
                     persistent.transformPosition,
                     persistent.transformRotation) as GameObject;
                 }
-                if (go == null)
+                if (go == null){
+                    Debug.Log("WARNING: Object not found "+persistent.prefabPath);
                     continue;
+                }
                 loadedObjects[persistent.id] = go;
                 go.name = Toolbox.Instance.CloneRemover(go.name);
                 if (!rootObject)
