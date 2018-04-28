@@ -76,7 +76,7 @@ public class Eater : Interactive, IMessagable, ISaveable {
             if (types[i]) {
                 switch (prefs[i]) {
                     case preference.dislikes:
-                        reaction -= 2;
+                        reaction -= 3;
                         break;
                     case preference.likes:
                         reaction++;
@@ -93,14 +93,13 @@ public class Eater : Interactive, IMessagable, ISaveable {
         return "Eat " + foodname;
     }
     public void Eat(Edible food) {
-        int reaction;
         nutrition += food.nutrition;
         MessageHead head = new MessageHead();
         head.type = MessageHead.HeadType.eating;
         head.value = true;
         head.crumbColor = food.pureeColor;
         Toolbox.Instance.SendMessage(gameObject, this, head);
-        //randomly store a clone of the object for later vomiting
+        // randomly store a clone of the object for later vomiting
         GameObject eaten = Instantiate(food.gameObject) as GameObject;
         eaten.name = Toolbox.Instance.CloneRemover(eaten.name);
         eatenQueue.Enqueue(eaten);
@@ -111,7 +110,7 @@ public class Eater : Interactive, IMessagable, ISaveable {
             Destroy(oldEaten);
         }
         //update our status based on our reaction to the food
-        reaction = CheckReaction(food);
+        int reaction = CheckReaction(food);
         if (reaction > 0) {
             Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Yummy!", eventData: new EventData(positive: 1)));
         }
