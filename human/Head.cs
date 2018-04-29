@@ -38,7 +38,7 @@ public class Head : Interactive, IExcludable, ISaveable {
         } else {
             h.transform.position = hatPoint.transform.position;
         }
-        h.transform.SetParent(transform, true);
+        h.transform.SetParent(hatPoint.transform, true);
         hatPoint.transform.localScale = Vector3.one;
         transform.localScale = Vector3.one;
         h.transform.rotation = Quaternion.identity;
