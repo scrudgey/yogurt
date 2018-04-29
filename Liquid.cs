@@ -57,6 +57,10 @@ public class Liquid {
             float.Parse(data["g"]) / 255.0F,
             float.Parse(data["b"]) / 255.0F,
             float.Parse(data["a"]) / 255.0f);
+        l.colorA = float.Parse(data["a"]);
+        l.colorR = float.Parse(data["r"]);
+        l.colorG = float.Parse(data["g"]);
+        l.colorB = float.Parse(data["b"]);
         l.nutrition = float.Parse(data["nutrition"]);
         l.vegetable = bool.Parse(data["vegetable"]);
         l.meat = bool.Parse(data["meat"]);
