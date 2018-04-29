@@ -17,6 +17,7 @@ public class Toolbox : Singleton<Toolbox> {
     public string message = "smoke weed every day";
     private CameraControl cameraControl;
     private GameObject tom;
+    public int numberOfLiveSpeakers;
     public T GetOrCreateComponent<T>(GameObject g) where T : Component {
         T component = g.GetComponent<T>();
         if (component) {
@@ -56,15 +57,21 @@ public class Toolbox : Singleton<Toolbox> {
         return source;
     }
     public void AudioSpeaker(string clipName, Vector3 position) {
+        if (numberOfLiveSpeakers > 10)
+            return;
         AudioClip clip = Resources.Load("sounds/" + clipName, typeof(AudioClip)) as AudioClip;
-        GameObject speaker = Instantiate(Resources.Load("Speaker"), position, Quaternion.identity) as GameObject;
-        speaker.GetComponent<AudioSource>().clip = clip;
-        speaker.GetComponent<AudioSource>().Play();
+        AudioSpeaker(clip, position);
     }
     public void AudioSpeaker(AudioClip clip, Vector3 position) {
+        if (numberOfLiveSpeakers > 10)
+            return;
         GameObject speaker = Instantiate(Resources.Load("Speaker"), position, Quaternion.identity) as GameObject;
-        speaker.GetComponent<AudioSource>().clip = clip;
-        speaker.GetComponent<AudioSource>().Play();
+        AudioSource speakerSource = speaker.GetComponent<AudioSource>();
+        speakerSource.clip = clip;
+        speakerSource.Play();
+        DestroyOnceQuiet doq = speaker.GetComponent<DestroyOnceQuiet>();
+        doq.instantiatedByToolbox = true;
+        numberOfLiveSpeakers += 1;
     }
     ///<summary>
     ///Spawn a droplet of liquid l at poisition pos.
