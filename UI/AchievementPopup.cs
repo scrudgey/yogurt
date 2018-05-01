@@ -48,7 +48,8 @@ public class AchievementPopup : MonoBehaviour {
         audioSource.spatialBlend = 0;
         titleText.text = "Achievement Unlocked!";
         bodyText.text = achieve.title;
-        // image.sprite = achieve.icon;
+        Sprite icon = Resources.Load<Sprite>("achievements/icons/"+achieve.icon) as Sprite;
+        image.sprite = icon;
         audioSource.PlayOneShot(collectedSound);
         StartCoroutine(Display());
     }
