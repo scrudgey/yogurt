@@ -128,6 +128,7 @@ public class Toolbox : Singleton<Toolbox> {
         foreach (Collider2D collider in spillerColliders) {
             Physics2D.IgnoreCollision(collider, phys.physical.objectCollider, true);
             Physics2D.IgnoreCollision(collider, phys.physical.horizonCollider, true);
+            Physics2D.IgnoreCollision(collider, phys.physical.groundCollider, true);
         }
         Liquid.MonoLiquidify(droplet, l);
         return droplet;
