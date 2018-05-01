@@ -312,7 +312,6 @@ public class UINew : Singleton<UINew> {
         }
     }
     public void SetActiveUI(bool active = false) {
-        Debug.Log(active);
         List<GameObject> buttons = new List<GameObject>() { inventoryButton, fightButton, punchButton, speakButton, hypnosisButton, vomitButton };
         foreach (GameObject button in buttons) {
             if (button)
