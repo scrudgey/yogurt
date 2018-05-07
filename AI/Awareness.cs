@@ -118,6 +118,7 @@ public class Awareness : MonoBehaviour, IMessagable, ISaveable {
         }
         float rot_z = Mathf.Atan2(control.direction.y, control.direction.x) * Mathf.Rad2Deg;
         sightConeTransform.rotation = Quaternion.Euler(0f, 0f, rot_z);
+        
         // work the timer for the discrete perception updates
         speciousPresent -= Time.deltaTime;
         if (speciousPresent <= 0) {
@@ -209,14 +210,16 @@ public class Awareness : MonoBehaviour, IMessagable, ISaveable {
         }
     }
     void OnTriggerEnter2D(Collider2D other) {
+        if (hitState >= Controllable.HitState.unconscious)
+            return;
         if (seenFlags.Contains(other.gameObject))
             return;
         if (other.tag == "occurrenceFlag") {
-            NoticeOccurrence(other.gameObject);
+            ProcessOccurrence(other.gameObject);
             seenFlags.Add(other.gameObject);
         }
     }
-    void NoticeOccurrence(GameObject flag) {
+    void ProcessOccurrence(GameObject flag) {
         Occurrence occurrence = flag.GetComponent<Occurrence>();
         if (occurrence == null)
             return;
@@ -326,7 +329,7 @@ public class Awareness : MonoBehaviour, IMessagable, ISaveable {
         if (possessionDefaultState == null) {
             return false;
         }
-        if (Time.time - knowledge.lastSeenTime > 1) {
+        if (Time.time - knowledge.lastSeenTime > 0.5f) {
             return false;
         }
         if (Vector2.Distance(knowledge.lastSeenPosition, possessionDefaultState.lastSeenPosition) > 0.1) {
