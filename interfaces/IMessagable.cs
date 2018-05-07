@@ -78,8 +78,10 @@ public class MessageInventoryChanged : Message {
 public class MessagePunch : Message {
 }
 public class MessageInsult : Message {
+    public bool respondOutLoud = true;
 }
 public class MessageThreaten : Message {
+    public bool respondOutLoud = true;
 }
 public class MessageOccurrence : Message {
     public OccurrenceData data;
