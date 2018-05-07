@@ -15,31 +15,45 @@ public class ActionButtonScript : MonoBehaviour {
     public void clicked() {
         if (bType == buttonType.Action) {
             if (Controller.Instance.InteractionIsWithinRange(action) || manualAction) {
-                action.DoAction();
+                // TODO: don't do action yet if current select is command
+                if (Controller.Instance.currentSelect == Controller.SelectType.command){
+                    // callback a new dialogue menu
+                    UINew.Instance.ClearWorldButtons();
+                    UINew.Instance.UpdateButtons();
+                    Controller.Instance.ResetLastLeftClicked();
+                    GameObject menuObject = UINew.Instance.ShowMenu(UINew.MenuType.dialogue);
+                    DialogueMenu dialogue = menuObject.GetComponent<DialogueMenu>();
+                    // Speech playerSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
+                    // Speech targetSpeech = Controller.Instance.commandTarget.GetComponent<Speech>();
+                    // dialogue.Configure(playerSpeech, targetSpeech);
+                    dialogue.CommandCallback(action);
+                } else {
+                    action.DoAction();
                 if (!action.dontWipeInterface) {
                     UINew.Instance.ClearWorldButtons();
                     UINew.Instance.UpdateButtons();
                     Controller.Instance.ResetLastLeftClicked();
                     if (Controller.Instance.currentSelect == Controller.SelectType.command)
-                        ResetCommandState();
+                        Controller.Instance.ResetCommandState();
+                    }
                 }
             }
         } else {
             HandAction();
             Controller.Instance.ResetLastLeftClicked();
             if (Controller.Instance.currentSelect == Controller.SelectType.command)
-                ResetCommandState();
+                Controller.Instance.ResetCommandState();
         }
         UINew.Instance.SetActionText("");
         GUI.FocusControl("none");
     }
-    void ResetCommandState(){
-        Controller.Instance.currentSelect = Controller.SelectType.none;
-        Controller.Instance.commandTarget = null;
-        // reset command state
-        Controller.Instance.suspendInput = false;
-        UINew.Instance.SetActiveUI(active:true);
-    }
+    // void ResetCommandState(){
+    //     Controller.Instance.currentSelect = Controller.SelectType.none;
+    //     Controller.Instance.commandTarget = null;
+    //     // reset command state
+    //     Controller.Instance.suspendInput = false;
+    //     UINew.Instance.SetActiveUI(active:true);
+    // }
     void Update() {
         if (mouseHeld && bType == buttonType.Action) {
             if (action.continuous && (Controller.Instance.InteractionIsWithinRange(action) || manualAction)) {
