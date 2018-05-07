@@ -25,7 +25,7 @@ public class Speech : Interactive, IMessagable, ISaveable {
     public string flavor = "test";
     private Dictionary<BuffType, Buff> lastNetIntrinsic;
     public Controllable.HitState hitState;
-    public Sprite portrait;
+    public Sprite[] portrait;
     public string defaultMonologue;
     public bool disableSpeakWith;
     void Awake() {
@@ -337,21 +337,23 @@ public class Speech : Interactive, IMessagable, ISaveable {
         string targetname = Toolbox.Instance.GetName(mainTarget);
         Say("that shazbotting " + targetname + "!", "shazbotting", insult: target);
     }
-    public Monologue Insult(GameObject target) {
+    public Monologue Insult(GameObject target, bool say=true) {
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
         string content = Insults.ComposeInsult(target);
         MessageInsult messageInsult = new MessageInsult();
+        messageInsult.respondOutLoud = say;
         Toolbox.Instance.SendMessage(target, this, messageInsult);
 
         EventData data = new EventData(chaos: 2, disturbing: 1, positive: -2, offensive: Random.Range(2, 3));
-        Say(content, data: data, insult: target);
+        if (say)
+            Say(content, data: data, insult: target);
 
         List<string> strings = new List<string>() { content };
         Monologue mono = new Monologue(this, strings.ToArray());
         return mono;
     }
-    public Monologue Threaten(GameObject target) {
+    public Monologue Threaten(GameObject target, bool say=true) {
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
 
@@ -361,7 +363,8 @@ public class Speech : Interactive, IMessagable, ISaveable {
         string content = grammar.Parse("{threat}");
 
         EventData data = new EventData(chaos: 2, disturbing: 1, positive: -2, offensive: Random.Range(2, 3));
-        Say(content, data: data, threat: target);
+        if (say)
+            Say(content, data: data, threat: target);
 
         List<string> strings = new List<string>() { content };
         Monologue mono = new Monologue(this, strings.ToArray());
@@ -371,20 +374,22 @@ public class Speech : Interactive, IMessagable, ISaveable {
     public Monologue Ellipsis() {
         return new Monologue(this, new string[] { "..." });
     }
-    public Monologue Riposte() {
+    public Monologue Riposte(bool say=false) {
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
         Monologue mono = new Monologue(this, new string[] { "How dare you!" });
         EventData data = new EventData(chaos: 1, disturbing: 0, positive: -1, offensive:0);
-        Say("how dare you!", data: data);
+        if (say)
+            Say("how dare you!", data: data);
         return mono;
     }
-    public Monologue RespondToThreat() {
+    public Monologue RespondToThreat(bool say=false) {
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
         Monologue mono = new Monologue(this, new string[] { "Mercy!" });
         EventData data = new EventData(chaos: 1, disturbing: 0, positive: -1, offensive:0);
-        Say("Mercy!", data: data);
+        if (say)
+            Say("Mercy!", data: data);
         return mono;
     }
     public void SayFromNimrod(string key) {
