@@ -40,6 +40,8 @@ public class Achievement {
             pass = pass && otherStats.deathByMisadventure >= stats.deathByMisadventure;
         if (stats.deathByAsphyxiation > 0)
             pass = pass && otherStats.deathByAsphyxiation >= stats.deathByAsphyxiation;
+        if (stats.mayorsSassed > 0)
+            pass = pass && otherStats.mayorsSassed >= stats.mayorsSassed;
         return pass;
     }
     public Achievement() { }
@@ -68,6 +70,7 @@ public class AchievementStats {
     public int deathByCombat;
     public int deathByMisadventure;
     public int deathByAsphyxiation;
+    public int mayorsSassed;
     public AchievementStats() { }
     public AchievementStats(AchievementStats source) {
         secondsPlayed = source.secondsPlayed;
@@ -84,5 +87,6 @@ public class AchievementStats {
         deathByCombat = source.deathByCombat;
         deathByMisadventure = source.deathByMisadventure;
         deathByAsphyxiation = source.deathByAsphyxiation;
+        mayorsSassed = source.mayorsSassed;
     }
 }
