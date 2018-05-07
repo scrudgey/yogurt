@@ -56,6 +56,8 @@ public class AchievementPopup : MonoBehaviour {
     IEnumerator Display() {
         RectTransform rectTransform = transform.Find("Panel").GetComponent<RectTransform>();
         Vector3 tempPos = rectTransform.anchoredPosition;
+        Canvas canvas = GetComponent<Canvas>();
+        canvas.sortingOrder = 500;
         float intime = 0.75f;
         float outtime = 0.75f;
         float hangtime = 1.55f;
