@@ -90,10 +90,13 @@ public class DialogueMenu : MonoBehaviour {
     public delegate void MyDelegate();
     public MyDelegate menuClosed;
     public bool configured;
+    public int blitCounter;
+    public Interaction commandAct = null;
     void Start() {
         if (configured)
             return;
         configured = true;
+        commandAct = null;
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         audioSource.spatialBlend = 0;
         portrait1 = transform.Find("base/dialogueElements/main/portrait1/Image").GetComponent<Image>();
@@ -130,7 +133,7 @@ public class DialogueMenu : MonoBehaviour {
         promptText.text = "[A]";
     }
 
-    public void Configure(Speech instigator, Speech target) {
+    public void Configure(Speech instigator, Speech target, bool interruptDefault=false) {
         Start();
         this.instigator = instigator;
         this.target = target;
@@ -145,8 +148,8 @@ public class DialogueMenu : MonoBehaviour {
         // if (targetTrade == null) {
         // buyButton.interactable = false;
         // }
-        portrait2.sprite = target.portrait;
-        portrait1.sprite = instigator.portrait;
+        portrait2.sprite = target.portrait[0];
+        portrait1.sprite = instigator.portrait[0];
         speechText.text = instigator.name + " " + target.name;
         targetControl = target.GetComponent<Controllable>();
         instigatorControl = instigator.GetComponent<Controllable>();
@@ -156,6 +159,13 @@ public class DialogueMenu : MonoBehaviour {
             targetControl.disabled = true;
         if (instigatorControl)
             instigatorControl.disabled = true;
+        if (interruptDefault){
+            choicePanel.SetActive(false);
+            choice1Object.SetActive(false);
+            choice2Object.SetActive(false);
+            choice3Object.SetActive(false);
+            return;
+        }
         if (target.defaultMonologue != "") {
             LoadDialogueTree(target.defaultMonologue);
         }
@@ -221,17 +231,20 @@ public class DialogueMenu : MonoBehaviour {
                 UINew.Instance.CloseActiveMenu();
                 break;
             case "insult":
-                Say(instigator.Insult(target.gameObject));
+                Say(instigator.Insult(target.gameObject, say:false));
                 MessageInsult insult = new MessageInsult();
                 Toolbox.Instance.SendMessage(target.gameObject, instigator, insult);
-                Say(target.Riposte());
+                Say(target.Riposte(say:false));
                 DisableResponses();
+                if (CutsceneManager.Instance.cutscene is CutsceneMayor){
+                    GameManager.Instance.data.achievementStats.mayorsSassed += 1;
+                }
                 break;
             case "threat":
-                Say(instigator.Threaten(target.gameObject));
+                Say(instigator.Threaten(target.gameObject, say:false));
                 MessageThreaten threat = new MessageThreaten();
                 Toolbox.Instance.SendMessage(target.gameObject, instigator, threat);
-                Say(target.RespondToThreat());
+                Say(target.RespondToThreat(say:false));
                 DisableResponses();
                 break;
             case "buy":
@@ -247,11 +260,35 @@ public class DialogueMenu : MonoBehaviour {
     }
     public void Command(){
         // Destroy(gameObject);
-        UINew.Instance.CloseActiveMenu();
+        
+        // UINew.Instance.CloseActiveMenu();
         Controller.Instance.commandTarget = target.gameObject;
         Controller.Instance.currentSelect = Controller.SelectType.command;
+        
         UINew.Instance.SetActiveUI();
         Controller.Instance.suspendInput = true;
+        Controllable targetControl = target.GetComponent<Controllable>();
+        targetControl.control = Controllable.ControlType.none;
+    }
+    public void CommandCallback(Interaction action){
+        Speech playerSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
+        Speech targetSpeech = Controller.Instance.commandTarget.GetComponent<Speech>();
+        Configure(playerSpeech, targetSpeech, interruptDefault:true);
+
+        string actionDescription = action.Description();
+
+        List<string> request = new List<string>();
+        request.Add("Say, could you " + actionDescription + " for me?");
+        Say(new Monologue(instigator, request.ToArray()));
+
+        string[] ender = new string[] {"END"};
+        Say(new Monologue(target, ender));
+
+        List<string> response = new List<string>();
+        response.Add("why certainly my good man!");
+        Say(new Monologue(target, response.ToArray()));
+
+        commandAct = action;
     }
     public void AttemptTrade() {
         switch (targetTrade.CheckTradeStatus(instigatorInv)) {
@@ -282,6 +319,10 @@ public class DialogueMenu : MonoBehaviour {
             instigatorControl.disabled = false;
         if (menuClosed != null)
             menuClosed();
+        if (commandAct != null){
+            commandAct.DoAction();
+            Controller.Instance.ResetCommandState();
+        }
     }
     public void Say(Speech speaker, string text) {
         Monologue newLogue = new Monologue(speaker, new string[] { text });
@@ -361,6 +402,7 @@ public class DialogueMenu : MonoBehaviour {
         if (monologue.MoreToSay()) {
             DisableButtons();
             speechText.text = monologue.GetString();
+            blitCounter += 1;
             monologue.PlaySpeakSound(audioSource);
             promptText.text = "[A]";
         } else {
@@ -373,6 +415,19 @@ public class DialogueMenu : MonoBehaviour {
                     EnableButtons();
                 promptText.text = "";
             }
+        }
+        if (blitCounter > 2){
+            if (instigator.portrait.Length > 1){
+                List<Sprite> unusedSprites = new List<Sprite>(instigator.portrait);
+                unusedSprites.Remove(portrait1.sprite);
+                portrait1.sprite = unusedSprites[Random.Range(0, unusedSprites.Count)];
+            }
+            if (target.portrait.Length > 1){
+                List<Sprite> unusedSprites = new List<Sprite>(target.portrait);
+                unusedSprites.Remove(portrait2.sprite);
+                portrait2.sprite = unusedSprites[Random.Range(0, unusedSprites.Count)];
+            } 
+            blitCounter = 0;
         }
     }
 }

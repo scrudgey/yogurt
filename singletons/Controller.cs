@@ -2,6 +2,12 @@
 using System.Linq;
 using System.Collections.Generic;
 public class Controller : Singleton<Controller> {
+    public enum SelectType {
+        none, swearAt, insultAt, hypnosis, command
+    }
+    public enum ControlMode {
+        normal, waitForMenu, commandSelect
+    }
     private Controllable _focus;
     public Controllable focus {
         get {
@@ -27,9 +33,7 @@ public class Controller : Singleton<Controller> {
     private GameObject lastLeftClicked;
     public List<string> forbiddenColliders = new List<string> { "fire", "sightcone", "table", "background", "occurrenceFlag" };
     public string message = "smoke weed every day";
-    public enum SelectType {
-        none, swearAt, insultAt, hypnosis, command
-    }
+    public ControlMode mode;
     public SelectType currentSelect = SelectType.none;
     public GameObject commandTarget;
     void Update() {
@@ -52,6 +56,7 @@ public class Controller : Singleton<Controller> {
             }
         }
         if (Input.GetButtonDown("Cancel")) {
+            ResetCommandState();
             if (!GameManager.Instance.InCutscene()) {
                 UINew.Instance.ShowMenu(UINew.MenuType.escape);
             } else {
@@ -262,5 +267,17 @@ public class Controller : Singleton<Controller> {
         } else {
             return false;
         }
+    }
+    public void ResetCommandState(){
+        Controller.Instance.suspendInput = false;
+        if (commandTarget != null){
+            Controllable targetControl = commandTarget.GetComponent<Controllable>();
+            targetControl.control = Controllable.ControlType.AI;
+        }
+        currentSelect = Controller.SelectType.none;
+        commandTarget = null;
+        // reset command state
+        suspendInput = false;
+        UINew.Instance.SetActiveUI(active:true);
     }
 }

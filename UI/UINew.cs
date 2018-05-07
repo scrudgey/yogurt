@@ -296,6 +296,8 @@ public class UINew : Singleton<UINew> {
             return null;
         CloseActiveMenu();
         activeMenu = GameObject.Instantiate(Resources.Load(menuPrefabs[typeMenu])) as GameObject;
+        Canvas canvas = activeMenu.GetComponent<Canvas>();
+        canvas.worldCamera = GameManager.Instance.cam;
         activeMenuType = typeMenu;
         if (actionRequired.Contains(typeMenu))
             menuRequiresAction = true;
