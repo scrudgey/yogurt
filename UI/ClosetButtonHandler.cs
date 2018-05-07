@@ -15,9 +15,9 @@ public class ClosetButtonHandler : MonoBehaviour {
         icon.sprite = null;
         icon.color = new Color(1f, 1f, 1f, 0f);
     }
-    private GameObject spawnEntry() {
+    private ItemEntryScript spawnEntry() {
         GameObject newObject = Instantiate(Resources.Load("UI/ItemEntry")) as GameObject;
-        return newObject;
+        return newObject.GetComponent<ItemEntryScript>();
     }
     public void PopulateItemList(HomeCloset.ClosetType type) {
         GameObject listObject = transform.Find("menu/body/ItemList").gameObject;
@@ -34,63 +34,22 @@ public class ClosetButtonHandler : MonoBehaviour {
             titleText.text = "Collected Items";
         }
         foreach (string name in itemList) {
-            GameObject wrapper = spawnEntry();
-            Text newText = wrapper.transform.Find("newIndicator").GetComponent<Text>();
-            newText.text = "";
-
-            GameObject newEntry = wrapper.transform.Find("item").gameObject;
-            ItemEntryScript entryScript = newEntry.GetComponent<ItemEntryScript>();
-            entryScript.itemName = name;
-            entryScript.enableItem = !GameManager.Instance.data.itemCheckedOut[name];
-            Text entryText = newEntry.GetComponent<Text>();
-            entryText.text = Toolbox.Instance.CloneRemover(name);
-            if (type == HomeCloset.ClosetType.all || type == HomeCloset.ClosetType.items) {
-                if (GameManager.Instance.data.newCollectedItems.Contains(name)) {
-                    if (!GameManager.Instance.data.itemCheckedOut[name]) {
-                        GameManager.Instance.data.newCollectedItems.Remove(name);
-                        newText.text = "new!";
-                    }
-                }
-            }
-            if (type == HomeCloset.ClosetType.food) {
-                if (GameManager.Instance.data.newCollectedFood.Contains(name)) {
-                    if (!GameManager.Instance.data.itemCheckedOut[name]) {
-                        GameManager.Instance.data.newCollectedFood.Remove(name);
-                        newText.text = "new!";
-                    }
-                }
-            }
-            if (type == HomeCloset.ClosetType.clothing) {
-                if (GameManager.Instance.data.newCollectedClothes.Contains(name)) {
-                    if (!GameManager.Instance.data.itemCheckedOut[name]) {
-                        GameManager.Instance.data.newCollectedClothes.Remove(name);
-                        newText.text = "new!";
-                    }
-                }
-            }
-            wrapper.transform.SetParent(listObject.transform, false);
+            ItemEntryScript script = spawnEntry();
+            script.Configure(name, type);
+            script.transform.SetParent(listObject.transform, false);
         }
     }
     public void CloseButtonClick() {
-        // Destroy(gameObject);
         UINew.Instance.CloseActiveMenu();
     }
     public void ItemClick(ItemEntryScript itemScript) {
         GameManager.Instance.RetrieveCollectedItem(itemScript.itemName);
-        // Destroy(gameObject);
         UINew.Instance.CloseActiveMenu();
     }
     public void ItemMouseover(ItemEntryScript itemScript) {
-        GameObject tempObject = Instantiate(Resources.Load("prefabs/" + itemScript.itemName)) as GameObject;
-        Item tempItem = tempObject.GetComponent<Item>();
-        icon.sprite = tempObject.GetComponent<SpriteRenderer>().sprite;
+        nameText.text = itemScript.itemName;
+        descriptionText.text = itemScript.description;
+        icon.sprite = itemScript.sprite;
         icon.color = new Color(1f, 1f, 1f, 1f);
-        if (tempItem.longDescription != "") {
-            descriptionText.text = tempItem.longDescription;
-        } else {
-            descriptionText.text = tempItem.description;
-        }
-        nameText.text = tempItem.itemName;
-        Destroy(tempObject);
     }
 }
