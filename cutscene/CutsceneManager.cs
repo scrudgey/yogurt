@@ -464,6 +464,7 @@ public class CutsceneMayor : Cutscene {
     }
     public void MenuWasClosed() {
         walkingAway = true;
+        Controller.Instance.suspendInput = true;
     }
 }
 public class CutsceneNewDay : Cutscene {
