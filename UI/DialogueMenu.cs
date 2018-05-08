@@ -263,7 +263,7 @@ public class DialogueMenu : MonoBehaviour {
         
         // UINew.Instance.CloseActiveMenu();
         Controller.Instance.commandTarget = target.gameObject;
-        Controller.Instance.currentSelect = Controller.SelectType.command;
+        // Controller.Instance.currentSelect = Controller.SelectType.command;
         
         UINew.Instance.SetActiveUI();
         Controller.Instance.suspendInput = true;

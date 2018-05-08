@@ -16,32 +16,29 @@ public class ActionButtonScript : MonoBehaviour {
         if (bType == buttonType.Action) {
             if (Controller.Instance.InteractionIsWithinRange(action) || manualAction) {
                 // TODO: don't do action yet if current select is command
-                if (Controller.Instance.currentSelect == Controller.SelectType.command){
+                if (Controller.Instance.state == Controller.ControlState.commandSelect) {
                     // callback a new dialogue menu
                     UINew.Instance.ClearWorldButtons();
                     UINew.Instance.UpdateButtons();
                     Controller.Instance.ResetLastLeftClicked();
                     GameObject menuObject = UINew.Instance.ShowMenu(UINew.MenuType.dialogue);
                     DialogueMenu dialogue = menuObject.GetComponent<DialogueMenu>();
-                    // Speech playerSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
-                    // Speech targetSpeech = Controller.Instance.commandTarget.GetComponent<Speech>();
-                    // dialogue.Configure(playerSpeech, targetSpeech);
                     dialogue.CommandCallback(action);
                 } else {
                     action.DoAction();
-                if (!action.dontWipeInterface) {
-                    UINew.Instance.ClearWorldButtons();
-                    UINew.Instance.UpdateButtons();
-                    Controller.Instance.ResetLastLeftClicked();
-                    if (Controller.Instance.currentSelect == Controller.SelectType.command)
-                        Controller.Instance.ResetCommandState();
+                    if (!action.dontWipeInterface) {
+                        UINew.Instance.ClearWorldButtons();
+                        UINew.Instance.UpdateButtons();
+                        Controller.Instance.ResetLastLeftClicked();
+                        // if (Controller.Instance.currentSelect == Controller.SelectType.command)
+                        //     Controller.Instance.ResetCommandState();
                     }
                 }
             }
         } else {
             HandAction();
             Controller.Instance.ResetLastLeftClicked();
-            if (Controller.Instance.currentSelect == Controller.SelectType.command)
+            if (Controller.Instance.state == Controller.ControlState.commandSelect)
                 Controller.Instance.ResetCommandState();
         }
         UINew.Instance.SetActionText("");
@@ -80,14 +77,14 @@ public class ActionButtonScript : MonoBehaviour {
     }
     public void MouseOver() {
         if (bType == buttonType.Action) {
-            if (Controller.Instance.commandTarget != null){
+            if (Controller.Instance.commandTarget != null) {
                 string targetName = Toolbox.Instance.GetName(Controller.Instance.commandTarget);
                 UINew.Instance.SetActionText("Command " + targetName + " to " + action.Description());
             } else {
                 UINew.Instance.SetActionText(action.Description());
             }
         } else {
-            if (Controller.Instance.commandTarget != null){
+            if (Controller.Instance.commandTarget != null) {
                 string targetName = Toolbox.Instance.GetName(Controller.Instance.commandTarget);
                 UINew.Instance.SetActionText("Command " + targetName + " to " + HandActionDescription());
             } else {

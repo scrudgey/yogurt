@@ -19,12 +19,14 @@ public class SpeechMenu : MonoBehaviour {
         UINew.Instance.CloseActiveMenu();
     }
     public void SwearAtButton() {
-        Controller.Instance.currentSelect = Controller.SelectType.swearAt;
+        // Controller.Instance.currentSelect = Controller.SelectType.swearAt;
+        Controller.Instance.state = Controller.ControlState.swearSelect;
         // Destroy(gameObject);
         UINew.Instance.CloseActiveMenu();
     }
     public void InsultButton() {
-        Controller.Instance.currentSelect = Controller.SelectType.insultAt;
+        // Controller.Instance.currentSelect = Controller.SelectType.insultAt;
+        Controller.Instance.state = Controller.ControlState.insultSelect;
         // Destroy(gameObject);
         UINew.Instance.CloseActiveMenu();
     }
