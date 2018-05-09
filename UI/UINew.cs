@@ -81,7 +81,7 @@ public class UINew : Singleton<UINew> {
         bool highlight = false;
         RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
         foreach (RaycastHit2D hit in hits) {
-            if (hit.collider != null && !Controller.Instance.forbiddenColliders.Contains(hit.collider.tag)) {
+            if (hit.collider != null && !Controller.forbiddenColliders.Contains(hit.collider.tag)) {
                 highlight = true;
             }
         }
@@ -156,8 +156,9 @@ public class UINew : Singleton<UINew> {
                     break;
             }
         } else {
-            // if (!highlight)
-                // SetActionText("");
+            if (Controller.selectionStates.Contains(Controller.Instance.state)){
+                SetActionText("");
+            }
         }
     }
     public void UpdateUIElements() {
@@ -311,11 +312,7 @@ public class UINew : Singleton<UINew> {
         sceneNameText.text = content;
     }
     public GameObject ShowMenu(MenuType typeMenu) {
-        Debug.Log(typeMenu);
-        Debug.Log(activeMenuType);
         if (activeMenu == null) {
-            // menuRequiresAction = false;
-            // Controller.Instance.MenuClosedCallback();
             activeMenuType = MenuType.none;
         }
         if (activeMenuType == typeMenu) {
@@ -339,8 +336,6 @@ public class UINew : Singleton<UINew> {
     }
     public void CloseActiveMenu() {
         if (activeMenu) {
-            Debug.Log("closing active menu");
-            // menuRequiresAction = false;
             Controller.Instance.MenuClosedCallback();
             Destroy(activeMenu);
             activeMenuType = MenuType.none;

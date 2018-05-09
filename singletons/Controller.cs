@@ -28,11 +28,15 @@ public class Controller : Singleton<Controller> {
         }
     }
     private GameObject lastLeftClicked;
-    public List<string> forbiddenColliders = new List<string> { "fire", "sightcone", "table", "background", "occurrenceFlag" };
+    public static List<string> forbiddenColliders = new List<string>() { "fire", "sightcone", "table", "background", "occurrenceFlag" };
+    public static List<ControlState> selectionStates = new List<ControlState>(){Controller.ControlState.swearSelect,
+                                                                                Controller.ControlState.insultSelect,
+                                                                                Controller.ControlState.hypnosisSelect,
+                                                                                Controller.ControlState.commandSelect};
     public string message = "smoke weed every day";
     private ControlState _state;
-    public ControlState state{
-        get {return _state;}
+    public ControlState state {
+        get { return _state; }
         set {
             ControlState previousState = _state;
             _state = value;
@@ -41,9 +45,9 @@ public class Controller : Singleton<Controller> {
     }
     // public SelectType currentSelect = SelectType.none;
     public GameObject commandTarget;
-    void ChangeState(ControlState previousState){
+    void ChangeState(ControlState previousState) {
         // TODO: code for transitioning between states
-        if (focus){
+        if (focus) {
             focus.ResetInput();
         }
         UINew.Instance.ClearWorldButtons();
@@ -183,60 +187,57 @@ public class Controller : Singleton<Controller> {
             return;
         if (focus.hitState >= Controllable.HitState.stun)
             return;
-        
+
         RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero).OrderBy(h => h.collider.gameObject.name).ToArray();
-        
-        switch(state){
+
+        switch (state) {
             case ControlState.swearSelect:
-            foreach (RaycastHit2D hit in hits) {
-                if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)) {
-                    // currentSelect = SelectType.none;
-                    state = ControlState.normal;
-                    MessageSpeech message = new MessageSpeech();
-                    message.swearTarget = hit.collider.gameObject;
-                    Toolbox.Instance.SendMessage(focus.gameObject, this, message);
-                    // UINew.Instance.SetActionText("");
+                foreach (RaycastHit2D hit in hits) {
+                    if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)) {
+                        state = ControlState.normal;
+                        MessageSpeech message = new MessageSpeech();
+                        message.swearTarget = hit.collider.gameObject;
+                        Toolbox.Instance.SendMessage(focus.gameObject, this, message);
+                        UINew.Instance.SetActionText("");
+                    }
                 }
-            }
-            break;
+                return;
             case ControlState.insultSelect:
-            GameObject top = Controller.Instance.GetFrontObject(hits);
-            if (top != null) {
-                // currentSelect = SelectType.none;
-                state = ControlState.normal;
-                GameObject target = Controller.Instance.GetBaseInteractive(top.transform);
-                Speech speech = focus.GetComponent<Speech>();
-                if (speech) {
-                    speech.Insult(target);
+                GameObject top = Controller.Instance.GetFrontObject(hits);
+                if (top != null) {
+                    state = ControlState.normal;
+                    GameObject target = Controller.Instance.GetBaseInteractive(top.transform);
+                    Speech speech = focus.GetComponent<Speech>();
+                    if (speech) {
+                        speech.Insult(target);
+                    }
+                    UINew.Instance.SetActionText("");
                 }
-                // UINew.Instance.SetActionText("");
-            }
-            break;
+                return;
             case ControlState.hypnosisSelect:
-            GameObject hypnoTop = Controller.Instance.GetFrontObject(hits);
-            if (hypnoTop != null) {
-                // currentSelect = SelectType.none;
-                state = ControlState.normal;
-                GameObject target = Controller.Instance.GetBaseInteractive(hypnoTop.transform);
-                Controllable controllable = target.GetComponent<Controllable>();
+                GameObject hypnoTop = Controller.Instance.GetFrontObject(hits);
+                if (hypnoTop != null) {
+                    state = ControlState.normal;
+                    GameObject target = Controller.Instance.GetBaseInteractive(hypnoTop.transform);
+                    Controllable controllable = target.GetComponent<Controllable>();
 
-                GameObject hypnosisEffect = Instantiate(Resources.Load("prefabs/fx/hypnosisEffect"), GameManager.Instance.playerObject.transform.position, Quaternion.identity) as GameObject;
-                HypnosisEffect fx = hypnosisEffect.GetComponent<HypnosisEffect>();
-                fx.target = target;
+                    GameObject hypnosisEffect = Instantiate(Resources.Load("prefabs/fx/hypnosisEffect"), GameManager.Instance.playerObject.transform.position, Quaternion.identity) as GameObject;
+                    HypnosisEffect fx = hypnosisEffect.GetComponent<HypnosisEffect>();
+                    fx.target = target;
 
-                if (controllable) {
-                    GameManager.Instance.SetFocus(target);
+                    if (controllable) {
+                        GameManager.Instance.SetFocus(target);
+                    }
+                    UINew.Instance.SetActionText("");
                 }
-                // UINew.Instance.SetActionText("");
-            }
-            break;
+                return;
             default:
-            break;
+                break;
         }
         // IsPointerOverGameObject is required here to exclude clicks if we are hovering over a UI element.
         // this may or may not cause problems down the road, but I'm unsure how else to do this.
         // NOTE: if an overlapping UI is causing problems, add a layout group and uncheck "blocks raycast"
-        if (state == ControlState.normal || state == ControlState.commandSelect){  
+        if (state == ControlState.normal || state == ControlState.commandSelect) {
             if (!UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) {
                 GameObject top = GetFrontObject(hits);
                 if (top != null) {
@@ -285,23 +286,22 @@ public class Controller : Singleton<Controller> {
             return false;
         }
     }
-    public void ResetCommandState(){
+    public void ResetCommandState() {
         Controller.Instance.suspendInput = false;
-        if (commandTarget != null){
+        if (commandTarget != null) {
             Controllable targetControl = commandTarget.GetComponent<Controllable>();
             targetControl.control = Controllable.ControlType.AI;
         }
-        // currentSelect = Controller.SelectType.none;
         commandTarget = null;
         // reset command state
         suspendInput = false;
-        UINew.Instance.SetActiveUI(active:true);
+        UINew.Instance.SetActiveUI(active: true);
     }
-    public void MenuClosedCallback(){
-        if (state == ControlState.inMenu || state == ControlState.waitForMenu){
+    public void MenuClosedCallback() {
+        if (state == ControlState.inMenu || state == ControlState.waitForMenu) {
             state = ControlState.normal;
         }
-        if (state == ControlState.commandSelect){
+        if (state == ControlState.commandSelect) {
             // TODO: check if we are transitioning to select command, or after command response
             // what holds state?
         }

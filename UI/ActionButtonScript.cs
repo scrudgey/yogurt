@@ -30,8 +30,6 @@ public class ActionButtonScript : MonoBehaviour {
                         UINew.Instance.ClearWorldButtons();
                         UINew.Instance.UpdateButtons();
                         Controller.Instance.ResetLastLeftClicked();
-                        // if (Controller.Instance.currentSelect == Controller.SelectType.command)
-                        //     Controller.Instance.ResetCommandState();
                     }
                 }
             }
@@ -44,13 +42,6 @@ public class ActionButtonScript : MonoBehaviour {
         UINew.Instance.SetActionText("");
         GUI.FocusControl("none");
     }
-    // void ResetCommandState(){
-    //     Controller.Instance.currentSelect = Controller.SelectType.none;
-    //     Controller.Instance.commandTarget = null;
-    //     // reset command state
-    //     Controller.Instance.suspendInput = false;
-    //     UINew.Instance.SetActiveUI(active:true);
-    // }
     void Update() {
         if (mouseHeld && bType == buttonType.Action) {
             if (action.continuous && (Controller.Instance.InteractionIsWithinRange(action) || manualAction)) {
@@ -95,7 +86,6 @@ public class ActionButtonScript : MonoBehaviour {
     public void MouseExit() {
         UINew.Instance.SetActionText("");
     }
-
     public void HandAction() {
         switch (bType) {
             case ActionButtonScript.buttonType.Drop:

@@ -36,10 +36,8 @@ public class UIButtonCallbacks : MonoBehaviour {
     }
     public void HypnosisButtonClick() {
         if (Controller.Instance.state != Controller.ControlState.hypnosisSelect) {
-            // Controller.Instance.currentSelect = Controller.SelectType.hypnosis;
             Controller.Instance.state = Controller.ControlState.hypnosisSelect;
         } else {
-            // Controller.Instance.currentSelect = Controller.SelectType.none;
             Controller.Instance.state = Controller.ControlState.normal;
         }
     }
