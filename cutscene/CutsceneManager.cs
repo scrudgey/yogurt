@@ -548,6 +548,7 @@ public class CutsceneManager : Singleton<CutsceneManager> {
             default:
                 break;
         }
+        Controller.Instance.state = Controller.ControlState.cutscene;
     }
     public void LevelWasLoaded(Scene scene, LoadSceneMode mode) {
         if (cutscene == null)
@@ -574,6 +575,7 @@ public class CutsceneManager : Singleton<CutsceneManager> {
         if (cutscene.complete) {
             cutscene.CleanUp();
             cutscene = null;
+            Controller.Instance.state = Controller.ControlState.normal;
         } else {
             if (cutscene.configured) {
                 cutscene.Update();
