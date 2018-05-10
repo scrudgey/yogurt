@@ -15,6 +15,7 @@ public class Diary : MonoBehaviour {
     }
     public void OKButtonCallback() {
         Time.timeScale = 1;
-        Destroy(gameObject);
+        // Destroy(gameObject);
+        UINew.Instance.CloseActiveMenu();
     }
 }
