@@ -22,7 +22,7 @@ public class UINew : Singleton<UINew> {
         {MenuType.teleport,                 "UI/TeleportMenu"}
     };
     private static List<MenuType> actionRequired = new List<MenuType> { MenuType.commercialReport, MenuType.diary, MenuType.perk, MenuType.dialogue };
-    private GameObject activeMenu;
+    public GameObject activeMenu;
     private MenuType activeMenuType;
     // private bool menuRequiresAction;
     private struct actionButton {
