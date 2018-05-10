@@ -175,21 +175,21 @@ public class Hurtable : Damageable, ISaveable {
         if (type == damageType.fire) {
             if (suicide) {
                 GameManager.Instance.data.achievementStats.selfImmolations += 1;
-                Debug.Log("self immolation");
+                // Debug.Log("self immolation");
             }
             GameManager.Instance.data.achievementStats.immolations += 1;
-            Debug.Log("immolation");
+            // Debug.Log("immolation");
         }
         if (type == damageType.asphyxiation) {
             GameManager.Instance.data.achievementStats.deathByAsphyxiation += 1;
         }
         if (damageZone) {
             GameManager.Instance.data.achievementStats.deathByMisadventure += 1;
-            Debug.Log("death by misadventure");
+            // Debug.Log("death by misadventure");
         }
         if (assailant) {
             GameManager.Instance.data.achievementStats.deathByCombat += 1;
-            Debug.Log("death by combat");
+            // Debug.Log("death by combat");
         }
         GameManager.Instance.CheckAchievements();
     }
