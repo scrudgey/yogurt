@@ -227,7 +227,6 @@ public class DialogueMenu : MonoBehaviour {
     public void ActionCallback(string callType) {
         switch (callType) {
             case "end":
-                // Destroy(gameObject);
                 UINew.Instance.CloseActiveMenu();
                 break;
             case "insult":
@@ -248,7 +247,6 @@ public class DialogueMenu : MonoBehaviour {
                 DisableResponses();
                 break;
             case "buy":
-                // Debug.Log("buying");
                 AttemptTrade();
                 break;
             case "command":
