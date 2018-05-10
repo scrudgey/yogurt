@@ -85,14 +85,14 @@ public class Bed : Doorway {
                 GameManager.Instance.playerObject.SetActive(true);
                 Toolbox.Instance.SwitchAudioListener(GameManager.Instance.playerObject);
                 audioSource.PlayOneShot(beddingSound);
+                UINew.Instance.SetActiveUI(active:true);
                 if (GameManager.Instance.data.days == 1) {
                     GameManager.Instance.ShowDiaryEntry("diaryNew");
                 }
-                if (GameManager.Instance.data.deaths == 1 && GameManager.Instance.data.deathCutscenesPlayed == 0) {
+                if (GameManager.Instance.data.deaths >= 1 && GameManager.Instance.data.deathCutscenesPlayed == 0) {
                     GameManager.Instance.data.deathCutscenesPlayed = 1;
                     GameManager.Instance.ShowDiaryEntry("death1");
                 }
-                UINew.Instance.SetActiveUI(active:true);
             }
         }
     }
