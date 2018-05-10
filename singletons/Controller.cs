@@ -43,7 +43,6 @@ public class Controller : Singleton<Controller> {
             ChangeState(previousState);
         }
     }
-    // public SelectType currentSelect = SelectType.none;
     public GameObject commandTarget;
     void ChangeState(ControlState previousState) {
         // TODO: code for transitioning between states
@@ -246,7 +245,6 @@ public class Controller : Singleton<Controller> {
             }
         }
     }
-
     public void Clicked(GameObject clicked, GameObject clickSite) {
         if (lastLeftClicked == clicked) {
             // TODO: fix this conditional!
@@ -267,11 +265,9 @@ public class Controller : Singleton<Controller> {
             }
         }
     }
-
     public void ResetLastLeftClicked() {
         lastLeftClicked = null;
     }
-
     public bool InteractionIsWithinRange(Interaction i) {
         // TODO: this all should use something other than lastleftclicked, for persistent buttons of sorts.
         // using i.action.parent doesn't work, because some actions are sourced from player gameobject, not "target", whatever it is
