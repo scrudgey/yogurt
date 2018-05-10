@@ -84,7 +84,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = false;
+    public bool debug = true;
     void Start() {
         if (data == null) {
             data = InitializedGameData();
@@ -617,7 +617,10 @@ public partial class GameManager : Singleton<GameManager> {
         data.packages.Add(packageName);
     }
     public void ShowDiaryEntry(string diaryName) {
-        GameObject diaryObject = UINew.Instance.ShowMenu(UINew.MenuType.diary);
+        GameObject diaryObject = UINew.Instance.activeMenu;
+        if (UINew.Instance.activeMenu == null){
+            diaryObject = UINew.Instance.ShowMenu(UINew.MenuType.diary);
+        } 
         Diary diary = diaryObject.GetComponent<Diary>();
         diary.loadDiaryName = diaryName;
     }
