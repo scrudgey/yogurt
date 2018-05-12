@@ -137,22 +137,30 @@ public class DecisionMaker : MonoBehaviour, IMessagable, ISaveable {
             MySaver.UpdateGameObjectReference(protectionZone.gameObject, data, "protectID", overWriteWithNull: false);
         if (warnZone != null)
             MySaver.UpdateGameObjectReference(warnZone.gameObject, data, "warnID", overWriteWithNull: false);
+        data.vectors["guardPoint"] = guardPoint;
     }
     public void LoadData(PersistentComponent data) {
         hitState = (Controllable.HitState)data.ints["hitstate"];
         initialAwareness = new List<GameObject>();
+        guardPoint = data.vectors["guardPoint"];
         if (data.ints.ContainsKey("protectID")) {
             GameObject protectObject = MySaver.IDToGameObject(data.ints["protectID"]);
             if (protectObject != null) {
                 awareness.protectZone = protectObject.GetComponent<BoxCollider2D>();
+                protectionZone = (BoxCollider2D)awareness.protectZone;
             }
         }
         if (data.ints.ContainsKey("warnID")) {
             GameObject warnObject = MySaver.IDToGameObject(data.ints["warnID"]);
             if (warnObject != null) {
                 awareness.warnZone = warnObject.GetComponent<Collider2D>();
+                warnZone = awareness.warnZone;
             }
         }
+        if (protectionZone != null) {
+            priorities.Add(new PriorityProtectZone(gameObject, control, protectionZone, guardPoint));
+        } 
+
         foreach (Priority priority in priorities) {
             foreach (Type priorityType in priorityTypes) {
                 if (priority.GetType() == priorityType) {
@@ -163,5 +171,6 @@ public class DecisionMaker : MonoBehaviour, IMessagable, ISaveable {
                 }
             }
         }
+        
     }
 }
