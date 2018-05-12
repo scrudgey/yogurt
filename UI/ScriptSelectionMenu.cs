@@ -6,7 +6,7 @@ public class ScriptSelectionMenu : MonoBehaviour {
     GameObject scrollContent;
     ScriptListEntry lastClicked;
     void Start() {
-        Controller.Instance.suspendInput = true;
+        // Controller.Instance.suspendInput = true;
         GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
 
         descriptionText = transform.Find("Panel/Body/sidebar/DescriptionPanel/DescriptionBox/Description").GetComponent<Text>();
@@ -49,7 +49,7 @@ public class ScriptSelectionMenu : MonoBehaviour {
         return newEntry;
     }
     public void ClickedOkay() {
-        Controller.Instance.suspendInput = false;
+        // Controller.Instance.suspendInput = false;
         if (lastClicked) {
             GameManager.Instance.activeCommercial = lastClicked.commercial;
             VideoCamera director = GameObject.FindObjectOfType<VideoCamera>();
@@ -59,7 +59,7 @@ public class ScriptSelectionMenu : MonoBehaviour {
         UINew.Instance.CloseActiveMenu();
     }
     public void ClickedCancel() {
-        Controller.Instance.suspendInput = false;
+        // Controller.Instance.suspendInput = false;
         // Destroy(gameObject);
         UINew.Instance.CloseActiveMenu();
     }

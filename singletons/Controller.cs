@@ -31,8 +31,7 @@ public class Controller : Singleton<Controller> {
     public static List<string> forbiddenColliders = new List<string>() { "fire", "sightcone", "table", "background", "occurrenceFlag" };
     public static List<ControlState> selectionStates = new List<ControlState>(){Controller.ControlState.swearSelect,
                                                                                 Controller.ControlState.insultSelect,
-                                                                                Controller.ControlState.hypnosisSelect,
-                                                                                Controller.ControlState.commandSelect};
+                                                                                Controller.ControlState.hypnosisSelect};
     public string message = "smoke weed every day";
     private ControlState _state;
     public ControlState state {
@@ -42,8 +41,11 @@ public class Controller : Singleton<Controller> {
             _state = value;
             ChangeState(previousState);
         }
-    }
+    } 
     public GameObject commandTarget;
+    public bool doCommand;
+    public Interaction commandAct = null;
+    public ActionButtonScript.buttonType commandButtonType = ActionButtonScript.buttonType.none;
     void ChangeState(ControlState previousState) {
         // TODO: code for transitioning between states
         if (focus) {
@@ -51,12 +53,33 @@ public class Controller : Singleton<Controller> {
         }
         UINew.Instance.ClearWorldButtons();
         ResetLastLeftClicked();
+        if (previousState == ControlState.inMenu || previousState == ControlState.waitForMenu)
+            UINew.Instance.RefreshUI(active: true);
+
+        if (previousState == ControlState.commandSelect) {
+            // if we've aborted command state without success
+            // reset command character and target control
+            // Debug.Log("disabling command target control");
+            Controllable commandTargetControl = commandTarget.GetComponent<Controllable>();
+            commandTargetControl.control = Controllable.ControlType.AI;
+            if (!doCommand)
+                ResetCommandState();
+        }
+        if (state == ControlState.commandSelect){
+            Controllable commandTargetControl = commandTarget.GetComponent<Controllable>();
+            commandTargetControl.control = Controllable.ControlType.none;
+        }
     }
     void Update() {
         if (Input.GetButtonDown("Cancel")) {
-            // ResetCommandState();
-            if (!GameManager.Instance.InCutscene()) {
-                UINew.Instance.ShowMenu(UINew.MenuType.escape);
+            // TODO: exit command states
+            if (state != ControlState.cutscene) {
+                if (selectionStates.Contains(state) || state == ControlState.commandSelect) {
+                    state = ControlState.normal;
+                    UINew.Instance.RefreshUI(active: true);
+                } else {
+                    UINew.Instance.ShowMenu(UINew.MenuType.escape);
+                }
             } else {
                 CutsceneManager.Instance.EscapePressed();
             }
@@ -283,7 +306,7 @@ public class Controller : Singleton<Controller> {
         }
     }
     public void ResetCommandState() {
-        Controller.Instance.suspendInput = false;
+        // Debug.Log("resetting command state");
         if (commandTarget != null) {
             Controllable targetControl = commandTarget.GetComponent<Controllable>();
             targetControl.control = Controllable.ControlType.AI;
@@ -291,15 +314,45 @@ public class Controller : Singleton<Controller> {
         commandTarget = null;
         // reset command state
         suspendInput = false;
-        UINew.Instance.SetActiveUI(active: true);
+        UINew.Instance.RefreshUI(active: true);
+        commandAct = null;
+        commandButtonType = ActionButtonScript.buttonType.none;
+        doCommand = false;
     }
     public void MenuClosedCallback() {
         if (state == ControlState.inMenu || state == ControlState.waitForMenu) {
             state = ControlState.normal;
         }
-        if (state == ControlState.commandSelect) {
-            // TODO: check if we are transitioning to select command, or after command response
-            // what holds state?
+        if (doCommand) {
+            if (commandButtonType != ActionButtonScript.buttonType.none) {
+                Inventory inventory = commandTarget.GetComponent<Inventory>();
+                Controllable controllable = commandTarget.GetComponent<Controllable>();
+                switch (commandButtonType) {
+                    case ActionButtonScript.buttonType.Drop:
+                        inventory.DropItem();
+                        UINew.Instance.ClearWorldButtons();
+                        break;
+                    case ActionButtonScript.buttonType.Throw:
+                        inventory.ThrowItem();
+                        UINew.Instance.ClearWorldButtons();
+                        break;
+                    case ActionButtonScript.buttonType.Stash:
+                        inventory.StashItem(inventory.holding.gameObject);
+                        UINew.Instance.ClearWorldButtons();
+                        UINew.Instance.UpdateInventoryButton(inventory);
+                        break;
+                    case ActionButtonScript.buttonType.Punch:
+                        controllable.shootPressedFlag = true;
+                        break;
+                    default:
+                        break;
+                }
+            } else {    
+                commandAct.DoAction();
+            }
+            ResetCommandState();
+            commandAct = null;
         }
+        
     }
 }
