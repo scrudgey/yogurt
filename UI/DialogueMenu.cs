@@ -91,12 +91,10 @@ public class DialogueMenu : MonoBehaviour {
     public MyDelegate menuClosed;
     public bool configured;
     public int blitCounter;
-    public Interaction commandAct = null;
     void Start() {
         if (configured)
             return;
         configured = true;
-        commandAct = null;
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         audioSource.spatialBlend = 0;
         portrait1 = transform.Find("base/dialogueElements/main/portrait1/Image").GetComponent<Image>();
@@ -258,10 +256,9 @@ public class DialogueMenu : MonoBehaviour {
     }
     public void Command(){
         Controller.Instance.commandTarget = target.gameObject;
-        UINew.Instance.SetActiveUI();
-        Controller.Instance.suspendInput = true;
-        Controllable targetControl = target.GetComponent<Controllable>();
-        targetControl.control = Controllable.ControlType.none;
+        // Debug.Log("command target set to "+Controller.Instance.commandTarget.ToString());
+        Controller.Instance.state = Controller.ControlState.commandSelect;
+        UINew.Instance.CloseActiveMenu();
     }
     public void CommandCallback(Interaction action){
         Speech playerSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
@@ -280,8 +277,44 @@ public class DialogueMenu : MonoBehaviour {
         List<string> response = new List<string>();
         response.Add("why certainly my good man!");
         Say(new Monologue(target, response.ToArray()));
+    }
+    public void HandCommandCallback(ActionButtonScript.buttonType btype){
+        string act = "do this thing";
 
-        commandAct = action;
+        //  Drop, Throw, Stash, Inventory, Action, Punch 
+        switch (btype){
+            case ActionButtonScript.buttonType.Drop:
+            act = "drop what you're holding";
+            break;
+            case ActionButtonScript.buttonType.Throw:
+            act = "throw that";
+            break;
+            case ActionButtonScript.buttonType.Stash:
+            act = "put that away";
+            break;
+            case ActionButtonScript.buttonType.Inventory:
+            act = "open your inventory";
+            break;
+            case ActionButtonScript.buttonType.Punch:
+            act = "throw a punch";
+            break;
+            default:
+            break;
+        }
+        Speech playerSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
+        Speech targetSpeech = Controller.Instance.commandTarget.GetComponent<Speech>();
+        Configure(playerSpeech, targetSpeech, interruptDefault:true);
+
+        List<string> request = new List<string>();
+        request.Add("Say, could you " + act + " for me?");
+        Say(new Monologue(instigator, request.ToArray()));
+
+        string[] ender = new string[] {"END"};
+        Say(new Monologue(target, ender));
+
+        List<string> response = new List<string>();
+        response.Add("why certainly my good man!");
+        Say(new Monologue(target, response.ToArray()));
     }
     public void AttemptTrade() {
         switch (targetTrade.CheckTradeStatus(instigatorInv)) {
@@ -312,10 +345,6 @@ public class DialogueMenu : MonoBehaviour {
             instigatorControl.disabled = false;
         if (menuClosed != null)
             menuClosed();
-        if (commandAct != null){
-            commandAct.DoAction();
-            Controller.Instance.ResetCommandState();
-        }
     }
     public void Say(Speech speaker, string text) {
         Monologue newLogue = new Monologue(speaker, new string[] { text });
