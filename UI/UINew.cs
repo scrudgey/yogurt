@@ -77,7 +77,7 @@ public class UINew : Singleton<UINew> {
         cursorTarget = (Texture2D)Resources.Load("UI/cursor3_target3");
     }
     void LateUpdate() {
-        UpdateUIElements();
+        LateUpdateUIElements();
         bool highlight = false;
         RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
         foreach (RaycastHit2D hit in hits) {
@@ -161,7 +161,9 @@ public class UINew : Singleton<UINew> {
             }
         }
     }
-    public void UpdateUIElements() {
+    public void LateUpdateUIElements() {
+        // handle pop ups, health bars, and display text
+
         actionTextObject.text = actionTextString;
         if (!achievementPopupInProgress && collectedStack.Count > 0) {
             PopupCollected(collectedStack.Pop());
@@ -316,7 +318,6 @@ public class UINew : Singleton<UINew> {
             activeMenuType = MenuType.none;
         }
         if (activeMenuType == typeMenu) {
-            Debug.Log("closing");
             CloseActiveMenu();
             return null;
         }
@@ -336,22 +337,19 @@ public class UINew : Singleton<UINew> {
     }
     public void CloseActiveMenu() {
         if (activeMenu) {
-            Controller.Instance.MenuClosedCallback();
-            Destroy(activeMenu);
             activeMenuType = MenuType.none;
-            UpdateInventoryButton();
-            Controller.Instance.suspendInput = false;
+            Destroy(activeMenu);
             Time.timeScale = 1f;
+            Controller.Instance.MenuClosedCallback();
         }
     }
-    public void SetActiveUI(bool active = false) {
+    public void RefreshUI(bool active = false) {
         List<GameObject> buttons = new List<GameObject>() { inventoryButton, fightButton, punchButton, speakButton, hypnosisButton, vomitButton };
         foreach (GameObject button in buttons) {
             if (button)
-                button.SetActive(active);
+                button.SetActive(false);
         }
         topRightBar.SetActive(active);
-        CloseActiveMenu();
         ClearWorldButtons();
         ClearActionButtons();
         foreach (Transform child in UICanvas.transform.Find("iconDock")) {
@@ -361,23 +359,27 @@ public class UINew : Singleton<UINew> {
             UpdateButtons();
     }
     public void UpdateButtons() {
-        // TODO: this is why the buttons are active but not the health bar
         if (UINew.Instance.activeMenuType != UINew.MenuType.none)
             return;
+        // speech button
         if (GameManager.Instance.playerObject.GetComponent<Speech>()) {
             speakButton.SetActive(true);
         }
+        // hand action buttons and inventory button
         Inventory inv = GameManager.Instance.playerObject.GetComponent<Inventory>();
         if (inv) {
-            inv.UpdateActions();
+            inv.UpdateInventoryActionButtons();
             UpdateInventoryButton(inv);
         }
+        // punch button
         if (Controller.Instance.focus.fightMode) {
             ShowPunchButton();
         } else {
             HidePunchButton();
         }
+        // fight button
         fightButton.SetActive(true);
+        // health bar
         if (GameManager.Instance.playerObject.GetComponent<Hurtable>()) {
             topRightBar.SetActive(true);
         }
@@ -398,9 +400,6 @@ public class UINew : Singleton<UINew> {
         } else {
             videoCam.DisableBubble();
         }
-    }
-    public void UpdateInventoryButton() {
-        UpdateInventoryButton(GameManager.Instance.playerObject.GetComponent<Inventory>());
     }
     public void UpdateInventoryButton(Inventory inventory) {
         if (inventory.items.Count > 0) {

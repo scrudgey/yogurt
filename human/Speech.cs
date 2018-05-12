@@ -69,18 +69,14 @@ public class Speech : Interactive, IMessagable, ISaveable {
     }
     public DialogueMenu SpeakWith() {
         // TODO: fix commanding someone to speak with player
-        UINew.Instance.SetActiveUI();
+        UINew.Instance.RefreshUI();
         DialogueMenu menu = UINew.Instance.ShowMenu(UINew.MenuType.dialogue).GetComponent<DialogueMenu>();
         if (Controller.Instance.commandTarget == null){ 
             menu.Configure(GameManager.Instance.playerObject.GetComponent<Speech>(), this);
         } else {
             menu.Configure(Controller.Instance.commandTarget.GetComponent<Speech>(), this);
         }
-        menu.menuClosed += DialogueMenuClosed;
         return menu;
-    }
-    public void DialogueMenuClosed(){
-        UINew.Instance.SetActiveUI(active:true);
     }
     public string SpeakWith_desc() {
         string otherName = Toolbox.Instance.GetName(gameObject);

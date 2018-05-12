@@ -19,7 +19,7 @@ public class CutsceneMoonLanding : Cutscene {
         materials = new Dictionary<Collider2D, PhysicsMaterial2D>();
         Transform spawnPoint = GameObject.Find("cannonEntryPoint").transform;
         GameObject player = GameManager.Instance.playerObject;
-        Controller.Instance.suspendInput = true;
+        // Controller.Instance.suspendInput = true;
         configured = true;
         player.transform.localScale = new Vector3(-1f, 1f, 1f);
         player.transform.position = spawnPoint.position;
@@ -51,7 +51,7 @@ public class CutsceneMoonLanding : Cutscene {
     }
     public override void Update() {
         if (timer == 0) {
-            UINew.Instance.SetActiveUI();
+            UINew.Instance.RefreshUI();
         }
         timer += Time.deltaTime;
         if (timer > 3f) {
@@ -59,8 +59,8 @@ public class CutsceneMoonLanding : Cutscene {
         }
     }
     public override void CleanUp() {
-        Controller.Instance.suspendInput = false;
-        UINew.Instance.SetActiveUI(active: true);
+        // Controller.Instance.suspendInput = false;
+        UINew.Instance.RefreshUI(active: true);
         Controllable playerControllable = GameManager.Instance.playerObject.GetComponent<Controllable>();
         if (playerControllable != null) {
             playerControllable.enabled = true;
@@ -91,7 +91,7 @@ public class CutsceneSpace : Cutscene {
     private float timer;
     public override void Configure() {
         GameObject player = GameManager.Instance.playerObject;
-        Controller.Instance.suspendInput = true;
+        // Controller.Instance.suspendInput = true;
         configured = true;
         player.transform.localScale = new Vector3(-1f, 1f, 1f);
         player.transform.RotateAround(player.transform.position, new Vector3(0f, 0f, 1f), 90f);
@@ -102,7 +102,7 @@ public class CutsceneSpace : Cutscene {
     }
     public override void Update() {
         if (timer == 0) {
-            UINew.Instance.SetActiveUI();
+            UINew.Instance.RefreshUI();
         }
         timer += Time.deltaTime;
         if (timer > 3.0f) {
@@ -112,7 +112,7 @@ public class CutsceneSpace : Cutscene {
         }
     }
     public override void CleanUp() {
-        Controller.Instance.suspendInput = false;
+        // Controller.Instance.suspendInput = false;
     }
 }
 public class CutsceneCannon : Cutscene {
@@ -128,12 +128,12 @@ public class CutsceneCannon : Cutscene {
         GameManager.Instance.playerObject.SetActive(false);
         camControl = GameObject.FindObjectOfType<CameraControl>();
         camControl.focus = cannon.gameObject;
-        Controller.Instance.suspendInput = true;
+        // Controller.Instance.suspendInput = true;
         configured = true;
     }
     public override void Update() {
         if (timer == 0) {
-            UINew.Instance.SetActiveUI();
+            UINew.Instance.RefreshUI();
         }
         timer += Time.deltaTime;
         if (timer > 2.5f && !shot) {
@@ -179,7 +179,7 @@ public class CutsceneCannon : Cutscene {
         }
     }
     public override void CleanUp() {
-        Controller.Instance.suspendInput = false;
+        // Controller.Instance.suspendInput = false;
     }
 }
 public class CutscenePickleBottom : Cutscene {
@@ -198,8 +198,8 @@ public class CutscenePickleBottom : Cutscene {
         doorway.Enter(peter);
         camControl = GameObject.FindObjectOfType<CameraControl>();
         camControl.focus = peter;
-        Controller.Instance.suspendInput = true;
-        UINew.Instance.SetActiveUI();
+        // Controller.Instance.suspendInput = true;
+        UINew.Instance.RefreshUI();
         nightShade = GameObject.Instantiate(Resources.Load("UI/nightShade")) as GameObject;
         nightShade.GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
         peterAI = peter.GetComponent<PeterPicklebottom>();
@@ -224,9 +224,9 @@ public class CutscenePickleBottom : Cutscene {
         }
     }
     public override void CleanUp() {
-        Controller.Instance.suspendInput = false;
+        // Controller.Instance.suspendInput = false;
         camControl.focus = GameManager.Instance.playerObject;
-        UINew.Instance.SetActiveUI(active: true);
+        UINew.Instance.RefreshUI(active: true);
         GameObject.Destroy(nightShade);
         peterAI.state = PeterPicklebottom.AIState.leave;
         UINew.Instance.SetActionText("");
@@ -387,8 +387,8 @@ public class CutsceneFall : Cutscene {
             initDrag = playerBody.drag;
             playerBody.drag = 0;
         }
-        Controller.Instance.suspendInput = true;
-        UINew.Instance.SetActiveUI();
+        // Controller.Instance.suspendInput = true;
+        UINew.Instance.RefreshUI();
         configured = true;
     }
     public override void Update() {
@@ -409,8 +409,8 @@ public class CutsceneFall : Cutscene {
                 playerHurtable.KnockDown();
                 playerHurtable.downedTimer = 3f;
             }
-            Controller.Instance.suspendInput = false;
-            UINew.Instance.SetActiveUI(active: true);
+            // Controller.Instance.suspendInput = false;
+            UINew.Instance.RefreshUI(active: true);
             // MessageSpeech message = new MessageSpeech("that hurt!");
             // Toolbox.Instance.SendMessage(player, CutsceneManager.Instance, message);
             complete = true;
@@ -434,9 +434,9 @@ public class CutsceneMayor : Cutscene {
         mayorSpeech = mayor.GetComponent<Speech>();
 
         mayorAI.enabled = false;
-        Controller.Instance.suspendInput = true;
+        // Controller.Instance.suspendInput = true;
 
-        UINew.Instance.SetActiveUI();
+        UINew.Instance.RefreshUI();
     }
     public override void Update() {
         if (!inPosition) {
@@ -453,18 +453,18 @@ public class CutsceneMayor : Cutscene {
             mayorControl.leftFlag = true;
             if (mayor.transform.position.x < spawnPoint.transform.position.x) {
                 Object.Destroy(mayor);
-                Controller.Instance.suspendInput = false;
+                // Controller.Instance.suspendInput = false;
                 complete = true;
-                UINew.Instance.SetActiveUI(active: true);
+                UINew.Instance.RefreshUI(active: true);
             }
         }
     }
     public override void CleanUp() {
-        Controller.Instance.suspendInput = false;
+        // Controller.Instance.suspendInput = false;
     }
     public void MenuWasClosed() {
         walkingAway = true;
-        Controller.Instance.suspendInput = true;
+        // Controller.Instance.suspendInput = true;
     }
 }
 public class CutsceneNewDay : Cutscene {
