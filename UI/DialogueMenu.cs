@@ -69,13 +69,11 @@ public class DialogueMenu : MonoBehaviour {
     public Text promptText;
     public GameObject choicePanel;
     public Button giveButton;
-    // public Button demandButton;
     public Button insultButton;
     public Button threatenButton;
     public Button suggestButton;
     public Button followButton;
     public Button endButton;
-    // public Button buyButton;
     private List<Button> buttons = new List<Button>();
     public Monologue monologue = new Monologue();
     public Stack<Monologue> dialogue = new Stack<Monologue>();
@@ -86,7 +84,6 @@ public class DialogueMenu : MonoBehaviour {
     public bool advancedKeyPressed;
     public float blitInterval = 0.005f;
     public float blitTimer;
-
     public delegate void MyDelegate();
     public MyDelegate menuClosed;
     public bool configured;
@@ -113,21 +110,14 @@ public class DialogueMenu : MonoBehaviour {
         choicePanel = transform.Find("base/dialogueElements/choicePanel").gameObject;
 
         giveButton = transform.Find("base/buttons/Give").GetComponent<Button>();
-        // demandButton = transform.Find("base/buttons/Demand").GetComponent<Button>();
         insultButton = transform.Find("base/buttons/Insult").GetComponent<Button>();
         threatenButton = transform.Find("base/buttons/Threaten").GetComponent<Button>();
         suggestButton = transform.Find("base/buttons/Suggest").GetComponent<Button>();
         followButton = transform.Find("base/buttons/Follow").GetComponent<Button>();
         endButton = transform.Find("base/buttons/End").GetComponent<Button>();
-        // buyButton = transform.Find("base/buttons/Buy").GetComponent<Button>();
-        // buttons.AddRange(new Button[] { giveButton, demandButton, insultButton, threatenButton, suggestButton, followButton, endButton, buyButton });
         buttons.AddRange(new Button[] { giveButton, insultButton, threatenButton, suggestButton, followButton, endButton });
 
         promptText.text = "";
-        // choicePanel.SetActive(false);
-        // choice1Object.SetActive(false);
-        // choice2Object.SetActive(false);
-        // choice3Object.SetActive(false);
         promptText.text = "[A]";
     }
 
@@ -141,11 +131,7 @@ public class DialogueMenu : MonoBehaviour {
         targetTrade = target.GetComponent<Trader>();
         if (instigatorInv == null || targetInv == null) {
             giveButton.interactable = false;
-            // demandButton.interactable = false;
         }
-        // if (targetTrade == null) {
-        // buyButton.interactable = false;
-        // }
         portrait2.sprite = target.portrait[0];
         portrait1.sprite = instigator.portrait[0];
         speechText.text = instigator.name + " " + target.name;
