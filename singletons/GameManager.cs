@@ -95,7 +95,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
         if (saveGameName == "test")
             MySaver.CleanupSaves();
-        if (!InCutscene()) {
+        if (!InCutsceneLevel()) {
             NewGame(switchlevel: false);
         }
         publicAudio = Toolbox.Instance.SetUpAudioSource(gameObject);
@@ -109,7 +109,7 @@ public partial class GameManager : Singleton<GameManager> {
     void Update() {
         timeSinceLastSave += Time.deltaTime;
         intervalTimer += Time.deltaTime;
-        if (!InCutscene()) {
+        if (!InCutsceneLevel()) {
             if (CutsceneManager.Instance.cutscene == null) {
                 sceneTime += Time.deltaTime;
             }
@@ -124,12 +124,12 @@ public partial class GameManager : Singleton<GameManager> {
             UINew.Instance.ShowMenu(UINew.MenuType.newDayReport);
         }
         string sceneName = SceneManager.GetActiveScene().name;
-        if (sceneTime > 0.1f && !data.unlockedScenes.Contains(sceneName) && !InCutscene()) {
+        if (sceneTime > 0.1f && !data.unlockedScenes.Contains(sceneName) && !InCutsceneLevel()) {
             data.unlockedScenes.Add(sceneName);
             UINew.Instance.ShowSceneText("- " + GameManager.sceneNames[sceneName] + " -");
         }
     }
-    public bool InCutscene() {
+    public bool InCutsceneLevel() {
         if (SceneManager.GetActiveScene().buildIndex > 2) {
             return false;
         } else {
@@ -190,8 +190,8 @@ public partial class GameManager : Singleton<GameManager> {
             if (playerInv.holding)
                 CheckItemCollection(playerInv.holding.gameObject, playerObject);
         }
-        // change UI buttons?
-        UINew.Instance.UpdateButtons();
+        // refresh UI
+        UINew.Instance.RefreshUI(active:true);
     }
     public void LeaveScene(string toSceneName, int toEntryNumber) {
         MySaver.Save();
@@ -201,7 +201,7 @@ public partial class GameManager : Singleton<GameManager> {
     void LevelWasLoaded(Scene scene, LoadSceneMode mode) {
         // Debug.Log("on level was loaded");
         sceneTime = 0f;
-        if (InCutscene()) {
+        if (InCutsceneLevel()) {
             InitializeNonPlayableLevel();
         } else {
             InitializePlayableLevel(loadLevel: true);
@@ -274,7 +274,7 @@ public partial class GameManager : Singleton<GameManager> {
     }
     public void InitializeNonPlayableLevel() {
         string sceneName = SceneManager.GetActiveScene().name;
-        UINew.Instance.SetActiveUI();
+        UINew.Instance.RefreshUI();
         Toolbox.Instance.SwitchAudioListener(GameObject.Find("Main Camera"));
         if (sceneName == "morning_cutscene") {
             CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.newDay);
@@ -581,7 +581,7 @@ public partial class GameManager : Singleton<GameManager> {
         data.itemCheckedOut[name] = true;
     }
     public void CheckAchievements() {
-        if (InCutscene())
+        if (InCutsceneLevel())
             return;
         foreach (Achievement achieve in data.achievements) {
             if (!achieve.complete) {
@@ -617,7 +617,10 @@ public partial class GameManager : Singleton<GameManager> {
         data.packages.Add(packageName);
     }
     public void ShowDiaryEntry(string diaryName) {
-        GameObject diaryObject = UINew.Instance.ShowMenu(UINew.MenuType.diary);
+        GameObject diaryObject = UINew.Instance.activeMenu;
+        if (UINew.Instance.activeMenu == null){
+            diaryObject = UINew.Instance.ShowMenu(UINew.MenuType.diary);
+        } 
         Diary diary = diaryObject.GetComponent<Diary>();
         diary.loadDiaryName = diaryName;
     }
@@ -627,7 +630,7 @@ public partial class GameManager : Singleton<GameManager> {
         playerIsDead = true;
         data.deaths += 1;
         // MySaver.Save();
-        UINew.Instance.SetActiveUI(active: false);
+        UINew.Instance.RefreshUI(active: false);
         Instantiate(Resources.Load("UI/deathMenu"));
         CameraControl camControl = FindObjectOfType<CameraControl>();
         camControl.audioSource.PlayOneShot(Resources.Load("sounds/xylophone/x4") as AudioClip);

@@ -199,7 +199,6 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable, IMessagable {
             if (physical == null)
                 return;
             if (physical.currentMode == Physical.mode.zip) {
-                Debug.Log(name+" Collision");
                 Collision(coll);
             }
         }
@@ -218,7 +217,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable, IMessagable {
     }
 
     void FixedUpdate() {
-        if (setV != Vector3.zero || addV != Vector3.zero){
+        if (setV != Vector3.zero || addV != Vector3.zero) {
             Vector2 objectVelocity = physical.objectBody.velocity;
             Vector2 groundVelocity = groundBody.velocity;
             if (setV != Vector3.zero) {
@@ -240,7 +239,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable, IMessagable {
             physical.objectBody.velocity = objectVelocity;
             groundBody.velocity = groundVelocity;
         }
-        
+
         if (doLoad) {
             doLoad = false;
             initHeight = 0;
@@ -287,11 +286,11 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable, IMessagable {
         ContactPoint2D contact = collision.contacts[0];
         // TODO: fix magnitude? z? amount?
         message.force = contact.normal;
-        if (physical.currentMode == Physical.mode.zip) {
-            message.amount = 25f;
-        } else {
-            message.amount = collision.relativeVelocity.magnitude;
-        }
+        message.amount = collision.relativeVelocity.magnitude;
+        if (physical)
+            if (physical.currentMode == Physical.mode.zip)
+                message.amount = 25f;
+
         message.type = damageType.physical;
         Toolbox.Instance.SendMessage(gameObject, this, message);
         Impact(message);
@@ -302,7 +301,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable, IMessagable {
             } else {
                 impactSound = Resources.Load("sounds/8bit_impact1", typeof(AudioClip)) as AudioClip;
             }
-         } else {
+        } else {
             impactSound = Resources.Load("sounds/8bit_impact1", typeof(AudioClip)) as AudioClip;
         }
         if (impactSound)

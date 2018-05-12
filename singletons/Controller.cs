@@ -2,11 +2,8 @@
 using System.Linq;
 using System.Collections.Generic;
 public class Controller : Singleton<Controller> {
-    public enum SelectType {
-        none, swearAt, insultAt, hypnosis, command
-    }
-    public enum ControlMode {
-        normal, waitForMenu, commandSelect
+    public enum ControlState {
+        normal, inMenu, waitForMenu, commandSelect, swearSelect, insultSelect, cutscene, hypnosisSelect
     }
     private Controllable _focus;
     public Controllable focus {
@@ -31,12 +28,64 @@ public class Controller : Singleton<Controller> {
         }
     }
     private GameObject lastLeftClicked;
-    public List<string> forbiddenColliders = new List<string> { "fire", "sightcone", "table", "background", "occurrenceFlag" };
+    public static List<string> forbiddenColliders = new List<string>() { "fire", "sightcone", "table", "background", "occurrenceFlag" };
+    public static List<ControlState> selectionStates = new List<ControlState>(){Controller.ControlState.swearSelect,
+                                                                                Controller.ControlState.insultSelect,
+                                                                                Controller.ControlState.hypnosisSelect};
     public string message = "smoke weed every day";
-    public ControlMode mode;
-    public SelectType currentSelect = SelectType.none;
+    private ControlState _state;
+    public ControlState state {
+        get { return _state; }
+        set {
+            ControlState previousState = _state;
+            _state = value;
+            ChangeState(previousState);
+        }
+    } 
     public GameObject commandTarget;
+    public bool doCommand;
+    public Interaction commandAct = null;
+    public ActionButtonScript.buttonType commandButtonType = ActionButtonScript.buttonType.none;
+    void ChangeState(ControlState previousState) {
+        // TODO: code for transitioning between states
+        if (focus) {
+            focus.ResetInput();
+        }
+        UINew.Instance.ClearWorldButtons();
+        ResetLastLeftClicked();
+        if (previousState == ControlState.inMenu || previousState == ControlState.waitForMenu)
+            UINew.Instance.RefreshUI(active: true);
+
+        if (previousState == ControlState.commandSelect) {
+            // if we've aborted command state without success
+            // reset command character and target control
+            // Debug.Log("disabling command target control");
+            Controllable commandTargetControl = commandTarget.GetComponent<Controllable>();
+            commandTargetControl.control = Controllable.ControlType.AI;
+            if (!doCommand)
+                ResetCommandState();
+        }
+        if (state == ControlState.commandSelect){
+            Controllable commandTargetControl = commandTarget.GetComponent<Controllable>();
+            commandTargetControl.control = Controllable.ControlType.none;
+        }
+    }
     void Update() {
+        if (Input.GetButtonDown("Cancel")) {
+            // TODO: exit command states
+            if (state != ControlState.cutscene) {
+                if (selectionStates.Contains(state) || state == ControlState.commandSelect) {
+                    state = ControlState.normal;
+                    UINew.Instance.RefreshUI(active: true);
+                } else {
+                    UINew.Instance.ShowMenu(UINew.MenuType.escape);
+                }
+            } else {
+                CutsceneManager.Instance.EscapePressed();
+            }
+        }
+        if (state != ControlState.normal)
+            return;
         if (focus != null & !suspendInput) {
             focus.ResetInput();
             if (Input.GetAxis("Vertical") > 0)
@@ -53,14 +102,6 @@ public class Controller : Singleton<Controller> {
             }
             if (Input.GetButton("Fire1")) {
                 focus.shootHeldFlag = true;
-            }
-        }
-        if (Input.GetButtonDown("Cancel")) {
-            ResetCommandState();
-            if (!GameManager.Instance.InCutscene()) {
-                UINew.Instance.ShowMenu(UINew.MenuType.escape);
-            } else {
-                CutsceneManager.Instance.EscapePressed();
             }
         }
     }
@@ -162,73 +203,71 @@ public class Controller : Singleton<Controller> {
         }
     }
     void LeftClick() {
+        if (state == ControlState.inMenu || state == ControlState.waitForMenu)
+            return;
         if (focus == null)
             return;
         if (focus.hitState >= Controllable.HitState.stun)
             return;
+
         RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero).OrderBy(h => h.collider.gameObject.name).ToArray();
+
+        switch (state) {
+            case ControlState.swearSelect:
+                foreach (RaycastHit2D hit in hits) {
+                    if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)) {
+                        state = ControlState.normal;
+                        MessageSpeech message = new MessageSpeech();
+                        message.swearTarget = hit.collider.gameObject;
+                        Toolbox.Instance.SendMessage(focus.gameObject, this, message);
+                        UINew.Instance.SetActionText("");
+                    }
+                }
+                return;
+            case ControlState.insultSelect:
+                GameObject top = Controller.Instance.GetFrontObject(hits);
+                if (top != null) {
+                    state = ControlState.normal;
+                    GameObject target = Controller.Instance.GetBaseInteractive(top.transform);
+                    Speech speech = focus.GetComponent<Speech>();
+                    if (speech) {
+                        speech.Insult(target);
+                    }
+                    UINew.Instance.SetActionText("");
+                }
+                return;
+            case ControlState.hypnosisSelect:
+                GameObject hypnoTop = Controller.Instance.GetFrontObject(hits);
+                if (hypnoTop != null) {
+                    state = ControlState.normal;
+                    GameObject target = Controller.Instance.GetBaseInteractive(hypnoTop.transform);
+                    Controllable controllable = target.GetComponent<Controllable>();
+
+                    GameObject hypnosisEffect = Instantiate(Resources.Load("prefabs/fx/hypnosisEffect"), GameManager.Instance.playerObject.transform.position, Quaternion.identity) as GameObject;
+                    HypnosisEffect fx = hypnosisEffect.GetComponent<HypnosisEffect>();
+                    fx.target = target;
+
+                    if (controllable) {
+                        GameManager.Instance.SetFocus(target);
+                    }
+                    UINew.Instance.SetActionText("");
+                }
+                return;
+            default:
+                break;
+        }
         // IsPointerOverGameObject is required here to exclude clicks if we are hovering over a UI element.
         // this may or may not cause problems down the road, but I'm unsure how else to do this.
         // NOTE: if an overlapping UI is causing problems, add a layout group and uncheck "blocks raycast"
-
-        if ((currentSelect == SelectType.none || currentSelect == SelectType.command) && !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) {
-            // if (currentSelect == SelectType.none){
-            // foreach (RaycastHit2D hit in hits){
-            //     if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)){
-            //         focus.lastLeftClicked = hit.collider.gameObject;
-            // 		// we need to check the object from the root for interactions, but place buttons at the child clicked on
-            // 		Clicked(GetBaseInteractive(hit.collider.transform), hit.collider.transform.gameObject);
-            // 		break;
-            //     }
-            // }
-            GameObject top = GetFrontObject(hits);
-            if (top != null) {
-                // Debug.Log(top);
-                Clicked(GetBaseInteractive(top.transform), top);
-            }
-        }
-        if (currentSelect == SelectType.swearAt) {
-            currentSelect = SelectType.none;
-            foreach (RaycastHit2D hit in hits) {
-                if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)) {
-                    MessageSpeech message = new MessageSpeech();
-                    message.swearTarget = hit.collider.gameObject;
-                    Toolbox.Instance.SendMessage(focus.gameObject, this, message);
-                    UINew.Instance.SetActionText("");
+        if (state == ControlState.normal || state == ControlState.commandSelect) {
+            if (!UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) {
+                GameObject top = GetFrontObject(hits);
+                if (top != null) {
+                    Clicked(GetBaseInteractive(top.transform), top);
                 }
-            }
-        }
-        if (currentSelect == SelectType.insultAt) {
-            currentSelect = SelectType.none;
-            GameObject top = Controller.Instance.GetFrontObject(hits);
-            if (top != null) {
-                GameObject target = Controller.Instance.GetBaseInteractive(top.transform);
-                Speech speech = focus.GetComponent<Speech>();
-                if (speech) {
-                    speech.Insult(target);
-                }
-                UINew.Instance.SetActionText("");
-            }
-        }
-        if (currentSelect == SelectType.hypnosis) {
-            currentSelect = SelectType.none;
-            GameObject top = Controller.Instance.GetFrontObject(hits);
-            if (top != null) {
-                GameObject target = Controller.Instance.GetBaseInteractive(top.transform);
-                Controllable controllable = target.GetComponent<Controllable>();
-
-                GameObject hypnosisEffect = Instantiate(Resources.Load("prefabs/fx/hypnosisEffect"), GameManager.Instance.playerObject.transform.position, Quaternion.identity) as GameObject;
-                HypnosisEffect fx = hypnosisEffect.GetComponent<HypnosisEffect>();
-                fx.target = target;
-
-                if (controllable) {
-                    GameManager.Instance.SetFocus(target);
-                }
-                UINew.Instance.SetActionText("");
             }
         }
     }
-
     public void Clicked(GameObject clicked, GameObject clickSite) {
         if (lastLeftClicked == clicked) {
             // TODO: fix this conditional!
@@ -249,11 +288,9 @@ public class Controller : Singleton<Controller> {
             }
         }
     }
-
     public void ResetLastLeftClicked() {
         lastLeftClicked = null;
     }
-
     public bool InteractionIsWithinRange(Interaction i) {
         // TODO: this all should use something other than lastleftclicked, for persistent buttons of sorts.
         // using i.action.parent doesn't work, because some actions are sourced from player gameobject, not "target", whatever it is
@@ -268,16 +305,54 @@ public class Controller : Singleton<Controller> {
             return false;
         }
     }
-    public void ResetCommandState(){
-        Controller.Instance.suspendInput = false;
-        if (commandTarget != null){
+    public void ResetCommandState() {
+        // Debug.Log("resetting command state");
+        if (commandTarget != null) {
             Controllable targetControl = commandTarget.GetComponent<Controllable>();
             targetControl.control = Controllable.ControlType.AI;
         }
-        currentSelect = Controller.SelectType.none;
         commandTarget = null;
         // reset command state
         suspendInput = false;
-        UINew.Instance.SetActiveUI(active:true);
+        UINew.Instance.RefreshUI(active: true);
+        commandAct = null;
+        commandButtonType = ActionButtonScript.buttonType.none;
+        doCommand = false;
+    }
+    public void MenuClosedCallback() {
+        if (state == ControlState.inMenu || state == ControlState.waitForMenu) {
+            state = ControlState.normal;
+        }
+        if (doCommand) {
+            if (commandButtonType != ActionButtonScript.buttonType.none) {
+                Inventory inventory = commandTarget.GetComponent<Inventory>();
+                Controllable controllable = commandTarget.GetComponent<Controllable>();
+                switch (commandButtonType) {
+                    case ActionButtonScript.buttonType.Drop:
+                        inventory.DropItem();
+                        UINew.Instance.ClearWorldButtons();
+                        break;
+                    case ActionButtonScript.buttonType.Throw:
+                        inventory.ThrowItem();
+                        UINew.Instance.ClearWorldButtons();
+                        break;
+                    case ActionButtonScript.buttonType.Stash:
+                        inventory.StashItem(inventory.holding.gameObject);
+                        UINew.Instance.ClearWorldButtons();
+                        UINew.Instance.UpdateInventoryButton(inventory);
+                        break;
+                    case ActionButtonScript.buttonType.Punch:
+                        controllable.shootPressedFlag = true;
+                        break;
+                    default:
+                        break;
+                }
+            } else {    
+                commandAct.DoAction();
+            }
+            ResetCommandState();
+            commandAct = null;
+        }
+        
     }
 }

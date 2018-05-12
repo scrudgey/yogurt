@@ -25,7 +25,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
             Toolbox.Instance.SendMessage(gameObject, this, invMessage);
             if (value != null)
                 GameManager.Instance.CheckItemCollection(value.gameObject, gameObject);
-            UpdateActions();
+            UpdateInventoryActionButtons();
         }
     }
     private Pickup _holding;
@@ -398,7 +398,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
             strong = intrins.netBuffs[BuffType.strength].boolValue;
         }
     }
-    public void UpdateActions() {
+    public void UpdateInventoryActionButtons() {
         Controllable controllable = GetComponent<Controllable>();
         if (holding) {
             HashSet<Interaction> manualActions = new HashSet<Interaction>(Interactor.ReportManualActions(holding.gameObject, gameObject));

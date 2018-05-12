@@ -14,11 +14,11 @@ public class CommercialReportMenu : MonoBehaviour {
         canvas = GetComponent<Canvas>();
         canvas.worldCamera = GameManager.Instance.cam;
         SetRefs();
-        Controller.Instance.suspendInput = true;
+        // Controller.Instance.suspendInput = true;
     }
     public void NewDayButton() {
         UINew.Instance.CloseActiveMenu();
-        Controller.Instance.suspendInput = false;
+        // Controller.Instance.suspendInput = false;
         MySaver.Save();
         // MySaver.SaveObjectDatabase();
         GameManager.Instance.BoardRoomCutscene();

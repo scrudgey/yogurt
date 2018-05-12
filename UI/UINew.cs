@@ -22,9 +22,9 @@ public class UINew : Singleton<UINew> {
         {MenuType.teleport,                 "UI/TeleportMenu"}
     };
     private static List<MenuType> actionRequired = new List<MenuType> { MenuType.commercialReport, MenuType.diary, MenuType.perk, MenuType.dialogue };
-    private GameObject activeMenu;
+    public GameObject activeMenu;
     private MenuType activeMenuType;
-    private bool menuRequiresAction;
+    // private bool menuRequiresAction;
     private struct actionButton {
         public GameObject gameobject;
         public ActionButtonScript buttonScript;
@@ -76,70 +76,100 @@ public class UINew : Singleton<UINew> {
         cursorHighlight = (Texture2D)Resources.Load("UI/cursor3_64_1");
         cursorTarget = (Texture2D)Resources.Load("UI/cursor3_target3");
     }
-    void Update() {
+    void LateUpdate() {
+        LateUpdateUIElements();
+        bool highlight = false;
+        RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+        foreach (RaycastHit2D hit in hits) {
+            if (hit.collider != null && !Controller.forbiddenColliders.Contains(hit.collider.tag)) {
+                highlight = true;
+            }
+        }
+        GameObject target = null;
+        if (highlight) {
+            GameObject top = Controller.Instance.GetFrontObject(hits);
+            target = Controller.Instance.GetBaseInteractive(top.transform);
+        }
+        UpdateCursor(highlight);
+        UpdateActionText(highlight, target);
+    }
+    public void UpdateCursor(bool highlight) {
+        switch (Controller.Instance.state) {
+            case Controller.ControlState.normal:
+                if (cursorText.activeInHierarchy)
+                    cursorText.SetActive(false);
+                if (highlight) {
+                    Cursor.SetCursor(cursorHighlight, new Vector2(28, 16), CursorMode.Auto);
+                } else {
+                    Cursor.SetCursor(cursorDefault, new Vector2(28, 16), CursorMode.Auto);
+                }
+                break;
+            case Controller.ControlState.inMenu:
+            case Controller.ControlState.waitForMenu:
+                if (cursorText.activeInHierarchy)
+                    cursorText.SetActive(false);
+                Cursor.SetCursor(cursorHighlight, new Vector2(28, 16), CursorMode.Auto);
+                break;
+            case Controller.ControlState.commandSelect:
+                SetCursorText("COMMAND");
+                break;
+            case Controller.ControlState.hypnosisSelect:
+                SetCursorText("HYPNOTIZE");
+                break;
+            case Controller.ControlState.insultSelect:
+                SetCursorText("INSULT");
+                break;
+            case Controller.ControlState.swearSelect:
+                SetCursorText("SWEAR\nAT");
+                break;
+            default:
+                if (cursorText.activeInHierarchy)
+                    cursorText.SetActive(false);
+                break;
+        }
+    }
+    public void SetCursorText(string text) {
+        if (!cursorText.activeInHierarchy)
+            cursorText.SetActive(true);
+        Vector3 mousePos = Input.mousePosition;
+        mousePos.y -= 30;
+        Vector2 pos;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(UICanvas.transform as RectTransform, mousePos, GameManager.Instance.cam, out pos);
+        cursorText.transform.position = UICanvas.transform.TransformPoint(pos);
+        cursorTextText.text = text;
+
+        Cursor.SetCursor(cursorTarget, new Vector2(28, 16), CursorMode.Auto);
+    }
+    public void UpdateActionText(bool highlight, GameObject target) {
+        if (target != null) {
+            switch (Controller.Instance.state) {
+                case Controller.ControlState.swearSelect:
+                    SetActionText("Swear at " + Toolbox.Instance.GetName(target));
+                    break;
+                case Controller.ControlState.insultSelect:
+                    SetActionText("Insult " + Toolbox.Instance.GetName(target));
+                    break;
+                case Controller.ControlState.hypnosisSelect:
+                    SetActionText("Hypnotize " + Toolbox.Instance.GetName(target));
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            if (Controller.selectionStates.Contains(Controller.Instance.state)){
+                SetActionText("");
+            }
+        }
+    }
+    public void LateUpdateUIElements() {
+        // handle pop ups, health bars, and display text
+
+        actionTextObject.text = actionTextString;
         if (!achievementPopupInProgress && collectedStack.Count > 0) {
             PopupCollected(collectedStack.Pop());
         }
         if (!achievementPopupInProgress && achievementStack.Count > 0) {
             PopupAchievement(achievementStack.Pop());
-        }
-        actionTextObject.text = actionTextString;
-        bool highlight = false;
-        RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-        foreach (RaycastHit2D hit in hits) {
-            if (hit.collider != null && !Controller.Instance.forbiddenColliders.Contains(hit.collider.tag)) {
-                highlight = true;
-            }
-        }
-        if (highlight) {
-            GameObject top = Controller.Instance.GetFrontObject(hits);
-            GameObject target = Controller.Instance.GetBaseInteractive(top.transform);
-            if (target != null) {
-                switch (Controller.Instance.currentSelect) {
-                    case Controller.SelectType.none:
-                        Cursor.SetCursor(cursorHighlight, new Vector2(28, 16), CursorMode.Auto);
-                        break;
-                    case Controller.SelectType.swearAt:
-                        SetActionText("Swear at " + Toolbox.Instance.GetName(target));
-                        break;
-                    case Controller.SelectType.insultAt:
-                        SetActionText("Insult " + Toolbox.Instance.GetName(target));
-                        break;
-                    case Controller.SelectType.hypnosis:
-                        SetActionText("Hypnotize " + Toolbox.Instance.GetName(target));
-                        break;
-                    default:
-                        break;
-                }
-            }
-        } else {
-            if (Controller.Instance.currentSelect == Controller.SelectType.none) {
-                Cursor.SetCursor(cursorDefault, new Vector2(28, 16), CursorMode.Auto);
-            } else {
-                Cursor.SetCursor(cursorTarget, new Vector2(16, 16), CursorMode.Auto);
-                if (Controller.Instance.currentSelect != Controller.SelectType.command)
-                    SetActionText("");
-            }
-        }
-        if (Controller.Instance.currentSelect != Controller.SelectType.none) {
-            if (!cursorText.activeInHierarchy)
-                cursorText.SetActive(true);
-            Vector3 mousePos = Input.mousePosition;
-            mousePos.y -= 30;
-            Vector2 pos;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(UICanvas.transform as RectTransform, mousePos, GameManager.Instance.cam, out pos);
-            cursorText.transform.position = UICanvas.transform.TransformPoint(pos);
-            if (Controller.Instance.currentSelect == Controller.SelectType.swearAt)
-                cursorTextText.text = "SWEAR\nAT";
-            if (Controller.Instance.currentSelect == Controller.SelectType.insultAt)
-                cursorTextText.text = "INSULT";
-            if (Controller.Instance.currentSelect == Controller.SelectType.hypnosis)
-                cursorTextText.text = "HYPNOTIZE";
-            if (Controller.Instance.currentSelect == Controller.SelectType.command)
-                cursorTextText.text = "COMMAND";
-        } else {
-            if (cursorText.activeInHierarchy)
-                cursorText.SetActive(false);
         }
         if (Controller.Instance.focusHurtable != null) {
             float width = (Controller.Instance.focusHurtable.health / Controller.Instance.focusHurtable.maxHealth) * lifebarDefaultSize.x;
@@ -285,42 +315,41 @@ public class UINew : Singleton<UINew> {
     }
     public GameObject ShowMenu(MenuType typeMenu) {
         if (activeMenu == null) {
-            menuRequiresAction = false;
             activeMenuType = MenuType.none;
         }
         if (activeMenuType == typeMenu) {
             CloseActiveMenu();
             return null;
         }
-        if (menuRequiresAction)
+        if (Controller.Instance.state == Controller.ControlState.waitForMenu)
             return null;
         CloseActiveMenu();
         activeMenu = GameObject.Instantiate(Resources.Load(menuPrefabs[typeMenu])) as GameObject;
         Canvas canvas = activeMenu.GetComponent<Canvas>();
         canvas.worldCamera = GameManager.Instance.cam;
         activeMenuType = typeMenu;
-        if (actionRequired.Contains(typeMenu))
-            menuRequiresAction = true;
+        if (actionRequired.Contains(typeMenu)) {
+            Controller.Instance.state = Controller.ControlState.waitForMenu;
+        } else {
+            Controller.Instance.state = Controller.ControlState.inMenu;
+        }
         return activeMenu;
     }
     public void CloseActiveMenu() {
         if (activeMenu) {
-            menuRequiresAction = false;
-            Destroy(activeMenu);
             activeMenuType = MenuType.none;
-            UpdateInventoryButton();
-            Controller.Instance.suspendInput = false;
+            Destroy(activeMenu);
             Time.timeScale = 1f;
+            Controller.Instance.MenuClosedCallback();
         }
     }
-    public void SetActiveUI(bool active = false) {
+    public void RefreshUI(bool active = false) {
         List<GameObject> buttons = new List<GameObject>() { inventoryButton, fightButton, punchButton, speakButton, hypnosisButton, vomitButton };
         foreach (GameObject button in buttons) {
             if (button)
-                button.SetActive(active);
+                button.SetActive(false);
         }
         topRightBar.SetActive(active);
-        CloseActiveMenu();
         ClearWorldButtons();
         ClearActionButtons();
         foreach (Transform child in UICanvas.transform.Find("iconDock")) {
@@ -330,23 +359,27 @@ public class UINew : Singleton<UINew> {
             UpdateButtons();
     }
     public void UpdateButtons() {
-        // TODO: this is why the buttons are active but not the health bar
         if (UINew.Instance.activeMenuType != UINew.MenuType.none)
             return;
+        // speech button
         if (GameManager.Instance.playerObject.GetComponent<Speech>()) {
             speakButton.SetActive(true);
         }
+        // hand action buttons and inventory button
         Inventory inv = GameManager.Instance.playerObject.GetComponent<Inventory>();
         if (inv) {
-            inv.UpdateActions();
+            inv.UpdateInventoryActionButtons();
             UpdateInventoryButton(inv);
         }
+        // punch button
         if (Controller.Instance.focus.fightMode) {
             ShowPunchButton();
         } else {
             HidePunchButton();
         }
+        // fight button
         fightButton.SetActive(true);
+        // health bar
         if (GameManager.Instance.playerObject.GetComponent<Hurtable>()) {
             topRightBar.SetActive(true);
         }
@@ -367,9 +400,6 @@ public class UINew : Singleton<UINew> {
         } else {
             videoCam.DisableBubble();
         }
-    }
-    public void UpdateInventoryButton() {
-        UpdateInventoryButton(GameManager.Instance.playerObject.GetComponent<Inventory>());
     }
     public void UpdateInventoryButton(Inventory inventory) {
         if (inventory.items.Count > 0) {
@@ -490,7 +520,7 @@ public class UINew : Singleton<UINew> {
         ClearWorldButtons();
         activeElements = new List<GameObject>();
         List<Interaction> clickedActions = new List<Interaction>();
-        if (Controller.Instance.commandTarget != null){
+        if (Controller.Instance.commandTarget != null) {
             clickedActions = Interactor.GetInteractions(Controller.Instance.commandTarget, clickedOn);
         } else {
             clickedActions = Interactor.GetInteractions(GameManager.Instance.playerObject, clickedOn);

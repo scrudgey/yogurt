@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-// using Nimrod;
 using System.IO;
 public class UIButtonCallbacks : MonoBehaviour {
     public void FightButtonClick() {
@@ -35,10 +34,10 @@ public class UIButtonCallbacks : MonoBehaviour {
         // Debug.Log(g.Parse("{main}"));
     }
     public void HypnosisButtonClick() {
-        if (Controller.Instance.currentSelect != Controller.SelectType.hypnosis) {
-            Controller.Instance.currentSelect = Controller.SelectType.hypnosis;
+        if (Controller.Instance.state != Controller.ControlState.hypnosisSelect) {
+            Controller.Instance.state = Controller.ControlState.hypnosisSelect;
         } else {
-            Controller.Instance.currentSelect = Controller.SelectType.none;
+            Controller.Instance.state = Controller.ControlState.normal;
         }
     }
     public void VomitButtonClick() {

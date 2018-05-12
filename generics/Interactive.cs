@@ -253,7 +253,7 @@ public class Interactive : MonoBehaviour {
             returnType = targetType.other;
         }
         // if we're commanding someone, then categories flip
-        if (Controller.Instance.commandTarget != null){
+        if (Controller.Instance.state == Controller.ControlState.commandSelect){
             if (returnType == targetType.player){
                 returnType = targetType.other;
             } else {
