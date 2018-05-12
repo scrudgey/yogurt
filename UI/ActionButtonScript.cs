@@ -12,42 +12,7 @@ public class ActionButtonScript : MonoBehaviour {
     public Inventory inventory;
     public Button button;
     public void clicked() {
-        if (bType == buttonType.Action) {
-            if (Controller.Instance.InteractionIsWithinRange(action) || manualAction) {
-                // TODO: don't do action yet if current select is command
-                if (Controller.Instance.state == Controller.ControlState.commandSelect) {
-                    // callback a new dialogue menu
-                    Controller.Instance.commandAct = action;
-                    Controller.Instance.doCommand = true;
-                    UINew.Instance.RefreshUI(active:true);
-                    Controller.Instance.ResetLastLeftClicked();
-                    GameObject menuObject = UINew.Instance.ShowMenu(UINew.MenuType.dialogue);
-                    DialogueMenu dialogue = menuObject.GetComponent<DialogueMenu>();
-                    dialogue.CommandCallback(action);
-                } else {
-                    action.DoAction();
-                    if (!action.dontWipeInterface) {
-                        UINew.Instance.RefreshUI(active:true);
-                        Controller.Instance.ResetLastLeftClicked();
-                    }
-                }
-            }
-        } else {
-            if (Controller.Instance.state == Controller.ControlState.commandSelect) {
-                Controller.Instance.commandButtonType = bType;
-                Controller.Instance.doCommand = true;
-                UINew.Instance.RefreshUI(active:true);
-                Controller.Instance.ResetLastLeftClicked();
-                GameObject menuObject = UINew.Instance.ShowMenu(UINew.MenuType.dialogue);
-                DialogueMenu dialogue = menuObject.GetComponent<DialogueMenu>();
-                dialogue.HandCommandCallback(bType);
-            } else {
-                HandAction();
-            }
-            Controller.Instance.ResetLastLeftClicked();
-        }
-        UINew.Instance.SetActionText("");
-        GUI.FocusControl("none");
+        Controller.Instance.ButtonClicked(this);
     }
     void Update() {
         if (mouseHeld && bType == buttonType.Action) {
@@ -95,34 +60,28 @@ public class ActionButtonScript : MonoBehaviour {
     }
     public void HandAction() {
         switch (bType) {
-            case ActionButtonScript.buttonType.Drop:
+            case buttonType.Drop:
                 inventory.DropItem();
                 UINew.Instance.ClearWorldButtons();
                 break;
 
-            case ActionButtonScript.buttonType.Throw:
+            case buttonType.Throw:
                 inventory.ThrowItem();
                 UINew.Instance.ClearWorldButtons();
                 break;
 
-            case ActionButtonScript.buttonType.Stash:
+            case buttonType.Stash:
                 inventory.StashItem(inventory.holding.gameObject);
                 UINew.Instance.ClearWorldButtons();
                 UINew.Instance.UpdateInventoryButton(inventory);
                 break;
 
-            case ActionButtonScript.buttonType.Punch:
+            case buttonType.Punch:
                 Controller.Instance.focus.shootPressedFlag = true;
                 break;
 
             default:
                 break;
-        }
-        if (Controller.Instance.state == Controller.ControlState.commandSelect){
-            UINew.Instance.RefreshUI(active:true);
-            Controller.Instance.ResetLastLeftClicked();
-            GameObject menuObject = UINew.Instance.ShowMenu(UINew.MenuType.dialogue);
-            DialogueMenu dialogue = menuObject.GetComponent<DialogueMenu>();
         }
     }
     public string HandActionDescription() {

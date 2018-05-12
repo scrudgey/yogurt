@@ -353,6 +353,43 @@ public class Controller : Singleton<Controller> {
             ResetCommandState();
             commandAct = null;
         }
-        
+    }
+    public void ButtonClicked(ActionButtonScript button) {
+        // normal click
+        if (state != ControlState.commandSelect) {
+            if (button.bType == ActionButtonScript.buttonType.Action) {
+                if (InteractionIsWithinRange(button.action) || button.manualAction) {
+                    button.action.DoAction();
+                    if (!button.action.dontWipeInterface) {
+                        UINew.Instance.RefreshUI(active: true);
+                        ResetLastLeftClicked();
+                    }
+                }
+            } else {
+                button.HandAction();
+                ResetLastLeftClicked();
+            }
+            return;
+        }
+        // handle commands clicked
+        if (button.bType == ActionButtonScript.buttonType.Action) {
+            if (InteractionIsWithinRange(button.action) || button.manualAction) {
+                commandAct = button.action;
+                DialogueCommand().CommandCallback(button.action);
+            } 
+        } else {
+            commandButtonType = button.bType;
+            DialogueCommand().HandCommandCallback(button.bType);
+        }
+        UINew.Instance.SetActionText("");
+        GUI.FocusControl("none");
+    }
+    private DialogueMenu DialogueCommand() {
+        doCommand = true;
+        UINew.Instance.RefreshUI(active: true);
+        ResetLastLeftClicked();
+        GameObject menuObject = UINew.Instance.ShowMenu(UINew.MenuType.dialogue);
+        DialogueMenu dialogue = menuObject.GetComponent<DialogueMenu>();
+        return dialogue;
     }
 }
