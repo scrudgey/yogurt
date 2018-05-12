@@ -199,7 +199,6 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable, IMessagable {
             if (physical == null)
                 return;
             if (physical.currentMode == Physical.mode.zip) {
-                Debug.Log(name + " Collision");
                 Collision(coll);
             }
         }

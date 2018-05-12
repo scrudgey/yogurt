@@ -182,7 +182,6 @@ public class MySaver {
                 System.IO.Stream objectsStream = new FileStream(objectsPath, FileMode.Open);
                 objectDataBase = persistentSerializer.Deserialize(objectsStream) as SerializableDictionary<int, PersistentObject>;
                 objectsStream.Close();
-                // Debug.Log(objectDataBase.Count);
             }
         } else {
             Debug.Log("WEIRD: no existing object database on Load!");
