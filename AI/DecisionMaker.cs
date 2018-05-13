@@ -10,10 +10,12 @@ public class Personality {
     public enum Stoicism { neutral, fragile, noble };
     public enum BattleStyle { normal, bloodthirsty };
     public enum Actor { no, yes };
+    public enum Suggestible {normal, suggestible, stubborn};
     public Bravery bravery;
     public Actor actor;
     public Stoicism stoicism;
     public BattleStyle battleStyle;
+    public Suggestible suggestible;
 }
 
 public class DecisionMaker : MonoBehaviour, IMessagable, ISaveable {
