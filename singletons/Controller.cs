@@ -369,6 +369,8 @@ public class Controller : Singleton<Controller> {
                 button.HandAction();
                 ResetLastLeftClicked();
             }
+            UINew.Instance.SetActionText("");
+            GUI.FocusControl("none");
             return;
         }
         // handle commands clicked
