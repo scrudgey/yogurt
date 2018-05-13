@@ -323,36 +323,41 @@ public class Controller : Singleton<Controller> {
         if (state == ControlState.inMenu || state == ControlState.waitForMenu) {
             state = ControlState.normal;
         }
+        // if a command action is specified, we should process it after the dialogue menu is closed.
         if (doCommand) {
-            if (commandButtonType != ActionButtonScript.buttonType.none) {
-                Inventory inventory = commandTarget.GetComponent<Inventory>();
-                Controllable controllable = commandTarget.GetComponent<Controllable>();
-                switch (commandButtonType) {
-                    case ActionButtonScript.buttonType.Drop:
-                        inventory.DropItem();
-                        UINew.Instance.ClearWorldButtons();
-                        break;
-                    case ActionButtonScript.buttonType.Throw:
-                        inventory.ThrowItem();
-                        UINew.Instance.ClearWorldButtons();
-                        break;
-                    case ActionButtonScript.buttonType.Stash:
-                        inventory.StashItem(inventory.holding.gameObject);
-                        UINew.Instance.ClearWorldButtons();
-                        UINew.Instance.UpdateInventoryButton(inventory);
-                        break;
-                    case ActionButtonScript.buttonType.Punch:
-                        controllable.shootPressedFlag = true;
-                        break;
-                    default:
-                        break;
-                }
-            } else {    
-                commandAct.DoAction();
-            }
-            ResetCommandState();
-            commandAct = null;
+            DoCommand();
         }
+    }
+    public void DoCommand() {
+        // Hand action
+        if (commandButtonType != ActionButtonScript.buttonType.none) {
+            Inventory inventory = commandTarget.GetComponent<Inventory>();
+            Controllable controllable = commandTarget.GetComponent<Controllable>();
+            switch (commandButtonType) {
+                case ActionButtonScript.buttonType.Drop:
+                    inventory.DropItem();
+                    UINew.Instance.ClearWorldButtons();
+                    break;
+                case ActionButtonScript.buttonType.Throw:
+                    inventory.ThrowItem();
+                    UINew.Instance.ClearWorldButtons();
+                    break;
+                case ActionButtonScript.buttonType.Stash:
+                    inventory.StashItem(inventory.holding.gameObject);
+                    UINew.Instance.ClearWorldButtons();
+                    UINew.Instance.UpdateInventoryButton(inventory);
+                    break;
+                case ActionButtonScript.buttonType.Punch:
+                    controllable.shootPressedFlag = true;
+                    break;
+                default:
+                    break;
+            }
+        } else { // normal action
+            commandAct.DoAction();
+        }
+        ResetCommandState();
+        commandAct = null;
     }
     public void ButtonClicked(ActionButtonScript button) {
         // normal click
