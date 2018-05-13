@@ -249,18 +249,32 @@ public class DialogueMenu : MonoBehaviour {
         Speech playerSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
         Speech targetSpeech = Controller.Instance.commandTarget.GetComponent<Speech>();
         Configure(playerSpeech, targetSpeech, interruptDefault: true);
+        desire desireToAct = action.GetDesire(Controller.Instance.commandTarget, GameManager.Instance.playerObject);
 
-        string actionDescription = action.Description();
-
+        PromptCommand(action.Description());
+        if (desireToAct == desire.decline){
+            DeclineCommand();
+            Controller.Instance.ResetCommandState();
+        } else {
+            AcceptCommand();
+        }
+    }
+    void PromptCommand(string actionDescription){
         List<string> request = new List<string>();
         request.Add("Say, could you " + actionDescription + " for me?");
         Say(new Monologue(instigator, request.ToArray()));
 
         string[] ender = new string[] { "END" };
         Say(new Monologue(target, ender));
-
+    }
+    void DeclineCommand(){
         List<string> response = new List<string>();
-        response.Add("why certainly my good man!");
+        response.Add("I'd rather not.");
+        Say(new Monologue(target, response.ToArray()));
+    }
+    void AcceptCommand(){
+        List<string> response = new List<string>();
+        response.Add("Why certainly my good man!");
         Say(new Monologue(target, response.ToArray()));
     }
     public void HandCommandCallback(ActionButtonScript.buttonType btype) {
