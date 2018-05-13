@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 
+public enum desire {none, accept, decline}
+public delegate desire DesireFunction(Personality myPersonality, GameObject requester);
+
 [System.Serializable]
 public class Interaction {
     public List<System.Type> parameterTypes;
@@ -32,6 +35,7 @@ public class Interaction {
     private System.Reflection.MethodInfo methodInfo;
     private System.Reflection.MethodInfo validationMethodInfo;
     private System.Reflection.MethodInfo descMethodInfo;
+    DesireFunction desireFunction;
     public bool playerOnOtherConsent = true;
     public bool otherOnPlayerConsent = true;
     public bool inertOnPlayerConsent = true;
@@ -55,6 +59,7 @@ public class Interaction {
             Debug.Log("interaction has failed to find its parent's method");
         }
         descMethodInfo = parent.GetType().GetMethod(action + "_desc");
+        desireFunction += defaultDesireFunction;
     }
     public Interaction(Interactive o, string name, Action<Component> initAction) {
         actionName = name;
@@ -161,6 +166,16 @@ public class Interaction {
         } else {
             actionDelegate(parameters[0] as Component);
         }
+    }
+    public desire defaultDesireFunction(Personality myPersonality, GameObject requester) {
+        if (myPersonality.suggestible == Personality.Suggestible.stubborn) {
+            return desire.decline;
+        }
+        return desire.accept;
+    }
+    public void AddDesireFunction(DesireFunction df) {
+        desireFunction -= defaultDesireFunction;
+        desireFunction += df;
     }
 }
 public class Interactive : MonoBehaviour {
@@ -271,14 +286,14 @@ public class Interactive : MonoBehaviour {
             where iBase.disableInteractions == false
             select iBase;
         foreach (Interaction interaction in interactions) {
-            // if (interaction.debug){
-            // 	Debug.Log("Checking the consent for interaction "+interaction.actionName);
-            // 	Debug.Log("target is "+targType.ToString());
-            // 	Debug.Log("source is "+sourceType);
-            // 	Debug.Log("other on player consent: "+interaction.otherOnPlayerConsent);
-            // 	Debug.Log("player on other consent: "+interaction.playerOnOtherConsent);
-            // 	Debug.Log("inert on other consent: "+interaction.inertOnPlayerConsent);
-            // }
+            if (interaction.debug){
+            	Debug.Log("Checking the consent for interaction "+interaction.actionName);
+            	Debug.Log("target is "+targType.ToString());
+            	Debug.Log("source is "+sourceType);
+            	Debug.Log("other on player consent: "+interaction.otherOnPlayerConsent);
+            	Debug.Log("player on other consent: "+interaction.playerOnOtherConsent);
+            	Debug.Log("inert on other consent: "+interaction.inertOnPlayerConsent);
+            }
             interaction.targetComponents = new List<Interactive>(actives);
             if (!interaction.playerOnOtherConsent && sourceType == targetType.player && targType == targetType.other) {
                 interaction.enabled = false;
