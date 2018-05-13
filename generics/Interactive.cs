@@ -35,7 +35,7 @@ public class Interaction {
     private System.Reflection.MethodInfo methodInfo;
     private System.Reflection.MethodInfo validationMethodInfo;
     private System.Reflection.MethodInfo descMethodInfo;
-    DesireFunction desireFunction;
+    private DesireFunction desireFunction;
     public bool playerOnOtherConsent = true;
     public bool otherOnPlayerConsent = true;
     public bool inertOnPlayerConsent = true;
@@ -176,6 +176,10 @@ public class Interaction {
     public void AddDesireFunction(DesireFunction df) {
         desireFunction -= defaultDesireFunction;
         desireFunction += df;
+    }
+    public desire GetDesire(GameObject commandTarget, GameObject requester){
+        DecisionMaker dm = commandTarget.GetComponent<DecisionMaker>();
+        return desireFunction(dm.personality, requester);
     }
 }
 public class Interactive : MonoBehaviour {
