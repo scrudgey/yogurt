@@ -121,7 +121,7 @@ public class DialogueMenu : MonoBehaviour {
         promptText.text = "[A]";
     }
 
-    public void Configure(Speech instigator, Speech target, bool interruptDefault=false) {
+    public void Configure(Speech instigator, Speech target, bool interruptDefault = false) {
         Start();
         this.instigator = instigator;
         this.target = target;
@@ -143,7 +143,7 @@ public class DialogueMenu : MonoBehaviour {
             targetControl.disabled = true;
         if (instigatorControl)
             instigatorControl.disabled = true;
-        if (interruptDefault){
+        if (interruptDefault) {
             choicePanel.SetActive(false);
             choice1Object.SetActive(false);
             choice2Object.SetActive(false);
@@ -214,20 +214,20 @@ public class DialogueMenu : MonoBehaviour {
                 UINew.Instance.CloseActiveMenu();
                 break;
             case "insult":
-                Say(instigator.Insult(target.gameObject, say:false));
+                Say(instigator.Insult(target.gameObject, say: false));
                 MessageInsult insult = new MessageInsult();
                 Toolbox.Instance.SendMessage(target.gameObject, instigator, insult);
-                Say(target.Riposte(say:false));
+                Say(target.Riposte(say: false));
                 DisableResponses();
-                if (CutsceneManager.Instance.cutscene is CutsceneMayor){
+                if (CutsceneManager.Instance.cutscene is CutsceneMayor) {
                     GameManager.Instance.data.achievementStats.mayorsSassed += 1;
                 }
                 break;
             case "threat":
-                Say(instigator.Threaten(target.gameObject, say:false));
+                Say(instigator.Threaten(target.gameObject, say: false));
                 MessageThreaten threat = new MessageThreaten();
                 Toolbox.Instance.SendMessage(target.gameObject, instigator, threat);
-                Say(target.RespondToThreat(say:false));
+                Say(target.RespondToThreat(say: false));
                 DisableResponses();
                 break;
             case "buy":
@@ -240,16 +240,15 @@ public class DialogueMenu : MonoBehaviour {
                 break;
         }
     }
-    public void Command(){
+    public void Command() {
         Controller.Instance.commandTarget = target.gameObject;
-        // Debug.Log("command target set to "+Controller.Instance.commandTarget.ToString());
         Controller.Instance.state = Controller.ControlState.commandSelect;
         UINew.Instance.CloseActiveMenu();
     }
-    public void CommandCallback(Interaction action){
+    public void CommandCallback(Interaction action) {
         Speech playerSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
         Speech targetSpeech = Controller.Instance.commandTarget.GetComponent<Speech>();
-        Configure(playerSpeech, targetSpeech, interruptDefault:true);
+        Configure(playerSpeech, targetSpeech, interruptDefault: true);
 
         string actionDescription = action.Description();
 
@@ -257,45 +256,45 @@ public class DialogueMenu : MonoBehaviour {
         request.Add("Say, could you " + actionDescription + " for me?");
         Say(new Monologue(instigator, request.ToArray()));
 
-        string[] ender = new string[] {"END"};
+        string[] ender = new string[] { "END" };
         Say(new Monologue(target, ender));
 
         List<string> response = new List<string>();
         response.Add("why certainly my good man!");
         Say(new Monologue(target, response.ToArray()));
     }
-    public void HandCommandCallback(ActionButtonScript.buttonType btype){
+    public void HandCommandCallback(ActionButtonScript.buttonType btype) {
         string act = "do this thing";
 
         //  Drop, Throw, Stash, Inventory, Action, Punch 
-        switch (btype){
+        switch (btype) {
             case ActionButtonScript.buttonType.Drop:
-            act = "drop what you're holding";
-            break;
+                act = "drop what you're holding";
+                break;
             case ActionButtonScript.buttonType.Throw:
-            act = "throw that";
-            break;
+                act = "throw that";
+                break;
             case ActionButtonScript.buttonType.Stash:
-            act = "put that away";
-            break;
+                act = "put that away";
+                break;
             case ActionButtonScript.buttonType.Inventory:
-            act = "open your inventory";
-            break;
+                act = "open your inventory";
+                break;
             case ActionButtonScript.buttonType.Punch:
-            act = "throw a punch";
-            break;
+                act = "throw a punch";
+                break;
             default:
-            break;
+                break;
         }
         Speech playerSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
         Speech targetSpeech = Controller.Instance.commandTarget.GetComponent<Speech>();
-        Configure(playerSpeech, targetSpeech, interruptDefault:true);
+        Configure(playerSpeech, targetSpeech, interruptDefault: true);
 
         List<string> request = new List<string>();
         request.Add("Say, could you " + act + " for me?");
         Say(new Monologue(instigator, request.ToArray()));
 
-        string[] ender = new string[] {"END"};
+        string[] ender = new string[] { "END" };
         Say(new Monologue(target, ender));
 
         List<string> response = new List<string>();
@@ -345,17 +344,17 @@ public class DialogueMenu : MonoBehaviour {
     }
     public void SetMonologue(Monologue newMonologue) {
         monologue = newMonologue;
-        if (monologue.speaker == target){
+        if (monologue.speaker == target) {
             portraitContainer1.SetActive(false);
             portraitContainer2.SetActive(true);
-        } else if (monologue.speaker == instigator){
+        } else if (monologue.speaker == instigator) {
             portraitContainer2.SetActive(false);
             portraitContainer1.SetActive(true);
         }
         // portrait1.sprite = monologue.speaker.portrait;
         if (monologue.text.Peek() == "END")
             UINew.Instance.CloseActiveMenu();
-            // Destroy(gameObject);
+        // Destroy(gameObject);
     }
     public void EnableButtons() {
         foreach (Button button in buttons)
@@ -424,17 +423,17 @@ public class DialogueMenu : MonoBehaviour {
                 promptText.text = "";
             }
         }
-        if (blitCounter > 2){
-            if (instigator.portrait.Length > 1){
+        if (blitCounter > 2) {
+            if (instigator.portrait.Length > 1) {
                 List<Sprite> unusedSprites = new List<Sprite>(instigator.portrait);
                 unusedSprites.Remove(portrait1.sprite);
                 portrait1.sprite = unusedSprites[Random.Range(0, unusedSprites.Count)];
             }
-            if (target.portrait.Length > 1){
+            if (target.portrait.Length > 1) {
                 List<Sprite> unusedSprites = new List<Sprite>(target.portrait);
                 unusedSprites.Remove(portrait2.sprite);
                 portrait2.sprite = unusedSprites[Random.Range(0, unusedSprites.Count)];
-            } 
+            }
             blitCounter = 0;
         }
     }
