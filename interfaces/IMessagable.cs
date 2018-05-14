@@ -1,9 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public interface IMessagable {
-    void ReceiveMessage(Message message);
-}
 public class Message {
     public Component messenger;
 }

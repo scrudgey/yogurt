@@ -13,6 +13,9 @@ public class TreeObject : Damageable {
         motor = hinge.motor;
         leafSpawnPoint = transform.Find("leafSpawnPoint");
     }
+    public override void NetIntrinsicsChanged(MessageNetIntrinsic message){
+        
+    }
     public void Update() {
         if (doShake) {
             timer += Time.deltaTime;

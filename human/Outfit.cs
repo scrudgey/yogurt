@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Outfit : Interactive, IMessagable, ISaveable {
+public class Outfit : Interactive, ISaveable {
     public string wornUniformName;
     public GameObject initUniform;
     public Controllable.HitState hitState;
@@ -13,6 +13,11 @@ public class Outfit : Interactive, IMessagable, ISaveable {
         Interaction stealInteraction = new Interaction(this, "Take Outfit", "StealUniform");
         stealInteraction.validationFunction = true;
         interactions.Add(stealInteraction);
+
+        Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
+    }
+    void HandleHitStun(MessageHitstun message) {
+        hitState = message.hitState;
     }
     void Start() {
         if (initUniform != null) {
@@ -41,6 +46,8 @@ public class Outfit : Interactive, IMessagable, ISaveable {
     }
     public bool StealUniform_Validation(Outfit otherOutfit) {
         if (otherOutfit == this)
+            return false;
+        if (otherOutfit.wornUniformName == "nude")
             return false;
         if (hitState >= Controllable.HitState.unconscious)
             return true;
@@ -84,12 +91,6 @@ public class Outfit : Interactive, IMessagable, ISaveable {
         SpriteRenderer sprite = uniform.GetComponent<SpriteRenderer>();
         sprite.sortingLayerName = "ground";
         return uniform;
-    }
-    public void ReceiveMessage(Message incoming) {
-        if (incoming is MessageHitstun) {
-            MessageHitstun hits = (MessageHitstun)incoming;
-            hitState = hits.hitState;
-        }
     }
     public void SaveData(PersistentComponent data) {
         data.strings["worn"] = wornUniformName;

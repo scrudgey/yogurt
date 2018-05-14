@@ -40,6 +40,22 @@ public class Hurtable : Damageable, ISaveable {
             }
         }
         oxygen = maxOxygen;
+        Toolbox.RegisterMessageCallback<MessageHead>(this, HandleHead);
+    }
+    void HandleHead(MessageHead head) {
+        if (head.type == MessageHead.HeadType.vomiting) {
+            DoubleOver(head.value);
+            if (head.value) {
+                impulse = 35f;
+            }
+        }
+    }
+    public override void NetIntrinsicsChanged(MessageNetIntrinsic intrins) {
+        if (intrins.netBuffs[BuffType.bonusHealth].floatValue > bonusHealth) {
+            health += intrins.netBuffs[BuffType.bonusHealth].floatValue;
+        }
+        bonusHealth = intrins.netBuffs[BuffType.bonusHealth].floatValue;
+        armor = intrins.netBuffs[BuffType.armor].floatValue;
     }
     public override float CalculateDamage(MessageDamage message) {
         if (message.responsibleParty != null) {
@@ -193,26 +209,7 @@ public class Hurtable : Damageable, ISaveable {
         }
         GameManager.Instance.CheckAchievements();
     }
-    public override void ReceiveMessage(Message incoming) {
-        base.ReceiveMessage(incoming);
-        if (incoming is MessageNetIntrinsic) {
-            MessageNetIntrinsic intrins = (MessageNetIntrinsic)incoming;
-            if (intrins.netBuffs[BuffType.bonusHealth].floatValue > bonusHealth) {
-                health += intrins.netBuffs[BuffType.bonusHealth].floatValue;
-            }
-            bonusHealth = intrins.netBuffs[BuffType.bonusHealth].floatValue;
-            armor = intrins.netBuffs[BuffType.armor].floatValue;
-        }
-        if (incoming is MessageHead) {
-            MessageHead head = (MessageHead)incoming;
-            if (head.type == MessageHead.HeadType.vomiting) {
-                DoubleOver(head.value);
-                if (head.value) {
-                    impulse = 35f;
-                }
-            }
-        }
-    }
+    
     public void Update() {
         if (impulse > 0) {
             impulse -= Time.deltaTime * 25f;

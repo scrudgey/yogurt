@@ -11,7 +11,7 @@ public class Stain : MonoBehaviour, ISaveable {
     }
     public void ConfigureParentObject(GameObject parent) {
         this.parent = parent;
-        parentMask = Toolbox.Instance.GetOrCreateComponent<SpriteMask>(parent);
+        parentMask = Toolbox.GetOrCreateComponent<SpriteMask>(parent);
         parentRenderer = parent.GetComponent<SpriteRenderer>();
         SpriteRenderer stainRenderer = GetComponent<SpriteRenderer>();
         stainRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;

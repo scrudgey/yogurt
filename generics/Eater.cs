@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class Eater : Interactive, IMessagable, ISaveable {
+public class Eater : Interactive, ISaveable {
     public float nutrition;
     public enum preference { neutral, likes, dislikes }
     enum nauseaStatement { none, warning, imminent }
@@ -46,6 +46,25 @@ public class Eater : Interactive, IMessagable, ISaveable {
         eatAction.validationFunction = true;
         interactions.Add(eatAction);
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
+        Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
+        Toolbox.RegisterMessageCallback<MessageOccurrence>(this, HandleOccurrence);
+    }
+    public void HandleNetIntrinsic(MessageNetIntrinsic message){
+        if (message.netBuffs[BuffType.poison].boolValue) {
+            poisonNausea = true;
+        } else {
+            poisonNausea = false;
+        }
+        if (message.netBuffs[BuffType.vampirism].boolValue) {
+            vegetablePreference = preference.dislikes;
+            meatPreference = preference.dislikes;
+            offalPreference = preference.dislikes;
+            immoralPreference = preference.likes;
+        }
+    }
+    public void HandleOccurrence(MessageOccurrence message){
+        foreach (EventData data in message.data.events)
+            ReactToOccurrence(data);
     }
     void Update() {
         if (poisonNausea) {
@@ -216,27 +235,7 @@ public class Eater : Interactive, IMessagable, ISaveable {
         vomitLiquid.vomit = true;
         Toolbox.Instance.SpawnDroplet(vomitLiquid, 0f, gameObject, 0.15f);
     }
-    public void ReceiveMessage(Message incoming) {
-        if (incoming is MessageNetIntrinsic) {
-            MessageNetIntrinsic message = (MessageNetIntrinsic)incoming;
-            if (message.netBuffs[BuffType.poison].boolValue) {
-                poisonNausea = true;
-            } else {
-                poisonNausea = false;
-            }
-            if (message.netBuffs[BuffType.vampirism].boolValue) {
-                vegetablePreference = preference.dislikes;
-                meatPreference = preference.dislikes;
-                offalPreference = preference.dislikes;
-                immoralPreference = preference.likes;
-            }
-        }
-        if (incoming is MessageOccurrence) {
-            MessageOccurrence occur = (MessageOccurrence)incoming;
-            foreach (EventData data in occur.data.events)
-                ReactToOccurrence(data);
-        }
-    }
+    
     void ReactToOccurrence(EventData od) {
         if (od.ratings[Rating.disgusting] > 1)
             nausea += 10f;

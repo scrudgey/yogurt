@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable, ISaveable {
+public class HeadAnimation : MonoBehaviour, IDirectable, ISaveable {
     private bool speaking;
     private string _spriteSheet;
     private string spriteSheet {
@@ -56,48 +56,46 @@ public class HeadAnimation : MonoBehaviour, IMessagable, IDirectable, ISaveable 
         crumbs = crumbObject.GetComponent<ParticleSystem>();
         crumbObject.transform.SetParent(transform, false);
         crumbObject.transform.localPosition = new Vector3(0.0121f, 0.0250f, 0);
+
+        Toolbox.RegisterMessageCallback<MessageHead>(this, HandleMessageHead);
+        Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
     }
-    public void ReceiveMessage(Message incoming) {
-        if (incoming is MessageHead) {
-            MessageHead message = (MessageHead)incoming;
-            switch (message.type) {
-                case MessageHead.HeadType.eating:
-                    crumbColor = message.crumbColor;
-                    eating = message.value;
-                    var mainModule = crumbs.main;
-                    mainModule.startColor = crumbColor;
+    void HandleMessageHead(MessageHead message) {
+        switch (message.type) {
+            case MessageHead.HeadType.eating:
+                crumbColor = message.crumbColor;
+                eating = message.value;
+                var mainModule = crumbs.main;
+                mainModule.startColor = crumbColor;
 
-                    if (eating) {
-                        eatingCountDown = 2f;
-                        if (!crumbs.isPlaying)
-                            crumbs.Play();
-                    }
-                    break;
+                if (eating) {
+                    eatingCountDown = 2f;
+                    if (!crumbs.isPlaying)
+                        crumbs.Play();
+                }
+                break;
+            case MessageHead.HeadType.vomiting:
+                vomiting = message.value;
+                mainModule = crumbs.main;
+                mainModule.startColor = crumbColor;
+                if (vomiting) {
+                    if (!vomit.isPlaying)
+                        vomit.Play();
+                } else {
+                    vomit.Stop();
+                }
+                break;
 
-                case MessageHead.HeadType.vomiting:
-                    vomiting = message.value;
-                    mainModule = crumbs.main;
-                    mainModule.startColor = crumbColor;
-                    if (vomiting) {
-                        if (!vomit.isPlaying)
-                            vomit.Play();
-                    } else {
-                        vomit.Stop();
-                    }
-                    break;
+            case MessageHead.HeadType.speaking:
+                speaking = message.value;
+                break;
 
-                case MessageHead.HeadType.speaking:
-                    speaking = message.value;
-                    break;
-
-                default:
-                    break;
-            }
+            default:
+                break;
         }
-        if (incoming is MessageHitstun) {
-            MessageHitstun message = (MessageHitstun)incoming;
-            hitState = message.hitState;
-        }
+    }
+    void HandleHitStun(MessageHitstun message){
+        hitState = message.hitState;
     }
     void Update() {
         string updateSheet = baseName;

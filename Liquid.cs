@@ -85,7 +85,7 @@ public class Liquid {
     }
     public static void MonoLiquidify(GameObject target, Liquid liquid, bool timeout = false) {
         // TODO: create intrinsics on gameobject and add liquid intrinsic
-        MonoLiquid monoLiquid = Toolbox.Instance.GetOrCreateComponent<MonoLiquid>(target);
+        MonoLiquid monoLiquid = Toolbox.GetOrCreateComponent<MonoLiquid>(target);
         monoLiquid.liquid = liquid;
         monoLiquid.edible.nutrition = liquid.nutrition;
         monoLiquid.edible.vegetable = liquid.vegetable;
@@ -99,7 +99,7 @@ public class Liquid {
             flam.flashpoint = 0.1f;
         }
         if (liquid.buffs.Count > 0) {
-            Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(target);
+            Intrinsics intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(target);
             intrinsics.buffs.AddRange(liquid.buffs);
         }
     }

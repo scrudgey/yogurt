@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using System.Text;
 using Nimrod;
 
-public class Speech : Interactive, IMessagable, ISaveable {
+public class Speech : Interactive, ISaveable {
     private string words;
     public bool speaking = false;
     public string[] randomPhrases;
@@ -67,11 +67,64 @@ public class Speech : Interactive, IMessagable, ISaveable {
             }
         }
     }
+    void HandleSpeech(MessageSpeech message) {
+        if (message.swearTarget != null) {
+            Swear(target: message.swearTarget);
+            return;
+        }
+        if (message.randomSwear) {
+            Swear();
+            return;
+        }
+        if (message.randomSpeech) {
+            SayRandom();
+            return;
+        }
+        if (message.nimrodKey) {
+            SayFromNimrod(message.phrase);
+            return;
+        }
+        if (message.swear != "") {
+            Say(message.phrase, swear: message.swear, data: message.eventData);
+        } else {
+            Say(message.phrase, data: message.eventData);
+        }
+        Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
+        Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
+        Toolbox.RegisterMessageCallback<MessageAnimation>(this, HandleAnimation);
+        Toolbox.RegisterMessageCallback<MessageOccurrence>(this, HandleOccurrence);
+        Toolbox.RegisterMessageCallback<MessageHead>(this, HandleHead);
+    }
+    void HandleHitStun(MessageHitstun message) {
+        hitState = message.hitState;
+    }
+    void HandleNetIntrinsic(MessageNetIntrinsic message) {
+        if (GameManager.Instance.playerObject == gameObject)
+            CompareLastNetIntrinsic(message.netBuffs);
+        lastNetIntrinsic = message.netBuffs;
+    }
+    void HandleAnimation(MessageAnimation message) {
+        if (message.type == MessageAnimation.AnimType.punching && message.value == true) {
+            SayFromNimrod("punchsay");
+        }
+    }
+    void HandleOccurrence(MessageOccurrence message) {
+        foreach (EventData data in message.data.events)
+            ReactToOccurrence(data);
+    }
+    void HandleHead(MessageHead message) {
+        if (message.type == MessageHead.HeadType.vomiting) {
+            vomiting = message.value;
+            if (vomiting) {
+                audioSource.Stop();
+            }
+        }
+    }
     public DialogueMenu SpeakWith() {
         // TODO: fix commanding someone to speak with player
         UINew.Instance.RefreshUI();
         DialogueMenu menu = UINew.Instance.ShowMenu(UINew.MenuType.dialogue).GetComponent<DialogueMenu>();
-        if (Controller.Instance.commandTarget == null){ 
+        if (Controller.Instance.commandTarget == null) {
             menu.Configure(GameManager.Instance.playerObject.GetComponent<Speech>(), this);
         } else {
             menu.Configure(Controller.Instance.commandTarget.GetComponent<Speech>(), this);
@@ -227,62 +280,6 @@ public class Speech : Interactive, IMessagable, ISaveable {
         speechData.line = words;
         Toolbox.Instance.OccurenceFlag(gameObject, speechData);
     }
-    public void ReceiveMessage(Message incoming) {
-        if (incoming is MessageSpeech) {
-            MessageSpeech message = (MessageSpeech)incoming;
-            if (message.swearTarget != null) {
-                Swear(target: message.swearTarget);
-                return;
-            }
-            if (message.randomSwear) {
-                Swear();
-                return;
-            }
-            if (message.randomSpeech) {
-                SayRandom();
-                return;
-            }
-            if (message.nimrodKey) {
-                SayFromNimrod(message.phrase);
-                return;
-            }
-            if (message.swear != "") {
-                Say(message.phrase, swear: message.swear, data: message.eventData);
-            } else {
-                Say(message.phrase, data: message.eventData);
-            }
-        }
-        if (incoming is MessageHitstun) {
-            MessageHitstun hits = (MessageHitstun)incoming;
-            hitState = hits.hitState;
-        }
-        if (incoming is MessageNetIntrinsic) {
-            MessageNetIntrinsic message = (MessageNetIntrinsic)incoming;
-            if (GameManager.Instance.playerObject == gameObject)
-                CompareLastNetIntrinsic(message.netBuffs);
-            lastNetIntrinsic = message.netBuffs;
-        }
-        if (incoming is MessageAnimation) {
-            MessageAnimation message = (MessageAnimation)incoming;
-            if (message.type == MessageAnimation.AnimType.punching && message.value == true) {
-                SayFromNimrod("punchsay");
-            }
-        }
-        if (incoming is MessageOccurrence) {
-            MessageOccurrence occur = (MessageOccurrence)incoming;
-            foreach (EventData data in occur.data.events)
-                ReactToOccurrence(data);
-        }
-        if (incoming is MessageHead) {
-            MessageHead message = (MessageHead)incoming;
-            if (message.type == MessageHead.HeadType.vomiting) {
-                vomiting = message.value;
-                if (vomiting) {
-                    audioSource.Stop();
-                }
-            }
-        }
-    }
     void ReactToOccurrence(EventData od) {
         if (od.ratings[Rating.disgusting] > 1)
             SayFromNimrod("grossreact");
@@ -333,7 +330,7 @@ public class Speech : Interactive, IMessagable, ISaveable {
         string targetname = Toolbox.Instance.GetName(mainTarget);
         Say("that shazbotting " + targetname + "!", "shazbotting", insult: target);
     }
-    public Monologue Insult(GameObject target, bool say=true) {
+    public Monologue Insult(GameObject target, bool say = true) {
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
         string content = Insults.ComposeInsult(target);
@@ -349,7 +346,7 @@ public class Speech : Interactive, IMessagable, ISaveable {
         Monologue mono = new Monologue(this, strings.ToArray());
         return mono;
     }
-    public Monologue Threaten(GameObject target, bool say=true) {
+    public Monologue Threaten(GameObject target, bool say = true) {
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
 
@@ -370,20 +367,20 @@ public class Speech : Interactive, IMessagable, ISaveable {
     public Monologue Ellipsis() {
         return new Monologue(this, new string[] { "..." });
     }
-    public Monologue Riposte(bool say=false) {
+    public Monologue Riposte(bool say = false) {
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
         Monologue mono = new Monologue(this, new string[] { "How dare you!" });
-        EventData data = new EventData(chaos: 1, disturbing: 0, positive: -1, offensive:0);
+        EventData data = new EventData(chaos: 1, disturbing: 0, positive: -1, offensive: 0);
         if (say)
             Say("how dare you!", data: data);
         return mono;
     }
-    public Monologue RespondToThreat(bool say=false) {
+    public Monologue RespondToThreat(bool say = false) {
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
         Monologue mono = new Monologue(this, new string[] { "Mercy!" });
-        EventData data = new EventData(chaos: 1, disturbing: 0, positive: -1, offensive:0);
+        EventData data = new EventData(chaos: 1, disturbing: 0, positive: -1, offensive: 0);
         if (say)
             Say("Mercy!", data: data);
         return mono;

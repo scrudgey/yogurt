@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class LiquidContainer : Interactive, IMessagable, ISaveable {
+public class LiquidContainer : Interactive, ISaveable {
     public SpriteRenderer liquidSprite;
     public Liquid liquid;
     private float _amount;
@@ -44,6 +44,13 @@ public class LiquidContainer : Interactive, IMessagable, ISaveable {
             liquidSprite.enabled = false;
         if (initLiquid != "") {
             FillByLoad(initLiquid);
+        }
+        Toolbox.RegisterMessageCallback<MessageDamage>(this, HandleDamage);
+    }
+    public void HandleDamage(MessageDamage message){
+        if (message.type == damageType.physical || message.type == damageType.cutting) {
+            if (!lid)
+                Spill();
         }
     }
     public void FillFromReservoir(LiquidResevoir l) {
@@ -159,15 +166,7 @@ public class LiquidContainer : Interactive, IMessagable, ISaveable {
         if (!lid)
             Spill();
     }
-    public void ReceiveMessage(Message incoming) {
-        if (incoming is MessageDamage) {
-            MessageDamage message = (MessageDamage)incoming;
-            if (message.type == damageType.physical || message.type == damageType.cutting) {
-                if (!lid)
-                    Spill();
-            }
-        }
-    }
+    
     public void SaveData(PersistentComponent data) {
         data.floats["fillCapacity"] = fillCapacity;
         data.floats["amount"] = amount;

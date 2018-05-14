@@ -18,7 +18,7 @@ public class Personality {
     public Suggestible suggestible;
 }
 
-public class DecisionMaker : MonoBehaviour, IMessagable, ISaveable {
+public class DecisionMaker : MonoBehaviour, ISaveable {
     static List<Type> priorityTypes = new List<Type>(){
         {typeof(PriorityAttack)},
         {typeof(PriorityFightFire)},
@@ -48,7 +48,7 @@ public class DecisionMaker : MonoBehaviour, IMessagable, ISaveable {
     void Initialize() {
         initialized = true;
         // make sure there's Awareness
-        awareness = Toolbox.Instance.GetOrCreateComponent<Awareness>(gameObject);
+        awareness = Toolbox.GetOrCreateComponent<Awareness>(gameObject);
         awareness.decisionMaker = this;
         control = GetComponent<Controllable>();
 
@@ -83,12 +83,13 @@ public class DecisionMaker : MonoBehaviour, IMessagable, ISaveable {
         } else {
             priorities.Add(new PriorityWander(gameObject, control));
         }
+        Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
+        Toolbox.RegisterMessageCallback<Message>(this, ReceiveMessage);
+    }
+    public void HandleHitStun(MessageHitstun message){
+        hitState = message.hitState;
     }
     public void ReceiveMessage(Message message) {
-        if (message is MessageHitstun) {
-            MessageHitstun hits = (MessageHitstun)message;
-            hitState = hits.hitState;
-        }
         if (hitState >= Controllable.HitState.unconscious)
             return;
         foreach (Priority priority in priorities) {

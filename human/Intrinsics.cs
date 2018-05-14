@@ -62,7 +62,7 @@ public class Intrinsics : MonoBehaviour, ISaveable {
                     break;
                 case BuffType.ethereal:
                     if (kvp.Value.boolValue || kvp.Value.floatValue > 0) {
-                        FadeAlpha fader = Toolbox.Instance.GetOrCreateComponent<FadeAlpha>(gameObject);
+                        FadeAlpha fader = Toolbox.GetOrCreateComponent<FadeAlpha>(gameObject);
                         Transform head = transform.Find("head");
                         if (head) {
                             fader.spriteRenderers.Add(head.GetComponent<SpriteRenderer>());

@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-public class PhysicalBootstrapper : MonoBehaviour, ISaveable, IMessagable {
+public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
     public enum shadowSize { normal, medium, small };
     public bool silentImpact;
     public AudioClip[] impactSounds;
@@ -41,6 +41,15 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable, IMessagable {
         Toolbox.Instance.SetUpAudioSource(gameObject);
         // }
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
+    }
+    public void Awake(){
+        Toolbox.RegisterMessageCallback<MessageDamage>(this, HandleDamage);
+    }
+    public void HandleDamage(MessageDamage dam) {
+        if (dam.type == damageType.fire || dam.type == damageType.cosmic || dam.type == damageType.asphyxiation)
+            return;
+        if (dam.messenger != this)
+            Impact(dam);
     }
     public void DestroyPhysical() {
         transform.SetParent(null);
@@ -309,16 +318,6 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable, IMessagable {
         // Collider2D mycollider = GetComponent<Collider2D>();
         // Debug.Log("Collision: "+mycollider.name+" collided with "+collision.collider.name);
         // Debug.Log(Physics2D.GetIgnoreCollision(mycollider, collision.collider));
-    }
-    public void ReceiveMessage(Message message) {
-        // TODO: change this?
-        if (message is MessageDamage && !impactsMiss) {
-            MessageDamage dam = (MessageDamage)message;
-            if (dam.type == damageType.fire || dam.type == damageType.cosmic || dam.type == damageType.asphyxiation)
-                return;
-            if (message.messenger != this)
-                Impact(dam);
-        }
     }
     public void Impact(MessageDamage message) {
         if (physical == null)

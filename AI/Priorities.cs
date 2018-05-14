@@ -2,7 +2,7 @@
 
 namespace AI {
     [System.Serializable]
-    public class Priority : IMessagable {
+    public class Priority {
         public string priorityName = "priority";
         public const float urgencyMinor = 1f;
         public const float urgencySmall = 2.5f;

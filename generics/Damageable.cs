@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public enum damageType { physical, fire, any, cutting, piercing, cosmic, asphyxiation }
 public enum ImpactResult { normal, repel, strong }
-public abstract class Damageable : MonoBehaviour, IMessagable {
+public abstract class Damageable : MonoBehaviour {
     public static Dictionary<damageType, List<BuffType>> defeatedBy = new Dictionary<damageType, List<BuffType>>(){
         {damageType.physical, new List<BuffType>(){BuffType.noPhysicalDamage, BuffType.ethereal, BuffType.invulnerable}},
         {damageType.fire, new List<BuffType>(){BuffType.fireproof, BuffType.ethereal, BuffType.invulnerable}},
@@ -61,11 +61,18 @@ public abstract class Damageable : MonoBehaviour, IMessagable {
         if (strongImpactSounds != null)
             if (strongImpactSounds.Length == 0)
                 strongImpactSounds = Resources.LoadAll<AudioClip>("sounds/impact_strong/");
-        rigidbody2D = Toolbox.Instance.GetOrCreateComponent<Rigidbody2D>(gameObject);
+        rigidbody2D = Toolbox.GetOrCreateComponent<Rigidbody2D>(gameObject);
         rigidbody2D.gravityScale = 0;
         controllable = GetComponent<Controllable>();
+        Toolbox.RegisterMessageCallback<MessageDamage>(this, TakeDamage);
+        Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
     }
-    public void TakeDamage(MessageDamage message) {
+    void HandleNetIntrinsic(MessageNetIntrinsic message){
+        netBuffs = message.netBuffs;
+        NetIntrinsicsChanged(message);
+    }
+    public abstract void NetIntrinsicsChanged(MessageNetIntrinsic message);
+    public virtual void TakeDamage(MessageDamage message) {
         lastMessage = message;
         lastDamage = message.type;
         bool vulnerable = Damages(this, message.type, netBuffs);
@@ -113,19 +120,7 @@ public abstract class Damageable : MonoBehaviour, IMessagable {
         ClaimsManager.Instance.WasDestroyed(gameObject);
         Destroy(gameObject);
     }
-    public virtual void ReceiveMessage(Message incoming) {
-        if (incoming is MessageDamage) {
-            // Debug.Log(name + " receiving damage message");
-            if (enabled == false)
-                return;
-            MessageDamage message = (MessageDamage)incoming;
-            TakeDamage(message);
-        }
-        if (incoming is MessageNetIntrinsic) {
-            MessageNetIntrinsic message = (MessageNetIntrinsic)incoming;
-            netBuffs = message.netBuffs;
-        }
-    }
+    
     public void PlayImpactSound(ImpactResult impactType, MessageDamage message) {
         AudioClip[] sounds = new AudioClip[0];
         switch (impactType) {
