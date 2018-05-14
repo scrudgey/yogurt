@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 
-
-public class SimpleControl : Controllable, IMessagable, ISaveable {
+public class SimpleControl : Controllable, ISaveable {
     protected float baseSpeed;
     public float maxSpeed;
     public float maxAcceleration;
@@ -22,6 +21,10 @@ public class SimpleControl : Controllable, IMessagable, ISaveable {
         base.Awake();
         baseSpeed = maxSpeed;
         rigidBody2D = GetComponent<Rigidbody2D>();
+        Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
+    }
+    void HandleNetIntrinsic(MessageNetIntrinsic message) {
+        maxSpeed = baseSpeed + message.netBuffs[BuffType.speed].floatValue;
     }
     public virtual void FixedUpdate() {
         Vector2 acceleration = Vector2.zero;
@@ -71,13 +74,7 @@ public class SimpleControl : Controllable, IMessagable, ISaveable {
             scaleVector = tempVector;
         }
     }
-    public override void ReceiveMessage(Message message) {
-        base.ReceiveMessage(message);
-        if (message is MessageNetIntrinsic) {
-            MessageNetIntrinsic intrins = (MessageNetIntrinsic)message;
-            maxSpeed = baseSpeed + intrins.netBuffs[BuffType.speed].floatValue;
-        }
-    }
+
     public void SaveData(PersistentComponent data) {
         data.strings["lastPressed"] = lastPressed;
         data.vectors["direction"] = direction;

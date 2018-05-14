@@ -45,7 +45,7 @@ public class CutsceneMoonLanding : Cutscene {
             materials[collider] = collider.sharedMaterial;
             collider.sharedMaterial = moonMaterial;
         }
-        AudioSource playerAudio = Toolbox.Instance.GetOrCreateComponent<AudioSource>(GameManager.Instance.playerObject);
+        AudioSource playerAudio = Toolbox.GetOrCreateComponent<AudioSource>(GameManager.Instance.playerObject);
         AudioClip charlierAugh = Resources.Load("sounds/auugh") as AudioClip;
         playerAudio.PlayOneShot(charlierAugh);
     }
@@ -165,7 +165,7 @@ public class CutsceneCannon : Cutscene {
             }
             Rigidbody2D playerBody = GameManager.Instance.playerObject.GetComponent<Rigidbody2D>();
             playerBody.gravityScale = GameManager.Instance.gravity;
-            AudioSource playerAudio = Toolbox.Instance.GetOrCreateComponent<AudioSource>(GameManager.Instance.playerObject);
+            AudioSource playerAudio = Toolbox.GetOrCreateComponent<AudioSource>(GameManager.Instance.playerObject);
             AudioClip charlierAugh = Resources.Load("sounds/auugh") as AudioClip;
             playerAudio.PlayOneShot(charlierAugh);
 

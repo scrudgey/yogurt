@@ -32,8 +32,8 @@ public class Gibs : MonoBehaviour {
             }
             if (notPhysical)
                 return;
-            Rigidbody2D bitBody = Toolbox.Instance.GetOrCreateComponent<Rigidbody2D>(bit);
-            PhysicalBootstrapper bitPhys = Toolbox.Instance.GetOrCreateComponent<PhysicalBootstrapper>(bit);
+            Rigidbody2D bitBody = Toolbox.GetOrCreateComponent<Rigidbody2D>(bit);
+            PhysicalBootstrapper bitPhys = Toolbox.GetOrCreateComponent<PhysicalBootstrapper>(bit);
             PhysicalBootstrapper myBoot = GetComponent<PhysicalBootstrapper>();
             bitPhys.impactsMiss = true;
             bitPhys.noCollisions = true;

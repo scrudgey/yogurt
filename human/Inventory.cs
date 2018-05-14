@@ -3,7 +3,7 @@ using UnityEngine.Rendering;
 using System.Collections.Generic;
 using System.Linq;
 
-public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISaveable {
+public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     public List<GameObject> items;
     public GameObject initHolding;
     public bool strong;
@@ -50,7 +50,6 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
         getAction.dontWipeInterface = false;
         getAction.otherOnPlayerConsent = false;
         getAction.playerOnOtherConsent = false;
-        // getAction.hideInManualActions = true;
         interactions.Add(getAction);
         Interaction swingAction = new Interaction(this, "Swing", "SwingItem", false, true);
         swingAction.defaultPriority = 5;
@@ -60,6 +59,35 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
             AudioClip[] punches = Resources.LoadAll<AudioClip>("sounds/swoosh/");
             punchSounds = new List<AudioClip>(punches);
         }
+        Toolbox.RegisterMessageCallback<MessageAnimation>(this, HandleAnimation);
+        Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
+        Toolbox.RegisterMessageCallback<MessagePunch>(this, HandlePunch);
+        Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
+    }
+    void HandleAnimation(MessageAnimation message) {
+        if (message.type == MessageAnimation.AnimType.fighting && message.value == true) {
+            if (holding)
+                DropItem();
+        }
+    }
+    void HandleHitStun(MessageHitstun message) {
+        if (message.doubledOver || message.knockedDown) {
+            if (holding)
+                DropItem();
+        }
+    }
+    void HandlePunch(MessagePunch message) {
+        if (holding) {
+            MeleeWeapon weapon = holding.GetComponent<MeleeWeapon>();
+            if (weapon != null) {
+                SwingItem(weapon);
+            }
+        } else {
+            StartPunch();
+        }
+    }
+    void HandleNetIntrinsic(MessageNetIntrinsic message) {
+        strong = message.netBuffs[BuffType.strength].boolValue;
     }
     public void Start() {
         if (initHolding) {
@@ -293,7 +321,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
     void StartSwing() {
         if (holding == null)
             return;
-        Dictionary<BuffType, Buff> netBuffs = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject).NetBuffs();
+        Dictionary<BuffType, Buff> netBuffs = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject).NetBuffs();
 
         GameObject slash = Instantiate(Resources.Load("Slash2"), transform.position, transform.rotation) as GameObject;
         MeleeWeapon weapon = holding.GetComponent<MeleeWeapon>();
@@ -333,7 +361,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
         }
     }
     public void PunchImpact() {
-        Dictionary<BuffType, Buff> netBuffs = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject).NetBuffs();
+        Dictionary<BuffType, Buff> netBuffs = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject).NetBuffs();
 
         Vector3 startPoint = transform.position;
         startPoint.x += direction.normalized.x / 6f;
@@ -368,36 +396,7 @@ public class Inventory : Interactive, IExcludable, IMessagable, IDirectable, ISa
         }
         items = new List<GameObject>();
     }
-    public void ReceiveMessage(Message m) {
-        if (m is MessageAnimation) {
-            MessageAnimation message = (MessageAnimation)m;
-            if (message.type == MessageAnimation.AnimType.fighting && message.value == true) {
-                if (holding)
-                    DropItem();
-            }
-        }
-        if (m is MessageHitstun) {
-            MessageHitstun message = (MessageHitstun)m;
-            if (message.doubledOver || message.knockedDown) {
-                if (holding)
-                    DropItem();
-            }
-        }
-        if (m is MessagePunch) {
-            if (holding) {
-                MeleeWeapon weapon = holding.GetComponent<MeleeWeapon>();
-                if (weapon != null) {
-                    SwingItem(weapon);
-                }
-            } else {
-                StartPunch();
-            }
-        }
-        if (m is MessageNetIntrinsic) {
-            MessageNetIntrinsic intrins = (MessageNetIntrinsic)m;
-            strong = intrins.netBuffs[BuffType.strength].boolValue;
-        }
-    }
+    
     public void UpdateInventoryActionButtons() {
         Controllable controllable = GetComponent<Controllable>();
         if (holding) {

@@ -44,7 +44,7 @@ public class PersonalAssessment {
     public PersonalAssessment() { }
 }
 
-public class Awareness : MonoBehaviour, IMessagable, ISaveable {
+public class Awareness : MonoBehaviour, ISaveable {
     public DecisionMaker decisionMaker;
     public List<GameObject> initialAwareness;
     public GameObject possession;
@@ -85,6 +85,42 @@ public class Awareness : MonoBehaviour, IMessagable, ISaveable {
             if (initialAwareness.Count > 0) {
                 fieldOfView = initialAwareness;
                 Perceive();
+            }
+        }
+    }
+    void Awake(){
+        Toolbox.RegisterMessageCallback<MessageInsult>(this, ProcessInsult);
+        Toolbox.RegisterMessageCallback<MessageDamage>(this, AttackedByPerson);
+        Toolbox.RegisterMessageCallback<MessageHitstun>(this, ProcessHitStun);
+        Toolbox.RegisterMessageCallback<MessageThreaten>(this, ProcessThreat);
+        Toolbox.RegisterMessageCallback<MessageInventoryChanged>(this, ProcessInventoryChanged);
+    }
+    void ProcessHitStun(MessageHitstun message){
+        hitState = message.hitState;
+    }
+    void ProcessThreat(MessageThreaten message){
+        if (hitState >= Controllable.HitState.unconscious)
+            return;
+        PersonalAssessment assessment = FormPersonalAssessment(message.messenger.gameObject);
+        assessment.status = PersonalAssessment.friendStatus.enemy;
+    }
+    void ProcessInventoryChanged(MessageInventoryChanged message) {
+        if (message.holding != null) {
+            Knowledge knowledge = null;
+            if (knowledgebase.TryGetValue(message.holding, out knowledge)) {
+                knowledge.UpdateInfo();
+            } else {
+                knowledge = new Knowledge(message.holding);
+                knowledgebase.Add(message.holding, knowledge);
+            }
+        }
+        if (message.dropped != null) {
+            Knowledge knowledge = null;
+            if (knowledgebase.TryGetValue(message.dropped, out knowledge)) {
+                knowledge.UpdateInfo();
+            } else {
+                knowledge = new Knowledge(message.dropped);
+                knowledgebase.Add(message.dropped, knowledge);
             }
         }
     }
@@ -364,7 +400,10 @@ public class Awareness : MonoBehaviour, IMessagable, ISaveable {
         people.Add(rootObject, assessment);
         return assessment;
     }
-    void AttackedByPerson(GameObject g) {
+    void AttackedByPerson(MessageDamage message) {
+        if (hitState >= Controllable.HitState.unconscious)
+            return;
+        GameObject g = message.responsibleParty;
         PersonalAssessment assessment = FormPersonalAssessment(g);
         if (assessment != null) {
             if (assessment.status != PersonalAssessment.friendStatus.friend) {
@@ -373,47 +412,10 @@ public class Awareness : MonoBehaviour, IMessagable, ISaveable {
             assessment.knowledge.lastSeenPosition = g.transform.position;
         }
     }
-    public void ReceiveMessage(Message incoming) {
-        if (incoming is MessageHitstun) {
-            MessageHitstun hits = (MessageHitstun)incoming;
-            hitState = hits.hitState;
-        }
+    
+    public void ProcessInsult(MessageInsult message) {
         if (hitState >= Controllable.HitState.unconscious)
             return;
-        if (incoming is MessageDamage) {
-            MessageDamage message = (MessageDamage)incoming;
-            AttackedByPerson(message.responsibleParty);
-        }
-        if (incoming is MessageInsult) {
-            ProcessInsult((MessageInsult)incoming);
-        }
-        if (incoming is MessageThreaten) {
-            PersonalAssessment assessment = FormPersonalAssessment(incoming.messenger.gameObject);
-            assessment.status = PersonalAssessment.friendStatus.enemy;
-        }
-        if (incoming is MessageInventoryChanged) {
-            MessageInventoryChanged message = (MessageInventoryChanged)incoming;
-            if (message.holding != null) {
-                Knowledge knowledge = null;
-                if (knowledgebase.TryGetValue(message.holding, out knowledge)) {
-                    knowledge.UpdateInfo();
-                } else {
-                    knowledge = new Knowledge(message.holding);
-                    knowledgebase.Add(message.holding, knowledge);
-                }
-            }
-            if (message.dropped != null) {
-                Knowledge knowledge = null;
-                if (knowledgebase.TryGetValue(message.dropped, out knowledge)) {
-                    knowledge.UpdateInfo();
-                } else {
-                    knowledge = new Knowledge(message.dropped);
-                    knowledgebase.Add(message.dropped, knowledge);
-                }
-            }
-        }
-    }
-    public void ProcessInsult(MessageInsult message) {
         // TODO: make the reaction to insults more sophisticated
         PersonalAssessment assessment = FormPersonalAssessment(message.messenger.gameObject);
         Speech mySpeech = GetComponent<Speech>();

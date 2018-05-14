@@ -8,6 +8,13 @@ public class Destructible : Damageable, ISaveable {
     public AudioClip[] destroySound;
     public float physicalMultiplier = 1f;
     public float fireMultiplier = 1f;
+    public override void NetIntrinsicsChanged(MessageNetIntrinsic intrins){
+        if (intrins.netBuffs[BuffType.bonusHealth].floatValue > bonusHealth) {
+            health += intrins.netBuffs[BuffType.bonusHealth].floatValue;
+        }
+        bonusHealth = intrins.netBuffs[BuffType.bonusHealth].floatValue;
+    }
+
     void Update() {
         if (health < 0) {
             Die();
@@ -90,17 +97,7 @@ public class Destructible : Damageable, ISaveable {
             GetComponent<AudioSource>().PlayOneShot(hitSound[Random.Range(0, hitSound.Length)]);
         }
     }
-    public override void ReceiveMessage(Message message) {
-        base.ReceiveMessage(message);
-        if (message is MessageNetIntrinsic) {
-            MessageNetIntrinsic intrins = (MessageNetIntrinsic)message;
-            // armor = intrins.netBuffs[BuffType.armor].floatValue;
-            if (intrins.netBuffs[BuffType.bonusHealth].floatValue > bonusHealth) {
-                health += intrins.netBuffs[BuffType.bonusHealth].floatValue;
-            }
-            bonusHealth = intrins.netBuffs[BuffType.bonusHealth].floatValue;
-        }
-    }
+   
     public void SaveData(PersistentComponent data) {
         data.floats["health"] = health;
         data.ints["lastDamage"] = (int)lastDamage;

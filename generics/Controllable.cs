@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System;
 
-public class Controllable : MonoBehaviour, IMessagable {
+public class Controllable : MonoBehaviour {
     public enum HitState { none, stun, unconscious, dead };
     public enum ControlType { none, AI, player }
     public static List<Type> AIComponents = new List<Type>(){
@@ -88,6 +88,17 @@ public class Controllable : MonoBehaviour, IMessagable {
         } else {
             SetControl(ControlType.none);
         }
+        Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
+        Toolbox.RegisterMessageCallback<MessageDirectable>(this, HandleDirectable);
+    }
+    void HandleHitStun(MessageHitstun message){
+        hitState = message.hitState;
+    }
+    void HandleDirectable(MessageDirectable message){
+        if (message.addDirectable != null)
+            directables.Add(message.addDirectable);
+        if (message.removeDirectable != null)
+            directables.Remove(message.removeDirectable);
     }
     public void SetControl(ControlType type) {
         switch (type) {
@@ -165,21 +176,5 @@ public class Controllable : MonoBehaviour, IMessagable {
     public virtual void ToggleFightMode() {
         fightMode = !fightMode;
     }
-    public virtual void ReceiveMessage(Message incoming) {
-        // if (incoming is MessageDamage){
-        // 	MessageDamage message = (MessageDamage)incoming;
-        // 	direction = -1f * message.force;
-        // }
-        if (incoming is MessageHitstun) {
-            MessageHitstun hits = (MessageHitstun)incoming;
-            hitState = hits.hitState;
-        }
-        if (incoming is MessageDirectable) {
-            MessageDirectable message = (MessageDirectable)incoming;
-            if (message.addDirectable != null)
-                directables.Add(message.addDirectable);
-            if (message.removeDirectable != null)
-                directables.Remove(message.removeDirectable);
-        }
-    }
+    
 }

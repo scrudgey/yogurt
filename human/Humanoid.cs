@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Humanoid : SimpleControl, IMessagable {
+public class Humanoid : SimpleControl {
     Transform cachedTransform;
     public new Transform transform {
         get {
@@ -32,6 +32,31 @@ public class Humanoid : SimpleControl, IMessagable {
         rightTilt = Quaternion.LookRotation(Vector3.forward, rightTiltVector);
         leftTilt = Quaternion.LookRotation(Vector3.forward, leftTiltVector);
         forward = Quaternion.LookRotation(Vector3.forward, -1 * Vector3.forward);
+
+        Toolbox.RegisterMessageCallback<MessageInventoryChanged>(this, HandleInventory);
+    }
+    void HandleInventory(MessageInventoryChanged invMessage){
+        Inventory inv = (Inventory)invMessage.messenger;
+        if (inv.holding) {
+            if (fightMode)
+                ToggleFightMode();
+            MonoBehaviour[] list = inv.holding.gameObject.GetComponents<MonoBehaviour>();
+            foreach (MonoBehaviour mb in list) {
+                if (mb is IDirectable) {
+                    IDirectable idir = (IDirectable)mb;
+                    directables.Add(idir);
+                    idir.DirectionChange(direction);
+                }
+            }
+        }
+        if (invMessage.dropped) {
+            MonoBehaviour[] list = invMessage.dropped.GetComponents<MonoBehaviour>();
+            foreach (MonoBehaviour mb in list) {
+                if (mb is IDirectable) {
+                    directables.Remove((IDirectable)mb);
+                }
+            }
+        }
     }
     public override void FixedUpdate() {
         if (hitState > Controllable.HitState.none) {
@@ -50,33 +75,6 @@ public class Humanoid : SimpleControl, IMessagable {
         }
         if (!rightFlag && !leftFlag) {
             transform.rotation = Quaternion.Lerp(transform.rotation, forward, 0.1f);
-        }
-    }
-    public override void ReceiveMessage(Message message) {
-        base.ReceiveMessage(message);
-        if (message is MessageInventoryChanged) {
-            Inventory inv = (Inventory)message.messenger;
-            MessageInventoryChanged invMessage = (MessageInventoryChanged)message;
-            if (inv.holding) {
-                if (fightMode)
-                    ToggleFightMode();
-                MonoBehaviour[] list = inv.holding.gameObject.GetComponents<MonoBehaviour>();
-                foreach (MonoBehaviour mb in list) {
-                    if (mb is IDirectable) {
-                        IDirectable idir = (IDirectable)mb;
-                        directables.Add(idir);
-                        idir.DirectionChange(direction);
-                    }
-                }
-            }
-            if (invMessage.dropped) {
-                MonoBehaviour[] list = invMessage.dropped.GetComponents<MonoBehaviour>();
-                foreach (MonoBehaviour mb in list) {
-                    if (mb is IDirectable) {
-                        directables.Remove((IDirectable)mb);
-                    }
-                }
-            }
         }
     }
     public override void ToggleFightMode() {

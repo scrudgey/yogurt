@@ -35,7 +35,7 @@ public class Physical : MonoBehaviour {
         InitValues();
     }
     public void Start() {
-        body = Toolbox.Instance.GetOrCreateComponent<Rigidbody2D>(gameObject);
+        body = Toolbox.GetOrCreateComponent<Rigidbody2D>(gameObject);
         // ignore collisions between ground and all other objects
         foreach (Physical phys in GameObject.FindObjectsOfType<Physical>()) {
             if (phys == this)

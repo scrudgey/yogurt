@@ -169,7 +169,7 @@ public partial class GameManager : Singleton<GameManager> {
         cameraControl = FindObjectOfType<CameraControl>();
         if (cameraControl)
             cameraControl.focus = target;
-        Intrinsics intrinsics = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(target);
+        Intrinsics intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(target);
         FocusIntrinsicsChanged(intrinsics);
         // check collections for new focus outfit, holding, and hat
         Outfit playerOutfit = target.GetComponent<Outfit>();
@@ -220,7 +220,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
         cam = GameObject.FindObjectOfType<Camera>();
         if (cam) {
-            Toolbox.Instance.GetOrCreateComponent<CameraControl>(cam.gameObject);
+            Toolbox.GetOrCreateComponent<CameraControl>(cam.gameObject);
         }
         UINew.Instance.ConfigureUIElements();
         if (loadLevel) {

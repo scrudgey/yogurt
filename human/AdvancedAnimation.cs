@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class AdvancedAnimation : MonoBehaviour, IMessagable, ISaveable {
+public class AdvancedAnimation : MonoBehaviour, ISaveable {
     private string _spriteSheet;
     private string spriteSheet {
         get { return _spriteSheet; }
@@ -43,45 +43,42 @@ public class AdvancedAnimation : MonoBehaviour, IMessagable, ISaveable {
         controllable = GetComponent<Controllable>();
         animator = GetComponent<Animation>();
         LoadSprites();
+        Toolbox.RegisterMessageCallback<MessageAnimation>(this, HandleAnimationMessage);
+        Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
     }
-    public void ReceiveMessage(Message message) {
-        if (message is MessageAnimation) {
-            MessageAnimation anim = (MessageAnimation)message;
-            switch (anim.type) {
-                case MessageAnimation.AnimType.fighting:
-                    fighting = anim.value;
-                    LateUpdate();
-                    SetFrame(0);
-                    break;
-                case MessageAnimation.AnimType.holding:
-                    holding = anim.value;
-                    break;
-                case MessageAnimation.AnimType.throwing:
-                    throwing = anim.value;
-                    break;
-                case MessageAnimation.AnimType.swinging:
-                    swinging = anim.value;
-                    break;
-                case MessageAnimation.AnimType.punching:
-                    punching = anim.value;
-                    break;
-                default:
-                    break;
-            }
-            if (anim.outfitName != "") {
-                baseName = anim.outfitName;
+    public void HandleAnimationMessage(MessageAnimation anim) {
+        switch (anim.type) {
+            case MessageAnimation.AnimType.fighting:
+                fighting = anim.value;
                 LateUpdate();
                 SetFrame(0);
-            }
+                break;
+            case MessageAnimation.AnimType.holding:
+                holding = anim.value;
+                break;
+            case MessageAnimation.AnimType.throwing:
+                throwing = anim.value;
+                break;
+            case MessageAnimation.AnimType.swinging:
+                swinging = anim.value;
+                break;
+            case MessageAnimation.AnimType.punching:
+                punching = anim.value;
+                break;
+            default:
+                break;
         }
-        if (message is MessageHitstun) {
-            MessageHitstun hits = (MessageHitstun)message;
-            // hitStun = hits.value;
-            hitState = hits.hitState;
-            doubledOver = hits.doubledOver;
+        if (anim.outfitName != "") {
+            baseName = anim.outfitName;
             LateUpdate();
             SetFrame(0);
         }
+    }
+    public void HandleHitStun(MessageHitstun message) {
+        hitState = message.hitState;
+        doubledOver = message.doubledOver;
+        LateUpdate();
+        SetFrame(0);
     }
     public void LoadSprites() {
         sprites = Resources.LoadAll<Sprite>("spritesheets/" + spriteSheet);

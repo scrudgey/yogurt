@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -18,7 +19,7 @@ public class Toolbox : Singleton<Toolbox> {
     private CameraControl cameraControl;
     private GameObject tom;
     public int numberOfLiveSpeakers;
-    public T GetOrCreateComponent<T>(GameObject g) where T : Component {
+    static public T GetOrCreateComponent<T>(GameObject g) where T : Component {
         T component = g.GetComponent<T>();
         if (component) {
             return component;
@@ -79,7 +80,7 @@ public class Toolbox : Singleton<Toolbox> {
     public GameObject SpawnDroplet(Vector3 pos, Liquid l) {
         /// this is a test
         Vector2 initialVelocity = Vector2.zero;
-        initialVelocity = Random.insideUnitCircle;
+        initialVelocity = UnityEngine.Random.insideUnitCircle;
         if (initialVelocity.y < 0)
             initialVelocity.y = initialVelocity.y * -1;
         return SpawnDroplet(pos, l, initialVelocity);
@@ -99,10 +100,10 @@ public class Toolbox : Singleton<Toolbox> {
     public GameObject SpawnDroplet(Liquid l, float severity, GameObject spiller, float initHeight, bool noCollision=true) {
         Vector3 initialVelocity = Vector2.zero;
         Vector3 randomVelocity = Vector2.zero;
-        randomVelocity = spiller.transform.right * Random.Range(-0.2f, 0.2f);
+        randomVelocity = spiller.transform.right * UnityEngine.Random.Range(-0.2f, 0.2f);
 
-        initialVelocity.x = spiller.transform.up.x * Random.Range(0.8f, 1.3f);
-        initialVelocity.z = Random.Range(severity, 0.2f + severity);
+        initialVelocity.x = spiller.transform.up.x * UnityEngine.Random.Range(0.8f, 1.3f);
+        initialVelocity.z = UnityEngine.Random.Range(severity, 0.2f + severity);
         initialVelocity.x += randomVelocity.x;
         initialVelocity.z += randomVelocity.y;
 
@@ -146,7 +147,7 @@ public class Toolbox : Singleton<Toolbox> {
     public Vector2 RandomVector(Vector2 baseDir, float angleSpread) {
         float baseAngle = (float)Mathf.Atan2(baseDir.y, baseDir.x);
         float spreadRads = angleSpread * Mathf.Deg2Rad;
-        float newAngle = baseAngle + Random.Range(-1f * spreadRads, 1f * spreadRads);
+        float newAngle = baseAngle + UnityEngine.Random.Range(-1f * spreadRads, 1f * spreadRads);
         return new Vector2(baseDir.magnitude * Mathf.Cos(newAngle), baseDir.magnitude * Mathf.Sin(newAngle));
     }
     public Vector2 RotateZ(Vector2 v, float angle) {
@@ -209,30 +210,32 @@ public class Toolbox : Singleton<Toolbox> {
     }
     public void SendMessage(GameObject host, Component messenger, Message message, bool sendUpwards = true) {
         message.messenger = messenger;
-        IMessagable[] childReceivers = host.GetComponentsInChildren<IMessagable>();
-        List<IMessagable> receivers = new List<IMessagable>(childReceivers);
+        HashSet<MessageRouter> routers = new HashSet<MessageRouter>(host.GetComponentsInChildren<MessageRouter>());
         if (sendUpwards) {
-            foreach (IMessagable parentReceiver in host.GetComponentsInParent<IMessagable>()) {
-                if (!receivers.Contains(parentReceiver))
-                    receivers.Add(parentReceiver);
+            foreach (MessageRouter superRouter in host.GetComponentsInParent<MessageRouter>()) {
+                routers.Add(superRouter);
             }
         }
-        foreach (IMessagable receiver in receivers) {
-            receiver.ReceiveMessage(message);
+        foreach (MessageRouter router in routers) {
+            router.ReceiveMessage(message);
         }
     }
+    public static void RegisterMessageCallback<T>(Component component, Action<T> handler) where T: Message {
+        MessageRouter router = GetOrCreateComponent<MessageRouter>(component.gameObject);
+        router.Subscribe<T>(handler);
+    }
     public void AddLiveBuffs(GameObject host, GameObject donor) {
-        Intrinsics hostIntrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(host);
-        Intrinsics donorIntrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(donor);
+        Intrinsics hostIntrins = GetOrCreateComponent<Intrinsics>(host);
+        Intrinsics donorIntrins = GetOrCreateComponent<Intrinsics>(donor);
         hostIntrins.CreateLiveBuffs(donorIntrins.buffs);
     }
     public void AddChildIntrinsics(GameObject host, Component component, GameObject donor) {
-        Intrinsics hostIntrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(host);
-        Intrinsics donorIntrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(donor);
+        Intrinsics hostIntrins = GetOrCreateComponent<Intrinsics>(host);
+        Intrinsics donorIntrins = GetOrCreateComponent<Intrinsics>(donor);
         hostIntrins.AddChild(component, donorIntrins);
     }
     public void RemoveChildIntrinsics(GameObject host, Component component) {
-        Intrinsics hostIntrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(host);
+        Intrinsics hostIntrins = GetOrCreateComponent<Intrinsics>(host);
         hostIntrins.RemoveChild(component);
     }
     public string DirectionToString(Vector2 direction) {
