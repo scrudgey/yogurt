@@ -200,6 +200,7 @@ public partial class GameManager : Singleton<GameManager> {
     }
     void LevelWasLoaded(Scene scene, LoadSceneMode mode) {
         // Debug.Log("on level was loaded");
+        Toolbox.Instance.numberOfLiveSpeakers = 0;
         sceneTime = 0f;
         if (InCutsceneLevel()) {
             InitializeNonPlayableLevel();
