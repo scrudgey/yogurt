@@ -28,6 +28,7 @@ public class Speech : Interactive, ISaveable {
     public Sprite[] portrait;
     public string defaultMonologue;
     public bool disableSpeakWith;
+    public bool inDialogue;
     void Awake() {
         Interaction speak = new Interaction(this, "Look", "Describe", true, false);
         speak.limitless = true;
@@ -66,6 +67,7 @@ public class Speech : Interactive, ISaveable {
                 bubbleCanvas.worldCamera = Camera.main;
             }
         }
+        Toolbox.RegisterMessageCallback<MessageSpeech>(this, HandleSpeech);
     }
     void HandleSpeech(MessageSpeech message) {
         if (message.swearTarget != null) {
@@ -221,6 +223,8 @@ public class Speech : Interactive, ISaveable {
         }
     }
     public void Say(string phrase, string swear = null, EventData data = null, GameObject insult = null, GameObject threat = null) {
+        if (inDialogue)
+            return;
         if (phrase == "")
             return;
         if (hitState >= Controllable.HitState.unconscious)

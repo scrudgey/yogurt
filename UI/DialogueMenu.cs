@@ -125,6 +125,9 @@ public class DialogueMenu : MonoBehaviour {
         Start();
         this.instigator = instigator;
         this.target = target;
+        instigator.inDialogue = true;
+        target.inDialogue = true;
+
         instigatorInv = instigator.GetComponent<Inventory>();
         targetInv = target.GetComponent<Inventory>();
         targetAwareness = target.GetComponent<Awareness>();
@@ -338,6 +341,8 @@ public class DialogueMenu : MonoBehaviour {
         }
     }
     void OnDestroy() {
+        instigator.inDialogue = false;
+        target.inDialogue = false;
         if (targetControl)
             targetControl.disabled = false;
         if (instigatorControl)
