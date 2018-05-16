@@ -436,6 +436,9 @@ public class CutsceneMayor : Cutscene {
         mayorAI.enabled = false;
         // Controller.Instance.suspendInput = true;
 
+        Controllable playerController = GameManager.Instance.playerObject.GetComponent<Controllable>();
+        playerController.SetDirection(Vector2.down);
+
         UINew.Instance.RefreshUI();
     }
     public override void Update() {
@@ -455,15 +458,18 @@ public class CutsceneMayor : Cutscene {
                 Object.Destroy(mayor);
                 // Controller.Instance.suspendInput = false;
                 complete = true;
-                UINew.Instance.RefreshUI(active: true);
+                Controller.Instance.state = Controller.ControlState.normal;
             }
         }
     }
     public override void CleanUp() {
         // Controller.Instance.suspendInput = false;
+        UINew.Instance.RefreshUI(active: true);
     }
     public void MenuWasClosed() {
         walkingAway = true;
+        Controller.Instance.state = Controller.ControlState.cutscene;
+        UINew.Instance.RefreshUI(active: false);
         // Controller.Instance.suspendInput = true;
     }
 }
