@@ -86,15 +86,20 @@ public class Bed : Doorway {
                 Toolbox.Instance.SwitchAudioListener(GameManager.Instance.playerObject);
                 audioSource.PlayOneShot(beddingSound);
                 UINew.Instance.RefreshUI(active:true);
-                if (GameManager.Instance.data.days == 1) {
-                    GameManager.Instance.ShowDiaryEntry("diaryNew");
-                }
-                if (GameManager.Instance.data.deaths >= 1 && GameManager.Instance.data.deathCutscenesPlayed == 0) {
-                    GameManager.Instance.data.deathCutscenesPlayed = 1;
-                    GameManager.Instance.ShowDiaryEntry("death1");
-                }
-                Controller.Instance.state = Controller.ControlState.normal;
+                CheckDiaryEntry();
             }
         }
+    }
+    void CheckDiaryEntry(){
+        if (GameManager.Instance.data.days == 1) {
+            GameManager.Instance.ShowDiaryEntry("diaryNew");
+            return;
+        }
+        if (GameManager.Instance.data.deaths >= 1 && GameManager.Instance.data.deathCutscenesPlayed == 0) {
+            GameManager.Instance.data.deathCutscenesPlayed = 1;
+            GameManager.Instance.ShowDiaryEntry("death1");
+            return;
+        }
+        Controller.Instance.state = Controller.ControlState.normal;
     }
 }
