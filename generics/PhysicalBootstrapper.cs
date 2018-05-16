@@ -274,7 +274,8 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
                 physical.objectBody.velocity = Vector3.zero;
             }
         }
-        previousVelocity = body.velocity;
+        if (body != null)
+            previousVelocity = body.velocity;
     }
     void OnApplicationQuit() {
         isQuitting = true;
