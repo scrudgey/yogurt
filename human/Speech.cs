@@ -273,8 +273,6 @@ public class Speech : Interactive, ISaveable {
             }
             eventData.ratings[Rating.chaos] += extremity * 2f;
             eventData.ratings[Rating.offensive] += extremity * 5f;
-            // eventData.chaos += extremity * 2f;
-            // eventData.offensive += extremity * 5f;
         }
         words = censoredPhrase;
         speakTime = DoubleSeat(phrase.Length, 2f, 50f, 5f, 2f);
