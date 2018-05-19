@@ -84,7 +84,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = true;
+    public bool debug = false;
     void Start() {
         if (data == null) {
             data = InitializedGameData();
@@ -102,7 +102,7 @@ public partial class GameManager : Singleton<GameManager> {
         SceneManager.sceneLoaded += LevelWasLoaded;
         // these bits are for debug!
         if (SceneManager.GetActiveScene().name == "boardroom_cutscene") {
-            CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.boardRoom);
+            CutsceneManager.Instance.InitializeCutscene<CutsceneBoardroom>();
             CutsceneManager.Instance.cutscene.Configure();
         }
     }
@@ -253,20 +253,24 @@ public partial class GameManager : Singleton<GameManager> {
                 }
             }
             if (!data.mayorCutsceneHappened) {
-                CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.mayorTalk);
+                // CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.mayorTalk);
+                CutsceneManager.Instance.InitializeCutscene<CutsceneMayor>();
                 data.mayorCutsceneHappened = true;
                 data.entryID = 0;
             }
             data.firstTimeLeavingHouse = false;
         }
         if (sceneName == "cave1" || sceneName == "cave2") {
-            CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.fall);
+            // CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.fall);
+            CutsceneManager.Instance.InitializeCutscene<CutsceneFall>();
         }
         if (sceneName == "space") {
-            CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.space);
+            // CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.space);
+            CutsceneManager.Instance.InitializeCutscene<CutsceneSpace>();
         }
         if (sceneName == "moon1" && (data.entryID == 420 || data.entryID == 99)) {
-            CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.moonLanding);
+            // CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.moonLanding);
+            CutsceneManager.Instance.InitializeCutscene<CutsceneMoonLanding>();
         }
         if (sceneName == "house" && !data.teleporterUnlocked) {
             GameObject.FindObjectOfType<Teleporter>().gameObject.SetActive(false);
@@ -278,10 +282,12 @@ public partial class GameManager : Singleton<GameManager> {
         UINew.Instance.RefreshUI();
         Toolbox.Instance.SwitchAudioListener(GameObject.Find("Main Camera"));
         if (sceneName == "morning_cutscene") {
-            CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.newDay);
+            // CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.newDay);
+            CutsceneManager.Instance.InitializeCutscene<CutsceneNewDay>();
         }
         if (sceneName == "boardroom_cutscene") {
-            CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.boardRoom);
+            // CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.boardRoom);
+            CutsceneManager.Instance.InitializeCutscene<CutsceneBoardroom>();
         }
     }
     void PlayerEnter() {

@@ -4,6 +4,7 @@ using Easings;
 using UnityEngine.SceneManagement;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using System;
 public abstract class Cutscene {
     public virtual void Update() { }
     public virtual void Configure() { }
@@ -19,7 +20,6 @@ public class CutsceneMoonLanding : Cutscene {
         materials = new Dictionary<Collider2D, PhysicsMaterial2D>();
         Transform spawnPoint = GameObject.Find("cannonEntryPoint").transform;
         GameObject player = GameManager.Instance.playerObject;
-        // Controller.Instance.suspendInput = true;
         configured = true;
         player.transform.localScale = new Vector3(-1f, 1f, 1f);
         player.transform.position = spawnPoint.position;
@@ -59,7 +59,6 @@ public class CutsceneMoonLanding : Cutscene {
         }
     }
     public override void CleanUp() {
-        // Controller.Instance.suspendInput = false;
         UINew.Instance.RefreshUI(active: true);
         Controllable playerControllable = GameManager.Instance.playerObject.GetComponent<Controllable>();
         if (playerControllable != null) {
@@ -91,7 +90,6 @@ public class CutsceneSpace : Cutscene {
     private float timer;
     public override void Configure() {
         GameObject player = GameManager.Instance.playerObject;
-        // Controller.Instance.suspendInput = true;
         configured = true;
         player.transform.localScale = new Vector3(-1f, 1f, 1f);
         player.transform.RotateAround(player.transform.position, new Vector3(0f, 0f, 1f), 90f);
@@ -111,9 +109,6 @@ public class CutsceneSpace : Cutscene {
             GameManager.Instance.data.entryID = 420;
         }
     }
-    public override void CleanUp() {
-        // Controller.Instance.suspendInput = false;
-    }
 }
 public class CutsceneCannon : Cutscene {
     public Cannon cannon;
@@ -128,7 +123,6 @@ public class CutsceneCannon : Cutscene {
         GameManager.Instance.playerObject.SetActive(false);
         camControl = GameObject.FindObjectOfType<CameraControl>();
         camControl.focus = cannon.gameObject;
-        // Controller.Instance.suspendInput = true;
         configured = true;
     }
     public override void Update() {
@@ -178,9 +172,6 @@ public class CutsceneCannon : Cutscene {
             SceneManager.LoadScene("space");
         }
     }
-    public override void CleanUp() {
-        // Controller.Instance.suspendInput = false;
-    }
 }
 public class CutscenePickleBottom : Cutscene {
     CameraControl camControl;
@@ -198,7 +189,6 @@ public class CutscenePickleBottom : Cutscene {
         doorway.Enter(peter);
         camControl = GameObject.FindObjectOfType<CameraControl>();
         camControl.focus = peter;
-        // Controller.Instance.suspendInput = true;
         UINew.Instance.RefreshUI();
         nightShade = GameObject.Instantiate(Resources.Load("UI/nightShade")) as GameObject;
         nightShade.GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
@@ -224,7 +214,6 @@ public class CutscenePickleBottom : Cutscene {
         }
     }
     public override void CleanUp() {
-        // Controller.Instance.suspendInput = false;
         camControl.focus = GameManager.Instance.playerObject;
         UINew.Instance.RefreshUI(active: true);
         GameObject.Destroy(nightShade);
@@ -366,7 +355,6 @@ public class CutsceneFall : Cutscene {
     Hurtable playerHurtable;
     float initDrag;
     public override void Configure() {
-        // Debug.Log("configuring");
         player = GameManager.Instance.playerObject;
         playerAnimation = player.GetComponent<AdvancedAnimation>();
         playerCollider = player.GetComponent<Collider2D>();
@@ -387,7 +375,6 @@ public class CutsceneFall : Cutscene {
             initDrag = playerBody.drag;
             playerBody.drag = 0;
         }
-        // Controller.Instance.suspendInput = true;
         UINew.Instance.RefreshUI();
         configured = true;
     }
@@ -409,10 +396,7 @@ public class CutsceneFall : Cutscene {
                 playerHurtable.KnockDown();
                 playerHurtable.downedTimer = 3f;
             }
-            // Controller.Instance.suspendInput = false;
             UINew.Instance.RefreshUI(active: true);
-            // MessageSpeech message = new MessageSpeech("that hurt!");
-            // Toolbox.Instance.SendMessage(player, CutsceneManager.Instance, message);
             complete = true;
         }
     }
@@ -432,13 +416,9 @@ public class CutsceneMayor : Cutscene {
         mayorControl = mayor.GetComponent<Humanoid>();
         mayorAI = mayor.GetComponent<DecisionMaker>();
         mayorSpeech = mayor.GetComponent<Speech>();
-
         mayorAI.enabled = false;
-        // Controller.Instance.suspendInput = true;
-
         Controllable playerController = GameManager.Instance.playerObject.GetComponent<Controllable>();
         playerController.SetDirection(Vector2.down);
-
         UINew.Instance.RefreshUI();
     }
     public override void Update() {
@@ -455,22 +435,19 @@ public class CutsceneMayor : Cutscene {
         if (walkingAway) {
             mayorControl.leftFlag = true;
             if (mayor.transform.position.x < spawnPoint.transform.position.x) {
-                Object.Destroy(mayor);
-                // Controller.Instance.suspendInput = false;
+                UnityEngine.Object.Destroy(mayor);
                 complete = true;
                 Controller.Instance.state = Controller.ControlState.normal;
             }
         }
     }
     public override void CleanUp() {
-        // Controller.Instance.suspendInput = false;
         UINew.Instance.RefreshUI(active: true);
     }
     public void MenuWasClosed() {
         walkingAway = true;
         Controller.Instance.state = Controller.ControlState.cutscene;
         UINew.Instance.RefreshUI(active: false);
-        // Controller.Instance.suspendInput = true;
     }
 }
 public class CutsceneNewDay : Cutscene {
@@ -514,46 +491,18 @@ public class CutsceneNewDay : Cutscene {
 }
 
 public class CutsceneManager : Singleton<CutsceneManager> {
-    public enum CutsceneType { newDay, mayorTalk, boardRoom, fall, pickelbottom, cannon, space, moonLanding }
+    public List<Type> lateConfigure = new List<Type>(){
+        typeof(CutsceneNewDay), 
+        typeof(CutsceneBoardroom),
+        typeof(CutsceneFall)};
     public Cutscene cutscene;
     void Start() {
         SceneManager.sceneLoaded += LevelWasLoaded;
     }
-    public void InitializeCutscene(CutsceneType scene) {
-        switch (scene) {
-            case CutsceneType.newDay:
-                cutscene = new CutsceneNewDay();
-                break;
-            case CutsceneType.mayorTalk:
-                cutscene = new CutsceneMayor();
-                cutscene.Configure();
-                break;
-            case CutsceneType.boardRoom:
-                cutscene = new CutsceneBoardroom();
-                break;
-            case CutsceneType.fall:
-                cutscene = new CutsceneFall();
-                cutscene.Configure();
-                break;
-            case CutsceneType.pickelbottom:
-                cutscene = new CutscenePickleBottom();
-                cutscene.Configure();
-                break;
-            case CutsceneType.cannon:
-                cutscene = new CutsceneCannon();
-                cutscene.Configure();
-                break;
-            case CutsceneType.space:
-                cutscene = new CutsceneSpace();
-                cutscene.Configure();
-                break;
-            case CutsceneType.moonLanding:
-                cutscene = new CutsceneMoonLanding();
-                cutscene.Configure();
-                break;
-            default:
-                break;
-        }
+    public void InitializeCutscene<T>() where T: Cutscene, new() {
+        cutscene = new T();
+        if (!lateConfigure.Contains(typeof(T)))
+            cutscene.Configure();
         Controller.Instance.state = Controller.ControlState.cutscene;
     }
     public void LevelWasLoaded(Scene scene, LoadSceneMode mode) {
@@ -565,14 +514,10 @@ public class CutsceneManager : Singleton<CutsceneManager> {
             return;
         }
         if (cutscene.configured == false) {
-            if (cutscene is CutsceneNewDay || cutscene is CutsceneBoardroom || cutscene is CutsceneFall) {
+            if (lateConfigure.Contains(cutscene.GetType())){
                 cutscene.Configure();
             }
         }
-        // else if (cutscene is CutsceneNewDay || cutscene is CutsceneBoardroom || cutscene is CutsceneFall) {
-        //     cutscene.CleanUp();
-        //     cutscene = null;
-        // }
     }
     void Update() {
         if (cutscene == null) {

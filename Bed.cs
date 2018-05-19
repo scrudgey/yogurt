@@ -59,7 +59,7 @@ public class Bed : Doorway {
                 collectible++;
         }
         if (collectible > 1 && GameManager.Instance.data.days > 1)
-            CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.pickelbottom);
+            CutsceneManager.Instance.InitializeCutscene<CutscenePickleBottom>();
     }
     void Update() {
         if (sleeping) {
@@ -76,7 +76,7 @@ public class Bed : Doorway {
                     audioSource.PlayOneShot(snoreSound);
                 }
             }
-            if (Input.anyKey && Controller.Instance.state == Controller.ControlState.cutscene && GameObject.Find("NewDayReport(Clone)") == null) {
+            if (Input.anyKey && Controller.Instance.state != Controller.ControlState.inMenu) {
                 sleeping = false;
                 unmade = true;
                 spriteRenderer.sprite = bedSprites[1];

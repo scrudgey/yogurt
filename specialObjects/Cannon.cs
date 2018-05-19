@@ -15,6 +15,6 @@ public class Cannon : Interactive {
     }
     public void StartCannon() {
         MySaver.Save();
-        CutsceneManager.Instance.InitializeCutscene(CutsceneManager.CutsceneType.cannon);
+        CutsceneManager.Instance.InitializeCutscene<CutsceneCannon>();
     }
 }

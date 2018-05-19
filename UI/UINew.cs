@@ -156,7 +156,7 @@ public class UINew : Singleton<UINew> {
                     break;
             }
         } else {
-            if (Controller.selectionStates.Contains(Controller.Instance.state)){
+            if (Controller.selectionStates.Contains(Controller.Instance.state)) {
                 SetActionText("");
             }
         }
