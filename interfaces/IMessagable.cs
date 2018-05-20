@@ -35,7 +35,6 @@ public class MessageHead : Message {
 }
 public class MessageSpeech : Message {
     public string phrase;
-    public string swear = "";
     public bool randomSwear;
     public bool randomSpeech;
     public bool sayLine;
@@ -43,9 +42,8 @@ public class MessageSpeech : Message {
     public bool nimrodKey;
     public EventData eventData;
     public MessageSpeech() { }
-    public MessageSpeech(string phrase, string swear = null, EventData eventData = null) {
+    public MessageSpeech(string phrase, EventData eventData = null) {
         this.phrase = phrase;
-        this.swear = swear;
         this.eventData = eventData;
     }
 }
@@ -75,10 +73,9 @@ public class MessageInventoryChanged : Message {
 public class MessagePunch : Message {
 }
 public class MessageInsult : Message {
-    public bool respondOutLoud = true;
 }
 public class MessageThreaten : Message {
-    public bool respondOutLoud = true;
+
 }
 public class MessageOccurrence : Message {
     public OccurrenceData data;
