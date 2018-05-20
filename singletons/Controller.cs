@@ -231,7 +231,7 @@ public class Controller : Singleton<Controller> {
                     GameObject target = Controller.Instance.GetBaseInteractive(top.transform);
                     Speech speech = focus.GetComponent<Speech>();
                     if (speech) {
-                        speech.Insult(target);
+                        speech.InsultMonologue(target);
                     }
                     UINew.Instance.SetActionText("");
                 }

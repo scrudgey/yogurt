@@ -217,7 +217,7 @@ public class DialogueMenu : MonoBehaviour {
                 UINew.Instance.CloseActiveMenu();
                 break;
             case "insult":
-                Say(instigator.Insult(target.gameObject, say: false));
+                Say(instigator.InsultMonologue(target.gameObject, say: false));
                 MessageInsult insult = new MessageInsult();
                 Toolbox.Instance.SendMessage(target.gameObject, instigator, insult);
                 Say(target.Riposte(say: false));
@@ -227,7 +227,7 @@ public class DialogueMenu : MonoBehaviour {
                 }
                 break;
             case "threat":
-                Say(instigator.Threaten(target.gameObject, say: false));
+                Say(instigator.ThreatMonologue(target.gameObject, say: false));
                 MessageThreaten threat = new MessageThreaten();
                 Toolbox.Instance.SendMessage(target.gameObject, instigator, threat);
                 Say(target.RespondToThreat(say: false));

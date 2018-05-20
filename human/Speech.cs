@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine.UI;
 using System.Text;
+using System.Text.RegularExpressions;
 using Nimrod;
 
 public class Speech : Interactive, ISaveable {
+    private string[] swearWords = new string[]{"shit", "fuck", "shazbot", "piss"};
     private string words;
     public bool speaking = false;
     public string[] randomPhrases;
@@ -17,7 +19,7 @@ public class Speech : Interactive, ISaveable {
     private Text bubbleText;
     private float speakSpeed;
     private char[] chars;
-    private int[] swearMask;
+    private bool[] swearMask;
     public bool vomiting;
     public AudioClip speakSound;
     public AudioClip bleepSound;
@@ -87,7 +89,7 @@ public class Speech : Interactive, ISaveable {
             return;
         }
         if (message.swear != "") {
-            Say(message.phrase, swear: message.swear, data: message.eventData);
+            Say(message.phrase, data: message.eventData);
         } else {
             Say(message.phrase, data: message.eventData);
         }
@@ -183,12 +185,12 @@ public class Speech : Interactive, ISaveable {
                 flipper.transform.localScale = tempscale;
             }
             if (charIndex < swearMask.Length) {
-                if (swearMask[(int)charIndex] == 0) {
-                    if (audioSource.clip != speakSound)
-                        audioSource.clip = speakSound;
-                } else {
+                if (swearMask[(int)charIndex]) {
                     if (audioSource.clip != bleepSound)
                         audioSource.clip = bleepSound;
+                } else {
+                    if (audioSource.clip != speakSound)
+                        audioSource.clip = speakSound;
                 }
                 if (!audioSource.isPlaying && !vomiting) {
                     audioSource.Play();
@@ -222,15 +224,15 @@ public class Speech : Interactive, ISaveable {
             Say(toSay);
         }
     }
-    public void Say(string phrase, string swear = null, EventData data = null, GameObject insult = null, GameObject threat = null) {
+    public OccurrenceSpeech Say(string phrase, EventData data = null) {
         if (inDialogue)
-            return;
+            return null;
         if (phrase == "")
-            return;
+            return null;
         if (hitState >= Controllable.HitState.unconscious)
-            return;
+            return null;
         if (speaking && phrase == words) {
-            return;
+            return null;
         }
         OccurrenceSpeech speechData = new OccurrenceSpeech();
         speechData.speaker = gameObject;
@@ -239,48 +241,58 @@ public class Speech : Interactive, ISaveable {
             eventData = data;
         }
         speechData.events.Add(eventData);
-        if (threat != null) {
-            speechData.threat = true;
-            speechData.target = threat;
-            eventData.noun = "threats";
+        string censoredPhrase = CensorSwears(phrase);
+        int extremity = Toolbox.LevenshteinDistance(phrase, censoredPhrase);
+        swearMask = new bool[phrase.Length];
+        for (int i = 0; i < phrase.Length; i++){
+            swearMask[i] = phrase[i] != censoredPhrase[i];
         }
-        if (insult != null) {
-            speechData.insult = true;
-            speechData.target = insult;
-            eventData.noun = "insults";
-        }
-        string censoredPhrase = phrase;
-        if (swear != null) {
-            eventData.noun = "profanity";
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < swear.Length; i++) {
-                builder.Append("∎");
-            }
-            censoredPhrase = censoredPhrase.Replace(swear, builder.ToString());
-        }
-        chars = phrase.ToCharArray();
-        swearMask = new int[chars.Length];
-        if (swear != null) {
-            int index = phrase.IndexOf(swear);
-            if (index != -1) {
-                for (int i = index; i < index + swear.Length - 1; i++) {
-                    swearMask[i] = 1;
-                }
-            }
-            float extremity = 0f;
-            foreach (int mask in swearMask) {
-                extremity += mask;
-            }
-            eventData.ratings[Rating.chaos] += extremity * 2f;
-            eventData.ratings[Rating.offensive] += extremity * 5f;
-        }
-        words = censoredPhrase;
+        phrase = censoredPhrase;
+        eventData.ratings[Rating.chaos] += extremity * 2f;
+        eventData.ratings[Rating.offensive] += extremity * 5f;
+        words = phrase;
         speakTime = DoubleSeat(phrase.Length, 2f, 50f, 5f, 2f);
         speakTimeTotal = speakTime;
         speakSpeed = phrase.Length / speakTime;
-
         speechData.line = words;
         Toolbox.Instance.OccurenceFlag(gameObject, speechData);
+        return speechData;
+    }
+    public string CensorSwears(string phrase){
+        string censoredPhrase = phrase;
+        foreach(string swear in swearWords){
+            StringBuilder builder = new StringBuilder();
+            foreach(char _ in swear) {
+                builder.Append("∎");
+            }
+            string mask = builder.ToString();
+            censoredPhrase = Regex.Replace(censoredPhrase, swear, mask);
+        }
+        return censoredPhrase;
+    }
+    public void Insult(string phrase, GameObject target, EventData data = null){
+        if (data == null) {
+            data = new EventData();
+        }
+        data.noun = "insults";
+        OccurrenceSpeech speechData = Say(phrase, data: data);
+        if (speechData == null)
+            return;
+        speechData.insult = true;
+        speechData.target = target;
+        speechData.CalculateDescriptions();
+    }
+    public void Threaten(string phrase, GameObject target, EventData data = null){
+        if (data == null) {
+            data = new EventData();
+        }
+        data.noun = "threats";
+        OccurrenceSpeech speechData = Say(phrase, data: data);
+        if (speechData == null)
+            return;
+        speechData.threat = true;
+        speechData.target = target;
+        speechData.CalculateDescriptions();
     }
     void ReactToOccurrence(EventData od) {
         if (od.ratings[Rating.disgusting] > 1)
@@ -325,14 +337,15 @@ public class Speech : Interactive, ISaveable {
     // TODO: this function will change to incorporate Nimrod and flavor
     public void Swear(GameObject target = null) {
         if (!target) {
-            Say("shazbot!", "shazbot");
+            Say("shazbot!");
             return;
         }
         GameObject mainTarget = Controller.Instance.GetBaseInteractive(target.transform);
         string targetname = Toolbox.Instance.GetName(mainTarget);
-        Say("that shazbotting " + targetname + "!", "shazbotting", insult: target);
+        // Say("that shazbotting " + targetname + "!", "shazbotting", insult: target);
+        Insult("that shazbotting " + targetname + "!", target);
     }
-    public Monologue Insult(GameObject target, bool say = true) {
+    public Monologue InsultMonologue(GameObject target, bool say = true) {
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
         string content = Insults.ComposeInsult(target);
@@ -342,13 +355,14 @@ public class Speech : Interactive, ISaveable {
 
         EventData data = new EventData(chaos: 2, disturbing: 1, positive: -2, offensive: Random.Range(2, 3));
         if (say)
-            Say(content, data: data, insult: target);
+            Insult(content, target, data: data);
+            // Say(content, data: data, insult: target);
 
         List<string> strings = new List<string>() { content };
         Monologue mono = new Monologue(this, strings.ToArray());
         return mono;
     }
-    public Monologue Threaten(GameObject target, bool say = true) {
+    public Monologue ThreatMonologue(GameObject target, bool say = true) {
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
 
@@ -359,7 +373,8 @@ public class Speech : Interactive, ISaveable {
 
         EventData data = new EventData(chaos: 2, disturbing: 1, positive: -2, offensive: Random.Range(2, 3));
         if (say)
-            Say(content, data: data, threat: target);
+            Threaten(content, target, data: data);
+            // Say(content, data: data, threat: target);
 
         List<string> strings = new List<string>() { content };
         Monologue mono = new Monologue(this, strings.ToArray());
