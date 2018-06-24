@@ -30,7 +30,6 @@ public class UINew : Singleton<UINew> {
         public ActionButtonScript buttonScript;
         public Text buttonText;
     }
-    public string MOTD = "smoke weed every day";
     public GameObject UICanvas;
     private List<GameObject> activeElements = new List<GameObject>();
     private List<GameObject> bottomElements = new List<GameObject>();

@@ -32,7 +32,6 @@ public class Controller : Singleton<Controller> {
     public static List<ControlState> selectionStates = new List<ControlState>(){Controller.ControlState.swearSelect,
                                                                                 Controller.ControlState.insultSelect,
                                                                                 Controller.ControlState.hypnosisSelect};
-    public string message = "smoke weed every day";
     private ControlState _state;
     public ControlState state {
         get { return _state; }

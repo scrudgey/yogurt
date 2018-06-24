@@ -65,7 +65,6 @@ public partial class GameManager : Singleton<GameManager> {
     };
     public GameData data;
     public string saveGameName = "test";
-    public string message = "smoke weed every day";
     private CameraControl cameraControl;
     public Camera cam;
     public GameObject playerObject;
