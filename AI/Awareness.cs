@@ -261,48 +261,49 @@ public class Awareness : MonoBehaviour, ISaveable {
             return;
         foreach (OccurrenceData od in occurrence.data) {
             Toolbox.Instance.SendMessage(gameObject, this, new MessageOccurrence(od));
-            if (od is OccurrenceViolence) {
-                OccurrenceViolence dat = (OccurrenceViolence)od;
-                if (dat.victim == null || dat.attacker == null)
-                    continue;
-                GameObject victimObject = Controller.Instance.GetBaseInteractive(dat.victim.transform);
-                GameObject attackerObject = Controller.Instance.GetBaseInteractive(dat.attacker.transform);
-                PersonalAssessment attacker = FormPersonalAssessment(attackerObject);
-                PersonalAssessment victim = FormPersonalAssessment(victimObject);
-                if (possession != null && possession == victimObject) {
-                    Debug.Log(dat.attacker.name + " attacked my possession!");
-                    if (attacker != null) {
-                        attacker.status = PersonalAssessment.friendStatus.enemy;
-                    }
-                }
-                if (attacker == null || victim == null) {
-                    continue;
-                }
-                if (gameObject == attacker.knowledge.obj || gameObject == victim.knowledge.obj)
-                    continue;
-                switch (attacker.status) {
-                    case PersonalAssessment.friendStatus.friend:
-                        victim.status = PersonalAssessment.friendStatus.enemy;
-                        // Debug.Log(name + " friend attacked friend");
-                        break;
-                    case PersonalAssessment.friendStatus.neutral:
-                        if (victim.status == PersonalAssessment.friendStatus.friend) {
-                            attacker.status = PersonalAssessment.friendStatus.enemy;
-                            // Debug.Log(name + " neutral attacked friend");
-                        }
-                        if (victim.status == PersonalAssessment.friendStatus.neutral) {
-                            attacker.status = PersonalAssessment.friendStatus.enemy;
-                            // Debug.Log(name + " neutral attacked neutral");
-                        }
-                        if (victim.status == PersonalAssessment.friendStatus.enemy) {
-                            attacker.status = PersonalAssessment.friendStatus.friend;
-                            // Debug.Log(name + " neutral attacked enemy");
-                        }
-                        break;
-                    default:
-                        break;
-                }
+            if (od is OccurrenceViolence) 
+                WitnessViolence((OccurrenceViolence)od);
+        }
+    }
+    void WitnessViolence(OccurrenceViolence dat) {
+        if (dat.victim == null || dat.attacker == null)
+            return;
+        GameObject victimObject = Controller.Instance.GetBaseInteractive(dat.victim.transform);
+        GameObject attackerObject = Controller.Instance.GetBaseInteractive(dat.attacker.transform);
+        PersonalAssessment attacker = FormPersonalAssessment(attackerObject);
+        PersonalAssessment victim = FormPersonalAssessment(victimObject);
+        if (possession != null && possession == victimObject) {
+            Debug.Log(dat.attacker.name + " attacked my possession!");
+            if (attacker != null) {
+                attacker.status = PersonalAssessment.friendStatus.enemy;
             }
+        }
+        if (attacker == null || victim == null) {
+            return;
+        }
+        if (gameObject == attacker.knowledge.obj || gameObject == victim.knowledge.obj)
+            return;
+        switch (attacker.status) {
+            case PersonalAssessment.friendStatus.friend:
+                victim.status = PersonalAssessment.friendStatus.enemy;
+                // Debug.Log(name + " friend attacked friend");
+                break;
+            case PersonalAssessment.friendStatus.neutral:
+                if (victim.status == PersonalAssessment.friendStatus.friend) {
+                    attacker.status = PersonalAssessment.friendStatus.enemy;
+                    // Debug.Log(name + " neutral attacked friend");
+                }
+                if (victim.status == PersonalAssessment.friendStatus.neutral) {
+                    attacker.status = PersonalAssessment.friendStatus.enemy;
+                    // Debug.Log(name + " neutral attacked neutral");
+                }
+                if (victim.status == PersonalAssessment.friendStatus.enemy) {
+                    attacker.status = PersonalAssessment.friendStatus.friend;
+                    // Debug.Log(name + " neutral attacked enemy");
+                }
+                break;
+            default:
+                break;
         }
     }
     // process the list of objects in the field of view.
