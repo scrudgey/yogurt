@@ -67,7 +67,6 @@ public class HeadAnimation : MonoBehaviour, IDirectable, ISaveable {
                 eating = message.value;
                 var mainModule = crumbs.main;
                 mainModule.startColor = crumbColor;
-
                 if (eating) {
                     eatingCountDown = 2f;
                     if (!crumbs.isPlaying)
@@ -85,11 +84,9 @@ public class HeadAnimation : MonoBehaviour, IDirectable, ISaveable {
                     vomit.Stop();
                 }
                 break;
-
             case MessageHead.HeadType.speaking:
                 speaking = message.value;
                 break;
-
             default:
                 break;
         }
