@@ -320,6 +320,7 @@ public class Hurtable : Damageable, ISaveable {
         data.floats["downed_timer"] = downedTimer;
         data.ints["hitstate"] = (int)hitState;
         data.floats["oxygen"] = oxygen;
+        data.floats["hitstuncounter"] = hitStunCounter;
     }
     public void LoadData(PersistentComponent data) {
         health = data.floats["health"];
@@ -329,5 +330,6 @@ public class Hurtable : Damageable, ISaveable {
         downedTimer = data.floats["downed_timer"];
         hitState = (Controllable.HitState)data.ints["hitstate"];
         oxygen = data.floats["oxygen"];
+        hitStunCounter = data.floats["hitstuncounter"];
     }
 }
