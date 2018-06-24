@@ -153,8 +153,12 @@ public class DialogueMenu : MonoBehaviour {
             choice3Object.SetActive(false);
             return;
         }
-        if (target.defaultMonologue != "") {
-            LoadDialogueTree(target.defaultMonologue);
+        if (target.hitState <= Controllable.HitState.stun){
+            if (target.defaultMonologue != "") {
+                LoadDialogueTree(target.defaultMonologue);
+            }
+        } else {
+            LoadDialogueTree("target_unresponsive");
         }
     }
     public void LoadDialogueTree(string filename) {
