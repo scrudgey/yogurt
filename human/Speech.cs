@@ -70,6 +70,11 @@ public class Speech : Interactive, ISaveable {
             }
         }
         Toolbox.RegisterMessageCallback<MessageSpeech>(this, HandleSpeech);
+        Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
+        Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
+        Toolbox.RegisterMessageCallback<MessageAnimation>(this, HandleAnimation);
+        Toolbox.RegisterMessageCallback<MessageOccurrence>(this, HandleOccurrence);
+        Toolbox.RegisterMessageCallback<MessageHead>(this, HandleHead);
     }
     void HandleSpeech(MessageSpeech message) {
         if (message.swearTarget != null) {
@@ -89,11 +94,6 @@ public class Speech : Interactive, ISaveable {
             return;
         }
         Say(message.phrase, data: message.eventData);
-        Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
-        Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
-        Toolbox.RegisterMessageCallback<MessageAnimation>(this, HandleAnimation);
-        Toolbox.RegisterMessageCallback<MessageOccurrence>(this, HandleOccurrence);
-        Toolbox.RegisterMessageCallback<MessageHead>(this, HandleHead);
     }
     void HandleHitStun(MessageHitstun message) {
         hitState = message.hitState;
@@ -221,8 +221,6 @@ public class Speech : Interactive, ISaveable {
         }
     }
     public OccurrenceSpeech Say(string phrase, EventData data = null) {
-        if (inDialogue)
-            return null;
         if (phrase == "")
             return null;
         if (hitState >= Controllable.HitState.unconscious)
@@ -243,15 +241,17 @@ public class Speech : Interactive, ISaveable {
         for (int i = 0; i < phrase.Length; i++){
             swearMask[i] = phrase[i] != censoredPhrase[i];
         }
-        // phrase = censoredPhrase;
         eventData.ratings[Rating.chaos] += extremity * 2f;
         eventData.ratings[Rating.offensive] += extremity * 5f;
+        
+        speechData.line = censoredPhrase;
+        Toolbox.Instance.OccurenceFlag(gameObject, speechData);
+        if (inDialogue)
+            return null;
         words = censoredPhrase;
         speakTime = DoubleSeat(phrase.Length, 2f, 50f, 5f, 2f);
         speakTimeTotal = speakTime;
         speakSpeed = phrase.Length / speakTime;
-        speechData.line = censoredPhrase;
-        Toolbox.Instance.OccurenceFlag(gameObject, speechData);
         return speechData;
     }
     public string CensorSwears(string phrase){
@@ -400,11 +400,11 @@ public class Speech : Interactive, ISaveable {
         Say(grammar.Parse("{" + key + "}"));
     }
     public void SaveData(PersistentComponent data) {
-        data.bools["speaking"] = speaking;
+        // data.bools["speaking"] = speaking;
         data.ints["hitstate"] = (int)hitState;
     }
     public void LoadData(PersistentComponent data) {
-        speaking = data.bools["speaking"];
+        // speaking = data.bools["speaking"];
         hitState = (Controllable.HitState)data.ints["hitstate"];
     }
 }
