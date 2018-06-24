@@ -1,11 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-// using System.Collections;
 
 public class ItemEntryScript : MonoBehaviour {
-
     public string itemName;
-    // public string displayName;
     private bool _enableItem;
     public bool enableItem {
         get {
@@ -23,12 +20,10 @@ public class ItemEntryScript : MonoBehaviour {
         ClosetButtonHandler handler = GetComponentInParent<ClosetButtonHandler>();
         handler.ItemClick(this);
     }
-
     public void MouseOver() {
         ClosetButtonHandler handler = GetComponentInParent<ClosetButtonHandler>();
         handler.ItemMouseover(this);
     }
-
     private void CheckGrey() {
         Text myText = transform.Find("item").GetComponent<Text>();
         if (enableItem) {
@@ -42,7 +37,6 @@ public class ItemEntryScript : MonoBehaviour {
         ItemEntryScript entryScript = transform.Find("item").GetComponent<ItemEntryScript>();
         Text entryText = transform.Find("item").GetComponent<Text>();
         newText.text = "";
-        itemName = name;
         enableItem = !GameManager.Instance.data.itemCheckedOut[name];
         if (type == HomeCloset.ClosetType.all || type == HomeCloset.ClosetType.items) {
             if (GameManager.Instance.data.newCollectedItems.Contains(name)) {
@@ -68,10 +62,10 @@ public class ItemEntryScript : MonoBehaviour {
                 }
             }
         }
-
-        GameObject tempObject = Instantiate(Resources.Load("prefabs/" + itemName)) as GameObject;
+        GameObject tempObject = Instantiate(Resources.Load("prefabs/" + name)) as GameObject;
         Item tempItem = tempObject.GetComponent<Item>();
         sprite = tempObject.GetComponent<SpriteRenderer>().sprite;
+        itemName = tempItem.itemName;
         if (tempItem.longDescription != "") {
             description = tempItem.longDescription;
         } else {
