@@ -77,7 +77,8 @@ public class ActionButtonScript : MonoBehaviour {
                 break;
 
             case buttonType.Punch:
-                Controller.Instance.focus.shootPressedFlag = true;
+                // Controller.Instance.focus.shootPressedFlag = true;
+                Controller.Instance.focus.ShootPressed();
                 break;
 
             default:

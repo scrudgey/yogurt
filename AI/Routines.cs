@@ -338,7 +338,8 @@ namespace AI {
         protected override status DoUpdate() {
             if (target.val != null) {
                 control.SetDirection(Vector2.ClampMagnitude(target.val.transform.position - gameObject.transform.position, 1f));
-                control.shootHeldFlag = true;
+                // control.shootHeldFlag = true;
+                control.ShootHeld();
                 return status.neutral;
             } else {
                 return status.failure;
@@ -475,7 +476,8 @@ namespace AI {
                 control.SetDirection(Vector2.ClampMagnitude(target.val.transform.position - gameObject.transform.position, 1f));
                 if (timer > 0.5) {
                     timer = 0f;
-                    control.shootPressedFlag = true;
+                    // control.shootPressedFlag = true;
+                    control.ShootPressed();
                 } else {
                     control.ResetInput();
                 }

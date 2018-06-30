@@ -25,7 +25,6 @@ public class Controllable : MonoBehaviour {
     private bool _downFlag;
     private bool _leftFlag;
     private bool _rightFlag;
-    private bool _shootPressedFlag;
     public bool upFlag {
         get { if (disabled) return false; else return _upFlag; }
         set { _upFlag = value; }
@@ -42,12 +41,6 @@ public class Controllable : MonoBehaviour {
         get { if (disabled) return false; else return _rightFlag; }
         set { _rightFlag = value; }
     }
-    public bool shootPressedFlag {
-        get { if (disabled) return false; else return _shootPressedFlag; }
-        set { _shootPressedFlag = value; }
-    }
-    private bool shootPressedDone;
-    public bool shootHeldFlag;
     public string lastPressed = "right";
     private Vector2 _direction = Vector2.right;
     public Vector2 direction {
@@ -62,7 +55,6 @@ public class Controllable : MonoBehaviour {
     }
     public float directionAngle = 0;
     public List<IDirectable> directables = new List<IDirectable>();
-    public Interaction defaultInteraction;
     public bool fightMode;
     public bool disabled = false;
     public HitState hitState;
@@ -75,8 +67,6 @@ public class Controllable : MonoBehaviour {
         downFlag = false;
         leftFlag = false;
         rightFlag = false;
-        shootPressedFlag = false;
-        shootHeldFlag = false;
     }
     public virtual void Awake() {
         // TODO: more sophisticated AI detecting here: there will be a whole class
@@ -145,15 +135,6 @@ public class Controllable : MonoBehaviour {
             SetDirection(rigidBody2D.velocity.normalized);
             directionAngle = Toolbox.Instance.ProperAngle(direction.x, direction.y);
         }
-        if (!shootPressedFlag && shootPressedDone)
-            shootPressedDone = false;
-        if (shootPressedFlag) {
-            ShootPressed();
-            shootPressedDone = true;
-        }
-        if (shootHeldFlag) {
-            ShootHeld();
-        }
     }
     public virtual void SetDirection(Vector2 d) {
         d = d.normalized;
@@ -164,14 +145,9 @@ public class Controllable : MonoBehaviour {
     public void ShootPressed() {
         if (fightMode)
             Toolbox.Instance.SendMessage(gameObject, this, new MessagePunch());
-        if (defaultInteraction != null)
-            defaultInteraction.DoAction();
     }
     public void ShootHeld() {
-        if (defaultInteraction != null) {
-            if (defaultInteraction.continuous)
-                defaultInteraction.DoAction();
-        }
+
     }
     public virtual void ToggleFightMode() {
         fightMode = !fightMode;

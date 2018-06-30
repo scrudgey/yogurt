@@ -45,6 +45,7 @@ public class Controller : Singleton<Controller> {
     public bool doCommand;
     public Interaction commandAct = null;
     public ActionButtonScript.buttonType commandButtonType = ActionButtonScript.buttonType.none;
+    public Interaction defaultInteraction;
     void ChangeState(ControlState previousState) {
         // TODO: code for transitioning between states
         if (focus) {
@@ -97,10 +98,18 @@ public class Controller : Singleton<Controller> {
                 focus.rightFlag = true;
             //Fire key 
             if (Input.GetButtonDown("Fire1")) {
-                focus.shootPressedFlag = true;
+                if (defaultInteraction != null){
+                    defaultInteraction.DoAction();
+                } else {    
+                    focus.ShootPressed();
+                }
             }
             if (Input.GetButton("Fire1")) {
-                focus.shootHeldFlag = true;
+                if (defaultInteraction != null && defaultInteraction.continuous) {
+                    defaultInteraction.DoAction();
+                } else {
+                    focus.ShootHeld();
+                }
             }
         }
     }
@@ -347,7 +356,7 @@ public class Controller : Singleton<Controller> {
                     UINew.Instance.UpdateInventoryButton(inventory);
                     break;
                 case ActionButtonScript.buttonType.Punch:
-                    controllable.shootPressedFlag = true;
+                    controllable.ShootPressed();
                     break;
                 default:
                     break;
