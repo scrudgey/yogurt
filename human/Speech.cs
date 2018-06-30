@@ -338,7 +338,6 @@ public class Speech : Interactive, ISaveable {
         }
         GameObject mainTarget = Controller.Instance.GetBaseInteractive(target.transform);
         string targetname = Toolbox.Instance.GetName(mainTarget);
-        // Say("that shazbotting " + targetname + "!", "shazbotting", insult: target);
         Insult("that shazbotting " + targetname + "!", target);
     }
     public Monologue InsultMonologue(GameObject target) {
