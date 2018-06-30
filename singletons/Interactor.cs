@@ -16,7 +16,7 @@ public class Interactor {
                 actionDictionary.Add(inter);
         return actionDictionary;
     }
-    static public Interaction GetDefaultAction(List<Interaction> actionList) {
+    static public Interaction GetDefaultAction(HashSet<Interaction> actionList) {
         int highestP = 0;
         Interaction returnInteraction = null;
         foreach (Interaction action in actionList) {
@@ -37,13 +37,19 @@ public class Interactor {
         }
         return returnDictionary;
     }
-    static public List<Interaction> ReportManualActions(GameObject targ, GameObject source) {
-        List<Interaction> returnDictionary = new List<Interaction>();
+    static public HashSet<Interaction> ReportManualActions(GameObject targ, GameObject source) {
+        HashSet<Interaction> returnDictionary = new HashSet<Interaction>();
         List<Interactive> interactives = GetInteractorTree(source);
         List<Interactive> targetInteractives = GetInteractorTree(targ);
         foreach (Interactive interactive in interactives)
             interactive.targetUpdate(targetInteractives, targ, source);
         foreach (Interactive interactive in interactives) {
+            List<Interaction> actions = interactive.GetManualActions();
+            foreach (Interaction action in actions) {
+                returnDictionary.Add(action);
+            }
+        }
+        foreach (Interactive interactive in targetInteractives){
             List<Interaction> actions = interactive.GetManualActions();
             foreach (Interaction action in actions) {
                 returnDictionary.Add(action);

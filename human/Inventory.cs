@@ -25,7 +25,9 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             Toolbox.Instance.SendMessage(gameObject, this, invMessage);
             if (value != null)
                 GameManager.Instance.CheckItemCollection(value.gameObject, gameObject);
-            UpdateInventoryActionButtons();
+            // UpdateInventoryActionButtons();
+            if (GameManager.Instance.playerObject == gameObject)
+                UINew.Instance.RefreshUI(active:true);
         }
     }
     private Pickup _holding;
@@ -325,7 +327,6 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
 
         GameObject slash = Instantiate(Resources.Load("Slash2"), transform.position, transform.rotation) as GameObject;
         MeleeWeapon weapon = holding.GetComponent<MeleeWeapon>();
-        // Intrinsics intrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
 
         slash.transform.SetParent(transform);
         slash.transform.localScale = Vector3.one;
@@ -368,7 +369,6 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         startPoint.y += direction.normalized.y / 6f + 0.02f;
         GameObject slash = Instantiate(Resources.Load("PhysicalImpact"), startPoint, holdpoint.rotation) as GameObject;
         PhysicalImpact impact = slash.GetComponent<PhysicalImpact>();
-        // Intrinsics intrins = Toolbox.Instance.GetOrCreateComponent<Intrinsics>(gameObject);
         MessageDamage message = new MessageDamage(10f, damageType.physical);
         if (netBuffs[BuffType.strength].boolValue){
             message.force = new Vector2(direction.x*2f, direction.y*2f);
@@ -395,25 +395,6 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             Destroy(item);
         }
         items = new List<GameObject>();
-    }
-    
-    public void UpdateInventoryActionButtons() {
-        Controllable controllable = GetComponent<Controllable>();
-        if (holding) {
-            HashSet<Interaction> manualActions = new HashSet<Interaction>(Interactor.ReportManualActions(holding.gameObject, gameObject));
-            foreach (Interaction inter in Interactor.ReportManualActions(gameObject, holding.gameObject))
-                manualActions.Add(inter);
-            List<Interaction> actionList = manualActions.ToList();
-            controllable.defaultInteraction = Interactor.GetDefaultAction(actionList);
-            if (GameManager.Instance.playerObject == gameObject)
-                UINew.Instance.CreateActionButtons(actionList, controllable.defaultInteraction);
-        } else {
-            controllable.defaultInteraction = null;
-            if (GameManager.Instance.playerObject == gameObject) {
-                UINew.Instance.ClearActionButtons();
-                UINew.Instance.ClearWorldButtons();
-            }
-        }
     }
     public void SaveData(PersistentComponent data) {
         if (holding != null) {

@@ -3,6 +3,8 @@ using System.IO;
 public class UIButtonCallbacks : MonoBehaviour {
     public void FightButtonClick() {
         Controller.Instance.focus.ToggleFightMode();
+        // UINew.Instance.RefreshUI(active:true);
+        UINew.Instance.UpdateButtons();
     }
     public void SpeakButtonClick() {
         UINew.Instance.ShowMenu(UINew.MenuType.speech);

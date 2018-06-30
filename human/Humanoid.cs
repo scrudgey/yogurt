@@ -82,13 +82,9 @@ public class Humanoid : SimpleControl {
         if (fightMode) {
             MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.fighting, true);
             Toolbox.Instance.SendMessage(gameObject, this, anim);
-            if (GameManager.Instance.playerObject == gameObject)
-                UINew.Instance.ShowPunchButton();
         } else {
             MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.fighting, false);
             Toolbox.Instance.SendMessage(gameObject, this, anim);
-            if (GameManager.Instance.playerObject == gameObject)
-                UINew.Instance.HidePunchButton();
         }
     }
 }

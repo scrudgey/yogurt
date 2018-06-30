@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine.UI;
 using Easings;
+// using System.Linq;
 
 public class UINew : Singleton<UINew> {
     public enum MenuType { none, escape, inventory, speech, closet, scriptSelect, commercialReport, newDayReport, email, diary, dialogue, phone, perk, teleport }
@@ -367,15 +368,10 @@ public class UINew : Singleton<UINew> {
         // hand action buttons and inventory button
         Inventory inv = GameManager.Instance.playerObject.GetComponent<Inventory>();
         if (inv) {
-            inv.UpdateInventoryActionButtons();
             UpdateInventoryButton(inv);
         }
-        // punch button
-        if (Controller.Instance.focus.fightMode) {
-            ShowPunchButton();
-        } else {
-            HidePunchButton();
-        }
+        UpdateActionButtons(inv);
+        
         // fight button
         fightButton.SetActive(true);
         // health bar
@@ -388,6 +384,35 @@ public class UINew : Singleton<UINew> {
         if (GameManager.Instance.playerObject.GetComponent<Eater>()) {
             vomitButton.SetActive(GameManager.Instance.data.perks["vomit"]);
         }
+    }
+    public void UpdateActionButtons(Inventory inv){
+        Controller.Instance.defaultInteraction = null;
+        GameObject player = Controller.Instance.focus.gameObject;
+        HashSet<Interaction> manualActions = new HashSet<Interaction>();
+        manualActions = Interactor.ReportManualActions(player, player);
+        if (inv != null){
+            if (inv.holding) {
+                manualActions.UnionWith(Interactor.ReportManualActions(inv.holding.gameObject, player));
+                manualActions.UnionWith(Interactor.ReportManualActions(player, inv.holding.gameObject));
+            }
+        }
+        Controller.Instance.defaultInteraction = Interactor.GetDefaultAction(manualActions);
+        List<actionButton> actionButtons = UINew.Instance.CreateActionButtons(new List<Interaction>(manualActions), Controller.Instance.defaultInteraction);
+        // punch button
+        if (Controller.Instance.focus.fightMode) {
+            Controller.Instance.defaultInteraction = null;
+            ShowPunchButton();
+            return;
+        } else {
+            HidePunchButton();
+            if (Controller.Instance.defaultInteraction != null){
+                foreach (actionButton button in actionButtons){
+                    if (button.buttonScript.action == Controller.Instance.defaultInteraction)
+                        MakeButtonDefault(button);
+                }
+            }
+        }
+        
     }
     public void UpdateRecordButtons(Commercial commercial) {
         if (GameManager.Instance.activeCommercial == null) {
@@ -410,12 +435,6 @@ public class UINew : Singleton<UINew> {
             CloseActiveMenu();
             ShowInventoryMenu();
         }
-    }
-    public void ShowFightButton() {
-        fightButton.SetActive(true);
-    }
-    public void HideFightButton() {
-        fightButton.SetActive(false);
     }
     public void ShowPunchButton() {
         punchButton.SetActive(true);
@@ -459,7 +478,6 @@ public class UINew : Singleton<UINew> {
             collectedStack.Push(info);
         }
     }
-
     public void PopupAchievement(Achievement achieve) {
         GameObject existingPop = GameObject.Find("AchievementPopup(Clone)");
         if (existingPop == null) {
@@ -618,7 +636,6 @@ public class UINew : Singleton<UINew> {
         }
         buttonAnchor.transform.position = renderingCamera.ScreenToWorldPoint(Input.mousePosition);
         buttonAnchor.transform.SetParent(target.transform);
-        // bottomDock.transform.SetAsLastSibling();
         return buttonAnchor;
     }
     private void ArrangeButtonsOnScreenTop(List<actionButton> buttons) {
@@ -639,16 +656,15 @@ public class UINew : Singleton<UINew> {
         indicator.transform.SetParent(button.gameobject.transform, false);
         indicator.transform.SetAsLastSibling();
     }
-    public void CreateActionButtons(List<Interaction> manualActions, Interaction defaultInteraction) {
+    private List<actionButton> CreateActionButtons(List<Interaction> manualActions, Interaction defaultInteraction) {
         ClearActionButtons();
         List<actionButton> manualButtons = CreateButtonsFromActions(manualActions, true);
         foreach (actionButton button in manualButtons) {
             bottomElements.Add(button.gameobject);
             button.buttonScript.manualAction = true;
-            if (button.buttonScript.action == defaultInteraction)
-                MakeButtonDefault(button);
         }
         ArrangeButtonsOnScreenTop(manualButtons);
+        return manualButtons;
     }
     public void ClearActionButtons() {
         foreach (GameObject element in bottomElements)
