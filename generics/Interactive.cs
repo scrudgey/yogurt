@@ -40,13 +40,13 @@ public class Interaction {
     public bool otherOnPlayerConsent = true;
     public bool inertOnPlayerConsent = true;
     public string descString = null;
-    public Interaction(Interactive o, string name, string action) : this(o, name, action, false, false) { }
-    public Interaction(Interactive o, string name, string action, bool manualHide, bool rightHide) {
-        this.action = action;
+    public Interaction(Interactive o, string name, string functionName) : this(o, name, functionName, false, false) { }
+    public Interaction(Interactive o, string name, string functionName, bool manualHide, bool rightHide) {
+        this.action = functionName;
         actionName = name;
         enabled = false;
         parent = o;
-        methodInfo = parent.GetType().GetMethod(action);
+        methodInfo = parent.GetType().GetMethod(functionName);
         parameterTypes = new List<System.Type>();
         hideInManualActions = manualHide;
         hideInRightClickMenu = rightHide;
@@ -58,7 +58,7 @@ public class Interaction {
         } else {
             Debug.Log("interaction has failed to find its parent's method");
         }
-        descMethodInfo = parent.GetType().GetMethod(action + "_desc");
+        descMethodInfo = parent.GetType().GetMethod(functionName + "_desc");
         desireFunction += defaultDesireFunction;
     }
     public Interaction(Interactive o, string name, Action<Component> initAction) {
