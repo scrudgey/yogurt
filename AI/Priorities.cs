@@ -133,6 +133,11 @@ namespace AI {
             }
         }
     }
+    public class PriorityMakeBalloonAnimals : Priority {
+        public PriorityMakeBalloonAnimals(GameObject g, Controllable c): base(g, c){
+            priorityName = "ballon animals";
+        }
+    }
     public class PriorityRunAway : Priority {
         public PriorityRunAway(GameObject g, Controllable c) : base(g, c) {
             priorityName = "run away";
