@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 
-public enum desire {none, accept, decline}
+public enum desire { none, accept, decline }
 public delegate desire DesireFunction(Personality myPersonality, GameObject requester);
 
 [System.Serializable]
@@ -177,7 +177,7 @@ public class Interaction {
         desireFunction -= defaultDesireFunction;
         desireFunction += df;
     }
-    public desire GetDesire(GameObject commandTarget, GameObject requester){
+    public desire GetDesire(GameObject commandTarget, GameObject requester) {
         DecisionMaker dm = commandTarget.GetComponent<DecisionMaker>();
         return desireFunction(dm.personality, requester);
     }
@@ -272,8 +272,8 @@ public class Interactive : MonoBehaviour {
             returnType = targetType.other;
         }
         // if we're commanding someone, then categories flip
-        if (Controller.Instance.state == Controller.ControlState.commandSelect){
-            if (returnType == targetType.player){
+        if (Controller.Instance.state == Controller.ControlState.commandSelect) {
+            if (returnType == targetType.player) {
                 returnType = targetType.other;
             } else {
                 if (returnType == targetType.other)
@@ -290,13 +290,13 @@ public class Interactive : MonoBehaviour {
             where iBase.disableInteractions == false
             select iBase;
         foreach (Interaction interaction in interactions) {
-            if (interaction.debug){
-            	Debug.Log("Checking the consent for interaction "+interaction.actionName);
-            	Debug.Log("target is "+targType.ToString());
-            	Debug.Log("source is "+sourceType);
-            	Debug.Log("other on player consent: "+interaction.otherOnPlayerConsent);
-            	Debug.Log("player on other consent: "+interaction.playerOnOtherConsent);
-            	Debug.Log("inert on other consent: "+interaction.inertOnPlayerConsent);
+            if (interaction.debug) {
+                Debug.Log("Checking the consent for interaction " + interaction.actionName);
+                Debug.Log("target is " + targType.ToString());
+                Debug.Log("source is " + sourceType);
+                Debug.Log("other on player consent: " + interaction.otherOnPlayerConsent);
+                Debug.Log("player on other consent: " + interaction.playerOnOtherConsent);
+                Debug.Log("inert on other consent: " + interaction.inertOnPlayerConsent);
             }
             interaction.targetComponents = new List<Interactive>(actives);
             if (!interaction.playerOnOtherConsent && sourceType == targetType.player && targType == targetType.other) {
