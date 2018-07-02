@@ -19,19 +19,29 @@ public class Personality {
 }
 
 public class DecisionMaker : MonoBehaviour, ISaveable {
-    static List<Type> priorityTypes = new List<Type>(){
-        {typeof(PriorityAttack)},
-        {typeof(PriorityFightFire)},
-        {typeof(PriorityProtectPossessions)},
-        {typeof(PriorityReadScript)},
-        {typeof(PriorityRunAway)},
-        {typeof(PriorityWander)}
+    public enum PriorityType {
+        Attack, FightFire, ProtectPossessions, 
+        ReadScript, RunAway, Wander, ProtectZone,
+        MakeBalloonAnimals
+    }
+    static Dictionary<Type, PriorityType> priorityTypes = new Dictionary<Type, PriorityType>(){
+        {typeof(PriorityAttack), PriorityType.Attack},
+        {typeof(PriorityFightFire), PriorityType.FightFire},
+        {typeof(PriorityProtectPossessions), PriorityType.ProtectPossessions},
+        {typeof(PriorityReadScript), PriorityType.ReadScript},
+        {typeof(PriorityRunAway), PriorityType.RunAway},
+        {typeof(PriorityWander), PriorityType.Wander},
+        {typeof(PriorityProtectZone), PriorityType.ProtectZone},
+        {typeof(PriorityMakeBalloonAnimals), PriorityType.MakeBalloonAnimals}
     };
+    public PriorityType defaultPriorityType;
+    
     public Controllable control;
     public GameObject thought;
     public Text thoughtText;
     public List<Priority> priorities;
     public Personality personality;
+    public Priority defaultPriority;
     private Priority activePriority = null;
     public List<GameObject> initialAwareness;
     public GameObject possession;
@@ -41,6 +51,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
     public Collider2D warnZone = null;
     public Vector3 guardPoint;
     public bool initialized = false;
+    // public priorityType
     void Awake() {
         if (!initialized)
             Initialize();
@@ -72,19 +83,28 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         // create priorities
         // TODO: allow for a default priority
         priorities = new List<Priority>();
-        priorities.Add(new PriorityFightFire(gameObject, control));
-        priorities.Add(new PriorityRunAway(gameObject, control));
-        priorities.Add(new PriorityAttack(gameObject, control));
+        InitializePriority(new PriorityFightFire(gameObject, control), typeof(PriorityFightFire));
+        InitializePriority(new PriorityRunAway(gameObject, control), typeof(PriorityRunAway));
+        InitializePriority(new PriorityAttack(gameObject, control), typeof(PriorityAttack));
+        InitializePriority(new PriorityProtectPossessions(gameObject, control), typeof(PriorityProtectPossessions));
+        InitializePriority(new PriorityWander(gameObject, control), typeof(PriorityWander));
         if (personality.actor == Personality.Actor.yes)
-            priorities.Add(new PriorityReadScript(gameObject, control));
-        priorities.Add(new PriorityProtectPossessions(gameObject, control));
+            InitializePriority(new PriorityReadScript(gameObject, control), typeof(PriorityReadScript));
         if (protectionZone != null) {
-            priorities.Add(new PriorityProtectZone(gameObject, control, protectionZone, guardPoint));
-        } else {
-            priorities.Add(new PriorityWander(gameObject, control));
+            InitializePriority(new PriorityProtectZone(gameObject, control, protectionZone, guardPoint), typeof(PriorityProtectZone));
         }
+        if (defaultPriorityType == PriorityType.MakeBalloonAnimals){
+            InitializePriority(new PriorityMakeBalloonAnimals(gameObject, control), typeof(PriorityMakeBalloonAnimals));
+        }
+
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
         Toolbox.RegisterMessageCallback<Message>(this, ReceiveMessage);
+    }
+    public void InitializePriority(Priority priority, Type type){
+        // Priority priority = new PriorityFightFire(gameObject, control);
+        priorities.Add(priority);
+        if (defaultPriorityType == priorityTypes[type])
+            defaultPriority = priority;
     }
     public void HandleHitStun(MessageHitstun message){
         hitState = message.hitState;
@@ -98,18 +118,21 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
     }
     public void Update() {
         Priority oldActivePriority = activePriority;
-        activePriority = null;
+        activePriority = defaultPriority;
         foreach (Priority priority in priorities) {
             priority.Update();
             if (activePriority == null)
                 activePriority = priority;
-            if (activePriority.Urgency(personality) < priority.Urgency(personality))
-                activePriority = priority;
+            
             if (priority.urgency > priority.minimumUrgency)
                 priority.urgency -= Time.deltaTime / 10f;
             if (priority.urgency < priority.minimumUrgency)
                 priority.urgency += Time.deltaTime / 10f;
             priority.urgency = Mathf.Min(priority.urgency, Priority.urgencyMaximum);
+            if (priority.Urgency(personality) <= Priority.urgencyMinor)
+                continue;
+            if (priority.Urgency(personality) > activePriority.Urgency(personality))
+                activePriority = priority;
         }
         if (hitState >= Controllable.HitState.unconscious)
             return;
@@ -129,7 +152,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
     }
     public void SaveData(PersistentComponent data) {
         data.ints["hitstate"] = (int)hitState;
-        foreach (Type priorityType in priorityTypes) {
+        foreach (Type priorityType in priorityTypes.Keys) {
             foreach (Priority priority in priorities) {
                 if (priority.GetType() == priorityType) {
                     data.floats[priorityType.ToString()] = priority.urgency;
@@ -165,7 +188,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         } 
 
         foreach (Priority priority in priorities) {
-            foreach (Type priorityType in priorityTypes) {
+            foreach (Type priorityType in priorityTypes.Keys) {
                 if (priority.GetType() == priorityType) {
                     string priorityName = priorityType.ToString();
                     if (data.floats.ContainsKey(priorityName)) {
