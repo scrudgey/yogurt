@@ -4,6 +4,7 @@ public class Telephone : Item {
     AudioSource source;
     public Doorway enterDoor;
     public float fireTime;
+    public float clownTime;
     public AudioClip phoneUp;
     public AudioClip phoneDown;
     void Start() {
@@ -34,6 +35,18 @@ public class Telephone : Item {
             Toolbox.Instance.SendMessage(gameObject, this, message);
         }
     }
+    public void ClownCallback(){
+        if (fireTime <= 0) {
+            MessageSpeech message = new MessageSpeech();
+            message.phrase = "Brother clown, assemble!";
+            Toolbox.Instance.SendMessage(gameObject, this, message);
+            clownTime = 1f;
+        } else {
+            MessageSpeech message = new MessageSpeech();
+            message.phrase = "Brother clown is with you this day!";
+            Toolbox.Instance.SendMessage(gameObject, this, message);
+        }
+    }
     public void Update() {
         if (fireTime > 0) {
             fireTime -= Time.deltaTime;
@@ -44,6 +57,28 @@ public class Telephone : Item {
                 Instantiate(Resources.Load("prefabs/Fireman"), tempPos, Quaternion.identity);
                 enterDoor.PlayEnterSound();
             }
+        }
+        if (clownTime > 0) {
+            clownTime -= Time.deltaTime;
+            if (clownTime <= 0) {
+                //do clown spawn
+                Vector3 tempPos = enterDoor.transform.position;
+                tempPos.y = tempPos.y - 0.05f;
+                Instantiate(Resources.Load("prefabs/Clown"), tempPos, Quaternion.identity);
+                enterDoor.PlayEnterSound();
+            }
+        }
+    }
+    public void MenuCallback(PhoneNumberButton.phoneNumber type){
+        switch (type) {
+            case PhoneNumberButton.phoneNumber.fire:
+                FireButtonCallback();
+                break;
+            case PhoneNumberButton.phoneNumber.clown:
+                ClownCallback();
+                break;
+            default:
+                break;
         }
     }
 }
