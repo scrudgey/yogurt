@@ -126,16 +126,21 @@ namespace AI {
             goal = new GoalWander(g, c);
         }
         public override float Urgency(Personality personality) {
-            if (personality.actor == Personality.Actor.yes) {
-                return -1;
-            } else {
-                return Priority.urgencyMinor;
-            }
+            // if (personality.actor == Personality.Actor.yes) {
+            //     return -1;
+            // } else {
+            //     return Priority.urgencyMinor;
+            // }
+            return Priority.urgencyMinor;
         }
     }
-    public class PriorityMakeBalloonAnimals : Priority {
+    public class PriorityMakeBalloonAnimals : PriorityWander {
         public PriorityMakeBalloonAnimals(GameObject g, Controllable c): base(g, c){
             priorityName = "ballon animals";
+            goal = new GoalInflateBalloons(g, c);
+        }
+        public override float Urgency(Personality personality) {
+            return Priority.urgencyMinor;
         }
     }
     public class PriorityRunAway : Priority {

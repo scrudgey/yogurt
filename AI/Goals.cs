@@ -194,8 +194,15 @@ namespace AI {
     public class GoalWander : Goal {
         public GoalWander(GameObject g, Controllable c) : base(g, c) {
             goalThought = "I'm doing nothing in particular.";
-            successCondition = new ConditionLocation(g, new Ref<Vector2>(Vector2.zero));
+            successCondition = new ConditionFail(g);
             routines.Add(new RoutineWander(g, c));
+        }
+    }
+    public class GoalInflateBalloons : Goal {
+        public GoalInflateBalloons(GameObject g, Controllable c) : base(g, c) {
+            goalThought = "I'm inflating balloons.";
+            successCondition = new ConditionFail(g);
+            routines.Add(new RoutineWanderAndPressF(g, c));
         }
     }
     public class GoalRunFromObject : Goal {

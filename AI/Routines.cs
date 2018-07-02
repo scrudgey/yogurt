@@ -272,6 +272,21 @@ namespace AI {
             return status.neutral;
         }
     }
+    public class RoutineWanderAndPressF : RoutineWander {
+        public float timeSinceF;
+        public RoutineWanderAndPressF(GameObject g, Controllable c) : base(g, c) {
+            routineThought = "I'm a clown.";
+            timeSinceF = UnityEngine.Random.Range(1.0f, 1.5f);
+        }
+        protected override status DoUpdate(){
+            timeSinceF -= Time.deltaTime;
+            if (timeSinceF <= 0){
+                timeSinceF = UnityEngine.Random.Range(1.5f, 10.5f);
+                control.ShootPressed();
+            }
+            return base.DoUpdate();
+        }
+    }
     public class RoutineLookAtObject : Routine {
         public Ref<GameObject> target = new Ref<GameObject>(null);
         public RoutineLookAtObject(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c) {
