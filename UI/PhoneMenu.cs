@@ -26,18 +26,21 @@ public class PhoneMenu : MonoBehaviour {
         selectedButton = null;
     }
     public void CloseButton() {
-        // Destroy(gameObject);
         UINew.Instance.CloseActiveMenu();
         if (phoneDown != null)
             Toolbox.Instance.AudioSpeaker(phoneDown, telephone.transform.position);
     }
-    public void PopulateList() {
-        Start();
+    public void AddNumber(PhoneNumberButton.phoneNumber type){
         GameObject newEntry = Instantiate(Resources.Load("UI/PhoneNumberButton")) as GameObject;
         newEntry.transform.SetParent(numbersList, false);
         PhoneNumberButton buttonScript = newEntry.GetComponent<PhoneNumberButton>();
         buttonScript.menu = this;
-        buttonScript.SetPhoneType(PhoneNumberButton.phoneNumber.fire);
+        buttonScript.SetPhoneType(type);
+    }
+    public void PopulateList() {
+        Start();
+        AddNumber(PhoneNumberButton.phoneNumber.fire);
+        AddNumber(PhoneNumberButton.phoneNumber.clown);
     }
     public void PhoneButtonCallback(PhoneNumberButton button) {
         if (selectedButton != null) {
@@ -55,13 +58,7 @@ public class PhoneMenu : MonoBehaviour {
             Debug.Log("no selected");
             return;
         }
-        switch (selectedButton.number) {
-            case PhoneNumberButton.phoneNumber.fire:
-                telephone.FireButtonCallback();
-                break;
-            default:
-                break;
-        }
+        telephone.MenuCallback(selectedButton.number);
         CloseButton();
     }
 }
