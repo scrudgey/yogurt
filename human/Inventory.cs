@@ -25,9 +25,11 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             Toolbox.Instance.SendMessage(gameObject, this, invMessage);
             if (value != null)
                 GameManager.Instance.CheckItemCollection(value.gameObject, gameObject);
-            // UpdateInventoryActionButtons();
+            Controllable controllable = GetComponent<Controllable>();
+            if (controllable != null)
+                controllable.UpdateDefaultInteraction();
             if (GameManager.Instance.playerObject == gameObject)
-                UINew.Instance.RefreshUI(active:true);
+                UINew.Instance.UpdateButtons();
         }
     }
     private Pickup _holding;

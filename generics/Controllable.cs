@@ -5,6 +5,7 @@ using System;
 public class Controllable : MonoBehaviour {
     public enum HitState { none, stun, unconscious, dead };
     public enum ControlType { none, AI, player }
+    public Interaction defaultInteraction;
     public static List<Type> AIComponents = new List<Type>(){
         typeof(DecisionMaker),
         typeof(PeterPicklebottom)
@@ -81,6 +82,28 @@ public class Controllable : MonoBehaviour {
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
         Toolbox.RegisterMessageCallback<MessageDirectable>(this, HandleDirectable);
     }
+    public virtual void Start() {
+        foreach (Component component in gameObject.GetComponentsInChildren<Component>()) {
+            if (component is IDirectable) {
+                directables.Add((IDirectable)component);
+            }
+        }
+        rigidBody2D = GetComponent<Rigidbody2D>();
+        UpdateDefaultInteraction();
+    }
+    public HashSet<Interaction> UpdateDefaultInteraction(){
+        defaultInteraction = null;
+        Inventory inv = GetComponent<Inventory>();
+        HashSet<Interaction> manualActions = Interactor.ReportManualActions(gameObject, gameObject);
+        if (inv != null){
+            if (inv.holding) {
+                manualActions.UnionWith(Interactor.ReportManualActions(inv.holding.gameObject, gameObject));
+                manualActions.UnionWith(Interactor.ReportManualActions(gameObject, inv.holding.gameObject));
+            }
+        }
+        defaultInteraction = Interactor.GetDefaultAction(manualActions);
+        return manualActions;
+    }
     void HandleHitStun(MessageHitstun message){
         hitState = message.hitState;
     }
@@ -107,14 +130,6 @@ public class Controllable : MonoBehaviour {
                 break;
         }
         control = type;
-    }
-    public virtual void Start() {
-        foreach (Component component in gameObject.GetComponentsInChildren<Component>()) {
-            if (component is IDirectable) {
-                directables.Add((IDirectable)component);
-            }
-        }
-        rigidBody2D = GetComponent<Rigidbody2D>();
     }
     void Update() {
         if (hitState > 0) {
@@ -143,11 +158,18 @@ public class Controllable : MonoBehaviour {
         direction = d;
     }
     public void ShootPressed() {
-        if (fightMode)
+        if (fightMode){
             Toolbox.Instance.SendMessage(gameObject, this, new MessagePunch());
+        } else {
+            if (defaultInteraction != null){
+                defaultInteraction.DoAction();
+            }
+        }
     }
     public void ShootHeld() {
-
+        if (defaultInteraction != null && defaultInteraction.continuous) {
+            defaultInteraction.DoAction();
+        }
     }
     public virtual void ToggleFightMode() {
         fightMode = !fightMode;

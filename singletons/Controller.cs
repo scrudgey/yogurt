@@ -40,12 +40,12 @@ public class Controller : Singleton<Controller> {
             _state = value;
             ChangeState(previousState);
         }
-    } 
+    }
     public GameObject commandTarget;
     public bool doCommand;
     public Interaction commandAct = null;
     public ActionButtonScript.buttonType commandButtonType = ActionButtonScript.buttonType.none;
-    public Interaction defaultInteraction;
+    // public Interaction defaultInteraction;
     void ChangeState(ControlState previousState) {
         // TODO: code for transitioning between states
         if (focus) {
@@ -65,7 +65,7 @@ public class Controller : Singleton<Controller> {
             if (!doCommand)
                 ResetCommandState();
         }
-        if (state == ControlState.commandSelect){
+        if (state == ControlState.commandSelect) {
             Controllable commandTargetControl = commandTarget.GetComponent<Controllable>();
             commandTargetControl.control = Controllable.ControlType.none;
         }
@@ -88,6 +88,8 @@ public class Controller : Singleton<Controller> {
             return;
         if (focus != null & !suspendInput) {
             focus.ResetInput();
+            if (focus.control == Controllable.ControlType.none)
+                return;
             if (Input.GetAxis("Vertical") > 0)
                 focus.upFlag = true;
             if (Input.GetAxis("Vertical") < 0)
@@ -98,18 +100,10 @@ public class Controller : Singleton<Controller> {
                 focus.rightFlag = true;
             //Fire key 
             if (Input.GetButtonDown("Fire1")) {
-                if (defaultInteraction != null){
-                    defaultInteraction.DoAction();
-                } else {    
-                    focus.ShootPressed();
-                }
+                focus.ShootPressed();
             }
             if (Input.GetButton("Fire1")) {
-                if (defaultInteraction != null && defaultInteraction.continuous) {
-                    defaultInteraction.DoAction();
-                } else {
-                    focus.ShootHeld();
-                }
+                focus.ShootHeld();
             }
         }
     }
@@ -391,7 +385,7 @@ public class Controller : Singleton<Controller> {
             if (InteractionIsWithinRange(button.action) || button.manualAction) {
                 commandAct = button.action;
                 DialogueCommand().CommandCallback(button.action);
-            } 
+            }
         } else {
             commandButtonType = button.bType;
             DialogueCommand().HandCommandCallback(button.bType);

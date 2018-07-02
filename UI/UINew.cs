@@ -386,28 +386,17 @@ public class UINew : Singleton<UINew> {
         }
     }
     public void UpdateActionButtons(Inventory inv){
-        Controller.Instance.defaultInteraction = null;
-        GameObject player = Controller.Instance.focus.gameObject;
-        HashSet<Interaction> manualActions = new HashSet<Interaction>();
-        manualActions = Interactor.ReportManualActions(player, player);
-        if (inv != null){
-            if (inv.holding) {
-                manualActions.UnionWith(Interactor.ReportManualActions(inv.holding.gameObject, player));
-                manualActions.UnionWith(Interactor.ReportManualActions(player, inv.holding.gameObject));
-            }
-        }
-        Controller.Instance.defaultInteraction = Interactor.GetDefaultAction(manualActions);
-        List<actionButton> actionButtons = UINew.Instance.CreateActionButtons(new List<Interaction>(manualActions), Controller.Instance.defaultInteraction);
+        HashSet<Interaction> manualActions = Controller.Instance.focus.UpdateDefaultInteraction();
+        List<actionButton> actionButtons = UINew.Instance.CreateActionButtons(new List<Interaction>(manualActions));
         // punch button
         if (Controller.Instance.focus.fightMode) {
-            Controller.Instance.defaultInteraction = null;
             ShowPunchButton();
             return;
         } else {
             HidePunchButton();
-            if (Controller.Instance.defaultInteraction != null){
+            if (Controller.Instance.focus.defaultInteraction != null){
                 foreach (actionButton button in actionButtons){
-                    if (button.buttonScript.action == Controller.Instance.defaultInteraction)
+                    if (button.buttonScript.action == Controller.Instance.focus.defaultInteraction)
                         MakeButtonDefault(button);
                 }
             }
@@ -656,7 +645,7 @@ public class UINew : Singleton<UINew> {
         indicator.transform.SetParent(button.gameobject.transform, false);
         indicator.transform.SetAsLastSibling();
     }
-    private List<actionButton> CreateActionButtons(List<Interaction> manualActions, Interaction defaultInteraction) {
+    private List<actionButton> CreateActionButtons(List<Interaction> manualActions) {
         ClearActionButtons();
         List<actionButton> manualButtons = CreateButtonsFromActions(manualActions, true);
         foreach (actionButton button in manualButtons) {
