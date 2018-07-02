@@ -199,10 +199,30 @@ namespace AI {
         }
     }
     public class GoalInflateBalloons : Goal {
+        float utteranceTimer = UnityEngine.Random.Range(10f, 20f);
+        List<string> phrases;
         public GoalInflateBalloons(GameObject g, Controllable c) : base(g, c) {
             goalThought = "I'm inflating balloons.";
             successCondition = new ConditionFail(g);
             routines.Add(new RoutineWanderAndPressF(g, c));
+            LoadPhrases();
+        }
+        public void LoadPhrases() {
+            phrases = new List<string>();
+            TextAsset textData = Resources.Load("data/dialogue/clown_phrases") as TextAsset;
+            foreach (string line in textData.text.Split('\n')) {
+                phrases.Add(line);
+            }
+        }
+        public override void Update() {
+            base.Update();
+            utteranceTimer -= Time.deltaTime;
+            if (utteranceTimer <= 0f) {
+                utteranceTimer = UnityEngine.Random.Range(10f, 20f);
+                MessageSpeech message = new MessageSpeech();
+                message.phrase = phrases[UnityEngine.Random.Range(0, phrases.Count)];
+                Toolbox.Instance.SendMessage(gameObject, gameObject.transform, message);
+            }
         }
     }
     public class GoalRunFromObject : Goal {
