@@ -34,7 +34,7 @@ public class ItemEntryScript : MonoBehaviour {
     }
     public void Configure(string name, HomeCloset.ClosetType type){
         Text newText = transform.Find("newIndicator").GetComponent<Text>();
-        ItemEntryScript entryScript = transform.Find("item").GetComponent<ItemEntryScript>();
+        // ItemEntryScript entryScript = transform.Find("item").GetComponent<ItemEntryScript>();
         Text entryText = transform.Find("item").GetComponent<Text>();
         newText.text = "";
         enableItem = !GameManager.Instance.data.itemCheckedOut[name];

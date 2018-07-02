@@ -6,7 +6,7 @@ public class Fire : MonoBehaviour {
     public Flammable flammable;
     private Dictionary<GameObject, Flammable> flammables = new Dictionary<GameObject, Flammable>();
     private MessageDamage message;
-    private HashSet<GameObject> damageQueue = new HashSet<GameObject>();
+    // private HashSet<GameObject> damageQueue = new HashSet<GameObject>();
     private HashSet<GameObject> collidedObjects = new HashSet<GameObject>();
     private float damageTimer;
     static List<string> forbiddenTags = new List<string>(new string[] { "occurrenceFlag", "background", "sightcone" });

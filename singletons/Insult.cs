@@ -38,17 +38,17 @@ public class Insults {
         // consider: insulter status
         // what am i doing? acting? selling?
         // stoicism
-        PersonalAssessment.friendStatus status = assessment.status;
-        switch (personality.stoicism) {
-            case (Personality.Stoicism.neutral):
-                break;
-            case (Personality.Stoicism.fragile):
-                break;
-            case (Personality.Stoicism.noble):
-                break;
-            default:
-                break;
-        }
+        // PersonalAssessment.friendStatus status = assessment.status;
+        // switch (personality.stoicism) {
+        //     case (Personality.Stoicism.neutral):
+        //         break;
+        //     case (Personality.Stoicism.fragile):
+        //         break;
+        //     case (Personality.Stoicism.noble):
+        //         break;
+        //     default:
+        //         break;
+        // }
         return "";
     }
 }

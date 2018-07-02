@@ -154,7 +154,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         sliderJoint2D = groundObject.AddComponent<SliderJoint2D>();
         sliderJoint2D.autoConfigureAngle = false;
         sliderJoint2D.autoConfigureConnectedAnchor = false;
-        AnchoredJoint2D zeroAnchor = new AnchoredJoint2D();
+        // AnchoredJoint2D zeroAnchor = new AnchoredJoint2D();
         sliderJoint2D.anchor = Vector2.zero;
         sliderJoint2D.connectedAnchor = Vector2.zero;
         sliderJoint2D.enableCollision = false;
