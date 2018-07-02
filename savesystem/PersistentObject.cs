@@ -20,6 +20,10 @@ public class PersistentObject {
     public string parentObject;
     public int creationDate;
     public string sceneName;
+    public float spriteColorRed;
+    public float spriteColorGreen;
+    public float spriteColorBlue;
+    public float spriteColorAlpha;
     public PersistentObject() {
         // needed for XML serialization
     }
@@ -68,6 +72,14 @@ public class PersistentObject {
                 persistentComponents[component.GetType().ToString()] = persist;
             }
         }
+        SpriteRenderer spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null){
+            spriteColorAlpha = spriteRenderer.color.a;
+            spriteColorRed = spriteRenderer.color.r;
+            spriteColorGreen = spriteRenderer.color.g;
+            spriteColorBlue = spriteRenderer.color.b;
+        }
+            // spriteColor = spriteRenderer.color;
     }
     public void HandleSave(GameObject parentObject) {
         foreach (Component component in parentObject.GetComponents<Component>()) {
@@ -88,6 +100,10 @@ public class PersistentObject {
     public void HandleLoad(GameObject parentObject) {
         parentObject.transform.rotation = transformRotation;
         parentObject.transform.localScale = transformScale;
+        SpriteRenderer spriteRenderer = parentObject.GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null){
+            spriteRenderer.color = new Color(spriteColorRed, spriteColorGreen, spriteColorBlue, spriteColorAlpha);
+        }
         List<Component> loadedComponents = new List<Component>(parentObject.GetComponents<Component>());
         loadedComponents.Sort(MySaver.CompareComponent);
         foreach (Component component in loadedComponents) {
@@ -102,5 +118,6 @@ public class PersistentObject {
             GameObject childObject = parentObject.transform.Find(kvp.Key).gameObject;
             kvp.Value.HandleLoad(childObject);
         }
+        
     }
 }
