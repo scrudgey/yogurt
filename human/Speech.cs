@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using Nimrod;
 
 public class Speech : Interactive, ISaveable {
-    private string[] swearWords = new string[]{"shit", "fuck", "shazbot", "piss", "dick", "ass"};
+    private string[] swearWords = new string[]{"\bshit\b", "\bfuck\b", "\bshazbot\b", "\bpiss\b", "\bdick\b", "\bass\b"};
     private string words;
     public bool speaking = false;
     public string[] randomPhrases;
@@ -18,7 +18,7 @@ public class Speech : Interactive, ISaveable {
     private GameObject flipper;
     private Text bubbleText;
     private float speakSpeed;
-    private char[] chars;
+    // private char[] chars;
     private bool[] swearMask;
     public bool vomiting;
     public AudioClip speakSound;
