@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using AI;
 using UnityEngine;
+using DropOutStack;
 
 [System.Serializable]
 public class Knowledge {
@@ -47,6 +48,7 @@ public class PersonalAssessment {
 public class Awareness : MonoBehaviour, ISaveable {
     public DecisionMaker decisionMaker;
     public List<GameObject> initialAwareness;
+    public DropOutStack.DropOutStack<EventData> shortTermMemory = new DropOutStack.DropOutStack<EventData>(1000);
     public GameObject possession;
     public Collider2D protectZone;
     public Collider2D warnZone;
@@ -263,7 +265,14 @@ public class Awareness : MonoBehaviour, ISaveable {
             Toolbox.Instance.SendMessage(gameObject, this, new MessageOccurrence(od));
             if (od is OccurrenceViolence) 
                 WitnessViolence((OccurrenceViolence)od);
+            foreach (EventData e in od.events) {
+                WitnessEvent(e);
+            }
         }
+    }
+    void WitnessEvent(EventData dat){
+        EventData memory = new EventData(dat);
+        
     }
     void WitnessViolence(OccurrenceViolence dat) {
         if (dat.victim == null || dat.attacker == null)
