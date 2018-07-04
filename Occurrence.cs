@@ -104,7 +104,7 @@ public class Occurrence : MonoBehaviour {
 
 [System.Serializable]
 public class EventData {
-    public SerializableDictionary<string, float> flags = new SerializableDictionary<string, float>();
+    // public SerializableDictionary<string, float> flags = new SerializableDictionary<string, float>();
     public string key;
     public float val;
     public string desc;
@@ -119,6 +119,18 @@ public class EventData {
         {Rating.positive, 0f}
     };
     public EventData() {
+    }
+    public EventData(EventData other){
+        this.key = other.key;
+        this.val = other.val;
+        this.desc = other.desc;
+        this.whatHappened = other.whatHappened;
+        this.transcriptLine = other.transcriptLine;
+        this.noun = other.noun;
+        this.ratings = new SerializableDictionary<Rating, float>();
+        foreach(KeyValuePair<Rating, float> kvp in other.ratings){
+            this.ratings[kvp.Key] = kvp.Value;
+        }
     }
     public EventData(float disturbing = 0, float disgusting = 0, float chaos = 0, float offensive = 0, float positive = 0) {
         ratings[Rating.disturbing] = disturbing;
