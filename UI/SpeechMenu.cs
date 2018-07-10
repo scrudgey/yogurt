@@ -26,7 +26,14 @@ public class SpeechMenu : MonoBehaviour {
     }
     public void RandomButton() {
         MessageSpeech message = new MessageSpeech();
-        message.randomSpeech = true;
+        // message.randomSpeech = true;
+        // Toolbox.Instance.SendMessage(GameManager.Instance.playerObject, this, message);
+        Awareness awareness = Controller.Instance.focus.GetComponent<Awareness>();
+        if (awareness){
+            message.phrase = awareness.RecallMemory();
+        } else {
+            message.randomSpeech = true;
+        }
         Toolbox.Instance.SendMessage(GameManager.Instance.playerObject, this, message);
         UINew.Instance.CloseActiveMenu();
     }
