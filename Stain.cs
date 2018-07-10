@@ -16,6 +16,12 @@ public class Stain : MonoBehaviour, ISaveable {
         SpriteRenderer stainRenderer = GetComponent<SpriteRenderer>();
         stainRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
         transform.SetParent(parent.transform, true);
+
+        parentMask.isCustomRangeActive = true;
+        parentMask.frontSortingLayerID = SortingLayer.NameToID("air");
+        parentMask.backSortingLayerID = SortingLayer.NameToID("air");
+        parentMask.frontSortingOrder = 100;
+        parentMask.backSortingOrder = 0;
     }
     public void RemoveStain() {
         Destroy(gameObject);
