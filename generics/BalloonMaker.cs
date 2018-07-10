@@ -10,7 +10,7 @@ public class BalloonMaker : Interactive {
     public GameObject particleEffect;
     void Awake() {
         Interaction balloon = new Interaction(this, "Balloon", "MakeBalloon");
-        balloon.defaultPriority = 10;
+        balloon.defaultPriority = 1;
         balloon.hideInManualActions = false;
         interactions.Add(balloon);
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
@@ -24,14 +24,14 @@ public class BalloonMaker : Interactive {
     }
     IEnumerator BalloonRoutine(Controllable controllable, Inventory inv){
         Controllable.ControlType oldControlType = controllable.control;
-        controllable.SetControl(Controllable.ControlType.none);
+        controllable.control = Controllable.ControlType.none;
         yield return new WaitForSeconds(0.5f);
         GameObject balloonObject = SpawnBalloon();
         Pickup balloonPickup = balloonObject.GetComponent<Pickup>();
         if (balloonPickup != null)
             inv.GetItem(balloonPickup);
         yield return new WaitForSeconds(0.2f);
-        controllable.SetControl(oldControlType);
+        controllable.control = oldControlType;
     }
     public GameObject SpawnBalloon(){
         GameObject balloon = GameObject.Instantiate(balloonPrefabs[Random.Range(0, balloonPrefabs.Count)], transform.position, Quaternion.identity);

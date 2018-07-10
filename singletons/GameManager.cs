@@ -158,13 +158,13 @@ public partial class GameManager : Singleton<GameManager> {
     public void SetFocus(GameObject target) {
         if (playerObject != null) {
             Controllable oldControl = playerObject.GetComponent<Controllable>();
-            oldControl.SetControl(Controllable.ControlType.AI);
+            oldControl.control = Controllable.ControlType.AI;
         }
         Toolbox.Instance.SwitchAudioListener(target);
         playerObject = target;
         Controllable targetControl = playerObject.GetComponent<Controllable>();
         Controller.Instance.focus = target.GetComponent<Controllable>();
-        targetControl.SetControl(Controllable.ControlType.player);
+        targetControl.control = Controllable.ControlType.player;
         cameraControl = FindObjectOfType<CameraControl>();
         if (cameraControl)
             cameraControl.focus = target;
@@ -173,7 +173,6 @@ public partial class GameManager : Singleton<GameManager> {
         // check collections for new focus outfit, holding, and hat
         Outfit playerOutfit = target.GetComponent<Outfit>();
         if (playerOutfit) {
-            // string prefabName = Toolbox.Instance.ReplaceUnderscore(playerOutfit.wornUniformName);
             string prefabName = playerOutfit.wornUniformName;
             GameObject uniform = Instantiate(Resources.Load("prefabs/" + prefabName)) as GameObject;
             CheckItemCollection(uniform, playerObject);

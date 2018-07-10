@@ -61,7 +61,14 @@ public class Controllable : MonoBehaviour {
     public HitState hitState;
     public GameObject lastRightClicked;
     public Rigidbody2D rigidBody2D;
-    public ControlType control;
+    private ControlType _control;
+    public ControlType control {
+        get {return _control;}
+        set {
+            SetControl(value);
+            _control = value;
+        }
+    }
     private DecisionMaker decisionMaker;
     public void ResetInput() {
         upFlag = false;
@@ -75,9 +82,9 @@ public class Controllable : MonoBehaviour {
         // plus, the player will eventually have attached AI that will have to be overridden
         decisionMaker = GetComponent<DecisionMaker>();
         if (decisionMaker != null) {
-            SetControl(ControlType.AI);
+            control = ControlType.AI;
         } else {
-            SetControl(ControlType.none);
+            control = ControlType.none;
         }
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
         Toolbox.RegisterMessageCallback<MessageDirectable>(this, HandleDirectable);
@@ -113,7 +120,7 @@ public class Controllable : MonoBehaviour {
         if (message.removeDirectable != null)
             directables.Remove(message.removeDirectable);
     }
-    public void SetControl(ControlType type) {
+    private void SetControl(ControlType type) {
         switch (type) {
             case ControlType.AI:
                 if (decisionMaker)
@@ -129,7 +136,6 @@ public class Controllable : MonoBehaviour {
                     decisionMaker.enabled = false;
                 break;
         }
-        control = type;
     }
     void Update() {
         if (hitState > 0) {
