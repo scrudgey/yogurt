@@ -13,7 +13,7 @@ public class FireExtinguisher : Interactive, IDirectable {
     private bool doSpray;
     void Start() {
         Interaction spray = new Interaction(this, "Spray", "Spray", false, true);
-        spray.defaultPriority = 1;
+        spray.defaultPriority = 2;
         spray.continuous = true;
         spray.dontWipeInterface = true;
         spray.otherOnPlayerConsent = false;
