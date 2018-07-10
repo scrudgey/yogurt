@@ -22,7 +22,7 @@ public class HeadAnimation : MonoBehaviour, IDirectable, ISaveable {
             }
         }
     }
-    private Sprite[] sprites;
+    public Sprite[] sprites;
     private SpriteRenderer spriteRenderer;
     public string baseName;
     private int baseFrame;
@@ -59,6 +59,7 @@ public class HeadAnimation : MonoBehaviour, IDirectable, ISaveable {
 
         Toolbox.RegisterMessageCallback<MessageHead>(this, HandleMessageHead);
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
+        Update();
     }
     void HandleMessageHead(MessageHead message) {
         switch (message.type) {

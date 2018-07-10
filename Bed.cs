@@ -49,6 +49,13 @@ public class Bed : Doorway {
         animationTimer = 0f;
         spriteRenderer.sprite = bedSprites[0];
         head.gameObject.SetActive(true);
+        // change head sprite
+        HeadAnimation playerHead = GameManager.Instance.playerObject.GetComponentInChildren<HeadAnimation>();
+        if (playerHead != null){
+            headSprites[0] = playerHead.sprites[0];
+            headSprites[1] = playerHead.sprites[1];
+        }
+
         bubble.gameObject.SetActive(true);
         Toolbox.Instance.SwitchAudioListener(gameObject);
         sleeping = true;
@@ -60,6 +67,7 @@ public class Bed : Doorway {
         }
         if (collectible > 1 && GameManager.Instance.data.days > 1)
             CutsceneManager.Instance.InitializeCutscene<CutscenePickleBottom>();
+        Update();
     }
     void Update() {
         if (sleeping) {
