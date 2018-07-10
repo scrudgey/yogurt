@@ -114,7 +114,7 @@ public class Container : Interactive, IExcludable, ISaveable {
         if (pickup.GetComponent<Rigidbody2D>())
             pickup.GetComponent<Rigidbody2D>().isKinematic = true;
     }
-    public void Remove(Inventory inv, Pickup pickup) {
+    public virtual void Remove(Inventory inv, Pickup pickup) {
         Vector3 pos = inv.transform.position;
         pickup.transform.parent = null;
         pickup.GetComponent<Collider2D>().enabled = true;

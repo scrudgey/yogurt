@@ -89,6 +89,15 @@ public class Blender : Container, ISaveable {
             base.Store(inv);
         }
     }
+    public override void Remove(Inventory inv, Pickup pickup){
+        base.Remove(inv, pickup);
+        if (power){
+            MessageDamage message = new MessageDamage(5f, damageType.cutting);
+            Toolbox.Instance.SendMessage(inv.gameObject, this, message);
+            MessageSpeech speech = new MessageSpeech("Ouch!");
+            Toolbox.Instance.SendMessage(inv.gameObject, this, speech);
+        }
+    }
     public override void WasDestroyed(GameObject obj) {
         base.WasDestroyed(obj);
         Edible edible = obj.GetComponent<Edible>();
