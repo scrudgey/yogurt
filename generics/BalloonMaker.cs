@@ -23,15 +23,19 @@ public class BalloonMaker : Interactive {
         }
     }
     IEnumerator BalloonRoutine(Controllable controllable, Inventory inv){
-        Controllable.ControlType oldControlType = controllable.control;
-        controllable.control = Controllable.ControlType.none;
+        controllable.disabled = true;
         yield return new WaitForSeconds(0.5f);
         GameObject balloonObject = SpawnBalloon();
         Pickup balloonPickup = balloonObject.GetComponent<Pickup>();
         if (balloonPickup != null)
             inv.GetItem(balloonPickup);
         yield return new WaitForSeconds(0.2f);
-        controllable.control = oldControlType;
+        if (controllable == Controller.Instance.focus){
+            controllable.control = Controllable.ControlType.player;
+        } else {
+            controllable.control = Controllable.ControlType.AI;
+        }
+        controllable.disabled = false;
     }
     public GameObject SpawnBalloon(){
         GameObject balloon = GameObject.Instantiate(balloonPrefabs[Random.Range(0, balloonPrefabs.Count)], transform.position, Quaternion.identity);
