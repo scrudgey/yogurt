@@ -45,7 +45,6 @@ public class Controller : Singleton<Controller> {
     public bool doCommand;
     public Interaction commandAct = null;
     public ActionButtonScript.buttonType commandButtonType = ActionButtonScript.buttonType.none;
-    // public Interaction defaultInteraction;
     void ChangeState(ControlState previousState) {
         // TODO: code for transitioning between states
         if (focus) {
@@ -59,7 +58,6 @@ public class Controller : Singleton<Controller> {
         if (previousState == ControlState.commandSelect) {
             // if we've aborted command state without success
             // reset command character and target control
-            // Debug.Log("disabling command target control");
             Controllable commandTargetControl = commandTarget.GetComponent<Controllable>();
             commandTargetControl.control = Controllable.ControlType.AI;
             if (!doCommand)
@@ -308,7 +306,6 @@ public class Controller : Singleton<Controller> {
         }
     }
     public void ResetCommandState() {
-        // Debug.Log("resetting command state");
         if (commandTarget != null) {
             Controllable targetControl = commandTarget.GetComponent<Controllable>();
             targetControl.control = Controllable.ControlType.AI;
