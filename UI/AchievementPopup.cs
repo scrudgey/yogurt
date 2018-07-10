@@ -8,6 +8,11 @@ public class AchievementPopup : MonoBehaviour {
         public Sprite sprite;
         public CollectedInfo(GameObject obj) {
             name = Toolbox.Instance.GetName(obj);
+            Pickup pickup = obj.GetComponent<Pickup>();
+            if (pickup && pickup.icon != null){
+                sprite = pickup.icon;
+                return;
+            }
             SpriteRenderer renderer = obj.GetComponent<SpriteRenderer>();
             if (renderer) {
                 sprite = renderer.sprite;
