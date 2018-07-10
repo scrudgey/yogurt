@@ -272,7 +272,18 @@ public class Awareness : MonoBehaviour, ISaveable {
     }
     void WitnessEvent(EventData dat){
         EventData memory = new EventData(dat);
-        
+        shortTermMemory.Push(memory);
+    }
+    public string RecallMemory(){
+        IEnumerator<EventData> enumerator = shortTermMemory.GetEnumerator();
+        int i = 0;
+        while(i < Random.Range(0, shortTermMemory.Count())){
+            i++;
+            enumerator.MoveNext();
+        }
+        EventData memory = enumerator.Current;
+        return "I remember when "+memory.whatHappened;
+        // EventData randomMemory = shortTermMemory[Random.Range(0, shortTermMemory.Count())];
     }
     void WitnessViolence(OccurrenceViolence dat) {
         if (dat.victim == null || dat.attacker == null)
