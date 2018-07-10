@@ -2,6 +2,8 @@
 using System.IO;
 public class UIButtonCallbacks : MonoBehaviour {
     public void FightButtonClick() {
+        if (Controller.Instance.state == Controller.ControlState.inMenu)
+            return;
         Controller.Instance.focus.ToggleFightMode();
         UINew.Instance.UpdateButtons();
     }
@@ -35,6 +37,8 @@ public class UIButtonCallbacks : MonoBehaviour {
         // Debug.Log(g.Parse("{main}"));
     }
     public void HypnosisButtonClick() {
+        if (Controller.Instance.state == Controller.ControlState.inMenu)
+            return;
         if (Controller.Instance.state != Controller.ControlState.hypnosisSelect) {
             Controller.Instance.state = Controller.ControlState.hypnosisSelect;
         } else {
@@ -42,6 +46,8 @@ public class UIButtonCallbacks : MonoBehaviour {
         }
     }
     public void VomitButtonClick() {
+        if (Controller.Instance.state == Controller.ControlState.inMenu)
+            return;
         Eater eater = GameManager.Instance.playerObject.GetComponent<Eater>();
         eater.Vomit();
     }

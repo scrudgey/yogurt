@@ -28,7 +28,7 @@ public class Controller : Singleton<Controller> {
         }
     }
     private GameObject lastLeftClicked;
-    public static List<string> forbiddenColliders = new List<string>() { "fire", "sightcone", "table", "background", "occurrenceFlag" };
+    public static List<string> forbiddenColliders = new List<string>() { "fire", "sightcone", "table", "background", "occurrenceFlag"};
     public static List<ControlState> selectionStates = new List<ControlState>(){Controller.ControlState.swearSelect,
                                                                                 Controller.ControlState.insultSelect,
                                                                                 Controller.ControlState.hypnosisSelect};
