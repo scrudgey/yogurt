@@ -3,6 +3,7 @@ using UnityEngine.UI;
 
 public class ItemEntryScript : MonoBehaviour {
     public string itemName;
+    public string prefabName;
     private bool _enableItem;
     public bool enableItem {
         get {
@@ -66,6 +67,7 @@ public class ItemEntryScript : MonoBehaviour {
         Item tempItem = tempObject.GetComponent<Item>();
         sprite = tempObject.GetComponent<SpriteRenderer>().sprite;
         itemName = tempItem.itemName;
+        prefabName = name;
         if (tempItem.longDescription != "") {
             description = tempItem.longDescription;
         } else {
