@@ -53,6 +53,12 @@ public class Flammable : MonoBehaviour, ISaveable {
         fireRadius.radius = 0.2f;
         fireRadius.name = "fire";
         fire.gameObject.layer = 13;
+        Toolbox.RegisterMessageCallback<MessageDamage>(this, HandleDamageMessage);
+    }
+    public void HandleDamageMessage(MessageDamage message){
+        if (message.type == damageType.fire){
+            heat += message.amount;
+        }
     }
     void Update() {
         if (fireSource) {
