@@ -1,82 +1,85 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
+public enum targetType { inert, player, other };
 public class Interactor {
     // maybe the most important method, it tells all available actions
     // from the perspective of a player or whatever
-    static public List<Interaction> GetInteractions(GameObject focus, GameObject target) {
-        // no manual actions in here, only right click
-        List<Interaction> actionDictionary = ReportRightClickActions(target, focus);
-        // free actions are okay whatever the occasion
-        List<Interaction> freeActions = ReportFreeActions(target, focus);
-        actionDictionary.AddRange(freeActions);
-        // what actions can the target do on *me* and my junk?
-        foreach (Interaction inter in ReportRightClickActions(focus, target))
-            if (!actionDictionary.Contains(inter))   // inverse double-count diode
-                actionDictionary.Add(inter);
+    static public HashSet<Interaction> GetInteractions(GameObject focus, GameObject target) {
+        HashSet<Interaction> actionDictionary = ReportRightClickActions(target, focus);
+        actionDictionary.UnionWith(ReportRightClickActions(focus, target));
         return actionDictionary;
+    }
+    static HashSet<Interaction> ReportRightClickActions(GameObject targ, GameObject source) {
+        HashSet<Interaction> returnDictionary = new HashSet<Interaction>();
+        foreach (Interactive interactive in GetInteractorTree(source)) {
+            returnDictionary.UnionWith(GetEnabledInteractions(interactive, targ));
+        }
+        return returnDictionary;
+    }
+    static HashSet<Interaction> GetEnabledInteractions(Interactive sourceInteractive, GameObject targ) {
+        HashSet<Interaction> returnList = new HashSet<Interaction>();
+        List<Interactive> targetInteractives = Interactor.GetInteractorTree(targ);
+        targetType targType = Interactor.TypeOfTarget(targ);
+        targetType sourceType = Interactor.TypeOfTarget(sourceInteractive.gameObject);
+        var actives =
+            from iBase in targetInteractives
+            where iBase.disableInteractions == false
+            select iBase;
+        foreach (Interaction interaction in sourceInteractive.interactions) {
+            if (interaction.debug) {
+                Debug.Log("Checking the consent for interaction " + interaction.actionName);
+                Debug.Log("target is " + targType.ToString());
+                Debug.Log("source is " + sourceType);
+                Debug.Log("other on player consent: " + interaction.otherOnPlayerConsent);
+                Debug.Log("player on other consent: " + interaction.playerOnOtherConsent);
+                Debug.Log("inert on other consent: " + interaction.inertOnPlayerConsent);
+            }
+            bool enabled = interaction.CheckDependency(new List<Interactive>(actives));
+            if (!interaction.playerOnOtherConsent && sourceType == targetType.player && targType == targetType.other) {
+                enabled = false;
+                continue;
+            }
+            if (!interaction.otherOnPlayerConsent && sourceType == targetType.other && targType == targetType.player) {
+                enabled = false;
+                continue;
+            }
+            if (!interaction.inertOnPlayerConsent && sourceType == targetType.inert && targType == targetType.player) {
+                enabled = false;
+                continue;
+            }
+            interaction.CheckDependency(new List<Interactive>(actives));
+            if (enabled && !interaction.hideInRightClickMenu && interaction.parameterTypes.Count > 0){
+                if (interaction.debug)
+                    Debug.Log("interaction enabled : " + enabled);
+                returnList.Add(interaction);
+            }
+            if (interaction.parameterTypes.Count == 0 && interaction.IsValid()) {
+                if (interaction.debug)
+                    Debug.Log("free action " + interaction.actionName + " enabled free action");
+                returnList.Add(interaction);
+                enabled = true;
+            }
+        }
+        return returnList;
     }
     static public Interaction GetDefaultAction(HashSet<Interaction> actionList) {
         int highestP = 0;
         Interaction returnInteraction = null;
         foreach (Interaction action in actionList) {
-            if (action.defaultPriority > highestP && action.enabled) {
+            // removed: action.enabled
+            if (action.defaultPriority > highestP) {
                 returnInteraction = action;
                 highestP = action.defaultPriority;
             }
         }
         return returnInteraction;
     }
-    static public List<Interaction> ReportFreeActions(GameObject targ, GameObject source) {
-        List<Interaction> returnDictionary = new List<Interaction>();
-        foreach (Interactive interactive in GetInteractorTree(targ)) {
-            List<Interaction> freeActions = interactive.GetFreeActions(targ, source);
-            foreach (Interaction action in freeActions) {
-                returnDictionary.Add(action);
-            }
-        }
-        return returnDictionary;
-    }
-    static public HashSet<Interaction> ReportManualActions(GameObject targ, GameObject source) {
-        HashSet<Interaction> returnDictionary = new HashSet<Interaction>();
-        List<Interactive> interactives = GetInteractorTree(source);
-        List<Interactive> targetInteractives = GetInteractorTree(targ);
-        foreach (Interactive interactive in interactives)
-            interactive.targetUpdate(targetInteractives, targ, source);
-        foreach (Interactive interactive in interactives) {
-            List<Interaction> actions = interactive.GetManualActions();
-            foreach (Interaction action in actions) {
-                returnDictionary.Add(action);
-            }
-        }
-        foreach (Interactive interactive in targetInteractives){
-            List<Interaction> actions = interactive.GetManualActions();
-            foreach (Interaction action in actions) {
-                returnDictionary.Add(action);
-            }
-        }
-        return returnDictionary;
-    }
-
-    static public List<Interaction> ReportRightClickActions(GameObject targ, GameObject source) {
-        List<Interactive> targetInteractives = new List<Interactive>();
-        List<Interactive> sourceInteractives = new List<Interactive>();
-        targetInteractives = GetInteractorTree(targ);
-        sourceInteractives = GetInteractorTree(source);
-        List<Interaction> returnDictionary = new List<Interaction>();
-        foreach (Interactive interactive in sourceInteractives)
-            interactive.targetUpdate(targetInteractives, targ, source);
-        foreach (Interactive interactive in sourceInteractives) {
-            foreach (Interaction action in interactive.GetRightClickActions()) {
-                returnDictionary.Add(action);
-            }
-        }
-        return returnDictionary;
-    }
     static public List<Interactive> GetInteractorTree(GameObject target) {
         List<Interactive> targetInteractives = new List<Interactive>(target.GetComponents<Interactive>());
-        Interactive.targetType targType = Interactive.TypeOfTarget(target);
-        if (targType == Interactive.targetType.inert) {
+        targetType targType = TypeOfTarget(target);
+        if (targType == targetType.inert) {
             foreach (Interactive interactive in target.GetComponentsInParent<Interactive>()) {
                 if (!targetInteractives.Contains(interactive))
                     targetInteractives.Add(interactive);
@@ -95,8 +98,6 @@ public class Interactor {
         }
         Pickup pickup = target.GetComponent<Pickup>();
         if (pickup != null) {
-            // Debug.Log("pickup");
-            // Debug.Log(pickup.holder);
             if (pickup.holder != null)
                 targetInteractives.AddRange(pickup.holder.gameObject.GetComponents<Interactive>());
         }
@@ -105,5 +106,30 @@ public class Interactor {
             targetInteractives.AddRange(targetHead.gameObject.GetComponents<Interactive>());
         }
         return targetInteractives;
+    }
+    static public targetType TypeOfTarget(GameObject target) {
+        targetType returnType = targetType.inert;
+        if (GameManager.Instance.playerObject != null){
+            if (GameManager.Instance.playerObject == target)
+                returnType = targetType.player;
+            if (target.transform.IsChildOf(GameManager.Instance.playerObject.transform)) {
+                returnType = targetType.player;
+            }
+        }
+        List<DecisionMaker> AIs = new List<DecisionMaker>(target.GetComponentsInParent<DecisionMaker>());
+        foreach (DecisionMaker dm in AIs){
+            if (dm.enabled)
+                returnType = targetType.other;
+        }
+        // if we're commanding someone, then categories flip
+        if (Controller.Instance.state == Controller.ControlState.commandSelect) {
+            if (returnType == targetType.player) {
+                returnType = targetType.other;
+            } else {
+                if (returnType == targetType.other)
+                    returnType = targetType.player;
+            }
+        }
+        return returnType;
     }
 }

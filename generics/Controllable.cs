@@ -101,13 +101,12 @@ public class Controllable : MonoBehaviour {
     public HashSet<Interaction> UpdateDefaultInteraction(){
         defaultInteraction = null;
         Inventory inv = GetComponent<Inventory>();
-        HashSet<Interaction> manualActions = Interactor.ReportManualActions(gameObject, gameObject);
-        if (inv != null){
-            if (inv.holding) {
-                manualActions.UnionWith(Interactor.ReportManualActions(inv.holding.gameObject, gameObject));
-                manualActions.UnionWith(Interactor.ReportManualActions(gameObject, inv.holding.gameObject));
-            }
-        }
+        HashSet<Interaction> manualActions = new HashSet<Interaction>(Interactor.GetInteractions(gameObject, gameObject));
+        // if (inv != null){
+        //     if (inv.holding) {
+        //         manualActions.UnionWith(Interactor.GetInteractions(inv.holding.gameObject, gameObject));
+        //     }
+        // }
         defaultInteraction = Interactor.GetDefaultAction(manualActions);
         return manualActions;
     }
