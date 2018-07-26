@@ -39,7 +39,8 @@ public class HeadAnimation : MonoBehaviour, IDirectable, ISaveable {
         sprites = Resources.LoadAll<Sprite>("spritesheets/" + spriteSheet);
     }
     public void UpdateSequence() {
-        GetComponent<Animation>().Play(sequence);
+        Animation animationComponent = GetComponent<Animation>();
+        animationComponent.Play(sequence);
     }
     void Awake() {
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -142,5 +143,6 @@ public class HeadAnimation : MonoBehaviour, IDirectable, ISaveable {
     public void LoadData(PersistentComponent data) {
         hitState = (Controllable.HitState)data.ints["hitstate"];
         baseName = data.strings["baseName"];
+        UpdateSequence();
     }
 }

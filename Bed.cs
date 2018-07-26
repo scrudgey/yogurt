@@ -94,6 +94,10 @@ public class Bed : Doorway {
                 Toolbox.Instance.SwitchAudioListener(GameManager.Instance.playerObject);
                 audioSource.PlayOneShot(beddingSound);
                 UINew.Instance.RefreshUI(active:true);
+                HeadAnimation playerHead = GameManager.Instance.playerObject.GetComponentInChildren<HeadAnimation>();
+                if (playerHead){
+                    playerHead.UpdateSequence();
+                }
                 CheckDiaryEntry();
             }
         }
