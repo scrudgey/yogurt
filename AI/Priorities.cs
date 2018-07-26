@@ -93,7 +93,7 @@ namespace AI {
         }
         public override void Update() {
             if (awareness.PossessionsAreOkay()) {
-                urgency = 0;
+                urgency = -1;
             } else {
                 urgency = urgencyLarge;
                 possession.val = awareness.possession;

@@ -34,8 +34,8 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         {typeof(PriorityProtectZone), PriorityType.ProtectZone},
         {typeof(PriorityMakeBalloonAnimals), PriorityType.MakeBalloonAnimals}
     };
+    public string activePriorityName;
     public PriorityType defaultPriorityType;
-    
     public Controllable control;
     public GameObject thought;
     public Text thoughtText;
@@ -101,7 +101,6 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         Toolbox.RegisterMessageCallback<Message>(this, ReceiveMessage);
     }
     public void InitializePriority(Priority priority, Type type){
-        // Priority priority = new PriorityFightFire(gameObject, control);
         priorities.Add(priority);
         if (defaultPriorityType == priorityTypes[type])
             defaultPriority = priority;
@@ -129,11 +128,12 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
             if (priority.urgency < priority.minimumUrgency)
                 priority.urgency += Time.deltaTime / 10f;
             priority.urgency = Mathf.Min(priority.urgency, Priority.urgencyMaximum);
-            if (priority.Urgency(personality) <= Priority.urgencyMinor)
-                continue;
+            // if (priority.Urgency(personality) <= Priority.urgencyMinor)
+            //     continue;
             if (priority.Urgency(personality) > activePriority.Urgency(personality))
                 activePriority = priority;
         }
+        activePriorityName = activePriority.priorityName;
         if (hitState >= Controllable.HitState.unconscious)
             return;
         if (activePriority != oldActivePriority)
