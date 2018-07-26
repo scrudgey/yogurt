@@ -574,7 +574,6 @@ public partial class GameManager : Singleton<GameManager> {
     }
     public bool IsItemCollected(GameObject obj) {
         string filename = Toolbox.Instance.CloneRemover(obj.name);
-        // filename = Toolbox.Instance.ReplaceUnderscore(filename);
         return data.collectedObjects.Contains(filename);
     }
     public void RetrieveCollectedItem(string name) {

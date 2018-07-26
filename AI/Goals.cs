@@ -27,6 +27,8 @@ namespace AI {
             slewTime = UnityEngine.Random.Range(0.1f, 0.5f);
         }
         public status Evaluate() {
+            // if (successCondition.Evaluate() == status.success)
+            //     return status.success;
             foreach (Goal requirement in requirements) {
                 if (requirement.Evaluate() != status.success) {
                     return status.failure;
@@ -35,7 +37,6 @@ namespace AI {
             return successCondition.Evaluate();
         }
         public virtual void Update() {
-
             // if i have any unmet requirements, my update goes to the first unmet one.
             foreach (Goal requirement in requirements) {
                 if (requirement.Evaluate() != status.success) {
@@ -103,10 +104,10 @@ namespace AI {
         public bool findingFail;
         public GoalGetItem(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c) {
             // TODO: fill this in
-            // successCondition = new ConditionHoldingObjectWithName(g, target);
             successCondition = new ConditionHoldingSpecificObject(g, target);
             routines.Add(new RoutineRetrieveRefFromInv(g, c, target));
             routines.Add(new RoutineGetRefFromEnvironment(g, c, target));
+        
         }
         public GoalGetItem(GameObject g, Controllable c, string target) : base(g, c) {
             goalThought = "I need a " + target + ".";

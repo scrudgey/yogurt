@@ -28,7 +28,6 @@ public class Fire : MonoBehaviour {
             foreach (GameObject obj in collidedObjects){
                 if (flammables.ContainsKey(obj)) {
                     Flammable targetFlam = flammables[obj];
-                    Debug.Log(targetFlam);
                     targetFlam.heat += Time.deltaTime * 2f;
                     if (flammable.responsibleParty != null) {
                         targetFlam.responsibleParty = flammable.responsibleParty;
