@@ -43,7 +43,7 @@ public class ClosetButtonHandler : MonoBehaviour {
         UINew.Instance.CloseActiveMenu();
     }
     public void ItemClick(ItemEntryScript itemScript) {
-        GameManager.Instance.RetrieveCollectedItem(itemScript.itemName);
+        GameManager.Instance.RetrieveCollectedItem(itemScript.prefabName);
         UINew.Instance.CloseActiveMenu();
     }
     public void ItemMouseover(ItemEntryScript itemScript) {
