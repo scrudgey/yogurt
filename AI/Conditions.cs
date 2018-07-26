@@ -26,7 +26,7 @@ namespace AI {
             target = t;
         }
         public override status Evaluate() {
-            if (Vector2.Distance(gameObject.transform.position, target.val) < 0.25f) {
+            if (Vector2.Distance(gameObject.transform.position, target.val) < 0.2f) {
                 return status.success;
             } else {
                 return status.neutral;
@@ -107,8 +107,9 @@ namespace AI {
         }
         public override status Evaluate() {
             if (target.val) {
-                if (Vector2.Distance(target.val.transform.position, place.val) < 0.1)
+                if (Vector2.Distance(target.val.transform.position, place.val) < 0.10){
                     return status.success;
+                }
                 return status.failure;
             }
             return status.failure;
