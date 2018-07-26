@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using Nimrod;
 
 public class Speech : Interactive, ISaveable {
-    private string[] swearWords = new string[]{"\bshit\b", "\bfuck\b", "\bshazbot\b", "\bpiss\b", "\bdick\b", "\bass\b"};
+    static string[] swearWords = new string[]{@"\bshit\b", @"\bfuck\b", @"\bfucked\b", @"\bshazbot\b", @"\bpiss\b", @"\bdick\b", @"\bass\b"};
     private string words;
     public bool speaking = false;
     public string[] randomPhrases;
