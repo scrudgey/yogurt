@@ -49,8 +49,7 @@ public class Interactor {
                 enabled = false;
                 continue;
             }
-            interaction.CheckDependency(new List<Interactive>(actives));
-            if (enabled && !interaction.hideInRightClickMenu && interaction.parameterTypes.Count > 0){
+            if (enabled && interaction.parameterTypes.Count > 0){
                 if (interaction.debug)
                     Debug.Log("interaction enabled : " + enabled);
                 returnList.Add(interaction);

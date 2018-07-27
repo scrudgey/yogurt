@@ -12,7 +12,10 @@ public class Interaction {
     public bool debug;
     public Interactive parent;
     public string action;
+    public GameObject lastTarget;
+    public GameObject defaultTarget;
     public List<Component> parameters;
+    public List<Component> defaultParameters;
     public bool hideInManualActions;
     public bool hideInRightClickMenu;
     public int defaultPriority;
@@ -154,9 +157,12 @@ public class Interaction {
         }
     }
     // this can be sped up if I store it in a delegate instead of calling Invoke
-    public void DoAction() {
+    public void DoAction(List<Component> customParameters=null) {
         // if (!enabled)
         //     return;
+        if (customParameters == null){
+            customParameters = parameters;
+        }
         if (actionDelegate == null) {
             if (parameters != null) {
                 methodInfo.Invoke(parent, parameters.ToArray());
