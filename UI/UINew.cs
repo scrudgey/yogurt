@@ -387,7 +387,7 @@ public class UINew : Singleton<UINew> {
     }
     public void UpdateActionButtons(Inventory inv){
         HashSet<Interaction> manualActions = Controller.Instance.focus.UpdateDefaultInteraction();
-        List<actionButton> actionButtons = UINew.Instance.CreateActionButtons(new List<Interaction>(manualActions));
+        List<actionButton> actionButtons = UINew.Instance.CreateActionButtons(new HashSet<Interaction>(manualActions));
         // punch button
         if (Controller.Instance.focus.fightMode) {
             ShowPunchButton();
@@ -525,7 +525,7 @@ public class UINew : Singleton<UINew> {
     public void SetClickedActions(GameObject clickedOn, GameObject clickSite) {
         ClearWorldButtons();
         activeElements = new List<GameObject>();
-        List<Interaction> clickedActions = new List<Interaction>();
+        HashSet<Interaction> clickedActions = new HashSet<Interaction>();
         if (Controller.Instance.commandTarget != null) {
             clickedActions = Interactor.GetInteractions(Controller.Instance.commandTarget, clickedOn);
         } else {
@@ -541,7 +541,7 @@ public class UINew : Singleton<UINew> {
             Destroy(element);
         activeElements = new List<GameObject>();
     }
-    private List<actionButton> CreateButtonsFromActions(List<Interaction> interactions, bool removeColliders = false) {
+    private List<actionButton> CreateButtonsFromActions(HashSet<Interaction> interactions, bool removeColliders = false) {
         List<actionButton> returnList = new List<actionButton>();
         foreach (Interaction interaction in interactions) {
             actionButton newButton = SpawnButton(interaction);
@@ -645,7 +645,7 @@ public class UINew : Singleton<UINew> {
         indicator.transform.SetParent(button.gameobject.transform, false);
         indicator.transform.SetAsLastSibling();
     }
-    private List<actionButton> CreateActionButtons(List<Interaction> manualActions) {
+    private List<actionButton> CreateActionButtons(HashSet<Interaction> manualActions) {
         ClearActionButtons();
         List<actionButton> manualButtons = CreateButtonsFromActions(manualActions, true);
         foreach (actionButton button in manualButtons) {

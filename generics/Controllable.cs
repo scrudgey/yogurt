@@ -6,6 +6,7 @@ public class Controllable : MonoBehaviour {
     public enum HitState { none, stun, unconscious, dead };
     public enum ControlType { none, AI, player }
     public Interaction defaultInteraction;
+    public List<Component> defaultParameters;
     public static List<Type> AIComponents = new List<Type>(){
         typeof(DecisionMaker),
         typeof(PeterPicklebottom)
@@ -101,14 +102,15 @@ public class Controllable : MonoBehaviour {
     public HashSet<Interaction> UpdateDefaultInteraction(){
         defaultInteraction = null;
         Inventory inv = GetComponent<Inventory>();
-        HashSet<Interaction> manualActions = Interactor.ReportManualActions(gameObject, gameObject);
-        if (inv != null){
-            if (inv.holding) {
-                manualActions.UnionWith(Interactor.ReportManualActions(inv.holding.gameObject, gameObject));
-                manualActions.UnionWith(Interactor.ReportManualActions(gameObject, inv.holding.gameObject));
-            }
-        }
+        HashSet<Interaction> manualActions = new HashSet<Interaction>(Interactor.GetInteractions(gameObject, gameObject));
+        // if (inv != null){
+        //     if (inv.holding) {
+        //         manualActions.UnionWith(Interactor.GetInteractions(inv.holding.gameObject, gameObject));
+        //     }
+        // }
         defaultInteraction = Interactor.GetDefaultAction(manualActions);
+        if (defaultInteraction != null)
+            defaultParameters = defaultInteraction.parameters;
         return manualActions;
     }
     void HandleHitStun(MessageHitstun message){
@@ -168,7 +170,7 @@ public class Controllable : MonoBehaviour {
             Toolbox.Instance.SendMessage(gameObject, this, new MessagePunch());
         } else {
             if (defaultInteraction != null){
-                defaultInteraction.DoAction();
+                defaultInteraction.DoAction(customParameters: defaultParameters);
             }
         }
     }

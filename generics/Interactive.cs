@@ -9,12 +9,13 @@ public delegate desire DesireFunction(Personality myPersonality, GameObject requ
 [System.Serializable]
 public class Interaction {
     public List<System.Type> parameterTypes;
-    public List<Interactive> targetComponents;
-    public bool enabled = true;
     public bool debug;
     public Interactive parent;
     public string action;
+    public GameObject lastTarget;
+    public GameObject defaultTarget;
     public List<Component> parameters;
+    public List<Component> defaultParameters;
     public bool hideInManualActions;
     public bool hideInRightClickMenu;
     public int defaultPriority;
@@ -44,7 +45,7 @@ public class Interaction {
     public Interaction(Interactive o, string name, string functionName, bool manualHide, bool rightHide) {
         this.action = functionName;
         actionName = name;
-        enabled = false;
+        // enabled = false;
         parent = o;
         methodInfo = parent.GetType().GetMethod(functionName);
         parameterTypes = new List<System.Type>();
@@ -63,7 +64,7 @@ public class Interaction {
     }
     public Interaction(Interactive o, string name, Action<Component> initAction) {
         actionName = name;
-        enabled = false;
+        // enabled = false;
         parent = o;
         actionDelegate = initAction;
     }
@@ -76,8 +77,9 @@ public class Interaction {
                 Debug.Log("interaction validation function was not located.");
         }
     }
-    public void CheckDependency() {
+    public bool CheckDependency(List<Interactive> targetComponents) {
         parameters = new List<Component>();
+        bool enabled = true;
         int parameterMatches = 0;
         int parameterMisses = 0;
         // set up the parameter list: check each Type required to be passed, check
@@ -125,6 +127,7 @@ public class Interaction {
                 Debug.Log("disabled");
             enabled = false;
         }
+        return enabled;
     }
     public bool IsValid() {
         bool validation = true;
@@ -154,9 +157,12 @@ public class Interaction {
         }
     }
     // this can be sped up if I store it in a delegate instead of calling Invoke
-    public void DoAction() {
-        if (!enabled)
-            return;
+    public void DoAction(List<Component> customParameters=null) {
+        // if (!enabled)
+        //     return;
+        if (customParameters == null){
+            customParameters = parameters;
+        }
         if (actionDelegate == null) {
             if (parameters != null) {
                 methodInfo.Invoke(parent, parameters.ToArray());
@@ -183,153 +189,6 @@ public class Interaction {
     }
 }
 public class Interactive : MonoBehaviour {
-    // TODO: cache default action parameters
     public bool disableInteractions;
     public List<Interaction> interactions = new List<Interaction>();
-    public List<Interaction> GetEnabledActions() {
-        List<Interaction> returnList = new List<Interaction>();
-        foreach (Interaction interaction in interactions) {
-            if (interaction.enabled && interaction.parameterTypes.Count > 0)
-                returnList.Add(interaction);
-        }
-        return returnList;
-    }
-    public List<Interaction> GetRightClickActions() {
-        List<Interaction> returnList = new List<Interaction>();
-        foreach (Interaction interaction in interactions) {
-            if (interaction.enabled && !interaction.hideInRightClickMenu && interaction.parameterTypes.Count > 0)
-                returnList.Add(interaction);
-        }
-        return returnList;
-    }
-    public List<Interaction> GetManualActions() {
-        List<Interaction> returnList = new List<Interaction>();
-        foreach (Interaction interaction in interactions) {
-            if (interaction.enabled && !interaction.hideInManualActions)
-                returnList.Add(interaction);
-        }
-        return returnList;
-    }
-    public List<Interaction> GetFreeActions(GameObject target, GameObject source) {
-        targetType targType = TypeOfTarget(target);
-        targetType sourceType = TypeOfTarget(source);
-        // Free interactions have no required input, and therefore 
-        List<Interaction> returnList = new List<Interaction>();
-        foreach (Interaction interaction in interactions) {
-            if (interaction.debug)
-                Debug.Log("free action " + interaction.actionName + " checking");
-            if (!interaction.playerOnOtherConsent && sourceType == targetType.player && targType == targetType.other) {
-                interaction.enabled = false;
-                continue;
-            }
-            if (!interaction.otherOnPlayerConsent && sourceType == targetType.other && targType == targetType.player) {
-                interaction.enabled = false;
-                continue;
-            }
-            if (!interaction.inertOnPlayerConsent && sourceType == targetType.inert && targType == targetType.player) {
-                interaction.enabled = false;
-                continue;
-            }
-            if (interaction.parameterTypes.Count == 0 && interaction.IsValid()) {
-                if (interaction.debug)
-                    Debug.Log("free action " + interaction.actionName + " enabled free action");
-                returnList.Add(interaction);
-                interaction.enabled = true;
-            }
-        }
-        return returnList;
-    }
-    public void CallAction(string requestAction, bool continuous = false) {
-        Interaction doThis = null;
-        // this logic might be tuned up a bit- checking versus duplicate action names
-        foreach (Interaction interaction in interactions) {
-            if (interaction.actionName == requestAction && interaction.enabled)
-                doThis = interaction;
-        }
-        // find a smarter way to do a distance calculation
-        if (doThis != null) {
-            doThis.DoAction();
-        }
-    }
-    public Interaction GetAction(string requestAction) {
-        Interaction returnAction = null;
-        // this logic might be tuned up a bit- checking versus duplicate action names
-        foreach (Interaction interaction in interactions) {
-            if (interaction.actionName == requestAction)
-                returnAction = interaction;
-        }
-        return returnAction;
-    }
-    public enum targetType { inert, player, other };
-    static public Interactive.targetType TypeOfTarget(GameObject target) {
-        targetType returnType = targetType.inert;
-        if (GameManager.Instance.playerObject != null){
-            if (GameManager.Instance.playerObject == target)
-                returnType = targetType.player;
-            if (target.transform.IsChildOf(GameManager.Instance.playerObject.transform)) {
-                returnType = targetType.player;
-            }
-        }
-        List<DecisionMaker> AIs = new List<DecisionMaker>(target.GetComponentsInParent<DecisionMaker>());
-        foreach (DecisionMaker dm in AIs){
-            if (dm.enabled)
-                returnType = targetType.other;
-        }
-        // if we're commanding someone, then categories flip
-        if (Controller.Instance.state == Controller.ControlState.commandSelect) {
-            if (returnType == targetType.player) {
-                returnType = targetType.other;
-            } else {
-                if (returnType == targetType.other)
-                    returnType = targetType.player;
-            }
-        }
-        return returnType;
-    }
-    public void targetUpdate(List<Interactive> components, GameObject targ, GameObject source) {
-        Interactive.targetType targType = TypeOfTarget(targ);
-        Interactive.targetType sourceType = TypeOfTarget(source);
-        var actives =
-            from iBase in components
-            where iBase.disableInteractions == false
-            select iBase;
-        foreach (Interaction interaction in interactions) {
-            if (interaction.debug) {
-                Debug.Log("Checking the consent for interaction " + interaction.actionName);
-                Debug.Log("target is " + targType.ToString());
-                Debug.Log("source is " + sourceType);
-                Debug.Log("other on player consent: " + interaction.otherOnPlayerConsent);
-                Debug.Log("player on other consent: " + interaction.playerOnOtherConsent);
-                Debug.Log("inert on other consent: " + interaction.inertOnPlayerConsent);
-            }
-            interaction.targetComponents = new List<Interactive>(actives);
-            if (!interaction.playerOnOtherConsent && sourceType == targetType.player && targType == targetType.other) {
-                interaction.enabled = false;
-                continue;
-            }
-            if (!interaction.otherOnPlayerConsent && sourceType == targetType.other && targType == targetType.player) {
-                interaction.enabled = false;
-                continue;
-            }
-            if (!interaction.inertOnPlayerConsent && sourceType == targetType.inert && targType == targetType.player) {
-                interaction.enabled = false;
-                continue;
-            }
-            interaction.CheckDependency();
-            if (interaction.debug)
-                Debug.Log("interaction enabled : " + interaction.enabled);
-            continue;
-        }
-    }
-    public Interaction ReportHighestPriority() {
-        Interaction returnInteraction = null;
-        int highestP = 0;
-        foreach (Interaction interaction in interactions) {
-            if (interaction.defaultPriority > highestP && interaction.enabled) {
-                returnInteraction = interaction;
-                highestP = interaction.defaultPriority;
-            }
-        }
-        return returnInteraction;
-    }
 }
