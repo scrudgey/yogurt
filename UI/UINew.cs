@@ -527,9 +527,9 @@ public class UINew : Singleton<UINew> {
         activeElements = new List<GameObject>();
         HashSet<Interaction> clickedActions = new HashSet<Interaction>();
         if (Controller.Instance.commandTarget != null) {
-            clickedActions = Interactor.GetInteractions(Controller.Instance.commandTarget, clickedOn);
+            clickedActions = Interactor.GetInteractions(Controller.Instance.commandTarget, clickedOn, rightClickMenu:true);
         } else {
-            clickedActions = Interactor.GetInteractions(GameManager.Instance.playerObject, clickedOn);
+            clickedActions = Interactor.GetInteractions(GameManager.Instance.playerObject, clickedOn, rightClickMenu:true);
         }
         List<actionButton> actionButtons = CreateButtonsFromActions(clickedActions); ;
         foreach (actionButton button in actionButtons)

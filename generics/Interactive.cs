@@ -45,7 +45,6 @@ public class Interaction {
     public Interaction(Interactive o, string name, string functionName, bool manualHide, bool rightHide) {
         this.action = functionName;
         actionName = name;
-        // enabled = false;
         parent = o;
         methodInfo = parent.GetType().GetMethod(functionName);
         parameterTypes = new List<System.Type>();
@@ -158,8 +157,6 @@ public class Interaction {
     }
     // this can be sped up if I store it in a delegate instead of calling Invoke
     public void DoAction(List<Component> customParameters=null) {
-        // if (!enabled)
-        //     return;
         if (customParameters == null){
             customParameters = parameters;
         }

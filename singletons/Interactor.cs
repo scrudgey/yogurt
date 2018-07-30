@@ -6,19 +6,19 @@ public enum targetType { inert, player, other };
 public class Interactor {
     // maybe the most important method, it tells all available actions
     // from the perspective of a player or whatever
-    static public HashSet<Interaction> GetInteractions(GameObject focus, GameObject target) {
-        HashSet<Interaction> actionDictionary = ReportRightClickActions(target, focus);
-        actionDictionary.UnionWith(ReportRightClickActions(focus, target));
+    static public HashSet<Interaction> GetInteractions(GameObject focus, GameObject target, bool rightClickMenu=false, bool manualActions=false) {
+        HashSet<Interaction> actionDictionary = GetAllEnabledInteractions(target, focus, rightClickMenu:rightClickMenu, manualActions:manualActions);
+        actionDictionary.UnionWith(GetAllEnabledInteractions(focus, target, rightClickMenu:rightClickMenu, manualActions:manualActions));
         return actionDictionary;
     }
-    static HashSet<Interaction> ReportRightClickActions(GameObject targ, GameObject source) {
+    static HashSet<Interaction> GetAllEnabledInteractions(GameObject targ, GameObject source, bool rightClickMenu=false, bool manualActions=false) {
         HashSet<Interaction> returnDictionary = new HashSet<Interaction>();
         foreach (Interactive interactive in GetInteractorTree(source)) {
-            returnDictionary.UnionWith(GetEnabledInteractions(interactive, targ));
+            returnDictionary.UnionWith(GetEnabledInteractions(interactive, targ, rightClickMenu:rightClickMenu, manualActions:manualActions));
         }
         return returnDictionary;
     }
-    static HashSet<Interaction> GetEnabledInteractions(Interactive sourceInteractive, GameObject targ) {
+    static HashSet<Interaction> GetEnabledInteractions(Interactive sourceInteractive, GameObject targ, bool rightClickMenu=false, bool manualActions=false) {
         HashSet<Interaction> returnList = new HashSet<Interaction>();
         List<Interactive> targetInteractives = Interactor.GetInteractorTree(targ);
         targetType targType = Interactor.TypeOfTarget(targ);
@@ -28,6 +28,10 @@ public class Interactor {
             where iBase.disableInteractions == false
             select iBase;
         foreach (Interaction interaction in sourceInteractive.interactions) {
+            if (rightClickMenu && interaction.hideInRightClickMenu)
+                continue;
+            if (manualActions && interaction.hideInManualActions)
+                continue;
             if (interaction.debug) {
                 Debug.Log("Checking the consent for interaction " + interaction.actionName);
                 Debug.Log("target is " + targType.ToString());

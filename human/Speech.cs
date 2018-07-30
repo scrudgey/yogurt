@@ -32,7 +32,8 @@ public class Speech : Interactive, ISaveable {
     public bool disableSpeakWith;
     public bool inDialogue;
     void Awake() {
-        Interaction speak = new Interaction(this, "Look", "Describe", true, false);
+        Interaction speak = new Interaction(this, "Look", "Describe");
+        speak.hideInManualActions = true;
         speak.limitless = true;
         speak.otherOnPlayerConsent = false;
         speak.playerOnOtherConsent = false;
@@ -136,7 +137,6 @@ public class Speech : Interactive, ISaveable {
         return "Speak with " + otherName;
     }
     public bool SpeakWith_Validation() {
-        // if (Controller.Instance.)
         return GameManager.Instance.playerObject != gameObject;
     }
     // TODO: allow liquids and things to self-describe; add modifiers etc.
