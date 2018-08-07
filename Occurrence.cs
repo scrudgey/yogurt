@@ -9,6 +9,12 @@ public class Occurrence : MonoBehaviour {
     // that knows how to describe an event in terms of EventData. 
     // occurrences can also be noticed by perceptive components which use the flag properties to compose 
     // a stimulus.
+    public HashSet<GameObject> involvedParties = new HashSet<GameObject>();
+    public void CalculateDescriptions(){
+        foreach(OccurrenceData dat in data){
+            dat.CalculateDescriptions(this);
+        }
+    }
     public List<OccurrenceData> data = new List<OccurrenceData>();
     public static EventData Yogurt(GameObject eater) {
         EventData data = new EventData(positive: 1);
@@ -166,9 +172,10 @@ public class EventData {
         return grammar.Parse("{" + key + "}");
     }
 }
+[System.Serializable]
 public class OccurrenceData {
     public List<EventData> events = new List<EventData>();
-    public virtual void CalculateDescriptions() {
+    public virtual void CalculateDescriptions(Occurrence parent) {
         Debug.Log("base calculatedescriptions was called.");
     }
     public OccurrenceData() { }
@@ -176,7 +183,7 @@ public class OccurrenceData {
 public class OccurrenceFire : OccurrenceData {
     public GameObject flamingObject;
     public bool extinguished;
-    public override void CalculateDescriptions() {
+    public override void CalculateDescriptions(Occurrence parent) {
         EventData data = new EventData(chaos: 2);
         string objectName = Toolbox.Instance.GetName(flamingObject);
         data.noun = "fire";
@@ -193,7 +200,7 @@ public class OccurrenceEat : OccurrenceData {
     public Liquid liquid;
     public Edible edible;
     public GameObject eater;
-    public override void CalculateDescriptions() {
+    public override void CalculateDescriptions(Occurrence parent) {
         EventData data = new EventData();
         data.noun = "eating";
         data.whatHappened = Toolbox.Instance.GetName(eater) + " ate " + edible.name;
@@ -231,14 +238,14 @@ public class OccurrenceEat : OccurrenceData {
 }
 public class OccurrenceDeath : OccurrenceData {
     public GameObject dead;
-    public override void CalculateDescriptions() {
+    public override void CalculateDescriptions(Occurrence parent) {
         events.Add(Occurrence.Death(dead));
     }
 }
 public class OccurrenceVomit : OccurrenceData {
     public GameObject vomiter;
     public GameObject vomit;
-    public override void CalculateDescriptions() {
+    public override void CalculateDescriptions(Occurrence parent) {
         if (vomit == null | vomiter == null)
             return;
         events.Add(Occurrence.Vomit(vomiter, vomit));
@@ -258,7 +265,7 @@ public class OccurrenceSpeech : OccurrenceData {
     public string line;
     public bool threat;
     public bool insult;
-    public override void CalculateDescriptions() {
+    public override void CalculateDescriptions(Occurrence parent) {
         string speakerName = Toolbox.Instance.GetName(speaker);
         string targetName = "";
         if (target != null)
@@ -295,7 +302,7 @@ public class OccurrenceSpeech : OccurrenceData {
 public class OccurrenceViolence : OccurrenceData {
     public GameObject attacker;
     public GameObject victim;
-    public override void CalculateDescriptions() {
+    public override void CalculateDescriptions(Occurrence parent) {
         string attackerName = Toolbox.Instance.GetName(attacker);
         string victimName = Toolbox.Instance.GetName(victim);
         EventData data = new EventData(disturbing: 2, chaos: 2);

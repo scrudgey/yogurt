@@ -220,7 +220,7 @@ public class Speech : Interactive, ISaveable {
             Say(toSay);
         }
     }
-    public OccurrenceSpeech Say(string phrase, EventData data = null) {
+    public OccurrenceSpeech Say(string phrase, EventData data = null, GameObject insultTarget = null, GameObject threatTarget = null) {
         if (phrase == "")
             return null;
         if (hitState >= Controllable.HitState.unconscious)
@@ -245,13 +245,24 @@ public class Speech : Interactive, ISaveable {
         eventData.ratings[Rating.offensive] += extremity * 5f;
         
         speechData.line = censoredPhrase;
-        Toolbox.Instance.OccurenceFlag(gameObject, speechData);
         if (inDialogue)
             return null;
         words = censoredPhrase;
         speakTime = DoubleSeat(phrase.Length, 2f, 50f, 5f, 2f);
         speakTimeTotal = speakTime;
         speakSpeed = phrase.Length / speakTime;
+        HashSet<GameObject> involvedParties = new HashSet<GameObject>(){gameObject};
+        if (insultTarget != null){
+            speechData.insult = true;
+            speechData.target = insultTarget;
+            involvedParties.Add(insultTarget);
+        }
+        if (threatTarget != null){
+            speechData.threat = true;
+            speechData.target = threatTarget;
+            involvedParties.Add(threatTarget);
+        }
+        Occurrence occurenceFlag =  Toolbox.Instance.OccurenceFlag(gameObject, speechData, involvedParties);
         return speechData;
     }
     public string CensorSwears(string phrase){
@@ -271,26 +282,18 @@ public class Speech : Interactive, ISaveable {
             data = new EventData();
         }
         data.noun = "insults";
-        OccurrenceSpeech speechData = Say(phrase, data: data);
-        if (speechData == null)
-            return;
-        speechData.insult = true;
-        speechData.target = target;
-        speechData.CalculateDescriptions();
+        OccurrenceSpeech speechData = Say(phrase, data: data, insultTarget: target);
     }
     public void Threaten(string phrase, GameObject target, EventData data = null){
         if (data == null) {
             data = new EventData();
         }
         data.noun = "threats";
-        OccurrenceSpeech speechData = Say(phrase, data: data);
-        if (speechData == null)
-            return;
-        speechData.threat = true;
-        speechData.target = target;
-        speechData.CalculateDescriptions();
+        OccurrenceSpeech speechData = Say(phrase, data: data, threatTarget: target);
     }
     void ReactToOccurrence(EventData od) {
+        // violence
+        // violence toward me
         if (od.ratings[Rating.disgusting] > 1)
             SayFromNimrod("grossreact");
     }
