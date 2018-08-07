@@ -171,16 +171,20 @@ namespace AI {
         }
         public override void Update() {
             base.Update();
-            // Debug.Log("look in direction update");
         }
     }
     public class GoalWalkToPoint : Goal {
         public Ref<Vector2> target;
-        public GoalWalkToPoint(GameObject g, Controllable c, Ref<Vector2> target) : base(g, c) {
+
+        public GoalWalkToPoint(GameObject g, Controllable c, Ref<Vector2> target, float minDistance) : base (g, c) {
             this.target = target;
-            successCondition = new ConditionLocation(g, target);
-            routines.Add(new RoutineWalkToPoint(g, c, target));
+            ConditionLocation condition = new ConditionLocation(g, target);
+            condition.minDistance = minDistance;
+            successCondition = condition;
+
+            routines.Add(new RoutineWalkToPoint(g, c, target, minDistance));
         }
+        public GoalWalkToPoint(GameObject g, Controllable c, Ref<Vector2> target) : this (g, c, target, 0.2f) { }
     }
     public class GoalHoseDown : Goal {
         public Ref<GameObject> target;
