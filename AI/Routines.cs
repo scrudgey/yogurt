@@ -312,18 +312,21 @@ namespace AI {
         }
     }
     public class RoutineWalkToPoint : Routine {
+        public float minDistance;
         public Ref<Vector2> target = new Ref<Vector2>(Vector2.zero);
-        public RoutineWalkToPoint(GameObject g, Controllable c, Ref<Vector2> t) : base(g, c) {
+        public RoutineWalkToPoint(GameObject g, Controllable c, Ref<Vector2> t, float minDistance) : base(g, c) {
             routineThought = "I'm walking to a spot.";
             target = t;
+            this.minDistance = minDistance;
         }
+        public RoutineWalkToPoint(GameObject g, Controllable c, Ref<Vector2> t) : this (g, c, t, 0.1f) { }
         protected override status DoUpdate() {
             float distToTarget = Vector2.Distance(gameObject.transform.position, target.val);
             control.ResetInput();
             if (distToTarget < 0.2f) {
                 return status.success;
             } else {
-                if (Math.Abs(gameObject.transform.position.x - target.val.x) > 0.1f) {
+                if (Math.Abs(gameObject.transform.position.x - target.val.x) > minDistance) {
                     if (gameObject.transform.position.x < target.val.x) {
                         control.rightFlag = true;
                     }
@@ -331,7 +334,7 @@ namespace AI {
                         control.leftFlag = true;
                     }
                 }
-                if (Math.Abs(gameObject.transform.position.y - target.val.y) > 0.1f) {
+                if (Math.Abs(gameObject.transform.position.y - target.val.y) > minDistance) {
                     if (gameObject.transform.position.y < target.val.y) {
                         control.upFlag = true;
                     }
