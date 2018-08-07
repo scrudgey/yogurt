@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 public class ChemicalSpray : MonoBehaviour {
     public GameObject collisionPlume;
     private float height;
@@ -11,7 +12,8 @@ public class ChemicalSpray : MonoBehaviour {
                 OccurrenceFire fireData = new OccurrenceFire();
                 fireData.flamingObject = coll.gameObject;
                 fireData.extinguished = true;
-                Toolbox.Instance.OccurenceFlag(gameObject, fireData);
+
+                Toolbox.Instance.OccurenceFlag(coll.gameObject, fireData, new HashSet<GameObject>(){coll.gameObject});
             }
         }
         Destroy(gameObject);

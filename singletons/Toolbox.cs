@@ -48,11 +48,17 @@ public class Toolbox : Singleton<Toolbox> {
         return d[n, m];
     }
     // TODO: fix mispelling
-    public void OccurenceFlag(GameObject spawner, OccurrenceData data) {
+    public Occurrence OccurenceFlag(GameObject spawner, OccurrenceData data, HashSet<GameObject> involvedParties) {
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
+        occurrence.involvedParties.UnionWith(involvedParties);
         occurrence.data.Add(data);
-        data.CalculateDescriptions();
+        occurrence.CalculateDescriptions();
+        GameObject noiseFlagObject = GameObject.Instantiate(Resources.Load("NoiseFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
+        Occurrence noiseFlag = noiseFlagObject.GetComponent<Occurrence>();
+        noiseFlag.involvedParties = occurrence.involvedParties;
+        // noiseFlag.occurrenceFlag = occurrence;
+        return occurrence;
     }
     public EventData DataFlag(GameObject spawner, float chaos = 0, float disgusting = 0, float disturbing = 0, float offensive = 0, float positive = 0) {
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
@@ -110,6 +116,7 @@ public class Toolbox : Singleton<Toolbox> {
         phys.initHeight = pos.z;
         phys.impactsMiss = true;
         phys.initVelocity = initialVelocity;
+        phys.silentImpact = true;
         Liquid.MonoLiquidify(droplet, l);
         return droplet;
     }

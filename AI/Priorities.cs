@@ -95,7 +95,7 @@ namespace AI {
             if (awareness.PossessionsAreOkay()) {
                 urgency = -1;
             } else {
-                urgency = urgencyLarge;
+                urgency = urgencySmall;
                 possession.val = awareness.possession;
                 returnPosition.val = awareness.possessionDefaultState.lastSeenPosition;
             }
@@ -126,11 +126,6 @@ namespace AI {
             goal = new GoalWander(g, c);
         }
         public override float Urgency(Personality personality) {
-            // if (personality.actor == Personality.Actor.yes) {
-            //     return -1;
-            // } else {
-            //     return Priority.urgencyMinor;
-            // }
             return Priority.urgencyMinor;
         }
     }
@@ -170,6 +165,26 @@ namespace AI {
         public override void Update() {
             if (awareness.nearestEnemy.val == null)
                 urgency -= Time.deltaTime / 10f;
+        }
+    }
+    public class PriorityInvestigateNoise: Priority {
+        public Ref<Vector2> lastHeardNoise = new Ref<Vector2>(Vector2.zero);
+        public PriorityInvestigateNoise(GameObject g, Controllable c): base(g, c){
+            priorityName = "investigate noise";
+
+            GoalWalkToPoint walkTo = new GoalWalkToPoint(g, c, lastHeardNoise, 0.3f);
+
+            goal = walkTo;
+        }
+        public override void ReceiveMessage(Message incoming){
+            if (incoming is MessageNoise){
+                MessageNoise message = (MessageNoise)incoming;
+                lastHeardNoise.val = message.location;
+                urgency = Priority.urgencyLarge;
+            }
+        }
+        public override void Update(){
+            urgency -= Time.deltaTime;
         }
     }
     public class PriorityAttack : Priority {

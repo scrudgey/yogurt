@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 public class Flammable : MonoBehaviour, ISaveable {
     public float heat;
     public float flashpoint;
@@ -92,19 +93,22 @@ public class Flammable : MonoBehaviour, ISaveable {
             }
             OccurrenceFire fireData = new OccurrenceFire();
             fireData.flamingObject = gameObject;
-            Toolbox.Instance.OccurenceFlag(gameObject, fireData);
+            Toolbox.Instance.OccurenceFlag(gameObject, fireData, new HashSet<GameObject>(){gameObject});
         }
         if (onFire) {
+            HashSet<GameObject> involvedParties = new HashSet<GameObject>(){gameObject};
             if (pickup) {
-                if (pickup.holder != null)
+                if (pickup.holder != null){
                     responsibleParty = pickup.holder.gameObject;
+                    involvedParties.Add(pickup.holder.gameObject);
+                }
             }
             flagTimer += Time.deltaTime;
             if (flagTimer > 0.5f) {
                 flagTimer = 0;
                 OccurrenceFire fireData = new OccurrenceFire();
                 fireData.flamingObject = gameObject;
-                Toolbox.Instance.OccurenceFlag(gameObject, fireData);
+                Toolbox.Instance.OccurenceFlag(gameObject, fireData, involvedParties);
             }
             // if i am on fire, i take damage.
             MessageDamage message = new MessageDamage(Time.deltaTime, damageType.fire);

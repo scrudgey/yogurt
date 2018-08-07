@@ -256,6 +256,18 @@ public class Awareness : MonoBehaviour, ISaveable {
             ProcessOccurrence(other.gameObject);
             seenFlags.Add(other.gameObject);
         }
+        if (other.tag == "occurrenceSound"){
+            // do something
+            Occurrence flag = other.GetComponent<Occurrence>();
+            if (!flag.involvedParties.Contains(gameObject)){
+                // react to noise
+                ProcessNoise(other.gameObject);
+            }
+        }
+    }
+    void ProcessNoise(GameObject flag){
+        MessageNoise message = new MessageNoise(flag);
+        Toolbox.Instance.SendMessage(gameObject, this, message);
     }
     void ProcessOccurrence(GameObject flag) {
         Occurrence occurrence = flag.GetComponent<Occurrence>();
@@ -283,7 +295,6 @@ public class Awareness : MonoBehaviour, ISaveable {
         }
         EventData memory = enumerator.Current;
         return "I remember when "+memory.whatHappened;
-        // EventData randomMemory = shortTermMemory[Random.Range(0, shortTermMemory.Count())];
     }
     void WitnessViolence(OccurrenceViolence dat) {
         if (dat.victim == null || dat.attacker == null)
@@ -424,6 +435,7 @@ public class Awareness : MonoBehaviour, ISaveable {
     void AttackedByPerson(MessageDamage message) {
         if (hitState >= Controllable.HitState.unconscious)
             return;
+        // adjust reaction depending on magnitude?
         GameObject g = message.responsibleParty;
         PersonalAssessment assessment = FormPersonalAssessment(g);
         if (assessment != null) {

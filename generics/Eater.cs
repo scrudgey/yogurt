@@ -166,7 +166,8 @@ public class Eater : Interactive, ISaveable {
             GameManager.Instance.data.achievementStats.hatsEaten += 1;
             GameManager.Instance.CheckAchievements();
         }
-        Toolbox.Instance.OccurenceFlag(gameObject, eatData);
+        HashSet<GameObject> involvedParties = new HashSet<GameObject>(){gameObject, food.gameObject};
+        Toolbox.Instance.OccurenceFlag(gameObject, eatData, involvedParties);
         // play eat sound
         if (food.eatSound != null) {
             Toolbox.Instance.AudioSpeaker(food.eatSound, transform.position);
@@ -197,9 +198,11 @@ public class Eater : Interactive, ISaveable {
 
         OccurrenceVomit data = new OccurrenceVomit();
         data.vomiter = gameObject;
+        HashSet<GameObject> involvedParties = new HashSet<GameObject>(){gameObject};
         if (eatenQueue.Count > 0) {
             GameObject eaten = eatenQueue.Dequeue();
             data.vomit = eaten.gameObject;
+            involvedParties.Add(eaten.gameObject);
             eaten.SetActive(true);
             eaten.transform.position = transform.position;
             MonoLiquid mono = eaten.GetComponent<MonoLiquid>();
@@ -222,7 +225,7 @@ public class Eater : Interactive, ISaveable {
             }
             eaten = null;
         }
-        Toolbox.Instance.OccurenceFlag(gameObject, data);
+        Toolbox.Instance.OccurenceFlag(gameObject, data, involvedParties);
         MessageHead head = new MessageHead();
         head.type = MessageHead.HeadType.vomiting;
         head.value = true;

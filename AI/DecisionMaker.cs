@@ -22,7 +22,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
     public enum PriorityType {
         Attack, FightFire, ProtectPossessions, 
         ReadScript, RunAway, Wander, ProtectZone,
-        MakeBalloonAnimals
+        MakeBalloonAnimals, InvestigateNoise
     }
     static Dictionary<Type, PriorityType> priorityTypes = new Dictionary<Type, PriorityType>(){
         {typeof(PriorityAttack), PriorityType.Attack},
@@ -32,7 +32,8 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         {typeof(PriorityRunAway), PriorityType.RunAway},
         {typeof(PriorityWander), PriorityType.Wander},
         {typeof(PriorityProtectZone), PriorityType.ProtectZone},
-        {typeof(PriorityMakeBalloonAnimals), PriorityType.MakeBalloonAnimals}
+        {typeof(PriorityMakeBalloonAnimals), PriorityType.MakeBalloonAnimals},
+        {typeof(PriorityInvestigateNoise), PriorityType.InvestigateNoise}
     };
     public string activePriorityName;
     public PriorityType defaultPriorityType;
@@ -81,13 +82,13 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         thoughtText.text = "";
 
         // create priorities
-        // TODO: allow for a default priority
         priorities = new List<Priority>();
         InitializePriority(new PriorityFightFire(gameObject, control), typeof(PriorityFightFire));
         InitializePriority(new PriorityRunAway(gameObject, control), typeof(PriorityRunAway));
         InitializePriority(new PriorityAttack(gameObject, control), typeof(PriorityAttack));
         InitializePriority(new PriorityProtectPossessions(gameObject, control), typeof(PriorityProtectPossessions));
         InitializePriority(new PriorityWander(gameObject, control), typeof(PriorityWander));
+        InitializePriority(new PriorityInvestigateNoise(gameObject, control), typeof(PriorityInvestigateNoise));
         if (personality.actor == Personality.Actor.yes)
             InitializePriority(new PriorityReadScript(gameObject, control), typeof(PriorityReadScript));
         if (protectionZone != null) {

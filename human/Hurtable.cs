@@ -172,7 +172,7 @@ public class Hurtable : Damageable, ISaveable {
         hitState = Controllable.AddHitState(hitState, Controllable.HitState.dead);
         OccurrenceDeath occurrenceData = new OccurrenceDeath();
         occurrenceData.dead = gameObject;
-        Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData);
+        Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData, new HashSet<GameObject>(){gameObject});
     }
     public void TypeOfDeath(damageType type) {
         bool suicide = false;

@@ -23,6 +23,7 @@ public class PhysicalImpact : MonoBehaviour {
         OccurrenceViolence violence = new OccurrenceViolence();
         violence.attacker = message.responsibleParty;
         violence.victim = collider.gameObject;
-        Toolbox.Instance.OccurenceFlag(gameObject, violence);
+        HashSet<GameObject> involvedParties = new HashSet<GameObject>() { message.responsibleParty, collider.gameObject };
+        Toolbox.Instance.OccurenceFlag(message.responsibleParty, violence, involvedParties);
     }
 }

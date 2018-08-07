@@ -83,3 +83,9 @@ public class MessageOccurrence : Message {
         this.data = data;
     }
 }
+public class MessageNoise : Message {
+    public Vector2 location;
+    public MessageNoise(GameObject gameObject){
+        this.location = gameObject.transform.position;
+    }
+}
