@@ -290,8 +290,13 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
     }
     public void Collision(Collision2D collision) {
         // Debug.Log("physical collision: "+gameObject.name+" + "+collision.gameObject.name);
+        // Debug.Log(collision.relativeVelocity.magnitude);
         MessageDamage message = new MessageDamage();
-        message.responsibleParty = thrownBy;
+        if (thrownBy != null){
+            message.responsibleParty = thrownBy;
+        } else {
+            message.responsibleParty = gameObject;
+        }
         // the force is normal to the surface we impacted.
         ContactPoint2D contact = collision.contacts[0];
         // TODO: fix magnitude? z? amount?
@@ -302,7 +307,10 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
                 message.amount = 25f;
 
         message.type = damageType.physical;
-        Toolbox.Instance.SendMessage(gameObject, this, message);
+        if (collision.relativeVelocity.magnitude > 1){
+            Toolbox.Instance.SendMessage(gameObject, this, message);
+            Toolbox.Instance.SendMessage(collision.gameObject, this, message);
+        }
         Impact(message);
         AudioClip impactSound = null;
         if (impactSounds != null && !silentImpact) {
