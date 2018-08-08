@@ -68,8 +68,6 @@ public class VideoCamera : Interactive, ISaveable {
     // TODO: there could be an issue here with the same occurrence triggering
     // multiple collisions. I will have to handle that eventually.
     void OnTriggerEnter2D(Collider2D col) {
-        // if (col.name != "OccurrenceFlag(Clone)" || !live)
-        //     return;
         if (col.tag != "occurrenceFlag" || !live)
             return;
         Occurrence occurrence = col.gameObject.GetComponent<Occurrence>();

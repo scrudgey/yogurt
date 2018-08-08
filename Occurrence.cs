@@ -144,7 +144,6 @@ public class EventData {
         ratings[Rating.chaos] = chaos;
         ratings[Rating.offensive] = offensive;
         ratings[Rating.positive] = positive;
-        // this.disturbing = disturbing;
     }
     public bool MatchSpecific(EventData other) {
         // TODO: include descriptions?
