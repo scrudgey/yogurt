@@ -129,16 +129,17 @@ public class Hurtable : Damageable, ISaveable {
         }
         if (damage > 0 && Random.Range(0.0f, 1.0f) < ouchFrequency) {
             MessageSpeech speechMessage = new MessageSpeech();
-            speechMessage.nimrodKey = true;
+            speechMessage.nimrod = true;
+            speechMessage.interrupt = true;
             switch (message.type) {
                 case damageType.physical:
-                    speechMessage.phrase = "pain-physical";
+                    speechMessage.phrase = "{pain-physical}";
                     break;
                 case damageType.fire:
-                    speechMessage.phrase = "pain-fire";
+                    speechMessage.phrase = "{pain-fire}";
                     break;
                 default:
-                    speechMessage.phrase = "pain-physical";
+                    speechMessage.phrase = "{pain-physical}";
                     break;
             }
             Toolbox.Instance.SendMessage(gameObject, this, speechMessage);
