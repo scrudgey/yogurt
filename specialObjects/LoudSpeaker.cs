@@ -13,7 +13,8 @@ public class LoudSpeaker : MonoBehaviour {
         timer += Time.deltaTime;
         if (timer > interval) {
             timer = 0f;
-            speech.Say(line);
+            MessageSpeech message = new MessageSpeech(line);
+            speech.Say(message);
         }
     }
 }

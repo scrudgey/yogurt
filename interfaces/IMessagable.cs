@@ -39,8 +39,11 @@ public class MessageSpeech : Message {
     public bool randomSpeech;
     public bool sayLine;
     public GameObject swearTarget;
-    public bool nimrodKey;
+    public GameObject insultTarget;
+    public GameObject threatTarget;
+    public bool nimrod;
     public EventData eventData;
+    public bool interrupt;
     public MessageSpeech() { }
     public MessageSpeech(string phrase, EventData eventData = null) {
         this.phrase = phrase;

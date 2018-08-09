@@ -10,15 +10,15 @@ public class Speech : Interactive, ISaveable {
     private string words;
     public bool speaking = false;
     public string[] randomPhrases;
-    private List<string> queue = new List<string>();
+    private List<MessageSpeech> queue = new List<MessageSpeech>();
     private float speakTime;
+    private float queueTime;
     private float speakTimeTotal;
     private GameObject bubbleParent;
     private FollowGameObjectInCamera follower;
     private GameObject flipper;
     private Text bubbleText;
     private float speakSpeed;
-    // private char[] chars;
     private bool[] swearMask;
     public bool vomiting;
     public AudioClip speakSound;
@@ -74,7 +74,6 @@ public class Speech : Interactive, ISaveable {
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
         Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
         Toolbox.RegisterMessageCallback<MessageAnimation>(this, HandleAnimation);
-        Toolbox.RegisterMessageCallback<MessageOccurrence>(this, HandleOccurrence);
         Toolbox.RegisterMessageCallback<MessageHead>(this, HandleHead);
     }
     void HandleSpeech(MessageSpeech message) {
@@ -90,11 +89,7 @@ public class Speech : Interactive, ISaveable {
             SayRandom();
             return;
         }
-        if (message.nimrodKey) {
-            SayFromNimrod(message.phrase);
-            return;
-        }
-        Say(message.phrase, data: message.eventData);
+        Say(message);
     }
     void HandleHitStun(MessageHitstun message) {
         hitState = message.hitState;
@@ -106,12 +101,11 @@ public class Speech : Interactive, ISaveable {
     }
     void HandleAnimation(MessageAnimation message) {
         if (message.type == MessageAnimation.AnimType.punching && message.value == true) {
-            SayFromNimrod("punchsay");
+            MessageSpeech speech = new MessageSpeech("{punchsay}");
+            speech.nimrod = true;
+            speech.interrupt = true;
+            Say(speech);
         }
-    }
-    void HandleOccurrence(MessageOccurrence message) {
-        foreach (EventData data in message.data.events)
-            ReactToOccurrence(data);
     }
     void HandleHead(MessageHead message) {
         if (message.type == MessageHead.HeadType.vomiting) {
@@ -144,17 +138,19 @@ public class Speech : Interactive, ISaveable {
     public void Describe(Item obj) {
         LiquidContainer container = obj.GetComponent<LiquidContainer>();
         MonoLiquid mono = obj.GetComponent<MonoLiquid>();
+        MessageSpeech message = new MessageSpeech();
         if (container) {
             if (container.amount > 0 && container.descriptionName != "") {
-                Say("It's a " + container.descriptionName + " of " + container.liquid.name + ".");
+                message.phrase = "It's a " + container.descriptionName + " of " + container.liquid.name + ".";
             } else {
-                Say(obj.description);
+                message.phrase = obj.description;
             }
         } else if (mono) {
-            Say("It's " + mono.liquid.name + ".");
+            message.phrase = "It's " + mono.liquid.name + ".";
         } else {
-            Say(obj.description);
+            message.phrase = obj.description;
         }
+        Say(message);
     }
     public string Describe_desc(Item obj) {
         string itemname = Toolbox.Instance.GetName(obj.gameObject);
@@ -204,63 +200,72 @@ public class Speech : Interactive, ISaveable {
             speaking = false;
             bubbleParent.SetActive(false);
             speakTime = 0;
-            if (queue.Count > 0) {
-                words = queue[0];
-                speakTime = DoubleSeat(words.Length, 2f, 5f, 12f, 2f);
-                queue.RemoveAt(0);
-                speaking = true;
-                bubbleText.text = words;
-                bubbleParent.SetActive(true);
+            queueTime = 0;
+        }
+        if (!speaking && queue.Count > 0){
+            queueTime += Time.deltaTime;
+            if (queueTime > 1f){
+                queueTime = 0;
+                int index = Random.Range(0, queue.Count);
+                Say(queue[index]);
+                queue.RemoveAt(index);
             }
         }
     }
     public void SayRandom() {
         if (randomPhrases.Length > 0) {
             string toSay = randomPhrases[Random.Range(0, randomPhrases.Length)];
-            Say(toSay);
+            MessageSpeech message = new MessageSpeech(toSay);
         }
     }
-    public OccurrenceSpeech Say(string phrase, EventData data = null, GameObject insultTarget = null, GameObject threatTarget = null) {
-        if (phrase == "")
+    public OccurrenceSpeech Say(MessageSpeech message) {
+        if (message.phrase == "")
             return null;
         if (hitState >= Controllable.HitState.unconscious)
             return null;
-        if (speaking && phrase == words) {
+        if (speaking && message.phrase == words && !message.interrupt) {
+            queue.Add(message);
             return null;
+        }
+        if (message.nimrod){
+            Grammar grammar = new Grammar();
+            grammar.Load("structure");
+            grammar.Load("flavor_" + flavor);
+            message.phrase = grammar.Parse(message.phrase);
+            if (message.phrase == "")
+                return null;
         }
         OccurrenceSpeech speechData = new OccurrenceSpeech();
         speechData.speaker = gameObject;
-        EventData eventData = new EventData();
-        if (data != null) {
-            eventData = data;
+        if (message.eventData == null)
+            message.eventData = new EventData();
+        speechData.events.Add(message.eventData);
+        string censoredPhrase = CensorSwears(message.phrase);
+        int extremity = Toolbox.LevenshteinDistance(message.phrase, censoredPhrase);
+        swearMask = new bool[message.phrase.Length];
+        for (int i = 0; i < message.phrase.Length; i++){
+            swearMask[i] = message.phrase[i] != censoredPhrase[i];
         }
-        speechData.events.Add(eventData);
-        string censoredPhrase = CensorSwears(phrase);
-        int extremity = Toolbox.LevenshteinDistance(phrase, censoredPhrase);
-        swearMask = new bool[phrase.Length];
-        for (int i = 0; i < phrase.Length; i++){
-            swearMask[i] = phrase[i] != censoredPhrase[i];
-        }
-        eventData.ratings[Rating.chaos] += extremity * 2f;
-        eventData.ratings[Rating.offensive] += extremity * 5f;
+        message.eventData.ratings[Rating.chaos] += extremity * 2f;
+        message.eventData.ratings[Rating.offensive] += extremity * 5f;
         
         speechData.line = censoredPhrase;
         if (inDialogue)
             return null;
         words = censoredPhrase;
-        speakTime = DoubleSeat(phrase.Length, 2f, 50f, 5f, 2f);
+        speakTime = DoubleSeat(message.phrase.Length, 2f, 50f, 5f, 2f);
         speakTimeTotal = speakTime;
-        speakSpeed = phrase.Length / speakTime;
+        speakSpeed = message.phrase.Length / speakTime;
         HashSet<GameObject> involvedParties = new HashSet<GameObject>(){gameObject};
-        if (insultTarget != null){
+        if (message.insultTarget != null){
             speechData.insult = true;
-            speechData.target = insultTarget;
-            involvedParties.Add(insultTarget);
+            speechData.target = message.insultTarget;
+            involvedParties.Add(message.insultTarget);
         }
-        if (threatTarget != null){
+        if (message.threatTarget != null){
             speechData.threat = true;
-            speechData.target = threatTarget;
-            involvedParties.Add(threatTarget);
+            speechData.target = message.threatTarget;
+            involvedParties.Add(message.threatTarget);
         }
         Occurrence occurenceFlag =  Toolbox.Instance.OccurenceFlag(gameObject, speechData, involvedParties);
         return speechData;
@@ -278,45 +283,49 @@ public class Speech : Interactive, ISaveable {
         return censoredPhrase;
     }
     public void Insult(string phrase, GameObject target, EventData data = null){
-        if (data == null) {
-            data = new EventData();
+        MessageSpeech message = new MessageSpeech(phrase);
+        message.eventData = new EventData();
+        if (data != null) {
+            message.eventData = data;
         }
-        data.noun = "insults";
-        OccurrenceSpeech speechData = Say(phrase, data: data, insultTarget: target);
+        message.eventData.noun = "insults";
+        Say(message);
     }
     public void Threaten(string phrase, GameObject target, EventData data = null){
-        if (data == null) {
-            data = new EventData();
+        MessageSpeech message = new MessageSpeech(phrase);
+        message.eventData = new EventData();
+        if (data != null) {
+            message.eventData = data;
         }
-        data.noun = "threats";
-        OccurrenceSpeech speechData = Say(phrase, data: data, threatTarget: target);
-    }
-    void ReactToOccurrence(EventData od) {
-        // violence
-        // violence toward me
-        if (od.ratings[Rating.disgusting] > 1)
-            SayFromNimrod("grossreact");
+        message.eventData.noun = "threats";
+        Say(message);
     }
     public void CompareLastNetIntrinsic(Dictionary<BuffType, Buff> net) {
         if (lastNetIntrinsic == null)
             return;
         if (lastNetIntrinsic[BuffType.fireproof].boolValue != net[BuffType.fireproof].boolValue) {
+            MessageSpeech message = new MessageSpeech();
             if (net[BuffType.fireproof].boolValue) {
-                Say("I feel fireproof!");
+                message.phrase = "I feel fireproof!";
             } else {
-                Say("I no longer feel fireproof!");
+                message.phrase = "I no longer feel fireproof!";
             }
+            Say(message);
         }
         if (lastNetIntrinsic[BuffType.telepathy].boolValue != net[BuffType.telepathy].boolValue) {
+            MessageSpeech message = new MessageSpeech();
             if (net[BuffType.telepathy].boolValue)
-                Say("I can hear thoughts!");
+                message.phrase = "I can hear thoughts!";
+            Say(message);
         }
         if (lastNetIntrinsic[BuffType.strength].boolValue != net[BuffType.strength].boolValue) {
+            MessageSpeech message = new MessageSpeech();
             if (net[BuffType.strength].boolValue) {
-                Say("I feel strong!");
+                message.phrase = "I feel strong!";
             } else {
-                Say("I no longer feel strong!");
+                message.phrase = "I no longer feel strong!";
             }
+            Say(message);
         }
 
     }
@@ -336,7 +345,8 @@ public class Speech : Interactive, ISaveable {
     // TODO: this function will change to incorporate Nimrod and flavor
     public void Swear(GameObject target = null) {
         if (!target) {
-            Say("shazbot!");
+            MessageSpeech message = new MessageSpeech("shazbot!");
+            Say(message);
             return;
         }
         GameObject mainTarget = Controller.Instance.GetBaseInteractive(target.transform);
@@ -382,8 +392,11 @@ public class Speech : Interactive, ISaveable {
             return Ellipsis();
         Monologue mono = new Monologue(this, new string[] { "How dare you!" });
         EventData data = new EventData(chaos: 1, disturbing: 0, positive: -1, offensive: 0);
-        if (say)
-            Say("how dare you!", data: data);
+        if (say){
+            MessageSpeech message = new MessageSpeech("how dare you!");
+            message.eventData = data;
+            Say(message);
+        }
         return mono;
     }
     public Monologue RespondToThreat(bool say = false) {
@@ -391,22 +404,18 @@ public class Speech : Interactive, ISaveable {
             return Ellipsis();
         Monologue mono = new Monologue(this, new string[] { "Mercy!" });
         EventData data = new EventData(chaos: 1, disturbing: 0, positive: -1, offensive: 0);
-        if (say)
-            Say("Mercy!", data: data);
+        if (say){
+            MessageSpeech message = new MessageSpeech("Mercy!");
+            message.eventData = data;
+            Say(message);
+        }
         return mono;
     }
-    public void SayFromNimrod(string key) {
-        Grammar grammar = new Grammar();
-        grammar.Load("structure");
-        grammar.Load("flavor_" + flavor);
-        Say(grammar.Parse("{" + key + "}"));
-    }
+
     public void SaveData(PersistentComponent data) {
-        // data.bools["speaking"] = speaking;
         data.ints["hitstate"] = (int)hitState;
     }
     public void LoadData(PersistentComponent data) {
-        // speaking = data.bools["speaking"];
         hitState = (Controllable.HitState)data.ints["hitstate"];
     }
 }

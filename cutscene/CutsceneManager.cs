@@ -309,12 +309,13 @@ public class CutsceneBoardroom : Cutscene {
         }
         if (lineHook.IsMatch(line)) {
             Match match = lineHook.Match(line);
+            MessageSpeech message = new MessageSpeech(match.Groups[2].Value);
             if (match.Groups[1].Value == "MOE") {
-                moe.Say(match.Groups[2].Value);
+                moe.Say(message);
             } else if (match.Groups[1].Value == "LARRY") {
-                larry.Say(match.Groups[2].Value);
+                larry.Say(message);
             } else if (match.Groups[1].Value == "CURLY") {
-                curly.Say(match.Groups[2].Value);
+                curly.Say(message);
             }
         }
         if (endHook.IsMatch(line)) {
