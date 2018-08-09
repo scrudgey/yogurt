@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
+    public Controllable.HitState hitstate;
     public List<GameObject> items;
     public GameObject initHolding;
     public bool strong;
@@ -75,6 +76,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         }
     }
     void HandleHitStun(MessageHitstun message) {
+        hitstate = message.hitState;
         if (message.doubledOver || message.knockedDown) {
             if (holding)
                 DropItem();
@@ -357,6 +359,8 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         }
     }
     public void StartPunch() {
+        if (hitstate >= Controllable.HitState.stun)
+            return;
         MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.punching, true);
         Toolbox.Instance.SendMessage(gameObject, this, anim);
         if (punchSounds.Count > 0) {
