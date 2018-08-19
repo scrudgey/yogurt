@@ -10,6 +10,7 @@ public class VideoCamera : Interactive, ISaveable {
     public bool live;
     public GameObject doneBubble;
     private GameObject regionIndicator;
+    private HashSet<GameObject> seenFlags = new HashSet<GameObject>();
 
     void Awake() {
         doneBubble = transform.Find("doneBubble").gameObject;
@@ -68,12 +69,20 @@ public class VideoCamera : Interactive, ISaveable {
     // TODO: there could be an issue here with the same occurrence triggering
     // multiple collisions. I will have to handle that eventually.
     void OnTriggerEnter2D(Collider2D col) {
-        if (col.tag != "occurrenceFlag" || !live)
+        if (!live)
             return;
+        if (seenFlags.Contains(col.gameObject))
+            return;
+        seenFlags.Add(col.gameObject);
+        Qualities qualities = col.GetComponent<Qualities>();
+        if (qualities != null){
+            // TODO: no messageoccurrence??
+            EventData data = qualities.ToEvent();
+            commercial.eventData.Add(data);
+        }
         Occurrence occurrence = col.gameObject.GetComponent<Occurrence>();
-        if (occurrence == null)
-            return;
-        ProcessOccurrence(occurrence);
+        if (occurrence != null)
+            ProcessOccurrence(occurrence);
     }
     void ProcessOccurrence(Occurrence oc) {
         foreach (OccurrenceData occurrence in oc.data) {
