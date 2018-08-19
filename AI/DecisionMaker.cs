@@ -22,8 +22,10 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
     public enum PriorityType {
         Attack, FightFire, ProtectPossessions, 
         ReadScript, RunAway, Wander, ProtectZone,
-        MakeBalloonAnimals, InvestigateNoise
+        MakeBalloonAnimals, InvestigateNoise, PrioritySocialize
     }
+    // the ONLY reason we need this redundant structure is so that I can expose
+    // a selectable default priority type in unity editor.
     static Dictionary<Type, PriorityType> priorityTypes = new Dictionary<Type, PriorityType>(){
         {typeof(PriorityAttack), PriorityType.Attack},
         {typeof(PriorityFightFire), PriorityType.FightFire},
@@ -33,7 +35,8 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         {typeof(PriorityWander), PriorityType.Wander},
         {typeof(PriorityProtectZone), PriorityType.ProtectZone},
         {typeof(PriorityMakeBalloonAnimals), PriorityType.MakeBalloonAnimals},
-        {typeof(PriorityInvestigateNoise), PriorityType.InvestigateNoise}
+        {typeof(PriorityInvestigateNoise), PriorityType.InvestigateNoise},
+        {typeof(PrioritySocialize), PriorityType.PrioritySocialize}
     };
     public string activePriorityName;
     public PriorityType defaultPriorityType;
@@ -83,6 +86,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
 
         // create priorities
         priorities = new List<Priority>();
+        InitializePriority(new PrioritySocialize(gameObject, control), typeof(PrioritySocialize));
         InitializePriority(new PriorityFightFire(gameObject, control), typeof(PriorityFightFire));
         InitializePriority(new PriorityRunAway(gameObject, control), typeof(PriorityRunAway));
         InitializePriority(new PriorityAttack(gameObject, control), typeof(PriorityAttack));
@@ -137,8 +141,12 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         activePriorityName = activePriority.priorityName;
         if (hitState >= Controllable.HitState.unconscious)
             return;
-        if (activePriority != oldActivePriority)
+        if (activePriority != oldActivePriority){
             control.ResetInput();
+            if (oldActivePriority != null)
+                oldActivePriority.EnterPriority();
+            activePriority.ExitPriority();
+        }
         if (activePriority != null) {
             // Debug.Log(activePriority.ToString() + " " + activePriority.Urgency(personality).ToString());
             activePriority.DoAct();

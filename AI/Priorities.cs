@@ -34,6 +34,8 @@ namespace AI {
         }
         public virtual void ReceiveMessage(Message m) { }
         // public virtual void ObserveOccurrence(OccurrenceData data){}
+        public virtual void EnterPriority(){}
+        public virtual void ExitPriority(){}
     }
     public class PriorityFightFire : Priority {
         public float updateInterval;
@@ -68,6 +70,22 @@ namespace AI {
             }
             if (goal == callFD && callFD.phoneCalled) {
                 goal = useFireExtinguisher;
+            }
+        }
+    }
+    public class PrioritySocialize : Priority {
+        public PrioritySocialize(GameObject g, Controllable c) : base(g, c) {
+            priorityName = "socialize";
+            GoalWalkToObject walkTo = new GoalWalkToObject(g, c, awareness.socializationTarget);
+            GoalTalkToPerson talkTo = new GoalTalkToPerson(g, c, awareness.socializationTarget);
+            talkTo.requirements.Add(walkTo);
+            goal = talkTo;
+        }
+        public override void Update(){
+            if (awareness.socializationTarget.val != null){
+                urgency = urgencySmall;
+            } else {
+                urgency = 0;
             }
         }
     }

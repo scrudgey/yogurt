@@ -98,7 +98,25 @@ namespace AI {
             }
         }
     }
-
+    public class RoutineTalkToPerson : Routine {
+        public Ref<GameObject> target;
+        private ConditionBoolSwitch condition;
+        public Speech mySpeech;
+        public RoutineTalkToPerson(GameObject g, Controllable c, Ref<GameObject> target, ConditionBoolSwitch condition) : base(g, c) {
+            this.target = target;
+            this.condition = condition;
+            mySpeech = g.GetComponent<Speech>();
+        }
+        protected override status DoUpdate() {
+            if (mySpeech && !condition.conditionMet) {
+                Debug.Log("speaking to target");
+                condition.conditionMet = true;
+                return status.success;
+            } else {
+                return status.failure;
+            }
+        }
+    }
     public class RoutineGetNamedFromEnvironment : Routine {
         private Inventory inv;
         private Awareness awareness;

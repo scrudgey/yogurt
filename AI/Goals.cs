@@ -99,7 +99,23 @@ namespace AI {
             }
         }
     }
-
+    public class GoalTalkToPerson : Goal {
+        public Ref<GameObject> target;
+        // ConditionBoolSwitch successCondition;
+        public GoalTalkToPerson(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c) {
+            this.target = target;
+            successCondition = new ConditionBoolSwitch(g);
+            RoutineTalkToPerson talkRoutine = new RoutineTalkToPerson(g, c, target, (ConditionBoolSwitch)successCondition);
+            routines.Add(talkRoutine);
+        }
+        // public override void Update() {
+        //     // Debug.Log(successCondition);
+        //     base.Update();
+        //     if (successCondition.Evaluate() == status.success && !phoneCalled) {
+        //         phoneCalled = true;
+        //     }
+        // }
+    }
     public class GoalGetItem : Goal {
         public bool findingFail;
         public GoalGetItem(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c) {
@@ -136,12 +152,12 @@ namespace AI {
         public new string goalThought {
             get { return "I'm going to check out that " + target.val.name + "."; }
         }
-        public GoalWalkToObject(GameObject g, Controllable c, Ref<GameObject> t) : base(g, c) {
+        public GoalWalkToObject(GameObject g, Controllable c, Ref<GameObject> t, float range=0.2f) : base(g, c) {
             target = t;
-            successCondition = new ConditionCloseToObject(g, target, 0.55f);
+            successCondition = new ConditionCloseToObject(g, target, range);
             routines.Add(new RoutineWalkToGameobject(g, c, target));
         }
-        public GoalWalkToObject(GameObject g, Controllable c, Type objType) : base(g, c) {
+        public GoalWalkToObject(GameObject g, Controllable c, Type objType, float range=0.2f) : base(g, c) {
             // GameObject targetObject = GameObject.FindObjectOfType<typeof(objType)>();
             UnityEngine.Object obj = GameObject.FindObjectOfType(objType);
             Component targetComponent = (Component)obj;
@@ -150,7 +166,7 @@ namespace AI {
                 GameObject targetObject = targetComponent.gameObject;
                 target = new Ref<GameObject>(targetObject);
                 routines.Add(new RoutineWalkToGameobject(g, c, target));
-                successCondition = new ConditionCloseToObject(g, target, 0.25f);
+                successCondition = new ConditionCloseToObject(g, target, range);
             }
         }
     }
@@ -223,9 +239,10 @@ namespace AI {
             base.Update();
             utteranceTimer -= Time.deltaTime;
             if (utteranceTimer <= 0f) {
+                EventData ed = new EventData(positive:1);
                 utteranceTimer = UnityEngine.Random.Range(10f, 20f);
-                MessageSpeech message = new MessageSpeech();
-                message.phrase = phrases[UnityEngine.Random.Range(0, phrases.Count)];
+                string phrase = phrases[UnityEngine.Random.Range(0, phrases.Count)];
+                MessageSpeech message = new MessageSpeech(phrase, eventData: ed);
                 Toolbox.Instance.SendMessage(gameObject, gameObject.transform, message);
             }
         }
