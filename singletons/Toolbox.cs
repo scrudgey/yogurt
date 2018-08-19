@@ -47,7 +47,21 @@ public class Toolbox : Singleton<Toolbox> {
         }
         return d[n, m];
     }
-    // TODO: fix mispelling
+    public static float Gompertz(float x, float a=1, float b=1, float c=1){
+        return (float)(a * Math.Exp(b * Math.Exp(-c * x)));
+    }
+    public static void ShuffleArray<T>(T[] array) {
+        int n = array.Length;
+        for (int i = 0; i < n; i++) {
+            // Pick a new index higher than current for each item in the array
+            int r = i + UnityEngine.Random.Range(0, n - i);
+
+            // Swap item into new spot
+            T t = array[r];
+            array[r] = array[i];
+            array[i] = t;
+        }
+    }
     public Occurrence OccurenceFlag(GameObject spawner, OccurrenceData data, HashSet<GameObject> involvedParties) {
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
