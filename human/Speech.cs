@@ -267,6 +267,7 @@ public class Speech : Interactive, ISaveable {
             speechData.target = message.threatTarget;
             involvedParties.Add(message.threatTarget);
         }
+        involvedParties.UnionWith(message.involvedParties);
         Occurrence occurenceFlag =  Toolbox.Instance.OccurenceFlag(gameObject, speechData, involvedParties);
         return speechData;
     }

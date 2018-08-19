@@ -44,6 +44,7 @@ public class MessageSpeech : Message {
     public bool nimrod;
     public EventData eventData;
     public bool interrupt;
+    public HashSet<GameObject> involvedParties = new HashSet<GameObject>();
     public MessageSpeech() { }
     public MessageSpeech(string phrase, EventData eventData = null) {
         this.phrase = phrase;
