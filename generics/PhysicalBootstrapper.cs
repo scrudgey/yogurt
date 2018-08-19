@@ -191,9 +191,11 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
                 if (impactSounds.Length > 0) {
                     GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
                 }
-            EventData data = Toolbox.Instance.DataFlag(gameObject, chaos: 1);
-            data.noun = "collision";
-            data.whatHappened = Toolbox.Instance.CloneRemover(coll.gameObject.name) + " collided with " + Toolbox.Instance.CloneRemover(gameObject.name);
+            if (coll.gameObject != horizon){
+                EventData data = Toolbox.Instance.DataFlag(gameObject, chaos: 1);
+                data.noun = "collision";
+                data.whatHappened = Toolbox.Instance.CloneRemover(coll.gameObject.name) + " collided with " + Toolbox.Instance.CloneRemover(gameObject.name);
+            }
         }
         if (coll.gameObject == groundObject) {
 
@@ -304,7 +306,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         message.amount = collision.relativeVelocity.magnitude;
         if (physical)
             if (physical.currentMode == Physical.mode.zip)
-                message.amount = 25f;
+                message.amount = 15f;
 
         message.type = damageType.physical;
         if (collision.relativeVelocity.magnitude > 1){
