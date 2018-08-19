@@ -301,6 +301,7 @@ public class OccurrenceSpeech : OccurrenceData {
 public class OccurrenceViolence : OccurrenceData {
     public GameObject attacker;
     public GameObject victim;
+    public float amount;
     public override void CalculateDescriptions(Occurrence parent) {
         string attackerName = Toolbox.Instance.GetName(attacker);
         string victimName = Toolbox.Instance.GetName(victim);

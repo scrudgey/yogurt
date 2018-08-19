@@ -17,13 +17,18 @@ public class PhysicalImpact : MonoBehaviour {
             return;
         if (impactedObjects.Contains(collider.transform.root))
             return;
+        GameObject victim = collider.gameObject;
+        if (collider.name == "maincollider") {
+            victim = collider.transform.parent.gameObject;
+        }
         impactedObjects.Add(collider.transform.root);
         message.impactor = this;
-        Toolbox.Instance.SendMessage(collider.gameObject, this, message);
+        Toolbox.Instance.SendMessage(victim, this, message);
         OccurrenceViolence violence = new OccurrenceViolence();
+        violence.amount = message.amount;
         violence.attacker = message.responsibleParty;
-        violence.victim = collider.gameObject;
-        HashSet<GameObject> involvedParties = new HashSet<GameObject>() { message.responsibleParty, collider.gameObject };
+        violence.victim = victim;
+        HashSet<GameObject> involvedParties = new HashSet<GameObject>() { message.responsibleParty, victim };
         Toolbox.Instance.OccurenceFlag(message.responsibleParty, violence, involvedParties);
     }
 }
