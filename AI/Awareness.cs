@@ -46,6 +46,19 @@ public class PersonalAssessment {
 }
 
 public class Awareness : MonoBehaviour, ISaveable {
+    public struct NewPeople {
+        public float countDownTimer;
+        public Ref<GameObject> person;
+    }
+    List<NewPeople> newPeopleList = new List<NewPeople>();
+    public Ref<GameObject> socializationTarget = new Ref<GameObject>(null);
+    public static Dictionary<Rating, string> reactions = new Dictionary<Rating, string>(){
+            {Rating.disgusting, "{grossreact}"},
+            {Rating.disturbing, "{disturbreact}"},
+            {Rating.chaos, "{chaosreact}"},
+            {Rating.offensive, "{offensereact}"},
+            {Rating.positive, "{positivereact}"}
+        };
     public DecisionMaker decisionMaker;
     public List<GameObject> initialAwareness;
     public DropOutStack.DropOutStack<EventData> shortTermMemory = new DropOutStack.DropOutStack<EventData>(1000);
@@ -55,7 +68,7 @@ public class Awareness : MonoBehaviour, ISaveable {
     public Knowledge possessionDefaultState;
     public GameObject wayWardPossession;
     private GameObject sightCone;
-    private List<GameObject> seenFlags = new List<GameObject>();
+    private HashSet<GameObject> seenFlags = new HashSet<GameObject>();
     Transform cachedTransform;
     public new Transform transform {
         get {
@@ -166,6 +179,17 @@ public class Awareness : MonoBehaviour, ISaveable {
             SetNearestEnemy();
             SetNearestFire();
         }
+        if (newPeopleList.Count > 0){
+            NewPeople personToSocializeWith = newPeopleList[0];
+            personToSocializeWith.countDownTimer -= Time.deltaTime;
+            if (personToSocializeWith.countDownTimer > 0){
+                newPeopleList[0] = personToSocializeWith;
+                socializationTarget.val = personToSocializeWith.person.val;
+            } else {
+                newPeopleList.RemoveAt(0);
+                socializationTarget.val = null;
+            }
+        }
     }
     public void SetNearestEnemy() {
         nearestEnemy.val = null;
@@ -253,38 +277,31 @@ public class Awareness : MonoBehaviour, ISaveable {
         if (seenFlags.Contains(other.gameObject))
             return;
         if (other.tag == "occurrenceFlag") {
-            ProcessOccurrence(other.gameObject);
-            seenFlags.Add(other.gameObject);
+            ProcessOccurrenceFlag(other.gameObject);
         }
         if (other.tag == "occurrenceSound"){
-            // do something
             Occurrence flag = other.GetComponent<Occurrence>();
             if (!flag.involvedParties.Contains(gameObject)){
                 // react to noise
                 ProcessNoise(other.gameObject);
             }
         }
+        Qualities qualities = other.GetComponent<Qualities>();
+        if (qualities){
+            // TODO: no messageoccurrence??
+            EventData data = qualities.ToEvent();
+            OccurrenceData oD = new OccurrenceData();
+            oD.events.Add(data);
+            MessageOccurrence message = new MessageOccurrence(oD);
+            Toolbox.Instance.SendMessage(gameObject, this, message);
+
+            ReactToEvent(qualities.ToEvent(), new HashSet<GameObject>());
+        }
+        seenFlags.Add(other.gameObject);
     }
     void ProcessNoise(GameObject flag){
         MessageNoise message = new MessageNoise(flag);
         Toolbox.Instance.SendMessage(gameObject, this, message);
-    }
-    void ProcessOccurrence(GameObject flag) {
-        Occurrence occurrence = flag.GetComponent<Occurrence>();
-        if (occurrence == null)
-            return;
-        foreach (OccurrenceData od in occurrence.data) {
-            Toolbox.Instance.SendMessage(gameObject, this, new MessageOccurrence(od));
-            if (od is OccurrenceViolence) 
-                WitnessViolence((OccurrenceViolence)od);
-            foreach (EventData e in od.events) {
-                WitnessEvent(e);
-            }
-        }
-    }
-    void WitnessEvent(EventData dat){
-        EventData memory = new EventData(dat);
-        shortTermMemory.Push(memory);
     }
     public string RecallMemory(){
         IEnumerator<EventData> enumerator = shortTermMemory.GetEnumerator();
@@ -295,6 +312,45 @@ public class Awareness : MonoBehaviour, ISaveable {
         }
         EventData memory = enumerator.Current;
         return "I remember when "+memory.whatHappened;
+    }
+    void ProcessOccurrenceFlag(GameObject flag) {
+        Occurrence occurrence = flag.GetComponent<Occurrence>();
+        if (occurrence == null)
+            return;
+        foreach (OccurrenceData od in occurrence.data) {
+            WitnessOccurrence(od, occurrence.involvedParties);
+        }
+    }
+    void WitnessOccurrence(OccurrenceData od, HashSet<GameObject> involvedParties) {
+        Toolbox.Instance.SendMessage(gameObject, this, new MessageOccurrence(od));
+        if (od is OccurrenceViolence)
+            WitnessViolence((OccurrenceViolence)od);
+        foreach (EventData e in od.events) {
+            ReactToEvent(e, involvedParties);
+        }
+    }
+    void ReactToEvent(EventData dat, HashSet<GameObject> involvedParties){
+        // store memory
+        EventData memory = new EventData(dat);
+        shortTermMemory.Push(memory);
+
+        // store reaction to memory?
+
+        // react to specifics of event
+        if (involvedParties.Contains(gameObject))
+            return;
+        Rating[] ratings = (Rating[])Rating.GetValues(typeof(Rating));
+        Toolbox.ShuffleArray<Rating>(ratings);
+        foreach(Rating rating in ratings) {
+            if (Random.Range(0f, 1f) < Toolbox.Gompertz(dat.ratings[rating], 1.26f, -6.9f, 1) && dat.ratings[rating] > 0) {
+                MessageSpeech message = new MessageSpeech(reactions[rating]);
+                message.nimrod = true;
+                message.involvedParties.Add(gameObject);
+                message.involvedParties.UnionWith(involvedParties);
+                Toolbox.Instance.SendMessage(gameObject, this, message);
+                break;
+            }
+        }
     }
     void WitnessViolence(OccurrenceViolence dat) {
         if (dat.victim == null || dat.attacker == null)
@@ -309,10 +365,21 @@ public class Awareness : MonoBehaviour, ISaveable {
                 attacker.status = PersonalAssessment.friendStatus.enemy;
             }
         }
+        if (dat.victim == gameObject){
+            // A. Getting hit
+            // B. Getting hit, but not enough to hurt
+            // MessageSpeech message = new MessageSpeech("How dare you!");
+            // Debug.Log(dat.amount);
+            // Toolbox.Instance.SendMessage(gameObject, this, message);
+        } else if (dat.attacker != gameObject) {
+            // F. Witnessing violence to other
+            MessageSpeech message = new MessageSpeech("Whoah! Yikes!");
+            Toolbox.Instance.SendMessage(gameObject, this, message);
+        }
         if (attacker == null || victim == null) {
             return;
         }
-        if (gameObject == attacker.knowledge.obj || gameObject == victim.knowledge.obj)
+        if (gameObject == attacker.knowledge.obj)
             return;
         switch (attacker.status) {
             case PersonalAssessment.friendStatus.friend:
@@ -426,20 +493,43 @@ public class Awareness : MonoBehaviour, ISaveable {
             knowledgebase.Add(rootObject, new Knowledge(rootObject));
         PersonalAssessment storedAssessment;
         if (people.TryGetValue(rootObject, out storedAssessment)) {
+            // TODO: trigger socialization if we havent seen this character in a while
+            float interval = Time.time - knowledgebase[rootObject].lastSeenTime;
             return storedAssessment;
         }
         PersonalAssessment assessment = new PersonalAssessment(knowledgebase[rootObject]);
+
+        // TODO: trigger socialization target
+        NewPeople newPerson = new NewPeople();
+        newPerson.person = new Ref<GameObject>(rootObject);
+        newPerson.countDownTimer = 10f;
+        newPeopleList.Add(newPerson);
+
         people.Add(rootObject, assessment);
         return assessment;
     }
     void AttackedByPerson(MessageDamage message) {
         if (hitState >= Controllable.HitState.unconscious)
             return;
-        // adjust reaction depending on magnitude?
+
+        // adjust reaction depending on magnitude
+        if (message.amount <= 15){
+            // minor nusiance
+            MessageSpeech speech = new MessageSpeech("{nuisance}");
+            speech.nimrod = true;
+            Toolbox.Instance.SendMessage(gameObject, this, speech);
+            return;
+        }
+        
         GameObject g = message.responsibleParty;
         PersonalAssessment assessment = FormPersonalAssessment(g);
         if (assessment != null) {
             if (assessment.status != PersonalAssessment.friendStatus.friend) {
+                if (assessment.status != PersonalAssessment.friendStatus.enemy){
+                    MessageSpeech speech = new MessageSpeech("{newenemy}");
+                    speech.nimrod = true;
+                    Toolbox.Instance.SendMessage(gameObject, this, speech);
+                }
                 assessment.status = PersonalAssessment.friendStatus.enemy;
             }
             assessment.knowledge.lastSeenPosition = g.transform.position;
