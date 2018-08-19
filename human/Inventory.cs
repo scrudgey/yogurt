@@ -320,9 +320,10 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     void EndSwing() {
         MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.swinging, false);
         Toolbox.Instance.SendMessage(gameObject, this, anim);
-
-        holding.GetComponent<Renderer>().sortingLayerName = "main";
-        holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
+        if (holding){
+            holding.GetComponent<Renderer>().sortingLayerName = "main";
+            holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
+        }
     }
     void StartSwing() {
         if (holding == null)
