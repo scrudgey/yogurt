@@ -74,18 +74,36 @@ namespace AI {
         }
     }
     public class PrioritySocialize : Priority {
+        public Ref<GameObject> target = new Ref<GameObject>(null);
+        public Ref<Awareness.NewPeople> peopleTarget = new Ref<Awareness.NewPeople>(null);
+        // GoalTalkToPerson talkTo;
         public PrioritySocialize(GameObject g, Controllable c) : base(g, c) {
             priorityName = "socialize";
-            GoalWalkToObject walkTo = new GoalWalkToObject(g, c, awareness.socializationTarget);
-            GoalTalkToPerson talkTo = new GoalTalkToPerson(g, c, awareness.socializationTarget);
-            talkTo.requirements.Add(walkTo);
+            Config();
+        }
+        public void Config(){
+            GoalWalkToObject walkTo = new GoalWalkToObject(gameObject, control, target);
+            GoalLookAtObject lookAt = new GoalLookAtObject(gameObject, control, target);
+            GoalTalkToPerson talkTo = new GoalTalkToPerson(gameObject, control, awareness, peopleTarget);
+            
+            lookAt.requirements.Add(walkTo);
+            talkTo.requirements.Add(lookAt);
+            
             goal = talkTo;
         }
-        public override void Update(){
-            if (awareness.socializationTarget.val != null){
-                urgency = urgencySmall;
-            } else {
+        public override void Update() {
+            if (awareness.newPeopleList.Count > 0) {
+                if (awareness.newPeopleList[0].person.val != target.val){
+                    target.val = awareness.newPeopleList[0].person.val;
+                    peopleTarget.val = awareness.newPeopleList[0];
+                    urgency = urgencySmall;
+                    Config();
+                }
+            } 
+            if (awareness.newPeopleList.Count == 0) {
                 urgency = 0;
+                peopleTarget.val = null;
+                target.val = null;
             }
         }
     }

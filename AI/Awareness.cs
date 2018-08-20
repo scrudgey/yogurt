@@ -45,13 +45,13 @@ public class PersonalAssessment {
     public PersonalAssessment() { }
 }
 
-public class Awareness : MonoBehaviour, ISaveable {
-    public struct NewPeople {
+public class Awareness : MonoBehaviour, ISaveable, IDirectable {
+    public class NewPeople {
         public float countDownTimer;
         public Ref<GameObject> person;
     }
-    List<NewPeople> newPeopleList = new List<NewPeople>();
-    public Ref<GameObject> socializationTarget = new Ref<GameObject>(null);
+    public List<NewPeople> newPeopleList = new List<NewPeople>();
+    // public Ref<GameObject> socializationTarget = new Ref<GameObject>(null);
     public static Dictionary<Rating, string> reactions = new Dictionary<Rating, string>(){
             {Rating.disgusting, "{grossreact}"},
             {Rating.disturbing, "{disturbreact}"},
@@ -78,9 +78,10 @@ public class Awareness : MonoBehaviour, ISaveable {
             return cachedTransform;
         }
     }
+    public Vector2 direction;
     public Transform sightConeTransform;
     private Vector3 sightConeScale;
-    private Controllable control;
+    // private Controllable control;
     private float speciousPresent;
     private const float perceptionInterval = 0.25f;
     private List<GameObject> fieldOfView = new List<GameObject>();
@@ -91,7 +92,10 @@ public class Awareness : MonoBehaviour, ISaveable {
     public SerializableDictionary<GameObject, Knowledge> knowledgebase = new SerializableDictionary<GameObject, Knowledge>();
     public SerializableDictionary<GameObject, PersonalAssessment> people = new SerializableDictionary<GameObject, PersonalAssessment>();
     void Start() {
-        control = gameObject.GetComponent<Controllable>();
+        MessageDirectable message = new MessageDirectable();
+        message.addDirectable.Add(this);
+        Toolbox.Instance.SendMessage(gameObject, this, message);
+
         sightCone = Instantiate(Resources.Load("sightcone1"), gameObject.transform.position, Quaternion.identity) as GameObject;
         sightConeScale = sightCone.transform.localScale;
         sightConeTransform = sightCone.transform;
@@ -167,7 +171,7 @@ public class Awareness : MonoBehaviour, ISaveable {
         if (transform.localScale.x > 0 && sightConeTransform.localScale.x < 0) {
             sightConeTransform.localScale = sightConeScale;
         }
-        float rot_z = Mathf.Atan2(control.direction.y, control.direction.x) * Mathf.Rad2Deg;
+        float rot_z = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         sightConeTransform.rotation = Quaternion.Euler(0f, 0f, rot_z);
         
         // work the timer for the discrete perception updates
@@ -184,10 +188,10 @@ public class Awareness : MonoBehaviour, ISaveable {
             personToSocializeWith.countDownTimer -= Time.deltaTime;
             if (personToSocializeWith.countDownTimer > 0){
                 newPeopleList[0] = personToSocializeWith;
-                socializationTarget.val = personToSocializeWith.person.val;
+                // socializationTarget.val = personToSocializeWith.person.val;
             } else {
                 newPeopleList.RemoveAt(0);
-                socializationTarget.val = null;
+                // socializationTarget.val = null;
             }
         }
     }
@@ -351,6 +355,40 @@ public class Awareness : MonoBehaviour, ISaveable {
                 break;
             }
         }
+    }
+    public void ReactToPerson(GameObject target){
+        PersonalAssessment assessment = FormPersonalAssessment(target);
+        if (assessment == null)
+            return;
+        List<NewPeople> removeThese = new List<NewPeople>();
+        foreach (NewPeople np in newPeopleList){
+            if (np.person.val == target){
+                removeThese.Add(np);
+            }
+        }
+        foreach(NewPeople np in removeThese){
+            newPeopleList.Remove(np);
+        }
+        MessageSpeech message = new MessageSpeech();
+        switch(assessment.status){
+            case PersonalAssessment.friendStatus.enemy:
+            message.phrase = "{greet-enemy}";
+            
+            break;
+            case PersonalAssessment.friendStatus.friend:
+            message.phrase = "{greet-friend}";
+            break;
+            default:
+            case PersonalAssessment.friendStatus.neutral:
+            message.phrase = "{greet-neutral}";
+            break;
+        }
+        message.nimrod = true;
+        message.involvedParties.Add(target);
+        message.involvedParties.Add(gameObject);
+        Toolbox.Instance.SendMessage(gameObject, this, message);
+        MessageNoise noise = new MessageNoise(gameObject);
+        Toolbox.Instance.SendMessage(target, this, noise);
     }
     void WitnessViolence(OccurrenceViolence dat) {
         if (dat.victim == null || dat.attacker == null)
@@ -644,5 +682,8 @@ public class Awareness : MonoBehaviour, ISaveable {
         assessment.status = input.status;
         assessment.unconscious = input.unconscious;
         return assessment;
+    }
+    public void DirectionChange(Vector2 newDirection){
+        direction = newDirection;
     }
 }

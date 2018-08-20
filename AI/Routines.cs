@@ -99,17 +99,19 @@ namespace AI {
         }
     }
     public class RoutineTalkToPerson : Routine {
-        public Ref<GameObject> target;
+        public Ref<Awareness.NewPeople> target;
         private ConditionBoolSwitch condition;
-        public Speech mySpeech;
-        public RoutineTalkToPerson(GameObject g, Controllable c, Ref<GameObject> target, ConditionBoolSwitch condition) : base(g, c) {
+        public Awareness awareness;
+        public RoutineTalkToPerson(GameObject g, Controllable c, Ref<Awareness.NewPeople> target, ConditionBoolSwitch condition, Awareness awareness) : base(g, c) {
             this.target = target;
             this.condition = condition;
-            mySpeech = g.GetComponent<Speech>();
+            this.awareness = awareness;
         }
         protected override status DoUpdate() {
-            if (mySpeech && !condition.conditionMet) {
-                Debug.Log("speaking to target");
+            if (target.val == null)
+                return status.neutral;
+            if (awareness && !condition.conditionMet) {
+                awareness.ReactToPerson(target.val.person.val);
                 condition.conditionMet = true;
                 return status.success;
             } else {
@@ -312,8 +314,7 @@ namespace AI {
         }
         protected override status DoUpdate() {
             control.ResetInput();
-            Vector2 dif = (Vector2)gameObject.transform.position - (Vector2)target.val.transform.position;
-            control.SetDirection(-1 * dif);
+            control.LookAtPoint(target.val.transform.position);
             return status.neutral;
         }
     }

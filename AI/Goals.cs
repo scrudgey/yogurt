@@ -100,12 +100,12 @@ namespace AI {
         }
     }
     public class GoalTalkToPerson : Goal {
-        public Ref<GameObject> target;
-        // ConditionBoolSwitch successCondition;
-        public GoalTalkToPerson(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c) {
+        public Ref<Awareness.NewPeople> target;
+        public GoalTalkToPerson(GameObject g, Controllable c, Awareness awareness, Ref<Awareness.NewPeople> target) : base(g, c) {
             this.target = target;
+            // this.target = awareness.socializationTarget;
             successCondition = new ConditionBoolSwitch(g);
-            RoutineTalkToPerson talkRoutine = new RoutineTalkToPerson(g, c, target, (ConditionBoolSwitch)successCondition);
+            RoutineTalkToPerson talkRoutine = new RoutineTalkToPerson(g, c, target, (ConditionBoolSwitch)successCondition, awareness);
             routines.Add(talkRoutine);
         }
         // public override void Update() {
