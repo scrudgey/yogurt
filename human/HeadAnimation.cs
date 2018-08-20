@@ -45,7 +45,7 @@ public class HeadAnimation : MonoBehaviour, IDirectable, ISaveable {
     void Awake() {
         spriteRenderer = GetComponent<SpriteRenderer>();
         MessageDirectable directableMessage = new MessageDirectable();
-        directableMessage.addDirectable = (IDirectable)this;
+        directableMessage.addDirectable.Add(this);
         Toolbox.Instance.SendMessage(gameObject, this, directableMessage);
 
         GameObject vomObject = Instantiate(Resources.Load("particles/vom"), transform.position, Quaternion.identity) as GameObject;

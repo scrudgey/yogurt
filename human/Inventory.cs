@@ -13,22 +13,27 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         set {
             MessageAnimation anim = new MessageAnimation();
             MessageInventoryChanged invMessage = new MessageInventoryChanged();
+            MessageDirectable directableMessage = new MessageDirectable();
 
             anim.type = MessageAnimation.AnimType.holding;
             anim.value = value != null;
             Toolbox.Instance.SendMessage(gameObject, this, anim);
             if (value == null) {
+                directableMessage.removeDirectable = new List<IDirectable>(_holding.GetComponents<IDirectable>()); 
                 invMessage.dropped = _holding.gameObject;
             }
             _holding = value;
-            if (value != null)
+            if (value != null){
                 invMessage.holding = value.gameObject;
+                directableMessage.addDirectable = new List<IDirectable>(_holding.GetComponents<IDirectable>());
+            }
             Toolbox.Instance.SendMessage(gameObject, this, invMessage);
+            Toolbox.Instance.SendMessage(gameObject, this, directableMessage);
             if (value != null)
                 GameManager.Instance.CheckItemCollection(value.gameObject, gameObject);
-            Controllable controllable = GetComponent<Controllable>();
-            if (controllable != null)
-                controllable.UpdateDefaultInteraction();
+            // Controllable controllable = GetComponent<Controllable>();
+            // if (controllable != null)
+            //     controllable.UpdateDefaultInteraction();
             if (GameManager.Instance.playerObject == gameObject)
                 UINew.Instance.UpdateButtons();
         }

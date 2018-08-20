@@ -10,12 +10,12 @@ public class HatAnimation : MonoBehaviour, IDirectable {
     }
     public void RegisterDirectable() {
         MessageDirectable directableMessage = new MessageDirectable();
-        directableMessage.addDirectable = (IDirectable)this;
+        directableMessage.addDirectable.Add(this);
         Toolbox.Instance.SendMessage(gameObject, this, directableMessage);
     }
     public void RemoveDirectable() {
         MessageDirectable directableMessage = new MessageDirectable();
-        directableMessage.removeDirectable = (IDirectable)this;
+        directableMessage.removeDirectable.Add(this);
         Toolbox.Instance.SendMessage(gameObject, this, directableMessage);
     }
     public void UpdateSprite() {

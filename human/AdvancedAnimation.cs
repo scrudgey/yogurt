@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class AdvancedAnimation : MonoBehaviour, ISaveable {
+public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
     private string _spriteSheet;
     private string spriteSheet {
         get { return _spriteSheet; }
@@ -24,7 +24,8 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable {
         }
     }
     private SpriteRenderer spriteRenderer;
-    private Controllable controllable;
+    // private Controllable controllable;
+    private string lastPressed;
     private bool swinging;
     private bool holding;
     private bool throwing;
@@ -40,11 +41,16 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable {
     private bool doubledOver;
     void Awake() {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        controllable = GetComponent<Controllable>();
+        // controllable = GetComponent<Controllable>();
         animator = GetComponent<Animation>();
         LoadSprites();
         Toolbox.RegisterMessageCallback<MessageAnimation>(this, HandleAnimationMessage);
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
+    }
+    void Start(){
+        MessageDirectable message = new MessageDirectable();
+        message.addDirectable.Add(this);
+        Toolbox.Instance.SendMessage(gameObject, this, message);
     }
     public void HandleAnimationMessage(MessageAnimation anim) {
         switch (anim.type) {
@@ -90,8 +96,8 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable {
         // Debug.Log(animation.IsPlaying(sequence));
     }
     public void LateUpdate() {
-        if (controllable == null)
-            Awake();
+        // if (controllable == null)
+        //     Awake();
         spriteSheet = baseName + "_spritesheet";
         string updateSequence = "generic3";
 
@@ -120,8 +126,8 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable {
         oldHolding = holding;
     }
     string GetSwingState(string updateSequence) {
-        updateSequence = updateSequence + "_swing_" + controllable.lastPressed;
-        switch (controllable.lastPressed) {
+        updateSequence = updateSequence + "_swing_" + lastPressed;
+        switch (lastPressed) {
             case "down":
                 baseFrame = 44;
                 break;
@@ -135,8 +141,8 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable {
         return updateSequence;
     }
     string GetThrowState(string updateSequence) {
-        updateSequence = updateSequence + "_throw_" + controllable.lastPressed;
-        switch (controllable.lastPressed) {
+        updateSequence = updateSequence + "_throw_" + lastPressed;
+        switch (lastPressed) {
             case "down":
                 baseFrame = 50;
                 break;
@@ -150,7 +156,7 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable {
         return updateSequence;
     }
     string GetWalkState(string updateSequence) {
-        switch (controllable.lastPressed) {
+        switch (lastPressed) {
             case "down":
                 baseFrame = 7;
                 break;
@@ -165,15 +171,15 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable {
             baseFrame += 21;
         }
         if (GetComponent<Rigidbody2D>().velocity.magnitude > 0.1) {
-            updateSequence = updateSequence + "_run_" + controllable.lastPressed; ;
+            updateSequence = updateSequence + "_run_" + lastPressed; ;
             baseFrame += 1;
         } else {
-            updateSequence = updateSequence + "_idle_" + controllable.lastPressed;
+            updateSequence = updateSequence + "_idle_" + lastPressed;
         }
         return updateSequence;
     }
     string GetFightState(string updateSequence) {
-        switch (controllable.lastPressed) {
+        switch (lastPressed) {
             case "down":
                 baseFrame = 57;
                 break;
@@ -185,14 +191,14 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable {
                 break;
         }
         if (!punching) {
-            updateSequence = updateSequence + "_idle_" + controllable.lastPressed;
+            updateSequence = updateSequence + "_idle_" + lastPressed;
         } else {
-            updateSequence = updateSequence + "_punch_" + controllable.lastPressed;
+            updateSequence = updateSequence + "_punch_" + lastPressed;
         }
         return updateSequence;
     }
     string GetHitStunState(string updateSequence) {
-        switch (controllable.lastPressed) {
+        switch (lastPressed) {
             case "down":
                 baseFrame = 64;
                 break;
@@ -204,9 +210,9 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable {
                 break;
         }
         if (!doubledOver) {
-            updateSequence = updateSequence + "_idle_" + controllable.lastPressed;
+            updateSequence = updateSequence + "_idle_" + lastPressed;
         } else {
-            updateSequence = updateSequence + "_doubled_" + controllable.lastPressed;
+            updateSequence = updateSequence + "_doubled_" + lastPressed;
             baseFrame += 3;
         }
         return updateSequence;
@@ -228,5 +234,10 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable {
         hitState = (Controllable.HitState)data.ints["hitstate"];
         baseName = data.strings["baseName"];
         LoadSprites();
+    }
+    public void DirectionChange(Vector2 newDirection){
+        lastPressed = Toolbox.Instance.DirectionToString(newDirection);
+        if (lastPressed == "left")
+            lastPressed = "right";
     }
 }

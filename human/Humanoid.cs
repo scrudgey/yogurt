@@ -40,31 +40,15 @@ public class Humanoid : SimpleControl {
         if (inv.holding) {
             if (fightMode)
                 ToggleFightMode();
-            MonoBehaviour[] list = inv.holding.gameObject.GetComponents<MonoBehaviour>();
-            foreach (MonoBehaviour mb in list) {
-                if (mb is IDirectable) {
-                    IDirectable idir = (IDirectable)mb;
-                    directables.Add(idir);
-                    idir.DirectionChange(direction);
-                }
-            }
-        }
-        if (invMessage.dropped) {
-            MonoBehaviour[] list = invMessage.dropped.GetComponents<MonoBehaviour>();
-            foreach (MonoBehaviour mb in list) {
-                if (mb is IDirectable) {
-                    directables.Remove((IDirectable)mb);
-                }
-            }
         }
     }
     public override void FixedUpdate() {
         if (hitState > Controllable.HitState.none) {
-            rigidBody2D.drag = 10f;
+            myRigidBody.drag = 10f;
             ResetInput();
             return;
         } else {
-            rigidBody2D.drag = 1f;
+            myRigidBody.drag = 1f;
         }
         base.FixedUpdate();
         if (leftFlag) {

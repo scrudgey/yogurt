@@ -16,8 +16,8 @@ public class MessageAnimation : Message {
     }
 }
 public class MessageDirectable : Message {
-    public IDirectable addDirectable;
-    public IDirectable removeDirectable;
+    public List<IDirectable> addDirectable = new List<IDirectable>();
+    public List<IDirectable> removeDirectable = new List<IDirectable>();
 }
 public class MessageNetIntrinsic : Message {
     public Intrinsics intrinsics;
