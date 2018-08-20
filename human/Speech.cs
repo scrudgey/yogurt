@@ -291,6 +291,8 @@ public class Speech : Interactive, ISaveable {
         }
         message.eventData.noun = "insults";
         Say(message);
+        MessageNoise noise = new MessageNoise(gameObject);
+        Toolbox.Instance.SendMessage(target, this, noise);
     }
     public void Threaten(string phrase, GameObject target, EventData data = null){
         MessageSpeech message = new MessageSpeech(phrase);
@@ -300,6 +302,8 @@ public class Speech : Interactive, ISaveable {
         }
         message.eventData.noun = "threats";
         Say(message);
+        MessageNoise noise = new MessageNoise(gameObject);
+        Toolbox.Instance.SendMessage(target, this, noise);
     }
     public void CompareLastNetIntrinsic(Dictionary<BuffType, Buff> net) {
         if (lastNetIntrinsic == null)
@@ -353,6 +357,8 @@ public class Speech : Interactive, ISaveable {
         GameObject mainTarget = Controller.Instance.GetBaseInteractive(target.transform);
         string targetname = Toolbox.Instance.GetName(mainTarget);
         Insult("that shazbotting " + targetname + "!", target);
+        MessageNoise noise = new MessageNoise(gameObject);
+        Toolbox.Instance.SendMessage(target, this, noise);
     }
     public Monologue InsultMonologue(GameObject target) {
         if (hitState >= Controllable.HitState.stun)
@@ -397,6 +403,8 @@ public class Speech : Interactive, ISaveable {
             MessageSpeech message = new MessageSpeech("how dare you!");
             message.eventData = data;
             Say(message);
+            // MessageNoise noise = new MessageNoise(gameObject);
+            // Toolbox.Instance.SendMessage(target, this, noise);
         }
         return mono;
     }
