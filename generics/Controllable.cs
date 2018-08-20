@@ -61,7 +61,7 @@ public class Controllable : MonoBehaviour {
     public bool disabled = false;
     public HitState hitState;
     public GameObject lastRightClicked;
-    public Rigidbody2D rigidBody2D;
+    public Rigidbody2D myRigidBody;
     private ControlType _control;
     public ControlType control {
         get {return _control;}
@@ -82,6 +82,7 @@ public class Controllable : MonoBehaviour {
         // of components that can control controllables.
         // plus, the player will eventually have attached AI that will have to be overridden
         decisionMaker = GetComponent<DecisionMaker>();
+        myRigidBody = GetComponent<Rigidbody2D>();
         if (decisionMaker != null) {
             control = ControlType.AI;
         } else {
@@ -89,6 +90,8 @@ public class Controllable : MonoBehaviour {
         }
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
         Toolbox.RegisterMessageCallback<MessageDirectable>(this, HandleDirectable);
+        Toolbox.RegisterMessageCallback<MessageInventoryChanged>(this, HandleInventoryMessage);
+        Toolbox.RegisterMessageCallback<MessageNoise>(this, HandleNoise);
     }
     public virtual void Start() {
         foreach (Component component in gameObject.GetComponentsInChildren<Component>()) {
@@ -96,7 +99,16 @@ public class Controllable : MonoBehaviour {
                 directables.Add((IDirectable)component);
             }
         }
-        rigidBody2D = GetComponent<Rigidbody2D>();
+        // rigidBody2D = GetComponent<Rigidbody2D>();
+        UpdateDefaultInteraction();
+    }
+    public void HandleNoise(MessageNoise message){
+        if (hitState >= HitState.stun)
+            return;
+            
+        LookAtPoint(message.location);
+    }
+    public void HandleInventoryMessage(MessageInventoryChanged message){
         UpdateDefaultInteraction();
     }
     public HashSet<Interaction> UpdateDefaultInteraction(){
@@ -112,10 +124,13 @@ public class Controllable : MonoBehaviour {
         hitState = message.hitState;
     }
     void HandleDirectable(MessageDirectable message){
-        if (message.addDirectable != null)
-            directables.Add(message.addDirectable);
-        if (message.removeDirectable != null)
-            directables.Remove(message.removeDirectable);
+        foreach(IDirectable directable in message.addDirectable){
+            directables.Add(directable);
+            directable.DirectionChange(direction);
+        }
+        foreach(IDirectable directable in message.removeDirectable){
+            directables.Remove(directable);
+        }
     }
     private void SetControl(ControlType type) {
         switch (type) {
@@ -149,8 +164,9 @@ public class Controllable : MonoBehaviour {
         if (upFlag)
             lastPressed = "up";
         // update direction vector if speed is above a certain value
-        if (GetComponent<Rigidbody2D>().velocity.normalized.magnitude > 0.1) {// && (upFlag || downFlag || leftFlag || rightFlag) ){
-            SetDirection(rigidBody2D.velocity.normalized);
+        Vector2 normedVel = myRigidBody.velocity.normalized;
+        if (normedVel.magnitude > 0.1) {// && (upFlag || downFlag || leftFlag || rightFlag) ){
+            SetDirection(normedVel);
             directionAngle = Toolbox.Instance.ProperAngle(direction.x, direction.y);
         }
     }
@@ -159,6 +175,11 @@ public class Controllable : MonoBehaviour {
         if (d == Vector2.zero)
             return;
         direction = d;
+    }
+    public void LookAtPoint(Vector3 target){
+        ResetInput();
+        Vector2 dif = (Vector2)gameObject.transform.position - (Vector2)target;
+        SetDirection(-1 * dif);
     }
     public void ShootPressed() {
         if (fightMode){
