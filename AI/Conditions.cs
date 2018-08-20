@@ -67,7 +67,8 @@ namespace AI {
             if (target.val == null) {
                 return status.failure;
             }
-            if (Vector2.Distance(gameObject.transform.position, target.val.transform.position) < dist) {
+            float d = Vector2.Distance(gameObject.transform.position, target.val.transform.position);
+            if (d < dist) {
                 // Debug.Log("close to object "+target.val.name+" at dist "+dist.ToString());
                 return status.success;
             } else {
@@ -124,9 +125,8 @@ namespace AI {
             controllable = c;
         }
         public override status Evaluate() {
-            Vector2 dif = (Vector2)gameObject.transform.position - (Vector2)target.val.transform.position;
-            float angle = Toolbox.Instance.ProperAngle(dif.x, dif.y);
-            if (Mathf.Abs(angle - controllable.directionAngle) < 20) {
+            float angledif = Mathf.Abs(Vector2.SignedAngle(controllable.direction, (Vector2)target.val.transform.position - (Vector2)gameObject.transform.position));
+            if (angledif < 20) {
                 return status.success;
             } else {
                 return status.neutral;
