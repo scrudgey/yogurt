@@ -144,8 +144,8 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         if (activePriority != oldActivePriority){
             control.ResetInput();
             if (oldActivePriority != null)
-                oldActivePriority.EnterPriority();
-            activePriority.ExitPriority();
+                oldActivePriority.ExitPriority();
+            activePriority.EnterPriority();
         }
         if (activePriority != null) {
             // Debug.Log(activePriority.ToString() + " " + activePriority.Urgency(personality).ToString());
