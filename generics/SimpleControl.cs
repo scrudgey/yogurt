@@ -20,7 +20,7 @@ public class SimpleControl : Controllable, ISaveable {
     public override void Awake() {
         base.Awake();
         baseSpeed = maxSpeed;
-        rigidBody2D = GetComponent<Rigidbody2D>();
+        // myRigidBody = GetComponent<Rigidbody2D>();
         Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
     }
     void HandleNetIntrinsic(MessageNetIntrinsic message) {
@@ -30,11 +30,11 @@ public class SimpleControl : Controllable, ISaveable {
         Vector2 acceleration = Vector2.zero;
         Vector2 deceleration = Vector2.zero;
         if (hitState > Controllable.HitState.none) {
-            rigidBody2D.drag = 10f;
+            myRigidBody.drag = 10f;
             ResetInput();
             return;
         } else {
-            rigidBody2D.drag = 1f;
+            myRigidBody.drag = 1f;
         }
         // Do the normal controls stuff
         // set vertical force or damp if neither up nor down is held
@@ -56,13 +56,13 @@ public class SimpleControl : Controllable, ISaveable {
             deceleration.x = -1 * friction * GetComponent<Rigidbody2D>().velocity.x;
         }
         // apply force
-        rigidBody2D.AddForce(acceleration + deceleration);
+        myRigidBody.AddForce(acceleration + deceleration);
         // clamp velocity to maximum
         // there's probably a more efficient way to do this calculation but whatevs
-        if (rigidBody2D.velocity.magnitude > maxSpeed)
-            rigidBody2D.velocity = Vector2.ClampMagnitude(rigidBody2D.velocity, maxSpeed);
+        if (myRigidBody.velocity.magnitude > maxSpeed)
+            myRigidBody.velocity = Vector2.ClampMagnitude(myRigidBody.velocity, maxSpeed);
         // use the scale x trick for left-facing animations
-        Vector2 vel = rigidBody2D.velocity;
+        Vector2 vel = myRigidBody.velocity;
         if (vel.x < -0.1) {
             Vector3 tempVector = Vector3.one;
             tempVector.x = -1;
