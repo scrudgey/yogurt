@@ -6,7 +6,15 @@ using System.Text.RegularExpressions;
 using Nimrod;
 
 public class Speech : Interactive, ISaveable {
-    static string[] swearWords = new string[]{@"\bshit\b", @"\bfuck\b", @"\bfucked\b", @"\bshazbot\b", @"\bpiss\b", @"\bdick\b", @"\bass\b"};
+    static string[] swearWords = new string[]{
+        @"\bshit\b", 
+        @"\bfuck\b", 
+        @"\bfucked\b", 
+        @"\bshazbotting\b",
+        @"\bshazbot\b",
+        @"\bpiss\b", 
+        @"\bdick\b", 
+        @"\bass\b"};
     private string words;
     public bool speaking = false;
     public string[] randomPhrases;
@@ -359,6 +367,8 @@ public class Speech : Interactive, ISaveable {
         Insult("that shazbotting " + targetname + "!", target);
         MessageNoise noise = new MessageNoise(gameObject);
         Toolbox.Instance.SendMessage(target, this, noise);
+        Controllable control = GetComponent<Controllable>();
+        control.LookAtPoint(target.transform.position);
     }
     public Monologue InsultMonologue(GameObject target) {
         if (hitState >= Controllable.HitState.stun)
@@ -372,6 +382,9 @@ public class Speech : Interactive, ISaveable {
         string censoredContent = CensorSwears(content);
         List<string> strings = new List<string>() { censoredContent };
         Monologue mono = new Monologue(this, strings.ToArray());
+
+        Controllable control = GetComponent<Controllable>();
+        control.LookAtPoint(target.transform.position);
         return mono;
     }
     public Monologue ThreatMonologue(GameObject target) {
@@ -388,6 +401,9 @@ public class Speech : Interactive, ISaveable {
         string censoredContent = CensorSwears(content);
         List<string> strings = new List<string>() { censoredContent };
         Monologue mono = new Monologue(this, strings.ToArray());
+
+        Controllable control = GetComponent<Controllable>();
+        control.LookAtPoint(target.transform.position);
         return mono;
     }
 
