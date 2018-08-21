@@ -107,8 +107,9 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
     }
     public void InitializePriority(Priority priority, Type type){
         priorities.Add(priority);
-        if (defaultPriorityType == priorityTypes[type])
+        if (defaultPriorityType == priorityTypes[type]){
             defaultPriority = priority;
+        }
     }
     public void HandleHitStun(MessageHitstun message){
         hitState = message.hitState;

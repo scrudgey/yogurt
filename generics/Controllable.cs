@@ -49,6 +49,7 @@ public class Controllable : MonoBehaviour {
         get { return _direction; }
         set {
             _direction = value;
+            // Debug.Log(_direction);
             directionAngle = Toolbox.Instance.ProperAngle(_direction.x, _direction.y);
             foreach (IDirectable directable in directables) {
                 directable.DirectionChange(value);
@@ -164,9 +165,12 @@ public class Controllable : MonoBehaviour {
         if (upFlag)
             lastPressed = "up";
         // update direction vector if speed is above a certain value
-        Vector2 normedVel = myRigidBody.velocity.normalized;
-        if (normedVel.magnitude > 0.1) {// && (upFlag || downFlag || leftFlag || rightFlag) ){
-            SetDirection(normedVel);
+        // Vector2 normedVel = myRigidBody.velocity.no;
+        // Vector2.
+        // flo
+        if (myRigidBody.velocity.magnitude > 0.1) {// && (upFlag || downFlag || leftFlag || rightFlag) ){
+            // Debug.Log(normedVel.magnitude);
+            SetDirection(myRigidBody.velocity);
             directionAngle = Toolbox.Instance.ProperAngle(direction.x, direction.y);
         }
     }
@@ -178,8 +182,8 @@ public class Controllable : MonoBehaviour {
     }
     public void LookAtPoint(Vector3 target){
         ResetInput();
-        Vector2 dif = (Vector2)gameObject.transform.position - (Vector2)target;
-        SetDirection(-1 * dif);
+        Vector2 dif = (Vector2)target - (Vector2)gameObject.transform.position;
+        SetDirection(dif);
     }
     public void ShootPressed() {
         if (fightMode){

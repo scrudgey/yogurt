@@ -293,7 +293,7 @@ namespace AI {
                 if (nextLine != null) {
                     return Priority.urgencyPressing;
                 } else {
-                    return 0.1f;
+                    return Priority.urgencyMinor;
                 }
             } else {
                 return -1;
@@ -304,11 +304,11 @@ namespace AI {
                 goal.Update();
             }
             if (nextLine != null) {
-                VideoCamera director = GameObject.FindObjectOfType<VideoCamera>();
-                Vector3 dif = director.transform.position - gameObject.transform.position;
-                Vector2 direction = (Vector2)dif;
-                control.direction = direction;
-                control.SetDirection(direction);
+                // VideoCamera director = GameObject.FindObjectOfType<VideoCamera>();
+                // Vector3 dif = director.transform.position - gameObject.transform.position;
+                // Vector2 direction = (Vector2)dif;
+                // control.direction = direction;
+                // control.SetDirection(direction);
 
                 Toolbox.Instance.SendMessage(gameObject, control, new MessageSpeech(nextLine));
                 nextLine = null;
