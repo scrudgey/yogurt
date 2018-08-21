@@ -39,6 +39,7 @@ public class PersonalAssessment {
     public int numberOfTimesInsulted;
     public bool warned;
     public float timeWarned = -99f;
+    public float timeLastSpokenTo;
     public PersonalAssessment(Knowledge k) {
         knowledge = k;
     }
@@ -113,6 +114,15 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, ProcessHitStun);
         Toolbox.RegisterMessageCallback<MessageThreaten>(this, ProcessThreat);
         Toolbox.RegisterMessageCallback<MessageInventoryChanged>(this, ProcessInventoryChanged);
+        Toolbox.RegisterMessageCallback<MessageSpeech>(this, HandleSpeech);
+    }
+    void HandleSpeech(MessageSpeech message){
+        foreach(GameObject party in message.involvedParties){
+            PersonalAssessment assessment = FormPersonalAssessment(party);
+            if (assessment != null){
+                assessment.timeLastSpokenTo = Time.time;
+            }
+        }
     }
     void ProcessHitStun(MessageHitstun message){
         hitState = message.hitState;
@@ -533,6 +543,13 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         if (people.TryGetValue(rootObject, out storedAssessment)) {
             // TODO: trigger socialization if we havent seen this character in a while
             float interval = Time.time - knowledgebase[rootObject].lastSeenTime;
+            if (interval > 10f){
+                AddSocializationTarget(rootObject);
+            }
+            interval = Time.time - storedAssessment.timeLastSpokenTo;
+            if (interval > 5f){
+                AddSocializationTarget(rootObject);
+            }
             return storedAssessment;
         }
         PersonalAssessment assessment = new PersonalAssessment(knowledgebase[rootObject]);
@@ -545,6 +562,16 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
 
         people.Add(rootObject, assessment);
         return assessment;
+    }
+    void AddSocializationTarget(GameObject target){
+        foreach(NewPeople np in newPeopleList){
+            if (np.person.val == target)
+                return;
+        }
+        NewPeople newPerson = new NewPeople();
+        newPerson.person = new Ref<GameObject>(target);
+        newPerson.countDownTimer = 10f;
+        newPeopleList.Add(newPerson);
     }
     void AttackedByPerson(MessageDamage message) {
         if (hitState >= Controllable.HitState.unconscious)
