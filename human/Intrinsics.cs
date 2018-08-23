@@ -1,7 +1,20 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public enum BuffType { telepathy, speed, bonusHealth, armor, fireproof, noPhysicalDamage, invulnerable, strength, poison, vampirism, ethereal }
+public enum BuffType { 
+    telepathy, 
+    speed, 
+    bonusHealth, 
+    armor, 
+    fireproof, 
+    noPhysicalDamage, 
+    invulnerable, 
+    strength, 
+    poison, 
+    vampirism, 
+    ethereal,  
+    coughing
+    }
 
 public class Intrinsics : MonoBehaviour, ISaveable {
     public List<Buff> buffs = new List<Buff>();
@@ -21,9 +34,21 @@ public class Intrinsics : MonoBehaviour, ISaveable {
     }
     public void CreateLiveBuffs(List<Buff> newBuffs) {
         foreach (Buff b in newBuffs) {
-            liveBuffs.Add(new Buff(b));
+            // liveBuffs.Add(new Buff(b));
+            AddNewLiveBuff(new Buff(b));
         }
         IntrinsicsChanged();
+    }
+    public void AddNewLiveBuff(Buff newBuff){
+        foreach(Buff buff in liveBuffs){
+            if (buff.type == newBuff.type){
+                // do stuff
+                buff.floatValue = Mathf.Max(buff.floatValue, newBuff.floatValue);
+                buff.boolValue = buff.boolValue || newBuff.boolValue;
+                return;
+            }
+        }
+        liveBuffs.Add(newBuff);
     }
     void Update() {
         bool changed = false;

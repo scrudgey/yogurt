@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 public class ChemicalSpray : MonoBehaviour {
     public GameObject collisionPlume;
+    public GameObject responsibleParty;
     private float height;
     void OnCollisionEnter2D(Collision2D coll) {
         Instantiate(collisionPlume, transform.position, Quaternion.identity);
@@ -16,6 +17,11 @@ public class ChemicalSpray : MonoBehaviour {
                 Toolbox.Instance.OccurenceFlag(coll.gameObject, fireData, new HashSet<GameObject>(){coll.gameObject});
             }
         }
+        Toolbox.Instance.AddLiveBuffs(coll.gameObject, gameObject);
+        MessageDamage impact = new MessageDamage();
+        impact.responsibleParty = responsibleParty;
+        impact.silentImpact = true;
+        Toolbox.Instance.SendMessage(coll.gameObject, this, impact);
         Destroy(gameObject);
     }
 }

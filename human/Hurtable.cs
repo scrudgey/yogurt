@@ -21,6 +21,7 @@ public class Hurtable : Damageable, ISaveable {
     public float maxOxygen = 100f;
     public float bonusHealth;
     public float armor;
+    public bool coughing;
     public bool ethereal;
     private float hitStunCounter;
     private bool doubledOver;
@@ -30,6 +31,7 @@ public class Hurtable : Damageable, ISaveable {
     public GameObject dizzyEffect;
     public GameObject lastAttacker;
     public List<Collider2D> backgroundColliders = new List<Collider2D>();
+    public float timeSinceLastCough;
     public override void Awake() {
         base.Awake();
         backgroundColliders = new List<Collider2D>();
@@ -56,6 +58,7 @@ public class Hurtable : Damageable, ISaveable {
         }
         bonusHealth = intrins.netBuffs[BuffType.bonusHealth].floatValue;
         armor = intrins.netBuffs[BuffType.armor].floatValue;
+        coughing = intrins.netBuffs[BuffType.coughing].boolValue;
     }
     public override float CalculateDamage(MessageDamage message) {
         if (message.responsibleParty != null) {
@@ -249,7 +252,18 @@ public class Hurtable : Damageable, ISaveable {
         if (impulse <= 0f && doubledOver && hitState < Controllable.HitState.unconscious) {
             DoubleOver(false);
         }
-
+        if (coughing) {
+            timeSinceLastCough -= Time.deltaTime;
+            if (timeSinceLastCough <= 0){
+                MessageSpeech speech = new MessageSpeech("{cough}");
+                speech.nimrod = true;
+                Toolbox.Instance.SendMessage(gameObject, this, speech);
+                timeSinceLastCough = 1f;
+                impulse = 50f;
+                hitStunCounter = 1f;
+                DoubleOver(true);
+            }
+        }
     }
     public void KnockDown() {
         if (hitState >= Controllable.HitState.unconscious)

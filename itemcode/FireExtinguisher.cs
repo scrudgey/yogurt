@@ -67,6 +67,12 @@ public class FireExtinguisher : Interactive, IDirectable {
                 }
             }
             p.GetComponent<Rigidbody2D>().AddForce(force * Time.deltaTime, ForceMode2D.Impulse);
+            ChemicalSpray spray = p.GetComponent<ChemicalSpray>();
+            if (spray){
+                Pickup myPickup = GetComponent<Pickup>();
+                if (myPickup)
+                    spray.responsibleParty = myPickup.holder.gameObject;
+            }
             emissionTimeout += emissionRate;
         }
         doSpray = false;
