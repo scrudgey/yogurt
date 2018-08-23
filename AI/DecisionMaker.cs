@@ -11,11 +11,13 @@ public class Personality {
     public enum BattleStyle { normal, bloodthirsty };
     public enum Actor { no, yes };
     public enum Suggestible {normal, suggestible, stubborn};
+    public enum Social {normal, chatty, reserved};
     public Bravery bravery;
     public Actor actor;
     public Stoicism stoicism;
     public BattleStyle battleStyle;
     public Suggestible suggestible;
+    public Social social;
 }
 
 public class DecisionMaker : MonoBehaviour, ISaveable {
@@ -86,7 +88,8 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
 
         // create priorities
         priorities = new List<Priority>();
-        InitializePriority(new PrioritySocialize(gameObject, control), typeof(PrioritySocialize));
+        if (personality.social != Personality.Social.reserved)
+            InitializePriority(new PrioritySocialize(gameObject, control), typeof(PrioritySocialize));
         InitializePriority(new PriorityFightFire(gameObject, control), typeof(PriorityFightFire));
         InitializePriority(new PriorityRunAway(gameObject, control), typeof(PriorityRunAway));
         InitializePriority(new PriorityAttack(gameObject, control), typeof(PriorityAttack));
