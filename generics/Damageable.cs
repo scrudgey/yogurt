@@ -122,6 +122,8 @@ public abstract class Damageable : MonoBehaviour {
     }
     
     public void PlayImpactSound(ImpactResult impactType, MessageDamage message) {
+        if (message.silentImpact)
+            return;
         AudioClip[] sounds = new AudioClip[0];
         switch (impactType) {
             case ImpactResult.normal:
