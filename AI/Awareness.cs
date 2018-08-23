@@ -116,10 +116,10 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         Toolbox.RegisterMessageCallback<MessageInventoryChanged>(this, ProcessInventoryChanged);
         Toolbox.RegisterMessageCallback<MessageSpeech>(this, HandleSpeech);
     }
-    void HandleSpeech(MessageSpeech message){
-        foreach(GameObject party in message.involvedParties){
+    void HandleSpeech(MessageSpeech message) {
+        foreach (GameObject party in message.involvedParties) {
             PersonalAssessment assessment = FormPersonalAssessment(party);
-            if (assessment != null){
+            if (assessment != null) {
                 assessment.timeLastSpokenTo = Time.time;
             }
         }
@@ -193,17 +193,24 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             SetNearestEnemy();
             SetNearestFire();
         }
-        if (newPeopleList.Count > 0){
-            NewPeople personToSocializeWith = newPeopleList[0];
+        // if (newPeopleList.Count > 0){
+            // NewPeople personToSocializeWith = newPeopleList[0];
+        List<NewPeople> peopleToRemove = new List<NewPeople>();
+        foreach(NewPeople personToSocializeWith in newPeopleList){
             personToSocializeWith.countDownTimer -= Time.deltaTime;
             if (personToSocializeWith.countDownTimer > 0){
                 newPeopleList[0] = personToSocializeWith;
                 // socializationTarget.val = personToSocializeWith.person.val;
             } else {
-                newPeopleList.RemoveAt(0);
+                // newPeopleList.RemoveAt(0);
+                peopleToRemove.Add(personToSocializeWith);
                 // socializationTarget.val = null;
             }
         }
+        foreach(NewPeople personToRemove in peopleToRemove){
+            newPeopleList.Remove(personToRemove);
+        }
+        // }
     }
     public void SetNearestEnemy() {
         nearestEnemy.val = null;
@@ -547,7 +554,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                 AddSocializationTarget(rootObject);
             }
             interval = Time.time - storedAssessment.timeLastSpokenTo;
-            if (interval > 5f){
+            if ((interval > 10f && decisionMaker.personality.social == Personality.Social.chatty) || (interval > 25f && decisionMaker.personality.social == Personality.Social.normal)){
                 AddSocializationTarget(rootObject);
             }
             return storedAssessment;
@@ -555,11 +562,11 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         PersonalAssessment assessment = new PersonalAssessment(knowledgebase[rootObject]);
 
         // TODO: trigger socialization target
-        NewPeople newPerson = new NewPeople();
-        newPerson.person = new Ref<GameObject>(rootObject);
-        newPerson.countDownTimer = 10f;
-        newPeopleList.Add(newPerson);
-
+        // NewPeople newPerson = new NewPeople();
+        // newPerson.person = new Ref<GameObject>(rootObject);
+        // newPerson.countDownTimer = 10f;
+        // newPeopleList.Add(newPerson);
+        AddSocializationTarget(rootObject);
         people.Add(rootObject, assessment);
         return assessment;
     }
