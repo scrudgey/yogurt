@@ -325,9 +325,12 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         Toolbox.Instance.SendMessage(gameObject, this, message);
     }
     public string RecallMemory(){
+        if (shortTermMemory.Count() == 0){
+            return "I am a blank slate.";
+        }
         IEnumerator<EventData> enumerator = shortTermMemory.GetEnumerator();
         int i = 0;
-        while(i < Random.Range(0, shortTermMemory.Count())){
+        while(i <= Random.Range(0, shortTermMemory.Count())){
             i++;
             enumerator.MoveNext();
         }
