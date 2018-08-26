@@ -4,12 +4,6 @@ public class SpeechMenu : MonoBehaviour {
     public void Start() {
         GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
     }
-    public void LineButton() {
-        MessageSpeech message = new MessageSpeech();
-        message.sayLine = true;
-        Toolbox.Instance.SendMessage(GameManager.Instance.playerObject, this, message);
-        UINew.Instance.CloseActiveMenu();
-    }
     public void SwearButton() {
         MessageSpeech message = new MessageSpeech();
         message.randomSwear = true;
