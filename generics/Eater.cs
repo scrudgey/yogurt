@@ -31,7 +31,7 @@ public class Eater : Interactive, ISaveable {
             MessageSpeech message = new MessageSpeech("I don't feel so good!!", eventData: new EventData(chaos: 1, disturbing: 1, positive: -1));
             Toolbox.Instance.SendMessage(gameObject, this, message);
         }
-        if (nausea > 30 && lastStatement != nauseaStatement.imminent) {
+        if (nausea > 60 && lastStatement != nauseaStatement.imminent) {
             lastStatement = nauseaStatement.imminent;
             MessageSpeech message = new MessageSpeech("I'm gonna puke!", eventData: new EventData(chaos: 2, disturbing: 1, positive: -2));
             Toolbox.Instance.SendMessage(gameObject, this, message);
@@ -71,7 +71,12 @@ public class Eater : Interactive, ISaveable {
             nausea += Time.deltaTime * 30f;
         }
         if (nausea > 50) {
+            // Vomit();
+            nausea += Time.deltaTime * 10f;
+        }
+        if (nausea > 100 && Random.RandomRange(0f, 1f) < 0.01f) {
             Vomit();
+            // nausea += Time.deltaTime * 10f;
         }
         if (nutrition > 100) {
             nausea += Time.deltaTime * 2;
