@@ -74,7 +74,7 @@ public class Eater : Interactive, ISaveable {
             // Vomit();
             nausea += Time.deltaTime * 10f;
         }
-        if (nausea > 100 && Random.RandomRange(0f, 1f) < 0.01f) {
+        if (nausea > 100 && Random.Range(0f, 1f) < 0.01f) {
             Vomit();
             // nausea += Time.deltaTime * 10f;
         }
