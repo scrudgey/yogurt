@@ -178,12 +178,7 @@ public class Speech : Interactive, ISaveable {
             follower.PreemptiveUpdate();
             bubbleText.text = words;
             float charIndex = (speakTimeTotal - speakTime) * speakSpeed;
-            // if the parent scale is flipped, we need to flip the flipper back to keep
-            // the text properly oriented.
-            if (flipper.transform.localScale != transform.localScale) {
-                Vector3 tempscale = transform.localScale;
-                flipper.transform.localScale = tempscale;
-            }
+            
             if (charIndex < swearMask.Length) {
                 if (swearMask[(int)charIndex]) {
                     if (audioSource.clip != bleepSound)
@@ -220,6 +215,14 @@ public class Speech : Interactive, ISaveable {
             }
         }
     }
+    public void LateUpdate(){
+        // if the parent scale is flipped, we need to flip the flipper back to keep
+        // the text properly oriented.
+        if (flipper.transform.localScale != transform.localScale) {
+            Vector3 tempscale = transform.localScale;
+            flipper.transform.localScale = tempscale;
+        }
+    }
     public void SayRandom() {
         if (randomPhrases.Length > 0) {
             string toSay = randomPhrases[Random.Range(0, randomPhrases.Length)];
@@ -231,13 +234,16 @@ public class Speech : Interactive, ISaveable {
             return null;
         if (hitState >= Controllable.HitState.unconscious)
             return null;
-        if (speaking && message.phrase == words && !message.interrupt) {
+        if (speaking && message.phrase != words && !message.interrupt) {
+            if (queue.Count >= 1)
+                return null;
             queue.Add(message);
             return null;
         }
         if (message.nimrod){
             Grammar grammar = new Grammar();
             grammar.Load("structure");
+            grammar.Load("flavor_test");
             grammar.Load("flavor_" + flavor);
             message.phrase = grammar.Parse(message.phrase);
             if (message.phrase == "")
