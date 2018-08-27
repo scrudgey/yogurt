@@ -68,10 +68,13 @@ public class Head : Interactive, IExcludable, ISaveable {
         if (hatAnimator) {
             hatAnimator.RemoveDirectable();
         }
-        hat.GetComponent<Rigidbody2D>().isKinematic = false;
+        Rigidbody2D hatBody = hat.GetComponent<Rigidbody2D>();
+        hatBody.isKinematic = false;
+        hatBody.simulated = true;
         hat.GetComponent<Collider2D>().isTrigger = false;
         PhysicalBootstrapper phys = hat.GetComponent<PhysicalBootstrapper>();
         if (phys) {
+            phys.gameObject.SetActive(true);
             phys.InitPhysical(0.2f, Vector2.zero);
         } else {
             hat.transform.parent = null;
@@ -80,6 +83,8 @@ public class Head : Interactive, IExcludable, ISaveable {
         if (hatRenderer) {
             hatRenderer.sortingLayerName = "main";
         }
+        MessageDirectable directable = new MessageDirectable();
+        directable.removeDirectable.AddRange(hat.GetComponentsInParent<IDirectable>());
         hat = null;
     }
     public void DropMessage(GameObject obj) {
