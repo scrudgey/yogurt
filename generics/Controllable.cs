@@ -114,7 +114,6 @@ public class Controllable : MonoBehaviour {
     }
     public HashSet<Interaction> UpdateDefaultInteraction(){
         defaultInteraction = null;
-        Inventory inv = GetComponent<Inventory>();
         HashSet<Interaction> manualActions = new HashSet<Interaction>(Interactor.GetInteractions(gameObject, gameObject, manualActions:true));
         defaultInteraction = Interactor.GetDefaultAction(manualActions);
         if (defaultInteraction != null)
