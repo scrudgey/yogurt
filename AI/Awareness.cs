@@ -134,24 +134,36 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         assessment.status = PersonalAssessment.friendStatus.enemy;
     }
     void ProcessInventoryChanged(MessageInventoryChanged message) {
-        if (message.holding != null) {
+        GameObject obj = message.holding;
+        if (message.dropped != null)
+            obj = message.dropped;
+        if (obj != null) {
             Knowledge knowledge = null;
-            if (knowledgebase.TryGetValue(message.holding, out knowledge)) {
+            if (knowledgebase.TryGetValue(obj, out knowledge)) {
                 knowledge.UpdateInfo();
             } else {
-                knowledge = new Knowledge(message.holding);
-                knowledgebase.Add(message.holding, knowledge);
+                knowledge = new Knowledge(obj);
+                knowledgebase.Add(obj, knowledge);
             }
         }
-        if (message.dropped != null) {
-            Knowledge knowledge = null;
-            if (knowledgebase.TryGetValue(message.dropped, out knowledge)) {
-                knowledge.UpdateInfo();
-            } else {
-                knowledge = new Knowledge(message.dropped);
-                knowledgebase.Add(message.dropped, knowledge);
-            }
-        }
+        // if (message.holding != null) {
+        //     Knowledge knowledge = null;
+        //     if (knowledgebase.TryGetValue(message.holding, out knowledge)) {
+        //         knowledge.UpdateInfo();
+        //     } else {
+        //         knowledge = new Knowledge(message.holding);
+        //         knowledgebase.Add(message.holding, knowledge);
+        //     }
+        // }
+        // if (message.dropped != null) {
+        //     Knowledge knowledge = null;
+        //     if (knowledgebase.TryGetValue(message.dropped, out knowledge)) {
+        //         knowledge.UpdateInfo();
+        //     } else {
+        //         knowledge = new Knowledge(message.dropped);
+        //         knowledgebase.Add(message.dropped, knowledge);
+        //     }
+        // }
     }
     public List<GameObject> FindObjectWithName(string targetName) {
         List<GameObject> returnArray = new List<GameObject>();
