@@ -5,7 +5,13 @@ public class Message {
     public Component messenger;
 }
 public class MessageAnimation : Message {
-    public enum AnimType { none, holding, throwing, swinging, fighting, punching, outfit };
+    public enum AnimType { 
+        none, 
+        throwing, 
+        swinging, 
+        fighting, 
+        punching, 
+        outfit };
     public AnimType type;
     public bool value;
     public string outfitName = "";

@@ -1,16 +1,6 @@
 ﻿using UnityEngine;
 
 public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
-    private string _spriteSheet;
-    private string spriteSheet {
-        get { return _spriteSheet; }
-        set {
-            if (value != _spriteSheet) {
-                _spriteSheet = value;
-                LoadSprites();
-            }
-        }
-    }
     private string _sequence;
     public string sequence {
         get { return _sequence; }
@@ -24,12 +14,10 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
         }
     }
     private SpriteRenderer spriteRenderer;
-    // private Controllable controllable;
-    private string lastPressed;
+    private string lastPressed = "right";
     private bool swinging;
     private bool holding;
     private bool throwing;
-    private bool oldHolding;
     private bool fighting;
     private bool punching;
     private Sprite[] sprites;
@@ -46,11 +34,45 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
         LoadSprites();
         Toolbox.RegisterMessageCallback<MessageAnimation>(this, HandleAnimationMessage);
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
+        Toolbox.RegisterMessageCallback<MessageInventoryChanged>(this, HandleInventoryMessage);
     }
     void Start(){
         MessageDirectable message = new MessageDirectable();
         message.addDirectable.Add(this);
         Toolbox.Instance.SendMessage(gameObject, this, message);
+    }
+    public void HandleInventoryMessage(MessageInventoryChanged message){
+        bool oldHolding = holding;
+        bool messageHolding = message.holding != null;
+        bool messageDrop = message.dropped != null;
+
+        if (messageHolding){
+            holding = true;
+            if (oldHolding == false) {
+                LateUpdate();
+                SetFrame(0);
+            }
+        } else {
+            holding = false;
+            if (oldHolding == true) {
+                LateUpdate();
+                SetFrame(0);
+            }
+        }
+
+        if (messageDrop){
+            holding = false;
+            if (oldHolding == true) {
+                LateUpdate();
+                SetFrame(0);
+            }
+        } else {
+            holding = true;
+            if (oldHolding == false) {
+                LateUpdate();
+                SetFrame(0);
+            }
+        }
     }
     public void HandleAnimationMessage(MessageAnimation anim) {
         switch (anim.type) {
@@ -58,9 +80,6 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
                 fighting = anim.value;
                 LateUpdate();
                 SetFrame(0);
-                break;
-            case MessageAnimation.AnimType.holding:
-                holding = anim.value;
                 break;
             case MessageAnimation.AnimType.throwing:
                 throwing = anim.value;
@@ -76,6 +95,7 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
         }
         if (anim.outfitName != "") {
             baseName = anim.outfitName;
+            LoadSprites();
             LateUpdate();
             SetFrame(0);
         }
@@ -87,7 +107,9 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
         SetFrame(0);
     }
     public void LoadSprites() {
+        string spriteSheet = baseName + "_spritesheet";
         sprites = Resources.LoadAll<Sprite>("spritesheets/" + spriteSheet);
+        // Debug.Log(gameObject.name + " loaded "+spriteSheet);
     }
     public void UpdateSequence() {
         // Debug.Log("updatesequence "+sequence);
@@ -96,9 +118,7 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
         // Debug.Log(animation.IsPlaying(sequence));
     }
     public void LateUpdate() {
-        // if (controllable == null)
-        //     Awake();
-        spriteSheet = baseName + "_spritesheet";
+        // spriteSheet = baseName + "_spritesheet";
         string updateSequence = "generic3";
 
         if (swinging) {
@@ -113,8 +133,6 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
             } else {
                 updateSequence = GetWalkState(updateSequence);
             }
-            if (oldHolding != holding)
-                SetFrame(0);
         }
         if (hitState > Controllable.HitState.none) {
             updateSequence = GetHitStunState("generic3");
@@ -123,7 +141,6 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
             GetComponent<Animation>().Play(sequence);
         }
         sequence = updateSequence;
-        oldHolding = holding;
     }
     string GetSwingState(string updateSequence) {
         updateSequence = updateSequence + "_swing_" + lastPressed;
@@ -218,10 +235,10 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
         return updateSequence;
     }
     public void SetFrame(int animationFrame) {
-        // Debug.Log("set frame "+animationFrame.ToString());
         frame = animationFrame + baseFrame;
         if (frame >= sprites.Length) {
             Debug.Log("coud not set frame");
+            Debug.Log(baseName);
         } else {
             spriteRenderer.sprite = sprites[frame];
         }
