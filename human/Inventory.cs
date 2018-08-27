@@ -11,13 +11,13 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     public Pickup holding {
         get { return _holding; }
         set {
-            MessageAnimation anim = new MessageAnimation();
+            // MessageAnimation anim = new MessageAnimation();
             MessageInventoryChanged invMessage = new MessageInventoryChanged();
             MessageDirectable directableMessage = new MessageDirectable();
 
-            anim.type = MessageAnimation.AnimType.holding;
-            anim.value = value != null;
-            Toolbox.Instance.SendMessage(gameObject, this, anim);
+            // anim.type = MessageAnimation.AnimType.holding;
+            // anim.value = value != null;
+            // Toolbox.Instance.SendMessage(gameObject, this, anim);
             if (value == null) {
                 directableMessage.removeDirectable = new List<IDirectable>(_holding.GetComponents<IDirectable>()); 
                 invMessage.dropped = _holding.gameObject;
