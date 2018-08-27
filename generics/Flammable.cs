@@ -106,9 +106,11 @@ public class Flammable : MonoBehaviour, ISaveable {
             flagTimer += Time.deltaTime;
             if (flagTimer > 0.5f) {
                 flagTimer = 0;
-                OccurrenceFire fireData = new OccurrenceFire();
-                fireData.flamingObject = gameObject;
-                Toolbox.Instance.OccurenceFlag(gameObject, fireData, involvedParties);
+                if (!fireSource){
+                    OccurrenceFire fireData = new OccurrenceFire();
+                    fireData.flamingObject = gameObject;
+                    Toolbox.Instance.OccurenceFlag(gameObject, fireData, involvedParties);
+                }
             }
             // if i am on fire, i take damage.
             MessageDamage message = new MessageDamage(Time.deltaTime, damageType.fire);
