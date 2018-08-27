@@ -28,8 +28,8 @@ public class PersistentObject {
         // needed for XML serialization
     }
     public void Update(GameObject gameObject) {
-        transformPosition = gameObject.transform.position;
-        transformRotation = gameObject.transform.rotation;
+        transformPosition = gameObject.transform.localPosition;
+        transformRotation = gameObject.transform.localRotation;
         transformScale = gameObject.transform.localScale;
         sceneName = SceneManager.GetActiveScene().name;
     }
