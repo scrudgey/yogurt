@@ -2,35 +2,9 @@
 using UnityEngine;
 
 public class Insults {
-    public static string ComposeInsult(GameObject inTarget) {
-        Grammar grammar = new Grammar();
-        grammar.Load("insult");
-        GameObject target = Controller.Instance.GetBaseInteractive(inTarget.transform);
-        Outfit targetOutfit = target.GetComponent<Outfit>();
-        Head targetHead = target.GetComponentInChildren<Head>();
-        DecisionMaker targetDM = target.GetComponent<DecisionMaker>();
-        string possessionName = null;
-        string clothesName = "";
-        string hatName = "";
-        if (targetDM != null) {
-            if (targetDM.possession != null) {
-                possessionName = targetDM.possession.name;
-                grammar.Load("insult_item");
-                grammar.AddSymbol("item-name", possessionName);
-            }
-        }
-        if (targetOutfit != null) {
-            clothesName = targetOutfit.wornUniformName;
-            grammar.Load("insult_clothes");
-            grammar.AddSymbol("clothes-name", clothesName);
-        }
-        if (targetHead != null) {
-            if (targetHead.hat != null) {
-                hatName = targetHead.hat.name;
-                grammar.Load("insult_hat");
-                grammar.AddSymbol("hat-name", hatName);
-            }
-        }
+    public static string ComposeInsult(GameObject insultTarget) {
+        GameObject target = Controller.Instance.GetBaseInteractive(insultTarget.transform);
+        Grammar grammar = TargetToNimrod(target);
         return grammar.Parse("{main}");
     }
 
@@ -50,5 +24,35 @@ public class Insults {
         //         break;
         // }
         return "";
+    }
+
+    public static Grammar TargetToNimrod(GameObject target){
+        Grammar g = new Grammar();
+        // DecisionMaker targetDM = target.GetComponent<DecisionMaker>();
+        // if (targetDM != null) {
+        //     if (targetDM.possession != null) {
+        //         possessionName = targetDM.possession.name;
+        //         g.Load("insult_item");
+        //         g.AddSymbol("item-name", possessionName);
+        //     }
+        // }
+
+        // Outfit targetOutfit = target.GetComponent<Outfit>();
+        // if (targetOutfit != null) {
+        //     clothesName = targetOutfit.wornUniformName;
+        //     grammar.Load("insult_clothes");
+        //     grammar.AddSymbol("clothes-name", clothesName);
+        // }
+
+        // Head targetHead = target.GetComponentInChildren<Head>();
+        // if (targetHead != null) {
+        //     if (targetHead.hat != null) {
+        //         hatName = targetHead.hat.name;
+        //         grammar.Load("insult_hat");
+        //         grammar.AddSymbol("hat-name", hatName);
+        //     }
+        // }
+
+        return g;
     }
 }
