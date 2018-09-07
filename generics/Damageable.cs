@@ -73,6 +73,8 @@ public abstract class Damageable : MonoBehaviour {
     }
     public abstract void NetIntrinsicsChanged(MessageNetIntrinsic message);
     public virtual void TakeDamage(MessageDamage message) {
+        if (message.amount == 0)
+            return;
         lastMessage = message;
         lastDamage = message.type;
         bool vulnerable = Damages(this, message.type, netBuffs);
