@@ -63,6 +63,7 @@ public class MessageDamage : Message {
     public Vector2 force;
     public AudioClip[] impactSounds = new AudioClip[0];
     public bool silentImpact;
+    public bool impersonal;
     public PhysicalImpact impactor;
     public GameObject responsibleParty;
     public bool strength;
