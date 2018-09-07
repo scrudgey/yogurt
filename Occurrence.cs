@@ -110,7 +110,6 @@ public class Occurrence : MonoBehaviour {
 
 [System.Serializable]
 public class EventData {
-    // public SerializableDictionary<string, float> flags = new SerializableDictionary<string, float>();
     public string key;
     public float val;
     public string desc;
@@ -264,6 +263,7 @@ public class OccurrenceSpeech : OccurrenceData {
     public string line;
     public bool threat;
     public bool insult;
+    public int profanity;
     public override void CalculateDescriptions(Occurrence parent) {
         string speakerName = Toolbox.Instance.GetName(speaker);
         string targetName = "";
@@ -293,6 +293,8 @@ public class OccurrenceSpeech : OccurrenceData {
             data.ratings[Rating.offensive] = Random.Range(2, 3);
             data.ratings[Rating.disturbing] = 2;
         }
+        if (profanity > 0 && data.noun == "dialogue")
+            data.noun = "profanity";
         if (events.Count == 0) {
             events.Add(data);
         }
