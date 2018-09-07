@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using AI;
 using UnityEngine;
 using DropOutStack;
@@ -16,11 +17,7 @@ public class Knowledge {
         transform = o.transform;
         lastSeenPosition = transform.position;
         lastSeenTime = Time.time;
-        foreach (Component component in o.GetComponents<Component>()) {
-            if (component is Flammable) {
-                flammable = (Flammable)component;
-            }
-        }
+        flammable = o.GetComponentInParent<Flammable>();
     }
     public void UpdateInfo() {
         if (obj) {
@@ -71,6 +68,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
     private GameObject sightCone;
     private HashSet<GameObject> seenFlags = new HashSet<GameObject>();
     Transform cachedTransform;
+    FixedSizedQueue<string> lastNEvents = new FixedSizedQueue<string>();
     public new Transform transform {
         get {
             if (cachedTransform == null) {
@@ -92,6 +90,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
     public Ref<GameObject> nearestFire = new Ref<GameObject>(null);
     public SerializableDictionary<GameObject, Knowledge> knowledgebase = new SerializableDictionary<GameObject, Knowledge>();
     public SerializableDictionary<GameObject, PersonalAssessment> people = new SerializableDictionary<GameObject, PersonalAssessment>();
+
     void Start() {
         MessageDirectable message = new MessageDirectable();
         message.addDirectable.Add(this);
@@ -109,6 +108,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         }
     }
     void Awake(){
+        lastNEvents.Limit = 25;
         Toolbox.RegisterMessageCallback<MessageInsult>(this, ProcessInsult);
         Toolbox.RegisterMessageCallback<MessageDamage>(this, AttackedByPerson);
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, ProcessHitStun);
@@ -146,24 +146,6 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                 knowledgebase.Add(obj, knowledge);
             }
         }
-        // if (message.holding != null) {
-        //     Knowledge knowledge = null;
-        //     if (knowledgebase.TryGetValue(message.holding, out knowledge)) {
-        //         knowledge.UpdateInfo();
-        //     } else {
-        //         knowledge = new Knowledge(message.holding);
-        //         knowledgebase.Add(message.holding, knowledge);
-        //     }
-        // }
-        // if (message.dropped != null) {
-        //     Knowledge knowledge = null;
-        //     if (knowledgebase.TryGetValue(message.dropped, out knowledge)) {
-        //         knowledge.UpdateInfo();
-        //     } else {
-        //         knowledge = new Knowledge(message.dropped);
-        //         knowledgebase.Add(message.dropped, knowledge);
-        //     }
-        // }
     }
     public List<GameObject> FindObjectWithName(string targetName) {
         List<GameObject> returnArray = new List<GameObject>();
@@ -205,8 +187,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             SetNearestEnemy();
             SetNearestFire();
         }
-        // if (newPeopleList.Count > 0){
-            // NewPeople personToSocializeWith = newPeopleList[0];
+        
         List<NewPeople> peopleToRemove = new List<NewPeople>();
         foreach(NewPeople personToSocializeWith in newPeopleList){
             personToSocializeWith.countDownTimer -= Time.deltaTime;
@@ -342,7 +323,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         }
         IEnumerator<EventData> enumerator = shortTermMemory.GetEnumerator();
         int i = 0;
-        while(i <= Random.Range(0, shortTermMemory.Count())){
+        while(i <= UnityEngine.Random.Range(0, shortTermMemory.Count())){
             i++;
             enumerator.MoveNext();
         }
@@ -365,7 +346,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             ReactToEvent(e, involvedParties);
         }
     }
-    void ReactToEvent(EventData dat, HashSet<GameObject> involvedParties){
+    void ReactToEvent(EventData dat, HashSet<GameObject> involvedParties) {
         // store memory
         EventData memory = new EventData(dat);
         shortTermMemory.Push(memory);
@@ -375,10 +356,21 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         // react to specifics of event
         if (involvedParties.Contains(gameObject))
             return;
+        
+        // Type datType = dat.GetType();
+        int seenCount = 0;
+        foreach (string noun in lastNEvents){
+            if (noun == dat.noun)
+                seenCount += 1;
+        }
+        Debug.Log(dat.noun);
+        lastNEvents.Add(dat.noun);
         Rating[] ratings = (Rating[])Rating.GetValues(typeof(Rating));
         Toolbox.ShuffleArray<Rating>(ratings);
         foreach(Rating rating in ratings) {
-            if (Random.Range(0f, 1f) < Toolbox.Gompertz(dat.ratings[rating], 1.26f, -6.9f, 1) && dat.ratings[rating] > 0) {
+            float threshhold = Toolbox.Gompertz(dat.ratings[rating], 1.26f, -6.9f, 1);
+            threshhold *= 1 - (float)seenCount/5.0f;
+            if (UnityEngine.Random.Range(0f, 1f) < threshhold && dat.ratings[rating] > 0) {
                 MessageSpeech message = new MessageSpeech(reactions[rating]);
                 message.nimrod = true;
                 message.involvedParties.Add(gameObject);
@@ -598,7 +590,8 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
     void AttackedByPerson(MessageDamage message) {
         if (hitState >= Controllable.HitState.unconscious)
             return;
-
+        if (message.impersonal)
+            return;
         // adjust reaction depending on magnitude
         if (message.amount <= 15){
             // minor nusiance
