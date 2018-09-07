@@ -143,7 +143,7 @@ namespace AI {
             base.Update();
             if (index == 2 && !findingFail) {
                 findingFail = true;
-                Debug.Log("finding fail");
+                // Debug.Log("finding fail");
             }
         }
     }

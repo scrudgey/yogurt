@@ -8,9 +8,6 @@ public class Qualities : MonoBehaviour {
     public float chaos;
     public float offensive;
     public float positive;
-    //     public string whatHappened;
-    // public string transcriptLine;
-    // public string noun;
     public EventData ToEvent() {
         EventData data = new EventData(
             disgusting:disgusting,

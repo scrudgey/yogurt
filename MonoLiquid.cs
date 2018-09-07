@@ -23,7 +23,6 @@ public class MonoLiquid : MonoBehaviour {
             spriteRenderer.color = liquid.color;
         }
     }
-    //TODO: figure out why splashes are happening instead of puddles for vomit
     void OnCollisionEnter2D(Collision2D coll) {
         if (ignoreCollisions)
             return;
@@ -50,7 +49,6 @@ public class MonoLiquid : MonoBehaviour {
     public void LoadLiquid(string type) {
         // TODO: check for null return
         liquid = Liquid.LoadLiquid(type);
-        // add things here for changing edible properties according to liquid properties (?)
     }
     void OnGroundImpact(Physical phys) {
         EventData data = Toolbox.Instance.DataFlag(gameObject, chaos: 1, disgusting: 1);

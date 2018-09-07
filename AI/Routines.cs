@@ -90,7 +90,7 @@ namespace AI {
         protected override status DoUpdate() {
             if (telephone && !condition.conditionMet) {
                 telephone.FireButtonCallback();
-                Debug.Log("called FD");
+                // Debug.Log("called FD");
                 condition.conditionMet = true;
                 return status.success;
             } else {
@@ -375,7 +375,6 @@ namespace AI {
         protected override status DoUpdate() {
             if (target.val != null) {
                 control.SetDirection(Vector2.ClampMagnitude(target.val.transform.position - gameObject.transform.position, 1f));
-                // control.shootHeldFlag = true;
                 control.ShootHeld();
                 return status.neutral;
             } else {
