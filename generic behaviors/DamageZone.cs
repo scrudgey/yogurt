@@ -24,6 +24,7 @@ public class DamageZone : MonoBehaviour {
             if (timerVal <= 0) {
                 timerVal = timerInterval;
                 message.responsibleParty = gameObject;
+                message.impersonal = true;
                 Toolbox.Instance.SendMessage(other.gameObject, this, message, sendUpwards: true);
             }
             hitTimeouts[other.gameObject] = timerVal;
