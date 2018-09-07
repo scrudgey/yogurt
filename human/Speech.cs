@@ -208,7 +208,7 @@ public class Speech : Interactive, ISaveable {
         if (!speaking && queue.Count > 0){
             queueTime += Time.deltaTime;
             if (queueTime > 1f){
-                queueTime = 0;
+                queueTime = Random.Range(-10f, 0f);
                 int index = Random.Range(0, queue.Count);
                 Say(queue[index]);
                 queue.RemoveAt(index);
@@ -255,13 +255,13 @@ public class Speech : Interactive, ISaveable {
             message.eventData = new EventData();
         speechData.events.Add(message.eventData);
         string censoredPhrase = CensorSwears(message.phrase);
-        int extremity = Toolbox.LevenshteinDistance(message.phrase, censoredPhrase);
+        speechData.profanity = Toolbox.LevenshteinDistance(message.phrase, censoredPhrase);
         swearMask = new bool[message.phrase.Length];
         for (int i = 0; i < message.phrase.Length; i++){
             swearMask[i] = message.phrase[i] != censoredPhrase[i];
         }
-        message.eventData.ratings[Rating.chaos] += extremity * 2f;
-        message.eventData.ratings[Rating.offensive] += extremity * 5f;
+        message.eventData.ratings[Rating.chaos] += speechData.profanity * 2f;
+        message.eventData.ratings[Rating.offensive] += speechData.profanity * 5f;
         
         speechData.line = censoredPhrase;
         if (inDialogue)
