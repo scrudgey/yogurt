@@ -138,7 +138,7 @@ public class UINew : Singleton<UINew> {
         cursorText.transform.position = UICanvas.transform.TransformPoint(pos);
         cursorTextText.text = text;
 
-        Cursor.SetCursor(cursorTarget, new Vector2(28, 16), CursorMode.Auto);
+        Cursor.SetCursor(cursorTarget, new Vector2(16, 16), CursorMode.Auto);
     }
     public void UpdateActionText(bool highlight, GameObject target) {
         if (target != null) {
@@ -582,6 +582,7 @@ public class UINew : Singleton<UINew> {
             Vector2 initPosition = renderingCamera.WorldToScreenPoint(initLocation);
             n++;
             button.gameobject.transform.SetParent(UICanvas.transform, false);
+            button.gameobject.transform.SetSiblingIndex(0);
             initPosition = (initPosition - centerPosition) / (renderingCamera.pixelWidth / 800f);
             if (initPosition.y > canvasRect.rect.height / 2f) {
                 initPosition.y = canvasRect.rect.height / 2f - 50f;
