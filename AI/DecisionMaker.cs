@@ -96,8 +96,9 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         InitializePriority(new PriorityProtectPossessions(gameObject, control), typeof(PriorityProtectPossessions));
         InitializePriority(new PriorityWander(gameObject, control), typeof(PriorityWander));
         InitializePriority(new PriorityInvestigateNoise(gameObject, control), typeof(PriorityInvestigateNoise));
-        if (personality.actor == Personality.Actor.yes)
+        if (personality.actor == Personality.Actor.yes){
             InitializePriority(new PriorityReadScript(gameObject, control), typeof(PriorityReadScript));
+        }
         if (protectionZone != null) {
             InitializePriority(new PriorityProtectZone(gameObject, control, protectionZone, guardPoint), typeof(PriorityProtectZone));
         }
