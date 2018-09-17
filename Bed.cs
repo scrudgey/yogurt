@@ -54,6 +54,7 @@ public class Bed : Doorway {
         if (playerHead != null){
             headSprites[0] = playerHead.sprites[0];
             headSprites[1] = playerHead.sprites[1];
+            head.sprite = playerHead.sprites[0];
         }
 
         bubble.gameObject.SetActive(true);
