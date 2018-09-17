@@ -117,8 +117,10 @@ public class DialogueMenu : MonoBehaviour {
         endButton = transform.Find("base/buttons/End").GetComponent<Button>();
         buttons.AddRange(new Button[] { giveButton, insultButton, threatenButton, suggestButton, followButton, endButton });
 
+        speechText.text = "";
         promptText.text = "";
         promptText.text = "[A]";
+        Canvas.ForceUpdateCanvases();
     }
 
     public void Configure(Speech instigator, Speech target, bool interruptDefault = false) {
@@ -137,7 +139,7 @@ public class DialogueMenu : MonoBehaviour {
         }
         portrait2.sprite = target.portrait[0];
         portrait1.sprite = instigator.portrait[0];
-        speechText.text = instigator.name + " " + target.name;
+        // speechText.text = instigator.name + " " + target.name;
         targetControl = target.GetComponent<Controllable>();
         instigatorControl = instigator.GetComponent<Controllable>();
         instigatorControl.SetDirection(target.transform.position - instigator.transform.position);
@@ -389,6 +391,8 @@ public class DialogueMenu : MonoBehaviour {
         if (choice1Text.gameObject.activeSelf) {
             choicePanel.SetActive(true);
         }
+        Canvas.ForceUpdateCanvases();
+        // Debug.Break();
     }
     public void DisableButtons() {
         foreach (Button button in buttons)
