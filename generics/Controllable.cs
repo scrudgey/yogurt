@@ -6,7 +6,7 @@ public class Controllable : MonoBehaviour {
     public enum HitState { none, stun, unconscious, dead };
     public enum ControlType { none, AI, player }
     public Interaction defaultInteraction;
-    public List<Component> defaultParameters;
+    public List<object> defaultParameters;
     public static List<Type> AIComponents = new List<Type>(){
         typeof(DecisionMaker),
         typeof(PeterPicklebottom)
@@ -65,7 +65,7 @@ public class Controllable : MonoBehaviour {
     public Rigidbody2D myRigidBody;
     private ControlType _control;
     public ControlType control {
-        get {return _control;}
+        get { return _control; }
         set {
             SetControl(value);
             _control = value;
@@ -100,35 +100,34 @@ public class Controllable : MonoBehaviour {
                 directables.Add((IDirectable)component);
             }
         }
-        // rigidBody2D = GetComponent<Rigidbody2D>();
         UpdateDefaultInteraction();
     }
-    public void HandleNoise(MessageNoise message){
+    public void HandleNoise(MessageNoise message) {
         if (hitState >= HitState.stun)
             return;
-            
+
         LookAtPoint(message.location);
     }
-    public void HandleInventoryMessage(MessageInventoryChanged message){
+    public void HandleInventoryMessage(MessageInventoryChanged message) {
         UpdateDefaultInteraction();
     }
-    public HashSet<Interaction> UpdateDefaultInteraction(){
+    public HashSet<Interaction> UpdateDefaultInteraction() {
         defaultInteraction = null;
-        HashSet<Interaction> manualActions = new HashSet<Interaction>(Interactor.GetInteractions(gameObject, gameObject, manualActions:true));
+        HashSet<Interaction> manualActions = new HashSet<Interaction>(Interactor.GetInteractions(gameObject, gameObject, manualActions: true));
         defaultInteraction = Interactor.GetDefaultAction(manualActions);
         if (defaultInteraction != null)
             defaultParameters = defaultInteraction.parameters;
         return manualActions;
     }
-    void HandleHitStun(MessageHitstun message){
+    void HandleHitStun(MessageHitstun message) {
         hitState = message.hitState;
     }
-    void HandleDirectable(MessageDirectable message){
-        foreach(IDirectable directable in message.addDirectable){
+    void HandleDirectable(MessageDirectable message) {
+        foreach (IDirectable directable in message.addDirectable) {
             directables.Add(directable);
             directable.DirectionChange(direction);
         }
-        foreach(IDirectable directable in message.removeDirectable){
+        foreach (IDirectable directable in message.removeDirectable) {
             directables.Remove(directable);
         }
     }
@@ -148,6 +147,7 @@ public class Controllable : MonoBehaviour {
                     decisionMaker.enabled = false;
                 break;
         }
+        ResetInput();
     }
     void Update() {
         if (hitState > 0) {
@@ -164,11 +164,7 @@ public class Controllable : MonoBehaviour {
         if (upFlag)
             lastPressed = "up";
         // update direction vector if speed is above a certain value
-        // Vector2 normedVel = myRigidBody.velocity.no;
-        // Vector2.
-        // flo
-        if (myRigidBody.velocity.magnitude > 0.1) {// && (upFlag || downFlag || leftFlag || rightFlag) ){
-            // Debug.Log(normedVel.magnitude);
+        if (myRigidBody.velocity.magnitude > 0.1) {
             SetDirection(myRigidBody.velocity);
             directionAngle = Toolbox.Instance.ProperAngle(direction.x, direction.y);
         }
@@ -179,16 +175,16 @@ public class Controllable : MonoBehaviour {
             return;
         direction = d;
     }
-    public void LookAtPoint(Vector3 target){
+    public void LookAtPoint(Vector3 target) {
         ResetInput();
         Vector2 dif = (Vector2)target - (Vector2)gameObject.transform.position;
         SetDirection(dif);
     }
     public void ShootPressed() {
-        if (fightMode){
+        if (fightMode) {
             Toolbox.Instance.SendMessage(gameObject, this, new MessagePunch());
         } else {
-            if (defaultInteraction != null){
+            if (defaultInteraction != null) {
                 defaultInteraction.DoAction(customParameters: defaultParameters);
             }
         }
@@ -201,5 +197,5 @@ public class Controllable : MonoBehaviour {
     public virtual void ToggleFightMode() {
         fightMode = !fightMode;
     }
-    
+
 }

@@ -27,6 +27,10 @@ public class Interactor {
             from iBase in targetInteractives
             where iBase.disableInteractions == false
             select iBase;
+        List<object> objectParams = new List<object>();
+        foreach(Interactive interactive in actives)
+            objectParams.Add((object)interactive);
+        objectParams.Add(targ);
         foreach (Interaction interaction in sourceInteractive.interactions) {
             if (rightClickMenu && interaction.hideInRightClickMenu)
                 continue;
@@ -40,7 +44,7 @@ public class Interactor {
                 Debug.Log("player on other consent: " + interaction.playerOnOtherConsent);
                 Debug.Log("inert on other consent: " + interaction.inertOnPlayerConsent);
             }
-            bool enabled = interaction.CheckDependency(new List<Interactive>(actives));
+            bool enabled = interaction.CheckDependency(objectParams);
             if (!interaction.playerOnOtherConsent && sourceType == targetType.player && targType == targetType.other) {
                 enabled = false;
                 continue;

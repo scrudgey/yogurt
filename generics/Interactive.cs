@@ -14,7 +14,7 @@ public class Interaction {
     public string action;
     public GameObject lastTarget;
     public GameObject defaultTarget;
-    public List<Component> parameters;
+    public List<object> parameters;
     public List<Component> defaultParameters;
     public bool hideInManualActions;
     public bool hideInRightClickMenu;
@@ -76,8 +76,8 @@ public class Interaction {
                 Debug.Log("interaction validation function was not located.");
         }
     }
-    public bool CheckDependency(List<Interactive> targetComponents) {
-        parameters = new List<Component>();
+    public bool CheckDependency(List<object> targetComponents) {
+        parameters = new List<object>();
         bool enabled = true;
         int parameterMatches = 0;
         int parameterMisses = 0;
@@ -91,11 +91,11 @@ public class Interaction {
             bool parameterMatched = false;
             if (debug)
                 Debug.Log("Looking for the required argument of type " + requiredType.ToString());
-            foreach (Component component in targetComponents) {
+            foreach (object component in targetComponents) {
                 if (debug)
                     Debug.Log("Comparing against target component " + component.GetType().ToString());
                 if ((component.GetType() == requiredType || component.GetType().IsSubclassOf(requiredType)) &&
-                    component != this.parent) {
+                    component != (object)this.parent) {
                     if (debug)
                         Debug.Log("***** MATCH *****");
                     parameterMatched = true;
@@ -156,7 +156,7 @@ public class Interaction {
         }
     }
     // this can be sped up if I store it in a delegate instead of calling Invoke
-    public void DoAction(List<Component> customParameters=null) {
+    public void DoAction(List<object> customParameters=null) {
         if (customParameters == null){
             customParameters = parameters;
         }
