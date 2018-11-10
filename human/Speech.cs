@@ -22,7 +22,7 @@ public class Speech : Interactive, ISaveable {
     private float speakTime;
     private float queueTime;
     private float speakTimeTotal;
-    private GameObject bubbleParent;
+    // private GameObject bubbleParent;
     private FollowGameObjectInCamera follower;
     private GameObject flipper;
     private Text bubbleText;
@@ -59,8 +59,9 @@ public class Speech : Interactive, ISaveable {
         speechFramework.transform.SetParent(transform, false);
         speechFramework.transform.localPosition = Vector3.zero;
         flipper = transform.Find("SpeechChild").gameObject;
-        bubbleParent = transform.Find("SpeechChild/Speechbubble").gameObject;
+        Transform bubbleParent = transform.Find("SpeechChild/Speechbubble");
         bubbleText = bubbleParent.transform.Find("Text").gameObject.GetComponent<Text>();
+        bubbleText.text = "";
         follower = bubbleText.GetComponent<FollowGameObjectInCamera>();
         follower.target = gameObject;
         audioSource = GetComponent<AudioSource>();
@@ -139,7 +140,11 @@ public class Speech : Interactive, ISaveable {
         return "Speak with " + otherName;
     }
     public bool SpeakWith_Validation() {
-        return GameManager.Instance.playerObject != gameObject;
+        if (Controller.Instance.state == Controller.ControlState.commandSelect){
+            return Controller.Instance.commandTarget != gameObject;
+        } else {
+            return GameManager.Instance.playerObject != gameObject;
+        }
     }
     // TODO: allow liquids and things to self-describe; add modifiers etc.
     // maybe this functionality should be in the base object class?
@@ -174,7 +179,6 @@ public class Speech : Interactive, ISaveable {
                 Toolbox.Instance.SendMessage(gameObject, this, head);
             }
             speaking = true;
-            bubbleParent.SetActive(true);
             follower.PreemptiveUpdate();
             bubbleText.text = words;
             float charIndex = (speakTimeTotal - speakTime) * speakSpeed;
@@ -201,7 +205,8 @@ public class Speech : Interactive, ISaveable {
                 Toolbox.Instance.SendMessage(gameObject, this, head);
             }
             speaking = false;
-            bubbleParent.SetActive(false);
+            // bubbleParent.SetActive(false);
+            bubbleText.text = "";
             speakTime = 0;
             queueTime = 0;
         }
