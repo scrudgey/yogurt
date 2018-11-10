@@ -63,6 +63,9 @@ public partial class GameManager : Singleton<GameManager> {
             ReceiveEmail("duplicator");
             ReceivePackage("duplicator");
         }
+        if (activeCommercial.name == "Torch That Table!") {
+            ReceivePackage("lighter");
+        }
     }
 }
 
