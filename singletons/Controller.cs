@@ -60,6 +60,7 @@ public class Controller : Singleton<Controller> {
             // reset command character and target control
             Controllable commandTargetControl = commandTarget.GetComponent<Controllable>();
             commandTargetControl.control = Controllable.ControlType.AI;
+            // commandTargetControl.ResetInput();
             if (!doCommand)
                 ResetCommandState();
         }
@@ -298,7 +299,12 @@ public class Controller : Singleton<Controller> {
             return false;
         if (i.limitless)
             return true;
-        float dist = Vector3.SqrMagnitude(lastLeftClicked.transform.position - focus.transform.position);
+        // GameObject focus = focus;
+        Transform focusTransform = focus.transform;
+        if (commandTarget != null){
+            focusTransform = commandTarget.transform;
+        }
+        float dist = Vector3.SqrMagnitude(lastLeftClicked.transform.position - focusTransform.position);
         if (dist < i.range) {
             return true;
         } else {
