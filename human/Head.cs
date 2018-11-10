@@ -42,6 +42,10 @@ public class Head : Interactive, IExcludable, ISaveable {
         hatPoint.transform.localScale = Vector3.one;
         transform.localScale = Vector3.one;
         h.transform.rotation = Quaternion.identity;
+        h.transform.localRotation = Quaternion.identity;
+        h.transform.localScale = transform.localScale;
+        // h.transform.rotation = transform.rotation;
+
         // h.GetComponent<Rigidbody2D>().isKinematic = true;
         h.GetComponent<Rigidbody2D>().simulated = false;
         h.GetComponent<Collider2D>().isTrigger = true;
