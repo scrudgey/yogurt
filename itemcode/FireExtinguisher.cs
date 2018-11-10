@@ -11,7 +11,7 @@ public class FireExtinguisher : Interactive, IDirectable {
     private SpriteRenderer spriteRenderer;
     private Vector2 direction = Vector2.right;
     private bool doSpray;
-    void Start() {
+    void Awake() {
         Interaction spray = new Interaction(this, "Spray", "Spray", false, true);
         spray.defaultPriority = 2;
         spray.continuous = true;
@@ -22,8 +22,8 @@ public class FireExtinguisher : Interactive, IDirectable {
 
         Interaction spray2 = new Interaction(this, "Spray", "SprayObject", true, false);
         spray2.continuous = true;
-        spray2.inertOnPlayerConsent = false;
-        spray2.otherOnPlayerConsent = false;
+        // spray2.inertOnPlayerConsent = false;
+        // spray2.otherOnPlayerConsent = true;
         spray2.limitless = true;
         spray2.dontWipeInterface = true;
         spray2.validationFunction = true;
@@ -70,26 +70,28 @@ public class FireExtinguisher : Interactive, IDirectable {
             ChemicalSpray spray = p.GetComponent<ChemicalSpray>();
             if (spray){
                 Pickup myPickup = GetComponent<Pickup>();
-                if (myPickup)
-                    spray.responsibleParty = myPickup.holder.gameObject;
+                if (myPickup){
+                    if (myPickup.holder)
+                        spray.responsibleParty = myPickup.holder.gameObject;
+                }
             }
             emissionTimeout += emissionRate;
         }
         doSpray = false;
     }
-    public void SprayObject(Item item) {
+    public void SprayObject(GameObject item) {
         if (emissionTimeout <= 0f) {
             direction = (Vector2)(item.transform.position - transform.position).normalized;
             Spray();
         }
     }
-    public string SprayObject_desc(Item item) {
+    public string SprayObject_desc(GameObject item) {
         string myname = Toolbox.Instance.GetName(gameObject);
         string itemname = Toolbox.Instance.GetName(item.gameObject);
         return "Spray " + myname + " at " + itemname;
     }
-    public bool SprayObject_Validation(Item item) {
-        if (item.gameObject != gameObject) {
+    public bool SprayObject_Validation(GameObject item) {
+        if (item != gameObject) {
             return true;
         } else {
             return false;
