@@ -19,6 +19,7 @@ public class ChemicalSpray : MonoBehaviour {
         }
         Toolbox.Instance.AddLiveBuffs(coll.gameObject, gameObject);
         MessageDamage impact = new MessageDamage();
+        impact.amount = 0;
         impact.responsibleParty = responsibleParty;
         impact.silentImpact = true;
         Toolbox.Instance.SendMessage(coll.gameObject, this, impact);
