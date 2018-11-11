@@ -229,6 +229,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
 
     void FixedUpdate() {
         if (setV != Vector3.zero || addV != Vector3.zero) {
+            Debug.Log(setV.x);
             Vector2 objectVelocity = physical.objectBody.velocity;
             Vector2 groundVelocity = groundBody.velocity;
             if (setV != Vector3.zero) {
@@ -332,6 +333,8 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
     }
     public void Impact(MessageDamage message) {
         if (physical == null)
+            return;
+        if (impactsMiss)
             return;
         if (physical.currentMode == Physical.mode.zip) {
             Rebound();

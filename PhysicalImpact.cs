@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 public class PhysicalImpact : MonoBehaviour {
+
     public List<Transform> impactedObjects = new List<Transform>();
     public float size = 0.08f;
     public MessageDamage message;
