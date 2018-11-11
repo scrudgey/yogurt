@@ -363,7 +363,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             if (noun == dat.noun)
                 seenCount += 1;
         }
-        Debug.Log(dat.noun);
+        // Debug.Log(dat.noun);
         lastNEvents.Add(dat.noun);
         Rating[] ratings = (Rating[])Rating.GetValues(typeof(Rating));
         Toolbox.ShuffleArray<Rating>(ratings);

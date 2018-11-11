@@ -229,7 +229,6 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
 
     void FixedUpdate() {
         if (setV != Vector3.zero || addV != Vector3.zero) {
-            Debug.Log(setV.x);
             Vector2 objectVelocity = physical.objectBody.velocity;
             Vector2 groundVelocity = groundBody.velocity;
             if (setV != Vector3.zero) {
