@@ -167,8 +167,16 @@ public class Eater : Interactive, ISaveable {
             GameManager.Instance.data.achievementStats.swordsEaten += 1;
             GameManager.Instance.CheckAchievements();
         }
+        if (Toolbox.Instance.CloneRemover(food.name) == "heart") {
+            GameManager.Instance.data.achievementStats.heartsEaten += 1;
+            GameManager.Instance.CheckAchievements();
+        }
         if (food.GetComponent<Hat>() != null) {
             GameManager.Instance.data.achievementStats.hatsEaten += 1;
+            GameManager.Instance.CheckAchievements();
+        }
+        if (food.human){
+            GameManager.Instance.data.achievementStats.actsOfCannibalism += 1;
             GameManager.Instance.CheckAchievements();
         }
         HashSet<GameObject> involvedParties = new HashSet<GameObject>(){gameObject, food.gameObject};

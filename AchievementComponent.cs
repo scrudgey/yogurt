@@ -6,7 +6,6 @@ public class AchievementComponent : MonoBehaviour {
 
 [System.Serializable]
 public class Achievement {
-    // public Sprite icon;
     public string icon;
     public bool complete;
     public string title;
@@ -42,6 +41,10 @@ public class Achievement {
             pass = pass && otherStats.deathByAsphyxiation >= stats.deathByAsphyxiation;
         if (stats.mayorsSassed > 0)
             pass = pass && otherStats.mayorsSassed >= stats.mayorsSassed;
+        if (stats.actsOfCannibalism > 0)
+            pass = pass && otherStats.actsOfCannibalism >= stats.actsOfCannibalism;
+        if (stats.heartsEaten > 0)
+            pass = pass && otherStats.heartsEaten >= stats.heartsEaten;
         return pass;
     }
     public Achievement() { }
@@ -71,6 +74,8 @@ public class AchievementStats {
     public int deathByMisadventure;
     public int deathByAsphyxiation;
     public int mayorsSassed;
+    public int actsOfCannibalism;
+    public int heartsEaten;
     public AchievementStats() { }
     public AchievementStats(AchievementStats source) {
         secondsPlayed = source.secondsPlayed;
@@ -88,5 +93,7 @@ public class AchievementStats {
         deathByMisadventure = source.deathByMisadventure;
         deathByAsphyxiation = source.deathByAsphyxiation;
         mayorsSassed = source.mayorsSassed;
+        actsOfCannibalism = source.actsOfCannibalism;
+        heartsEaten = source.heartsEaten;
     }
 }
