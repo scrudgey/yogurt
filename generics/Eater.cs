@@ -218,6 +218,10 @@ public class Eater : Interactive, ISaveable {
             involvedParties.Add(eaten.gameObject);
             eaten.SetActive(true);
             eaten.transform.position = transform.position;
+            PhysicalBootstrapper phys = eaten.GetComponent<PhysicalBootstrapper>();
+            if (phys){
+                phys.InitPhysical(0.13f, Vector3.zero);
+            }
             MonoLiquid mono = eaten.GetComponent<MonoLiquid>();
             if (mono) {
                 GameObject droplet = Toolbox.Instance.SpawnDroplet(mono.liquid, 0f, gameObject, 0.15f);
