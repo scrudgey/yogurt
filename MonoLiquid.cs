@@ -37,11 +37,14 @@ public class MonoLiquid : MonoBehaviour {
                 splashSprite.color = liquid.color;
                 Transform rectTransform = splash.GetComponent<Transform>();
                 rectTransform.Rotate(new Vector3(0, 0, Random.Range(0f, 360f)));
-
-                GameObject stain = CreateStain(coll.gameObject, transform.position);
-                SpriteRenderer stainRenderer = stain.GetComponent<SpriteRenderer>();
-                stainRenderer.color = liquid.color;
-                Liquid.MonoLiquidify(stain, liquid);
+                Transform existingStain = coll.transform.Find("stain(Clone)");
+                if (existingStain == null){
+                    GameObject stain = CreateStain(coll.gameObject, transform.position);
+                    SpriteRenderer stainRenderer = stain.GetComponent<SpriteRenderer>();
+                    stainRenderer.color = liquid.color;
+                    Liquid.MonoLiquidify(stain, liquid);
+                    
+                }
                 ClaimsManager.Instance.WasDestroyed(gameObject);
                 Destroy(gameObject);
             }
