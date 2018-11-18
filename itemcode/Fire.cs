@@ -6,7 +6,7 @@ public class Fire : MonoBehaviour {
     public Flammable flammable;
     private Dictionary<GameObject, Flammable> flammables = new Dictionary<GameObject, Flammable>();
     private MessageDamage message;
-    // private HashSet<GameObject> damageQueue = new HashSet<GameObject>();
+    private HashSet<GameObject> damageQueue = new HashSet<GameObject>();
     private HashSet<GameObject> collidedObjects = new HashSet<GameObject>();
     private float damageTimer;
     static List<string> forbiddenTags = new List<string>(new string[] { "occurrenceFlag", "background", "sightcone" });
@@ -36,17 +36,17 @@ public class Fire : MonoBehaviour {
             }
             collidedObjects = new HashSet<GameObject>();
         }
-            // foreach (GameObject obj in damageQueue) {
-            //     if (obj == null)
-            //         continue;
-            //     if (transform.IsChildOf(obj.transform.root))
-            //         continue;
-            //     if (obj != null) {
-            //         Toolbox.Instance.SendMessage(obj, this, message);
-            //     }
-            // }
-            // damageQueue = new HashSet<GameObject>();
-        // }
+        foreach (GameObject obj in damageQueue) {
+                if (obj == null)
+                    continue;
+                if (transform.IsChildOf(obj.transform.root))
+                    continue;
+                if (obj != null) {
+                    Toolbox.Instance.SendMessage(obj, this, message);
+                }
+            }
+        damageQueue = new HashSet<GameObject>();
+        
     }
     void OnTriggerEnter2D(Collider2D coll) {
         if (!flammables.ContainsKey(coll.gameObject)) {
@@ -69,12 +69,12 @@ public class Fire : MonoBehaviour {
             return;
         // Debug.Log(coll.gameObject);
         collidedObjects.Add(coll.gameObject);
-        // damageQueue.Add(coll.transform.root.gameObject);
-        // if (flammables.ContainsKey(coll.gameObject)) {
-        //     flammables[coll.gameObject].heat += Time.deltaTime;
-        //     if (flammable.responsibleParty != null) {
-        //         flammables[coll.gameObject].responsibleParty = flammable.responsibleParty;
-        //     }
-        // }
+        damageQueue.Add(coll.transform.root.gameObject);
+        if (flammables.ContainsKey(coll.gameObject)) {
+            flammables[coll.gameObject].heat += Time.deltaTime;
+            if (flammable.responsibleParty != null) {
+                flammables[coll.gameObject].responsibleParty = flammable.responsibleParty;
+            }
+        }
     }
 }
