@@ -36,7 +36,8 @@ public class CommercialReportMenu : MonoBehaviour {
             disgustingScore = transform.Find("Image/Center/RightHalf/RatingsPanel/Disgusting/Amount").GetComponent<Text>();
             disturbingScore = transform.Find("Image/Center/RightHalf/RatingsPanel/Disturbing/Amount").GetComponent<Text>();
             offensiveScore = transform.Find("Image/Center/RightHalf/RatingsPanel/Offensive/Amount").GetComponent<Text>();
-            transcript = transform.Find("Image/Center/TranscriptPanel/Transcript").GetComponent<Text>();
+            
+            transcript = transform.Find("Image/Center/Scroll View/Viewport/content/Transcript").GetComponent<Text>();
             eventText = transform.Find("Image/Center/RightHalf/EventsPanel/Text").GetComponent<Text>();
         }
     }
@@ -53,6 +54,7 @@ public class CommercialReportMenu : MonoBehaviour {
         disturbingScore.text = total.ratings[Rating.disturbing].ToString();
         offensiveScore.text = total.ratings[Rating.offensive].ToString();
 
+        transcript.text = "";
         foreach (string line in commercial.transcript) {
             transcript.text = transcript.text + line + "\n";
         }
