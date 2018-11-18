@@ -51,6 +51,7 @@ public class Controller : Singleton<Controller> {
             focus.ResetInput();
         }
         UINew.Instance.ClearWorldButtons();
+        UINew.Instance.SetActionText("");
         ResetLastLeftClicked();
         if (previousState == ControlState.inMenu || previousState == ControlState.waitForMenu)
             UINew.Instance.RefreshUI(active: true);
