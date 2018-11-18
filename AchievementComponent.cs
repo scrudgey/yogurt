@@ -45,6 +45,8 @@ public class Achievement {
             pass = pass && otherStats.actsOfCannibalism >= stats.actsOfCannibalism;
         if (stats.heartsEaten > 0)
             pass = pass && otherStats.heartsEaten >= stats.heartsEaten;
+        if (stats.nullifications > 0)
+            pass = pass && otherStats.nullifications >= stats.nullifications;
         return pass;
     }
     public Achievement() { }
@@ -76,6 +78,7 @@ public class AchievementStats {
     public int mayorsSassed;
     public int actsOfCannibalism;
     public int heartsEaten;
+    public int nullifications;
     public AchievementStats() { }
     public AchievementStats(AchievementStats source) {
         secondsPlayed = source.secondsPlayed;
@@ -95,5 +98,6 @@ public class AchievementStats {
         mayorsSassed = source.mayorsSassed;
         actsOfCannibalism = source.actsOfCannibalism;
         heartsEaten = source.heartsEaten;
+        nullifications = source.nullifications;
     }
 }

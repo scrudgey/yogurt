@@ -17,6 +17,11 @@ public class CosmicNullifier : Pickup {
     public void Nullify(Duplicatable duplicatable) {
         if (duplicatable == null)
             return;
+        if (GameManager.Instance.playerObject == duplicatable.gameObject) {
+            GameManager.Instance.data.achievementStats.nullifications += 1;
+            GameManager.Instance.CheckAchievements();
+            GameManager.Instance.PlayerDeath();
+        }
         duplicatable.Nullify();
         Destroy(gameObject);
         ClaimsManager.Instance.WasDestroyed(gameObject);
