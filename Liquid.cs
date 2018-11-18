@@ -95,8 +95,11 @@ public class Liquid {
         monoLiquid.edible.pureeColor = liquid.color;
         monoLiquid.edible.vomit = liquid.vomit;
         if (liquid.flammable) {
-            Flammable flam = target.AddComponent<Flammable>();
-            flam.flashpoint = 0.1f;
+            Flammable existingFlammable = target.transform.root.GetComponentInChildren<Flammable>();
+            if (existingFlammable == null){
+                Flammable flam = target.AddComponent<Flammable>();
+                flam.flashpoint = 0.1f;
+            }
         }
         if (liquid.buffs.Count > 0) {
             Intrinsics intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(target);
