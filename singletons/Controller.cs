@@ -70,6 +70,28 @@ public class Controller : Singleton<Controller> {
             commandTargetControl.control = Controllable.ControlType.none;
         }
     }
+    public void ResetCommandState() {
+        if (commandTarget != null) {
+            Controllable targetControl = commandTarget.GetComponent<Controllable>();
+            targetControl.control = Controllable.ControlType.AI;
+        }
+        commandTarget = null;
+        // reset command state
+        suspendInput = false;
+        UINew.Instance.RefreshUI(active: true);
+        commandAct = null;
+        commandButtonType = ActionButtonScript.buttonType.none;
+        doCommand = false;
+    }
+    public void MenuClosedCallback() {
+        if (state == ControlState.inMenu || state == ControlState.waitForMenu) {
+            state = ControlState.normal;
+        }
+        // if a command action is specified, we should process it after the dialogue menu is closed.
+        if (doCommand) {
+            DoCommand();
+        }
+    }
     void Update() {
         if (Input.GetButtonDown("Cancel")) {
             // TODO: exit command states
@@ -310,28 +332,6 @@ public class Controller : Singleton<Controller> {
             return true;
         } else {
             return false;
-        }
-    }
-    public void ResetCommandState() {
-        if (commandTarget != null) {
-            Controllable targetControl = commandTarget.GetComponent<Controllable>();
-            targetControl.control = Controllable.ControlType.AI;
-        }
-        commandTarget = null;
-        // reset command state
-        suspendInput = false;
-        UINew.Instance.RefreshUI(active: true);
-        commandAct = null;
-        commandButtonType = ActionButtonScript.buttonType.none;
-        doCommand = false;
-    }
-    public void MenuClosedCallback() {
-        if (state == ControlState.inMenu || state == ControlState.waitForMenu) {
-            state = ControlState.normal;
-        }
-        // if a command action is specified, we should process it after the dialogue menu is closed.
-        if (doCommand) {
-            DoCommand();
         }
     }
     public void DoCommand() {
