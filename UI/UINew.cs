@@ -339,6 +339,7 @@ public class UINew : Singleton<UINew> {
         if (activeMenu) {
             activeMenuType = MenuType.none;
             Destroy(activeMenu);
+            activeMenu.SendMessage("OnDestroy", options:SendMessageOptions.DontRequireReceiver);
             Time.timeScale = 1f;
             Controller.Instance.MenuClosedCallback();
         }
