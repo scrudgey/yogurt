@@ -83,7 +83,7 @@ public class DialogueMenu : MonoBehaviour {
     public bool waitForKeyPress;
     public bool advancedKeyPressed;
     public float blitInterval = 0.005f;
-    public float blitTimer;
+    // public float blitTimer;
     public delegate void MyDelegate();
     public MyDelegate menuClosed;
     public bool configured;
@@ -162,6 +162,16 @@ public class DialogueMenu : MonoBehaviour {
         } else {
             LoadDialogueTree("target_unresponsive");
         }
+    }
+    void OnDestroy() {
+        instigator.inDialogue = false;
+        target.inDialogue = false;
+        if (targetControl)
+            targetControl.disabled = false;
+        if (instigatorControl)
+            instigatorControl.disabled = false;
+        if (menuClosed != null)
+            menuClosed();
     }
     public void LoadDialogueTree(string filename) {
         Regex node_hook = new Regex(@"^(\d)>(.+)", RegexOptions.Multiline);
@@ -346,16 +356,7 @@ public class DialogueMenu : MonoBehaviour {
                 break;
         }
     }
-    void OnDestroy() {
-        instigator.inDialogue = false;
-        target.inDialogue = false;
-        if (targetControl)
-            targetControl.disabled = false;
-        if (instigatorControl)
-            instigatorControl.disabled = false;
-        if (menuClosed != null)
-            menuClosed();
-    }
+
     public void Say(Speech speaker, string text) {
         Monologue newLogue = new Monologue(speaker, new string[] { text });
         Say(newLogue);
@@ -388,6 +389,9 @@ public class DialogueMenu : MonoBehaviour {
             giveButton.gameObject.SetActive(false);
             // demandButton.gameObject.SetActive(false);
         }
+        if (CutsceneManager.Instance.cutscene.GetType() == typeof(CutsceneMayor)){
+            suggestButton.GetComponent<Button>().interactable = false;
+        }
         if (choice1Text.gameObject.activeSelf) {
             choicePanel.SetActive(true);
         }
@@ -400,7 +404,6 @@ public class DialogueMenu : MonoBehaviour {
         choicePanel.SetActive(false);
     }
     public void Update() {
-        blitTimer += Time.deltaTime;
         if (Input.GetKeyDown("a")) {
             if (waitForKeyPress) {
                 waitForKeyPress = false;
@@ -412,37 +415,29 @@ public class DialogueMenu : MonoBehaviour {
                 }
             }
         }
-        if (Input.GetKey("a")) {
-            if (!advancedKeyPressed)
-                blitTimer = blitInterval;
-        } else {
-            advancedKeyPressed = false;
-        }
-        if (blitTimer < blitInterval) {
-            return;
-        }
+
+        advancedKeyPressed = false;
         if (monologue.text.Count == 0) {
             if (dialogue.Count > 0 && !waitForKeyPress) {
                 waitForKeyPress = true;
                 if (dialogue.Peek().text.Peek() == "END") {
                     promptText.text = "[END]";
                 } else {
-                    promptText.text = "[MORE...]";
+                    promptText.text = "[PRESS A]";
                 }
             }
             return;
         }
-        blitTimer = 0;
         if (monologue.MoreToSay()) {
             DisableButtons();
             speechText.text = monologue.GetString();
             blitCounter += 1;
             monologue.PlaySpeakSound(audioSource);
-            promptText.text = "[A]";
+            promptText.text = "";
         } else {
             if (monologue.text.Count > 1) {
                 waitForKeyPress = true;
-                promptText.text = "[MORE...]";
+                promptText.text = "[PRESS A]";
             } else {
                 monologue.text.Pop();
                 if (dialogue.Count == 0)
