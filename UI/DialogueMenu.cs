@@ -389,8 +389,10 @@ public class DialogueMenu : MonoBehaviour {
             giveButton.gameObject.SetActive(false);
             // demandButton.gameObject.SetActive(false);
         }
-        if (CutsceneManager.Instance.cutscene.GetType() == typeof(CutsceneMayor)){
-            suggestButton.GetComponent<Button>().interactable = false;
+        if (CutsceneManager.Instance.cutscene != null){
+            if (CutsceneManager.Instance.cutscene.GetType() == typeof(CutsceneMayor)){
+                suggestButton.GetComponent<Button>().interactable = false;
+            }
         }
         if (choice1Text.gameObject.activeSelf) {
             choicePanel.SetActive(true);
