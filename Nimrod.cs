@@ -103,7 +103,7 @@ namespace Nimrod {
             // insult outfit
             Outfit targetOutfit = target.GetComponent<Outfit>();
             if (targetOutfit != null) {
-                string clothesName = targetOutfit.wornUniformName;
+                string clothesName = targetOutfit.readableUniformName;
                 g.SetSymbol("target-clothes", clothesName);
             }
 

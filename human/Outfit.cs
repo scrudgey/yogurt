@@ -2,6 +2,7 @@
 
 public class Outfit : Interactive, ISaveable {
     public string wornUniformName;
+    public string readableUniformName;
     public GameObject initUniform;
     public Controllable.HitState hitState;
     public Intrinsics uniformIntrinsics;
@@ -43,6 +44,7 @@ public class Outfit : Interactive, ISaveable {
         anim.outfitName = "nude";
         Toolbox.Instance.SendMessage(gameObject, this, anim);
         wornUniformName = "nude";
+        readableUniformName = "body";
     }
     public bool StealUniform_Validation(Outfit otherOutfit) {
         if (otherOutfit == this)
@@ -69,6 +71,7 @@ public class Outfit : Interactive, ISaveable {
         Toolbox.Instance.SendMessage(gameObject, this, anim);
         Toolbox.Instance.AddChildIntrinsics(gameObject, this, uniform.gameObject);
         wornUniformName = Toolbox.Instance.CloneRemover(uniform.gameObject.name);
+        readableUniformName = uniform.readableName;
         GameManager.Instance.CheckItemCollection(uniform.gameObject, gameObject);
         ClaimsManager.Instance.WasDestroyed(uniform.gameObject);
         Destroy(uniform.gameObject);
