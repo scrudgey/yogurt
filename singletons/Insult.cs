@@ -4,7 +4,7 @@ using UnityEngine;
 public class Insults {
     public static string ComposeInsult(GameObject insultTarget) {
         GameObject target = Controller.Instance.GetBaseInteractive(insultTarget.transform);
-        Grammar grammar = TargetToNimrod(target);
+        Grammar grammar = InsultGrammar(target);
         return grammar.Parse("{main}");
     }
 
@@ -26,32 +26,22 @@ public class Insults {
         return "";
     }
 
-    public static Grammar TargetToNimrod(GameObject target){
-        Grammar g = new Grammar();
-        // DecisionMaker targetDM = target.GetComponent<DecisionMaker>();
-        // if (targetDM != null) {
-        //     if (targetDM.possession != null) {
-        //         possessionName = targetDM.possession.name;
-        //         g.Load("insult_item");
-        //         g.AddSymbol("item-name", possessionName);
-        //     }
-        // }
+    public static Grammar InsultGrammar(GameObject target){
+        Grammar g = Grammar.ObjectToGrammar(target);
+        g.Load("insult");
 
-        // Outfit targetOutfit = target.GetComponent<Outfit>();
-        // if (targetOutfit != null) {
-        //     clothesName = targetOutfit.wornUniformName;
-        //     grammar.Load("insult_clothes");
-        //     grammar.AddSymbol("clothes-name", clothesName);
-        // }
-
-        // Head targetHead = target.GetComponentInChildren<Head>();
-        // if (targetHead != null) {
-        //     if (targetHead.hat != null) {
-        //         hatName = targetHead.hat.name;
-        //         grammar.Load("insult_hat");
-        //         grammar.AddSymbol("hat-name", hatName);
-        //     }
-        // }
+        if (g.Parse("{target-item}") != "none"){
+            g.Load("insult_item");
+            // flavor
+        }
+        if (g.Parse("{target-clothes}") != "none"){
+            g.Load("insult_clothes");
+            // flavor
+        }
+        if (g.Parse("{target-hat}") != "none"){
+            g.Load("insult_hat");
+            // flavor
+        }
 
         return g;
     }
