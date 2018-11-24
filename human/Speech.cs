@@ -232,6 +232,7 @@ public class Speech : Interactive, ISaveable {
         if (randomPhrases.Length > 0) {
             string toSay = randomPhrases[Random.Range(0, randomPhrases.Length)];
             MessageSpeech message = new MessageSpeech(toSay);
+            Toolbox.Instance.SendMessage(gameObject, this, message);
         }
     }
     public OccurrenceSpeech Say(MessageSpeech message) {
