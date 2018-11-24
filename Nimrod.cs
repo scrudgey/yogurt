@@ -13,6 +13,11 @@ namespace Nimrod {
             TextAsset textData = Resources.Load("data/nimrod/" + filename) as TextAsset;
             string currentSymbol = "";
             foreach (string line in textData.text.Split('\n')) {
+                if (line.Length == 0)
+                    continue;
+                if (line[0] == '%'){
+                    continue;
+                }
                 Match match = def_hook.Match(line);
                 if (match.Success) {
                     currentSymbol = match.Groups[1].Value;
@@ -73,6 +78,45 @@ namespace Nimrod {
                 symbols[key] = new List<string>();
             }
             symbols[key].Add(val);
+        }
+        public void SetSymbol(string key, string val) {
+            symbols[key] = new List<string>();
+            symbols[key].Add(val);
+        }
+
+        public static Grammar ObjectToGrammar(GameObject target){
+            Grammar g = new Grammar();
+
+            g.AddSymbol("target-item", "none");
+            g.AddSymbol("target-clothes", "none");
+            g.AddSymbol("target-hat", "none");
+
+            // insult possessions
+            DecisionMaker targetDM = target.GetComponent<DecisionMaker>();
+            if (targetDM != null) {
+                if (targetDM.possession != null) {
+                    string possessionName = targetDM.possession.name;
+                    g.SetSymbol("target-item", possessionName);
+                }
+            }
+
+            // insult outfit
+            Outfit targetOutfit = target.GetComponent<Outfit>();
+            if (targetOutfit != null) {
+                string clothesName = targetOutfit.wornUniformName;
+                g.SetSymbol("target-clothes", clothesName);
+            }
+
+            // insult hat
+            Head targetHead = target.GetComponentInChildren<Head>();
+            if (targetHead != null) {
+                if (targetHead.hat != null) {
+                    string hatName = targetHead.hat.name;
+                    g.SetSymbol("target-hat", hatName);
+                }
+            }
+
+            return g;
         }
     }
 }
