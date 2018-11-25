@@ -288,7 +288,7 @@ public class Speech : Interactive, ISaveable {
             involvedParties.Add(message.threatTarget);
         }
         involvedParties.UnionWith(message.involvedParties);
-        Occurrence occurenceFlag =  Toolbox.Instance.OccurenceFlag(gameObject, speechData, involvedParties);
+        Toolbox.Instance.OccurenceFlag(gameObject, speechData, involvedParties);
         return speechData;
     }
     public string CensorSwears(string phrase){
