@@ -410,9 +410,20 @@ public class CutsceneMayor : Cutscene {
     private Speech mayorSpeech;
     private bool inPosition;
     private bool walkingAway;
+    private Dictionary<Controllable, Controllable.ControlType> initialState = new Dictionary<Controllable, Controllable.ControlType>();
     public override void Configure() {
         configured = true;
         spawnPoint = GameObject.Find("mayorSpawnpoint");
+        // GameObject farmer = GameObject.Find("Farmer");
+        // if (farmer){
+        //     Debug.Log("disabling farmer");
+        //     farmer.GetComponent<Controllable>().control = Controllable.ControlType.none;
+        // }
+        foreach (Controllable controllable in GameObject.FindObjectsOfType<Controllable>()){
+            // controllable.
+            initialState[controllable] = controllable.control;
+            controllable.control = Controllable.ControlType.none;
+        }
         mayor = GameObject.Instantiate(Resources.Load("prefabs/Mayor"), spawnPoint.transform.position, Quaternion.identity) as GameObject;
         mayorControl = mayor.GetComponent<Humanoid>();
         mayorAI = mayor.GetComponent<DecisionMaker>();
@@ -444,6 +455,9 @@ public class CutsceneMayor : Cutscene {
     }
     public override void CleanUp() {
         UINew.Instance.RefreshUI(active: true);
+        foreach (KeyValuePair<Controllable, Controllable.ControlType> kvp in initialState){
+            kvp.Key.control = kvp.Value;
+        }
     }
     public void MenuWasClosed() {
         walkingAway = true;
