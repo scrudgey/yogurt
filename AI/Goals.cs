@@ -100,8 +100,8 @@ namespace AI {
         }
     }
     public class GoalTalkToPerson : Goal {
-        public Ref<Awareness.NewPeople> target;
-        public GoalTalkToPerson(GameObject g, Controllable c, Awareness awareness, Ref<Awareness.NewPeople> target) : base(g, c) {
+        public Ref<GameObject> target;
+        public GoalTalkToPerson(GameObject g, Controllable c, Awareness awareness, Ref<GameObject> target) : base(g, c) {
             this.target = target;
             // this.target = awareness.socializationTarget;
             successCondition = new ConditionBoolSwitch(g);

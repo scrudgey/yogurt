@@ -44,11 +44,12 @@ public class PersonalAssessment {
 }
 
 public class Awareness : MonoBehaviour, ISaveable, IDirectable {
-    public class NewPeople {
-        public float countDownTimer;
-        public Ref<GameObject> person;
-    }
-    public List<NewPeople> newPeopleList = new List<NewPeople>();
+    // public class NewPeople {
+    //     // public float countDownTimer;
+    //     public Ref<GameObject> person;
+    // }
+    public List<Ref<GameObject>> newPeopleList = new List<Ref<GameObject>>();
+    public float socializationTimer;
     // public Ref<GameObject> socializationTarget = new Ref<GameObject>(null);
     public static Dictionary<Rating, string> reactions = new Dictionary<Rating, string>(){
             {Rating.disgusting, "{grossreact}"},
@@ -188,22 +189,27 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             SetNearestFire();
         }
         
-        List<NewPeople> peopleToRemove = new List<NewPeople>();
-        foreach(NewPeople personToSocializeWith in newPeopleList){
-            personToSocializeWith.countDownTimer -= Time.deltaTime;
-            if (personToSocializeWith.countDownTimer > 0){
-                newPeopleList[0] = personToSocializeWith;
-                // socializationTarget.val = personToSocializeWith.person.val;
-            } else {
-                // newPeopleList.RemoveAt(0);
-                peopleToRemove.Add(personToSocializeWith);
-                // socializationTarget.val = null;
+        // List<Ref<GameObject>> peopleToRemove = new List<Ref<GameObject>>();
+        // foreach(NewPeople personToSocializeWith in newPeopleList){
+        //     personToSocializeWith.countDownTimer -= Time.deltaTime;
+        //     if (personToSocializeWith.countDownTimer > 0){
+        //         newPeopleList[0] = personToSocializeWith;
+        //     } else {
+        //         peopleToRemove.Add(personToSocializeWith);
+        //     }
+        // }
+        // foreach(NewPeople personToRemove in peopleToRemove){
+        //     newPeopleList.Remove(personToRemove);
+        // }
+
+        if (socializationTimer <= 0){
+            if (decisionMaker.personality.social == Personality.Social.chatty){
+                socializationTimer += 2.5f * Time.deltaTime;
+            }
+            if (decisionMaker.personality.social == Personality.Social.normal){
+                socializationTimer += 0.5f * Time.deltaTime;
             }
         }
-        foreach(NewPeople personToRemove in peopleToRemove){
-            newPeopleList.Remove(personToRemove);
-        }
-        // }
     }
     public void SetNearestEnemy() {
         nearestEnemy.val = null;
@@ -384,13 +390,13 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         PersonalAssessment assessment = FormPersonalAssessment(target);
         if (assessment == null)
             return;
-        List<NewPeople> removeThese = new List<NewPeople>();
-        foreach (NewPeople np in newPeopleList){
-            if (np.person.val == target){
+        List<Ref<GameObject>> removeThese = new List<Ref<GameObject>>();
+        foreach (Ref<GameObject> np in newPeopleList){
+            if (np.val == target){
                 removeThese.Add(np);
             }
         }
-        foreach(NewPeople np in removeThese){
+        foreach(Ref<GameObject> np in removeThese){
             newPeopleList.Remove(np);
         }
         MessageSpeech message = new MessageSpeech();
@@ -578,13 +584,12 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         return assessment;
     }
     void AddSocializationTarget(GameObject target){
-        foreach(NewPeople np in newPeopleList){
-            if (np.person.val == target)
+        foreach(Ref<GameObject> np in newPeopleList){
+            if (np.val == target)
                 return;
         }
-        NewPeople newPerson = new NewPeople();
-        newPerson.person = new Ref<GameObject>(target);
-        newPerson.countDownTimer = 10f;
+        Ref<GameObject> newPerson = new Ref<GameObject>(target);
+        // newPerson.countDownTimer = 10f;
         newPeopleList.Add(newPerson);
     }
     void AttackedByPerson(MessageDamage message) {
