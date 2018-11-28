@@ -188,19 +188,6 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             SetNearestEnemy();
             SetNearestFire();
         }
-        
-        // List<Ref<GameObject>> peopleToRemove = new List<Ref<GameObject>>();
-        // foreach(NewPeople personToSocializeWith in newPeopleList){
-        //     personToSocializeWith.countDownTimer -= Time.deltaTime;
-        //     if (personToSocializeWith.countDownTimer > 0){
-        //         newPeopleList[0] = personToSocializeWith;
-        //     } else {
-        //         peopleToRemove.Add(personToSocializeWith);
-        //     }
-        // }
-        // foreach(NewPeople personToRemove in peopleToRemove){
-        //     newPeopleList.Remove(personToRemove);
-        // }
 
         if (socializationTimer <= 0){
             if (decisionMaker.personality.social == Personality.Social.chatty){
@@ -499,7 +486,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                 assessment.unconscious = human.hitState >= Controllable.HitState.stun;
                 if (protectZone != null) {
                     if (warnZone.bounds.Contains(knowledge.transform.position) &&
-                        GameManager.Instance.sceneTime - assessment.timeWarned > 4f &&
+                        GameManager.Instance.sceneTime - assessment.timeWarned > 7f &&
                         assessment.status != PersonalAssessment.friendStatus.enemy) {
                         assessment.timeWarned = GameManager.Instance.sceneTime;
                         MessageSpeech message = new MessageSpeech();
