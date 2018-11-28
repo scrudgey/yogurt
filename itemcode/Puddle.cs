@@ -1,12 +1,12 @@
 ﻿using UnityEngine;
-// using System.Collections;
+using System.Collections.Generic;
 
 public class Puddle : MonoBehaviour {
     public enum moveState { unmoved, set }
     public float amount;
     private SpriteRenderer spriteRenderer;
     private moveState state = moveState.unmoved;
-
+    private List<GameObject> ignoredObjects = new List<GameObject>();
     void Start() {
         amount = 1;
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -24,6 +24,8 @@ public class Puddle : MonoBehaviour {
 
     void OnTriggerStay2D(Collider2D coll) {
         if (coll.gameObject.tag == "fire")
+            return;
+        if (ignoredObjects.Contains(coll.gameObject))
             return;
         Puddle otherPuddle = coll.gameObject.GetComponent<Puddle>();
         if (otherPuddle) {
@@ -44,7 +46,7 @@ public class Puddle : MonoBehaviour {
                     state = moveState.set;
                 }
             }
-
         }
+        ignoredObjects.Add(coll.gameObject);
     }
 }
