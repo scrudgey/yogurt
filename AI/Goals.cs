@@ -108,13 +108,6 @@ namespace AI {
             RoutineTalkToPerson talkRoutine = new RoutineTalkToPerson(g, c, target, (ConditionBoolSwitch)successCondition, awareness);
             routines.Add(talkRoutine);
         }
-        // public override void Update() {
-        //     // Debug.Log(successCondition);
-        //     base.Update();
-        //     if (successCondition.Evaluate() == status.success && !phoneCalled) {
-        //         phoneCalled = true;
-        //     }
-        // }
     }
     public class GoalGetItem : Goal {
         public bool findingFail;
