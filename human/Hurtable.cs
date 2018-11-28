@@ -43,6 +43,7 @@ public class Hurtable : Damageable, ISaveable {
         }
         oxygen = maxOxygen;
         Toolbox.RegisterMessageCallback<MessageHead>(this, HandleHead);
+        Toolbox.RegisterMessageCallback<MessageStun>(this, HandleStun);
     }
     void HandleHead(MessageHead head) {
         if (head.type == MessageHead.HeadType.vomiting) {
@@ -51,6 +52,10 @@ public class Hurtable : Damageable, ISaveable {
                 impulse = 35f;
             }
         }
+    }
+    void HandleStun(MessageStun message){
+        hitState = Controllable.AddHitState(hitState, Controllable.HitState.stun);
+        hitStunCounter = message.timeout;
     }
     public override void NetIntrinsicsChanged(MessageNetIntrinsic intrins) {
         if (intrins.netBuffs[BuffType.bonusHealth].floatValue > bonusHealth) {
@@ -128,7 +133,7 @@ public class Hurtable : Damageable, ISaveable {
         }
         if (message.type != damageType.fire && message.type != damageType.cosmic) {
             hitState = Controllable.AddHitState(hitState, Controllable.HitState.stun);
-            hitStunCounter = 0.25f;
+            hitStunCounter = Random.Range(0.2f, 0.25f);
         }
         if (damage > 0 && Random.Range(0.0f, 1.0f) < ouchFrequency) {
             MessageSpeech speechMessage = new MessageSpeech();

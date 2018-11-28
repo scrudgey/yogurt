@@ -74,9 +74,14 @@ public class MessageDamage : Message {
     }
 }
 public class MessageHitstun : Message {
+    // Message for passing hitstun state internally between components
     public Controllable.HitState hitState;
     public bool doubledOver;
     public bool knockedDown;
+}
+public class MessageStun : Message {
+    // Message for stunning a target for amount of time timout
+    public float timeout;
 }
 public class MessageInventoryChanged : Message {
     public GameObject dropped;

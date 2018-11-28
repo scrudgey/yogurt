@@ -358,6 +358,10 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     }
     public void DropMessage(GameObject obj) {
         SoftDropItem();
+        MessageStun message = new MessageStun();
+        message.timeout = Random.Range(0.3f, 0.45f);
+        // message.
+        Toolbox.Instance.SendMessage(gameObject, this, message);
     }
     public void WasDestroyed(GameObject obj) {
         if (obj == holding.gameObject) {
