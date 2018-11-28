@@ -126,6 +126,8 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         }
     }
     public void Update() {
+        if (hitState >= Controllable.HitState.stun)
+            return;
         Priority oldActivePriority = activePriority;
         activePriority = defaultPriority;
         foreach (Priority priority in priorities) {
@@ -144,8 +146,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
                 activePriority = priority;
         }
         activePriorityName = activePriority.priorityName;
-        if (hitState >= Controllable.HitState.unconscious)
-            return;
+        
         if (activePriority != oldActivePriority){
             control.ResetInput();
             if (oldActivePriority != null)
