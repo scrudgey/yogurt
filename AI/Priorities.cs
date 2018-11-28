@@ -50,7 +50,7 @@ namespace AI {
             wander.successCondition = new ConditionKnowAboutFire(gameObject);
             wander.requirements.Add(getExt);
 
-            Goal approach = new GoalWalkToObject(gameObject, control, awareness.nearestFire);
+            Goal approach = new GoalWalkToObject(gameObject, control, awareness.nearestFire, range:0.6f);
             approach.requirements.Add(wander);
 
             useFireExtinguisher = new GoalHoseDown(gameObject, control, awareness.nearestFire);
@@ -63,8 +63,13 @@ namespace AI {
             callFD.requirements.Add(walkToPhone);
         }
         public override void Update() {
-            if (awareness.nearestFire.val != null)
+            if (awareness.nearestFire.val != null){
                 urgency = Priority.urgencyPressing;
+            } else {
+                if (urgency > 0){
+                    urgency -= Time.deltaTime;
+                }
+            }
             if (getExt.findingFail && goal != callFD && !callFD.phoneCalled) {
                 goal = callFD;
             }
@@ -178,13 +183,15 @@ namespace AI {
         }
     }
     public class PriorityRunAway : Priority {
+        public Ref<GameObject> lastAttacker = new Ref<GameObject>(null);
         public PriorityRunAway(GameObject g, Controllable c) : base(g, c) {
             priorityName = "run away";
-            goal = new GoalRunFromObject(gameObject, control, awareness.nearestEnemy);
+            goal = new GoalRunFromObject(gameObject, control, lastAttacker);
         }
         public override void ReceiveMessage(Message incoming) {
             if (incoming is MessageDamage) {
-                // MessageDamage dam = (MessageDamage)incoming;
+                MessageDamage dam = (MessageDamage)incoming;
+                lastAttacker.val = dam.messenger.gameObject;
                 urgency += Priority.urgencyMinor;
             }
             if (incoming is MessageInsult) {
