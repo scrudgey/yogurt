@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine.UI;
 using System.Text;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Nimrod;
 
 public class Speech : Interactive, ISaveable {
     static string[] swearWords = new string[]{
         @"\bshit\b", 
-        @"\bfuck\b", 
         @"\bfucked\b", 
+        @"\bfuck\b", 
         @"\bshazbotting\b",
         @"\bshazbot\b",
         @"\bpiss\b", 
@@ -29,9 +30,13 @@ public class Speech : Interactive, ISaveable {
     private float speakSpeed;
     private bool[] swearMask;
     public bool vomiting;
-    public AudioClip speakSound;
+    // public AudioClip speakSound;
+    public string voice = "none";
+    public AudioClip[] speakSounds;
+    public Vector2 pitchRange = new Vector2(0, 1);
+    public Vector2 spacingRange = new Vector2(0.1f, 0.15f);
+    private SoundGibberizer gibberizer;
     public AudioClip bleepSound;
-    private AudioSource audioSource;
     public string flavor = "test";
     private Dictionary<BuffType, Buff> lastNetIntrinsic;
     public Controllable.HitState hitState;
@@ -64,21 +69,25 @@ public class Speech : Interactive, ISaveable {
         bubbleText.text = "";
         follower = bubbleText.GetComponent<FollowGameObjectInCamera>();
         follower.target = gameObject;
-        audioSource = GetComponent<AudioSource>();
         if (flipper.transform.localScale != transform.localScale) {
             Vector3 tempscale = transform.localScale;
             flipper.transform.localScale = tempscale;
         }
-        if (audioSource == null) {
-            audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
-        }
-        audioSource.loop = true;
         if (bubbleParent) {
             Canvas bubbleCanvas = bubbleParent.GetComponent<Canvas>();
             if (bubbleCanvas) {
                 bubbleCanvas.worldCamera = Camera.main;
             }
         }
+        if (voice != "none") {
+            AudioClip[] voiceSounds = Resources.LoadAll<AudioClip>("sounds/speechSets/"+voice);
+            speakSounds = speakSounds.Concat(voiceSounds).ToArray();
+        }
+        gibberizer = gameObject.AddComponent<SoundGibberizer>();
+        gibberizer.bleepSound = bleepSound;
+        gibberizer.sounds = speakSounds;
+        gibberizer.pitchRange = pitchRange;
+        gibberizer.spacingRange = spacingRange;
         Toolbox.RegisterMessageCallback<MessageSpeech>(this, HandleSpeech);
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
         Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
@@ -120,7 +129,7 @@ public class Speech : Interactive, ISaveable {
         if (message.type == MessageHead.HeadType.vomiting) {
             vomiting = message.value;
             if (vomiting) {
-                audioSource.Stop();
+                gibberizer.StopPlay();
             }
         }
     }
@@ -184,20 +193,23 @@ public class Speech : Interactive, ISaveable {
             float charIndex = (speakTimeTotal - speakTime) * speakSpeed;
             
             if (charIndex < swearMask.Length) {
-                if (swearMask[(int)charIndex]) {
-                    if (audioSource.clip != bleepSound)
-                        audioSource.clip = bleepSound;
-                } else {
-                    if (audioSource.clip != speakSound)
-                        audioSource.clip = speakSound;
-                }
-                if (!audioSource.isPlaying && !vomiting) {
-                    audioSource.Play();
+                gibberizer.bleep = swearMask[(int)charIndex];
+                // if (swearMask[(int)charIndex]) {
+                //     // gibberizer.sounds = new AudioClip[]{bleepSound};
+                //     // gibberizer.bleepSound = bleepSound;
+                //     gibberizer.bleep = true;
+                // } else {
+                //     // gibberizer.sounds = speakSounds;
+                //     gibberizer.bleep =
+                // }
+                if (!gibberizer.play && !vomiting){
+                    gibberizer.play = true;
                 }
             }
         }
         if (speakTime < 0) {
-            audioSource.Stop();
+            // audioSource.Stop();
+            gibberizer.StopPlay();
             if (speaking) {
                 MessageHead head = new MessageHead();
                 head.type = MessageHead.HeadType.speaking;
@@ -266,6 +278,7 @@ public class Speech : Interactive, ISaveable {
         for (int i = 0; i < message.phrase.Length; i++){
             swearMask[i] = message.phrase[i] != censoredPhrase[i];
         }
+        
         message.eventData.ratings[Rating.chaos] += speechData.profanity * 2f;
         message.eventData.ratings[Rating.offensive] += speechData.profanity * 5f;
         
@@ -295,7 +308,7 @@ public class Speech : Interactive, ISaveable {
         string censoredPhrase = phrase;
         foreach(string swear in swearWords){
             StringBuilder builder = new StringBuilder();
-            foreach(char _ in swear) {
+            foreach(char c in swear.Substring(2, swear.Length-4)) {
                 builder.Append("∎");
             }
             string mask = builder.ToString();

@@ -55,6 +55,7 @@ public class BalloonMaker : Interactive {
             }
         }
         if (spawnSounds.Count > 0) {
+            audioSource.pitch = 1;
             audioSource.PlayOneShot(spawnSounds[Random.Range(0, spawnSounds.Count)]);
         }
         if (particleEffect != null) {

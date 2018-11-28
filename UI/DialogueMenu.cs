@@ -40,8 +40,8 @@ public class Monologue {
             return;
         if (speaker == null)
             return;
-        if (speaker.speakSound)
-            audioSource.PlayOneShot(speaker.speakSound);
+        // if (speaker.speakSound)
+        //     audioSource.PlayOneShot(speaker.speakSound);
     }
 }
 
