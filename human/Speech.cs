@@ -35,7 +35,7 @@ public class Speech : Interactive, ISaveable {
     public AudioClip[] speakSounds;
     public Vector2 pitchRange = new Vector2(0, 1);
     public Vector2 spacingRange = new Vector2(0.1f, 0.15f);
-    private SoundGibberizer gibberizer;
+    public SoundGibberizer gibberizer;
     public AudioClip bleepSound;
     public string flavor = "test";
     private Dictionary<BuffType, Buff> lastNetIntrinsic;
@@ -203,7 +203,7 @@ public class Speech : Interactive, ISaveable {
                 //     gibberizer.bleep =
                 // }
                 if (!gibberizer.play && !vomiting){
-                    gibberizer.play = true;
+                    gibberizer.StartPlay();
                 }
             }
         }

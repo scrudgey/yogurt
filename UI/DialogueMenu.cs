@@ -35,14 +35,6 @@ public class Monologue {
         index = 0;
         text.Pop();
     }
-    public void PlaySpeakSound(AudioSource audioSource) {
-        if (audioSource == null)
-            return;
-        if (speaker == null)
-            return;
-        // if (speaker.speakSound)
-        //     audioSource.PlayOneShot(speaker.speakSound);
-    }
 }
 
 public class DialogueMenu : MonoBehaviour {
@@ -127,6 +119,8 @@ public class DialogueMenu : MonoBehaviour {
         Start();
         this.instigator = instigator;
         this.target = target;
+        target.gibberizer.StopPlay();
+        instigator.gibberizer.StopPlay();
         instigator.inDialogue = true;
         target.inDialogue = true;
 
@@ -164,6 +158,7 @@ public class DialogueMenu : MonoBehaviour {
         }
     }
     void OnDestroy() {
+        monologue.speaker.gibberizer.StopPlay();
         instigator.inDialogue = false;
         target.inDialogue = false;
         if (targetControl)
@@ -434,9 +429,11 @@ public class DialogueMenu : MonoBehaviour {
             DisableButtons();
             speechText.text = monologue.GetString();
             blitCounter += 1;
-            monologue.PlaySpeakSound(audioSource);
+            // monologue.PlaySpeakSound(audioSource);
+            monologue.speaker.gibberizer.StartPlay();
             promptText.text = "";
         } else {
+            monologue.speaker.gibberizer.StopPlay();
             if (monologue.text.Count > 1) {
                 waitForKeyPress = true;
                 promptText.text = "[PRESS A]";
