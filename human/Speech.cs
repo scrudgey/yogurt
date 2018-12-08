@@ -194,14 +194,6 @@ public class Speech : Interactive, ISaveable {
             
             if (charIndex < swearMask.Length) {
                 gibberizer.bleep = swearMask[(int)charIndex];
-                // if (swearMask[(int)charIndex]) {
-                //     // gibberizer.sounds = new AudioClip[]{bleepSound};
-                //     // gibberizer.bleepSound = bleepSound;
-                //     gibberizer.bleep = true;
-                // } else {
-                //     // gibberizer.sounds = speakSounds;
-                //     gibberizer.bleep =
-                // }
                 if (!gibberizer.play && !vomiting){
                     gibberizer.StartPlay();
                 }
