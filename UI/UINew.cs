@@ -67,7 +67,10 @@ public class UINew : Singleton<UINew> {
     private float oxygenBarEasingTimer;
     private EasingDirection healthBarEasingDirection;
     private EasingDirection oxygenBarEasingDirection;
-    public void Start() {
+    public void Start(){
+        Awake();
+    }
+    public void Awake() {
         if (!init) {
             ConfigureUIElements();
             init = true;
