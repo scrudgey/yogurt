@@ -37,6 +37,7 @@ public class Controller : Singleton<Controller> {
         get { return _state; }
         set {
             ControlState previousState = _state;
+            // Debug.Log("changing state to "+value.ToString());
             _state = value;
             ChangeState(previousState);
         }
@@ -95,7 +96,7 @@ public class Controller : Singleton<Controller> {
     void Update() {
         if (Input.GetButtonDown("Cancel")) {
             // TODO: exit command states
-            if (state != ControlState.cutscene) {
+            if (state != ControlState.cutscene ) {
                 if (selectionStates.Contains(state) || state == ControlState.commandSelect) {
                     state = ControlState.normal;
                     UINew.Instance.RefreshUI(active: true);
