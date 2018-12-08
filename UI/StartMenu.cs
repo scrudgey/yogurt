@@ -8,7 +8,7 @@ public class StartMenu : MonoBehaviour {
     public AudioClip music;
     private GameObject mainMenu;
     private GameObject newGameMenu;
-    private GameObject loadGameMenu;
+    private LoadGameMenu loadGameMenu;
     private GameObject prompt;
     private GameObject alert;
     private enum menuState { anykey, main, startNew, load }
@@ -20,11 +20,11 @@ public class StartMenu : MonoBehaviour {
         source.Play();
         mainMenu = transform.Find("MainMenu").gameObject;
         newGameMenu = transform.Find("NewGameMenu").gameObject;
-        loadGameMenu = transform.Find("LoadGameMenu").gameObject;
+        loadGameMenu = transform.Find("LoadGameMenu").GetComponent<LoadGameMenu>();
         alert = transform.Find("Alert").gameObject;
         prompt = transform.Find("prompt").gameObject;
         newGameMenu.SetActive(false);
-        loadGameMenu.SetActive(false);
+        loadGameMenu.gameObject.SetActive(false);
         mainMenu.SetActive(false);
         alert.SetActive(false);
         state = menuState.anykey;
@@ -39,7 +39,7 @@ public class StartMenu : MonoBehaviour {
     }
     private void SwitchMenu(menuState switchTo) {
         newGameMenu.SetActive(false);
-        loadGameMenu.SetActive(false);
+        loadGameMenu.gameObject.SetActive(false);
         mainMenu.SetActive(false);
         state = switchTo;
         switch (switchTo) {
@@ -47,8 +47,8 @@ public class StartMenu : MonoBehaviour {
                 OpenNewGameMenu();
                 break;
             case menuState.load:
-                loadGameMenu.SetActive(true);
-                ConfigLoadMenu();
+                loadGameMenu.gameObject.SetActive(true);
+                loadGameMenu.ConfigLoadMenu(this);
                 break;
             default:
                 mainMenu.SetActive(true);
@@ -64,39 +64,6 @@ public class StartMenu : MonoBehaviour {
         input.text = SuggestANAme();
     }
 
-    private void ConfigLoadMenu() {
-        GameObject saveGamePanel = loadGameMenu.transform.Find("Scroll View/Viewport/Content").gameObject;
-        int children = saveGamePanel.transform.childCount;
-        for (int i = 0; i < children; ++i)
-            Destroy(saveGamePanel.transform.GetChild(i).gameObject);
-        DirectoryInfo info = new DirectoryInfo(Application.persistentDataPath);
-        DirectoryInfo[] dirs = info.GetDirectories();
-        foreach (DirectoryInfo dir in dirs) {
-            GameObject newSelector = spawnSaveGameSelector();
-            newSelector.transform.SetParent(saveGamePanel.transform, false);
-            SaveGameSelectorScript script = newSelector.GetComponent<SaveGameSelectorScript>();
-            script.ConfigValues();
-            script.nameText.text = dir.Name;
-            script.saveName = dir.Name;
-            if (dir.Name != "test") {
-                GameData data = GameManager.Instance.LoadGameData(dir.Name);
-                TimeSpan t = TimeSpan.FromSeconds(0f);
-                if (data != null) {
-                    t = TimeSpan.FromSeconds(data.secondsPlayed);
-                    script.dateText.text = data.saveDate;
-                }
-                script.timeText.text = string.Format("{0:D2}:{1:D2}:{2:D2}s",
-                                            t.Hours,
-                                            t.Minutes,
-                                            t.Seconds).ToString();
-            }
-        }
-    }
-
-    private GameObject spawnSaveGameSelector() {
-        GameObject newobject = Instantiate(Resources.Load("UI/SaveGameSelector")) as GameObject;
-        return newobject;
-    }
 
     public void StartButton() {
         SwitchMenu(menuState.startNew);
@@ -173,7 +140,9 @@ public class StartMenu : MonoBehaviour {
             "Scrauncho",
             "Bengis",
             "Pingy",
-            "Scrints"
+            "Scrints",
+            "Chungus",
+            "Beppo"
         };
         return names[UnityEngine.Random.Range(0, names.Count)];
     }
