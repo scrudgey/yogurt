@@ -3,7 +3,7 @@
 public class HeadAnimation : MonoBehaviour, IDirectable, ISaveable {
     private bool speaking;
     private string _spriteSheet;
-    private string spriteSheet {
+    public string spriteSheet {
         get { return _spriteSheet; }
         set {
             if (value != _spriteSheet) {
