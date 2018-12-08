@@ -75,7 +75,6 @@ public class DialogueMenu : MonoBehaviour {
     public bool waitForKeyPress;
     public bool advancedKeyPressed;
     public float blitInterval = 0.005f;
-    // public float blitTimer;
     public delegate void MyDelegate();
     public MyDelegate menuClosed;
     public bool configured;
@@ -158,7 +157,8 @@ public class DialogueMenu : MonoBehaviour {
         }
     }
     void OnDestroy() {
-        monologue.speaker.gibberizer.StopPlay();
+        if (monologue != null && monologue.speaker != null)
+            monologue.speaker.gibberizer.StopPlay();
         instigator.inDialogue = false;
         target.inDialogue = false;
         if (targetControl)
