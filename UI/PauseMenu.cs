@@ -7,13 +7,14 @@ public class PauseMenu : MonoBehaviour {
     public void SaveClick() {
         MySaver.Save();
         MySaver.SaveObjectDatabase();
+        UINew.Instance.CloseActiveMenu();
         GameManager.Instance.TitleScreen();
     }
     public void QuitClick() {
+        UINew.Instance.CloseActiveMenu();
         GameManager.Instance.TitleScreen();
     }
     public void ContinueClick() {
-        // Destroy(gameObject);
         UINew.Instance.CloseActiveMenu();
     }
 }
