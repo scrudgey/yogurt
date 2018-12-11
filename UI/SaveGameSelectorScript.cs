@@ -10,6 +10,7 @@ public class SaveGameSelectorScript : MonoBehaviour {
     public Image icon;
     public string saveName;
     public StartMenu startMenu;
+    public GameData data;
 
     void Awake() {
         InitValues();
@@ -25,6 +26,7 @@ public class SaveGameSelectorScript : MonoBehaviour {
         timeText = temp.GetComponent<Text>();
     }
     public void Configure(StartMenu startMenu, DirectoryInfo dir, GameData data){
+        this.data = data;
         this.startMenu = startMenu;
         nameText.text = dir.Name;
         saveName = dir.Name;
@@ -42,6 +44,6 @@ public class SaveGameSelectorScript : MonoBehaviour {
         icon.sprite = sprites[0];
     }
     public void Clicked() {
-        startMenu.LoadGameSelect(this);
+        startMenu.InspectSaveGame(this);
     }
 }

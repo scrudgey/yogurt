@@ -10,6 +10,7 @@ public class Achievement {
     public bool complete;
     public string title;
     public string description;
+    public string directive;
     public AchievementStats stats = new AchievementStats();
     public bool Evaluate(AchievementStats otherStats) {
         bool pass = true;

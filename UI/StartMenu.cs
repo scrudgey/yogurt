@@ -6,11 +6,15 @@ using System.Collections.Generic;
 
 public class StartMenu : MonoBehaviour {
     public AudioClip music;
-    private GameObject mainMenu;
-    private GameObject newGameMenu;
-    private LoadGameMenu loadGameMenu;
-    private GameObject prompt;
-    private GameObject alert;
+    public GameObject logo;
+    public GameObject mainMenu;
+    public GameObject newGameMenu;
+    public LoadGameMenu loadGameMenu;
+    public SaveInspector saveInspector;
+    public ItemCollectionInspector itemCollectionInspector;
+    public AchievementBrowser achievementBrowser;
+    public GameObject prompt;
+    public GameObject alert;
     private enum menuState { anykey, main, startNew, load }
     private menuState state;
 
@@ -18,15 +22,15 @@ public class StartMenu : MonoBehaviour {
         AudioSource source = GetComponent<AudioSource>();
         source.clip = music;
         source.Play();
-        mainMenu = transform.Find("MainMenu").gameObject;
-        newGameMenu = transform.Find("NewGameMenu").gameObject;
-        loadGameMenu = transform.Find("LoadGameMenu").GetComponent<LoadGameMenu>();
-        alert = transform.Find("Alert").gameObject;
-        prompt = transform.Find("prompt").gameObject;
+        prompt.SetActive(true);
         newGameMenu.SetActive(false);
         loadGameMenu.gameObject.SetActive(false);
+        saveInspector.gameObject.SetActive(false);
+        itemCollectionInspector.gameObject.SetActive(false);
+        achievementBrowser.gameObject.SetActive(false);
         mainMenu.SetActive(false);
         alert.SetActive(false);
+        logo.SetActive(true);
         state = menuState.anykey;
     }
 
@@ -110,9 +114,29 @@ public class StartMenu : MonoBehaviour {
             GameManager.Instance.NewGame();
         }
     }
-    public void LoadGameSelect(SaveGameSelectorScript saveGame) {
-        GameManager.Instance.saveGameName = saveGame.saveName;
-        GameManager.Instance.LoadGameDataIntoMemory(saveGame.saveName);
+    public void InspectSaveGame(SaveGameSelectorScript saveGame) {
+        loadGameMenu.gameObject.SetActive(false);
+        saveInspector.gameObject.SetActive(true);
+        saveInspector.Initialize(this, saveGame);
+    }
+    public void InspectItemCollection(GameData data){
+        saveInspector.gameObject.SetActive(false);
+        itemCollectionInspector.gameObject.SetActive(true);
+        itemCollectionInspector.Initialize(this, data);
+        // ite
+    }
+    public void CloseItemCollectionInspector(){
+        itemCollectionInspector.gameObject.SetActive(false);
+        saveInspector.gameObject.SetActive(true);
+    }
+    public void InspectAchievements(GameData data){
+        saveInspector.gameObject.SetActive(false);
+        achievementBrowser.gameObject.SetActive(true);
+        achievementBrowser.Initialize(data);
+    }
+    public void CloseAchievementBrowser(){
+        achievementBrowser.gameObject.SetActive(false);
+        saveInspector.gameObject.SetActive(true);
     }
     public void ShowAlert(string text) {
         alert.SetActive(true);

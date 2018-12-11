@@ -96,7 +96,7 @@ public class Controller : Singleton<Controller> {
     void Update() {
         if (Input.GetButtonDown("Cancel")) {
             // TODO: exit command states
-            if (state != ControlState.cutscene ) {
+            if (state != ControlState.cutscene) {
                 if (selectionStates.Contains(state) || state == ControlState.commandSelect) {
                     state = ControlState.normal;
                     UINew.Instance.RefreshUI(active: true);

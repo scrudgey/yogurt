@@ -536,6 +536,7 @@ public partial class GameManager : Singleton<GameManager> {
         return data;
     }
     public void LoadGameDataIntoMemory(string gameName) {
+        saveGameName = gameName;
         // Debug.Log("Loadsavegame into memory");
         data = LoadGameData(gameName);
         if (data.lastScene != null) {
