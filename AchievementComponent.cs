@@ -1,7 +1,32 @@
 ﻿using UnityEngine;
-
+using System.Collections.Generic;
 public class AchievementComponent : MonoBehaviour {
     public Achievement achivement;
+}
+[System.Serializable]
+public class Stat {
+    public enum StatType {
+        secondsPlayed,
+        yogurtEaten,
+        vomit,
+        yogurtVomit,
+        dollarsFlushed,
+        dollarsDuplicated,
+        dollarsBurned,
+        swordsEaten,
+        hatsEaten,
+        immolations,
+        selfImmolations,
+        deathByCombat,
+        deathByMisadventure,
+        deathByAsphyxiation,
+        mayorsSassed,
+        actsOfCannibalism,
+        heartsEaten,
+        nullifications
+    }
+    public StatType type;
+    public float value;
 }
 
 [System.Serializable]
