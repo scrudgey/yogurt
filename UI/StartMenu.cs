@@ -13,6 +13,7 @@ public class StartMenu : MonoBehaviour {
     public SaveInspector saveInspector;
     public ItemCollectionInspector itemCollectionInspector;
     public AchievementBrowser achievementBrowser;
+    public StatsBrowser statsBrowser;
     public GameObject prompt;
     public GameObject alert;
     private enum menuState { anykey, main, startNew, load }
@@ -28,6 +29,7 @@ public class StartMenu : MonoBehaviour {
         saveInspector.gameObject.SetActive(false);
         itemCollectionInspector.gameObject.SetActive(false);
         achievementBrowser.gameObject.SetActive(false);
+        statsBrowser.gameObject.SetActive(false);
         mainMenu.SetActive(false);
         alert.SetActive(false);
         logo.SetActive(true);
@@ -136,6 +138,15 @@ public class StartMenu : MonoBehaviour {
     }
     public void CloseAchievementBrowser(){
         achievementBrowser.gameObject.SetActive(false);
+        saveInspector.gameObject.SetActive(true);
+    }
+    public void InspectStats(GameData data){
+        saveInspector.gameObject.SetActive(false);
+        statsBrowser.gameObject.SetActive(true);
+        statsBrowser.Initialize(data);
+    }
+    public void CloseStatsBrowser(){
+        statsBrowser.gameObject.SetActive(false);
         saveInspector.gameObject.SetActive(true);
     }
     public void ShowAlert(string text) {

@@ -49,7 +49,7 @@ public class SaveInspector : MonoBehaviour {
         startMenu.InspectAchievements(data);
     }
     public void StatsButtonCallback(){
-
+        startMenu.InspectStats(data);
     }
     public void LoadButtonCallback(){
         GameManager.Instance.LoadGameDataIntoMemory(saveName);
