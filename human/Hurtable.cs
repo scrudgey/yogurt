@@ -199,24 +199,29 @@ public class Hurtable : Damageable, ISaveable {
         }
         if (type == damageType.fire) {
             if (suicide) {
-                GameManager.Instance.data.achievementStats.selfImmolations += 1;
+                // GameManager.Instance.data.achievementStats.selfImmolations += 1;
+                GameManager.Instance.IncrementStat(StatType.selfImmolations, 1);
                 // Debug.Log("self immolation");
             }
-            GameManager.Instance.data.achievementStats.immolations += 1;
+            // GameManager.Instance.data.achievementStats.immolations += 1;
+            GameManager.Instance.IncrementStat(StatType.immolations, 1);
             // Debug.Log("immolation");
         }
         if (type == damageType.asphyxiation) {
-            GameManager.Instance.data.achievementStats.deathByAsphyxiation += 1;
+            // GameManager.Instance.data.achievementStats.deathByAsphyxiation += 1;
+            GameManager.Instance.IncrementStat(StatType.deathByAsphyxiation, 1);
         }
         if (damageZone) {
-            GameManager.Instance.data.achievementStats.deathByMisadventure += 1;
+            // GameManager.Instance.data.achievementStats.deathByMisadventure += 1;
+            GameManager.Instance.IncrementStat(StatType.deathByMisadventure, 1);
             // Debug.Log("death by misadventure");
         }
         if (assailant) {
-            GameManager.Instance.data.achievementStats.deathByCombat += 1;
+            // GameManager.Instance.data.achievementStats.deathByCombat += 1;
+            GameManager.Instance.IncrementStat(StatType.deathByCombat, 1);
             // Debug.Log("death by combat");
         }
-        GameManager.Instance.CheckAchievements();
+        // GameManager.Instance.CheckAchievements();
     }
     
     public void Update() {

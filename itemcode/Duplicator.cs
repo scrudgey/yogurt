@@ -26,8 +26,9 @@ public class Duplicator : Interactive, IDirectable {
         audioSource.PlayOneShot(dupSound);
         Instantiate(Resources.Load("particles/poof"), dupObj.transform.position, Quaternion.identity);
         if (duplicatable.duplicationPrefab.name == "dollar") {
-            GameManager.Instance.data.achievementStats.dollarsDuplicated += 1;
-            GameManager.Instance.CheckAchievements();
+            // GameManager.Instance.data.achievementStats.dollarsDuplicated += 1;
+            // GameManager.Instance.CheckAchievements();
+            GameManager.Instance.IncrementStat(StatType.dollarsDuplicated, 1);
         }
         if (particles != null) {
             particles.Play();

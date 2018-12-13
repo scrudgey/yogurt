@@ -234,7 +234,8 @@ public class DialogueMenu : MonoBehaviour {
                 Say(target.Riposte(say: false));
                 DisableResponses();
                 if (CutsceneManager.Instance.cutscene is CutsceneMayor) {
-                    GameManager.Instance.data.achievementStats.mayorsSassed += 1;
+                    // GameManager.Instance.data.achievementStats.mayorsSassed += 1;
+                    GameManager.Instance.IncrementStat(StatType.mayorsSassed, 1);
                 }
                 break;
             case "threat":
