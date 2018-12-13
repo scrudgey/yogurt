@@ -36,7 +36,8 @@ public class GameData {
     public HashSet<string> unlockedScenes;
     public int entryID;
     public List<Achievement> achievements;
-    public AchievementStats achievementStats = new AchievementStats();
+    public SerializableDictionary<StatType, Stat> stats = new SerializableDictionary<StatType, Stat>();
+    // public AchievementStats achievementStats = new AchievementStats();
     public List<Email> emails;
     public List<string> packages;
     public bool firstTimeLeavingHouse;
@@ -47,6 +48,20 @@ public class GameData {
         days = 0;
         saveDate = System.DateTime.Now.ToString();
     }
+    public List<Achievement> CheckAchievements(){
+        List<Achievement> completeAchievements = new List<Achievement>();
+        foreach (Achievement achieve in achievements) {
+            if (!achieve.complete) {
+                bool pass = achieve.Evaluate(stats);
+                if (pass) {
+                    achieve.complete = true;
+                    completeAchievements.Add(achieve);
+                }
+            }
+        }
+        return completeAchievements;
+    }
+
 }
 public partial class GameManager : Singleton<GameManager> {
     protected GameManager() { }
@@ -117,8 +132,8 @@ public partial class GameManager : Singleton<GameManager> {
             }
         }
         if (intervalTimer > 3f) {
-            data.achievementStats.secondsPlayed = timeSinceLastSave;
-            CheckAchievements();
+            // data.achievementStats.secondsPlayed = timeSinceLastSave;
+            SetStat(StatType.secondsPlayed, timeSinceLastSave);
             intervalTimer = 0;
         }
         if (awaitNewDayPrompt && sceneTime > 2f) {
@@ -589,17 +604,26 @@ public partial class GameManager : Singleton<GameManager> {
         publicAudio.PlayOneShot(Resources.Load("sounds/pop", typeof(AudioClip)) as AudioClip);
         data.itemCheckedOut[name] = true;
     }
-    public void CheckAchievements() {
+    public void IncrementStat(StatType statType, float value){
+        // change stat
+        if (!data.stats.ContainsKey(statType))
+            data.stats[statType] = new Stat(statType);
+        data.stats[statType].value += value;
+        CheckStats();
+    }
+    public void SetStat(StatType statType, float value){
+        if (!data.stats.ContainsKey(statType))
+            data.stats[statType] = new Stat(statType);
+        data.stats[statType].value = value;
+        CheckStats();
+    }
+    private void CheckStats(){
+        // check achievements
         if (InCutsceneLevel())
             return;
-        foreach (Achievement achieve in data.achievements) {
-            if (!achieve.complete) {
-                bool pass = achieve.Evaluate(data.achievementStats);
-                if (pass) {
-                    achieve.complete = true;
-                    UINew.Instance.PopupAchievement(achieve);
-                }
-            }
+        List<Achievement> completeAchievements = data.CheckAchievements();
+        foreach(Achievement achievement in completeAchievements){
+            UINew.Instance.PopupAchievement(achievement);
         }
     }
     public void ReceiveEmail(string emailName) {

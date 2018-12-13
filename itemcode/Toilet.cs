@@ -22,8 +22,9 @@ public class Toilet : Container {
             Pickup target = items[i];
             StartCoroutine(spinCycle(target.transform));
             if (Toolbox.Instance.CloneRemover(target.name) == "dollar") {
-                GameManager.Instance.data.achievementStats.dollarsFlushed += 1;
-                GameManager.Instance.CheckAchievements();
+                // GameManager.Instance.data.achievementStats.dollarsFlushed += 1;
+                // GameManager.Instance.CheckAchievements();
+                GameManager.Instance.IncrementStat(StatType.dollarsFlushed, 1);
             }
         }
         items = new List<Pickup>();

@@ -158,26 +158,31 @@ public class Eater : Interactive, ISaveable {
             eatData.liquid = mliquid.liquid;
             if (mliquid.liquid != null) {
                 if (mliquid.liquid.name == "yogurt") {
-                    GameManager.Instance.data.achievementStats.yogurtEaten += 1;
-                    GameManager.Instance.CheckAchievements();
+                    // GameManager.Instance.data.achievementStats.yogurtEaten += 1;
+                    // GameManager.Instance.CheckAchievements();
+                    GameManager.Instance.IncrementStat(StatType.yogurtEaten, 1);
                 }
             }
         }
         if (Toolbox.Instance.CloneRemover(food.name) == "sword") {
-            GameManager.Instance.data.achievementStats.swordsEaten += 1;
-            GameManager.Instance.CheckAchievements();
+            // GameManager.Instance.data.achievementStats.swordsEaten += 1;
+            // GameManager.Instance.CheckAchievements();
+            GameManager.Instance.IncrementStat(StatType.swordsEaten, 1);
         }
         if (Toolbox.Instance.CloneRemover(food.name) == "heart") {
-            GameManager.Instance.data.achievementStats.heartsEaten += 1;
-            GameManager.Instance.CheckAchievements();
+            // GameManager.Instance.data.achievementStats.heartsEaten += 1;
+            // GameManager.Instance.CheckAchievements();
+            GameManager.Instance.IncrementStat(StatType.heartsEaten, 1);
         }
         if (food.GetComponent<Hat>() != null) {
-            GameManager.Instance.data.achievementStats.hatsEaten += 1;
-            GameManager.Instance.CheckAchievements();
+            // GameManager.Instance.data.achievementStats.hatsEaten += 1;
+            // GameManager.Instance.CheckAchievements();
+            GameManager.Instance.IncrementStat(StatType.hatsEaten, 1);
         }
         if (food.human){
-            GameManager.Instance.data.achievementStats.actsOfCannibalism += 1;
-            GameManager.Instance.CheckAchievements();
+            // GameManager.Instance.data.achievementStats.actsOfCannibalism += 1;
+            // GameManager.Instance.CheckAchievements();
+            GameManager.Instance.IncrementStat(StatType.actsOfCannibalism, 1);
         }
         HashSet<GameObject> involvedParties = new HashSet<GameObject>(){gameObject, food.gameObject};
         Toolbox.Instance.OccurenceFlag(gameObject, eatData, involvedParties);
@@ -203,8 +208,9 @@ public class Eater : Interactive, ISaveable {
     public void Vomit() {
         vomitCountDown = 1.5f;
 
-        GameManager.Instance.data.achievementStats.vomit += 1;
-        GameManager.Instance.CheckAchievements();
+        // GameManager.Instance.data.achievementStats.vomit += 1;
+        // GameManager.Instance.CheckAchievements();
+        GameManager.Instance.IncrementStat(StatType.vomit, 1);
 
         nausea = 0;
         nutrition = 0;
@@ -228,8 +234,9 @@ public class Eater : Interactive, ISaveable {
                 mono.liquid.vomit = true;
                 mono.edible.vomit = true;
                 if (mono.liquid.name == "yogurt") {
-                    GameManager.Instance.data.achievementStats.yogurtVomit += 1;
-                    GameManager.Instance.CheckAchievements();
+                    // GameManager.Instance.data.achievementStats.yogurtVomit += 1;
+                    // GameManager.Instance.CheckAchievements();
+                    GameManager.Instance.IncrementStat(StatType.yogurtVomit, 1);
                 }
                 CircleCollider2D dropCollider = droplet.GetComponent<CircleCollider2D>();
                 foreach (Collider2D collider in GetComponentsInChildren<Collider2D>()) {
