@@ -14,10 +14,17 @@ public class ItemCollectionInspector : MonoBehaviour {
         foreach(Transform oldButton in collectionList){
             Destroy(oldButton.gameObject);
         }
-        List<string> objects = data.collectedObjects;
-        objects.Sort();
+        Dictionary<string, Item> itemDict = new Dictionary<string, Item>();
+        foreach(string obj in data.collectedObjects){
+            GameObject tempObject = Instantiate(Resources.Load("prefabs/" + obj)) as GameObject;
+            Item tempItem = tempObject.GetComponent<Item>();
+            itemDict[obj] = tempItem;
+        }
+        List<string> items = data.collectedObjects;
+        items.Sort((item1, item2) => itemDict[item1].itemName.CompareTo(itemDict[item2].itemName));
+
         bool initializedText = false;
-        foreach (string itemName in objects){
+        foreach (string itemName in items){
             // create itemCollectionButton
             GameObject entry = GameObject.Instantiate(Resources.Load("UI/ItemCollectionEntry")) as GameObject;
             ItemCollectionButton script = entry.GetComponent<ItemCollectionButton>();
