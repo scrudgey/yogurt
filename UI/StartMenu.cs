@@ -42,11 +42,39 @@ public class StartMenu : MonoBehaviour {
             mainMenu.SetActive(true);
             prompt.SetActive(false);
         }
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            if (saveInspector.gameObject.activeInHierarchy){
+                saveInspector.gameObject.SetActive(false);
+                loadGameMenu.gameObject.SetActive(true);
+                loadGameMenu.ConfigLoadMenu(this);
+                return;
+            }
+            if (achievementBrowser.gameObject.activeInHierarchy){
+                CloseAchievementBrowser();
+            }
+            if (statsBrowser.gameObject.activeInHierarchy){
+                CloseStatsBrowser();
+            }
+            if (itemCollectionInspector.gameObject.activeInHierarchy){
+                CloseItemCollectionInspector();
+            }
+            if (loadGameMenu.gameObject.activeInHierarchy){
+                loadGameMenu.gameObject.SetActive(false);
+                mainMenu.SetActive(true);
+                state = menuState.main;
+            }
+            if (newGameMenu.gameObject.activeInHierarchy){
+                newGameMenu.SetActive(false);
+                mainMenu.SetActive(true);
+                state = menuState.main;
+            }
+        }
     }
     private void SwitchMenu(menuState switchTo) {
         newGameMenu.SetActive(false);
         loadGameMenu.gameObject.SetActive(false);
         mainMenu.SetActive(false);
+        saveInspector.gameObject.SetActive(false);
         state = switchTo;
         switch (switchTo) {
             case menuState.startNew:
@@ -113,6 +141,7 @@ public class StartMenu : MonoBehaviour {
             ShowAlert("Bad name!!!");
         } else {
             GameManager.Instance.saveGameName = newName;
+            GameManager.Instance.SaveGameData();
             GameManager.Instance.NewGame();
         }
     }
