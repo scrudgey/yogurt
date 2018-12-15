@@ -10,10 +10,10 @@ public class AchievementBrowser : MonoBehaviour {
     public Text date;
     public Text counter;
     public Text directive;
+    public GameObject badge;
     public Transform scrollArea;
     public GameObject entryPrefab;
     public Image icon;
-
     public StartMenu startMenu;
 
     public void Initialize(GameData data){
@@ -35,13 +35,23 @@ public class AchievementBrowser : MonoBehaviour {
 
             AchievementEntry entryScript = entry.GetComponent<AchievementEntry>();
             entryScript.browser = this;
-            entryScript.achievement = achievement;
-
-            if (!initializeFirst){
-                AchievementEntryCallback(achievement);
-            }
-            if (achievement.complete){
-                numberComplete += 1;
+            foreach (Achievement savedAchievement in data.achievements){
+                if (savedAchievement.title != achievement.title)
+                    continue;
+                
+                entryScript.achievement = savedAchievement;
+                if (savedAchievement.complete){
+                    numberComplete += 1;
+                    Button entryButton = entry.GetComponent<Button>();
+                    // entryButton.transition.
+                    ColorBlock cb = entryButton.colors;
+                    cb.normalColor = new Color(114f/255f, 185f/255f, 255f/255f, 1f);
+                    entryButton.colors = cb;
+                }
+                if (!initializeFirst){
+                    initializeFirst = true;
+                    AchievementEntryCallback(savedAchievement);
+                }
             }
             // if i didn't collect this achievement
         }
@@ -68,6 +78,11 @@ public class AchievementBrowser : MonoBehaviour {
         directive.text = achievement.directive;
         date.text = "Achieved on 4/20/69";
         icon.sprite = Resources.Load<Sprite>("achievements/icons/"+achievement.icon) as Sprite;
+        if (achievement.complete){
+            badge.SetActive(true);
+        } else {
+            badge.SetActive(false);
+        }
     }
     public void CloseButtonCallback(){
         startMenu.CloseAchievementBrowser();
