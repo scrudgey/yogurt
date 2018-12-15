@@ -139,11 +139,16 @@ public class StartMenu : MonoBehaviour {
         string newName = field.text;
         if (newName.Length == 0) {
             ShowAlert("Bad name!!!");
-        } else {
-            GameManager.Instance.saveGameName = newName;
-            GameManager.Instance.SaveGameData();
-            GameManager.Instance.NewGame();
+            return;
+        } 
+        string path = Path.Combine(Application.persistentDataPath, newName);
+        if (Directory.Exists(path)){
+            ShowAlert(newName + " already exists...?");
+            return;
         }
+        GameManager.Instance.saveGameName = newName;
+        GameManager.Instance.SaveGameData();
+        GameManager.Instance.NewGame();
     }
     public void InspectSaveGame(SaveGameSelectorScript saveGame) {
         loadGameMenu.gameObject.SetActive(false);
