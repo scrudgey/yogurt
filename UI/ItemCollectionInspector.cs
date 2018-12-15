@@ -19,6 +19,7 @@ public class ItemCollectionInspector : MonoBehaviour {
             GameObject tempObject = Instantiate(Resources.Load("prefabs/" + obj)) as GameObject;
             Item tempItem = tempObject.GetComponent<Item>();
             itemDict[obj] = tempItem;
+            Destroy(tempObject);
         }
         List<string> items = data.collectedObjects;
         items.Sort((item1, item2) => itemDict[item1].itemName.CompareTo(itemDict[item2].itemName));
@@ -35,6 +36,7 @@ public class ItemCollectionInspector : MonoBehaviour {
                 EntryClickedCallback(script);
             }
         }
+        // foreach(KeyValuePair<string, Item> in itemDict)
     }
     public void EntryClickedCallback(ItemCollectionButton script){
         // update icon
