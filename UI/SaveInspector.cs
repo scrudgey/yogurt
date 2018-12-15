@@ -10,6 +10,7 @@ public class SaveInspector : MonoBehaviour {
     public Text totalTimeText;
     public Text completionText;
     public Text itemCountText;
+    public Text achievementCountText;
     public Image headShot;
     public GameData data;
     public string saveName;
@@ -34,6 +35,12 @@ public class SaveInspector : MonoBehaviour {
         headShot.sprite = sprites[0];
 
         itemCountText.text = data.collectedObjects.Count.ToString() + "/100";
+        int completeAchievements = 0;
+        foreach(Achievement achievement in save.data.achievements){
+            if (achievement.complete)
+                completeAchievements += 1;
+        }
+        achievementCountText.text = completeAchievements.ToString() + "/" + data.achievements.Count.ToString();
         completionText.text = "Completion: " + Completion(data).ToString("0")+"%";
     }
     public float Completion(GameData data){
