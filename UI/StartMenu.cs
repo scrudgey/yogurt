@@ -112,7 +112,23 @@ public class StartMenu : MonoBehaviour {
         SwitchMenu(menuState.main);
     }
     public void ContinueButton() {
-        Debug.Log("pressed Continue");
+        // TODO: catch if there is no save game
+        Dictionary<string, GameData> dataDirs = new Dictionary<string, GameData>();
+        List<string> datas = new List<string>();
+        DirectoryInfo info = new DirectoryInfo(Application.persistentDataPath);
+        DirectoryInfo[] dirs = info.GetDirectories();
+        if (dirs.Length == 0)
+            return;
+        foreach (DirectoryInfo dir in dirs) {
+            if (dir.Name == "test" || dir.Name == "Unity") 
+                continue;
+            GameData data = GameManager.Instance.LoadGameData(dir.Name);
+            datas.Add(dir.Name);
+            dataDirs[dir.Name] = data;
+        }
+        datas.Sort((d1, d2) => dataDirs[d2].saveDateTime.CompareTo(dataDirs[d1].saveDateTime));
+        Debug.Log(datas[0]);
+        GameManager.Instance.LoadGameDataIntoMemory(datas[0]);
     }
     public void SettingsButton() {
         Debug.Log("pressed Settings");
