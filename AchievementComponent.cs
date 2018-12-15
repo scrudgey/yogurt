@@ -56,7 +56,6 @@ public class Achievement {
         }
     }
     private SerializableDictionary<StatType, Stat> _statDict;
-
     private SerializableDictionary<StatType, Stat> SetStatDict(){
         SerializableDictionary<StatType, Stat> dict = new SerializableDictionary<StatType, Stat>();
         foreach(Stat stat in statList){
