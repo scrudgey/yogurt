@@ -509,15 +509,17 @@ public partial class GameManager : Singleton<GameManager> {
         string playerName = Toolbox.Instance.GetName(GameManager.Instance.playerObject);
         path = Path.Combine(path, "player_" + playerName + "_state.xml");
         data.lastSavedPlayerPath = path;
-        // data.lastPlayerName = GameManager.Instance.playerObject.name;
         return path;
     }
     public void SaveGameData() {
+        
         data.secondsPlayed += timeSinceLastSave;
         data.lastScene = SceneManager.GetActiveScene().name;
 
         var serializer = new XmlSerializer(typeof(GameData));
         string path = Path.Combine(Application.persistentDataPath, saveGameName);
+        if (!Directory.Exists(path))
+            Directory.CreateDirectory(path);
         path = Path.Combine(path, "gameData.xml");
         FileStream sceneStream = File.Create(path);
         try{    
