@@ -90,5 +90,6 @@ public class Achievement {
         description = source.description;
         statList = source.statList;
         statDict = source.statDict;
+        directive = source.directive;
     }
 }
