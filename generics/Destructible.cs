@@ -64,8 +64,6 @@ public class Destructible : Damageable, ISaveable {
         data.whatHappened = Toolbox.Instance.CloneRemover(gameObject.name) + " was destroyed";
         if (lastDamage == damageType.fire) {
             if (Toolbox.Instance.CloneRemover(name) == "dollar") {
-                // GameManager.Instance.data.achievementStats.dollarsBurned += 1;
-                // GameManager.Instance.CheckAchievements();
                 GameManager.Instance.IncrementStat(StatType.dollarsBurned, 1);
             }
         }
