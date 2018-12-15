@@ -25,6 +25,7 @@ public class GameData {
     public string lastSavedPlayerPath;
     public string lastSavedScenePath;
     public string saveDate;
+    public  System.DateTime saveDateTime;
     public float secondsPlayed;
     public string lastScene;
     public int days;
@@ -47,6 +48,7 @@ public class GameData {
     public GameData() {
         days = 0;
         saveDate = System.DateTime.Now.ToString();
+        saveDateTime = System.DateTime.Now;
     }
     public List<Achievement> CheckAchievements(){
         List<Achievement> completeAchievements = new List<Achievement>();
@@ -515,6 +517,8 @@ public partial class GameManager : Singleton<GameManager> {
         
         data.secondsPlayed += timeSinceLastSave;
         data.lastScene = SceneManager.GetActiveScene().name;
+        data.saveDateTime = System.DateTime.Now;
+        data.saveDate = System.DateTime.Now.ToString();
 
         var serializer = new XmlSerializer(typeof(GameData));
         string path = Path.Combine(Application.persistentDataPath, saveGameName);
