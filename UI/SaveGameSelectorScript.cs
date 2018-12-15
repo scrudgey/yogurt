@@ -40,8 +40,11 @@ public class SaveGameSelectorScript : MonoBehaviour {
                                     t.Hours,
                                     t.Minutes,
                                     t.Seconds).ToString();
-        Sprite[] sprites = Resources.LoadAll<Sprite>("spritesheets/" + data.headSpriteSheet);
-        icon.sprite = sprites[0];
+        if (data.headSpriteSheet != null){
+            Sprite[] sprites = Resources.LoadAll<Sprite>("spritesheets/" + data.headSpriteSheet);
+            icon.sprite = sprites[0];
+        }
+            
     }
     public void Clicked() {
         startMenu.InspectSaveGame(this);
