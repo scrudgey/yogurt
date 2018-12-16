@@ -469,6 +469,7 @@ public partial class GameManager : Singleton<GameManager> {
         data.completeCommercials = new HashSet<Commercial>();
         // initialize achievements
         data.achievements = new List<Achievement>();
+        data.stats = new SerializableDictionary<StatType, Stat>();
         GameObject[] achievementPrefabs = Resources.LoadAll("achievements/", typeof(GameObject))
             .Cast<GameObject>()
             .ToArray();
