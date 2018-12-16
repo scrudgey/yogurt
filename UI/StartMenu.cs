@@ -117,8 +117,6 @@ public class StartMenu : MonoBehaviour {
         List<string> datas = new List<string>();
         DirectoryInfo info = new DirectoryInfo(Application.persistentDataPath);
         DirectoryInfo[] dirs = info.GetDirectories();
-        if (dirs.Length == 0)
-            return;
         foreach (DirectoryInfo dir in dirs) {
             if (dir.Name == "test" || dir.Name == "Unity") 
                 continue;
@@ -126,6 +124,8 @@ public class StartMenu : MonoBehaviour {
             datas.Add(dir.Name);
             dataDirs[dir.Name] = data;
         }
+        if (datas.Count == 0)
+            return;
         datas.Sort((d1, d2) => dataDirs[d2].saveDateTime.CompareTo(dataDirs[d1].saveDateTime));
         Debug.Log(datas[0]);
         GameManager.Instance.LoadGameDataIntoMemory(datas[0]);
@@ -162,6 +162,8 @@ public class StartMenu : MonoBehaviour {
             ShowAlert(newName + " already exists...?");
             return;
         }
+        // GameManager.Instance.data = null;
+        GameManager.Instance.data = GameManager.Instance.InitializedGameData();
         GameManager.Instance.saveGameName = newName;
         GameManager.Instance.SaveGameData();
         GameManager.Instance.NewGame();
