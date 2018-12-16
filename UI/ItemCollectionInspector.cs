@@ -36,7 +36,6 @@ public class ItemCollectionInspector : MonoBehaviour {
                 EntryClickedCallback(script);
             }
         }
-        // foreach(KeyValuePair<string, Item> in itemDict)
     }
     public void EntryClickedCallback(ItemCollectionButton script){
         // update icon
