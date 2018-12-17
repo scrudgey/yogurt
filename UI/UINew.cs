@@ -515,15 +515,11 @@ public class UINew : Singleton<UINew> {
         activeElements.Add(CircularizeButtons(buttons, GameManager.Instance.playerObject));
     }
     public void ShowInventoryMenu() {
-        Inventory inventory = GameManager.Instance.playerObject.GetComponent<Inventory>();
         GameObject inventoryMenu = ShowMenu(UINew.MenuType.inventory);
         if (inventoryMenu != null) {
-            Transform itemDrawer = inventoryMenu.transform.Find("menu/itemdrawer");
-            foreach (GameObject item in inventory.items) {
-                GameObject button = Instantiate(Resources.Load("UI/ItemButton")) as GameObject;
-                button.transform.SetParent(itemDrawer.transform, false);
-                button.GetComponent<ItemButtonScript>().SetButtonAttributes(item, inventory);
-            }
+            Inventory inventory = GameManager.Instance.playerObject.GetComponent<Inventory>();
+            InventoryMenu menu = inventoryMenu.GetComponent<InventoryMenu>();
+            menu.Initialize(inventory);
         }
     }
     public void SetClickedActions(GameObject clickedOn, GameObject clickSite) {
