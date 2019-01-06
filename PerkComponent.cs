@@ -6,6 +6,7 @@ public class PerkComponent : MonoBehaviour {
 
 [System.Serializable]
 public class Perk {
+    public int requiredPerks;
     public string name;
     public string title;
     public string desc;
@@ -16,5 +17,6 @@ public class Perk {
         this.title = otherPerk.title;
         this.desc = otherPerk.desc;
         this.perkImage = otherPerk.perkImage;
+        this.requiredPerks = otherPerk.requiredPerks;
     }
 }

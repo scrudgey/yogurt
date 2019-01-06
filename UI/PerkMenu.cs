@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
+using System.Collections.Generic;
 
 public class PerkMenu : MonoBehaviour {
     public Transform buttonList;
@@ -30,6 +31,12 @@ public class PerkMenu : MonoBehaviour {
         GameObject[] perkPrefabs = Resources.LoadAll("perks/", typeof(GameObject))
             .Cast<GameObject>()
             .ToArray();
+        int numberCollected = 0;
+        foreach(KeyValuePair<string, bool> kvp in GameManager.Instance.data.perks){
+            if (kvp.Value){
+                numberCollected += 1;
+            }
+        }
         foreach (GameObject prefab in perkPrefabs) {
             PerkComponent component = prefab.GetComponent<PerkComponent>();
             if (component) {
@@ -40,10 +47,14 @@ public class PerkMenu : MonoBehaviour {
                 perkScript.menu = this;
                 perkScript.perk = new Perk(component.perk);
                 buttonText.text = component.perk.title;
-                if (GameManager.Instance.data.perks[component.perk.name]) {
-                    Button perkButton = buttonObject.GetComponent<Button>();
+                Button perkButton = buttonObject.GetComponent<Button>();
+                if (numberCollected < component.perk.requiredPerks){
                     perkButton.interactable = false;
                 }
+                if (GameManager.Instance.data.perks[component.perk.name]) {
+                    perkButton.interactable = false;
+                }
+                
             }
         }
     }
