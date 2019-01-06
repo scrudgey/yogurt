@@ -153,7 +153,7 @@ public class StartMenu : MonoBehaviour {
     public void NewGameOK() {
         InputField field = newGameMenu.transform.Find("InputField").gameObject.GetComponent<InputField>();
         string newName = field.text;
-        if (newName.Length == 0) {
+        if (newName.Length == 0 || newName == "test" || newName == "Unity") {
             ShowAlert("Bad name!!!");
             return;
         } 
