@@ -28,13 +28,11 @@ public class Intrinsics : MonoBehaviour, ISaveable {
         IntrinsicsChanged();
     }
     public void RemoveChild(Component owner) {
-        // Debug.Log(gameObject.name+"> removing "+owner.ToString());
         childBuffs.Remove(owner);
         IntrinsicsChanged();
     }
     public void CreateLiveBuffs(List<Buff> newBuffs) {
         foreach (Buff b in newBuffs) {
-            // liveBuffs.Add(new Buff(b));
             AddNewLiveBuff(new Buff(b));
         }
         IntrinsicsChanged();
@@ -44,6 +42,7 @@ public class Intrinsics : MonoBehaviour, ISaveable {
             if (buff.type == newBuff.type){
                 // do stuff
                 buff.floatValue = Mathf.Max(buff.floatValue, newBuff.floatValue);
+                buff.time = Mathf.Min(buff.time, newBuff.time);
                 buff.boolValue = buff.boolValue || newBuff.boolValue;
                 return;
             }
