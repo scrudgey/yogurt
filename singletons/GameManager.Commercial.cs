@@ -13,9 +13,10 @@ public partial class GameManager : Singleton<GameManager> {
         }
         var serializer = new XmlSerializer(typeof(Commercial));
         foreach (TextAsset asset in xmlList) {
-            var reader = new System.IO.StringReader(asset.text);
-            Commercial newCommercial = serializer.Deserialize(reader) as Commercial;
-            passList.Add(newCommercial);
+            using(var reader = new System.IO.StringReader(asset.text)){
+                Commercial newCommercial = serializer.Deserialize(reader) as Commercial;
+                passList.Add(newCommercial);
+            }
         }
         return passList;
     }

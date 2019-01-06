@@ -17,6 +17,7 @@ public class GameData {
     public List<string> newCollectedFood;
     public List<string> collectedClothes;
     public List<string> newCollectedClothes;
+    public int[] collectedChelas = new int[10];
     public int itemsCollectedToday;
     public int clothesCollectedToday;
     public int foodCollectedToday;
@@ -79,7 +80,8 @@ public partial class GameManager : Singleton<GameManager> {
         {"room2", "item room"},
         {"moon_cave", "moon cave"},
         {"woods", "woods"},
-        {"vampire_house", "mansion"}
+        {"vampire_house", "mansion"},
+        {"mountain", "mountain"}
     };
     public GameData data;
     public string saveGameName = "test";
@@ -101,7 +103,8 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = true;
+    public bool debug = false;
+    public bool failedLevelLoad = false;
     void Start() {
         if (data == null) {
             data = InitializedGameData();
@@ -227,7 +230,49 @@ public partial class GameManager : Singleton<GameManager> {
         if (InCutsceneLevel()) {
             InitializeNonPlayableLevel();
         } else {
-            InitializePlayableLevel(loadLevel: true);
+            try {
+                InitializePlayableLevel(loadLevel: true);
+                failedLevelLoad = false;
+            } catch {
+                if (failedLevelLoad){
+                    Debug.Break();
+                }
+                // TODO: default / corrupt save recovery
+                Debug.Log("Load failed, defaulting to new day");
+                failedLevelLoad = true;
+                ResetGameState();
+                return;
+            }
+        }
+    }
+    void ResetGameState(){
+        try{ 
+            MySaver.CleanupSaves();
+
+            string housePath = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
+            housePath = Path.Combine(housePath, "house_state.xml");
+            string[] paths = new string[]{housePath, GameManager.Instance.data.lastSavedPlayerPath};
+            
+            foreach(string path in paths){
+                if (!System.IO.File.Exists(path))
+                    return;
+                FileInfo info = new FileInfo(path);
+                File.Delete(info.FullName);
+            }
+            
+            NewGame();
+        } catch (Exception e){
+            Debug.Log("reset game state failed");
+            // Debug.Log(e.Data);
+            // Debug.Log(e.HelpLink);
+            // Debug.Log(e.InnerException);
+            Debug.Log(e.Message);
+            // Debug.Log(e.Source);
+            // Debug.Log(e.StackTrace);
+            // Debug.Log(e.TargetSite);
+            Debug.Log(e.ToString());
+            Debug.Log(e.GetBaseException());
+            Debug.Break();
         }
     }
     public void InitializePlayableLevel(bool loadLevel = false) {
@@ -297,6 +342,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
         PlayerEnter();
     }
+
     public void InitializeNonPlayableLevel() {
         string sceneName = SceneManager.GetActiveScene().name;
         Controller.Instance.state = Controller.ControlState.cutscene;
@@ -526,16 +572,17 @@ public partial class GameManager : Singleton<GameManager> {
         if (!Directory.Exists(path))
             Directory.CreateDirectory(path);
         path = Path.Combine(path, "gameData.xml");
-        FileStream sceneStream = File.Create(path);
         try{    
-            serializer.Serialize(sceneStream, data);
+            using(FileStream sceneStream = File.Create(path)){
+                serializer.Serialize(sceneStream, data);
+            }
         } catch(Exception e) {
             Debug.Log(e.ToString());
             Debug.Log(e.Source);
             Debug.Log(e.StackTrace);
             Debug.Log(e.Message);
         }
-        sceneStream.Close();
+        // sceneStream.Close();
         timeSinceLastSave = 0f;
     }
     public GameData LoadGameData(string gameName) {
@@ -545,9 +592,10 @@ public partial class GameManager : Singleton<GameManager> {
         path = Path.Combine(path, "gameData.xml");
         if (File.Exists(path)) {
             try {
-                var dataStream = new FileStream(path, FileMode.Open);
-                data = serializer.Deserialize(dataStream) as GameData;
-                dataStream.Close();
+                using(var dataStream = new FileStream(path, FileMode.Open)){
+                    data = serializer.Deserialize(dataStream) as GameData;
+                }
+                // dataStream.Close();
             }
             catch (Exception e) {
                 Debug.Log("Error loading game data: " + path);
