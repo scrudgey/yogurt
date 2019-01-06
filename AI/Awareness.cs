@@ -93,6 +93,9 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
     public SerializableDictionary<GameObject, PersonalAssessment> people = new SerializableDictionary<GameObject, PersonalAssessment>();
 
     void Start() {
+        // Debug.Log(name + "awareness starting");
+        // Debug.Log(initialAwareness);
+        // Debug.Log(initialAwareness.Count);
         MessageDirectable message = new MessageDirectable();
         message.addDirectable.Add(this);
         Toolbox.Instance.SendMessage(gameObject, this, message);
@@ -103,6 +106,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         sightConeTransform.parent = transform;
         if (initialAwareness != null) {
             if (initialAwareness.Count > 0) {
+                // Debug.Log(initialAwareness[0]);
                 fieldOfView = initialAwareness;
                 Perceive();
             }
