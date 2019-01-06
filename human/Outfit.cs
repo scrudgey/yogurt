@@ -3,6 +3,7 @@
 public class Outfit : Interactive, ISaveable {
     public string wornUniformName;
     public string readableUniformName;
+    public string pluralUniformType;
     public GameObject initUniform;
     public Controllable.HitState hitState;
     public Intrinsics uniformIntrinsics;
@@ -72,6 +73,7 @@ public class Outfit : Interactive, ISaveable {
         Toolbox.Instance.AddChildIntrinsics(gameObject, this, uniform.gameObject);
         wornUniformName = Toolbox.Instance.CloneRemover(uniform.gameObject.name);
         readableUniformName = uniform.readableName;
+        pluralUniformType = uniform.pluralName;
         GameManager.Instance.CheckItemCollection(uniform.gameObject, gameObject);
         ClaimsManager.Instance.WasDestroyed(uniform.gameObject);
         Destroy(uniform.gameObject);
