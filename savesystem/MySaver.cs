@@ -46,20 +46,28 @@ public class MySaver {
         var listSerializer = new XmlSerializer(typeof(List<int>));
         List<int> playerIDs = new List<int>();
         string playerPath = GameManager.Instance.data.lastSavedPlayerPath;
+        Stack<int> removeEntries = new Stack<int>();
         if (File.Exists(playerPath)) {
-            using (var playerStream = new FileStream(playerPath, FileMode.OpenOrCreate)){
+            using (var playerStream = new FileStream(playerPath, FileMode.Open)){
                 playerIDs = listSerializer.Deserialize(playerStream) as List<int>;
             }
             // var playerStream = new FileStream(playerPath, FileMode.Open);
             // playerIDs = listSerializer.Deserialize(playerStream) as List<int>;
             // playerStream.Close();
-        }
-        Stack<int> removeEntries = new Stack<int>();
-        if (objectDataBase != null) {
-            foreach (KeyValuePair<int, PersistentObject> kvp in objectDataBase) {
-                if (kvp.Value.sceneName != "house") {
-                    if (!playerIDs.Contains(kvp.Key))
+            if (objectDataBase != null) {
+                foreach (KeyValuePair<int, PersistentObject> kvp in objectDataBase) {
+                    if (kvp.Value.sceneName != "house") {
+                        if (!playerIDs.Contains(kvp.Key))
+                            removeEntries.Push(kvp.Key);
+                    }
+                }
+            }
+        } else {
+            if (objectDataBase != null) {
+                foreach (KeyValuePair<int, PersistentObject> kvp in objectDataBase) {
+                    if (kvp.Value.sceneName != "house") {
                         removeEntries.Push(kvp.Key);
+                    }
                 }
             }
         }
@@ -234,17 +242,13 @@ public class MySaver {
         }
         if (File.Exists(playerPath)) {
             using(var playerStream = new FileStream(playerPath, FileMode.Open)){
-                Debug.Log(playerPath);
                 playerIDs = listSerializer.Deserialize(playerStream) as List<int>;
-                Debug.Log(playerIDs);
             }
             // playerStream.Close();
             playerObject = LoadObjects(playerIDs);
         } else {
             playerObject = GameObject.Instantiate(Resources.Load("prefabs/Tom")) as GameObject;
         }
-        Debug.Log("handling loaded persistents");
-        Debug.Log(playerObject);
         HandleLoadedPersistents(sceneIDs);
         HandleLoadedPersistents(playerIDs);
 
