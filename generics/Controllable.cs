@@ -57,7 +57,7 @@ public class Controllable : MonoBehaviour {
         }
     }
     public float directionAngle = 0;
-    public List<IDirectable> directables = new List<IDirectable>();
+    public HashSet<IDirectable> directables = new HashSet<IDirectable>();
     public bool fightMode;
     public bool disabled = false;
     public HitState hitState;
