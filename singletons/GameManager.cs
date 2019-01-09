@@ -103,7 +103,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = false;
+    public bool debug = true;
     public bool failedLevelLoad = false;
     void Start() {
         if (data == null) {
@@ -233,12 +233,13 @@ public partial class GameManager : Singleton<GameManager> {
             try {
                 InitializePlayableLevel(loadLevel: true);
                 failedLevelLoad = false;
-            } catch {
+            } catch (Exception e) {
                 if (failedLevelLoad){
                     Debug.Break();
                 }
                 // TODO: default / corrupt save recovery
                 Debug.Log("Load failed, defaulting to new day");
+                Debug.LogException(e);
                 failedLevelLoad = true;
                 ResetGameState();
                 return;
@@ -247,8 +248,18 @@ public partial class GameManager : Singleton<GameManager> {
     }
     void ResetGameState(){
         try{ 
+            // string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
+            // if (!System.IO.Directory.Exists(path))
+            //     return;
+            // path = Path.Combine(path, GameManager.Instance.saveGameName + ".xml");
+            FileInfo playerFile = new FileInfo(GameManager.Instance.data.lastSavedPlayerPath);
+            if (playerFile.Exists){
+                playerFile.Delete();
+            }
+            // Debug.Log("cleaning up saves");
+            // Debug.Break();
             MySaver.CleanupSaves();
-
+            
             string housePath = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
             housePath = Path.Combine(housePath, "house_state.xml");
             string[] paths = new string[]{housePath, GameManager.Instance.data.lastSavedPlayerPath};
@@ -259,20 +270,12 @@ public partial class GameManager : Singleton<GameManager> {
                 FileInfo info = new FileInfo(path);
                 File.Delete(info.FullName);
             }
-            
             NewGame();
         } catch (Exception e){
             Debug.Log("reset game state failed");
-            // Debug.Log(e.Data);
-            // Debug.Log(e.HelpLink);
-            // Debug.Log(e.InnerException);
-            Debug.Log(e.Message);
-            // Debug.Log(e.Source);
+            // Debug.Log(e.Message);
             // Debug.Log(e.StackTrace);
-            // Debug.Log(e.TargetSite);
-            Debug.Log(e.ToString());
-            Debug.Log(e.GetBaseException());
-            Debug.Break();
+            Debug.LogException(e);
         }
     }
     public void InitializePlayableLevel(bool loadLevel = false) {
