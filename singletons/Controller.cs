@@ -129,23 +129,31 @@ public class Controller : Singleton<Controller> {
                 focus.ShootHeld();
             }
         }
-    }
-    void OnGUI() {
-        if (Event.current.isMouse) {
-            // right click
-            if (Input.GetMouseButtonDown(1)) {
-                RightClick();
-            }
-            // left click
-            if (Input.GetMouseButtonDown(0)) {
-                LeftClick();
-            }
-            // mouse up event
-            // if (Input.GetMouseButtonUp(1)){
-            // 	focus.MouseUp();
-            // }
+        // right click
+        if (Input.GetMouseButtonDown(1)) {
+            RightClick();
+        }
+        // left click
+        if (Input.GetMouseButtonDown(0)) {
+            LeftClick();
         }
     }
+    // void Update() {
+    //     if (Event.current.isMouse) {
+    //         // right click
+    //         if (Input.GetMouseButtonDown(1)) {
+    //             RightClick();
+    //         }
+    //         // left click
+    //         if (Input.GetMouseButtonDown(0)) {
+    //             LeftClick();
+    //         }
+    //         // mouse up event
+    //         // if (Input.GetMouseButtonUp(1)){
+    //         // 	focus.MouseUp();
+    //         // }
+    //     }
+    // }
     void RightClick() {
         //detect if we clicked anything
         RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
@@ -179,9 +187,13 @@ public class Controller : Singleton<Controller> {
         }
         return one;
     }
-    public GameObject GetFrontObject(RaycastHit2D[] hits) {
+    public GameObject GetFrontObject(RaycastHit2D[] hits, bool debug=false) {
+        if (debug)
+            Debug.Log("*******************");
         List<GameObject> candidates = new List<GameObject>();
         foreach (RaycastHit2D hit in hits) {
+            if (debug)
+                Debug.Log(hit.collider.gameObject);
             if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)) {
                 candidates.Add(hit.collider.gameObject);
             }
@@ -286,7 +298,7 @@ public class Controller : Singleton<Controller> {
         // NOTE: if an overlapping UI is causing problems, add a layout group and uncheck "blocks raycast"
         if (state == ControlState.normal || state == ControlState.commandSelect) {
             if (!UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) {
-                GameObject top = GetFrontObject(hits);
+                GameObject top = GetFrontObject(hits, debug:false);
                 if (top != null) {
                     Clicked(GetBaseInteractive(top.transform), top);
                 }
@@ -294,6 +306,7 @@ public class Controller : Singleton<Controller> {
         }
     }
     public void Clicked(GameObject clicked, GameObject clickSite) {
+        // Debug.Log("clicked "+clicked.name + " last: "+lastLeftClicked);
         if (lastLeftClicked == clicked) {
             // TODO: fix this conditional!
             UINew.Instance.ClearWorldButtons();
@@ -305,9 +318,14 @@ public class Controller : Singleton<Controller> {
                 actor = commandTarget;
             if (clicked.transform.IsChildOf(actor.transform) || clicked == actor) {
                 Inventory inventory = actor.GetComponent<Inventory>();
-                if (inventory)
-                    if (inventory.holding)
+                if (inventory){
+                    if (inventory.holding){
                         UINew.Instance.DisplayHandActions(inventory);
+                    } else {
+                        UINew.Instance.ClearWorldButtons();
+                        lastLeftClicked = null;
+                    }      
+                }   
             } else {
                 UINew.Instance.SetClickedActions(lastLeftClicked, clickSite);
             }
