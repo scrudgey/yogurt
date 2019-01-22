@@ -113,6 +113,8 @@ public abstract class Damageable : MonoBehaviour {
     }
     public abstract float CalculateDamage(MessageDamage message);
     public virtual void Destruct() {
+        if (lastMessage == null)
+            lastMessage = new MessageDamage(0.5f, damageType.physical);
         foreach (Gibs gib in GetComponents<Gibs>())
             gib.Emit(lastDamage, lastMessage.force);
         PhysicalBootstrapper phys = GetComponent<PhysicalBootstrapper>();
