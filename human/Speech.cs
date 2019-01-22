@@ -149,6 +149,8 @@ public class Speech : Interactive, ISaveable {
         return "Speak with " + otherName;
     }
     public bool SpeakWith_Validation() {
+        if (disableInteractions)
+            return false;
         if (Controller.Instance.state == Controller.ControlState.commandSelect){
             return Controller.Instance.commandTarget != gameObject;
         } else {
