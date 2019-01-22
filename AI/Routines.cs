@@ -413,25 +413,25 @@ namespace AI {
             if (target.val) {
                 float distToTarget = Vector2.Distance(transform.position, targetTransform.position);
                 control.leftFlag = control.rightFlag = control.upFlag = control.downFlag = false;
-                if (distToTarget < minDistance) {
+                if (distToTarget <= minDistance) {
                     return status.success;
                 } else {
-                    if (Math.Abs(transform.position.x - targetTransform.position.x) > 0.1f) {
-                        if (transform.position.x < targetTransform.position.x) {
-                            control.rightFlag = true;
-                        }
-                        if (transform.position.x > targetTransform.position.x) {
-                            control.leftFlag = true;
-                        }
+                    // if (Math.Abs(transform.position.x - targetTransform.position.x) > 0) {
+                    if (transform.position.x < targetTransform.position.x) {
+                        control.rightFlag = true;
                     }
-                    if (Math.Abs(transform.position.y - targetTransform.position.y) > 0.1f) {
-                        if (transform.position.y < targetTransform.position.y) {
-                            control.upFlag = true;
-                        }
-                        if (transform.position.y > targetTransform.position.y) {
-                            control.downFlag = true;
-                        }
+                    if (transform.position.x > targetTransform.position.x) {
+                        control.leftFlag = true;
                     }
+                    // }
+                    // if (Math.Abs(transform.position.y - targetTransform.position.y) > 0) {
+                    if (transform.position.y < targetTransform.position.y) {
+                        control.upFlag = true;
+                    }
+                    if (transform.position.y > targetTransform.position.y) {
+                        control.downFlag = true;
+                    }
+                    // }
                     return status.neutral;
                 }
             } else {
