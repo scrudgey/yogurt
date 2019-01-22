@@ -515,10 +515,10 @@ public class CutsceneManager : Singleton<CutsceneManager> {
         SceneManager.sceneLoaded += LevelWasLoaded;
     }
     public void InitializeCutscene<T>() where T: Cutscene, new() {
+        Controller.Instance.state = Controller.ControlState.cutscene;
         cutscene = new T();
         if (!lateConfigure.Contains(typeof(T)))
             cutscene.Configure();
-        Controller.Instance.state = Controller.ControlState.cutscene;
     }
     public void LevelWasLoaded(Scene scene, LoadSceneMode mode) {
         if (cutscene == null)
