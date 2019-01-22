@@ -63,11 +63,13 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
             Initialize();
     }
     void Initialize() {
+
         // Debug.Log("decision maker initialize");
         initialized = true;
         // make sure there's Awareness
         awareness = Toolbox.GetOrCreateComponent<Awareness>(gameObject);
         awareness.decisionMaker = this;
+        awareness.enabled = this.enabled;
         control = GetComponent<Controllable>();
 
         // start awareness with knowledge of possessions
