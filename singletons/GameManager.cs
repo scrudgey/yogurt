@@ -138,7 +138,8 @@ public partial class GameManager : Singleton<GameManager> {
         }
         if (intervalTimer > 3f) {
             // data.achievementStats.secondsPlayed = timeSinceLastSave;
-            SetStat(StatType.secondsPlayed, timeSinceLastSave);
+            SetStat(StatType.secondsPlayed, data.secondsPlayed);
+            // SetStat(StatType.secondsPlayed, data.stats[StatType.secondsPlayed].value+timeSinceLastSave);
             intervalTimer = 0;
         }
         if (awaitNewDayPrompt && sceneTime > 2f) {
@@ -657,10 +658,15 @@ public partial class GameManager : Singleton<GameManager> {
     public void RetrieveCollectedItem(string name) {
         if (data.itemCheckedOut[name])
             return;
-        Instantiate(Resources.Load("prefabs/" + name), playerObject.transform.position, Quaternion.identity);
+        GameObject item = Instantiate(Resources.Load("prefabs/" + name), playerObject.transform.position, Quaternion.identity) as GameObject;
         Instantiate(Resources.Load("particles/poof"), playerObject.transform.position, Quaternion.identity);
         publicAudio.PlayOneShot(Resources.Load("sounds/pop", typeof(AudioClip)) as AudioClip);
         data.itemCheckedOut[name] = true;
+        Inventory playerInventory = playerObject.GetComponent<Inventory>();
+        Pickup itemPickup = item.GetComponent<Pickup>();
+        if (playerInventory != null && itemPickup != null){
+            playerInventory.GetItem(itemPickup);
+        }
     }
     public void IncrementStat(StatType statType, float value){
         // change stat
