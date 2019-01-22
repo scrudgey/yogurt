@@ -73,6 +73,8 @@ public class SoundGibberizer : MonoBehaviour {
 	}
     public void Play(){
         // play with current values
+        if (sounds.Length == 0)
+            return;
         AudioClip clip = sounds[Random.Range(0, sounds.Length)];
         audioSource.pitch = currentPitch;
         audioSource.PlayOneShot(clip);
