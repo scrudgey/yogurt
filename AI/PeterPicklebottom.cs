@@ -49,9 +49,8 @@ public class PeterPicklebottom : MonoBehaviour {
         switch (state) {
             case AIState.walkToTarget:
                 float distanceToTarget = Vector2.Distance(transform.position, target.val.transform.position);
-                if (distanceToTarget > 0.1f) {
-                    routine.Update();
-                } else {
+                status routineStatus = routine.Update();
+                if (routineStatus == status.success) {
                     timer = 0;
                     state = AIState.slewAtTarget;
                     controllable.ResetInput();
