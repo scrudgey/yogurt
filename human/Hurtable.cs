@@ -230,6 +230,9 @@ public class Hurtable : Damageable, ISaveable {
         }
         if (downedTimer > 0) {
             downedTimer -= Time.deltaTime;
+            if (gameObject == GameManager.Instance.playerObject) {
+                downedTimer -= Time.deltaTime * 2f;
+            }
         }
         if (hitStunCounter > 0) {
             hitStunCounter -= Time.deltaTime;
@@ -281,7 +284,7 @@ public class Hurtable : Damageable, ISaveable {
         hitState = Controllable.AddHitState(hitState, Controllable.HitState.unconscious);
         doubledOver = false;
         if (gameObject == GameManager.Instance.playerObject) {
-            downedTimer = 2f;
+            downedTimer = 1.5f;
         } else {
             downedTimer = 10f;
         }
