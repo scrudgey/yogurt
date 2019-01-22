@@ -85,7 +85,7 @@ public class Bed : Doorway {
                     audioSource.PlayOneShot(snoreSound);
                 }
             }
-            if (Input.anyKey && Controller.Instance.state != Controller.ControlState.inMenu) {
+            if (Input.anyKey && Controller.Instance.state != Controller.ControlState.cutscene) {
                 sleeping = false;
                 unmade = true;
                 spriteRenderer.sprite = bedSprites[1];
