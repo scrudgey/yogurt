@@ -27,14 +27,14 @@ public class Blender : Container, ISaveable {
                 audioSource.Play();
             }
             //vibrate the blender
-            Vector3 pos = transform.position;
+            Vector3 pos = transform.root.position;
             vibrate = !vibrate;
             if (vibrate) {
                 pos.y = pos.y + 0.01f;
             } else {
                 pos.y = pos.y - 0.01f;
             }
-            transform.position = pos;
+            transform.root.position = pos;
             //blend contained item
             if (items.Count > 0) {
                 MessageDamage message = new MessageDamage();
