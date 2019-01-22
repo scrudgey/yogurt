@@ -30,7 +30,13 @@ public class Toilet : Container {
         items = new List<Pickup>();
         timeout = refractoryPeriod;
         for (int i = 0; i < 3; i++) {
-            Toolbox.Instance.SpawnDroplet(Liquid.LoadLiquid("toilet_water"), 0.5f, gameObject, 0.2f);
+            GameObject droplet = Toolbox.Instance.SpawnDroplet(Liquid.LoadLiquid("toilet_water"), 0.5f, gameObject, 0.2f);
+            if (i < 2){
+                Collider2D dropletCollider = droplet.GetComponent<Collider2D>();
+                foreach(Collider2D playerCollider in Controller.Instance.focus.GetComponentsInChildren<Collider2D>()){
+                    Physics2D.IgnoreCollision(dropletCollider, playerCollider, true);
+                }
+            }
         }
     }
     public string Flush_desc() {
