@@ -244,15 +244,18 @@ public class OccurrenceVomit : OccurrenceData {
     public GameObject vomiter;
     public GameObject vomit;
     public override void CalculateDescriptions(Occurrence parent) {
-        if (vomit == null | vomiter == null)
+        if (vomit == null & vomiter == null)
             return;
-        events.Add(Occurrence.Vomit(vomiter, vomit));
-        MonoLiquid mliquid = vomit.GetComponent<MonoLiquid>();
-        if (mliquid == null)
-            return;
-        if (mliquid.liquid != null) {
-            if (mliquid.liquid.name == "yogurt")
-                events.Add(Occurrence.VomitYogurt(vomiter));
+        EventData data = Occurrence.Vomit(vomiter, vomit);
+        events.Add(data);
+        if (vomit != null){
+            MonoLiquid mliquid = vomit.GetComponent<MonoLiquid>();
+            if (mliquid == null)
+                return;
+            if (mliquid.liquid != null) {
+                if (mliquid.liquid.name == "yogurt")
+                    events.Add(Occurrence.VomitYogurt(vomiter));
+            }
         }
     }
 }
