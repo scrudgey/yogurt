@@ -195,8 +195,12 @@ public class Commercial {
             properties[data.key] = new CommercialProperty();
             properties[data.key].desc = data.desc;
         }
+        
         float initvalue = properties[data.key].val;
         float finalvalue = initvalue + data.val;
+        if (data.key == "table_fire" & initvalue > 0){
+            return;
+        }
         UINew.Instance.PopupCounter(data.desc, initvalue, finalvalue, this);
         properties[data.key].val = finalvalue;
     }
