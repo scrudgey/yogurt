@@ -260,7 +260,7 @@ public class Eater : Interactive, ISaveable {
         }
         Liquid vomitLiquid = Liquid.LoadLiquid("vomit");
         vomitLiquid.vomit = true;
-        Toolbox.Instance.SpawnDroplet(vomitLiquid, 0f, gameObject, 0.15f);
+        Toolbox.Instance.SpawnDroplet(vomitLiquid, 0f, gameObject, 0.05f);
     }
     
     void ReactToOccurrence(EventData od) {
