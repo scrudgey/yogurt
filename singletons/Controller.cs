@@ -107,7 +107,7 @@ public class Controller : Singleton<Controller> {
                 CutsceneManager.Instance.EscapePressed();
             }
         }
-        if (state != ControlState.normal)
+        if (state != ControlState.normal & state != ControlState.commandSelect & state != ControlState.hypnosisSelect & state != ControlState.insultSelect & state != ControlState.swearSelect)
             return;
         if (focus != null & !suspendInput) {
             focus.ResetInput();
@@ -240,6 +240,7 @@ public class Controller : Singleton<Controller> {
         }
     }
     void LeftClick() {
+        Debug.Log(state);
         if (state == ControlState.inMenu || state == ControlState.waitForMenu)
             return;
         if (focus == null)
