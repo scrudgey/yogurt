@@ -227,7 +227,7 @@ public class Toolbox : Singleton<Toolbox> {
         // use player name, speech name
         string nameOut = "";
         if (obj == null) {
-            Debug.Log("null name");
+            // Debug.Log("null name");
             return nameOut;
         }
         Item item = obj.GetComponent<Item>();
