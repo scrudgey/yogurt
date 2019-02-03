@@ -365,6 +365,8 @@ public class UINew : Singleton<UINew> {
     public void UpdateButtons() {
         if (UINew.Instance.activeMenuType != UINew.MenuType.none)
             return;
+        if (GameManager.Instance.playerObject == null)
+            return;
         // speech button
         if (GameManager.Instance.playerObject.GetComponent<Speech>()) {
             speakButton.SetActive(true);
