@@ -240,7 +240,6 @@ public class Controller : Singleton<Controller> {
         }
     }
     void LeftClick() {
-        Debug.Log(state);
         if (state == ControlState.inMenu || state == ControlState.waitForMenu)
             return;
         if (focus == null)
