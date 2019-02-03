@@ -87,6 +87,13 @@ public class PersistentObject {
             if (saveable != null) {
                 // TODO: update each component, don't override.
                 // saveable.LoadInit();
+                // Debug.Log(component.GetType());
+                if (!persistentComponents.ContainsKey(component.GetType().ToString())){
+                    Debug.Log("broken persistentComponent reference");
+                    Debug.Log(component.GetType());
+                    Debug.Log(parentObject.name);
+                    continue;
+                }
                 saveable.SaveData(persistentComponents[component.GetType().ToString()]);
             }
         }
