@@ -513,6 +513,7 @@ public partial class GameManager : Singleton<GameManager> {
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eggplant10"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("fireman"));
             data.perks["hypnosis"] = true;
+            // data.perks["vomit"] = true;
             data.unlockedScenes.Add("moon_cave");
             data.teleporterUnlocked = true;
         }
@@ -710,6 +711,7 @@ public partial class GameManager : Singleton<GameManager> {
     public void ReceivePackage(string packageName) {
         if (data.packages.Contains(packageName)) {
             Debug.Log("already recieved package. aborting...");
+            return;
         }
         data.packages.Add(packageName);
     }
