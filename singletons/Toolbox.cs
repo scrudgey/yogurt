@@ -24,6 +24,7 @@ public class Toolbox : Singleton<Toolbox> {
             return component;
         } else {
             component = g.AddComponent<T>();
+            MySaver.AddComponentToPersistent(g, component);
             return component;
         }
     }

@@ -76,6 +76,23 @@ public class MySaver {
             objectDataBase.Remove(entry);
         }
     }
+    public static void AddComponentToPersistent(GameObject target, Component component){
+        if (objectDataBase == null)
+            return;
+        MyMarker marker = target.GetComponent<MyMarker>();
+        if (marker == null)
+            return;
+        if (objectDataBase.ContainsKey(marker.id)) {
+            PersistentObject persistentObject = objectDataBase[marker.id];
+            ISaveable saveable = component as ISaveable;
+            if (saveable != null) {
+                PersistentComponent persist = new PersistentComponent(persistentObject);
+                persistentObject.persistentComponents[component.GetType().ToString()] = persist;
+            }
+        }
+        // either get the existing persistent in the database, or make a new one
+        
+    }
     public static void Save() {
         referenceTree = new Dictionary<int, List<int>>();
         savedObjects = new Dictionary<GameObject, int>();
