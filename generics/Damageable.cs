@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public enum damageType { physical, fire, any, cutting, piercing, cosmic, asphyxiation }
 public enum ImpactResult { normal, repel, strong }
 public abstract class Damageable : MonoBehaviour {
-    public static Dictionary<damageType, List<BuffType>> defeatedBy = new Dictionary<damageType, List<BuffType>>(){
+    public static Dictionary<damageType, List<BuffType>> blockedBy = new Dictionary<damageType, List<BuffType>>(){
         {damageType.physical, new List<BuffType>(){BuffType.noPhysicalDamage, BuffType.ethereal, BuffType.invulnerable}},
         {damageType.fire, new List<BuffType>(){BuffType.fireproof, BuffType.ethereal, BuffType.invulnerable}},
         {damageType.cutting, new List<BuffType>(){BuffType.noPhysicalDamage, BuffType.ethereal, BuffType.invulnerable}},
@@ -28,7 +28,7 @@ public abstract class Damageable : MonoBehaviour {
         if (netBuffs == null)
             return true;
         // is this type of damage described in terms of immunities?
-        if (!defeatedBy.ContainsKey(type)) {
+        if (!blockedBy.ContainsKey(type)) {
             return true;
         }
         // check each buff for providing immunity
@@ -36,7 +36,7 @@ public abstract class Damageable : MonoBehaviour {
             if (!kvp.Value.boolValue && kvp.Value.floatValue <= 0) {
                 continue;
             }
-            if (defeatedBy[type].Contains(kvp.Key)) {
+            if (blockedBy[type].Contains(kvp.Key)) {
                 return false;
             }
         }
