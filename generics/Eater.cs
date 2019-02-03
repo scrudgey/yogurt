@@ -79,7 +79,7 @@ public class Eater : Interactive, ISaveable {
             // nausea += Time.deltaTime * 10f;
         }
         if (nutrition > 100) {
-            nausea += Time.deltaTime * 2;
+            nausea += Time.deltaTime * 20f * Mathf.Min(2f, nutrition/200);
         }
         if (vomitCountDown > 0) {
             vomitCountDown -= Time.deltaTime;
@@ -163,6 +163,23 @@ public class Eater : Interactive, ISaveable {
                     GameManager.Instance.IncrementStat(StatType.yogurtEaten, 1);
                 }
             }
+        }
+        LiquidContainer container = food.GetComponent<LiquidContainer>();
+        if (container){
+            if (container.amount > 0){
+                // container.li
+                GameObject sip = new GameObject();
+                Liquid.MonoLiquidify(sip, container.liquid);
+                Toolbox.Instance.AddLiveBuffs(gameObject, sip);
+                Destroy(sip);
+            }
+        }
+        LiquidResevoir reservoir = food.GetComponent<LiquidResevoir>();
+        if (reservoir){
+            GameObject sip = new GameObject();
+            Liquid.MonoLiquidify(sip, reservoir.liquid);
+            Toolbox.Instance.AddLiveBuffs(gameObject, sip);
+            Destroy(sip);
         }
         if (Toolbox.Instance.CloneRemover(food.name) == "sword") {
             // GameManager.Instance.data.achievementStats.swordsEaten += 1;
