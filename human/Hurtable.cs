@@ -32,6 +32,7 @@ public class Hurtable : Damageable, ISaveable {
     public GameObject lastAttacker;
     public List<Collider2D> backgroundColliders = new List<Collider2D>();
     public float timeSinceLastCough;
+    bool vibrate;
     public override void Awake() {
         base.Awake();
         backgroundColliders = new List<Collider2D>();
@@ -230,8 +231,18 @@ public class Hurtable : Damageable, ISaveable {
         }
         if (downedTimer > 0) {
             downedTimer -= Time.deltaTime;
-            if (gameObject == GameManager.Instance.playerObject) {
-                downedTimer -= Time.deltaTime * 2f;
+            // if (gameObject == GameManager.Instance.playerObject) {
+            //     downedTimer -= Time.deltaTime * 2f;
+            // }
+            if (downedTimer < 2 & hitState < Controllable.HitState.dead) {
+                Vector3 pos = transform.root.position;
+                vibrate = !vibrate;
+                if (vibrate) {
+                    pos.y = pos.y + 0.01f;
+                } else {
+                    pos.y = pos.y - 0.01f;
+                }
+                transform.root.position = pos;
             }
         }
         if (hitStunCounter > 0) {
@@ -256,7 +267,7 @@ public class Hurtable : Damageable, ISaveable {
         if (impulse > 50f && hitState < Controllable.HitState.unconscious) {
             KnockDown();
         }
-        if (downedTimer <= 0 && hitState == Controllable.HitState.unconscious && health > 0) {
+        if (downedTimer <= 0 && hitState == Controllable.HitState.unconscious ){ //&& health > 0) {
             GetUp();
         }
         if (impulse > 35f && !doubledOver && hitState < Controllable.HitState.unconscious) {
@@ -284,7 +295,7 @@ public class Hurtable : Damageable, ISaveable {
         hitState = Controllable.AddHitState(hitState, Controllable.HitState.unconscious);
         doubledOver = false;
         if (gameObject == GameManager.Instance.playerObject) {
-            downedTimer = 1.5f;
+            downedTimer = 4f;
         } else {
             downedTimer = 10f;
         }
@@ -314,6 +325,10 @@ public class Hurtable : Damageable, ISaveable {
         if (dizzyEffect != null) {
             ClaimsManager.Instance.WasDestroyed(dizzyEffect);
             Destroy(dizzyEffect);
+        }
+        if (gameObject != GameManager.Instance.playerObject){
+            hitState = Controllable.HitState.stun;
+            hitStunCounter = 0.5f;
         }
     }
     public void DoubleOver(bool val) {
