@@ -111,6 +111,9 @@ public class Speech : Interactive, ISaveable {
     }
     void HandleHitStun(MessageHitstun message) {
         hitState = message.hitState;
+        if (hitState >= Controllable.HitState.unconscious){
+            Stop();
+        }
     }
     void HandleNetIntrinsic(MessageNetIntrinsic message) {
         if (GameManager.Instance.playerObject == gameObject)
@@ -202,19 +205,7 @@ public class Speech : Interactive, ISaveable {
             }
         }
         if (speakTime < 0) {
-            // audioSource.Stop();
-            gibberizer.StopPlay();
-            if (speaking) {
-                MessageHead head = new MessageHead();
-                head.type = MessageHead.HeadType.speaking;
-                head.value = false;
-                Toolbox.Instance.SendMessage(gameObject, this, head);
-            }
-            speaking = false;
-            // bubbleParent.SetActive(false);
-            bubbleText.text = "";
-            speakTime = 0;
-            queueTime = 0;
+            Stop();
         }
         if (!speaking && queue.Count > 0){
             queueTime += Time.deltaTime;
@@ -225,6 +216,22 @@ public class Speech : Interactive, ISaveable {
                 queue.RemoveAt(index);
             }
         }
+    }
+    public void Stop(){
+        speakTime = 0;
+        // audioSource.Stop();
+        gibberizer.StopPlay();
+        if (speaking) {
+            MessageHead head = new MessageHead();
+            head.type = MessageHead.HeadType.speaking;
+            head.value = false;
+            Toolbox.Instance.SendMessage(gameObject, this, head);
+        }
+        speaking = false;
+        // bubbleParent.SetActive(false);
+        bubbleText.text = "";
+        speakTime = 0;
+        queueTime = 0;
     }
     public void LateUpdate(){
         // if the parent scale is flipped, we need to flip the flipper back to keep
