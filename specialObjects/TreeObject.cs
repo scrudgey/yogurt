@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public class TreeObject : Damageable {
     HingeJoint2D hinge;
@@ -7,6 +8,10 @@ public class TreeObject : Damageable {
     private bool doShake;
     public GameObject leaf;
     private Transform leafSpawnPoint;
+    private static List<damageType> immunities = new List<damageType>(){
+        damageType.asphyxiation,
+        damageType.fire
+    };
     public override void Awake() {
         base.Awake();
         hinge = GetComponent<HingeJoint2D>();
@@ -30,6 +35,8 @@ public class TreeObject : Damageable {
         }
     }
     public override float CalculateDamage(MessageDamage message) {
+        if (immunities.Contains(message.type))
+            return 0;
         hinge.useMotor = true;
         timer = 0;
         doShake = true;
