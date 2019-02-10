@@ -100,7 +100,7 @@ public class Hurtable : Damageable, ISaveable {
                 impulse += damage;
                 break;
             case damageType.fire:
-                damage = message.amount;
+                damage = message.amount * 10;
                 break;
             case damageType.cosmic:
                 damage = message.amount;
