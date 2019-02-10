@@ -129,6 +129,8 @@ public class Commercial {
     public string cutscene = "default";
     public SerializableDictionary<string, CommercialProperty> properties = new SerializableDictionary<string, CommercialProperty>();
     public List<string> unlockUponCompletion;
+    public string unlockItem = "";
+    public string email = "";
     public List<EventData> eventData;
     [XmlIgnore]
     public CommercialDescription analysis;
@@ -147,6 +149,10 @@ public class Commercial {
             string[] bits = line.Split(',');
             if (bits[0] == "unlock") {
                 c.unlockUponCompletion.Add(bits[1]);
+            } else if (bits[0] == "item"){
+                c.unlockItem = bits[1];
+            } else if (bits[0] == "email"){
+                c.email = bits[1];
             } else {
                 prop.val = float.Parse(bits[2]);
                 switch (bits[1]) {

@@ -59,13 +59,13 @@ public partial class GameManager : Singleton<GameManager> {
         CommercialReportMenu menu = report.GetComponent<CommercialReportMenu>();
         menu.commercial = commercial;
         report.GetComponent<CommercialReportMenu>().Report(activeCommercial);
-        if (activeCommercial.name == "Healthy Eggplant Commercial") {
-            // send the duplicator email, and deliver duplicator package
-            ReceiveEmail("duplicator");
-            ReceivePackage("duplicator");
+        Debug.Log(activeCommercial.unlockItem);
+        Debug.Log(activeCommercial.email);
+        if (activeCommercial.unlockItem != ""){
+            ReceivePackage(activeCommercial.unlockItem);
         }
-        if (activeCommercial.name == "Torch That Table!") {
-            ReceivePackage("lighter");
+        if (activeCommercial.email != ""){
+            ReceiveEmail(activeCommercial.email);
         }
     }
 }
