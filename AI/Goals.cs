@@ -184,7 +184,6 @@ namespace AI {
     }
     public class GoalWalkToPoint : Goal {
         public Ref<Vector2> target;
-
         public GoalWalkToPoint(GameObject g, Controllable c, Ref<Vector2> target, float minDistance) : base (g, c) {
             this.target = target;
             ConditionLocation condition = new ConditionLocation(g, target);
@@ -202,7 +201,12 @@ namespace AI {
         }
         public GoalHoseDown(GameObject g, Controllable c, Ref<GameObject> r) : base(g, c) {
             successCondition = new ConditionFail(g);
-            routines.Add(new RoutineUseObjectOnTarget(g, c, r));
+            RoutineUseObjectOnTarget hoseRoutine = new RoutineUseObjectOnTarget(g, c, r);
+            RoutineWander wanderRoutine = new RoutineWander(g, c);
+            hoseRoutine.timeLimit = 1;
+            wanderRoutine.timeLimit = 1;
+            routines.Add(hoseRoutine);
+            routines.Add(wanderRoutine);
         }
     }
     public class GoalWander : Goal {
