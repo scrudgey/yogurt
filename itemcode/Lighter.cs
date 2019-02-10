@@ -7,6 +7,7 @@ public class Lighter : Interactive {
     private bool flameon;
     private Collider2D flameRadius;
     private Dictionary<GameObject, Flammable> flammables = new Dictionary<GameObject, Flammable>();
+    static List<string> forbiddenTags = new List<string>(new string[] { "occurrenceFlag", "background", "sightcone" });
     void Start() {
         pickup = GetComponent<Pickup>();
         Interaction f = new Interaction(this, "Fire", "Fire", false, true);
@@ -26,6 +27,7 @@ public class Lighter : Interactive {
         }
     }
     void OnTriggerEnter2D(Collider2D coll) {
+        
         if (!flammables.ContainsKey(coll.gameObject)) {
             Flammable flammable = coll.GetComponent<Flammable>();
             if (flammable != null) {
@@ -34,6 +36,10 @@ public class Lighter : Interactive {
         }
     }
     void OnTriggerStay2D(Collider2D coll) {
+        if (forbiddenTags.Contains(coll.tag))
+            return;
+        if (coll.transform.IsChildOf(transform.root))
+            return;
         if (flammables.ContainsKey(coll.gameObject) && flameRadius.enabled) {
             flammables[coll.gameObject].heat += Time.deltaTime * 2f;
             if (pickup != null) {
