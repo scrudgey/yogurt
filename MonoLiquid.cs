@@ -51,6 +51,22 @@ public class MonoLiquid : MonoBehaviour {
                     SpriteRenderer stainRenderer = stain.GetComponent<SpriteRenderer>();
                     stainRenderer.color = liquid.color;
                     Liquid.MonoLiquidify(stain, liquid);   
+
+                    EventData data = Toolbox.Instance.DataFlag(coll.gameObject, chaos: 1, disgusting: 1);
+                    data.whatHappened = liquid.name + " stained "+Toolbox.Instance.GetName(coll.gameObject);
+                    if (liquid.immoral){
+                        data.ratings[Rating.chaos] += 1;
+                        data.ratings[Rating.disturbing] += 1;
+                    }
+                    if (liquid.vomit){
+                        data.ratings[Rating.chaos] += 1;
+                        data.ratings[Rating.disgusting] += 1;
+                    }
+                    if (liquid.offal){
+                        data.ratings[Rating.chaos] += 1;
+                        data.ratings[Rating.disgusting] += 1;
+                    }
+                    data.noun = "staining";
                 }
                 ClaimsManager.Instance.WasDestroyed(gameObject);
                 Destroy(gameObject);
