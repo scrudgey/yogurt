@@ -35,6 +35,7 @@ namespace AI {
         public status Update() {
             runTime += Time.deltaTime;
             if (timeLimit > 0 && runTime > timeLimit) {
+                runTime = 0;
                 return status.failure;
             } else
                 return DoUpdate();
@@ -265,6 +266,10 @@ namespace AI {
         private direction dir;
         public RoutineWander(GameObject g, Controllable c) : base(g, c) {
             routineThought = "I'm wandering around.";
+        }
+        public override void Configure(){
+            wanderTime = UnityEngine.Random.Range(0, 2);
+            dir = (direction)(UnityEngine.Random.Range(0, 4));
         }
         protected override status DoUpdate() {
             control.ResetInput();
