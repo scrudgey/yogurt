@@ -282,34 +282,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                     fieldOfView.Add(otherHead.hat.gameObject);
         }
     }
-    void OnTriggerEnter2D(Collider2D other) {
-        if (hitState >= Controllable.HitState.unconscious)
-            return;
-        if (seenFlags.Contains(other.gameObject))
-            return;
-        if (other.tag == "occurrenceFlag") {
-            ProcessOccurrenceFlag(other.gameObject);
-        }
-        if (other.tag == "occurrenceSound"){
-            Occurrence flag = other.GetComponent<Occurrence>();
-            if (!flag.involvedParties.Contains(gameObject)){
-                // react to noise
-                ProcessNoise(other.gameObject);
-            }
-        }
-        Qualities qualities = other.GetComponent<Qualities>();
-        if (qualities){
-            // TODO: no messageoccurrence??
-            EventData data = qualities.ToEvent();
-            OccurrenceData oD = new OccurrenceData();
-            oD.events.Add(data);
-            MessageOccurrence message = new MessageOccurrence(oD);
-            Toolbox.Instance.SendMessage(gameObject, this, message);
-
-            ReactToEvent(qualities.ToEvent(), new HashSet<GameObject>());
-        }
-        seenFlags.Add(other.gameObject);
-    }
+    
     void ProcessNoise(GameObject flag){
         MessageNoise message = new MessageNoise(flag);
         Toolbox.Instance.SendMessage(gameObject, this, message);
@@ -335,6 +308,34 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             WitnessOccurrence(od, occurrence.involvedParties);
         }
     }
+    void OnTriggerEnter2D(Collider2D other) {
+        if (hitState >= Controllable.HitState.unconscious)
+            return;
+        if (seenFlags.Contains(other.gameObject))
+            return;
+        if (other.tag == "occurrenceFlag") {
+            ProcessOccurrenceFlag(other.gameObject);
+        }
+        if (other.tag == "occurrenceSound"){
+            Occurrence flag = other.GetComponent<Occurrence>();
+            if (!flag.involvedParties.Contains(gameObject)){
+                // react to noise
+                ProcessNoise(other.gameObject);
+            }
+        }
+        Qualities qualities = other.GetComponent<Qualities>();
+        if (qualities){
+            // TODO: no messageoccurrence??
+            EventData data = qualities.ToEvent();
+            OccurrenceData oD = new OccurrenceData();
+            oD.events.Add(data);
+            MessageOccurrence message = new MessageOccurrence(oD);
+            
+            Toolbox.Instance.SendMessage(gameObject, this, message);
+            ReactToEvent(qualities.ToEvent(), new HashSet<GameObject>());
+        }
+        seenFlags.Add(other.gameObject);
+    }
     void WitnessOccurrence(OccurrenceData od, HashSet<GameObject> involvedParties) {
         Toolbox.Instance.SendMessage(gameObject, this, new MessageOccurrence(od));
         if (od is OccurrenceViolence)
@@ -354,13 +355,11 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         if (involvedParties.Contains(gameObject))
             return;
         
-        // Type datType = dat.GetType();
         int seenCount = 0;
         foreach (string noun in lastNEvents){
             if (noun == dat.noun)
                 seenCount += 1;
         }
-        // Debug.Log(dat.noun);
         lastNEvents.Add(dat.noun);
         Rating[] ratings = (Rating[])Rating.GetValues(typeof(Rating));
         Toolbox.ShuffleArray<Rating>(ratings);
