@@ -5,7 +5,6 @@ public class Flammable : MonoBehaviour, ISaveable {
     public float flashpoint;
     public bool onFire;
     public bool fireSource;
-    public bool noDamage;
     public ParticleSystem smoke;
     public ParticleSystem fireParticles;
     private CircleCollider2D fireRadius;
@@ -17,6 +16,8 @@ public class Flammable : MonoBehaviour, ISaveable {
     public bool playSounds = true;
     public Pickup pickup;
     public float fireRetardantBuffer = 2f;
+    // public Dictionary<BuffType, Buff> netBuffs;
+    public bool fireproof;
     void Start() {
         pickup = GetComponent<Pickup>();
 
@@ -55,6 +56,15 @@ public class Flammable : MonoBehaviour, ISaveable {
         fireRadius.name = "fire";
         fire.gameObject.layer = 13;
         Toolbox.RegisterMessageCallback<MessageDamage>(this, HandleDamageMessage);
+        Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
+    }
+    void HandleNetIntrinsic(MessageNetIntrinsic message){
+        // netBuffs = message.netBuffs;
+        if (message.netBuffs[BuffType.fireproof].boolValue || message.netBuffs[BuffType.fireproof].floatValue > 0){
+            fireproof = true;
+        } else {
+            fireproof = false;
+        }
     }
     public void HandleDamageMessage(MessageDamage message){
         if (message.type == damageType.fire){
@@ -65,6 +75,11 @@ public class Flammable : MonoBehaviour, ISaveable {
         if (fireSource) {
             onFire = true;
             heat = 100;
+        }
+        if (fireproof && heat > 1)
+            heat = 1;
+        if (fireproof && onFire){
+            onFire = false;   
         }
         if (heat > (-1f * fireRetardantBuffer) && !onFire) {
             heat -= Time.deltaTime;
@@ -82,7 +97,7 @@ public class Flammable : MonoBehaviour, ISaveable {
         if (heat > 1 && smoke.isStopped) {
             smoke.Play();
         }
-        if (heat > flashpoint && fireParticles.isStopped) {
+        if (heat > flashpoint && fireParticles.isStopped && !fireproof) {
             fireParticles.Play();
             onFire = true;
             if (playSounds) {
@@ -94,6 +109,9 @@ public class Flammable : MonoBehaviour, ISaveable {
             OccurrenceFire fireData = new OccurrenceFire();
             fireData.flamingObject = gameObject;
             Toolbox.Instance.OccurenceFlag(gameObject, fireData, new HashSet<GameObject>(){gameObject});
+            if (responsibleParty == GameManager.Instance.playerObject && gameObject != GameManager.Instance.playerObject) {
+                GameManager.Instance.IncrementStat(StatType.othersSetOnFire, 1);
+            }
         }
         if (onFire) {
             HashSet<GameObject> involvedParties = new HashSet<GameObject>(){gameObject};
@@ -106,7 +124,7 @@ public class Flammable : MonoBehaviour, ISaveable {
             flagTimer += Time.deltaTime;
             if (flagTimer > 0.5f) {
                 flagTimer = 0;
-                if (!fireSource){
+                if (!fireSource) {
                     OccurrenceFire fireData = new OccurrenceFire();
                     fireData.flamingObject = gameObject;
                     Toolbox.Instance.OccurenceFlag(gameObject, fireData, involvedParties);
