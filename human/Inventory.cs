@@ -381,8 +381,8 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         Dictionary<BuffType, Buff> netBuffs = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject).NetBuffs();
 
         Vector3 startPoint = transform.position;
-        startPoint.x += direction.normalized.x / 6f;
-        startPoint.y += direction.normalized.y / 6f + 0.02f;
+        startPoint.x += direction.normalized.x / 8f;
+        startPoint.y += direction.normalized.y / 7f + 0.01f;
         GameObject slash = Instantiate(Resources.Load("PhysicalImpact"), startPoint, holdpoint.rotation) as GameObject;
         PhysicalImpact impact = slash.GetComponent<PhysicalImpact>();
         MessageDamage message = new MessageDamage(10f, damageType.physical);
@@ -395,12 +395,12 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         message.strength = netBuffs[BuffType.strength].boolValue;
         message.type = damageType.physical;
         message.amount = 20f;
-        message.responsibleParty = gameObject;
         impact.message = message;
         Collider2D slashCollider = slash.GetComponent<Collider2D>();
         foreach (Collider2D tomCollider in GetComponentsInChildren<Collider2D>()) {
             Physics2D.IgnoreCollision(tomCollider, slashCollider, true);
         }
+        // Debug.Break();
     }
     public void EndPunch() {
         MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.punching, false);
