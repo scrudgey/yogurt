@@ -21,7 +21,8 @@ public enum StatType {
     mayorsSassed,
     actsOfCannibalism,
     heartsEaten,
-    nullifications
+    nullifications,
+    othersSetOnFire,
 }
 
 [System.Serializable]
