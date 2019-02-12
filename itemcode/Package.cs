@@ -2,7 +2,7 @@
 
 public class Package : Interactive, ISaveable {
     public string contents;
-    void Awake() {
+    void Start() {
         if (contents == "none")
             return;
         Gibs gibs = gameObject.AddComponent<Gibs>();
