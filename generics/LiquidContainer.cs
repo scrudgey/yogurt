@@ -47,6 +47,16 @@ public class LiquidContainer : Interactive, ISaveable {
         }
         Toolbox.RegisterMessageCallback<MessageDamage>(this, HandleDamage);
     }
+    public void UpdateIntrinsics(Liquid l){
+        Intrinsics myIntrinsics = GetComponent<Intrinsics>();
+        if (myIntrinsics != null) {
+            Destroy(myIntrinsics);
+        }
+        if (l.buffs.Count > 0) {
+            Intrinsics intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject);
+            intrinsics.buffs.AddRange(liquid.buffs);
+        }
+    }
     public void HandleDamage(MessageDamage message){
         if (message.type == damageType.physical || message.type == damageType.cutting) {
             if (!lid)
@@ -95,11 +105,13 @@ public class LiquidContainer : Interactive, ISaveable {
         }
         liquid = l;
         amount = fillCapacity;
+        UpdateIntrinsics(l);
         CheckLiquid();
     }
     public void FillByLoad(string type) {
         liquid = Liquid.LoadLiquid(type);
         amount = fillCapacity;
+        UpdateIntrinsics(liquid);
         CheckLiquid();
     }
     private void CheckLiquid() {

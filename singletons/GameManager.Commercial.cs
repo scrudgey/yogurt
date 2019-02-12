@@ -59,8 +59,6 @@ public partial class GameManager : Singleton<GameManager> {
         CommercialReportMenu menu = report.GetComponent<CommercialReportMenu>();
         menu.commercial = commercial;
         report.GetComponent<CommercialReportMenu>().Report(activeCommercial);
-        Debug.Log(activeCommercial.unlockItem);
-        Debug.Log(activeCommercial.email);
         if (activeCommercial.unlockItem != ""){
             ReceivePackage(activeCommercial.unlockItem);
         }
