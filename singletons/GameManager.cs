@@ -6,7 +6,6 @@ using UnityEngine.SceneManagement;
 using System.Linq;
 using System;
 
-// [XmlRoot("GameData")]
 [System.Serializable]
 public class GameData {
     public float money;
@@ -26,7 +25,7 @@ public class GameData {
     public string lastSavedPlayerPath;
     public string lastSavedScenePath;
     public string saveDate;
-    public  System.DateTime saveDateTime;
+    public System.DateTime saveDateTime;
     public float secondsPlayed;
     public string lastScene;
     public int days;
@@ -39,7 +38,6 @@ public class GameData {
     public int entryID;
     public List<Achievement> achievements;
     public SerializableDictionary<StatType, Stat> stats = new SerializableDictionary<StatType, Stat>();
-    // public AchievementStats achievementStats = new AchievementStats();
     public List<Email> emails;
     public List<string> packages;
     public bool firstTimeLeavingHouse;
@@ -58,6 +56,7 @@ public class GameData {
                 bool pass = achieve.Evaluate(stats);
                 if (pass) {
                     achieve.complete = true;
+                    achieve.completedTime = System.DateTime.Now;
                     completeAchievements.Add(achieve);
                 }
             }
@@ -103,13 +102,14 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = true;
+    public bool debug = false;
     public bool failedLevelLoad = false;
     void Start() {
         if (data == null) {
             data = InitializedGameData();
             // ReceiveEmail("duplicator");
             // ReceivePackage("duplicator");
+            // ReceivePackage("golf_club");
             if (debug)
                 data.mayorCutsceneHappened = true;
         }
@@ -346,7 +346,6 @@ public partial class GameManager : Singleton<GameManager> {
         }
         PlayerEnter();
     }
-
     public void InitializeNonPlayableLevel() {
         string sceneName = SceneManager.GetActiveScene().name;
         Controller.Instance.state = Controller.ControlState.cutscene;
@@ -403,14 +402,11 @@ public partial class GameManager : Singleton<GameManager> {
             bed.SleepCutscene();
         }
     }
-
     public bool CheckNewDayPrompt() {
         if (data.days <= 1)
             return false;
-        // return data.newCollectedClothes.Count + data.newCollectedFood.Count + data.newCollectedItems.Count + data.newUnlockedCommercials.Count > 0;
         return data.itemsCollectedToday + data.foodCollectedToday + data.clothesCollectedToday + data.newUnlockedCommercials.Count > 0;
     }
-
     public void NewGame(bool switchlevel = true) {
         Debug.Log("New game");
         if (data == null)
@@ -513,7 +509,8 @@ public partial class GameManager : Singleton<GameManager> {
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eggplant10"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("fireman"));
             data.perks["hypnosis"] = true;
-            // data.perks["vomit"] = true;
+            data.perks["vomit"] = true;
+            data.perks["eat_all"] = true;
             data.unlockedScenes.Add("moon_cave");
             data.teleporterUnlocked = true;
         }
@@ -719,7 +716,11 @@ public partial class GameManager : Singleton<GameManager> {
         GameObject diaryObject = UINew.Instance.activeMenu;
         if (UINew.Instance.activeMenu == null){
             diaryObject = UINew.Instance.ShowMenu(UINew.MenuType.diary);
-        } 
+        }
+        // } else {
+        //     UINew.Instance.CloseActiveMenu();
+        //     diaryObject = UINew.Instance.ShowMenu(UINew.MenuType.diary);
+        // }
         Diary diary = diaryObject.GetComponent<Diary>();
         diary.loadDiaryName = diaryName;
     }
