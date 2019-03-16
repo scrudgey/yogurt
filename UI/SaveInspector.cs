@@ -44,9 +44,15 @@ public class SaveInspector : MonoBehaviour {
         completionText.text = "Completion: " + Completion(data).ToString("0")+"%";
     }
     public float Completion(GameData data){
+        int completeAchievements = 0;
+        foreach(Achievement achievement in data.achievements){
+            if (achievement.complete)
+                completeAchievements += 1;
+        }
         float completion = 0;
-        completion += data.collectedObjects.Count / 100f;
-        completion += data.completeCommercials.Count / 5f;
+        completion += 0.33f * data.collectedObjects.Count / 100f;
+        completion += 0.33f * data.completeCommercials.Count / 5f;
+        completion += 0.33f * completeAchievements / data.achievements.Count;
         return completion*100f;
     }
     public void ItemCollectionCallback(){
