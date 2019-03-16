@@ -231,6 +231,9 @@ public class Toolbox : Singleton<Toolbox> {
             // Debug.Log("null name");
             return nameOut;
         }
+        if (obj == GameManager.Instance.playerObject){
+            return GameManager.Instance.saveGameName;
+        }
         Item item = obj.GetComponent<Item>();
         if (item) {
             nameOut = item.itemName;

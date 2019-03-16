@@ -480,6 +480,7 @@ public class CutsceneNewDay : Cutscene {
         tomText = canvas.transform.Find("tomText").GetComponent<Text>();
         dayText = canvas.transform.Find("dayText").GetComponent<Text>();
 
+        tomText.text = GameManager.Instance.saveGameName + "'s house";
         dayText.text = "Day " + GameManager.Instance.data.days.ToString();
 
         Color blank = new Color(255, 255, 255, 0);
