@@ -44,12 +44,12 @@ public class Interaction {
     public Interaction(Interactive o, string name, string functionName) : this(o, name, functionName, false, false) { }
     public Interaction(Interactive o, string name, string functionName, bool manualHide, bool rightHide) {
         this.action = functionName;
-        actionName = name;
-        parent = o;
+        this.actionName = name;
+        this.parent = o;
+        this.hideInManualActions = manualHide;
+        this.hideInRightClickMenu = rightHide;
         methodInfo = parent.GetType().GetMethod(functionName);
         parameterTypes = new List<System.Type>();
-        hideInManualActions = manualHide;
-        hideInRightClickMenu = rightHide;
         if (methodInfo != null) {
             System.Reflection.ParameterInfo[] pars = methodInfo.GetParameters();
             foreach (System.Reflection.ParameterInfo p in pars) {
