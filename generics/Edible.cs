@@ -34,7 +34,7 @@ public class Edible : Interactive, ISaveable {
         if (refuse != null) {
             Instantiate(refuse, transform.position, transform.rotation);
         }
-        Destroy(gameObject);
+        // Destroy(gameObject);
     }
     public Liquid Liquify() {
         Liquid returnLiquid = null;
