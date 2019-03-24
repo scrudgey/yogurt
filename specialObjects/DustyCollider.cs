@@ -12,11 +12,15 @@ public class DustyCollider : MonoBehaviour {
         camControl = GameObject.FindObjectOfType<CameraControl>();
     }
     public void OnCollisionEnter2D(Collision2D coll) {
+        if (GameManager.Instance.playerIsDead)
+            return;
         particles.Play();
         audioSource.PlayOneShot(impactSound);
         coll.gameObject.GetComponent<AudioSource>().Stop();
     }
     public void OnCollisionStay2D(Collision2D coll) {
+        if (GameManager.Instance.playerIsDead)
+            return;
         Vector2 contactPoint = coll.contacts[0].point;
         dust.transform.position = new Vector3(contactPoint.x, contactPoint.y, 0);
         camControl.Shake(0.05f);
