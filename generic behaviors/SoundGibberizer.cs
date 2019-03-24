@@ -46,20 +46,13 @@ public class SoundGibberizer : MonoBehaviour {
     private float currentPitch;
     private float currentSpace;
     
-	void Start () {
+	void Awake () {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         currentPitch = Random.Range(pitchRange.x, pitchRange.y);
         currentSpace = Random.Range(spacingRange.x, spacingRange.y);
-        // StartPlay();
 	}
 	
 	void Update () {
-        // if (bleep){
-
-        //     if (!audioSource.isPlaying){
-        //         audioSource.PlayOneShot(bleepSound);
-        //     }
-        // }
         if (bleep)
             return;
 		if (play){
@@ -91,7 +84,8 @@ public class SoundGibberizer : MonoBehaviour {
     }
     public void StopPlay(){
         play = false;
-        audioSource.Stop();
         spacingTimer = 0;
+        if (audioSource != null)
+            audioSource.Stop();
     }
 }
