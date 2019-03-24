@@ -28,7 +28,14 @@ public class Controller : Singleton<Controller> {
         }
     }
     private GameObject lastLeftClicked;
-    public static List<string> forbiddenColliders = new List<string>() { "fire", "sightcone", "table", "background", "occurrenceFlag"};
+    public static List<string> forbiddenColliders = new List<string>() { 
+        "fire", 
+        "sightcone", 
+        "table", 
+        "background", 
+        "occurrenceFlag", 
+        "occurrenceSound", 
+        "footprint"};
     public static List<ControlState> selectionStates = new List<ControlState>(){Controller.ControlState.swearSelect,
                                                                                 Controller.ControlState.insultSelect,
                                                                                 Controller.ControlState.hypnosisSelect};
@@ -138,22 +145,6 @@ public class Controller : Singleton<Controller> {
             LeftClick();
         }
     }
-    // void Update() {
-    //     if (Event.current.isMouse) {
-    //         // right click
-    //         if (Input.GetMouseButtonDown(1)) {
-    //             RightClick();
-    //         }
-    //         // left click
-    //         if (Input.GetMouseButtonDown(0)) {
-    //             LeftClick();
-    //         }
-    //         // mouse up event
-    //         // if (Input.GetMouseButtonUp(1)){
-    //         // 	focus.MouseUp();
-    //         // }
-    //     }
-    // }
     void RightClick() {
         //detect if we clicked anything
         RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
