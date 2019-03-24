@@ -22,6 +22,7 @@ public class LiquidContainer : Interactive, ISaveable {
     public string initLiquid;
     public string descriptionName;
     public AudioClip[] drinkSounds;
+    public bool configured = false;
     void Update() {
         if (spillTimeout > 0) {
             spillTimeout -= Time.deltaTime;
@@ -31,33 +32,37 @@ public class LiquidContainer : Interactive, ISaveable {
         }
     }
     void Awake() {
-        interactions.Add(new Interaction(this, "Fill", "FillFromReservoir"));
-        Interaction fillContainer = new Interaction(this, "Fill", "FillFromContainer");
-        Interaction drinker = new Interaction(this, "Drink", "Drink");
-        drinker.validationFunction = true;
-        drinker.playerOnOtherConsent = false;
-        interactions.Add(drinker);
-        fillContainer.validationFunction = true;
-        interactions.Add(fillContainer);
-        empty = true;
-        if (liquidSprite)
-            liquidSprite.enabled = false;
-        if (initLiquid != "") {
-            FillByLoad(initLiquid);
+        if (!configured) {
+            configured = true;
+            Interaction fillReservoir = new Interaction(this, "Fill", "FillFromReservoir");
+            Interaction fillContainer = new Interaction(this, "Fill", "FillFromContainer");
+            Interaction drinker = new Interaction(this, "Drink", "Drink");
+            drinker.validationFunction = true;
+            drinker.playerOnOtherConsent = false;
+            fillContainer.validationFunction = true;
+            interactions.Add(drinker);
+            interactions.Add(fillContainer);
+            interactions.Add(fillReservoir);
+            empty = true;
+            if (liquidSprite)
+                liquidSprite.enabled = false;
+            if (initLiquid != "") {
+                FillByLoad(initLiquid);
+            }
+            Toolbox.RegisterMessageCallback<MessageDamage>(this, HandleDamage);
         }
-        Toolbox.RegisterMessageCallback<MessageDamage>(this, HandleDamage);
     }
-    public void UpdateIntrinsics(Liquid l){
+    public void UpdateIntrinsics(Liquid l) {
         Intrinsics myIntrinsics = GetComponent<Intrinsics>();
         if (myIntrinsics != null) {
             Destroy(myIntrinsics);
         }
+        Intrinsics intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject);
         if (l.buffs.Count > 0) {
-            Intrinsics intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject);
             intrinsics.buffs.AddRange(liquid.buffs);
         }
     }
-    public void HandleDamage(MessageDamage message){
+    public void HandleDamage(MessageDamage message) {
         if (message.type == damageType.physical || message.type == damageType.cutting) {
             if (!lid)
                 Spill();
@@ -145,7 +150,7 @@ public class LiquidContainer : Interactive, ISaveable {
             if (amount > 0 && spillTimeout <= 0) {
                 GameObject droplet = Toolbox.Instance.SpawnDroplet(liquid, spillSeverity, gameObject, 0.02f);
                 foreach (Collider2D myCollider in transform.root.GetComponentsInChildren<Collider2D>()) {
-                    foreach (Collider2D dropCollider in droplet.transform.root.GetComponentsInChildren<Collider2D>()){
+                    foreach (Collider2D dropCollider in droplet.transform.root.GetComponentsInChildren<Collider2D>()) {
                         Physics2D.IgnoreCollision(myCollider, dropCollider, true);
                     }
                 }
@@ -178,7 +183,7 @@ public class LiquidContainer : Interactive, ISaveable {
         if (!lid)
             Spill();
     }
-    
+
     public void SaveData(PersistentComponent data) {
         data.floats["fillCapacity"] = fillCapacity;
         data.floats["amount"] = amount;

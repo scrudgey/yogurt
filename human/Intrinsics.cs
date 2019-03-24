@@ -37,6 +37,12 @@ public class Intrinsics : MonoBehaviour, ISaveable {
         }
         IntrinsicsChanged();
     }
+    public void CreatePromotedLiveBuffs(List<Buff> newBuffs) {
+        foreach (Buff b in newBuffs) {
+            AddNewPromotedLiveBuff(new Buff(b));
+        }
+        IntrinsicsChanged();
+    }
     public void AddNewLiveBuff(Buff newBuff){
         foreach(Buff buff in liveBuffs){
             if (buff.type == newBuff.type){
@@ -44,6 +50,21 @@ public class Intrinsics : MonoBehaviour, ISaveable {
                 buff.floatValue = Mathf.Max(buff.floatValue, newBuff.floatValue);
                 buff.time = Mathf.Min(buff.time, newBuff.time);
                 buff.boolValue = buff.boolValue || newBuff.boolValue;
+                return;
+            }
+        }
+        liveBuffs.Add(newBuff);
+    }
+    public void AddNewPromotedLiveBuff(Buff newBuff){
+        newBuff.lifetime = 0;
+        newBuff.time = 0;
+        foreach(Buff buff in liveBuffs){
+            if (buff.type == newBuff.type){
+                // do stuff
+                buff.floatValue = Mathf.Max(buff.floatValue, newBuff.floatValue);
+                buff.time = 0;
+                buff.lifetime = 0;
+                buff.boolValue = true;
                 return;
             }
         }

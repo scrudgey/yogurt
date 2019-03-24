@@ -22,6 +22,14 @@ public class DeathTrap1 : MonoBehaviour {
         // trapSprung = true;
         // trapActive = true;
     }
+    void StartTrap() {
+        if (trapSprung)
+            return;
+        trapSprung = true;
+        Toolbox.Instance.AudioSpeaker(tripSound, door.transform.position);
+        cameraControl.Shake(0.2f);
+        timer = -3f;
+    }
     void Update() {
         timer += Time.deltaTime;
         if (timer > 2 && !trapActive) {
@@ -31,17 +39,15 @@ public class DeathTrap1 : MonoBehaviour {
         if (!trapActive)
             return;
         if (potion == null && !trapSprung) {
-            trapSprung = true;
-            Toolbox.Instance.AudioSpeaker(tripSound, door.transform.position);
-            cameraControl.Shake(0.2f);
-            timer = -3f;
+            StartTrap();
+        }
+        if (potion != null && !potion.activeInHierarchy && !trapSprung) {
+            StartTrap();
         }
         if (potionPickup.holder != null && !trapSprung) {
-            trapSprung = true;
-            Toolbox.Instance.AudioSpeaker(tripSound, potion.transform.position);
-            cameraControl.Shake(0.2f);
-            timer = -3f;
+            StartTrap();
         }
+
         if (trapSprung && timer > 0.1f && !trapDone) {
             fireAngle -= 5f;
             timer = 0;

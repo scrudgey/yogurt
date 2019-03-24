@@ -43,7 +43,6 @@ public class AchievementBrowser : MonoBehaviour {
                 if (savedAchievement.complete){
                     numberComplete += 1;
                     Button entryButton = entry.GetComponent<Button>();
-                    // entryButton.transition.
                     ColorBlock cb = entryButton.colors;
                     cb.normalColor = new Color(114f/255f, 185f/255f, 255f/255f, 1f);
                     entryButton.colors = cb;
@@ -72,11 +71,16 @@ public class AchievementBrowser : MonoBehaviour {
     }
     public void AchievementEntryCallback(Achievement achievement){
         // play sound
-
         title.text = achievement.title;
         description.text = achievement.description;
         directive.text = achievement.directive;
-        date.text = "Achieved on 4/20/69";
+        if (achievement.complete){
+            date.gameObject.SetActive(true);
+            date.text = "Achieved on "+achievement.completedTime.ToShortDateString();
+        } else {
+            date.gameObject.SetActive(false);
+            date.text = "Achieved on 4/20/69";
+        }
         icon.sprite = Resources.Load<Sprite>("achievements/icons/"+achievement.icon) as Sprite;
         if (achievement.complete){
             badge.SetActive(true);

@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System;
+// using UnityEditor;
 public class AchievementComponent : MonoBehaviour {
     public Achievement achivement;
 }
@@ -41,8 +43,12 @@ public class Stat {
 public class Achievement {
     public string icon;
     public bool complete;
+    public System.DateTime completedTime;
+    [TextArea(3,10)]
     public string title;
+    [TextArea(3,10)]
     public string description;
+    [TextArea(3,10)]
     public string directive;
     public List<Stat> statList = new List<Stat>();
     public SerializableDictionary<StatType, Stat> statDict {

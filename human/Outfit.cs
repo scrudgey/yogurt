@@ -50,14 +50,14 @@ public class Outfit : Interactive, ISaveable {
     public bool StealUniform_Validation(Outfit otherOutfit) {
         if (otherOutfit == this)
             return false;
-        if (otherOutfit.wornUniformName == "nude")
+        if (wornUniformName == "nude")
             return false;
         if (hitState >= Controllable.HitState.unconscious)
             return true;
         return false;
     }
     public string StealUniform_desc(Outfit otherOutfit) {
-        return "Take " + wornUniformName;
+        return "Take " + readableUniformName;
     }
     public void DonUniformWrapper(Uniform uniform) {
         DonUniform(uniform);

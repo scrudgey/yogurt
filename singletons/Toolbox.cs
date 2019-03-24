@@ -231,6 +231,9 @@ public class Toolbox : Singleton<Toolbox> {
             // Debug.Log("null name");
             return nameOut;
         }
+        if (obj == GameManager.Instance.playerObject){
+            return GameManager.Instance.saveGameName;
+        }
         Item item = obj.GetComponent<Item>();
         if (item) {
             nameOut = item.itemName;
@@ -269,6 +272,11 @@ public class Toolbox : Singleton<Toolbox> {
         Intrinsics hostIntrins = GetOrCreateComponent<Intrinsics>(host);
         Intrinsics donorIntrins = GetOrCreateComponent<Intrinsics>(donor);
         hostIntrins.CreateLiveBuffs(donorIntrins.buffs);
+    }
+    public void AddPromotedLiveBuffs(GameObject host, GameObject donor) {
+        Intrinsics hostIntrins = GetOrCreateComponent<Intrinsics>(host);
+        Intrinsics donorIntrins = GetOrCreateComponent<Intrinsics>(donor);
+        hostIntrins.CreatePromotedLiveBuffs(donorIntrins.buffs);
     }
     public void AddChildIntrinsics(GameObject host, Component component, GameObject donor) {
         Intrinsics hostIntrins = GetOrCreateComponent<Intrinsics>(host);

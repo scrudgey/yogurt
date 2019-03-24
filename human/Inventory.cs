@@ -365,7 +365,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     }
     public void WasDestroyed(GameObject obj) {
         if (obj == holding.gameObject) {
-            holding = null;
+            SoftDropItem();
         }
     }
     public void StartPunch() {

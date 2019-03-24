@@ -3,6 +3,7 @@
 public class PiggyBank : Interactive {
     void Start() {
         Interaction openAct = new Interaction(this, "Open", "Open");
+        openAct.descString = "Open piggybank";
         interactions.Add(openAct);
         if (GameManager.Instance.debug)
             SetUpDollar();

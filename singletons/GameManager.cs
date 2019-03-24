@@ -6,7 +6,6 @@ using UnityEngine.SceneManagement;
 using System.Linq;
 using System;
 
-// [XmlRoot("GameData")]
 [System.Serializable]
 public class GameData {
     public float money;
@@ -26,7 +25,7 @@ public class GameData {
     public string lastSavedPlayerPath;
     public string lastSavedScenePath;
     public string saveDate;
-    public  System.DateTime saveDateTime;
+    public System.DateTime saveDateTime;
     public float secondsPlayed;
     public string lastScene;
     public int days;
@@ -39,7 +38,6 @@ public class GameData {
     public int entryID;
     public List<Achievement> achievements;
     public SerializableDictionary<StatType, Stat> stats = new SerializableDictionary<StatType, Stat>();
-    // public AchievementStats achievementStats = new AchievementStats();
     public List<Email> emails;
     public List<string> packages;
     public bool firstTimeLeavingHouse;
@@ -51,13 +49,14 @@ public class GameData {
         saveDate = System.DateTime.Now.ToString();
         saveDateTime = System.DateTime.Now;
     }
-    public List<Achievement> CheckAchievements(){
+    public List<Achievement> CheckAchievements() {
         List<Achievement> completeAchievements = new List<Achievement>();
         foreach (Achievement achieve in achievements) {
             if (!achieve.complete) {
                 bool pass = achieve.Evaluate(stats);
                 if (pass) {
                     achieve.complete = true;
+                    achieve.completedTime = System.DateTime.Now;
                     completeAchievements.Add(achieve);
                 }
             }
@@ -103,13 +102,14 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = true;
+    public bool debug = false;
     public bool failedLevelLoad = false;
     void Start() {
         if (data == null) {
             data = InitializedGameData();
             // ReceiveEmail("duplicator");
             // ReceivePackage("duplicator");
+            // ReceivePackage("golf_club");
             if (debug)
                 data.mayorCutsceneHappened = true;
         }
@@ -121,7 +121,7 @@ public partial class GameManager : Singleton<GameManager> {
             InitializeNonPlayableLevel();
         }
         publicAudio = Toolbox.Instance.SetUpAudioSource(gameObject);
-        SceneManager.sceneLoaded += LevelWasLoaded;
+        SceneManager.sceneLoaded += SceneWasLoaded;
         // these bits are for debug!
         if (SceneManager.GetActiveScene().name == "boardroom_cutscene") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneBoardroom>();
@@ -207,7 +207,7 @@ public partial class GameManager : Singleton<GameManager> {
             if (playerHead.hat != null)
                 CheckItemCollection(playerHead.hat.gameObject, playerObject);
             HeadAnimation headAnim = playerHead.GetComponent<HeadAnimation>();
-            if (headAnim){
+            if (headAnim) {
                 data.headSpriteSheet = headAnim.spriteSheet;
             }
         }
@@ -217,14 +217,14 @@ public partial class GameManager : Singleton<GameManager> {
                 CheckItemCollection(playerInv.holding.gameObject, playerObject);
         }
         // refresh UI
-        UINew.Instance.RefreshUI(active:true);
+        UINew.Instance.RefreshUI(active: true);
     }
     public void LeaveScene(string toSceneName, int toEntryNumber) {
         MySaver.Save();
         data.entryID = toEntryNumber;
         SceneManager.LoadScene(toSceneName);
     }
-    void LevelWasLoaded(Scene scene, LoadSceneMode mode) {
+    void SceneWasLoaded(Scene scene, LoadSceneMode mode) {
         // Debug.Log("on level was loaded");
         Toolbox.Instance.numberOfLiveSpeakers = 0;
         sceneTime = 0f;
@@ -234,8 +234,9 @@ public partial class GameManager : Singleton<GameManager> {
             try {
                 InitializePlayableLevel(loadLevel: true);
                 failedLevelLoad = false;
-            } catch (Exception e) {
-                if (failedLevelLoad){
+            }
+            catch (Exception e) {
+                if (failedLevelLoad) {
                     Debug.Break();
                 }
                 // TODO: default / corrupt save recovery
@@ -247,32 +248,33 @@ public partial class GameManager : Singleton<GameManager> {
             }
         }
     }
-    void ResetGameState(){
-        try{ 
+    void ResetGameState() {
+        try {
             // string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
             // if (!System.IO.Directory.Exists(path))
             //     return;
             // path = Path.Combine(path, GameManager.Instance.saveGameName + ".xml");
             FileInfo playerFile = new FileInfo(GameManager.Instance.data.lastSavedPlayerPath);
-            if (playerFile.Exists){
+            if (playerFile.Exists) {
                 playerFile.Delete();
             }
             // Debug.Log("cleaning up saves");
             // Debug.Break();
             MySaver.CleanupSaves();
-            
+
             string housePath = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
             housePath = Path.Combine(housePath, "house_state.xml");
-            string[] paths = new string[]{housePath, GameManager.Instance.data.lastSavedPlayerPath};
-            
-            foreach(string path in paths){
+            string[] paths = new string[] { housePath, GameManager.Instance.data.lastSavedPlayerPath };
+
+            foreach (string path in paths) {
                 if (!System.IO.File.Exists(path))
                     return;
                 FileInfo info = new FileInfo(path);
                 File.Delete(info.FullName);
             }
             NewGame();
-        } catch (Exception e){
+        }
+        catch (Exception e) {
             Debug.Log("reset game state failed");
             // Debug.Log(e.Message);
             // Debug.Log(e.StackTrace);
@@ -280,6 +282,8 @@ public partial class GameManager : Singleton<GameManager> {
         }
     }
     public void InitializePlayableLevel(bool loadLevel = false) {
+        string sceneName = SceneManager.GetActiveScene().name;
+
         // make sure all required parts are in place
         string[] requirements = new string[] { "Main Camera", "EventSystem", "NeoUICanvas" };
         foreach (string requirement in requirements) {
@@ -290,10 +294,12 @@ public partial class GameManager : Singleton<GameManager> {
                 newgo.name = Toolbox.Instance.CloneRemover(newgo.name);
             }
         }
+
         cam = GameObject.FindObjectOfType<Camera>();
         if (cam) {
             Toolbox.GetOrCreateComponent<CameraControl>(cam.gameObject);
         }
+
         UINew.Instance.ConfigureUIElements();
         if (loadLevel) {
             playerObject = MySaver.LoadScene();
@@ -310,10 +316,11 @@ public partial class GameManager : Singleton<GameManager> {
             }
             data.entryID = 99;
         }
+
         SetFocus(playerObject);
         Controller.Instance.state = Controller.ControlState.normal;
-        UINew.Instance.RefreshUI(active:true);
-        string sceneName = SceneManager.GetActiveScene().name;
+        UINew.Instance.RefreshUI(active: true);
+
         if (sceneName == "krazy1") {
             GameObject packageSpawnPoint = GameObject.Find("packageSpawnPoint");
             if (data.firstTimeLeavingHouse) {
@@ -346,7 +353,6 @@ public partial class GameManager : Singleton<GameManager> {
         }
         PlayerEnter();
     }
-
     public void InitializeNonPlayableLevel() {
         string sceneName = SceneManager.GetActiveScene().name;
         Controller.Instance.state = Controller.ControlState.cutscene;
@@ -398,19 +404,21 @@ public partial class GameManager : Singleton<GameManager> {
                 playerHurtable.oxygen = playerHurtable.maxOxygen;
                 // TODO: reset hitstate ?
             }
+            Flammable playerFlammable = playerObject.GetComponent<Flammable>();
+            if (playerFlammable) {
+                playerFlammable.onFire = false;
+                playerFlammable.heat = 0;
+            }
             MySaver.Save();
             awaitNewDayPrompt = CheckNewDayPrompt();
             bed.SleepCutscene();
         }
     }
-
     public bool CheckNewDayPrompt() {
         if (data.days <= 1)
             return false;
-        // return data.newCollectedClothes.Count + data.newCollectedFood.Count + data.newCollectedItems.Count + data.newUnlockedCommercials.Count > 0;
         return data.itemsCollectedToday + data.foodCollectedToday + data.clothesCollectedToday + data.newUnlockedCommercials.Count > 0;
     }
-
     public void NewGame(bool switchlevel = true) {
         Debug.Log("New game");
         if (data == null)
@@ -494,11 +502,13 @@ public partial class GameManager : Singleton<GameManager> {
             {"hypnosis", false}
         };
         data.collectedClothes.Add("blue_shirt");
-        data.collectedObjects.Add("blue_shirt");
-        data.itemCheckedOut["blue_shirt"] = false;
         data.collectedClothes.Add("pajamas");
+        data.collectedObjects.Add("glass_jar");
+        data.collectedObjects.Add("blue_shirt");
         data.collectedObjects.Add("pajamas");
         data.itemCheckedOut["pajamas"] = false;
+        data.itemCheckedOut["blue_shirt"] = false;
+        data.itemCheckedOut["glass_jar"] = false;
         data.firstTimeLeavingHouse = true;
         // initialize commercials
         // TODO: change this temporary hack into something more correct.
@@ -513,7 +523,8 @@ public partial class GameManager : Singleton<GameManager> {
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eggplant10"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("fireman"));
             data.perks["hypnosis"] = true;
-            // data.perks["vomit"] = true;
+            data.perks["vomit"] = true;
+            data.perks["eat_all"] = true;
             data.unlockedScenes.Add("moon_cave");
             data.teleporterUnlocked = true;
         }
@@ -566,7 +577,7 @@ public partial class GameManager : Singleton<GameManager> {
         return path;
     }
     public void SaveGameData() {
-        
+
         data.secondsPlayed += timeSinceLastSave;
         data.lastScene = SceneManager.GetActiveScene().name;
         data.saveDateTime = System.DateTime.Now;
@@ -577,11 +588,12 @@ public partial class GameManager : Singleton<GameManager> {
         if (!Directory.Exists(path))
             Directory.CreateDirectory(path);
         path = Path.Combine(path, "gameData.xml");
-        try{    
-            using(FileStream sceneStream = File.Create(path)){
+        try {
+            using (FileStream sceneStream = File.Create(path)) {
                 serializer.Serialize(sceneStream, data);
             }
-        } catch(Exception e) {
+        }
+        catch (Exception e) {
             Debug.Log(e.ToString());
             Debug.Log(e.Source);
             Debug.Log(e.StackTrace);
@@ -597,7 +609,7 @@ public partial class GameManager : Singleton<GameManager> {
         path = Path.Combine(path, "gameData.xml");
         if (File.Exists(path)) {
             try {
-                using(var dataStream = new FileStream(path, FileMode.Open)){
+                using (var dataStream = new FileStream(path, FileMode.Open)) {
                     data = serializer.Deserialize(dataStream) as GameData;
                 }
                 // dataStream.Close();
@@ -665,29 +677,29 @@ public partial class GameManager : Singleton<GameManager> {
         data.itemCheckedOut[name] = true;
         Inventory playerInventory = playerObject.GetComponent<Inventory>();
         Pickup itemPickup = item.GetComponent<Pickup>();
-        if (playerInventory != null && itemPickup != null){
+        if (playerInventory != null && itemPickup != null) {
             playerInventory.GetItem(itemPickup);
         }
     }
-    public void IncrementStat(StatType statType, float value){
+    public void IncrementStat(StatType statType, float value) {
         // change stat
         if (!data.stats.ContainsKey(statType))
             data.stats[statType] = new Stat(statType);
         data.stats[statType].value += value;
         CheckStats();
     }
-    public void SetStat(StatType statType, float value){
+    public void SetStat(StatType statType, float value) {
         if (!data.stats.ContainsKey(statType))
             data.stats[statType] = new Stat(statType);
         data.stats[statType].value = value;
         CheckStats();
     }
-    private void CheckStats(){
+    private void CheckStats() {
         // check achievements
         if (InCutsceneLevel())
             return;
         List<Achievement> completeAchievements = data.CheckAchievements();
-        foreach(Achievement achievement in completeAchievements){
+        foreach (Achievement achievement in completeAchievements) {
             UINew.Instance.PopupAchievement(achievement);
         }
     }
@@ -717,9 +729,13 @@ public partial class GameManager : Singleton<GameManager> {
     }
     public void ShowDiaryEntry(string diaryName) {
         GameObject diaryObject = UINew.Instance.activeMenu;
-        if (UINew.Instance.activeMenu == null){
+        if (UINew.Instance.activeMenu == null) {
             diaryObject = UINew.Instance.ShowMenu(UINew.MenuType.diary);
-        } 
+        }
+        // } else {
+        //     UINew.Instance.CloseActiveMenu();
+        //     diaryObject = UINew.Instance.ShowMenu(UINew.MenuType.diary);
+        // }
         Diary diary = diaryObject.GetComponent<Diary>();
         diary.loadDiaryName = diaryName;
     }

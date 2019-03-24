@@ -49,7 +49,7 @@ public class Eater : Interactive, ISaveable {
         Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
         Toolbox.RegisterMessageCallback<MessageOccurrence>(this, HandleOccurrence);
     }
-    public void HandleNetIntrinsic(MessageNetIntrinsic message){
+    public void HandleNetIntrinsic(MessageNetIntrinsic message) {
         if (message.netBuffs[BuffType.poison].boolValue) {
             poisonNausea = true;
         } else {
@@ -62,7 +62,7 @@ public class Eater : Interactive, ISaveable {
             immoralPreference = preference.likes;
         }
     }
-    public void HandleOccurrence(MessageOccurrence message){
+    public void HandleOccurrence(MessageOccurrence message) {
         foreach (EventData data in message.data.events)
             ReactToOccurrence(data);
     }
@@ -79,7 +79,7 @@ public class Eater : Interactive, ISaveable {
             // nausea += Time.deltaTime * 10f;
         }
         if (nutrition > 100) {
-            nausea += Time.deltaTime * 20f * Mathf.Min(2f, nutrition/200);
+            nausea += Time.deltaTime * 20f * Mathf.Min(2f, nutrition / 200);
         }
         if (vomitCountDown > 0) {
             vomitCountDown -= Time.deltaTime;
@@ -124,7 +124,8 @@ public class Eater : Interactive, ISaveable {
         head.crumbColor = food.pureeColor;
         Toolbox.Instance.SendMessage(gameObject, this, head);
         // randomly store a clone of the object for later vomiting
-        GameObject eaten = Instantiate(food.gameObject) as GameObject;
+        // GameObject eaten = Instantiate(food.gameObject) as GameObject;
+        GameObject eaten = food.gameObject;
         eaten.name = Toolbox.Instance.CloneRemover(eaten.name);
         eatenQueue.Enqueue(eaten);
         eaten.SetActive(false);
@@ -158,50 +159,40 @@ public class Eater : Interactive, ISaveable {
             eatData.liquid = mliquid.liquid;
             if (mliquid.liquid != null) {
                 if (mliquid.liquid.name == "yogurt") {
-                    // GameManager.Instance.data.achievementStats.yogurtEaten += 1;
-                    // GameManager.Instance.CheckAchievements();
                     GameManager.Instance.IncrementStat(StatType.yogurtEaten, 1);
                 }
             }
         }
         LiquidContainer container = food.GetComponent<LiquidContainer>();
-        if (container){
-            if (container.amount > 0){
+        if (container) {
+            if (container.amount > 0) {
                 // container.li
                 GameObject sip = new GameObject();
                 Liquid.MonoLiquidify(sip, container.liquid);
-                Toolbox.Instance.AddLiveBuffs(gameObject, sip);
+                Toolbox.Instance.AddPromotedLiveBuffs(gameObject, sip);
                 Destroy(sip);
             }
         }
         LiquidResevoir reservoir = food.GetComponent<LiquidResevoir>();
-        if (reservoir){
+        if (reservoir) {
             GameObject sip = new GameObject();
             Liquid.MonoLiquidify(sip, reservoir.liquid);
-            Toolbox.Instance.AddLiveBuffs(gameObject, sip);
+            Toolbox.Instance.AddPromotedLiveBuffs(gameObject, sip);
             Destroy(sip);
         }
         if (Toolbox.Instance.CloneRemover(food.name) == "sword") {
-            // GameManager.Instance.data.achievementStats.swordsEaten += 1;
-            // GameManager.Instance.CheckAchievements();
             GameManager.Instance.IncrementStat(StatType.swordsEaten, 1);
         }
         if (Toolbox.Instance.CloneRemover(food.name) == "heart") {
-            // GameManager.Instance.data.achievementStats.heartsEaten += 1;
-            // GameManager.Instance.CheckAchievements();
             GameManager.Instance.IncrementStat(StatType.heartsEaten, 1);
         }
         if (food.GetComponent<Hat>() != null) {
-            // GameManager.Instance.data.achievementStats.hatsEaten += 1;
-            // GameManager.Instance.CheckAchievements();
             GameManager.Instance.IncrementStat(StatType.hatsEaten, 1);
         }
-        if (food.human){
-            // GameManager.Instance.data.achievementStats.actsOfCannibalism += 1;
-            // GameManager.Instance.CheckAchievements();
+        if (food.human) {
             GameManager.Instance.IncrementStat(StatType.actsOfCannibalism, 1);
         }
-        HashSet<GameObject> involvedParties = new HashSet<GameObject>(){gameObject, food.gameObject};
+        HashSet<GameObject> involvedParties = new HashSet<GameObject>() { gameObject, food.gameObject };
         Toolbox.Instance.OccurenceFlag(gameObject, eatData, involvedParties);
         // play eat sound
         if (food.eatSound != null) {
@@ -225,8 +216,6 @@ public class Eater : Interactive, ISaveable {
     public void Vomit() {
         vomitCountDown = 1.5f;
 
-        // GameManager.Instance.data.achievementStats.vomit += 1;
-        // GameManager.Instance.CheckAchievements();
         GameManager.Instance.IncrementStat(StatType.vomit, 1);
 
         nausea = 0;
@@ -234,7 +223,7 @@ public class Eater : Interactive, ISaveable {
 
         OccurrenceVomit data = new OccurrenceVomit();
         data.vomiter = gameObject;
-        HashSet<GameObject> involvedParties = new HashSet<GameObject>(){gameObject};
+        HashSet<GameObject> involvedParties = new HashSet<GameObject>() { gameObject };
         if (eatenQueue.Count > 0) {
             GameObject eaten = eatenQueue.Dequeue();
             data.vomit = eaten.gameObject;
@@ -242,7 +231,8 @@ public class Eater : Interactive, ISaveable {
             eaten.SetActive(true);
             eaten.transform.position = transform.position;
             PhysicalBootstrapper phys = eaten.GetComponent<PhysicalBootstrapper>();
-            if (phys){
+            if (phys) {
+                phys.doInit = true;
                 phys.InitPhysical(0.13f, Vector3.zero);
             }
             MonoLiquid mono = eaten.GetComponent<MonoLiquid>();
@@ -279,7 +269,7 @@ public class Eater : Interactive, ISaveable {
         vomitLiquid.vomit = true;
         Toolbox.Instance.SpawnDroplet(vomitLiquid, 0f, gameObject, 0.05f);
     }
-    
+
     void ReactToOccurrence(EventData od) {
         if (od.ratings[Rating.disgusting] > 1)
             nausea += 10f;
