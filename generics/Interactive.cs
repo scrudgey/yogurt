@@ -43,16 +43,17 @@ public class Interaction {
     public string descString = null;
     public Interaction(Interactive o, string name, string functionName) : this(o, name, functionName, false, false) { }
     public Interaction(Interactive o, string name, string functionName, bool manualHide, bool rightHide) {
+        this.parameterTypes = new List<System.Type>();
         this.action = functionName;
         this.actionName = name;
         this.parent = o;
         this.hideInManualActions = manualHide;
         this.hideInRightClickMenu = rightHide;
         methodInfo = parent.GetType().GetMethod(functionName);
-        parameterTypes = new List<System.Type>();
         if (methodInfo != null) {
             System.Reflection.ParameterInfo[] pars = methodInfo.GetParameters();
             foreach (System.Reflection.ParameterInfo p in pars) {
+                // Debug.Log(actionName + " " + p.ParameterType.ToString());
                 parameterTypes.Add(p.ParameterType);
             }
         } else {
@@ -62,6 +63,7 @@ public class Interaction {
         desireFunction += defaultDesireFunction;
     }
     public Interaction(Interactive o, string name, Action<Component> initAction) {
+        this.parameterTypes = new List<System.Type>();
         actionName = name;
         // enabled = false;
         parent = o;
