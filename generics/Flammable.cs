@@ -16,7 +16,6 @@ public class Flammable : MonoBehaviour, ISaveable {
     public bool playSounds = true;
     public Pickup pickup;
     public float fireRetardantBuffer = 2f;
-    // public Dictionary<BuffType, Buff> netBuffs;
     public bool fireproof;
     void Start() {
         pickup = GetComponent<Pickup>();
@@ -58,16 +57,16 @@ public class Flammable : MonoBehaviour, ISaveable {
         Toolbox.RegisterMessageCallback<MessageDamage>(this, HandleDamageMessage);
         Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
     }
-    void HandleNetIntrinsic(MessageNetIntrinsic message){
+    void HandleNetIntrinsic(MessageNetIntrinsic message) {
         // netBuffs = message.netBuffs;
-        if (message.netBuffs[BuffType.fireproof].boolValue || message.netBuffs[BuffType.fireproof].floatValue > 0){
+        if (message.netBuffs[BuffType.fireproof].boolValue || message.netBuffs[BuffType.fireproof].floatValue > 0) {
             fireproof = true;
         } else {
             fireproof = false;
         }
     }
-    public void HandleDamageMessage(MessageDamage message){
-        if (message.type == damageType.fire){
+    public void HandleDamageMessage(MessageDamage message) {
+        if (message.type == damageType.fire) {
             heat += message.amount;
         }
     }
@@ -78,8 +77,8 @@ public class Flammable : MonoBehaviour, ISaveable {
         }
         if (fireproof && heat > 1)
             heat = 1;
-        if (fireproof && onFire){
-            onFire = false;   
+        if (fireproof && onFire) {
+            onFire = false;
         }
         if (heat > (-1f * fireRetardantBuffer) && !onFire) {
             heat -= Time.deltaTime;
@@ -108,15 +107,15 @@ public class Flammable : MonoBehaviour, ISaveable {
             }
             OccurrenceFire fireData = new OccurrenceFire();
             fireData.flamingObject = gameObject;
-            Toolbox.Instance.OccurenceFlag(gameObject, fireData, new HashSet<GameObject>(){gameObject});
+            Toolbox.Instance.OccurenceFlag(gameObject, fireData, new HashSet<GameObject>() { gameObject });
             if (responsibleParty == GameManager.Instance.playerObject && gameObject != GameManager.Instance.playerObject) {
                 GameManager.Instance.IncrementStat(StatType.othersSetOnFire, 1);
             }
         }
         if (onFire) {
-            HashSet<GameObject> involvedParties = new HashSet<GameObject>(){gameObject};
+            HashSet<GameObject> involvedParties = new HashSet<GameObject>() { gameObject };
             if (pickup) {
-                if (pickup.holder != null){
+                if (pickup.holder != null) {
                     responsibleParty = pickup.holder.gameObject;
                     involvedParties.Add(pickup.holder.gameObject);
                 }
@@ -144,10 +143,13 @@ public class Flammable : MonoBehaviour, ISaveable {
         data.floats["heat"] = heat;
         data.floats["flashpoint"] = flashpoint;
         data.bools["onFire"] = onFire;
+        data.bools["fireproof"] = fireproof;
     }
     public void LoadData(PersistentComponent data) {
         heat = data.floats["heat"];
         flashpoint = data.floats["flashpoint"];
         onFire = data.bools["onFire"];
+        if (data.bools.ContainsKey("fireproof"))
+            fireproof = data.bools["fireproof"];
     }
 }
