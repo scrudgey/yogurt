@@ -73,13 +73,13 @@ public class PersistentObject {
             }
         }
         SpriteRenderer spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
-        if (spriteRenderer != null){
+        if (spriteRenderer != null) {
             spriteColorAlpha = spriteRenderer.color.a;
             spriteColorRed = spriteRenderer.color.r;
             spriteColorGreen = spriteRenderer.color.g;
             spriteColorBlue = spriteRenderer.color.b;
         }
-            // spriteColor = spriteRenderer.color;
+        // spriteColor = spriteRenderer.color;
     }
     public void HandleSave(GameObject parentObject) {
         foreach (Component component in parentObject.GetComponents<Component>()) {
@@ -88,7 +88,7 @@ public class PersistentObject {
                 // TODO: update each component, don't override.
                 // saveable.LoadInit();
                 // Debug.Log(component.GetType());
-                if (!persistentComponents.ContainsKey(component.GetType().ToString())){
+                if (!persistentComponents.ContainsKey(component.GetType().ToString())) {
                     Debug.Log("broken persistentComponent reference");
                     Debug.Log(component.GetType());
                     Debug.Log(parentObject.name);
@@ -108,7 +108,7 @@ public class PersistentObject {
         parentObject.transform.rotation = transformRotation;
         parentObject.transform.localScale = transformScale;
         SpriteRenderer spriteRenderer = parentObject.GetComponent<SpriteRenderer>();
-        if (spriteRenderer != null){
+        if (spriteRenderer != null) {
             spriteRenderer.color = new Color(spriteColorRed, spriteColorGreen, spriteColorBlue, spriteColorAlpha);
         }
         List<Component> loadedComponents = new List<Component>(parentObject.GetComponents<Component>());
@@ -116,15 +116,24 @@ public class PersistentObject {
         foreach (Component component in loadedComponents) {
             ISaveable saveable = component as ISaveable;
             if (saveable != null) {
-                saveable.LoadData(persistentComponents[component.GetType().ToString()]);
+                if (persistentComponents.ContainsKey(component.GetType().ToString())) {
+                    saveable.LoadData(persistentComponents[component.GetType().ToString()]);
+                } else {
+                    Debug.Log("on load could not find persistent component " + component.GetType().ToString() + " on object " + name);
+                }
             }
         }
         foreach (KeyValuePair<string, PersistentObject> kvp in persistentChildren) {
             if (kvp.Value == this)
                 continue;
             GameObject childObject = parentObject.transform.Find(kvp.Key).gameObject;
-            kvp.Value.HandleLoad(childObject);
+            if (childObject != null) {
+
+                kvp.Value.HandleLoad(childObject);
+            } else {
+                Debug.Log("on load could not find child object " + kvp.Key);
+            }
         }
-        
+
     }
 }
