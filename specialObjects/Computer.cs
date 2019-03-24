@@ -2,7 +2,9 @@
 public class Computer : Item {
     AnimateUIBubble newBubble;
     void Awake() {
-        interactions.Add(new Interaction(this, "Email", "OpenEmail"));
+        Interaction emailInteraction = new Interaction(this, "Email", "OpenEmail");
+        emailInteraction.descString = "Check email";
+        interactions.Add(emailInteraction);
         newBubble = GetComponent<AnimateUIBubble>();
         newBubble.DisableFrames();
         CheckBubble();
