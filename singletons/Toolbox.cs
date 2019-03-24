@@ -273,6 +273,11 @@ public class Toolbox : Singleton<Toolbox> {
         Intrinsics donorIntrins = GetOrCreateComponent<Intrinsics>(donor);
         hostIntrins.CreateLiveBuffs(donorIntrins.buffs);
     }
+    public void AddPromotedLiveBuffs(GameObject host, GameObject donor) {
+        Intrinsics hostIntrins = GetOrCreateComponent<Intrinsics>(host);
+        Intrinsics donorIntrins = GetOrCreateComponent<Intrinsics>(donor);
+        hostIntrins.CreatePromotedLiveBuffs(donorIntrins.buffs);
+    }
     public void AddChildIntrinsics(GameObject host, Component component, GameObject donor) {
         Intrinsics hostIntrins = GetOrCreateComponent<Intrinsics>(host);
         Intrinsics donorIntrins = GetOrCreateComponent<Intrinsics>(donor);
