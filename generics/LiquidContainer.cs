@@ -34,14 +34,15 @@ public class LiquidContainer : Interactive, ISaveable {
     void Awake() {
         if (!configured) {
             configured = true;
-            interactions.Add(new Interaction(this, "Fill", "FillFromReservoir"));
+            Interaction fillReservoir = new Interaction(this, "Fill", "FillFromReservoir");
             Interaction fillContainer = new Interaction(this, "Fill", "FillFromContainer");
             Interaction drinker = new Interaction(this, "Drink", "Drink");
             drinker.validationFunction = true;
             drinker.playerOnOtherConsent = false;
-            interactions.Add(drinker);
             fillContainer.validationFunction = true;
+            interactions.Add(drinker);
             interactions.Add(fillContainer);
+            interactions.Add(fillReservoir);
             empty = true;
             if (liquidSprite)
                 liquidSprite.enabled = false;
@@ -56,8 +57,8 @@ public class LiquidContainer : Interactive, ISaveable {
         if (myIntrinsics != null) {
             Destroy(myIntrinsics);
         }
+        Intrinsics intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject);
         if (l.buffs.Count > 0) {
-            Intrinsics intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject);
             intrinsics.buffs.AddRange(liquid.buffs);
         }
     }
