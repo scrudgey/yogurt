@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine.UI;
 using Easings;
+using UnityEngine.EventSystems;
 // using System.Linq;
 
 public class UINew : Singleton<UINew> {
@@ -67,7 +68,10 @@ public class UINew : Singleton<UINew> {
     private float oxygenBarEasingTimer;
     private EasingDirection healthBarEasingDirection;
     private EasingDirection oxygenBarEasingDirection;
-    public void Start(){
+    private string lastTarget;
+    public string actionButtonText;
+
+    public void Start() {
         Awake();
     }
     public void Awake() {
@@ -93,8 +97,12 @@ public class UINew : Singleton<UINew> {
             GameObject top = Controller.Instance.GetFrontObject(hits);
             target = Controller.Instance.GetBaseInteractive(top.transform);
         }
+        bool cursorOverButton = false;
+        if (EventSystem.current.IsPointerOverGameObject()) {
+            cursorOverButton = true;
+        }
         UpdateCursor(highlight);
-        UpdateActionText(highlight, target);
+        UpdateActionText(highlight, target, cursorOverButton);
     }
     public void UpdateCursor(bool highlight) {
         switch (Controller.Instance.state) {
@@ -143,23 +151,39 @@ public class UINew : Singleton<UINew> {
 
         Cursor.SetCursor(cursorTarget, new Vector2(16, 16), CursorMode.Auto);
     }
-    public void UpdateActionText(bool highlight, GameObject target) {
-        if (target != null) {
-            switch (Controller.Instance.state) {
-                case Controller.ControlState.swearSelect:
-                    SetActionText("Swear at " + Toolbox.Instance.GetName(target));
-                    break;
-                case Controller.ControlState.insultSelect:
-                    SetActionText("Insult " + Toolbox.Instance.GetName(target));
-                    break;
-                case Controller.ControlState.hypnosisSelect:
-                    SetActionText("Hypnotize " + Toolbox.Instance.GetName(target));
-                    break;
-                default:
-                    break;
+    public void UpdateActionText(bool highlight, GameObject target, bool cursorOverButton) {
+        if (!activeMenu && CutsceneManager.Instance.cutscene == null) {
+            if (activeElements.Count > 0) {
+                if (cursorOverButton) {
+                    SetActionText(actionButtonText);
+                } else {
+                    SetActionText(lastTarget);
+                }
+            } else {
+                if (target != null) {
+                    lastTarget = Toolbox.Instance.GetName(target);
+                    switch (Controller.Instance.state) {
+                        case Controller.ControlState.swearSelect:
+                            SetActionText("Swear at " + lastTarget);
+                            break;
+                        case Controller.ControlState.insultSelect:
+                            SetActionText("Insult " + lastTarget);
+                            break;
+                        case Controller.ControlState.hypnosisSelect:
+                            SetActionText("Hypnotize " + lastTarget);
+                            break;
+                        default:
+                            SetActionText(lastTarget);
+                            break;
+                    }
+                } else {
+                    SetActionText("");
+                }
             }
         } else {
-            if (Controller.selectionStates.Contains(Controller.Instance.state)) {
+            if (CutsceneManager.Instance.cutscene is CutscenePickleBottom){
+                SetActionText("You have been visited by Peter Picklebottom");
+            } else {
                 SetActionText("");
             }
         }
@@ -342,7 +366,7 @@ public class UINew : Singleton<UINew> {
         if (activeMenu) {
             activeMenuType = MenuType.none;
             Destroy(activeMenu);
-            activeMenu.SendMessage("OnDestroy", options:SendMessageOptions.DontRequireReceiver);
+            activeMenu.SendMessage("OnDestroy", options: SendMessageOptions.DontRequireReceiver);
             Time.timeScale = 1f;
             Controller.Instance.MenuClosedCallback();
         }
@@ -377,7 +401,7 @@ public class UINew : Singleton<UINew> {
             UpdateInventoryButton(inv);
         }
         UpdateActionButtons(inv);
-        
+
         // fight button
         fightButton.SetActive(true);
         // health bar
@@ -391,7 +415,7 @@ public class UINew : Singleton<UINew> {
             vomitButton.SetActive(GameManager.Instance.data.perks["vomit"]);
         }
     }
-    public void UpdateActionButtons(Inventory inv){
+    public void UpdateActionButtons(Inventory inv) {
         HashSet<Interaction> manualActions = Controller.Instance.focus.UpdateDefaultInteraction();
         List<actionButton> actionButtons = UINew.Instance.CreateActionButtons(new HashSet<Interaction>(manualActions));
         // punch button
@@ -400,14 +424,14 @@ public class UINew : Singleton<UINew> {
             return;
         } else {
             HidePunchButton();
-            if (Controller.Instance.focus.defaultInteraction != null){
-                foreach (actionButton button in actionButtons){
+            if (Controller.Instance.focus.defaultInteraction != null) {
+                foreach (actionButton button in actionButtons) {
                     if (button.buttonScript.action == Controller.Instance.focus.defaultInteraction)
                         MakeButtonDefault(button);
                 }
             }
         }
-        
+
     }
     public void UpdateRecordButtons(Commercial commercial) {
         if (GameManager.Instance.activeCommercial == null) {
@@ -529,9 +553,9 @@ public class UINew : Singleton<UINew> {
         activeElements = new List<GameObject>();
         HashSet<Interaction> clickedActions = new HashSet<Interaction>();
         if (Controller.Instance.commandTarget != null) {
-            clickedActions = Interactor.GetInteractions(Controller.Instance.commandTarget, clickedOn, rightClickMenu:true);
+            clickedActions = Interactor.GetInteractions(Controller.Instance.commandTarget, clickedOn, rightClickMenu: true);
         } else {
-            clickedActions = Interactor.GetInteractions(GameManager.Instance.playerObject, clickedOn, rightClickMenu:true);
+            clickedActions = Interactor.GetInteractions(GameManager.Instance.playerObject, clickedOn, rightClickMenu: true);
         }
         List<actionButton> actionButtons = CreateButtonsFromActions(clickedActions); ;
         foreach (actionButton button in actionButtons)
