@@ -28,13 +28,13 @@ public class Controller : Singleton<Controller> {
         }
     }
     private GameObject lastLeftClicked;
-    public static List<string> forbiddenColliders = new List<string>() { 
-        "fire", 
-        "sightcone", 
-        "table", 
-        "background", 
-        "occurrenceFlag", 
-        "occurrenceSound", 
+    public static List<string> forbiddenColliders = new List<string>() {
+        "fire",
+        "sightcone",
+        "table",
+        "background",
+        "occurrenceFlag",
+        "occurrenceSound",
         "footprint"};
     public static List<ControlState> selectionStates = new List<ControlState>(){Controller.ControlState.swearSelect,
                                                                                 Controller.ControlState.insultSelect,
@@ -178,7 +178,7 @@ public class Controller : Singleton<Controller> {
         }
         return one;
     }
-    public GameObject GetFrontObject(RaycastHit2D[] hits, bool debug=false) {
+    public GameObject GetFrontObject(RaycastHit2D[] hits, bool debug = false) {
         if (debug)
             Debug.Log("*******************");
         List<GameObject> candidates = new List<GameObject>();
@@ -289,7 +289,7 @@ public class Controller : Singleton<Controller> {
         // NOTE: if an overlapping UI is causing problems, add a layout group and uncheck "blocks raycast"
         if (state == ControlState.normal || state == ControlState.commandSelect) {
             if (!UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) {
-                GameObject top = GetFrontObject(hits, debug:false);
+                GameObject top = GetFrontObject(hits, debug: false);
                 if (top != null) {
                     Clicked(GetBaseInteractive(top.transform), top);
                 }
@@ -309,14 +309,14 @@ public class Controller : Singleton<Controller> {
                 actor = commandTarget;
             if (clicked.transform.IsChildOf(actor.transform) || clicked == actor) {
                 Inventory inventory = actor.GetComponent<Inventory>();
-                if (inventory){
-                    if (inventory.holding){
+                if (inventory) {
+                    if (inventory.holding) {
                         UINew.Instance.DisplayHandActions(inventory);
                     } else {
                         UINew.Instance.ClearWorldButtons();
                         lastLeftClicked = null;
-                    }      
-                }   
+                    }
+                }
             } else {
                 UINew.Instance.SetClickedActions(lastLeftClicked, clickSite);
             }
@@ -330,11 +330,11 @@ public class Controller : Singleton<Controller> {
         // using i.action.parent doesn't work, because some actions are sourced from player gameobject, not "target", whatever it is
         if (i == null || lastLeftClicked == null)
             return false;
-        if (i.limitless)
+        if (i.unlimitedRange)
             return true;
         // GameObject focus = focus;
         Transform focusTransform = focus.transform;
-        if (commandTarget != null){
+        if (commandTarget != null) {
             focusTransform = commandTarget.transform;
         }
         float dist = Vector3.SqrMagnitude(lastLeftClicked.transform.position - focusTransform.position);

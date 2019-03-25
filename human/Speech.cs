@@ -8,13 +8,13 @@ using Nimrod;
 
 public class Speech : Interactive, ISaveable {
     static string[] swearWords = new string[]{
-        @"\bshit\b", 
-        @"\bfucked\b", 
-        @"\bfuck\b", 
+        @"\bshit\b",
+        @"\bfucked\b",
+        @"\bfuck\b",
         @"\bshazbotting\b",
         @"\bshazbot\b",
-        @"\bpiss\b", 
-        @"\bdick\b", 
+        @"\bpiss\b",
+        @"\bdick\b",
         @"\bass\b"};
     private string words;
     public bool speaking = false;
@@ -47,7 +47,7 @@ public class Speech : Interactive, ISaveable {
     void Awake() {
         Interaction speak = new Interaction(this, "Look", "Describe");
         speak.hideInManualActions = true;
-        speak.limitless = true;
+        speak.unlimitedRange = true;
         speak.otherOnPlayerConsent = false;
         speak.playerOnOtherConsent = false;
         speak.inertOnPlayerConsent = false;
@@ -55,7 +55,7 @@ public class Speech : Interactive, ISaveable {
         interactions.Add(speak);
         if (!disableSpeakWith) {
             Interaction speakWith = new Interaction(this, "Talk...", "SpeakWith");
-            speakWith.limitless = true;
+            speakWith.unlimitedRange = true;
             speakWith.validationFunction = true;
             interactions.Add(speakWith);
         }
@@ -80,7 +80,7 @@ public class Speech : Interactive, ISaveable {
             }
         }
         if (voice != "none") {
-            AudioClip[] voiceSounds = Resources.LoadAll<AudioClip>("sounds/speechSets/"+voice);
+            AudioClip[] voiceSounds = Resources.LoadAll<AudioClip>("sounds/speechSets/" + voice);
             speakSounds = speakSounds.Concat(voiceSounds).ToArray();
         }
         gibberizer = gameObject.AddComponent<SoundGibberizer>();
@@ -111,7 +111,7 @@ public class Speech : Interactive, ISaveable {
     }
     void HandleHitStun(MessageHitstun message) {
         hitState = message.hitState;
-        if (hitState >= Controllable.HitState.unconscious){
+        if (hitState >= Controllable.HitState.unconscious) {
             Stop();
         }
     }
@@ -154,7 +154,7 @@ public class Speech : Interactive, ISaveable {
     public bool SpeakWith_Validation() {
         if (disableInteractions)
             return false;
-        if (Controller.Instance.state == Controller.ControlState.commandSelect){
+        if (Controller.Instance.state == Controller.ControlState.commandSelect) {
             return Controller.Instance.commandTarget != gameObject;
         } else {
             return GameManager.Instance.playerObject != gameObject;
@@ -196,10 +196,10 @@ public class Speech : Interactive, ISaveable {
             follower.PreemptiveUpdate();
             bubbleText.text = words;
             float charIndex = (speakTimeTotal - speakTime) * speakSpeed;
-            
+
             if (charIndex < swearMask.Length) {
                 gibberizer.bleep = swearMask[(int)charIndex];
-                if (!gibberizer.play && !vomiting){
+                if (!gibberizer.play && !vomiting) {
                     gibberizer.StartPlay();
                 }
             }
@@ -207,9 +207,9 @@ public class Speech : Interactive, ISaveable {
         if (speakTime < 0) {
             Stop();
         }
-        if (!speaking && queue.Count > 0){
+        if (!speaking && queue.Count > 0) {
             queueTime += Time.deltaTime;
-            if (queueTime > 1f){
+            if (queueTime > 1f) {
                 queueTime = Random.Range(-10f, 0f);
                 int index = Random.Range(0, queue.Count);
                 Say(queue[index]);
@@ -217,7 +217,7 @@ public class Speech : Interactive, ISaveable {
             }
         }
     }
-    public void Stop(){
+    public void Stop() {
         speakTime = 0;
         // audioSource.Stop();
         gibberizer.StopPlay();
@@ -233,7 +233,7 @@ public class Speech : Interactive, ISaveable {
         speakTime = 0;
         queueTime = 0;
     }
-    public void LateUpdate(){
+    public void LateUpdate() {
         // if the parent scale is flipped, we need to flip the flipper back to keep
         // the text properly oriented.
         if (flipper.transform.localScale != transform.localScale) {
@@ -259,7 +259,7 @@ public class Speech : Interactive, ISaveable {
             queue.Add(message);
             return null;
         }
-        if (message.nimrod){
+        if (message.nimrod) {
             Grammar grammar = new Grammar();
             grammar.Load("structure");
             grammar.Load("flavor_test");
@@ -276,13 +276,13 @@ public class Speech : Interactive, ISaveable {
         string censoredPhrase = CensorSwears(message.phrase);
         speechData.profanity = Toolbox.LevenshteinDistance(message.phrase, censoredPhrase);
         swearMask = new bool[message.phrase.Length];
-        for (int i = 0; i < message.phrase.Length; i++){
+        for (int i = 0; i < message.phrase.Length; i++) {
             swearMask[i] = message.phrase[i] != censoredPhrase[i];
         }
-        
+
         message.eventData.ratings[Rating.chaos] += speechData.profanity * 2f;
         message.eventData.ratings[Rating.offensive] += speechData.profanity * 5f;
-        
+
         speechData.line = censoredPhrase;
         if (inDialogue)
             return null;
@@ -290,13 +290,13 @@ public class Speech : Interactive, ISaveable {
         speakTime = DoubleSeat(message.phrase.Length, 2f, 50f, 5f, 2f);
         speakTimeTotal = speakTime;
         speakSpeed = message.phrase.Length / speakTime;
-        HashSet<GameObject> involvedParties = new HashSet<GameObject>(){gameObject};
-        if (message.insultTarget != null){
+        HashSet<GameObject> involvedParties = new HashSet<GameObject>() { gameObject };
+        if (message.insultTarget != null) {
             speechData.insult = true;
             speechData.target = message.insultTarget;
             involvedParties.Add(message.insultTarget);
         }
-        if (message.threatTarget != null){
+        if (message.threatTarget != null) {
             speechData.threat = true;
             speechData.target = message.threatTarget;
             involvedParties.Add(message.threatTarget);
@@ -305,11 +305,11 @@ public class Speech : Interactive, ISaveable {
         Toolbox.Instance.OccurenceFlag(gameObject, speechData, involvedParties);
         return speechData;
     }
-    public string CensorSwears(string phrase){
+    public string CensorSwears(string phrase) {
         string censoredPhrase = phrase;
-        foreach(string swear in swearWords){
+        foreach (string swear in swearWords) {
             StringBuilder builder = new StringBuilder();
-            foreach(char c in swear.Substring(2, swear.Length-4)) {
+            foreach (char c in swear.Substring(2, swear.Length - 4)) {
                 builder.Append("∎");
             }
             string mask = builder.ToString();
@@ -317,7 +317,7 @@ public class Speech : Interactive, ISaveable {
         }
         return censoredPhrase;
     }
-    public void Insult(string phrase, GameObject target, EventData data = null){
+    public void Insult(string phrase, GameObject target, EventData data = null) {
         MessageSpeech message = new MessageSpeech(phrase);
         message.eventData = new EventData();
         if (data != null) {
@@ -328,7 +328,7 @@ public class Speech : Interactive, ISaveable {
         MessageNoise noise = new MessageNoise(gameObject);
         Toolbox.Instance.SendMessage(target, this, noise);
     }
-    public void Threaten(string phrase, GameObject target, EventData data = null){
+    public void Threaten(string phrase, GameObject target, EventData data = null) {
         MessageSpeech message = new MessageSpeech(phrase);
         message.eventData = new EventData();
         if (data != null) {
@@ -441,7 +441,7 @@ public class Speech : Interactive, ISaveable {
             return Ellipsis();
         Monologue mono = new Monologue(this, new string[] { "How dare you!" });
         EventData data = new EventData(chaos: 1, disturbing: 0, positive: -1, offensive: 0);
-        if (say){
+        if (say) {
             MessageSpeech message = new MessageSpeech("how dare you!");
             message.eventData = data;
             Say(message);
@@ -455,7 +455,7 @@ public class Speech : Interactive, ISaveable {
             return Ellipsis();
         Monologue mono = new Monologue(this, new string[] { "Mercy!" });
         EventData data = new EventData(chaos: 1, disturbing: 0, positive: -1, offensive: 0);
-        if (say){
+        if (say) {
             MessageSpeech message = new MessageSpeech("Mercy!");
             message.eventData = data;
             Say(message);

@@ -24,7 +24,7 @@ public class FireExtinguisher : Interactive, IDirectable {
         spray2.continuous = true;
         // spray2.inertOnPlayerConsent = false;
         // spray2.otherOnPlayerConsent = true;
-        spray2.limitless = true;
+        spray2.unlimitedRange = true;
         spray2.dontWipeInterface = true;
         spray2.validationFunction = true;
         interactions.Add(spray2);
@@ -68,9 +68,9 @@ public class FireExtinguisher : Interactive, IDirectable {
             }
             p.GetComponent<Rigidbody2D>().AddForce(force * Time.deltaTime, ForceMode2D.Impulse);
             ChemicalSpray spray = p.GetComponent<ChemicalSpray>();
-            if (spray){
+            if (spray) {
                 Pickup myPickup = GetComponent<Pickup>();
-                if (myPickup){
+                if (myPickup) {
                     if (myPickup.holder)
                         spray.responsibleParty = myPickup.holder.gameObject;
                 }

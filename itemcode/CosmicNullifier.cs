@@ -7,7 +7,7 @@ public class CosmicNullifier : Pickup {
     public GameObject nullifyParticleEffect;
     void Start() {
         nullify = new Interaction(this, "Nullify", "Nullify");
-        nullify.limitless = true;
+        nullify.unlimitedRange = true;
         nullify.validationFunction = true;
         // nullify.inertOnPlayerConsent = false;
         // nullify.otherOnPlayerConsent = false;

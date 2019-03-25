@@ -18,9 +18,10 @@ public class VideoCamera : Interactive, ISaveable {
         regionIndicator = transform.Find("Graphic").gameObject;
         regionIndicator.SetActive(false);
         live = false;
-        Interaction stasher = new Interaction(this, "Finish", "FinishButtonClick");
-        stasher.validationFunction = true;
-        interactions.Add(stasher);
+        Interaction finish = new Interaction(this, "Finish", "FinishButtonClick");
+        finish.validationFunction = true;
+        finish.unlimitedRange = true;
+        interactions.Add(finish);
         Interaction enableAct = new Interaction(this, "Start", "Enable");
         enableAct.validationFunction = true;
         interactions.Add(enableAct);
@@ -62,7 +63,7 @@ public class VideoCamera : Interactive, ISaveable {
         var serializer = new XmlSerializer(typeof(Commercial));
         string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
         path = Path.Combine(path, "commercial.xml");
-        using(FileStream sceneStream = File.Create(path)){
+        using (FileStream sceneStream = File.Create(path)) {
             serializer.Serialize(sceneStream, commercial);
         }
         // sceneStream.Close();
@@ -76,7 +77,7 @@ public class VideoCamera : Interactive, ISaveable {
             return;
         seenFlags.Add(col.gameObject);
         Qualities qualities = col.GetComponent<Qualities>();
-        if (qualities != null){
+        if (qualities != null) {
             // TODO: no messageoccurrence??
             EventData data = qualities.ToEvent();
             commercial.eventData.Add(data);
