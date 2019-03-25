@@ -153,14 +153,16 @@ public class UINew : Singleton<UINew> {
     }
     public void UpdateActionText(bool highlight, GameObject target, bool cursorOverButton) {
         if (!activeMenu && CutsceneManager.Instance.cutscene == null) {
-            if (activeElements.Count > 0) {
+            if (activeElements.Count > 1) {
                 if (cursorOverButton) {
                     SetActionText(actionButtonText);
                 } else {
                     SetActionText(lastTarget);
                 }
             } else {
-                if (target != null) {
+                if (cursorOverButton) {
+                    SetActionText(actionButtonText);
+                } else if (target != null) {
                     lastTarget = Toolbox.Instance.GetName(target);
                     switch (Controller.Instance.state) {
                         case Controller.ControlState.swearSelect:
@@ -181,7 +183,7 @@ public class UINew : Singleton<UINew> {
                 }
             }
         } else {
-            if (CutsceneManager.Instance.cutscene is CutscenePickleBottom){
+            if (CutsceneManager.Instance.cutscene is CutscenePickleBottom) {
                 SetActionText("You have been visited by Peter Picklebottom");
             } else {
                 SetActionText("");
