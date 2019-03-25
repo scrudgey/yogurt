@@ -48,7 +48,7 @@ public class MySaver {
         string playerPath = GameManager.Instance.data.lastSavedPlayerPath;
         Stack<int> removeEntries = new Stack<int>();
         if (File.Exists(playerPath)) {
-            using (var playerStream = new FileStream(playerPath, FileMode.Open)){
+            using (var playerStream = new FileStream(playerPath, FileMode.Open)) {
                 playerIDs = listSerializer.Deserialize(playerStream) as List<int>;
             }
             // var playerStream = new FileStream(playerPath, FileMode.Open);
@@ -76,7 +76,7 @@ public class MySaver {
             objectDataBase.Remove(entry);
         }
     }
-    public static void AddComponentToPersistent(GameObject target, Component component){
+    public static void AddComponentToPersistent(GameObject target, Component component) {
         if (objectDataBase == null)
             return;
         MyMarker marker = target.GetComponent<MyMarker>();
@@ -91,7 +91,7 @@ public class MySaver {
             }
         }
         // either get the existing persistent in the database, or make a new one
-        
+
     }
     public static void Save() {
         referenceTree = new Dictionary<int, List<int>>();
@@ -105,7 +105,7 @@ public class MySaver {
                 var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<int, PersistentObject>));
                 Debug.Log("loading existing " + objectsPath + " ...");
                 // System.IO.Stream objectsStream = new FileStream(objectsPath, FileMode.Open);
-                using (System.IO.Stream objectsStream = new FileStream(objectsPath, FileMode.Open)){
+                using (System.IO.Stream objectsStream = new FileStream(objectsPath, FileMode.Open)) {
                     objectDataBase = persistentSerializer.Deserialize(objectsStream) as SerializableDictionary<int, PersistentObject>;
                 }
                 // objectDataBase = persistentSerializer.Deserialize(objectsStream) as SerializableDictionary<int, PersistentObject>;
@@ -157,7 +157,7 @@ public class MySaver {
             RecursivelyAddTree(playerTree, childPersistent.id);
             playerTree.Remove(childPersistent.id);
         }
-        using (FileStream sceneStream = File.Create(scenePath)){
+        using (FileStream sceneStream = File.Create(scenePath)) {
             listSerializer.Serialize(sceneStream, savedIDs.ToList().Except(playerTree.ToList()).ToList());
         }
         // remove all children objects from player tree. they are included in prefab.
@@ -177,7 +177,7 @@ public class MySaver {
         while (playerChildObjects.Count > 0) {
             playerTree.Remove(playerChildObjects.Pop());
         }
-        using (FileStream playerStream = File.Create(playerPath)){
+        using (FileStream playerStream = File.Create(playerPath)) {
             listSerializer.Serialize(playerStream, playerTree.ToList());
         }
         // close the XML serialization stream
@@ -193,10 +193,10 @@ public class MySaver {
             return;
         var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<int, PersistentObject>));
         string objectsPath = GameManager.Instance.ObjectsSavePath();
-        
+
         // Debug.Log("saving "+objectsPath+" ...");
         // Debug.Log(objectDataBase.Count);
-        using (FileStream objectStream = File.Create(objectsPath)){
+        using (FileStream objectStream = File.Create(objectsPath)) {
             persistentSerializer.Serialize(objectStream, objectDataBase);
         }
         // objectStream.Close();
@@ -216,7 +216,7 @@ public class MySaver {
                 var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<int, PersistentObject>));
                 //     System.IO.Stream objectsStream = new FileStream(objectsPath, FileMode.Open);
                 // using 
-                using (System.IO.Stream objectsStream = new FileStream(objectsPath, FileMode.Open)){
+                using (System.IO.Stream objectsStream = new FileStream(objectsPath, FileMode.Open)) {
                     objectDataBase = persistentSerializer.Deserialize(objectsStream) as SerializableDictionary<int, PersistentObject>;
                 }
                 //  objectDataBase = persistentSerializer.Deserialize(objectsStream) as SerializableDictionary<int, PersistentObject>;
@@ -251,14 +251,14 @@ public class MySaver {
         List<int> playerIDs = new List<int>();
         var listSerializer = new XmlSerializer(typeof(List<int>));
         if (File.Exists(scenePath)) {
-            using (var sceneStream = new FileStream(scenePath, FileMode.Open)){
+            using (var sceneStream = new FileStream(scenePath, FileMode.Open)) {
                 sceneIDs = listSerializer.Deserialize(sceneStream) as List<int>;
             }
             // sceneStream.Close();
             LoadObjects(sceneIDs);
         }
         if (File.Exists(playerPath)) {
-            using(var playerStream = new FileStream(playerPath, FileMode.Open)){
+            using (var playerStream = new FileStream(playerPath, FileMode.Open)) {
                 playerIDs = listSerializer.Deserialize(playerStream) as List<int>;
             }
             // playerStream.Close();
@@ -297,8 +297,8 @@ public class MySaver {
                     persistent.transformPosition,
                     persistent.transformRotation) as GameObject;
                 }
-                if (go == null){
-                    Debug.Log("WARNING: Object not found "+persistent.prefabPath);
+                if (go == null) {
+                    Debug.Log("WARNING: Object not found " + persistent.prefabPath);
                     continue;
                 }
                 loadedObjects[persistent.id] = go;
@@ -311,7 +311,7 @@ public class MySaver {
                 }
             } else {
                 Debug.Log("ERROR: object " + idn.ToString() + " not found in database!");
-                
+
             }
         }
         return rootObject;
