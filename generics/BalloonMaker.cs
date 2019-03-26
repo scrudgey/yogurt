@@ -6,7 +6,6 @@ public class BalloonMaker : Interactive {
     public List<GameObject> balloonPrefabs;
     public List<Color> balloonColors;
     public List<AudioClip> spawnSounds;
-    private AudioSource audioSource;
     public GameObject particleEffect;
     void Awake() {
         Interaction balloon = new Interaction(this, "Balloon", "MakeBalloon");
@@ -17,7 +16,6 @@ public class BalloonMaker : Interactive {
         balloon.playerOnOtherConsent = false;
         balloon.inertOnPlayerConsent = false;
         interactions.Add(balloon);
-        audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
     }
     public void MakeBalloon() {
         Controllable controllable = GetComponent<Controllable>();
@@ -55,8 +53,7 @@ public class BalloonMaker : Interactive {
             }
         }
         if (spawnSounds.Count > 0) {
-            audioSource.pitch = 1;
-            audioSource.PlayOneShot(spawnSounds[Random.Range(0, spawnSounds.Count)]);
+            Toolbox.Instance.AudioSpeaker(spawnSounds[Random.Range(0, spawnSounds.Count)], transform.position);
         }
         if (particleEffect != null) {
             GameObject.Instantiate(particleEffect, transform.position, Quaternion.identity);
