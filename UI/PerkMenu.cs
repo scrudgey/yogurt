@@ -8,16 +8,24 @@ public class PerkMenu : MonoBehaviour {
     public Image perkImage;
     public Text perkTitleText;
     public Text perkDescText;
+    public Text requiredText;
+    public Text levelText;
     public Button doneButton;
     public Button acceptButton;
     public bool perkChosen;
     public PerkButton selectedPerk;
+    int numberCollected = 0;
+    public Color unlockedPerkColor;
+    public Color lockedPerkColor;
     void Start() {
         GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
         perkImage = transform.Find("menu/body/infoPanel/imagePanel/Image").GetComponent<Image>();
 
         perkDescText = transform.Find("menu/body/infoPanel/textPanel/desc").GetComponent<Text>();
         perkTitleText = transform.Find("menu/body/infoPanel/textPanel/title").GetComponent<Text>();
+        requiredText = transform.Find("menu/body/infoPanel/textPanel/req").GetComponent<Text>();
+        levelText = transform.Find("menu/body/infoPanel/levelText").GetComponent<Text>();
+
         doneButton = transform.Find("menu/body/infoPanel/Done").GetComponent<Button>();
         acceptButton = transform.Find("menu/body/infoPanel/Accept").GetComponent<Button>();
 
@@ -25,18 +33,24 @@ public class PerkMenu : MonoBehaviour {
         doneButton.interactable = false;
         acceptButton.interactable = false;
 
+        numberCollected = 1;
+        foreach (KeyValuePair<string, bool> kvp in GameManager.Instance.data.perks) {
+            if (kvp.Value) {
+                numberCollected += 1;
+            }
+        }
+        levelText.text = "Level: " + numberCollected.ToString();
         PopulatePerkList();
     }
     void PopulatePerkList() {
         GameObject[] perkPrefabs = Resources.LoadAll("perks/", typeof(GameObject))
             .Cast<GameObject>()
             .ToArray();
-        int numberCollected = 0;
-        foreach (KeyValuePair<string, bool> kvp in GameManager.Instance.data.perks) {
-            if (kvp.Value) {
-                numberCollected += 1;
-            }
+        requiredText.text = "";
+        foreach (Transform child in buttonList) {
+            Destroy(child.gameObject);
         }
+
         Dictionary<GameObject, PerkComponent> perkComponents = new Dictionary<GameObject, PerkComponent>();
         foreach (GameObject prefab in perkPrefabs) {
             PerkComponent component = prefab.GetComponent<PerkComponent>();
@@ -55,9 +69,13 @@ public class PerkMenu : MonoBehaviour {
             perkScript.perk = new Perk(component.perk);
             buttonText.text = component.perk.title;
             Button perkButton = buttonObject.GetComponent<Button>();
-            if (numberCollected < component.perk.requiredPerks) {
-                perkButton.interactable = false;
+            ColorBlock colors = perkButton.colors;
+            if (numberCollected > component.perk.requiredPerks) {
+                colors.highlightedColor = unlockedPerkColor;
+            } else {
+                colors.highlightedColor = lockedPerkColor;
             }
+            perkButton.colors = colors;
             if (GameManager.Instance.data.perks[component.perk.name]) {
                 perkButton.interactable = false;
             }
@@ -71,21 +89,39 @@ public class PerkMenu : MonoBehaviour {
         perkDescText.text = buttonScript.perk.desc;
         perkTitleText.text = buttonScript.perk.title;
         perkImage.sprite = buttonScript.perk.perkImage;
-
-        if (!doneButton.interactable)
+        Button perkButton = buttonScript.GetComponent<Button>();
+        int reqLevel = buttonScript.perk.requiredPerks + 1;
+        requiredText.text = "required: level " + reqLevel.ToString();
+        if (numberCollected > buttonScript.perk.requiredPerks) {
+            requiredText.color = unlockedPerkColor;
+        } else {
+            requiredText.color = lockedPerkColor;
+        }
+        if (perkChosen) {
+            acceptButton.interactable = false;
+        } else if (numberCollected <= buttonScript.perk.requiredPerks) {
+            acceptButton.interactable = false;
+        } else if (GameManager.Instance.data.perks[buttonScript.perk.name]) {
+            acceptButton.interactable = false;
+        } else {
             acceptButton.interactable = true;
+        }
     }
     public void AcceptButtonClicked() {
         if (selectedPerk == null)
             return;
+        perkChosen = true;
         acceptButton.interactable = false;
         doneButton.interactable = true;
         GameManager.Instance.data.perks[selectedPerk.perk.name] = true;
         selectedPerk.GetComponent<Button>().interactable = false;
         UINew.Instance.RefreshUI(active: true);
         UINew.Instance.PlayUISound("sounds/8-bit/BOUNCE3");
+        numberCollected += 1;
+        levelText.text = "Level: " + numberCollected.ToString();
     }
     public void DoneButtonClick() {
         UINew.Instance.CloseActiveMenu();
     }
+
 }
