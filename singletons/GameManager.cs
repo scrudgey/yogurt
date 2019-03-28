@@ -104,6 +104,18 @@ public partial class GameManager : Singleton<GameManager> {
     public bool playerIsDead;
     public bool debug = false;
     public bool failedLevelLoad = false;
+    public void PlayPublicSound(AudioClip clip) {
+        if (clip == null)
+            return;
+        if (publicAudio == null) {
+            cam = GameObject.FindObjectOfType<Camera>();
+            publicAudio = Toolbox.Instance.SetUpAudioSource(cam.gameObject);
+            if (cam) {
+                Toolbox.GetOrCreateComponent<CameraControl>(cam.gameObject);
+            }
+        }
+        publicAudio.PlayOneShot(clip);
+    }
     void Start() {
         if (data == null) {
             data = InitializedGameData();
@@ -120,7 +132,7 @@ public partial class GameManager : Singleton<GameManager> {
         } else {
             InitializeNonPlayableLevel();
         }
-        publicAudio = Toolbox.Instance.SetUpAudioSource(gameObject);
+        // publicAudio = Toolbox.Instance.SetUpAudioSource(cam.gameObject);
         SceneManager.sceneLoaded += SceneWasLoaded;
         // these bits are for debug!
         if (SceneManager.GetActiveScene().name == "boardroom_cutscene") {
@@ -296,6 +308,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
 
         cam = GameObject.FindObjectOfType<Camera>();
+        publicAudio = Toolbox.Instance.SetUpAudioSource(cam.gameObject);
         if (cam) {
             Toolbox.GetOrCreateComponent<CameraControl>(cam.gameObject);
         }
