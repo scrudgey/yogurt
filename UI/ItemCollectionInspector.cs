@@ -10,9 +10,11 @@ public class ItemCollectionInspector : MonoBehaviour {
     public Text itemName;
     public StartMenu startMenu;
     private UIButtonEffects effects;
+    public Button closeButton;
     public void Initialize(StartMenu menu, GameData data) {
         this.startMenu = menu;
         effects = GetComponent<UIButtonEffects>();
+        effects.buttons = new List<Button>() { closeButton };
         foreach (Transform oldButton in collectionList) {
             Destroy(oldButton.gameObject);
         }
@@ -40,6 +42,7 @@ public class ItemCollectionInspector : MonoBehaviour {
                 EntryClickedCallback(script);
             }
         }
+        effects.Configure();
     }
     public void EntryClickedCallback(ItemCollectionButton script) {
         // update icon

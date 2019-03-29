@@ -8,9 +8,11 @@ using System;
 public class LoadGameMenu : MonoBehaviour {
     public StartMenu startMenu;
     public UIButtonEffects effects;
+    public Button cancelButton;
     public void ConfigLoadMenu(StartMenu startMenu) {
         this.startMenu = startMenu;
         effects = GetComponent<UIButtonEffects>();
+        effects.buttons = new List<Button> { cancelButton };
         GameObject saveGamePanel = transform.Find("Scroll View/Viewport/Content").gameObject;
         int children = saveGamePanel.transform.childCount;
         for (int i = 0; i < children; ++i)
@@ -28,6 +30,7 @@ public class LoadGameMenu : MonoBehaviour {
             newSelector.transform.SetParent(saveGamePanel.transform, false);
             script.Configure(startMenu, dir, data);
         }
+        effects.Configure();
     }
 
     private GameObject spawnSaveGameSelector() {

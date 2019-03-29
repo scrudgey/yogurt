@@ -9,6 +9,8 @@ public class ClosetButtonHandler : MonoBehaviour {
     public Text descriptionText;
     public Text nameText;
     public Transform listContent;
+    public UIButtonEffects effects;
+    public Button closeButton;
     // public Text titleText;
     void Start() {
         GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
@@ -23,6 +25,8 @@ public class ClosetButtonHandler : MonoBehaviour {
         return newObject.GetComponent<ItemEntryScript>();
     }
     public void PopulateItemList(HomeCloset.ClosetType type) {
+        effects = GetComponent<UIButtonEffects>();
+        effects.buttons = new List<Button>() { closeButton };
         foreach (Transform childObject in listContent) {
             Destroy(childObject.gameObject);
         }
@@ -53,9 +57,11 @@ public class ClosetButtonHandler : MonoBehaviour {
         itemList = itemList.OrderBy(i => names[i]).ToList();
         foreach (string name in itemList) {
             ItemEntryScript script = spawnEntry();
+            effects.buttons.Add(script.GetComponentInChildren<Button>());
             script.Configure(name, type);
             script.transform.SetParent(listContent, false);
         }
+        effects.Configure();
     }
     public void CloseButtonClick() {
         UINew.Instance.CloseActiveMenu();

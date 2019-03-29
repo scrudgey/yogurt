@@ -15,6 +15,10 @@ public class UIButtonEffects : MonoBehaviour {
     public AudioClip mouseOverSound;
     public AudioClip inputChangedSound;
     void Start() {
+        Configure();
+    }
+
+    public void Configure() {
         if (prefabSet != null)
             AdoptPrefabSounds(prefabSet);
         Play(startSound);

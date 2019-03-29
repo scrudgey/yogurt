@@ -17,7 +17,10 @@ public class PerkMenu : MonoBehaviour {
     int numberCollected = 0;
     public Color unlockedPerkColor;
     public Color lockedPerkColor;
+    public List<Button> builtInButtons;
+    public UIButtonEffects effects;
     void Start() {
+        effects = GetComponent<UIButtonEffects>();
         GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
         perkImage = transform.Find("menu/body/infoPanel/imagePanel/Image").GetComponent<Image>();
 
@@ -43,6 +46,7 @@ public class PerkMenu : MonoBehaviour {
         PopulatePerkList();
     }
     void PopulatePerkList() {
+        effects.buttons = new List<Button>(builtInButtons);
         GameObject[] perkPrefabs = Resources.LoadAll("perks/", typeof(GameObject))
             .Cast<GameObject>()
             .ToArray();
@@ -69,6 +73,7 @@ public class PerkMenu : MonoBehaviour {
             perkScript.perk = new Perk(component.perk);
             buttonText.text = component.perk.title;
             Button perkButton = buttonObject.GetComponent<Button>();
+            effects.buttons.Add(perkButton);
             ColorBlock colors = perkButton.colors;
             if (numberCollected > component.perk.requiredPerks) {
                 colors.highlightedColor = unlockedPerkColor;
@@ -83,6 +88,7 @@ public class PerkMenu : MonoBehaviour {
         if (numberCollected == perkPrefabs.Count()) {
             doneButton.interactable = true;
         }
+        effects.Configure();
     }
     public void PerkButtonClicked(PerkButton buttonScript) {
         selectedPerk = buttonScript;

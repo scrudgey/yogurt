@@ -10,7 +10,11 @@ public class EmailUI : MonoBehaviour {
     public Text subjectText;
     public List<emailEntryButton> emailButtons;
     public Computer computer;
+    public Button doneButton;
+    public UIButtonEffects effects;
     void Start() {
+
+
         GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
 
         emailButtons = new List<emailEntryButton>();
@@ -29,6 +33,8 @@ public class EmailUI : MonoBehaviour {
         InitializeEmailList();
     }
     public void InitializeEmailList() {
+        effects = GetComponent<UIButtonEffects>();
+        effects.buttons = new List<Button>() { doneButton };
         // remove any existing entries
         // retrieve an email list, populate the list of buttons
         Destroy(emailListObject.transform.GetChild(0).gameObject);
@@ -36,6 +42,8 @@ public class EmailUI : MonoBehaviour {
         foreach (Email email in GameManager.Instance.data.emails) {
             GameObject entry = GameObject.Instantiate(Resources.Load("UI/emailEntry")) as GameObject;
             emailEntryButton entryScript = entry.GetComponent<emailEntryButton>();
+            Button emailButton = entry.GetComponent<Button>();
+            effects.buttons.Add(emailButton);
             entryScript.Initialize(this, email);
             entry.transform.SetParent(emailListObject.transform, false);
             emailButtons.Add(entryScript);
@@ -43,6 +51,7 @@ public class EmailUI : MonoBehaviour {
         if (emailButtons.Count > 0) {
             EmailEntryCallback(emailButtons[0].email);
         }
+        effects.Configure();
     }
     public void EmailEntryCallback(Email email) {
         // populate the text entries with the information from the email

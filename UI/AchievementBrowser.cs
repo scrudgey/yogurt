@@ -16,9 +16,11 @@ public class AchievementBrowser : MonoBehaviour {
     public Image icon;
     public StartMenu startMenu;
     private UIButtonEffects effects;
+    public Button closeButton;
 
     public void Initialize(GameData data) {
         effects = GetComponent<UIButtonEffects>();
+        effects.buttons = new List<Button>() { closeButton };
         foreach (Transform child in scrollArea) {
             Destroy(child.gameObject);
         }
@@ -56,8 +58,8 @@ public class AchievementBrowser : MonoBehaviour {
                     AchievementEntryCallback(savedAchievement);
                 }
             }
-            // if i didn't collect this achievement
         }
+        effects.Configure();
         counter.text = numberComplete.ToString() + "/" + allAchievements.Count.ToString() + "\nComplete";
     }
     public List<Achievement> LoadAchievements() {
