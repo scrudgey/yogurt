@@ -69,6 +69,7 @@ public class PerkMenu : MonoBehaviour {
             Text buttonText = buttonObject.transform.Find("Text").GetComponent<Text>();
             buttonObject.transform.SetParent(buttonList, false);
             PerkButton perkScript = buttonObject.GetComponent<PerkButton>();
+            // perkScript.graphic = Resources.Load("perks/graphics" + component.perk.name) as Image;
             perkScript.menu = this;
             perkScript.perk = new Perk(component.perk);
             buttonText.text = component.perk.title;
@@ -85,7 +86,7 @@ public class PerkMenu : MonoBehaviour {
                 perkButton.interactable = false;
             }
         }
-        if (numberCollected == perkPrefabs.Count()) {
+        if (numberCollected == perkPrefabs.Count() + 1) {
             doneButton.interactable = true;
         }
         effects.Configure();
