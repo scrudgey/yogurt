@@ -276,7 +276,8 @@ public class Controller : Singleton<Controller> {
                     fx.target = target;
 
                     if (controllable) {
-                        GameManager.Instance.SetFocus(target);
+                        if (controllable.hitState < Controllable.HitState.unconscious)
+                            GameManager.Instance.SetFocus(target);
                     }
                     UINew.Instance.SetActionText("");
                 }
