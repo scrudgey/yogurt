@@ -7,8 +7,11 @@ public class PerkComponent : MonoBehaviour {
 [System.Serializable]
 public class Perk {
     public int requiredPerks;
+    [TextArea(3, 10)]
     public string name;
+    [TextArea(3, 10)]
     public string title;
+    [TextArea(3, 10)]
     public string desc;
     public Sprite perkImage;
     public Perk() { } // required for serialization 
