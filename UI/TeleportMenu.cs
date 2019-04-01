@@ -9,9 +9,11 @@ public class TeleportMenu : MonoBehaviour {
     public Teleporter teleporter;
     public UIButtonEffects effects;
     public List<Button> builtInButtons;
+    public Image image;
     void Start() {
         effects = GetComponent<UIButtonEffects>();
         GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
+        image = transform.Find("main/imageBackground/image").GetComponent<Image>();
     }
     public void SetReferences() {
         buttonList = transform.Find("main/list");
@@ -38,9 +40,18 @@ public class TeleportMenu : MonoBehaviour {
     public void TeleportButtonCallback() {
         // teleport to selected scene
         if (selectedButton != null) {
-            teleporter.DoTeleport(selectedButton.scene_name);
+            GameManager.Instance.data.teleportedToday = true;
             UINew.Instance.CloseActiveMenu();
             Controller.Instance.suspendInput = true;
+            if (teleporter != null) {
+                teleporter.DoTeleport(selectedButton.scene_name);
+            } else {
+                GameObject teleporterFX = Instantiate(Resources.Load("prefabs/TeleportFX")) as GameObject;
+                teleporter = teleporterFX.GetComponent<Teleporter>();
+                teleporterFX.transform.SetParent(GameManager.Instance.playerObject.transform, false);
+                teleporterFX.transform.localPosition = Vector3.zero;
+                teleporter.DoTeleport(selectedButton.scene_name);
+            }
         }
     }
     public void CancelButtonCallback() {

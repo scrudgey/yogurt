@@ -20,6 +20,7 @@ public class GameData {
     public int itemsCollectedToday;
     public int clothesCollectedToday;
     public int foodCollectedToday;
+    public bool teleportedToday;
     public SerializableDictionary<string, bool> itemCheckedOut;
     public SerializableDictionary<string, bool> perks;
     public string lastSavedPlayerPath;
@@ -102,7 +103,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = false;
+    public bool debug = true;
     public bool failedLevelLoad = false;
     public void PlayPublicSound(AudioClip clip) {
         if (clip == null)
@@ -114,6 +115,7 @@ public partial class GameManager : Singleton<GameManager> {
                 Toolbox.GetOrCreateComponent<CameraControl>(cam.gameObject);
             }
         }
+        // Debug.Log(publicAudio);
         publicAudio.PlayOneShot(clip);
     }
     void Start() {
@@ -352,6 +354,12 @@ public partial class GameManager : Singleton<GameManager> {
             }
             data.firstTimeLeavingHouse = false;
         }
+        if (data.entryID == 420) {
+            // teleport entry
+            AudioClip teleportEnter = Resources.Load("sounds/clown/clown4") as AudioClip;
+            // Debug.Log(teleportEnter);
+            PlayPublicSound(teleportEnter);
+        }
         if (sceneName == "cave1" || sceneName == "cave2") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneFall>();
         }
@@ -361,9 +369,10 @@ public partial class GameManager : Singleton<GameManager> {
         if (sceneName == "moon1" && (data.entryID == 420 || data.entryID == 99)) {
             CutsceneManager.Instance.InitializeCutscene<CutsceneMoonLanding>();
         }
-        if (sceneName == "house" && !data.teleporterUnlocked) {
-            GameObject.FindObjectOfType<Teleporter>().gameObject.SetActive(false);
-        }
+        // if (sceneName == "house" && !data.teleporterUnlocked) {
+        //     GameObject.FindObjectOfType<Teleporter>().gameObject.SetActive(false);
+        // }
+
         PlayerEnter();
     }
     public void InitializeNonPlayableLevel() {
@@ -422,6 +431,7 @@ public partial class GameManager : Singleton<GameManager> {
                 playerFlammable.onFire = false;
                 playerFlammable.heat = 0;
             }
+            data.teleportedToday = false;
             MySaver.Save();
             awaitNewDayPrompt = CheckNewDayPrompt();
             bed.SleepCutscene();

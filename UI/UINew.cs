@@ -44,6 +44,7 @@ public class UINew : Singleton<UINew> {
     private GameObject testButton;
     private GameObject hypnosisButton;
     private GameObject vomitButton;
+    private GameObject teleportButton;
     private bool init = false;
     public bool inventoryVisible = false;
     public Text status;
@@ -262,11 +263,12 @@ public class UINew : Singleton<UINew> {
         fightButton = UICanvas.transform.Find("topdock/FightButton").gameObject;
         punchButton = UICanvas.transform.Find("topdock/PunchButton").gameObject;
         speakButton = UICanvas.transform.Find("topdock/SpeakButton").gameObject;
+        hypnosisButton = UICanvas.transform.Find("topdock/HypnosisButton").gameObject;
+        vomitButton = UICanvas.transform.Find("topdock/VomitButton").gameObject;
+        teleportButton = UICanvas.transform.Find("topdock/TeleportButton").gameObject;
         saveButton = UICanvas.transform.Find("save").gameObject;
         loadButton = UICanvas.transform.Find("load").gameObject;
         testButton = UICanvas.transform.Find("test").gameObject;
-        hypnosisButton = UICanvas.transform.Find("topdock/HypnosisButton").gameObject;
-        vomitButton = UICanvas.transform.Find("topdock/VomitButton").gameObject;
         cursorText = UICanvas.transform.Find("cursorText").gameObject;
         cursorTextText = cursorText.GetComponent<Text>();
         actionTextObject = UICanvas.transform.Find("ActionText").GetComponent<Text>();
@@ -287,6 +289,7 @@ public class UINew : Singleton<UINew> {
         topRightBar.SetActive(false);
         cursorText.SetActive(false);
         vomitButton.SetActive(false);
+        teleportButton.SetActive(false);
         HidePunchButton();
         if (!GameManager.Instance.debug) {
             if (saveButton)
@@ -374,7 +377,7 @@ public class UINew : Singleton<UINew> {
         }
     }
     public void RefreshUI(bool active = false) {
-        List<GameObject> buttons = new List<GameObject>() { inventoryButton, fightButton, punchButton, speakButton, hypnosisButton, vomitButton };
+        List<GameObject> buttons = new List<GameObject>() { inventoryButton, fightButton, punchButton, speakButton, hypnosisButton, vomitButton, teleportButton };
         foreach (GameObject button in buttons) {
             if (button)
                 button.SetActive(false);
@@ -415,6 +418,11 @@ public class UINew : Singleton<UINew> {
         // do we have elective vomiting?
         if (GameManager.Instance.playerObject.GetComponent<Eater>()) {
             vomitButton.SetActive(GameManager.Instance.data.perks["vomit"]);
+        }
+        if (GameManager.Instance.data.teleporterUnlocked && !GameManager.Instance.data.teleportedToday) {
+            teleportButton.SetActive(true);
+        } else {
+            teleportButton.SetActive(false);
         }
     }
     public void UpdateActionButtons(Inventory inv) {

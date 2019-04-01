@@ -51,4 +51,9 @@ public class UIButtonCallbacks : MonoBehaviour {
         Eater eater = GameManager.Instance.playerObject.GetComponent<Eater>();
         eater.Vomit();
     }
+    public void TeleportButtonClick() {
+        GameObject menuObject = UINew.Instance.ShowMenu(UINew.MenuType.teleport);
+        TeleportMenu menu = menuObject.GetComponent<TeleportMenu>();
+        menu.PopulateSceneList();
+    }
 }
