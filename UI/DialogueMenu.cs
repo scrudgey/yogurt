@@ -15,11 +15,13 @@ public class Monologue {
     public int index;
     private string currentString;
     public Monologue() { }
+    private Regex name_hook = new Regex(@"\$name");
     public Monologue(Speech speaker, string[] texts) {
         index = 0;
         this.speaker = speaker;
         for (int i = texts.Length - 1; i >= 0; i--) {
-            text.Push(texts[i]);
+            string line = name_hook.Replace(texts[i], GameManager.Instance.saveGameName);
+            text.Push(line);
         }
     }
     public string GetString() {
@@ -148,7 +150,7 @@ public class DialogueMenu : MonoBehaviour {
             choice3Object.SetActive(false);
             return;
         }
-        if (target.hitState <= Controllable.HitState.stun){
+        if (target.hitState <= Controllable.HitState.stun) {
             if (target.defaultMonologue != "") {
                 LoadDialogueTree(target.defaultMonologue);
             }
@@ -267,14 +269,14 @@ public class DialogueMenu : MonoBehaviour {
         desire desireToAct = action.GetDesire(Controller.Instance.commandTarget, GameManager.Instance.playerObject);
 
         PromptCommand(action.Description());
-        if (desireToAct == desire.decline){
+        if (desireToAct == desire.decline) {
             DeclineCommand();
             Controller.Instance.ResetCommandState();
         } else {
             AcceptCommand();
         }
     }
-    void PromptCommand(string actionDescription){
+    void PromptCommand(string actionDescription) {
         List<string> request = new List<string>();
         request.Add("Say, could you " + actionDescription + " for me?");
         Say(new Monologue(instigator, request.ToArray()));
@@ -282,12 +284,12 @@ public class DialogueMenu : MonoBehaviour {
         string[] ender = new string[] { "END" };
         Say(new Monologue(target, ender));
     }
-    void DeclineCommand(){
+    void DeclineCommand() {
         List<string> response = new List<string>();
         response.Add("I'd rather not.");
         Say(new Monologue(target, response.ToArray()));
     }
-    void AcceptCommand(){
+    void AcceptCommand() {
         List<string> response = new List<string>();
         response.Add("Why certainly my good man!");
         Say(new Monologue(target, response.ToArray()));
@@ -385,8 +387,8 @@ public class DialogueMenu : MonoBehaviour {
             giveButton.gameObject.SetActive(false);
             // demandButton.gameObject.SetActive(false);
         }
-        if (CutsceneManager.Instance.cutscene != null){
-            if (CutsceneManager.Instance.cutscene.GetType() == typeof(CutsceneMayor)){
+        if (CutsceneManager.Instance.cutscene != null) {
+            if (CutsceneManager.Instance.cutscene.GetType() == typeof(CutsceneMayor)) {
                 suggestButton.GetComponent<Button>().interactable = false;
             }
         }
