@@ -23,14 +23,12 @@ public class Speech : Interactive, ISaveable {
     private float speakTime;
     private float queueTime;
     private float speakTimeTotal;
-    // private GameObject bubbleParent;
     private FollowGameObjectInCamera follower;
     private GameObject flipper;
     private Text bubbleText;
     private float speakSpeed;
     private bool[] swearMask;
     public bool vomiting;
-    // public AudioClip speakSound;
     public string voice = "none";
     public AudioClip[] speakSounds;
     public Vector2 pitchRange = new Vector2(0, 1);
