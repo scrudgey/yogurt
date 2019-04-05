@@ -161,7 +161,7 @@ public class UINew : Singleton<UINew> {
                     SetActionText(lastTarget);
                 }
             } else {
-                if (cursorOverButton) {
+                if (cursorOverButton && !GameManager.Instance.playerIsDead) {
                     SetActionText(actionButtonText);
                 } else if (target != null) {
                     lastTarget = Toolbox.Instance.GetName(target);
