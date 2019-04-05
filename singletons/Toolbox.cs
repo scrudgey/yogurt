@@ -48,7 +48,7 @@ public class Toolbox : Singleton<Toolbox> {
         }
         return d[n, m];
     }
-    public static float Gompertz(float x, float a=1, float b=1, float c=1){
+    public static float Gompertz(float x, float a = 1, float b = 1, float c = 1) {
         return (float)(a * Math.Exp(b * Math.Exp(-c * x)));
     }
     public static void ShuffleArray<T>(T[] array) {
@@ -138,15 +138,27 @@ public class Toolbox : Singleton<Toolbox> {
     public GameObject SpawnDroplet(Liquid l, float severity, GameObject spiller) {
         return SpawnDroplet(l, severity, spiller, 0.01f);
     }
-    public GameObject SpawnDroplet(Liquid l, float severity, GameObject spiller, float initHeight, bool noCollision=true) {
+    public GameObject SpawnDroplet(Liquid l, float severity, GameObject spiller, float initHeight, bool noCollision = true) {
         Vector3 initialVelocity = Vector2.zero;
-        Vector3 randomVelocity = Vector2.zero;
-        randomVelocity = spiller.transform.right * UnityEngine.Random.Range(-0.2f, 0.2f);
-
+        Vector3 randomVelocity = spiller.transform.right * UnityEngine.Random.Range(-0.2f, 0.2f);
         initialVelocity.x = spiller.transform.up.x * UnityEngine.Random.Range(0.8f, 1.3f);
         initialVelocity.z = UnityEngine.Random.Range(severity, 0.2f + severity);
         initialVelocity.x += randomVelocity.x;
         initialVelocity.z += randomVelocity.y;
+        return SpawnDroplet(l, severity, spiller, initHeight, initialVelocity, noCollision: noCollision);
+    }
+    public GameObject SpawnDroplet(Liquid l, float severity, GameObject spiller, float initHeight, Vector3 initVelocity, bool noCollision = true) {
+
+        Vector3 initialVelocity = Vector2.zero;
+        if (initVelocity == Vector3.zero) {
+            Vector3 randomVelocity = spiller.transform.right * UnityEngine.Random.Range(-0.2f, 0.2f);
+            initialVelocity.x = spiller.transform.up.x * UnityEngine.Random.Range(0.8f, 1.3f);
+            initialVelocity.z = UnityEngine.Random.Range(severity, 0.2f + severity);
+            initialVelocity.x += randomVelocity.x;
+            initialVelocity.z += randomVelocity.y;
+        } else {
+            initialVelocity = initVelocity;
+        }
 
         GameObject droplet = Instantiate(Resources.Load("droplet"), transform.position, Quaternion.identity) as GameObject;
         PhysicalBootstrapper phys = droplet.GetComponent<PhysicalBootstrapper>();
@@ -157,7 +169,7 @@ public class Toolbox : Singleton<Toolbox> {
             initHeight += pb.height;
         } else {
             Inventory holderInv = spiller.GetComponentInParent<Inventory>();
-            if (holderInv){
+            if (holderInv) {
                 initHeight += holderInv.dropHeight;
             }
         }
@@ -231,7 +243,7 @@ public class Toolbox : Singleton<Toolbox> {
             // Debug.Log("null name");
             return nameOut;
         }
-        if (obj == GameManager.Instance.playerObject){
+        if (obj == GameManager.Instance.playerObject) {
             return GameManager.Instance.saveGameName;
         }
         Item item = obj.GetComponent<Item>();
@@ -264,7 +276,7 @@ public class Toolbox : Singleton<Toolbox> {
             router.ReceiveMessage(message);
         }
     }
-    public static void RegisterMessageCallback<T>(Component component, Action<T> handler) where T: Message {
+    public static void RegisterMessageCallback<T>(Component component, Action<T> handler) where T : Message {
         MessageRouter router = GetOrCreateComponent<MessageRouter>(component.gameObject);
         router.Subscribe<T>(handler);
     }

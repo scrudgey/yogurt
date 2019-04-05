@@ -87,7 +87,7 @@ public class Hurtable : Damageable, ISaveable {
             case damageType.cutting:
                 damage = Mathf.Max(message.amount - armor, 0);
                 if (damage > 0) {
-                    Bleed(transform.position);
+                    Bleed(transform.position, message.force.normalized);
                 }
                 goto case damageType.physical;
             case damageType.physical:
@@ -352,10 +352,10 @@ public class Hurtable : Damageable, ISaveable {
             Toolbox.Instance.SendMessage(gameObject, this, message);
         }
     }
-    public void Bleed(Vector3 position) {
+    public void Bleed(Vector3 position, Vector3 direction) {
         Liquid blood = Liquid.LoadLiquid("blood");
         float initHeight = (position.y - transform.position.y) + 0.15f;
-        GameObject drop = Toolbox.Instance.SpawnDroplet(blood, 0.3f, gameObject, initHeight);
+        GameObject drop = Toolbox.Instance.SpawnDroplet(blood, 0.3f, gameObject, initHeight, direction.normalized);
         Edible edible = drop.GetComponent<Edible>();
         edible.human = true;
     }
