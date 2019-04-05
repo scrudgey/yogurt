@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 public class EmailUI : MonoBehaviour {
     public GameObject emailListObject;
@@ -12,6 +13,7 @@ public class EmailUI : MonoBehaviour {
     public Computer computer;
     public Button doneButton;
     public UIButtonEffects effects;
+    private Regex name_hook = new Regex(@"\$name");
     void Start() {
 
 
@@ -55,10 +57,10 @@ public class EmailUI : MonoBehaviour {
     }
     public void EmailEntryCallback(Email email) {
         // populate the text entries with the information from the email
-        emailText.text = email.content;
-        toText.text = "To: " + email.toString;
+        emailText.text = name_hook.Replace(email.content, GameManager.Instance.saveGameName);
+        toText.text = "To: " + name_hook.Replace(email.toString, GameManager.Instance.saveGameName);
         fromText.text = "From: " + email.fromString;
-        subjectText.text = "Subject: " + email.subject;
+        subjectText.text = "Subject: " + name_hook.Replace(email.subject, GameManager.Instance.saveGameName);
         email.read = true;
 
         foreach (emailEntryButton button in emailButtons) {
