@@ -13,7 +13,7 @@ public class DamageZone : MonoBehaviour {
         message = new MessageDamage(amount, type);
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         audioSource.clip = damageSound;
-        // message.impactSounds = damageSound;
+        // message.impactSounds = new AudioClip[] { damageSound };
     }
     void OnTriggerStay2D(Collider2D other) {
         float timerVal = 0;

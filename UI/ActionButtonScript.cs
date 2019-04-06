@@ -42,26 +42,19 @@ public class ActionButtonScript : MonoBehaviour {
         if (bType == buttonType.Action) {
             if (Controller.Instance.commandTarget != null) {
                 string targetName = Toolbox.Instance.GetName(Controller.Instance.commandTarget);
-                // UINew.Instance.SetActionText("Command " + targetName + " to " + action.Description());
                 UINew.Instance.actionButtonText = "Command " + targetName + " to " + action.Description();
             } else {
-                // UINew.Instance.SetActionText(action.Description());
                 UINew.Instance.actionButtonText = action.Description();
             }
         } else {
             if (Controller.Instance.commandTarget != null) {
                 string targetName = Toolbox.Instance.GetName(Controller.Instance.commandTarget);
-                // UINew.Instance.SetActionText("Command " + targetName + " to " + HandActionDescription());
                 UINew.Instance.actionButtonText = "Command " + targetName + " to " + HandActionDescription();
             } else {
-                // UINew.Instance.SetActionText(HandActionDescription());
                 UINew.Instance.actionButtonText = HandActionDescription();
             }
         }
     }
-    // public void MouseExit() {
-    //     UINew.Instance.SetActionText("");
-    // }
     public void HandAction() {
         switch (bType) {
             case buttonType.Drop:
@@ -81,7 +74,6 @@ public class ActionButtonScript : MonoBehaviour {
                 break;
 
             case buttonType.Punch:
-                // Controller.Instance.focus.shootPressedFlag = true;
                 Controller.Instance.focus.ShootPressed();
                 break;
 

@@ -1,5 +1,5 @@
 ﻿// using System.Collections;
-// using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,7 +15,10 @@ public class PhoneMenu : MonoBehaviour {
     private PhoneNumberButton selectedButton;
     private Image callButtonImage;
     private Button callButton;
+    public List<Button> builtInButtons;
+    public UIButtonEffects effects;
     void Start() {
+        effects = GetComponent<UIButtonEffects>();
         numbersList = transform.Find("main/Numbers");
         callButtonImage = transform.Find("main/ButtonBar/Call").GetComponent<Image>();
         callButton = transform.Find("main/ButtonBar/Call").GetComponent<Button>();
@@ -30,17 +33,20 @@ public class PhoneMenu : MonoBehaviour {
         if (phoneDown != null)
             Toolbox.Instance.AudioSpeaker(phoneDown, telephone.transform.position);
     }
-    public void AddNumber(PhoneNumberButton.phoneNumber type){
+    public void AddNumber(PhoneNumberButton.phoneNumber type) {
         GameObject newEntry = Instantiate(Resources.Load("UI/PhoneNumberButton")) as GameObject;
         newEntry.transform.SetParent(numbersList, false);
         PhoneNumberButton buttonScript = newEntry.GetComponent<PhoneNumberButton>();
         buttonScript.menu = this;
         buttonScript.SetPhoneType(type);
+        effects.buttons.Add(newEntry.GetComponent<Button>());
     }
     public void PopulateList() {
         Start();
+        effects.buttons = new List<Button>(builtInButtons);
         AddNumber(PhoneNumberButton.phoneNumber.fire);
         AddNumber(PhoneNumberButton.phoneNumber.clown);
+        effects.Configure();
     }
     public void PhoneButtonCallback(PhoneNumberButton button) {
         if (selectedButton != null) {

@@ -21,6 +21,11 @@ public class HatAnimation : MonoBehaviour, IDirectable {
     public void UpdateSprite() {
         if (spriteRenderer == null)
             return;
+        if (transform.localScale.x < 0) {
+            Vector3 scales = transform.localScale;
+            scales.x = 1;
+            transform.localScale = scales;
+        }
         switch (lastPressed) {
             case "down":
                 spriteRenderer.sprite = downSprite;

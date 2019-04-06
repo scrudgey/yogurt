@@ -54,7 +54,7 @@ public class Hurtable : Damageable, ISaveable {
             }
         }
     }
-    void HandleStun(MessageStun message){
+    void HandleStun(MessageStun message) {
         hitState = Controllable.AddHitState(hitState, Controllable.HitState.stun);
         hitStunCounter = message.timeout;
     }
@@ -87,7 +87,7 @@ public class Hurtable : Damageable, ISaveable {
             case damageType.cutting:
                 damage = Mathf.Max(message.amount - armor, 0);
                 if (damage > 0) {
-                    Bleed(transform.position);
+                    Bleed(transform.position, message.force.normalized);
                 }
                 goto case damageType.physical;
             case damageType.physical:
@@ -182,7 +182,7 @@ public class Hurtable : Damageable, ISaveable {
         hitState = Controllable.AddHitState(hitState, Controllable.HitState.dead);
         OccurrenceDeath occurrenceData = new OccurrenceDeath();
         occurrenceData.dead = gameObject;
-        Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData, new HashSet<GameObject>(){gameObject});
+        Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData, new HashSet<GameObject>() { gameObject });
     }
     public void TypeOfDeath(damageType type) {
         bool suicide = false;
@@ -224,7 +224,7 @@ public class Hurtable : Damageable, ISaveable {
         }
         // GameManager.Instance.CheckAchievements();
     }
-    
+
     public void Update() {
         if (impulse > 0) {
             impulse -= Time.deltaTime * 25f;
@@ -267,7 +267,7 @@ public class Hurtable : Damageable, ISaveable {
         if (impulse > 50f && hitState < Controllable.HitState.unconscious) {
             KnockDown();
         }
-        if (downedTimer <= 0 && hitState == Controllable.HitState.unconscious ){ //&& health > 0) {
+        if (downedTimer <= 0 && hitState == Controllable.HitState.unconscious) { //&& health > 0) {
             GetUp();
         }
         if (impulse > 35f && !doubledOver && hitState < Controllable.HitState.unconscious) {
@@ -278,7 +278,7 @@ public class Hurtable : Damageable, ISaveable {
         }
         if (coughing) {
             timeSinceLastCough -= Time.deltaTime;
-            if (timeSinceLastCough <= 0){
+            if (timeSinceLastCough <= 0) {
                 MessageSpeech speech = new MessageSpeech("{cough}");
                 speech.nimrod = true;
                 Toolbox.Instance.SendMessage(gameObject, this, speech);
@@ -316,7 +316,11 @@ public class Hurtable : Damageable, ISaveable {
     public void GetUp() {
         // Debug.Log(health);
         if (health < 0.25f * maxHealth)
-            health = 0.25f * maxHealth;
+            if (gameObject == GameManager.Instance.playerObject) {
+                health = 0.66f * maxHealth;
+            } else {
+                health = 0.25f * maxHealth;
+            }
         hitState = Controllable.RemoveHitState(hitState, Controllable.HitState.unconscious);
         doubledOver = false;
         Vector3 pivot = transform.position;
@@ -326,7 +330,7 @@ public class Hurtable : Damageable, ISaveable {
             ClaimsManager.Instance.WasDestroyed(dizzyEffect);
             Destroy(dizzyEffect);
         }
-        if (gameObject != GameManager.Instance.playerObject){
+        if (gameObject != GameManager.Instance.playerObject) {
             hitState = Controllable.HitState.stun;
             hitStunCounter = 0.5f;
         }
@@ -348,10 +352,10 @@ public class Hurtable : Damageable, ISaveable {
             Toolbox.Instance.SendMessage(gameObject, this, message);
         }
     }
-    public void Bleed(Vector3 position) {
+    public void Bleed(Vector3 position, Vector3 direction) {
         Liquid blood = Liquid.LoadLiquid("blood");
         float initHeight = (position.y - transform.position.y) + 0.15f;
-        GameObject drop = Toolbox.Instance.SpawnDroplet(blood, 0.3f, gameObject, initHeight);
+        GameObject drop = Toolbox.Instance.SpawnDroplet(blood, 0.3f, gameObject, initHeight, direction.normalized);
         Edible edible = drop.GetComponent<Edible>();
         edible.human = true;
     }

@@ -5,10 +5,10 @@ public class Teleporter : Interactive {
     public float timer;
     public float teleportDelay;
     public string destination;
+    public AudioClip teleportStartSound;
     void Start() {
         Interaction teleport = new Interaction(this, "Teleport", "Teleport");
         interactions.Add(teleport);
-        startEffect.Stop();
     }
     public void Teleport() {
         GameObject menuObject = UINew.Instance.ShowMenu(UINew.MenuType.teleport);
@@ -19,6 +19,7 @@ public class Teleporter : Interactive {
     public void DoTeleport(string toSceneName) {
         timer += teleportDelay;
         startEffect.Play();
+        GameManager.Instance.PlayPublicSound(teleportStartSound);
         destination = toSceneName;
     }
     void Update() {

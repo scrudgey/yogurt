@@ -16,7 +16,6 @@ public class ItemEntryScript : MonoBehaviour {
     }
     public Sprite sprite;
     public string description;
-
     public void Clicked() {
         ClosetButtonHandler handler = GetComponentInParent<ClosetButtonHandler>();
         handler.ItemClick(this);
@@ -33,7 +32,7 @@ public class ItemEntryScript : MonoBehaviour {
             myText.color = new Color(0.5f, 0.5f, 0.5f, 1f);
         }
     }
-    public void Configure(string name, HomeCloset.ClosetType type){
+    public void Configure(string name, HomeCloset.ClosetType type) {
         Text newText = transform.Find("newIndicator").GetComponent<Text>();
         // ItemEntryScript entryScript = transform.Find("item").GetComponent<ItemEntryScript>();
         Text entryText = transform.Find("item").GetComponent<Text>();

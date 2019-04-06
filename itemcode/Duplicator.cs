@@ -13,7 +13,7 @@ public class Duplicator : Interactive, IDirectable {
     void Start() {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         Interaction dup = new Interaction(this, "Duplicate", "Duplicate");
-        dup.limitless = true;
+        dup.unlimitedRange = true;
         dup.validationFunction = true;
         // dup.inertOnPlayerConsent = false;
         // dup.otherOnPlayerConsent = false;
@@ -46,6 +46,6 @@ public class Duplicator : Interactive, IDirectable {
         }
     }
     public string Duplicate_desc(Duplicatable duplicatable) {
-        return "Duplicate " + Toolbox.Instance.GetName(duplicatable.duplicationPrefab);
+        return "Duplicate " + Toolbox.Instance.GetName(duplicatable.gameObject);
     }
 }

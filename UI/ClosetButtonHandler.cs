@@ -1,17 +1,22 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using System.Linq;
 
 public class ClosetButtonHandler : MonoBehaviour {
-    private Image icon;
-    private Text titleText;
-    private Text descriptionText;
-    private Text nameText;
+    public Image icon;
+    public Text titleText;
+    public Text descriptionText;
+    public Text nameText;
+    public Transform listContent;
+    public UIButtonEffects effects;
+    public Button closeButton;
+    // public Text titleText;
     void Start() {
         GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
-        icon = transform.Find("menu/body/InfoPanel/ImagePanel/Icon").GetComponent<Image>();
-        descriptionText = transform.Find("menu/body/InfoPanel/TextPanel/Description").GetComponent<Text>();
-        nameText = transform.Find("menu/body/InfoPanel/TextPanel/Title").GetComponent<Text>();
+        // icon = transform.Find("menu/body/InfoPanel/ImagePanel/Icon").GetComponent<Image>();
+        // descriptionText = transform.Find("menu/body/InfoPanel/TextPanel/Description").GetComponent<Text>();
+        // nameText = transform.Find("menu/body/InfoPanel/TextPanel/Title").GetComponent<Text>();
         icon.sprite = null;
         icon.color = new Color(1f, 1f, 1f, 0f);
     }
@@ -20,9 +25,15 @@ public class ClosetButtonHandler : MonoBehaviour {
         return newObject.GetComponent<ItemEntryScript>();
     }
     public void PopulateItemList(HomeCloset.ClosetType type) {
-        GameObject listObject = transform.Find("menu/body/ItemList").gameObject;
+        effects = GetComponent<UIButtonEffects>();
+        effects.buttons = new List<Button>() { closeButton };
+        foreach (Transform childObject in listContent) {
+            Destroy(childObject.gameObject);
+        }
+        // GameObject listObject = transform.Find("menu/body/ItemList").gameObject;
         List<string> itemList = GameManager.Instance.data.collectedObjects;
-        titleText = transform.Find("menu/menubar/titlebar").GetComponent<Text>();
+
+        // titleText = transform.Find("menu/menubar/titlebar").GetComponent<Text>();
         if (type == HomeCloset.ClosetType.clothing) {
             itemList = GameManager.Instance.data.collectedClothes;
             titleText.text = "Collected Clothing";
@@ -33,11 +44,24 @@ public class ClosetButtonHandler : MonoBehaviour {
             itemList = GameManager.Instance.data.collectedItems;
             titleText.text = "Collected Items";
         }
+        Dictionary<string, string> names = new Dictionary<string, string>();
+        foreach (string name in itemList) {
+            GameObject tempObject = Instantiate(Resources.Load("prefabs/" + name)) as GameObject;
+            Item tempItem = tempObject.GetComponent<Item>();
+            // names.Add(tempItem.itemName);
+            names[name] = tempItem.itemName;
+            Destroy(tempObject);
+        }
+        // docs = docs.OrderBy(d => docsIds.IndexOf(d.Id)).ToList();
+        // itemList.Sort();
+        itemList = itemList.OrderBy(i => names[i]).ToList();
         foreach (string name in itemList) {
             ItemEntryScript script = spawnEntry();
+            effects.buttons.Add(script.GetComponentInChildren<Button>());
             script.Configure(name, type);
-            script.transform.SetParent(listObject.transform, false);
+            script.transform.SetParent(listContent, false);
         }
+        effects.Configure();
     }
     public void CloseButtonClick() {
         UINew.Instance.CloseActiveMenu();

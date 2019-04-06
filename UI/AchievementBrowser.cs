@@ -15,48 +15,54 @@ public class AchievementBrowser : MonoBehaviour {
     public GameObject entryPrefab;
     public Image icon;
     public StartMenu startMenu;
+    private UIButtonEffects effects;
+    public Button closeButton;
 
-    public void Initialize(GameData data){
-        foreach (Transform child in scrollArea){
+    public void Initialize(GameData data) {
+        effects = GetComponent<UIButtonEffects>();
+        effects.buttons = new List<Button>() { closeButton };
+        foreach (Transform child in scrollArea) {
             Destroy(child.gameObject);
         }
         List<Achievement> allAchievements = LoadAchievements();
         bool initializeFirst = false;
         int numberComplete = 0;
-        foreach (Achievement achievement in allAchievements){
+        foreach (Achievement achievement in allAchievements) {
             GameObject entry = GameObject.Instantiate(entryPrefab) as GameObject;
+            Button entryButton = entry.GetComponent<Button>();
+            effects.buttons.Add(entryButton);
             entry.transform.SetParent(scrollArea, false);
             Image entryImage = entry.transform.Find("Image/Image").GetComponent<Image>();
             Text entryText = entry.transform.Find("Image/Text").GetComponent<Text>();
 
             entryText.text = achievement.title;
-            Sprite icon = Resources.Load<Sprite>("achievements/icons/"+achievement.icon) as Sprite;
+            Sprite icon = Resources.Load<Sprite>("achievements/icons/" + achievement.icon) as Sprite;
             entryImage.sprite = icon;
 
             AchievementEntry entryScript = entry.GetComponent<AchievementEntry>();
             entryScript.browser = this;
-            foreach (Achievement savedAchievement in data.achievements){
+            foreach (Achievement savedAchievement in data.achievements) {
                 if (savedAchievement.title != achievement.title)
                     continue;
-                
+
                 entryScript.achievement = savedAchievement;
-                if (savedAchievement.complete){
+                if (savedAchievement.complete) {
                     numberComplete += 1;
-                    Button entryButton = entry.GetComponent<Button>();
+                    // Button entryButton = entry.GetComponent<Button>();
                     ColorBlock cb = entryButton.colors;
-                    cb.normalColor = new Color(114f/255f, 185f/255f, 255f/255f, 1f);
+                    cb.normalColor = new Color(114f / 255f, 185f / 255f, 255f / 255f, 1f);
                     entryButton.colors = cb;
                 }
-                if (!initializeFirst){
+                if (!initializeFirst) {
                     initializeFirst = true;
                     AchievementEntryCallback(savedAchievement);
                 }
             }
-            // if i didn't collect this achievement
         }
-        counter.text = numberComplete.ToString() + "/"+ allAchievements.Count.ToString() + "\nComplete";
+        effects.Configure();
+        counter.text = numberComplete.ToString() + "/" + allAchievements.Count.ToString() + "\nComplete";
     }
-    public List<Achievement> LoadAchievements(){
+    public List<Achievement> LoadAchievements() {
         List<Achievement> achievements = new List<Achievement>();
         GameObject[] achievementPrefabs = Resources.LoadAll("achievements/", typeof(GameObject))
             .Cast<GameObject>()
@@ -69,26 +75,26 @@ public class AchievementBrowser : MonoBehaviour {
         }
         return achievements;
     }
-    public void AchievementEntryCallback(Achievement achievement){
+    public void AchievementEntryCallback(Achievement achievement) {
         // play sound
         title.text = achievement.title;
         description.text = achievement.description;
         directive.text = achievement.directive;
-        if (achievement.complete){
+        if (achievement.complete) {
             date.gameObject.SetActive(true);
-            date.text = "Achieved on "+achievement.completedTime.ToShortDateString();
+            date.text = "Achieved on " + achievement.completedTime.ToShortDateString();
         } else {
             date.gameObject.SetActive(false);
             date.text = "Achieved on 4/20/69";
         }
-        icon.sprite = Resources.Load<Sprite>("achievements/icons/"+achievement.icon) as Sprite;
-        if (achievement.complete){
+        icon.sprite = Resources.Load<Sprite>("achievements/icons/" + achievement.icon) as Sprite;
+        if (achievement.complete) {
             badge.SetActive(true);
         } else {
             badge.SetActive(false);
         }
     }
-    public void CloseButtonCallback(){
+    public void CloseButtonCallback() {
         startMenu.CloseAchievementBrowser();
     }
 }

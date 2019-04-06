@@ -9,13 +9,17 @@ public class ItemCollectionInspector : MonoBehaviour {
     public Text descriptionText;
     public Text itemName;
     public StartMenu startMenu;
-    public void Initialize(StartMenu menu, GameData data){
+    private UIButtonEffects effects;
+    public Button closeButton;
+    public void Initialize(StartMenu menu, GameData data) {
         this.startMenu = menu;
-        foreach(Transform oldButton in collectionList){
+        effects = GetComponent<UIButtonEffects>();
+        effects.buttons = new List<Button>() { closeButton };
+        foreach (Transform oldButton in collectionList) {
             Destroy(oldButton.gameObject);
         }
         Dictionary<string, Item> itemDict = new Dictionary<string, Item>();
-        foreach(string obj in data.collectedObjects){
+        foreach (string obj in data.collectedObjects) {
             GameObject tempObject = Instantiate(Resources.Load("prefabs/" + obj)) as GameObject;
             Item tempItem = tempObject.GetComponent<Item>();
             itemDict[obj] = tempItem;
@@ -25,26 +29,29 @@ public class ItemCollectionInspector : MonoBehaviour {
         items.Sort((item1, item2) => itemDict[item1].itemName.CompareTo(itemDict[item2].itemName));
 
         bool initializedText = false;
-        foreach (string itemName in items){
+        foreach (string itemName in items) {
             // create itemCollectionButton
             GameObject entry = GameObject.Instantiate(Resources.Load("UI/ItemCollectionEntry")) as GameObject;
             ItemCollectionButton script = entry.GetComponent<ItemCollectionButton>();
             // set itemCollectionButton inspector value
             script.Configure(this, itemName);
+            Button entryButton = entry.GetComponent<Button>();
+            effects.buttons.Add(entryButton);
             script.transform.SetParent(collectionList, false);
-            if (!initializedText){
+            if (!initializedText) {
                 EntryClickedCallback(script);
             }
         }
+        effects.Configure();
     }
-    public void EntryClickedCallback(ItemCollectionButton script){
+    public void EntryClickedCallback(ItemCollectionButton script) {
         // update icon
         sprite.sprite = script.sprite;
         // update description
         descriptionText.text = script.description;
         itemName.text = script.itemName;
     }
-    public void CloseButtonCallback(){
+    public void CloseButtonCallback() {
         startMenu.CloseItemCollectionInspector();
     }
 }

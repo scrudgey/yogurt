@@ -20,7 +20,7 @@ public class Interaction {
     public bool hideInRightClickMenu;
     public int defaultPriority;
     public float range = Mathf.Pow(0.35f, 2f);
-    public bool limitless = false;
+    public bool unlimitedRange = false;
     public bool dontWipeInterface = false;
     public string actionName;
     private bool _validationFunction;
@@ -158,8 +158,8 @@ public class Interaction {
         }
     }
     // this can be sped up if I store it in a delegate instead of calling Invoke
-    public void DoAction(List<object> customParameters=null) {
-        if (customParameters == null){
+    public void DoAction(List<object> customParameters = null) {
+        if (customParameters == null) {
             customParameters = parameters;
         }
         if (actionDelegate == null) {

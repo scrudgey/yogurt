@@ -419,7 +419,7 @@ public class CutsceneMayor : Cutscene {
         //     Debug.Log("disabling farmer");
         //     farmer.GetComponent<Controllable>().control = Controllable.ControlType.none;
         // }
-        foreach (Controllable controllable in GameObject.FindObjectsOfType<Controllable>()){
+        foreach (Controllable controllable in GameObject.FindObjectsOfType<Controllable>()) {
             // controllable.
             initialState[controllable] = controllable.control;
             controllable.control = Controllable.ControlType.none;
@@ -455,7 +455,7 @@ public class CutsceneMayor : Cutscene {
     }
     public override void CleanUp() {
         UINew.Instance.RefreshUI(active: true);
-        foreach (KeyValuePair<Controllable, Controllable.ControlType> kvp in initialState){
+        foreach (KeyValuePair<Controllable, Controllable.ControlType> kvp in initialState) {
             kvp.Key.control = kvp.Value;
         }
     }
@@ -508,14 +508,14 @@ public class CutsceneNewDay : Cutscene {
 
 public class CutsceneManager : Singleton<CutsceneManager> {
     public List<Type> lateConfigure = new List<Type>(){
-        typeof(CutsceneNewDay), 
+        typeof(CutsceneNewDay),
         typeof(CutsceneBoardroom),
         typeof(CutsceneFall)};
     public Cutscene cutscene;
     void Start() {
         SceneManager.sceneLoaded += LevelWasLoaded;
     }
-    public void InitializeCutscene<T>() where T: Cutscene, new() {
+    public void InitializeCutscene<T>() where T : Cutscene, new() {
         Controller.Instance.state = Controller.ControlState.cutscene;
         cutscene = new T();
         if (!lateConfigure.Contains(typeof(T)))
@@ -530,7 +530,7 @@ public class CutsceneManager : Singleton<CutsceneManager> {
             return;
         }
         if (cutscene.configured == false) {
-            if (lateConfigure.Contains(cutscene.GetType())){
+            if (lateConfigure.Contains(cutscene.GetType())) {
                 cutscene.Configure();
             }
         }

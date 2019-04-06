@@ -10,8 +10,8 @@ public class Occurrence : MonoBehaviour {
     // occurrences can also be noticed by perceptive components which use the flag properties to compose 
     // a stimulus.
     public HashSet<GameObject> involvedParties = new HashSet<GameObject>();
-    public void CalculateDescriptions(){
-        foreach(OccurrenceData dat in data){
+    public void CalculateDescriptions() {
+        foreach (OccurrenceData dat in data) {
             dat.CalculateDescriptions(this);
         }
     }
@@ -125,7 +125,7 @@ public class EventData {
     };
     public EventData() {
     }
-    public EventData(EventData other){
+    public EventData(EventData other) {
         this.key = other.key;
         this.val = other.val;
         this.desc = other.desc;
@@ -133,7 +133,7 @@ public class EventData {
         this.transcriptLine = other.transcriptLine;
         this.noun = other.noun;
         this.ratings = new SerializableDictionary<Rating, float>();
-        foreach(KeyValuePair<Rating, float> kvp in other.ratings){
+        foreach (KeyValuePair<Rating, float> kvp in other.ratings) {
             this.ratings[kvp.Key] = kvp.Value;
         }
     }
@@ -166,7 +166,8 @@ public class EventData {
         Rating rate = Quality();
         if (ratings[rate] == 0)
             return "none";
-        string key = rate.ToString() + "_" + ratings[rate].ToString();
+        float severity = Mathf.Min(ratings[rate], 3);
+        string key = rate.ToString() + "_" + severity.ToString();
         return grammar.Parse("{" + key + "}");
     }
 }
@@ -200,8 +201,13 @@ public class OccurrenceEat : OccurrenceData {
     public GameObject eater;
     public override void CalculateDescriptions(Occurrence parent) {
         EventData data = new EventData();
+        MonoLiquid monoLiquid = edible.GetComponent<MonoLiquid>();
+        if (monoLiquid) {
+            data.whatHappened = Toolbox.Instance.GetName(eater) + " drank " + monoLiquid.liquid.name;
+        } else {
+            data.whatHappened = Toolbox.Instance.GetName(eater) + " ate " + edible.name;
+        }
         data.noun = "eating";
-        data.whatHappened = Toolbox.Instance.GetName(eater) + " ate " + edible.name;
         if (edible.offal) {
             data.ratings[Rating.disgusting] = 2;
             data.ratings[Rating.chaos] = 2;
@@ -248,7 +254,7 @@ public class OccurrenceVomit : OccurrenceData {
             return;
         EventData data = Occurrence.Vomit(vomiter, vomit);
         events.Add(data);
-        if (vomit != null){
+        if (vomit != null) {
             MonoLiquid mliquid = vomit.GetComponent<MonoLiquid>();
             if (mliquid == null)
                 return;

@@ -67,7 +67,7 @@ public abstract class Damageable : MonoBehaviour {
         Toolbox.RegisterMessageCallback<MessageDamage>(this, TakeDamage);
         Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
     }
-    void HandleNetIntrinsic(MessageNetIntrinsic message){
+    void HandleNetIntrinsic(MessageNetIntrinsic message) {
         netBuffs = message.netBuffs;
         NetIntrinsicsChanged(message);
     }
@@ -96,7 +96,7 @@ public abstract class Damageable : MonoBehaviour {
                 result = ImpactResult.repel;
             }
             // play impact sounds
-            if (message.type != damageType.fire && message.type != damageType.asphyxiation)
+            if ((message.impactSounds.Length > 0) || (message.type != damageType.fire && message.type != damageType.asphyxiation && message.type != damageType.cosmic))
                 PlayImpactSound(result, message);
             if (message.messenger != null)
                 message.messenger.SendMessage("ImpactReceived", result, SendMessageOptions.DontRequireReceiver);
@@ -124,7 +124,7 @@ public abstract class Damageable : MonoBehaviour {
         ClaimsManager.Instance.WasDestroyed(gameObject);
         Destroy(gameObject);
     }
-    
+
     public void PlayImpactSound(ImpactResult impactType, MessageDamage message) {
         if (message.silentImpact)
             return;

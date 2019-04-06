@@ -1,17 +1,22 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System.Collections.Generic;
 public class ScriptSelectionMenu : MonoBehaviour {
     Text descriptionText;
     GameObject scrollContent;
     ScriptListEntry lastClicked;
+    public List<Button> builtInButtons;
+    public UIButtonEffects effects;
     void Start() {
+        effects = GetComponent<UIButtonEffects>();
         // Controller.Instance.suspendInput = true;
         GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
 
         descriptionText = transform.Find("Panel/Body/sidebar/DescriptionPanel/DescriptionBox/Description").GetComponent<Text>();
         scrollContent = transform.Find("Panel/Body/Left/ScriptList/Viewport/Content").gameObject;
         GameObject firstEntry = null;
+        effects.buttons = new List<Button>(builtInButtons);
         foreach (Commercial script in GameManager.Instance.data.unlockedCommercials) {
             bool complete = false;
             foreach (Commercial completed in GameManager.Instance.data.completeCommercials) {
@@ -40,9 +45,11 @@ public class ScriptSelectionMenu : MonoBehaviour {
         }
         EventSystem.current.SetSelectedGameObject(firstEntry);
         ClickedScript(firstEntry.GetComponent<ScriptListEntry>());
+        effects.Configure();
     }
     GameObject CreateScriptButton(Commercial script) {
         GameObject newEntry = Instantiate(Resources.Load("UI/ScriptListEntry")) as GameObject;
+        effects.buttons.Add(newEntry.GetComponent<Button>());
         newEntry.transform.SetParent(scrollContent.transform, false);
         ScriptListEntry scriptEntry = newEntry.GetComponent<ScriptListEntry>();
         scriptEntry.Configure(script, this);

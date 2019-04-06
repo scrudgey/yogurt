@@ -43,27 +43,27 @@ public class StartMenu : MonoBehaviour {
             prompt.SetActive(false);
         }
         if (Input.GetKeyDown(KeyCode.Escape)) {
-            if (saveInspector.gameObject.activeInHierarchy){
+            if (saveInspector.gameObject.activeInHierarchy) {
                 saveInspector.gameObject.SetActive(false);
                 loadGameMenu.gameObject.SetActive(true);
                 loadGameMenu.ConfigLoadMenu(this);
                 return;
             }
-            if (achievementBrowser.gameObject.activeInHierarchy){
+            if (achievementBrowser.gameObject.activeInHierarchy) {
                 CloseAchievementBrowser();
             }
-            if (statsBrowser.gameObject.activeInHierarchy){
+            if (statsBrowser.gameObject.activeInHierarchy) {
                 CloseStatsBrowser();
             }
-            if (itemCollectionInspector.gameObject.activeInHierarchy){
+            if (itemCollectionInspector.gameObject.activeInHierarchy) {
                 CloseItemCollectionInspector();
             }
-            if (loadGameMenu.gameObject.activeInHierarchy){
+            if (loadGameMenu.gameObject.activeInHierarchy) {
                 loadGameMenu.gameObject.SetActive(false);
                 mainMenu.SetActive(true);
                 state = menuState.main;
             }
-            if (newGameMenu.gameObject.activeInHierarchy){
+            if (newGameMenu.gameObject.activeInHierarchy) {
                 newGameMenu.SetActive(false);
                 mainMenu.SetActive(true);
                 state = menuState.main;
@@ -118,7 +118,7 @@ public class StartMenu : MonoBehaviour {
         DirectoryInfo info = new DirectoryInfo(Application.persistentDataPath);
         DirectoryInfo[] dirs = info.GetDirectories();
         foreach (DirectoryInfo dir in dirs) {
-            if (dir.Name == "test" || dir.Name == "Unity") 
+            if (dir.Name == "test" || dir.Name == "Unity")
                 continue;
             GameData data = GameManager.Instance.LoadGameData(dir.Name);
             datas.Add(dir.Name);
@@ -156,9 +156,9 @@ public class StartMenu : MonoBehaviour {
         if (newName.Length == 0 || newName == "test" || newName == "Unity") {
             ShowAlert("Bad name!!!");
             return;
-        } 
+        }
         string path = Path.Combine(Application.persistentDataPath, newName);
-        if (Directory.Exists(path)){
+        if (Directory.Exists(path)) {
             ShowAlert(newName + " already exists...?");
             return;
         }
@@ -173,31 +173,31 @@ public class StartMenu : MonoBehaviour {
         saveInspector.gameObject.SetActive(true);
         saveInspector.Initialize(this, saveGame);
     }
-    public void InspectItemCollection(GameData data){
+    public void InspectItemCollection(GameData data) {
         saveInspector.gameObject.SetActive(false);
         itemCollectionInspector.gameObject.SetActive(true);
         itemCollectionInspector.Initialize(this, data);
         // ite
     }
-    public void CloseItemCollectionInspector(){
+    public void CloseItemCollectionInspector() {
         itemCollectionInspector.gameObject.SetActive(false);
         saveInspector.gameObject.SetActive(true);
     }
-    public void InspectAchievements(GameData data){
+    public void InspectAchievements(GameData data) {
         saveInspector.gameObject.SetActive(false);
         achievementBrowser.gameObject.SetActive(true);
         achievementBrowser.Initialize(data);
     }
-    public void CloseAchievementBrowser(){
+    public void CloseAchievementBrowser() {
         achievementBrowser.gameObject.SetActive(false);
         saveInspector.gameObject.SetActive(true);
     }
-    public void InspectStats(GameData data){
+    public void InspectStats(GameData data) {
         saveInspector.gameObject.SetActive(false);
         statsBrowser.gameObject.SetActive(true);
         statsBrowser.Initialize(data);
     }
-    public void CloseStatsBrowser(){
+    public void CloseStatsBrowser() {
         statsBrowser.gameObject.SetActive(false);
         saveInspector.gameObject.SetActive(true);
     }
@@ -229,7 +229,11 @@ public class StartMenu : MonoBehaviour {
             "Pingy",
             "Scrints",
             "Chungus",
-            "Beppo"
+            "Beppo",
+            "Bippy",
+            "Smits",
+            "Oprah Noodlemantra",
+            "Hash Burnslide"
         };
         return names[UnityEngine.Random.Range(0, names.Count)];
     }

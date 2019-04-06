@@ -28,19 +28,19 @@ public class Telephone : Item {
             MessageSpeech message = new MessageSpeech();
             message.phrase = "We'll send someone over right away!";
             Toolbox.Instance.SendMessage(gameObject, this, message);
-            fireTime = 1f;
+            fireTime = 10f;
         } else {
             MessageSpeech message = new MessageSpeech();
             message.phrase = "Just sit tight, the team is on their way!";
             Toolbox.Instance.SendMessage(gameObject, this, message);
         }
     }
-    public void ClownCallback(){
+    public void ClownCallback() {
         if (fireTime <= 0) {
             MessageSpeech message = new MessageSpeech();
             message.phrase = "Brother clown, assemble!";
             Toolbox.Instance.SendMessage(gameObject, this, message);
-            clownTime = 1f;
+            clownTime = 10f;
         } else {
             MessageSpeech message = new MessageSpeech();
             message.phrase = "Brother clown is with you this day!";
@@ -69,7 +69,7 @@ public class Telephone : Item {
             }
         }
     }
-    public void MenuCallback(PhoneNumberButton.phoneNumber type){
+    public void MenuCallback(PhoneNumberButton.phoneNumber type) {
         switch (type) {
             case PhoneNumberButton.phoneNumber.fire:
                 FireButtonCallback();
