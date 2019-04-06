@@ -32,7 +32,8 @@ public class PersonalAssessment {
     public enum friendStatus { neutral, friend, enemy }
     public friendStatus status;
     public Knowledge knowledge;
-    public bool unconscious;
+    // public bool unconscious;
+    public Controllable.HitState hitstate;
     public int numberOfTimesInsulted;
     public bool warned;
     public float timeWarned = -99f;
@@ -112,7 +113,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             }
         }
     }
-    void Awake(){
+    void Awake() {
         lastNEvents.Limit = 25;
         Toolbox.RegisterMessageCallback<MessageInsult>(this, ProcessInsult);
         Toolbox.RegisterMessageCallback<MessageDamage>(this, AttackedByPerson);
@@ -129,10 +130,10 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             }
         }
     }
-    void ProcessHitStun(MessageHitstun message){
+    void ProcessHitStun(MessageHitstun message) {
         hitState = message.hitState;
     }
-    void ProcessThreat(MessageThreaten message){
+    void ProcessThreat(MessageThreaten message) {
         if (hitState >= Controllable.HitState.unconscious)
             return;
         PersonalAssessment assessment = FormPersonalAssessment(message.messenger.gameObject);
@@ -182,7 +183,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         }
         float rot_z = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         sightConeTransform.rotation = Quaternion.Euler(0f, 0f, rot_z);
-        
+
         // work the timer for the discrete perception updates
         speciousPresent -= Time.deltaTime;
         if (speciousPresent <= 0) {
@@ -193,11 +194,11 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             SetNearestFire();
         }
 
-        if (socializationTimer <= 0){
-            if (decisionMaker.personality.social == Personality.Social.chatty){
+        if (socializationTimer <= 0) {
+            if (decisionMaker.personality.social == Personality.Social.chatty) {
                 socializationTimer += 2.5f * Time.deltaTime;
             }
-            if (decisionMaker.personality.social == Personality.Social.normal){
+            if (decisionMaker.personality.social == Personality.Social.normal) {
                 socializationTimer += 0.5f * Time.deltaTime;
             }
         }
@@ -214,7 +215,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             }
             if (assessment.status != PersonalAssessment.friendStatus.enemy)
                 continue;
-            if (assessment.unconscious && decisionMaker.personality.battleStyle != Personality.BattleStyle.bloodthirsty)
+            if (assessment.hitstate == Controllable.HitState.dead || (assessment.hitstate == Controllable.HitState.unconscious && decisionMaker.personality.battleStyle != Personality.BattleStyle.bloodthirsty))
                 continue;
             // Vector3 directionToTarget = assessment.knowledge.lastSeenPosition - currentPosition;
             Vector3 directionToTarget = assessment.knowledge.transform.position - currentPosition;
@@ -282,23 +283,23 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                     fieldOfView.Add(otherHead.hat.gameObject);
         }
     }
-    
-    void ProcessNoise(GameObject flag){
+
+    void ProcessNoise(GameObject flag) {
         MessageNoise message = new MessageNoise(flag);
         Toolbox.Instance.SendMessage(gameObject, this, message);
     }
-    public string RecallMemory(){
-        if (shortTermMemory.Count() == 0){
+    public string RecallMemory() {
+        if (shortTermMemory.Count() == 0) {
             return "I am a blank slate.";
         }
         IEnumerator<EventData> enumerator = shortTermMemory.GetEnumerator();
         int i = 0;
-        while(i <= UnityEngine.Random.Range(0, shortTermMemory.Count())){
+        while (i <= UnityEngine.Random.Range(0, shortTermMemory.Count())) {
             i++;
             enumerator.MoveNext();
         }
         EventData memory = enumerator.Current;
-        return "I remember when "+memory.whatHappened;
+        return "I remember when " + memory.whatHappened;
     }
     void ProcessOccurrenceFlag(GameObject flag) {
         Occurrence occurrence = flag.GetComponent<Occurrence>();
@@ -316,21 +317,21 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         if (other.tag == "occurrenceFlag") {
             ProcessOccurrenceFlag(other.gameObject);
         }
-        if (other.tag == "occurrenceSound"){
+        if (other.tag == "occurrenceSound") {
             Occurrence flag = other.GetComponent<Occurrence>();
-            if (!flag.involvedParties.Contains(gameObject)){
+            if (!flag.involvedParties.Contains(gameObject)) {
                 // react to noise
                 ProcessNoise(other.gameObject);
             }
         }
         Qualities qualities = other.GetComponent<Qualities>();
-        if (qualities){
+        if (qualities) {
             // TODO: no messageoccurrence??
             EventData data = qualities.ToEvent();
             OccurrenceData oD = new OccurrenceData();
             oD.events.Add(data);
             MessageOccurrence message = new MessageOccurrence(oD);
-            
+
             Toolbox.Instance.SendMessage(gameObject, this, message);
             ReactToEvent(qualities.ToEvent(), new HashSet<GameObject>());
         }
@@ -354,18 +355,18 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         // react to specifics of event
         if (involvedParties.Contains(gameObject))
             return;
-        
+
         int seenCount = 0;
-        foreach (string noun in lastNEvents){
+        foreach (string noun in lastNEvents) {
             if (noun == dat.noun)
                 seenCount += 1;
         }
         lastNEvents.Add(dat.noun);
         Rating[] ratings = (Rating[])Rating.GetValues(typeof(Rating));
         Toolbox.ShuffleArray<Rating>(ratings);
-        foreach(Rating rating in ratings) {
+        foreach (Rating rating in ratings) {
             float threshhold = Toolbox.Gompertz(dat.ratings[rating], 1.26f, -6.9f, 1);
-            threshhold *= 1 - (float)seenCount/5.0f;
+            threshhold *= 1 - (float)seenCount / 5.0f;
             if (UnityEngine.Random.Range(0f, 1f) < threshhold && dat.ratings[rating] > 0) {
                 MessageSpeech message = new MessageSpeech(reactions[rating]);
                 message.nimrod = true;
@@ -376,32 +377,32 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             }
         }
     }
-    public void ReactToPerson(GameObject target){
+    public void ReactToPerson(GameObject target) {
         PersonalAssessment assessment = FormPersonalAssessment(target);
         if (assessment == null)
             return;
         List<Ref<GameObject>> removeThese = new List<Ref<GameObject>>();
-        foreach (Ref<GameObject> np in newPeopleList){
-            if (np.val == target){
+        foreach (Ref<GameObject> np in newPeopleList) {
+            if (np.val == target) {
                 removeThese.Add(np);
             }
         }
-        foreach(Ref<GameObject> np in removeThese){
+        foreach (Ref<GameObject> np in removeThese) {
             newPeopleList.Remove(np);
         }
         MessageSpeech message = new MessageSpeech();
-        switch(assessment.status){
+        switch (assessment.status) {
             case PersonalAssessment.friendStatus.enemy:
-            message.phrase = "{greet-enemy}";
-            
-            break;
+                message.phrase = "{greet-enemy}";
+
+                break;
             case PersonalAssessment.friendStatus.friend:
-            message.phrase = "{greet-friend}";
-            break;
+                message.phrase = "{greet-friend}";
+                break;
             default:
             case PersonalAssessment.friendStatus.neutral:
-            message.phrase = "{greet-neutral}";
-            break;
+                message.phrase = "{greet-neutral}";
+                break;
         }
         message.nimrod = true;
         message.involvedParties.Add(target);
@@ -423,7 +424,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                 attacker.status = PersonalAssessment.friendStatus.enemy;
             }
         }
-        if (dat.victim == gameObject){
+        if (dat.victim == gameObject) {
             // A. Getting hit
             // B. Getting hit, but not enough to hurt
             // MessageSpeech message = new MessageSpeech("How dare you!");
@@ -486,7 +487,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             PersonalAssessment assessment = FormPersonalAssessment(g);
             Humanoid human = g.GetComponentInParent<Humanoid>();
             if (human) {
-                assessment.unconscious = human.hitState >= Controllable.HitState.stun;
+                assessment.hitstate = human.hitState;
                 if (protectZone != null) {
                     if (warnZone.bounds.Contains(knowledge.transform.position) &&
                         GameManager.Instance.sceneTime - assessment.timeWarned > 7f &&
@@ -551,30 +552,24 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             knowledgebase.Add(rootObject, new Knowledge(rootObject));
         PersonalAssessment storedAssessment;
         if (people.TryGetValue(rootObject, out storedAssessment)) {
-            // TODO: trigger socialization if we havent seen this character in a while
             float interval = Time.time - knowledgebase[rootObject].lastSeenTime;
-            if (interval > 10f){
+            if (interval > 10f) {
                 AddSocializationTarget(rootObject);
             }
             interval = Time.time - storedAssessment.timeLastSpokenTo;
-            if ((interval > 10f && decisionMaker.personality.social == Personality.Social.chatty) || (interval > 25f && decisionMaker.personality.social == Personality.Social.normal)){
+            if ((interval > 10f && decisionMaker.personality.social == Personality.Social.chatty) || (interval > 25f && decisionMaker.personality.social == Personality.Social.normal)) {
                 AddSocializationTarget(rootObject);
             }
             return storedAssessment;
         }
         PersonalAssessment assessment = new PersonalAssessment(knowledgebase[rootObject]);
 
-        // TODO: trigger socialization target
-        // NewPeople newPerson = new NewPeople();
-        // newPerson.person = new Ref<GameObject>(rootObject);
-        // newPerson.countDownTimer = 10f;
-        // newPeopleList.Add(newPerson);
         AddSocializationTarget(rootObject);
         people.Add(rootObject, assessment);
         return assessment;
     }
-    void AddSocializationTarget(GameObject target){
-        foreach(Ref<GameObject> np in newPeopleList){
+    void AddSocializationTarget(GameObject target) {
+        foreach (Ref<GameObject> np in newPeopleList) {
             if (np.val == target)
                 return;
         }
@@ -588,19 +583,19 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         if (message.impersonal)
             return;
         // adjust reaction depending on magnitude
-        if (message.amount <= 15){
+        if (message.amount <= 15) {
             // minor nusiance
             MessageSpeech speech = new MessageSpeech("{nuisance}");
             speech.nimrod = true;
             Toolbox.Instance.SendMessage(gameObject, this, speech);
             return;
         }
-        
+
         GameObject g = message.responsibleParty;
         PersonalAssessment assessment = FormPersonalAssessment(g);
         if (assessment != null) {
             if (assessment.status != PersonalAssessment.friendStatus.friend) {
-                if (assessment.status != PersonalAssessment.friendStatus.enemy){
+                if (assessment.status != PersonalAssessment.friendStatus.enemy) {
                     MessageSpeech speech = new MessageSpeech("{newenemy}");
                     speech.nimrod = true;
                     Toolbox.Instance.SendMessage(gameObject, this, speech);
@@ -610,7 +605,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             assessment.knowledge.lastSeenPosition = g.transform.position;
         }
     }
-    
+
     public void ProcessInsult(MessageInsult message) {
         if (hitState >= Controllable.HitState.unconscious)
             return;
@@ -619,7 +614,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         Speech mySpeech = GetComponent<Speech>();
         assessment.numberOfTimesInsulted += 1;
         // TODO: make the insult trigger personality-dependent
-        if (assessment.numberOfTimesInsulted >= 2){
+        if (assessment.numberOfTimesInsulted >= 2) {
             assessment.status = PersonalAssessment.friendStatus.enemy;
         }
         // process hurt feelings
@@ -708,7 +703,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
     SerializedPersonalAssessment SavePerson(PersonalAssessment input) {
         SerializedPersonalAssessment data = new SerializedPersonalAssessment();
         data.status = input.status;
-        data.unconscious = input.unconscious;
+        data.HitState = input.hitstate;
         if (!MySaver.savedObjects.TryGetValue(input.knowledge.obj, out data.gameObjectID)) {
             data.gameObjectID = -1;
         }
@@ -717,10 +712,10 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
     PersonalAssessment LoadPerson(SerializedPersonalAssessment input) {
         PersonalAssessment assessment = new PersonalAssessment();
         assessment.status = input.status;
-        assessment.unconscious = input.unconscious;
+        assessment.hitstate = input.HitState;
         return assessment;
     }
-    public void DirectionChange(Vector2 newDirection){
+    public void DirectionChange(Vector2 newDirection) {
         direction = newDirection;
     }
 }
