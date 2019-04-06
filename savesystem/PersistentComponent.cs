@@ -32,6 +32,7 @@ public struct SerializedKnowledge {
 public struct SerializedPersonalAssessment {
     public PersonalAssessment.friendStatus status;
     public SerializedKnowledge knowledge;
-    public bool unconscious;
+    // public bool unconscious;
+    public Controllable.HitState HitState;
     public int gameObjectID;
 }
