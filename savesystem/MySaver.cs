@@ -13,16 +13,19 @@ public class MySaver {
     public static List<GameObject> disabledPersistents = new List<GameObject>();
     public static List<Type> LoadOrder = new List<Type>{
         typeof(Intrinsics),
-        typeof(Outfit)
+        typeof(Outfit),
+        typeof(Inventory)
     };
     public static int CompareComponent(Component x, Component y) {
-        int xIndex = 0;
-        int yIndex = 0;
-        if (LoadOrder.Contains(x.GetType()))
-            xIndex = LoadOrder.IndexOf(x.GetType());
-        if (LoadOrder.Contains(y.GetType()))
-            yIndex = LoadOrder.IndexOf(y.GetType());
-        return xIndex - yIndex;
+        if (LoadOrder.Contains(x.GetType()) && LoadOrder.Contains(y.GetType())) {
+            return LoadOrder.IndexOf(x.GetType()) - LoadOrder.IndexOf(y.GetType());
+        } else if (LoadOrder.Contains(x.GetType())) {
+            return 1;
+        } else if (LoadOrder.Contains(y.GetType())) {
+            return -1;
+        } else {
+            return 0;
+        }
     }
     public static void CleanupSaves() {
         string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
@@ -214,13 +217,9 @@ public class MySaver {
             // Debug.Log("loading "+objectsPath+" ...");
             if (objectDataBase == null) {
                 var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<int, PersistentObject>));
-                //     System.IO.Stream objectsStream = new FileStream(objectsPath, FileMode.Open);
-                // using 
                 using (System.IO.Stream objectsStream = new FileStream(objectsPath, FileMode.Open)) {
                     objectDataBase = persistentSerializer.Deserialize(objectsStream) as SerializableDictionary<int, PersistentObject>;
                 }
-                //  objectDataBase = persistentSerializer.Deserialize(objectsStream) as SerializableDictionary<int, PersistentObject>;
-                // objectsStream.Close();
             }
         } else {
             Debug.Log("WEIRD: no existing object database on Load!");
@@ -311,7 +310,6 @@ public class MySaver {
                 }
             } else {
                 Debug.Log("ERROR: object " + idn.ToString() + " not found in database!");
-
             }
         }
         return rootObject;

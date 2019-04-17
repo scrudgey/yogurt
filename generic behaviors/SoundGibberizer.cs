@@ -6,7 +6,7 @@ public class SoundGibberizer : MonoBehaviour {
     private bool _play;
     public bool play {
         set {
-            if (value && !_play && !bleep){        
+            if (value && !_play && !bleep) {
                 // start play sound
                 Play();
             }
@@ -22,19 +22,19 @@ public class SoundGibberizer : MonoBehaviour {
     public AudioSource audioSource;
     public AudioClip bleepSound;
     private bool _bleep;
-    public bool bleep{
+    public bool bleep {
         get {
             return _bleep;
         }
         set {
-            if (value && !_bleep){
+            if (value && !_bleep) {
                 audioSource.Stop();
                 audioSource.loop = true;
                 audioSource.clip = bleepSound;
                 audioSource.pitch = 1;
                 audioSource.Play();
             }
-            if (!value && _bleep){
+            if (!value && _bleep) {
                 audioSource.Stop();
                 audioSource.loop = false;
                 spacingTimer = currentSpace;
@@ -45,26 +45,30 @@ public class SoundGibberizer : MonoBehaviour {
     public float spacingTimer = 0;
     private float currentPitch;
     private float currentSpace;
-    
-	void Awake () {
+
+    void Awake() {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         currentPitch = Random.Range(pitchRange.x, pitchRange.y);
         currentSpace = Random.Range(spacingRange.x, spacingRange.y);
-	}
-	
-	void Update () {
+    }
+    public void Initialize() {
+        currentPitch = Random.Range(pitchRange.x, pitchRange.y);
+        currentSpace = Random.Range(spacingRange.x, spacingRange.y);
+    }
+
+    void Update() {
         if (bleep)
             return;
-		if (play){
+        if (play) {
             if (audioSource.isPlaying)
                 return;
             spacingTimer += Time.deltaTime;
-            if (spacingTimer > currentSpace){
+            if (spacingTimer > currentSpace) {
                 Play();
             }
         }
-	}
-    public void Play(){
+    }
+    public void Play() {
         // play with current values
         if (sounds.Length == 0)
             return;
@@ -79,10 +83,10 @@ public class SoundGibberizer : MonoBehaviour {
         currentPitch = Random.Range(pitchRange.x, pitchRange.y);
         currentSpace = Random.Range(spacingRange.x, spacingRange.y);
     }
-    public void StartPlay(){
+    public void StartPlay() {
         play = true;
     }
-    public void StopPlay(){
+    public void StopPlay() {
         play = false;
         spacingTimer = 0;
         if (audioSource != null)

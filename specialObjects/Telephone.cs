@@ -38,7 +38,7 @@ public class Telephone : Item {
     public void ClownCallback() {
         if (fireTime <= 0) {
             MessageSpeech message = new MessageSpeech();
-            message.phrase = "Brother clown, assemble!";
+            message.phrase = "Ho ho! Sit tight! We have dispatched a clown to your location!";
             Toolbox.Instance.SendMessage(gameObject, this, message);
             clownTime = 10f;
         } else {

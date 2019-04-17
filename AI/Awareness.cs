@@ -215,7 +215,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             }
             if (assessment.status != PersonalAssessment.friendStatus.enemy)
                 continue;
-            if (assessment.hitstate == Controllable.HitState.dead || (assessment.hitstate == Controllable.HitState.unconscious && decisionMaker.personality.battleStyle != Personality.BattleStyle.bloodthirsty))
+            if (assessment.hitstate == Controllable.HitState.unconscious && decisionMaker.personality.battleStyle != Personality.BattleStyle.bloodthirsty)
                 continue;
             // Vector3 directionToTarget = assessment.knowledge.lastSeenPosition - currentPosition;
             Vector3 directionToTarget = assessment.knowledge.transform.position - currentPosition;

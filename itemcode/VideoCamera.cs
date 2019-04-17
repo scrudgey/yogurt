@@ -23,6 +23,7 @@ public class VideoCamera : Interactive, ISaveable {
         finish.unlimitedRange = true;
         interactions.Add(finish);
         Interaction enableAct = new Interaction(this, "Start", "Enable");
+        enableAct.descString = "Start commercial...";
         enableAct.validationFunction = true;
         interactions.Add(enableAct);
     }

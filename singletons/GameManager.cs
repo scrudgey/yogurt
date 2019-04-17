@@ -64,7 +64,6 @@ public class GameData {
         }
         return completeAchievements;
     }
-
 }
 public partial class GameManager : Singleton<GameManager> {
     protected GameManager() { }
@@ -103,7 +102,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = true;
+    public bool debug = false;
     public bool failedLevelLoad = false;
     public void PlayPublicSound(AudioClip clip) {
         if (clip == null)
@@ -121,7 +120,9 @@ public partial class GameManager : Singleton<GameManager> {
     void Start() {
         if (data == null) {
             data = InitializedGameData();
-            // ReceiveEmail("duplicator");
+            ReceiveEmail("duplicator");
+            ReceiveEmail("golf_club");
+            // ReceivePackage("kaiser_helmet");
             // ReceivePackage("duplicator");
             // ReceivePackage("golf_club");
             if (debug)
@@ -625,6 +626,17 @@ public partial class GameManager : Singleton<GameManager> {
         // sceneStream.Close();
         timeSinceLastSave = 0f;
     }
+    public void LoadGameDataIntoMemory(string gameName) {
+        MySaver.objectDataBase = null;
+        saveGameName = gameName;
+        // Debug.Log("Loadsavegame into memory");
+        data = LoadGameData(gameName);
+        if (data.lastScene != null) {
+            SceneManager.LoadScene(data.lastScene);
+        } else {
+            SceneManager.LoadScene("house");
+        }
+    }
     public GameData LoadGameData(string gameName) {
         GameData data = null;
         var serializer = new XmlSerializer(typeof(GameData));
@@ -645,16 +657,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
         return data;
     }
-    public void LoadGameDataIntoMemory(string gameName) {
-        saveGameName = gameName;
-        // Debug.Log("Loadsavegame into memory");
-        data = LoadGameData(gameName);
-        if (data.lastScene != null) {
-            SceneManager.LoadScene(data.lastScene);
-        } else {
-            SceneManager.LoadScene("house");
-        }
-    }
+
     public void CheckItemCollection(GameObject obj, GameObject owner) {
         if (owner != playerObject)
             return;
@@ -729,7 +732,6 @@ public partial class GameManager : Singleton<GameManager> {
     public void ReceiveEmail(string emailName) {
         // Debug.Log("receiving email "+emailName);
         foreach (Email email in data.emails) {
-            Debug.Log(email.filename);
             if (email.filename == emailName) {
                 // Debug.Log("already received email. aborting...");
                 return;
