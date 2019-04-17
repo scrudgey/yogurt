@@ -153,6 +153,10 @@ public class UINew : Singleton<UINew> {
         Cursor.SetCursor(cursorTarget, new Vector2(16, 16), CursorMode.Auto);
     }
     public void UpdateActionText(bool highlight, GameObject target, bool cursorOverButton) {
+        if (GameManager.Instance.playerIsDead || GameManager.Instance.InCutsceneLevel()) {
+            SetActionText("");
+            return;
+        }
         if (!activeMenu && CutsceneManager.Instance.cutscene == null) {
             if (activeElements.Count > 1) {
                 if (cursorOverButton) {
@@ -161,7 +165,7 @@ public class UINew : Singleton<UINew> {
                     SetActionText(lastTarget);
                 }
             } else {
-                if (cursorOverButton && !GameManager.Instance.playerIsDead) {
+                if (cursorOverButton) {
                     SetActionText(actionButtonText);
                 } else if (target != null) {
                     lastTarget = Toolbox.Instance.GetName(target);

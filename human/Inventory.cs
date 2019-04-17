@@ -19,11 +19,11 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             // anim.value = value != null;
             // Toolbox.Instance.SendMessage(gameObject, this, anim);
             if (value == null) {
-                directableMessage.removeDirectable = new List<IDirectable>(_holding.GetComponents<IDirectable>()); 
+                directableMessage.removeDirectable = new List<IDirectable>(_holding.GetComponents<IDirectable>());
                 invMessage.dropped = _holding.gameObject;
             }
             _holding = value;
-            if (value != null){
+            if (value != null) {
                 invMessage.holding = value.gameObject;
                 directableMessage.addDirectable = new List<IDirectable>(_holding.GetComponents<IDirectable>());
             }
@@ -99,6 +99,13 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     }
     void HandleNetIntrinsic(MessageNetIntrinsic message) {
         strong = message.netBuffs[BuffType.strength].boolValue;
+        if (holding) {
+            if (!strong) {
+                if (holding.heavyObject) {
+                    DropItem();
+                }
+            }
+        }
     }
     public void Start() {
         if (initHolding) {
@@ -325,7 +332,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     void EndSwing() {
         MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.swinging, false);
         Toolbox.Instance.SendMessage(gameObject, this, anim);
-        if (holding){
+        if (holding) {
             holding.GetComponent<Renderer>().sortingLayerName = "main";
             holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
         }
@@ -386,10 +393,10 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         GameObject slash = Instantiate(Resources.Load("PhysicalImpact"), startPoint, holdpoint.rotation) as GameObject;
         PhysicalImpact impact = slash.GetComponent<PhysicalImpact>();
         MessageDamage message = new MessageDamage(10f, damageType.physical);
-        if (netBuffs[BuffType.strength].boolValue){
-            message.force = new Vector2(direction.x*2f, direction.y*2f);
-        }else {
-            message.force = new Vector2(direction.x/2f, direction.y/2f);
+        if (netBuffs[BuffType.strength].boolValue) {
+            message.force = new Vector2(direction.x * 2f, direction.y * 2f);
+        } else {
+            message.force = new Vector2(direction.x / 2f, direction.y / 2f);
         }
         message.responsibleParty = gameObject;
         message.strength = netBuffs[BuffType.strength].boolValue;

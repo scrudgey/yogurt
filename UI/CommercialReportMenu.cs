@@ -18,10 +18,13 @@ public class CommercialReportMenu : MonoBehaviour {
     }
     public void NewDayButton() {
         UINew.Instance.CloseActiveMenu();
-        // Controller.Instance.suspendInput = false;
         MySaver.Save();
         // MySaver.SaveObjectDatabase();
-        GameManager.Instance.BoardRoomCutscene();
+        if (GameManager.Instance.activeCommercial.cutscene != "none") {
+            GameManager.Instance.BoardRoomCutscene();
+        } else {
+            GameManager.Instance.NewDayCutscene();
+        }
     }
     public void ReviewButton() {
         GameObject menuObject = Instantiate(Resources.Load("UI/FocusGroupMenu")) as GameObject;
@@ -36,7 +39,7 @@ public class CommercialReportMenu : MonoBehaviour {
             disgustingScore = transform.Find("Image/Center/RightHalf/RatingsPanel/Disgusting/Amount").GetComponent<Text>();
             disturbingScore = transform.Find("Image/Center/RightHalf/RatingsPanel/Disturbing/Amount").GetComponent<Text>();
             offensiveScore = transform.Find("Image/Center/RightHalf/RatingsPanel/Offensive/Amount").GetComponent<Text>();
-            
+
             transcript = transform.Find("Image/Center/Scroll View/Viewport/content/Transcript").GetComponent<Text>();
             eventText = transform.Find("Image/Center/RightHalf/EventsPanel/Text").GetComponent<Text>();
         }

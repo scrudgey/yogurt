@@ -5,7 +5,8 @@ public class Cannon : Interactive {
     public AudioSource audioSource;
     public AudioClip shootSound;
     void Start() {
-        Interaction shoot = new Interaction(this, "Shoot", "StartCannon");
+        Interaction shoot = new Interaction(this, "Enter", "StartCannon");
+        shoot.descString = "Climb into cannon";
         interactions.Add(shoot);
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
     }

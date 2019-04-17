@@ -86,6 +86,7 @@ public class Speech : Interactive, ISaveable {
         gibberizer.sounds = speakSounds;
         gibberizer.pitchRange = pitchRange;
         gibberizer.spacingRange = spacingRange;
+        gibberizer.Initialize();
         Toolbox.RegisterMessageCallback<MessageSpeech>(this, HandleSpeech);
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
         Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
