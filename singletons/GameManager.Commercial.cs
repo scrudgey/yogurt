@@ -13,7 +13,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
         var serializer = new XmlSerializer(typeof(Commercial));
         foreach (TextAsset asset in xmlList) {
-            using(var reader = new System.IO.StringReader(asset.text)){
+            using (var reader = new System.IO.StringReader(asset.text)) {
                 Commercial newCommercial = serializer.Deserialize(reader) as Commercial;
                 passList.Add(newCommercial);
             }
@@ -59,12 +59,13 @@ public partial class GameManager : Singleton<GameManager> {
         CommercialReportMenu menu = report.GetComponent<CommercialReportMenu>();
         menu.commercial = commercial;
         report.GetComponent<CommercialReportMenu>().Report(activeCommercial);
-        if (activeCommercial.unlockItem != ""){
+        if (activeCommercial.unlockItem != "") {
             ReceivePackage(activeCommercial.unlockItem);
         }
-        if (activeCommercial.email != ""){
+        if (activeCommercial.email != "") {
             ReceiveEmail(activeCommercial.email);
         }
+        UINew.Instance.RefreshUI(active: false);
     }
 }
 
