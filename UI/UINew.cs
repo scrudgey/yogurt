@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using Easings;
 using UnityEngine.EventSystems;
-// using System.Linq;
 
 public class UINew : Singleton<UINew> {
     public enum MenuType { none, escape, inventory, speech, closet, scriptSelect, commercialReport, newDayReport, email, diary, dialogue, phone, perk, teleport }
@@ -26,7 +25,6 @@ public class UINew : Singleton<UINew> {
     private static List<MenuType> actionRequired = new List<MenuType> { MenuType.commercialReport, MenuType.diary, MenuType.perk, MenuType.dialogue };
     public GameObject activeMenu;
     private MenuType activeMenuType;
-    // private bool menuRequiresAction;
     private struct actionButton {
         public GameObject gameobject;
         public ActionButtonScript buttonScript;
