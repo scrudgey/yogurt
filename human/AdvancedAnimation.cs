@@ -36,42 +36,39 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
         Toolbox.RegisterMessageCallback<MessageInventoryChanged>(this, HandleInventoryMessage);
     }
-    void Start(){
+    void Start() {
         MessageDirectable message = new MessageDirectable();
         message.addDirectable.Add(this);
         Toolbox.Instance.SendMessage(gameObject, this, message);
     }
-    public void HandleInventoryMessage(MessageInventoryChanged message){
-        bool oldHolding = holding;
+    public void HandleInventoryMessage(MessageInventoryChanged message) {
+        // bool oldHolding = holding;
         bool messageHolding = message.holding != null;
         bool messageDrop = message.dropped != null;
 
-        if (messageHolding){
+        bool doUpdate = false;
+
+        if (messageHolding) {
             holding = true;
-            if (oldHolding == false) {
-                LateUpdate();
-                SetFrame(0);
-            }
+            doUpdate = true;
         } else {
             holding = false;
-            if (oldHolding == true) {
-                LateUpdate();
-                SetFrame(0);
-            }
+            doUpdate = true;
         }
 
-        if (messageDrop){
+        if (messageDrop) {
             holding = false;
-            if (oldHolding == true) {
-                LateUpdate();
-                SetFrame(0);
-            }
+            doUpdate = true;
         } else {
             holding = true;
-            if (oldHolding == false) {
-                LateUpdate();
-                SetFrame(0);
-            }
+            doUpdate = true;
+        }
+
+        if (throwing || swinging)
+            return;
+        if (doUpdate) {
+            LateUpdate();
+            SetFrame(0);
         }
     }
     public void HandleAnimationMessage(MessageAnimation anim) {
@@ -252,7 +249,7 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
         baseName = data.strings["baseName"];
         LoadSprites();
     }
-    public void DirectionChange(Vector2 newDirection){
+    public void DirectionChange(Vector2 newDirection) {
         lastPressed = Toolbox.Instance.DirectionToString(newDirection);
         if (lastPressed == "left")
             lastPressed = "right";
