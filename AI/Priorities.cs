@@ -34,8 +34,8 @@ namespace AI {
         }
         public virtual void ReceiveMessage(Message m) { }
         // public virtual void ObserveOccurrence(OccurrenceData data){}
-        public virtual void EnterPriority(){}
-        public virtual void ExitPriority(){}
+        public virtual void EnterPriority() { }
+        public virtual void ExitPriority() { }
     }
     public class PriorityFightFire : Priority {
         public float updateInterval;
@@ -50,7 +50,7 @@ namespace AI {
             wander.successCondition = new ConditionKnowAboutFire(gameObject);
             wander.requirements.Add(getExt);
 
-            Goal approach = new GoalWalkToObject(gameObject, control, awareness.nearestFire, range:0.6f);
+            Goal approach = new GoalWalkToObject(gameObject, control, awareness.nearestFire, range: 0.6f);
             approach.requirements.Add(wander);
 
             useFireExtinguisher = new GoalHoseDown(gameObject, control, awareness.nearestFire);
@@ -63,10 +63,10 @@ namespace AI {
             callFD.requirements.Add(walkToPhone);
         }
         public override void Update() {
-            if (awareness.nearestFire.val != null){
+            if (awareness.nearestFire.val != null) {
                 urgency = Priority.urgencyPressing;
             } else {
-                if (urgency > 0){
+                if (urgency > 0) {
                     urgency -= Time.deltaTime;
                 }
             }
@@ -85,29 +85,29 @@ namespace AI {
             priorityName = "socialize";
             Config();
         }
-        public void Config(){
-            GoalWalkToObject walkTo = new GoalWalkToObject(gameObject, control, target, range:1f);
+        public void Config() {
+            GoalWalkToObject walkTo = new GoalWalkToObject(gameObject, control, target, range: 1f);
             GoalLookAtObject lookAt = new GoalLookAtObject(gameObject, control, target);
             GoalTalkToPerson talkTo = new GoalTalkToPerson(gameObject, control, awareness, peopleTarget);
-            
+
             lookAt.requirements.Add(walkTo);
             talkTo.requirements.Add(lookAt);
-            
+
             goal = talkTo;
         }
         public override void Update() {
-            if (awareness.socializationTimer < 0){
+            if (awareness.socializationTimer < 0) {
                 urgency = 0;
                 return;
             }
             if (awareness.newPeopleList.Count > 0) {
-                if (awareness.newPeopleList[0].val != target.val){
+                if (awareness.newPeopleList[0].val != target.val) {
                     target.val = awareness.newPeopleList[0].val;
                     peopleTarget.val = awareness.newPeopleList[0].val;
                     urgency = urgencySmall;
                     Config();
                 }
-            } 
+            }
             if (awareness.newPeopleList.Count == 0) {
                 urgency = 0;
                 peopleTarget.val = null;
@@ -174,12 +174,46 @@ namespace AI {
         }
     }
     public class PriorityMakeBalloonAnimals : PriorityWander {
-        public PriorityMakeBalloonAnimals(GameObject g, Controllable c): base(g, c){
+        public PriorityMakeBalloonAnimals(GameObject g, Controllable c) : base(g, c) {
             priorityName = "ballon animals";
             goal = new GoalInflateBalloons(g, c);
         }
         public override float Urgency(Personality personality) {
             return Priority.urgencyMinor;
+        }
+    }
+    public class PriorityPanic : Priority {
+        public PriorityPanic(GameObject g, Controllable c) : base(g, c) {
+            priorityName = "panic";
+            goal = new GoalPanic(g, c);
+        }
+        public override void Update() {
+            if (urgency > 0) {
+                urgency -= Time.deltaTime;
+            }
+        }
+        public override float Urgency(Personality personality) {
+            if (awareness.imOnFire) {
+                return 2 * Priority.urgencyMaximum;
+            }
+            return urgency;
+        }
+        public override void ReceiveMessage(Message incoming) {
+            if (awareness.imOnFire)
+                if (awareness.decisionMaker.personality.bravery == Personality.Bravery.cowardly) {
+                    if (incoming is MessageDamage) {
+                        urgency += Priority.urgencyMinor / 2f;
+                    }
+                    if (incoming is MessageThreaten) {
+                        urgency += Priority.urgencyMinor / 2f;
+                    }
+                }
+            if (incoming is MessageOccurrence) {
+                MessageOccurrence message = (MessageOccurrence)incoming;
+                foreach (EventData data in message.data.events) {
+                    urgency += data.ratings[Rating.disturbing] / 2f;
+                }
+            }
         }
     }
     public class PriorityRunAway : Priority {
@@ -213,23 +247,23 @@ namespace AI {
                 urgency -= Time.deltaTime / 10f;
         }
     }
-    public class PriorityInvestigateNoise: Priority {
+    public class PriorityInvestigateNoise : Priority {
         public Ref<Vector2> lastHeardNoise = new Ref<Vector2>(Vector2.zero);
-        public PriorityInvestigateNoise(GameObject g, Controllable c): base(g, c){
+        public PriorityInvestigateNoise(GameObject g, Controllable c) : base(g, c) {
             priorityName = "investigate noise";
 
             GoalWalkToPoint walkTo = new GoalWalkToPoint(g, c, lastHeardNoise, 0.3f);
 
             goal = walkTo;
         }
-        public override void ReceiveMessage(Message incoming){
-            if (incoming is MessageNoise){
+        public override void ReceiveMessage(Message incoming) {
+            if (incoming is MessageNoise) {
                 MessageNoise message = (MessageNoise)incoming;
                 lastHeardNoise.val = message.location;
                 urgency = Priority.urgencyLarge;
             }
         }
-        public override void Update(){
+        public override void Update() {
             urgency -= Time.deltaTime;
         }
     }
@@ -248,7 +282,7 @@ namespace AI {
             approachGoal.requirements.Add(dukesUp);
 
             Goal punchGoal = new Goal(gameObject, control);
-            punchGoal.routines.Add(new RoutinePunchAt(gameObject, control, awareness.nearestEnemy));
+            punchGoal.routines.Add(new RoutinePunchAt(gameObject, control, awareness.nearestEnemy, awareness.decisionMaker.personality.combatProficiency));
             punchGoal.requirements.Add(approachGoal);
 
             goal = punchGoal;

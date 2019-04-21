@@ -10,21 +10,24 @@ public class Personality {
     public enum Stoicism { neutral, fragile, noble };
     public enum BattleStyle { normal, bloodthirsty };
     public enum Actor { no, yes };
-    public enum Suggestible {normal, suggestible, stubborn};
-    public enum Social {normal, chatty, reserved};
+    public enum Suggestible { normal, suggestible, stubborn };
+    public enum Social { normal, chatty, reserved };
+    public enum CombatProfficiency { normal, poor, expert };
     public Bravery bravery;
     public Actor actor;
     public Stoicism stoicism;
     public BattleStyle battleStyle;
     public Suggestible suggestible;
     public Social social;
+    public CombatProfficiency combatProficiency;
 }
 
 public class DecisionMaker : MonoBehaviour, ISaveable {
     public enum PriorityType {
-        Attack, FightFire, ProtectPossessions, 
+        Attack, FightFire, ProtectPossessions,
         ReadScript, RunAway, Wander, ProtectZone,
-        MakeBalloonAnimals, InvestigateNoise, PrioritySocialize
+        MakeBalloonAnimals, InvestigateNoise, PrioritySocialize,
+        Panic
     }
     // the ONLY reason we need this redundant structure is so that I can expose
     // a selectable default priority type in unity editor.
@@ -38,7 +41,8 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         {typeof(PriorityProtectZone), PriorityType.ProtectZone},
         {typeof(PriorityMakeBalloonAnimals), PriorityType.MakeBalloonAnimals},
         {typeof(PriorityInvestigateNoise), PriorityType.InvestigateNoise},
-        {typeof(PrioritySocialize), PriorityType.PrioritySocialize}
+        {typeof(PrioritySocialize), PriorityType.PrioritySocialize},
+        {typeof(PriorityPanic), PriorityType.Panic}
     };
     public string activePriorityName;
     public PriorityType defaultPriorityType;
@@ -99,26 +103,27 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         InitializePriority(new PriorityProtectPossessions(gameObject, control), typeof(PriorityProtectPossessions));
         InitializePriority(new PriorityWander(gameObject, control), typeof(PriorityWander));
         InitializePriority(new PriorityInvestigateNoise(gameObject, control), typeof(PriorityInvestigateNoise));
-        if (personality.actor == Personality.Actor.yes){
+        InitializePriority(new PriorityPanic(gameObject, control), typeof(PriorityPanic));
+        if (personality.actor == Personality.Actor.yes) {
             InitializePriority(new PriorityReadScript(gameObject, control), typeof(PriorityReadScript));
         }
         if (protectionZone != null) {
             InitializePriority(new PriorityProtectZone(gameObject, control, protectionZone, guardPoint), typeof(PriorityProtectZone));
         }
-        if (defaultPriorityType == PriorityType.MakeBalloonAnimals){
+        if (defaultPriorityType == PriorityType.MakeBalloonAnimals) {
             InitializePriority(new PriorityMakeBalloonAnimals(gameObject, control), typeof(PriorityMakeBalloonAnimals));
         }
 
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
         Toolbox.RegisterMessageCallback<Message>(this, ReceiveMessage);
     }
-    public void InitializePriority(Priority priority, Type type){
+    public void InitializePriority(Priority priority, Type type) {
         priorities.Add(priority);
-        if (defaultPriorityType == priorityTypes[type]){
+        if (defaultPriorityType == priorityTypes[type]) {
             defaultPriority = priority;
         }
     }
-    public void HandleHitStun(MessageHitstun message){
+    public void HandleHitStun(MessageHitstun message) {
         hitState = message.hitState;
     }
     public void ReceiveMessage(Message message) {
@@ -137,7 +142,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
             priority.Update();
             if (activePriority == null)
                 activePriority = priority;
-            
+
             if (priority.urgency > priority.minimumUrgency)
                 priority.urgency -= Time.deltaTime / 10f;
             if (priority.urgency < priority.minimumUrgency)
@@ -149,8 +154,8 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
                 activePriority = priority;
         }
         activePriorityName = activePriority.priorityName;
-        
-        if (activePriority != oldActivePriority){
+
+        if (activePriority != oldActivePriority) {
             control.ResetInput();
             if (oldActivePriority != null)
                 oldActivePriority.ExitPriority();
@@ -203,7 +208,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         }
         if (protectionZone != null) {
             priorities.Add(new PriorityProtectZone(gameObject, control, protectionZone, guardPoint));
-        } 
+        }
 
         foreach (Priority priority in priorities) {
             foreach (Type priorityType in priorityTypes.Keys) {
@@ -215,6 +220,6 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
                 }
             }
         }
-        
+
     }
 }
