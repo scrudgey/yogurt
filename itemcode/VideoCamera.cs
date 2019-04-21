@@ -48,6 +48,7 @@ public class VideoCamera : Interactive, ISaveable {
     }
     public void FinishButtonClick() {
         live = false;
+        DisableBubble();
         GameManager.Instance.EvaluateCommercial(commercial);
     }
     public bool FinishButtonClick_Validation() {
