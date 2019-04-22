@@ -93,7 +93,7 @@ public class HeadAnimation : MonoBehaviour, IDirectable, ISaveable {
                 break;
         }
     }
-    void HandleHitStun(MessageHitstun message){
+    void HandleHitStun(MessageHitstun message) {
         hitState = message.hitState;
     }
     void Update() {

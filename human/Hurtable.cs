@@ -185,6 +185,7 @@ public class Hurtable : Damageable, ISaveable {
         Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData, new HashSet<GameObject>() { gameObject });
     }
     public void TypeOfDeath(damageType type) {
+
         bool suicide = false;
         bool damageZone = false;
         bool assailant = false;

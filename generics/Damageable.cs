@@ -105,6 +105,9 @@ public abstract class Damageable : MonoBehaviour {
         }
         if (damage <= 0)
             return;
+        if (gameObject == GameManager.Instance.playerObject) {
+            UINew.Instance.Hit();
+        }
         if (message.type == damageType.fire || message.type == damageType.cosmic || message.type == damageType.asphyxiation)
             return;
         if (controllable) {

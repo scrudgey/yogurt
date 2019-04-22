@@ -10,6 +10,7 @@ public class DustyCollider : MonoBehaviour {
         dust = transform.Find("dust");
         particles = dust.GetComponent<ParticleSystem>();
         camControl = GameObject.FindObjectOfType<CameraControl>();
+        audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
     }
     public void OnCollisionEnter2D(Collision2D coll) {
         if (GameManager.Instance.playerIsDead)

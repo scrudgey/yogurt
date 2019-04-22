@@ -69,7 +69,8 @@ public class UINew : Singleton<UINew> {
     private EasingDirection oxygenBarEasingDirection;
     private string lastTarget;
     public string actionButtonText;
-
+    public UIHitIndicator hitIndicator;
+    public List<string> previousTopButtons = new List<string>();
     public void Start() {
         Awake();
     }
@@ -279,6 +280,7 @@ public class UINew : Singleton<UINew> {
         lifebar = UICanvas.transform.Find("topright/lifebar/mask/fill").GetComponent<RectTransform>();
         oxygenbar = UICanvas.transform.Find("topright/oxygenbar/mask/fill").GetComponent<RectTransform>();
         topRightBar = UICanvas.transform.Find("topright").gameObject;
+        hitIndicator = UICanvas.transform.Find("hitIndicator").GetComponent<UIHitIndicator>();
         topRightRectTransform = topRightBar.GetComponent<RectTransform>();
         if (lifebarDefaultSize == Vector2.zero)
             lifebarDefaultSize = new Vector2(lifebar.rect.width, lifebar.rect.height);
@@ -301,6 +303,9 @@ public class UINew : Singleton<UINew> {
             if (testButton)
                 testButton.SetActive(false);
         }
+    }
+    public void Hit() {
+        hitIndicator.Hit();
     }
     public void HealthBarOn() {
         if (Controller.Instance.focusHurtable.oxygen >= Controller.Instance.focusHurtable.maxOxygen) {
@@ -668,16 +673,33 @@ public class UINew : Singleton<UINew> {
     }
     private void ArrangeButtonsOnScreenTop(List<actionButton> buttons) {
         GameObject bottomBar = UICanvas.transform.Find("topdock").gameObject;
+        List<string> newButtonList = new List<string>();
         foreach (actionButton button in buttons) {
+            RectTransform buttonRect = button.gameobject.GetComponent<RectTransform>();
+            newButtonList.Add(button.buttonText.text);
             ContentSizeFitter buttonSizeFitter = button.gameobject.GetComponent<ContentSizeFitter>();
             if (buttonSizeFitter) {
                 buttonSizeFitter.enabled = false;
             }
             button.gameobject.transform.SetParent(bottomBar.transform, false);
             button.gameobject.transform.SetSiblingIndex(3);
-            RectTransform buttonRect = button.gameobject.GetComponent<RectTransform>();
             buttonRect.sizeDelta = new Vector2(100, 40);
+
+            // if (!previousTopButtons.Contains(button.buttonText.text)) {
+            //     GameObject popEffect = GameObject.Instantiate(Resources.Load("UI/PopEffect") as GameObject);
+            //     RectTransform popRect = popEffect.GetComponent<RectTransform>();
+
+            //     popEffect.transform.SetParent(bottomBar.transform, false);
+            //     popEffect.transform.position = button.gameobject.transform.position;
+            //     popRect.sizeDelta = new Vector2(100, 40);
+
+            //     ActionButtonPopEffect popFX = popEffect.GetComponent<ActionButtonPopEffect>();
+            //     popFX.targetTransform = button.gameobject.transform;
+            //     popFX.Pop();
+            //     Debug.Break();
+            // }
         }
+        previousTopButtons = newButtonList;
     }
     private void MakeButtonDefault(actionButton button) {
         GameObject indicator = Instantiate(Resources.Load("UI/defaultButtonIndicator")) as GameObject;

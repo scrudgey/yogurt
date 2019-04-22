@@ -13,39 +13,39 @@ public class Fire : MonoBehaviour {
         message = new MessageDamage(1f, damageType.fire);
     }
     // void Update() {
-        // if (flammable)
-        //     if (flammable.noDamage)
-        //         return;
-        // damageTimer += Time.deltaTime;
-        // if (damageTimer > 0.05f) {
-        //     damageTimer = 0;
-            // if (flammable)
-            //     message.responsibleParty = flammable.responsibleParty;
-            // process the objects in the damage queue.
-            // do not send a damage message to anything above me in the transform tree: 
-            // this is so that the player can hold a flaming object without being hurt.
-            // foreach (GameObject obj in collidedObjects){
-            //     if (flammables.ContainsKey(obj)) {
-            //         Flammable targetFlam = flammables[obj];
-            //         targetFlam.heat += Time.deltaTime * 2f;
-            //         if (flammable.responsibleParty != null) {
-            //             targetFlam.responsibleParty = flammable.responsibleParty;
-            //         }
-            //     }
-            // }
-            // collidedObjects = new HashSet<GameObject>();
-        // }
-        // foreach (GameObject obj in damageQueue) {
-        //         if (obj == null)
-        //             continue;
-        //         if (transform.IsChildOf(obj.transform.root))
-        //             continue;
-        //         if (obj != null) {
-        //             Toolbox.Instance.SendMessage(obj, this, message);
-        //         }
-        //     }
-        // damageQueue = new HashSet<GameObject>();
-        
+    // if (flammable)
+    //     if (flammable.noDamage)
+    //         return;
+    // damageTimer += Time.deltaTime;
+    // if (damageTimer > 0.05f) {
+    //     damageTimer = 0;
+    // if (flammable)
+    //     message.responsibleParty = flammable.responsibleParty;
+    // process the objects in the damage queue.
+    // do not send a damage message to anything above me in the transform tree: 
+    // this is so that the player can hold a flaming object without being hurt.
+    // foreach (GameObject obj in collidedObjects){
+    //     if (flammables.ContainsKey(obj)) {
+    //         Flammable targetFlam = flammables[obj];
+    //         targetFlam.heat += Time.deltaTime * 2f;
+    //         if (flammable.responsibleParty != null) {
+    //             targetFlam.responsibleParty = flammable.responsibleParty;
+    //         }
+    //     }
+    // }
+    // collidedObjects = new HashSet<GameObject>();
+    // }
+    // foreach (GameObject obj in damageQueue) {
+    //         if (obj == null)
+    //             continue;
+    //         if (transform.IsChildOf(obj.transform.root))
+    //             continue;
+    //         if (obj != null) {
+    //             Toolbox.Instance.SendMessage(obj, this, message);
+    //         }
+    //     }
+    // damageQueue = new HashSet<GameObject>();
+
     // }
     // void Update(){
     //     _transforms = (Transform[])transform.root.GetComponentsInChildren( typeof(Transform), true);
@@ -58,7 +58,7 @@ public class Fire : MonoBehaviour {
                 flammables.Add(coll.gameObject, flam);
                 return;
             }
-            if (otherFire != null && otherFire != this){
+            if (otherFire != null && otherFire != this) {
                 flammables.Add(coll.gameObject, otherFire.flammable);
             }
         }
@@ -71,14 +71,10 @@ public class Fire : MonoBehaviour {
             return;
         if (coll.transform.IsChildOf(transform.root))
             return;
-        // if (transform.root.)
-        // Debug.Log(coll.gameObject);
-        // collidedObjects.Add(coll.gameObject);
-        // damageQueue.Add(coll.transform.root.gameObject);
         Flammable flam = null;
-        if (flammables.TryGetValue(coll.gameObject, out flam)){
+        if (flammables.TryGetValue(coll.gameObject, out flam)) {
             flam.heat += Time.deltaTime;
-            if (flam.responsibleParty != null) {
+            if (flammable.responsibleParty != null) {
                 flam.responsibleParty = flammable.responsibleParty;
             }
         }

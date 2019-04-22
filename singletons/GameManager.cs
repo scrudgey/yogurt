@@ -102,7 +102,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = false;
+    public bool debug = true;
     public bool failedLevelLoad = false;
     public void PlayPublicSound(AudioClip clip) {
         if (clip == null)
@@ -114,7 +114,6 @@ public partial class GameManager : Singleton<GameManager> {
                 Toolbox.GetOrCreateComponent<CameraControl>(cam.gameObject);
             }
         }
-        // Debug.Log(publicAudio);
         publicAudio.PlayOneShot(clip);
     }
     void Start() {
@@ -355,12 +354,7 @@ public partial class GameManager : Singleton<GameManager> {
             }
             data.firstTimeLeavingHouse = false;
         }
-        if (data.entryID == 420) {
-            // teleport entry
-            AudioClip teleportEnter = Resources.Load("sounds/clown/clown4") as AudioClip;
-            // Debug.Log(teleportEnter);
-            PlayPublicSound(teleportEnter);
-        }
+
         if (sceneName == "cave1" || sceneName == "cave2") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneFall>();
         }
@@ -399,6 +393,13 @@ public partial class GameManager : Singleton<GameManager> {
                 // if this is a bed entry, we've got a new day going on!
                 if (data.entryID == -99) {
                     WakeUpInBed();
+                }
+                if (data.entryID == 420) {
+                    // teleport entry
+                    AudioClip teleportEnter = Resources.Load("sounds/clown/clown4") as AudioClip;
+                    PlayPublicSound(teleportEnter);
+                    GameObject.Instantiate(Resources.Load("prefabs/fx/teleportEntryEffect"), playerObject.transform.position, Quaternion.identity);
+                    Toolbox.Instance.AudioSpeaker(teleportEnter, playerObject.transform.position);
                 }
             }
         }
