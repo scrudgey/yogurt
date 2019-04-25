@@ -18,7 +18,8 @@ public class OrderByY : MonoBehaviour {
     void Start() {
         spriteRenderer = GetComponentInParent<SpriteRenderer>();
         sortGroup = GetComponent<SortingGroup>();
-        footPoint = transform.Find("footPoint");
+        if (footPoint == null)
+            footPoint = transform.Find("footPoint");
         bootstrapper = GetComponent<PhysicalBootstrapper>();
     }
     void Update() {

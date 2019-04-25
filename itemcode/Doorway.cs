@@ -9,6 +9,7 @@ public class Doorway : Interactive {
     protected AudioSource audioSource;
     public string leaveDesc;
     public string actionDesc = "Exit";
+    public Transform enterPoint;
     public virtual void Awake() {
         Interaction leaveaction = new Interaction(this, actionDesc, "Leave");
         interactions.Add(leaveaction);
@@ -16,7 +17,11 @@ public class Doorway : Interactive {
     }
     public virtual void Enter(GameObject player) {
         Vector3 tempPos = transform.position;
-        tempPos.y = tempPos.y - 0.05f;
+        if (enterPoint) {
+            tempPos = enterPoint.position;
+        } else {
+            tempPos.y = tempPos.y - 0.05f;
+        }
         player.transform.position = tempPos;
         PlayEnterSound();
     }
