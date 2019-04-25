@@ -32,6 +32,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
     private Vector3 previousVelocity;
     public float bounceCoefficient = 0.5f;
     public AudioSource audioSource;
+    public Vector2 groundSize = new Vector2(0.07f, 0.04f);
     public void Start() {
         tag = "Physical";
         GetComponent<Renderer>().sortingLayerName = "main";
@@ -42,7 +43,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         // }
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
     }
-    public void Awake(){
+    public void Awake() {
         Toolbox.RegisterMessageCallback<MessageDamage>(this, HandleDamage);
     }
     public void HandleDamage(MessageDamage dam) {
@@ -109,7 +110,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         groundCollider = groundObject.AddComponent<CapsuleCollider2D>();
         groundCollider.direction = CapsuleDirection2D.Horizontal;
         groundCollider.sharedMaterial = Resources.Load<PhysicsMaterial2D>("ground");
-        groundCollider.size = new Vector2(0.07f, 0.04f);
+        groundCollider.size = groundSize;
         foreach (Table table in Object.FindObjectsOfType<Table>()) {
             Collider2D tableCollider = table.transform.parent.GetComponent<Collider2D>();
             Physics2D.IgnoreCollision(groundCollider, tableCollider, true);
@@ -191,7 +192,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
                 if (impactSounds.Length > 0) {
                     GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
                 }
-            if (coll.gameObject != horizon){
+            if (coll.gameObject != horizon) {
                 EventData data = Toolbox.Instance.DataFlag(gameObject, chaos: 1);
                 data.noun = "collision";
                 data.whatHappened = Toolbox.Instance.CloneRemover(coll.gameObject.name) + " collided with " + Toolbox.Instance.CloneRemover(gameObject.name);
@@ -294,7 +295,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         // Debug.Log("physical collision: "+gameObject.name+" + "+collision.gameObject.name);
         // Debug.Log(collision.relativeVelocity.magnitude);
         MessageDamage message = new MessageDamage();
-        if (thrownBy != null){
+        if (thrownBy != null) {
             message.responsibleParty = thrownBy;
         } else {
             message.responsibleParty = gameObject;
@@ -309,7 +310,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
                 message.amount = 15f;
 
         message.type = damageType.physical;
-        if (collision.relativeVelocity.magnitude > 1){
+        if (collision.relativeVelocity.magnitude > 1) {
             Toolbox.Instance.SendMessage(gameObject, this, message);
             Toolbox.Instance.SendMessage(collision.gameObject, this, message);
         }
