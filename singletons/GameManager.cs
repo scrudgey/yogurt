@@ -80,7 +80,9 @@ public partial class GameManager : Singleton<GameManager> {
         {"moon_cave", "moon cave"},
         {"woods", "woods"},
         {"vampire_house", "mansion"},
-        {"mountain", "mountain"}
+        {"mountain", "mountain"},
+        {"clearing", "clearing"},
+        {"chamber", "meditation chamber"}
     };
     public GameData data;
     public string saveGameName = "test";
