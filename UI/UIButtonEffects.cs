@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class UIButtonEffects : MonoBehaviour {
+public class UIButtonEffects : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler {
     public GameObject prefabSet;
 
     public List<Button> buttons = new List<Button>();
@@ -24,11 +24,13 @@ public class UIButtonEffects : MonoBehaviour {
         Play(startSound);
         foreach (Button button in buttons) {
             button.onClick.AddListener(PlayClickSound);
-            EventTrigger eventTrigger = button.gameObject.AddComponent<EventTrigger>();
-            EventTrigger.Entry entry = new EventTrigger.Entry();
-            entry.eventID = EventTriggerType.PointerEnter;
-            entry.callback.AddListener((data) => { PlayMouseOverSound(); });
-            eventTrigger.triggers.Add(entry);
+            UIButtonEffects bfx = button.gameObject.AddComponent<UIButtonEffects>();
+            bfx.mouseOverSound = mouseOverSound;
+            // EventTrigger eventTrigger = button.gameObject.AddComponent<EventTrigger>();
+            // EventTrigger.Entry entry = new EventTrigger.Entry();
+            // entry.eventID = EventTriggerType.PointerEnter;
+            // entry.callback.AddListener((data) => { PlayMouseOverSound(); });
+            // eventTrigger.triggers.Add(entry);
         }
         foreach (InputField infield in inputs) {
             infield.onValueChanged.AddListener(delegate { PlayInputChangedSound(); });
@@ -52,12 +54,18 @@ public class UIButtonEffects : MonoBehaviour {
     void PlayInputChangedSound() {
         Play(inputChangedSound);
     }
+    public void OnPointerDown(PointerEventData eventData) {
+        Play(clickSound);
+    }
     void PlayClickSound() {
         Play(clickSound);
     }
-    public void PlayMouseOverSound() {
+    public void OnPointerEnter(PointerEventData eventData) {
         Play(mouseOverSound);
     }
+    //     public void OnUpdateSelected(BaseEventData eventData) {
+    // Play(inputChangedSound);
+    //     }
     void OnDestroy() {
         Play(stopSound);
     }
