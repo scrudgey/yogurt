@@ -278,6 +278,8 @@ public class Eater : Interactive, ISaveable {
     }
     public void SaveData(PersistentComponent data) {
         data.floats["nutrition"] = nutrition;
+        data.floats["nausea"] = nausea;
+        data.floats["vomitCountDown"] = vomitCountDown;
         int index = 0;
         while (eatenQueue.Count > 0) {
             GameObject eaten = eatenQueue.Dequeue();
@@ -288,6 +290,8 @@ public class Eater : Interactive, ISaveable {
     }
     public void LoadData(PersistentComponent data) {
         nutrition = data.floats["nutrition"];
+        nausea = data.floats["nausea"];
+        vomitCountDown = data.floats["vomitCountDown"];
         if (data.ints.ContainsKey("eaten1")) {
             GameObject eaten = MySaver.IDToGameObject(data.ints["eaten1"]);
             if (eaten != null) {
