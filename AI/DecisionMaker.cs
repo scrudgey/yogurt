@@ -220,6 +220,5 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
                 }
             }
         }
-
     }
 }
