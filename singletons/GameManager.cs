@@ -45,6 +45,7 @@ public class GameData {
     public bool mayorCutsceneHappened;
     public bool teleporterUnlocked;
     public string headSpriteSheet;
+    public string cosmicName = "";
     public GameData() {
         days = 0;
         saveDate = System.DateTime.Now.ToString();
@@ -435,6 +436,12 @@ public partial class GameManager : Singleton<GameManager> {
                 playerFlammable.onFire = false;
                 playerFlammable.heat = 0;
             }
+            Intrinsics playerIntrinsics = playerObject.GetComponent<Intrinsics>();
+            if (playerIntrinsics) {
+                // Debug.Log(playerIntrinsics.liveBuffs);
+                playerIntrinsics.liveBuffs = new List<Buff>();
+                // playerIntrinsics.
+            }
             data.teleportedToday = false;
             MySaver.Save();
             awaitNewDayPrompt = CheckNewDayPrompt();
@@ -778,6 +785,17 @@ public partial class GameManager : Singleton<GameManager> {
         CameraControl camControl = FindObjectOfType<CameraControl>();
         camControl.audioSource.PlayOneShot(Resources.Load("sounds/xylophone/x4") as AudioClip);
         Toolbox.Instance.SwitchAudioListener(GameObject.Find("Main Camera"));
+    }
+
+    public string CosmicName() {
+        List<string> names = new List<string>(){
+            "Stupor Mundi",
+            "Northstar Megarainbow",
+            "Hyperplane Godhead",
+            "Ignotum P. Ignotius",
+            "Magna Morti"
+        };
+        return names[UnityEngine.Random.Range(0, names.Count)];
     }
 }
 
