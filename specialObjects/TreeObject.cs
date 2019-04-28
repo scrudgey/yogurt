@@ -18,8 +18,8 @@ public class TreeObject : Damageable {
         motor = hinge.motor;
         leafSpawnPoint = transform.Find("leafSpawnPoint");
     }
-    public override void NetIntrinsicsChanged(MessageNetIntrinsic message){
-        
+    public override void NetIntrinsicsChanged(MessageNetIntrinsic message) {
+
     }
     public void Update() {
         if (doShake) {
@@ -41,9 +41,11 @@ public class TreeObject : Damageable {
         timer = 0;
         doShake = true;
         Vector3 randomBump = new Vector3(Random.Range(-0.05f, 0.05f), Random.Range(-0.05f, 0.05f), 0);
-        GameObject newLeaf = Instantiate(leaf, leafSpawnPoint.position + randomBump, Quaternion.identity) as GameObject;
-        FallingLeaf newLeafScript = newLeaf.GetComponent<FallingLeaf>();
-        newLeafScript.height = 0.9f;
+        if (Random.Range(0f, 1f) < 0.5f) {
+            GameObject newLeaf = Instantiate(leaf, leafSpawnPoint.position + randomBump, Quaternion.identity) as GameObject;
+            FallingLeaf newLeafScript = newLeaf.GetComponent<FallingLeaf>();
+            newLeafScript.height = Random.Range(0.9f, 1f);
+        }
         return 1f;
     }
 }

@@ -20,12 +20,6 @@ public class Flammable : MonoBehaviour, ISaveable {
     void Start() {
         pickup = GetComponent<Pickup>();
 
-        //ensure that there is a speaker
-        audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
-        burnSounds = Resources.Load("sounds/Crackling Fire", typeof(AudioClip)) as AudioClip;
-        igniteSounds[0] = Resources.Load("sounds/Flash Fire Ignite 01", typeof(AudioClip)) as AudioClip;
-        igniteSounds[1] = Resources.Load("sounds/Flash Fire Ignite 02", typeof(AudioClip)) as AudioClip;
-
         //add the particle effect and set its position
         Vector3 flamePosition = transform.position;
         Transform flamepoint = transform.Find("flamepoint");
@@ -54,6 +48,12 @@ public class Flammable : MonoBehaviour, ISaveable {
         fireRadius.radius = 0.2f;
         fireRadius.name = "fire";
         fire.gameObject.layer = 13;
+        //ensure that there is a speaker
+        audioSource = Toolbox.Instance.SetUpAudioSource(fireChild);
+        burnSounds = Resources.Load("sounds/Crackling Fire", typeof(AudioClip)) as AudioClip;
+        igniteSounds[0] = Resources.Load("sounds/Flash Fire Ignite 01", typeof(AudioClip)) as AudioClip;
+        igniteSounds[1] = Resources.Load("sounds/Flash Fire Ignite 02", typeof(AudioClip)) as AudioClip;
+
         Toolbox.RegisterMessageCallback<MessageDamage>(this, HandleDamageMessage);
         Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
     }
@@ -68,6 +68,10 @@ public class Flammable : MonoBehaviour, ISaveable {
     public void HandleDamageMessage(MessageDamage message) {
         if (message.type == damageType.fire) {
             heat += message.amount;
+        }
+        if (message.type == damageType.asphyxiation) {
+            heat = -999f;
+            onFire = false;
         }
     }
     void Update() {
@@ -131,6 +135,7 @@ public class Flammable : MonoBehaviour, ISaveable {
             }
             // if i am on fire, i take damage.
             MessageDamage message = new MessageDamage(Time.deltaTime, damageType.fire);
+            message.responsibleParty = gameObject;
             Toolbox.Instance.SendMessage(gameObject, this, message, sendUpwards: false);
             if (Random.Range(0, 100f) < 1) {
                 MessageSpeech speechMessage = new MessageSpeech();

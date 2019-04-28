@@ -154,15 +154,27 @@ public class MySaver {
         }
         // separate lists of persistent objects for the scene and the player
         HashSet<int> playerTree = new HashSet<int>();
-        RecursivelyAddTree(playerTree, objectIDs[GameManager.Instance.playerObject]);
-        foreach (PersistentObject childPersistent in persistents[GameManager.Instance.playerObject].persistentChildren.Values) {
-            // add the child object's referents to tree
-            RecursivelyAddTree(playerTree, childPersistent.id);
-            playerTree.Remove(childPersistent.id);
+        if (GameManager.Instance.playerObject != null) {
+            RecursivelyAddTree(playerTree, objectIDs[GameManager.Instance.playerObject]);
+            foreach (PersistentObject childPersistent in persistents[GameManager.Instance.playerObject].persistentChildren.Values) {
+                // add the child object's referents to tree
+                RecursivelyAddTree(playerTree, childPersistent.id);
+                playerTree.Remove(childPersistent.id);
+            }
+            using (FileStream sceneStream = File.Create(scenePath)) {
+                listSerializer.Serialize(sceneStream, savedIDs.ToList().Except(playerTree.ToList()).ToList());
+            }
         }
-        using (FileStream sceneStream = File.Create(scenePath)) {
-            listSerializer.Serialize(sceneStream, savedIDs.ToList().Except(playerTree.ToList()).ToList());
-        }
+        // HashSet<int> playerTree = new HashSet<int>();
+        // RecursivelyAddTree(playerTree, objectIDs[GameManager.Instance.playerObject]);
+        // foreach (PersistentObject childPersistent in persistents[GameManager.Instance.playerObject].persistentChildren.Values) {
+        //     // add the child object's referents to tree
+        //     RecursivelyAddTree(playerTree, childPersistent.id);
+        //     playerTree.Remove(childPersistent.id);
+        // }
+        // using (FileStream sceneStream = File.Create(scenePath)) {
+        //     listSerializer.Serialize(sceneStream, savedIDs.ToList().Except(playerTree.ToList()).ToList());
+        // }
         // remove all children objects from player tree. they are included in prefab.
         // note: the order of operations here means that child objects aren't in the scene or player trees.
         Stack<int> playerChildObjects = new Stack<int>();
@@ -180,9 +192,12 @@ public class MySaver {
         while (playerChildObjects.Count > 0) {
             playerTree.Remove(playerChildObjects.Pop());
         }
-        using (FileStream playerStream = File.Create(playerPath)) {
-            listSerializer.Serialize(playerStream, playerTree.ToList());
+        if (playerTree.Count > 0) {
+            using (FileStream playerStream = File.Create(playerPath)) {
+                listSerializer.Serialize(playerStream, playerTree.ToList());
+            }
         }
+
         // close the XML serialization stream
         // sceneStream.Close();
         // playerStream.Close();

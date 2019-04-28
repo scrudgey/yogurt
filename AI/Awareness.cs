@@ -68,6 +68,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
     public Knowledge possessionDefaultState;
     public GameObject wayWardPossession;
     private GameObject sightCone;
+    private Flammable flammable;
     private HashSet<GameObject> seenFlags = new HashSet<GameObject>();
     Transform cachedTransform;
     FixedSizedQueue<string> lastNEvents = new FixedSizedQueue<string>();
@@ -90,6 +91,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
     public Controllable.HitState hitState;
     public Ref<GameObject> nearestEnemy = new Ref<GameObject>(null);
     public Ref<GameObject> nearestFire = new Ref<GameObject>(null);
+    public bool imOnFire;
     public SerializableDictionary<GameObject, Knowledge> knowledgebase = new SerializableDictionary<GameObject, Knowledge>();
     public SerializableDictionary<GameObject, PersonalAssessment> people = new SerializableDictionary<GameObject, PersonalAssessment>();
 
@@ -192,6 +194,13 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             }
             SetNearestEnemy();
             SetNearestFire();
+            // TODO: check if i am on fire
+            if (flammable == null) {
+                flammable = GetComponent<Flammable>();
+            }
+            if (flammable != null) {
+                imOnFire = flammable.onFire;
+            }
         }
 
         if (socializationTimer <= 0) {

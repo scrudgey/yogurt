@@ -45,6 +45,7 @@ public class GameData {
     public bool mayorCutsceneHappened;
     public bool teleporterUnlocked;
     public string headSpriteSheet;
+    public string cosmicName = "";
     public GameData() {
         days = 0;
         saveDate = System.DateTime.Now.ToString();
@@ -80,7 +81,9 @@ public partial class GameManager : Singleton<GameManager> {
         {"moon_cave", "moon cave"},
         {"woods", "woods"},
         {"vampire_house", "mansion"},
-        {"mountain", "mountain"}
+        {"mountain", "mountain"},
+        {"clearing", "clearing"},
+        {"chamber", "meditation chamber"}
     };
     public GameData data;
     public string saveGameName = "test";
@@ -102,7 +105,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = false;
+    public bool debug = true;
     public bool failedLevelLoad = false;
     public void PlayPublicSound(AudioClip clip) {
         if (clip == null)
@@ -114,7 +117,6 @@ public partial class GameManager : Singleton<GameManager> {
                 Toolbox.GetOrCreateComponent<CameraControl>(cam.gameObject);
             }
         }
-        // Debug.Log(publicAudio);
         publicAudio.PlayOneShot(clip);
     }
     void Start() {
@@ -355,12 +357,7 @@ public partial class GameManager : Singleton<GameManager> {
             }
             data.firstTimeLeavingHouse = false;
         }
-        if (data.entryID == 420) {
-            // teleport entry
-            AudioClip teleportEnter = Resources.Load("sounds/clown/clown4") as AudioClip;
-            // Debug.Log(teleportEnter);
-            PlayPublicSound(teleportEnter);
-        }
+
         if (sceneName == "cave1" || sceneName == "cave2") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneFall>();
         }
@@ -400,6 +397,13 @@ public partial class GameManager : Singleton<GameManager> {
                 if (data.entryID == -99) {
                     WakeUpInBed();
                 }
+                if (data.entryID == 420) {
+                    // teleport entry
+                    AudioClip teleportEnter = Resources.Load("sounds/clown/clown4") as AudioClip;
+                    PlayPublicSound(teleportEnter);
+                    GameObject.Instantiate(Resources.Load("prefabs/fx/teleportEntryEffect"), playerObject.transform.position, Quaternion.identity);
+                    Toolbox.Instance.AudioSpeaker(teleportEnter, playerObject.transform.position);
+                }
             }
         }
     }
@@ -431,6 +435,12 @@ public partial class GameManager : Singleton<GameManager> {
             if (playerFlammable) {
                 playerFlammable.onFire = false;
                 playerFlammable.heat = 0;
+            }
+            Intrinsics playerIntrinsics = playerObject.GetComponent<Intrinsics>();
+            if (playerIntrinsics) {
+                // Debug.Log(playerIntrinsics.liveBuffs);
+                playerIntrinsics.liveBuffs = new List<Buff>();
+                // playerIntrinsics.
             }
             data.teleportedToday = false;
             MySaver.Save();
@@ -775,6 +785,17 @@ public partial class GameManager : Singleton<GameManager> {
         CameraControl camControl = FindObjectOfType<CameraControl>();
         camControl.audioSource.PlayOneShot(Resources.Load("sounds/xylophone/x4") as AudioClip);
         Toolbox.Instance.SwitchAudioListener(GameObject.Find("Main Camera"));
+    }
+
+    public string CosmicName() {
+        List<string> names = new List<string>(){
+            "Stupor Mundi",
+            "Northstar Megarainbow",
+            "Hyperplane Godhead",
+            "Ignotum P. Ignotius",
+            "Magna Morti"
+        };
+        return names[UnityEngine.Random.Range(0, names.Count)];
     }
 }
 

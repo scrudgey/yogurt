@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 public class DoorwayZone : Doorway {
-    public Transform enterPoint;
+    // public Transform enterPoint;
     public override void Enter(GameObject player) {
         enterPoint = transform.Find("enterPoint");
         player.transform.position = enterPoint.position;

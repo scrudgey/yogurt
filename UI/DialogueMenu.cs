@@ -15,12 +15,20 @@ public class Monologue {
     public int index;
     private string currentString;
     public Monologue() { }
-    private Regex name_hook = new Regex(@"\$name");
+    static private Regex name_hook = new Regex(@"\$name");
+    static private Regex cosmic_name_hook = new Regex(@"\$cosmicName");
+    public static string replaceHooks(string inString) {
+        string line = name_hook.Replace(inString, GameManager.Instance.saveGameName);
+        line = cosmic_name_hook.Replace(line, GameManager.Instance.data.cosmicName);
+        return line;
+    }
     public Monologue(Speech speaker, string[] texts) {
         index = 0;
         this.speaker = speaker;
         for (int i = texts.Length - 1; i >= 0; i--) {
-            string line = name_hook.Replace(texts[i], GameManager.Instance.saveGameName);
+            // string line = name_hook.Replace(texts[i], GameManager.Instance.saveGameName);
+            // line = cosmic_name_hook.Replace(texts[i], GameManager.Instance.data.cosmicName);
+            string line = replaceHooks(texts[i]);
             text.Push(line);
         }
     }
@@ -49,6 +57,7 @@ public class DialogueMenu : MonoBehaviour {
     public Trader targetTrade;
     private Controllable instigatorControl;
     private Controllable targetControl;
+    private AnchoriteDance targetAnchoriteDance;
     public Image portrait1;
     public Image portrait2;
     public GameObject portraitContainer1;
@@ -81,6 +90,7 @@ public class DialogueMenu : MonoBehaviour {
     public MyDelegate menuClosed;
     public bool configured;
     public int blitCounter;
+    public bool cutsceneDialogue;
     void Start() {
         if (configured)
             return;
@@ -129,12 +139,14 @@ public class DialogueMenu : MonoBehaviour {
         targetInv = target.GetComponent<Inventory>();
         targetAwareness = target.GetComponent<Awareness>();
         targetTrade = target.GetComponent<Trader>();
+        targetAnchoriteDance = target.GetComponent<AnchoriteDance>();
+        if (targetAnchoriteDance)
+            targetAnchoriteDance.StopDance();
         if (instigatorInv == null || targetInv == null) {
             giveButton.interactable = false;
         }
         portrait2.sprite = target.portrait[0];
         portrait1.sprite = instigator.portrait[0];
-        // speechText.text = instigator.name + " " + target.name;
         targetControl = target.GetComponent<Controllable>();
         instigatorControl = instigator.GetComponent<Controllable>();
         instigatorControl.SetDirection(target.transform.position - instigator.transform.position);
@@ -167,12 +179,19 @@ public class DialogueMenu : MonoBehaviour {
             targetControl.disabled = false;
         if (instigatorControl)
             instigatorControl.disabled = false;
+        if (targetAnchoriteDance)
+            targetAnchoriteDance.StartDance();
         if (menuClosed != null)
             menuClosed();
     }
     public void LoadDialogueTree(string filename) {
-        Regex node_hook = new Regex(@"^(\d)>(.+)", RegexOptions.Multiline);
-        Regex response_hook = new Regex(@"^(\d)\)(.+)");
+        if (filename == "polestar_first") {
+            cutsceneDialogue = true;
+            EnableButtons();
+        }
+
+        Regex node_hook = new Regex(@"^(\d+)>(.+)", RegexOptions.Multiline);
+        Regex response_hook = new Regex(@"^(\d+)\)(.+)");
         TextAsset textData = Resources.Load("data/dialogue/" + filename) as TextAsset;
         DialogueNode newNode = null;
         foreach (string line in textData.text.Split('\n')) {
@@ -185,7 +204,8 @@ public class DialogueMenu : MonoBehaviour {
             }
             if (response_hook.IsMatch(line)) {
                 Match match = response_hook.Match(line);
-                newNode.responses.Add(match.Groups[2].Value);
+                string response = Monologue.replaceHooks(match.Groups[2].Value);
+                newNode.responses.Add(response);
                 newNode.responseLinks.Add(int.Parse(match.Groups[1].Value));
                 continue;
             }
@@ -375,21 +395,27 @@ public class DialogueMenu : MonoBehaviour {
             portraitContainer2.SetActive(false);
             portraitContainer1.SetActive(true);
         }
-        // portrait1.sprite = monologue.speaker.portrait;
         if (monologue.text.Peek() == "END")
             UINew.Instance.CloseActiveMenu();
-        // Destroy(gameObject);
     }
     public void EnableButtons() {
-        foreach (Button button in buttons)
-            button.interactable = true;
-        if (instigatorInv == null || targetInv == null) {
-            giveButton.gameObject.SetActive(false);
-            // demandButton.gameObject.SetActive(false);
-        }
-        if (CutsceneManager.Instance.cutscene != null) {
-            if (CutsceneManager.Instance.cutscene.GetType() == typeof(CutsceneMayor)) {
-                suggestButton.GetComponent<Button>().interactable = false;
+        if (cutsceneDialogue) {
+            foreach (Button button in buttons) {
+                button.interactable = false;
+                button.gameObject.SetActive(false);
+            }
+        } else {
+            foreach (Button button in buttons)
+                button.interactable = true;
+
+            if (instigatorInv == null || targetInv == null) {
+                giveButton.gameObject.SetActive(false);
+                // demandButton.gameObject.SetActive(false);
+            }
+            if (CutsceneManager.Instance.cutscene != null) {
+                if (CutsceneManager.Instance.cutscene.GetType() == typeof(CutsceneMayor)) {
+                    suggestButton.GetComponent<Button>().interactable = false;
+                }
             }
         }
         if (choice1Text.gameObject.activeSelf) {
@@ -410,8 +436,10 @@ public class DialogueMenu : MonoBehaviour {
                 advancedKeyPressed = true;
                 if (monologue.text.Count > 0) {
                     monologue.NextLine();
+                    CheckForCommands(monologue.text.Peek());
                 } else if (dialogue.Count > 0) {
                     SetMonologue(dialogue.Pop());
+                    CheckForCommands(monologue.text.Peek());
                 }
             }
         }
@@ -432,7 +460,6 @@ public class DialogueMenu : MonoBehaviour {
             DisableButtons();
             speechText.text = monologue.GetString();
             blitCounter += 1;
-            // monologue.PlaySpeakSound(audioSource);
             monologue.speaker.gibberizer.StartPlay();
             promptText.text = "";
         } else {
@@ -460,5 +487,20 @@ public class DialogueMenu : MonoBehaviour {
             }
             blitCounter = 0;
         }
+    }
+
+    public void CheckForCommands(string text) {
+        if (text == "END")
+            UINew.Instance.CloseActiveMenu();
+        if (text == "POLESTARCALLBACK") {
+            PoleStarCallback();
+            monologue.NextLine();
+            speechText.text = monologue.GetString();
+        }
+    }
+    public void PoleStarCallback() {
+        target.defaultMonologue = "polestar";
+        GameManager.Instance.data.teleporterUnlocked = true;
+        GameManager.Instance.data.cosmicName = GameManager.Instance.CosmicName();
     }
 }

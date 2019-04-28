@@ -259,7 +259,44 @@ namespace AI {
             }
         }
     }
-
+    public class RoutinePanic : Routine {
+        private float wanderTime = 0;
+        public enum direction { left, right, up, down, none }
+        private direction dir;
+        public RoutinePanic(GameObject g, Controllable c) : base(g, c) {
+            routineThought = "Panic!!!!";
+        }
+        public override void Configure() {
+            wanderTime = UnityEngine.Random.Range(0, 2);
+            dir = (direction)(UnityEngine.Random.Range(0, 4));
+        }
+        protected override status DoUpdate() {
+            control.ResetInput();
+            if (wanderTime > 0) {
+                switch (dir) {
+                    case direction.down:
+                        control.downFlag = true;
+                        break;
+                    case direction.left:
+                        control.leftFlag = true;
+                        break;
+                    case direction.right:
+                        control.rightFlag = true;
+                        break;
+                    case direction.up:
+                        control.upFlag = true;
+                        break;
+                }
+            }
+            if (wanderTime < 0f) {
+                wanderTime = UnityEngine.Random.Range(0, 2);
+                dir = (direction)(UnityEngine.Random.Range(0, 4));
+            } else {
+                wanderTime -= Time.deltaTime;
+            }
+            return status.neutral;
+        }
+    }
     public class RoutineWander : Routine {
         private float wanderTime = 0;
         public enum direction { left, right, up, down, none }
@@ -267,7 +304,7 @@ namespace AI {
         public RoutineWander(GameObject g, Controllable c) : base(g, c) {
             routineThought = "I'm wandering around.";
         }
-        public override void Configure(){
+        public override void Configure() {
             wanderTime = UnityEngine.Random.Range(0, 2);
             dir = (direction)(UnityEngine.Random.Range(0, 4));
         }
@@ -304,9 +341,9 @@ namespace AI {
             routineThought = "I'm a clown.";
             timeSinceF = UnityEngine.Random.Range(1.0f, 1.5f);
         }
-        protected override status DoUpdate(){
+        protected override status DoUpdate() {
             timeSinceF -= Time.deltaTime;
-            if (timeSinceF <= 0){
+            if (timeSinceF <= 0) {
                 timeSinceF = UnityEngine.Random.Range(1.5f, 10.5f);
                 control.ShootPressed();
             }
@@ -344,7 +381,7 @@ namespace AI {
             target = t;
             this.minDistance = minDistance;
         }
-        public RoutineWalkToPoint(GameObject g, Controllable c, Ref<Vector2> t) : this (g, c, t, 0.1f) { }
+        public RoutineWalkToPoint(GameObject g, Controllable c, Ref<Vector2> t) : this(g, c, t, 0.1f) { }
         protected override status DoUpdate() {
             float distToTarget = Vector2.Distance(gameObject.transform.position, target.val);
             control.ResetInput();
@@ -508,16 +545,24 @@ namespace AI {
     public class RoutinePunchAt : Routine {
         Ref<GameObject> target;
         float timer;
-        public RoutinePunchAt(GameObject g, Controllable c, Ref<GameObject> t) : base(g, c) {
+        Personality.CombatProfficiency proficiency;
+        public RoutinePunchAt(GameObject g, Controllable c, Ref<GameObject> t, Personality.CombatProfficiency proficiency) : base(g, c) {
             routineThought = "Fisticuffs!";
             target = t;
+            this.proficiency = proficiency;
         }
         protected override status DoUpdate() {
-            timer += Time.deltaTime;
+            timer -= Time.deltaTime;
             if (target.val != null) {
                 control.SetDirection(Vector2.ClampMagnitude(target.val.transform.position - gameObject.transform.position, 1f));
-                if (timer > 0.5) {
-                    timer = 0f;
+                if (timer < 0) {
+                    if (proficiency == Personality.CombatProfficiency.normal) {
+                        timer = 0.65f + UnityEngine.Random.Range(0, 0.25f);
+                    } else if (proficiency == Personality.CombatProfficiency.expert) {
+                        timer = 0.5f + UnityEngine.Random.Range(0, 0.2f);
+                    } else if (proficiency == Personality.CombatProfficiency.poor) {
+                        timer = 0.8f + UnityEngine.Random.Range(0, 0.25f);
+                    }
                     control.ShootPressed();
                 } else {
                     control.ResetInput();

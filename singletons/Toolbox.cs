@@ -234,6 +234,10 @@ public class Toolbox : Singleton<Toolbox> {
         }
         return output;
     }
+    public string UnderscoreRemover(string input) {
+        Regex underScoreFinder = new Regex(@"_", RegexOptions.Multiline);
+        return underScoreFinder.Replace(input, " ");
+    }
     public string GetName(GameObject obj) {
         // TODO: include extra description, like "vomited up"
         // possibly also use intrinsics
@@ -257,11 +261,12 @@ public class Toolbox : Singleton<Toolbox> {
             if (edible.vomit)
                 nameOut = "vomited-up " + nameOut;
         }
-        Speech speech = obj.GetComponent<Speech>();
-        if (speech) {
-            nameOut = speech.name;
-        }
+        // Speech speech = obj.GetComponent<Speech>();
+        // if (speech) {
+        //     nameOut = speech.name;
+        // }
         nameOut = CloneRemover(nameOut);
+        nameOut = UnderscoreRemover(nameOut);
         return nameOut;
     }
     public void SendMessage(GameObject host, Component messenger, Message message, bool sendUpwards = true) {

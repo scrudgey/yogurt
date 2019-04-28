@@ -116,7 +116,7 @@ namespace AI {
             successCondition = new ConditionHoldingSpecificObject(g, target);
             routines.Add(new RoutineRetrieveRefFromInv(g, c, target));
             routines.Add(new RoutineGetRefFromEnvironment(g, c, target));
-        
+
         }
         public GoalGetItem(GameObject g, Controllable c, string target) : base(g, c) {
             goalThought = "I need a " + target + ".";
@@ -145,12 +145,12 @@ namespace AI {
         public new string goalThought {
             get { return "I'm going to check out that " + target.val.name + "."; }
         }
-        public GoalWalkToObject(GameObject g, Controllable c, Ref<GameObject> t, float range=0.2f) : base(g, c) {
+        public GoalWalkToObject(GameObject g, Controllable c, Ref<GameObject> t, float range = 0.2f) : base(g, c) {
             target = t;
             successCondition = new ConditionCloseToObject(g, target, range);
             routines.Add(new RoutineWalkToGameobject(g, c, target));
         }
-        public GoalWalkToObject(GameObject g, Controllable c, Type objType, float range=0.2f) : base(g, c) {
+        public GoalWalkToObject(GameObject g, Controllable c, Type objType, float range = 0.2f) : base(g, c) {
             // GameObject targetObject = GameObject.FindObjectOfType<typeof(objType)>();
             UnityEngine.Object obj = GameObject.FindObjectOfType(objType);
             Component targetComponent = (Component)obj;
@@ -184,7 +184,7 @@ namespace AI {
     }
     public class GoalWalkToPoint : Goal {
         public Ref<Vector2> target;
-        public GoalWalkToPoint(GameObject g, Controllable c, Ref<Vector2> target, float minDistance) : base (g, c) {
+        public GoalWalkToPoint(GameObject g, Controllable c, Ref<Vector2> target, float minDistance) : base(g, c) {
             this.target = target;
             ConditionLocation condition = new ConditionLocation(g, target);
             condition.minDistance = minDistance;
@@ -192,7 +192,7 @@ namespace AI {
 
             routines.Add(new RoutineWalkToPoint(g, c, target, minDistance));
         }
-        public GoalWalkToPoint(GameObject g, Controllable c, Ref<Vector2> target) : this (g, c, target, 0.2f) { }
+        public GoalWalkToPoint(GameObject g, Controllable c, Ref<Vector2> target) : this(g, c, target, 0.2f) { }
     }
     public class GoalHoseDown : Goal {
         public Ref<GameObject> target;
@@ -216,6 +216,13 @@ namespace AI {
             routines.Add(new RoutineWander(g, c));
         }
     }
+    public class GoalPanic : Goal {
+        public GoalPanic(GameObject g, Controllable c) : base(g, c) {
+            goalThought = "Panic!";
+            successCondition = new ConditionFail(g);
+            routines.Add(new RoutinePanic(g, c));
+        }
+    }
     public class GoalInflateBalloons : Goal {
         float utteranceTimer = UnityEngine.Random.Range(10f, 20f);
         List<string> phrases;
@@ -236,7 +243,7 @@ namespace AI {
             base.Update();
             utteranceTimer -= Time.deltaTime;
             if (utteranceTimer <= 0f) {
-                EventData ed = new EventData(positive:1);
+                EventData ed = new EventData(positive: 1);
                 utteranceTimer = UnityEngine.Random.Range(10f, 20f);
                 string phrase = phrases[UnityEngine.Random.Range(0, phrases.Count)];
                 MessageSpeech message = new MessageSpeech(phrase, eventData: ed);

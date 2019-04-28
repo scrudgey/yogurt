@@ -16,6 +16,10 @@ public abstract class Cutscene {
 public class CutsceneMoonLanding : Cutscene {
     private float timer;
     public Dictionary<Collider2D, PhysicsMaterial2D> materials;
+    Controllable playerControllable;
+    AdvancedAnimation playerAnimation;
+    HeadAnimation playerHeadAnimation;
+    Speech playerSpeech;
     public override void Configure() {
         materials = new Dictionary<Collider2D, PhysicsMaterial2D>();
         Transform spawnPoint = GameObject.Find("cannonEntryPoint").transform;
@@ -24,17 +28,21 @@ public class CutsceneMoonLanding : Cutscene {
         player.transform.localScale = new Vector3(-1f, 1f, 1f);
         player.transform.position = spawnPoint.position;
         player.transform.rotation = spawnPoint.rotation;
-        Controllable playerControllable = GameManager.Instance.playerObject.GetComponent<Controllable>();
+        playerControllable = GameManager.Instance.playerObject.GetComponent<Controllable>();
+        playerAnimation = GameManager.Instance.playerObject.GetComponent<AdvancedAnimation>();
+        playerHeadAnimation = GameManager.Instance.playerObject.GetComponent<HeadAnimation>();
+        playerSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
         if (playerControllable != null) {
             playerControllable.enabled = false;
         }
-        AdvancedAnimation playerAnimation = GameManager.Instance.playerObject.GetComponent<AdvancedAnimation>();
         if (playerAnimation != null) {
             playerAnimation.enabled = false;
         }
-        HeadAnimation playerHeadAnimation = GameManager.Instance.playerObject.GetComponent<HeadAnimation>();
         if (playerHeadAnimation != null) {
             playerHeadAnimation.enabled = false;
+        }
+        if (playerSpeech != null) {
+            playerSpeech.enabled = false;
         }
         Rigidbody2D body = player.GetComponent<Rigidbody2D>();
         body.gravityScale = GameManager.Instance.gravity;
@@ -45,9 +53,12 @@ public class CutsceneMoonLanding : Cutscene {
             materials[collider] = collider.sharedMaterial;
             collider.sharedMaterial = moonMaterial;
         }
-        AudioSource playerAudio = Toolbox.GetOrCreateComponent<AudioSource>(GameManager.Instance.playerObject);
+        // AudioSource playerAudio = Toolbox.GetOrCreateComponent<AudioSource>(GameManager.Instance.playerObject);
+        // AudioSource playerAudio = Toolbox.Instance.SetUpAudioSource(GameManager.Instance.playerObject);
         AudioClip charlierAugh = Resources.Load("sounds/auugh") as AudioClip;
-        playerAudio.PlayOneShot(charlierAugh);
+        // GameManager.Instance.PlayPublicSound(charlierAugh);
+        Toolbox.Instance.AudioSpeaker(charlierAugh, new Vector3(0.38f, -0.65f, 0));
+        // playerAudio.PlayOneShot(charlierAugh);
     }
     public override void Update() {
         if (timer == 0) {
@@ -60,17 +71,17 @@ public class CutsceneMoonLanding : Cutscene {
     }
     public override void CleanUp() {
         UINew.Instance.RefreshUI(active: true);
-        Controllable playerControllable = GameManager.Instance.playerObject.GetComponent<Controllable>();
         if (playerControllable != null) {
             playerControllable.enabled = true;
         }
-        AdvancedAnimation playerAnimation = GameManager.Instance.playerObject.GetComponent<AdvancedAnimation>();
         if (playerAnimation != null) {
             playerAnimation.enabled = true;
         }
-        HeadAnimation playerHeadAnimation = GameManager.Instance.playerObject.GetComponent<HeadAnimation>();
         if (playerHeadAnimation != null) {
             playerHeadAnimation.enabled = true;
+        }
+        if (playerSpeech != null) {
+            playerSpeech.enabled = true;
         }
         Rigidbody2D body = GameManager.Instance.playerObject.GetComponent<Rigidbody2D>();
         body.gravityScale = 0f;
@@ -96,6 +107,10 @@ public class CutsceneSpace : Cutscene {
         Controllable playerControllable = GameManager.Instance.playerObject.GetComponent<Controllable>();
         if (playerControllable != null) {
             playerControllable.enabled = false;
+        }
+        Speech playerSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
+        if (playerSpeech != null) {
+            playerSpeech.enabled = false;
         }
     }
     public override void Update() {
@@ -238,6 +253,8 @@ public class CutsceneBoardroom : Cutscene {
     Speech moe;
     Speech larry;
     Speech curly;
+    HeadAnimation moeControl;
+    GameObject moeObj;
     List<string> lines = new List<string>();
     int index = 0;
     float scriptTimeSpace = 1f;
@@ -250,12 +267,14 @@ public class CutsceneBoardroom : Cutscene {
         escPrompt.gameObject.SetActive(false);
         Color blank = new Color(255, 255, 255, 0);
         settingText.color = blank;
-        GameObject moeObj = GameObject.Find("moe");
+        moeObj = GameObject.Find("moe");
         GameObject larryObj = GameObject.Find("larry");
         GameObject curlyObj = GameObject.Find("curly");
         moeObj.GetComponent<Humanoid>().SetDirection(Vector2.down);
         larryObj.GetComponent<Humanoid>().SetDirection(Vector2.right);
         curlyObj.GetComponent<Humanoid>().SetDirection(Vector2.left);
+        moeControl = moeObj.GetComponentInChildren<HeadAnimation>();
+        moeControl.DirectionChange(Vector2.down);
         moe = moeObj.GetComponent<Speech>();
         larry = larryObj.GetComponent<Speech>();
         curly = curlyObj.GetComponent<Speech>();
@@ -317,6 +336,23 @@ public class CutsceneBoardroom : Cutscene {
             } else if (match.Groups[1].Value == "CURLY") {
                 curly.Say(message);
             }
+        }
+        if (line == "<LEFT>") {
+            Vector3 scale = new Vector3(-1, 1, 1);
+            moeObj.transform.localScale = scale;
+            moeControl.DirectionChange(Vector2.left);
+        } else if (line == "<RIGHT>") {
+            Vector3 scale = new Vector3(1, 1, 1);
+            moeObj.transform.localScale = scale;
+            moeControl.DirectionChange(Vector2.right);
+        } else if (line == "<DOWN>") {
+            Vector3 scale = new Vector3(1, 1, 1);
+            moeObj.transform.localScale = scale;
+            moeControl.DirectionChange(Vector2.down);
+        } else if (line == "<UP>") {
+            Vector3 scale = new Vector3(1, 1, 1);
+            moeObj.transform.localScale = scale;
+            moeControl.DirectionChange(Vector2.up);
         }
         if (endHook.IsMatch(line)) {
             complete = true;
