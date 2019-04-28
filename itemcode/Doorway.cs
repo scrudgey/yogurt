@@ -10,6 +10,7 @@ public class Doorway : Interactive {
     public string leaveDesc;
     public string actionDesc = "Exit";
     public Transform enterPoint;
+    public bool smallEntrance;
     public virtual void Awake() {
         Interaction leaveaction = new Interaction(this, actionDesc, "Leave");
         interactions.Add(leaveaction);
@@ -26,6 +27,18 @@ public class Doorway : Interactive {
         PlayEnterSound();
     }
     public void Leave() {
+        if (smallEntrance) {
+            Inventory playerInventory = GameManager.Instance.playerObject.GetComponent<Inventory>();
+            if (playerInventory) {
+                if (playerInventory.holding) {
+                    if (playerInventory.holding.heavyObject) {
+                        MessageSpeech message = new MessageSpeech("I can't fit holding this!");
+                        Toolbox.Instance.SendMessage(GameManager.Instance.playerObject, this, message);
+                        return;
+                    }
+                }
+            }
+        }
         GameManager.Instance.publicAudio.PlayOneShot(leaveSound);
         GameManager.Instance.LeaveScene(destination, destinationEntry);
     }
