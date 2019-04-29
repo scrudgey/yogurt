@@ -30,6 +30,9 @@ public class Duplicator : Interactive, IDirectable {
             // GameManager.Instance.CheckAchievements();
             GameManager.Instance.IncrementStat(StatType.dollarsDuplicated, 1);
         }
+        if (duplicatable.gameObject == GameManager.Instance.playerObject) {
+            dupObj.name = GameManager.Instance.saveGameName;
+        }
         if (particles != null) {
             particles.Play();
         }

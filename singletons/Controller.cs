@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
+using UnityEngine.EventSystems;
 public class Controller : Singleton<Controller> {
     public enum ControlState {
         normal, inMenu, waitForMenu, commandSelect, swearSelect, insultSelect, cutscene, hypnosisSelect

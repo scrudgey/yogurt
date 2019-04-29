@@ -52,6 +52,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     public bool normalPunchSounds = true;
     public List<AudioClip> punchSounds;
     private AudioSource audioSource;
+    private MessageAnimation.AnimType currentAnimation;
     void Awake() {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         holdpoint = transform.Find("holdpoint");
@@ -78,6 +79,11 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         if (message.type == MessageAnimation.AnimType.fighting && message.value == true) {
             if (holding)
                 DropItem();
+        }
+        if (message.value) {
+            currentAnimation = message.type;
+        } else {
+            currentAnimation = MessageAnimation.AnimType.none;
         }
     }
     void HandleHitStun(MessageHitstun message) {
@@ -302,11 +308,13 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
                 holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder + 2;
             }
             holding.transform.position = holdpoint.transform.position;
-            if (holdpoint_angle != 0) {
+            if (holdpoint_angle != 0 && currentAnimation == MessageAnimation.AnimType.none) {
                 string dirString = Toolbox.Instance.DirectionToString(direction);
                 if (dirString == "left" || dirString == "right") {
                     holding.transform.rotation = Quaternion.AngleAxis(holdpoint_angle * transform.localScale.x, new Vector3(0, 0, 1f));
                 }
+            } else {
+                holding.transform.rotation = holdpoint.transform.rotation;
             }
         }
     }

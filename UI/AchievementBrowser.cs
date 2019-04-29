@@ -29,18 +29,13 @@ public class AchievementBrowser : MonoBehaviour {
         int numberComplete = 0;
         foreach (Achievement achievement in allAchievements) {
             GameObject entry = GameObject.Instantiate(entryPrefab) as GameObject;
-            Button entryButton = entry.GetComponent<Button>();
-            effects.buttons.Add(entryButton);
-            entry.transform.SetParent(scrollArea, false);
-            Image entryImage = entry.transform.Find("Image/Image").GetComponent<Image>();
-            Text entryText = entry.transform.Find("Image/Text").GetComponent<Text>();
-
-            entryText.text = achievement.title;
-            Sprite icon = Resources.Load<Sprite>("achievements/icons/" + achievement.icon) as Sprite;
-            entryImage.sprite = icon;
-
             AchievementEntry entryScript = entry.GetComponent<AchievementEntry>();
-            entryScript.browser = this;
+            entryScript.Initialize(achievement, this);
+
+            effects.buttons.Add(entryScript.entryButton);
+            entry.transform.SetParent(scrollArea, false);
+
+
             foreach (Achievement savedAchievement in data.achievements) {
                 if (savedAchievement.title != achievement.title)
                     continue;
@@ -48,10 +43,7 @@ public class AchievementBrowser : MonoBehaviour {
                 entryScript.achievement = savedAchievement;
                 if (savedAchievement.complete) {
                     numberComplete += 1;
-                    // Button entryButton = entry.GetComponent<Button>();
-                    ColorBlock cb = entryButton.colors;
-                    cb.normalColor = new Color(114f / 255f, 185f / 255f, 255f / 255f, 1f);
-                    entryButton.colors = cb;
+                    entryScript.Complete();
                 }
                 if (!initializeFirst) {
                     initializeFirst = true;

@@ -91,7 +91,7 @@ public class DialogueMenu : MonoBehaviour {
     public bool configured;
     public int blitCounter;
     public bool cutsceneDialogue;
-    void Start() {
+    public void Start() {
         if (configured)
             return;
         configured = true;
@@ -134,6 +134,8 @@ public class DialogueMenu : MonoBehaviour {
         instigator.gibberizer.StopPlay();
         instigator.inDialogue = true;
         target.inDialogue = true;
+        giveButton.gameObject.SetActive(false);
+        followButton.gameObject.SetActive(false);
 
         instigatorInv = instigator.GetComponent<Inventory>();
         targetInv = target.GetComponent<Inventory>();
