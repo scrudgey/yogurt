@@ -119,7 +119,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
         publicAudio.PlayOneShot(clip);
     }
-    void Start() {
+    public void Start() {
         if (data == null) {
             data = InitializedGameData();
             ReceiveEmail("duplicator");
@@ -462,6 +462,8 @@ public partial class GameManager : Singleton<GameManager> {
         } else {
             InitializePlayableLevel();
         }
+        if (!debug)
+            ReceiveEmail("start");
         sceneTime = 0f;
         timeSinceLastSave = 0f;
     }
@@ -533,7 +535,8 @@ public partial class GameManager : Singleton<GameManager> {
         data.perks = new SerializableDictionary<string, bool>(){
             {"vomit", false},
             {"eat_all", false},
-            {"hypnosis", false}
+            {"hypnosis", false},
+            {"swear", false}
         };
         data.collectedClothes.Add("blue_shirt");
         data.collectedClothes.Add("pajamas");
@@ -559,7 +562,13 @@ public partial class GameManager : Singleton<GameManager> {
             data.perks["hypnosis"] = true;
             data.perks["vomit"] = true;
             data.perks["eat_all"] = true;
-            data.unlockedScenes.Add("moon_cave");
+            data.perks["swear"] = true;
+            // data.unlockedScenes.Add("moon_cave");
+            // data.unlockedScenes.Add("house");
+            // data.unlockedScenes.Add("forest");
+            foreach (string sceneName in sceneNames.Keys) {
+                data.unlockedScenes.Add(sceneName);
+            }
             data.teleporterUnlocked = true;
         }
         data.completeCommercials = new HashSet<Commercial>();

@@ -196,6 +196,12 @@ namespace AI {
             if (awareness.imOnFire) {
                 return 2 * Priority.urgencyMaximum;
             }
+            if (personality.bravery == Personality.Bravery.brave) {
+                return urgency / 100f;
+            }
+            // return urgency / 100f;
+            if (personality.bravery == Personality.Bravery.cowardly)
+                return urgency * 2f;
             return urgency;
         }
         public override void ReceiveMessage(Message incoming) {
@@ -236,8 +242,10 @@ namespace AI {
             }
         }
         public override float Urgency(Personality personality) {
-            if (personality.bravery == Personality.Bravery.brave)
+            if (personality.bravery == Personality.Bravery.brave) {
                 return urgency / 10f;
+            }
+            // return urgency / 100f;
             if (personality.bravery == Personality.Bravery.cowardly)
                 return urgency * 2f;
             return urgency;

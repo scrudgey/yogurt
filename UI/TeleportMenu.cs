@@ -9,14 +9,19 @@ public class TeleportMenu : MonoBehaviour {
     public Teleporter teleporter;
     public UIButtonEffects effects;
     public List<Button> builtInButtons;
-    public Image image;
+    public Text descriptionText;
+    // public Image image;
     void Start() {
         effects = GetComponent<UIButtonEffects>();
         GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
-        image = transform.Find("main/imageBackground/image").GetComponent<Image>();
     }
     public void SetReferences() {
-        buttonList = transform.Find("main/list");
+        buttonList = transform.Find("main/Scroll View/Viewport/Content");
+        descriptionText = transform.Find("main/desc").GetComponent<Text>();
+        descriptionText.gameObject.SetActive(false);
+        foreach (Transform child in buttonList) {
+            Destroy(child.gameObject);
+        }
         teleportButton = transform.Find("main/buttonBar/teleport").GetComponent<Button>();
         teleportButton.interactable = false;
     }
@@ -33,8 +38,10 @@ public class TeleportMenu : MonoBehaviour {
         effects.Configure();
     }
     public void SceneButtonCallback(SceneButton button) {
+        descriptionText.gameObject.SetActive(true);
         teleportButton.interactable = true;
         // update image with selected scene info
+        descriptionText.text = "Teleport to: " + GameManager.sceneNames[button.scene_name];
         selectedButton = button;
     }
     public void TeleportButtonCallback() {

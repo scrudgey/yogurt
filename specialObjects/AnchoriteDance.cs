@@ -70,13 +70,19 @@ public class AnchoriteDance : MonoBehaviour {
             }
         }
         offset = 0;
-        // offset = Random.Range(0f, 0.005f);
         timer = offset;
         hopTimer = offset;
 
         poseIndex = Random.Range(0, poseSound.Length - 1);
 
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandeHitStun);
+        if (GameManager.Instance.data == null) {
+            GameManager.Instance.Start();
+        }
+        if (GameManager.Instance.data.teleporterUnlocked) {
+            Speech mySpeech = GetComponent<Speech>();
+            mySpeech.defaultMonologue = "polestar";
+        }
     }
     public void HandeHitStun(MessageHitstun message) {
         EndDance();

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
+// public class UIButtonEffects : MonoBehaviour { }
 public class UIButtonEffects : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler {
     public GameObject prefabSet;
 

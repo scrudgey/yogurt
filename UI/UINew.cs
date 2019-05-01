@@ -5,7 +5,7 @@ using Easings;
 using UnityEngine.EventSystems;
 
 public class UINew : Singleton<UINew> {
-    public enum MenuType { none, escape, inventory, speech, closet, scriptSelect, commercialReport, newDayReport, email, diary, dialogue, phone, perk, teleport }
+    public enum MenuType { none, escape, inventory, speech, closet, scriptSelect, commercialReport, newDayReport, email, diary, dialogue, phone, perk, teleport, tv }
     private enum EasingDirection { none, up, down }
     private Dictionary<MenuType, string> menuPrefabs = new Dictionary<MenuType, string>{
         {MenuType.escape,                   "UI/PauseMenu"},
@@ -20,7 +20,8 @@ public class UINew : Singleton<UINew> {
         {MenuType.dialogue,                 "UI/DialogueMenu"},
         {MenuType.phone,                    "UI/PhoneMenu"},
         {MenuType.perk,                     "UI/PerkMenu"},
-        {MenuType.teleport,                 "UI/TeleportMenu"}
+        {MenuType.teleport,                 "UI/TeleportMenu"},
+        {MenuType.tv,                       "UI/TVMenu"}
     };
     private static List<MenuType> actionRequired = new List<MenuType> { MenuType.commercialReport, MenuType.diary, MenuType.perk, MenuType.dialogue };
     public GameObject activeMenu;
@@ -97,12 +98,79 @@ public class UINew : Singleton<UINew> {
             GameObject top = Controller.Instance.GetFrontObject(hits);
             target = Controller.Instance.GetBaseInteractive(top.transform);
         }
-        bool cursorOverButton = false;
-        if (EventSystem.current.IsPointerOverGameObject()) {
-            cursorOverButton = true;
-        }
+        bool cursorOverButton = EventSystem.current.IsPointerOverGameObject();
+
         UpdateCursor(highlight);
         UpdateActionText(highlight, target, cursorOverButton);
+    }
+    public void UpdateActionText(bool highlight, GameObject target, bool cursorOverButton) {
+        if (GameManager.Instance.playerIsDead || GameManager.Instance.InCutsceneLevel()) {
+            SetActionText("");
+            return;
+        }
+        if (!activeMenu && CutsceneManager.Instance.cutscene == null) {
+            if (activeElements.Count > 1) {
+                if (cursorOverButton) {
+                    SetActionText(actionButtonText);
+                } else {
+                    SetActionText(lastTarget);
+                }
+            } else {
+                List<Controller.ControlState> selectStates = new List<Controller.ControlState>{
+                    Controller.ControlState.swearSelect,
+                    Controller.ControlState.insultSelect,
+                    Controller.ControlState.hypnosisSelect};
+                if (Controller.Instance.state == Controller.ControlState.commandSelect) {
+                    string commandName = Toolbox.Instance.GetName(Controller.Instance.commandTarget);
+                    if (target != null) {
+                        SetActionText("Command " + commandName + " to...");
+                    } else {
+                        SetActionText("Command " + commandName + "...");
+                    }
+                } else if (selectStates.Contains(Controller.Instance.state)) {
+                    if (target != null) {
+                        lastTarget = Toolbox.Instance.GetName(target);
+                        switch (Controller.Instance.state) {
+                            case Controller.ControlState.swearSelect:
+                                SetActionText("Swear at " + lastTarget);
+                                break;
+                            case Controller.ControlState.insultSelect:
+                                SetActionText("Insult " + lastTarget);
+                                break;
+                            case Controller.ControlState.hypnosisSelect:
+                                SetActionText("Hypnotize " + lastTarget);
+                                break;
+                        }
+                    } else {
+                        switch (Controller.Instance.state) {
+                            case Controller.ControlState.swearSelect:
+                                SetActionText("Swear at ...");
+                                break;
+                            case Controller.ControlState.insultSelect:
+                                SetActionText("Insult ...");
+                                break;
+                            case Controller.ControlState.hypnosisSelect:
+                                SetActionText("Hypnotize ...");
+                                break;
+
+                        }
+                    }
+                } else if (target != null) {
+                    lastTarget = Toolbox.Instance.GetName(target);
+                    SetActionText(lastTarget);
+                } else if (cursorOverButton) {
+                    SetActionText(actionButtonText);
+                } else {
+                    SetActionText("");
+                }
+            }
+        } else {
+            if (CutsceneManager.Instance.cutscene is CutscenePickleBottom) {
+                SetActionText("You have been visited by Peter Picklebottom");
+            } else {
+                SetActionText("");
+            }
+        }
     }
     public void UpdateCursor(bool highlight) {
         switch (Controller.Instance.state) {
@@ -151,49 +219,7 @@ public class UINew : Singleton<UINew> {
 
         Cursor.SetCursor(cursorTarget, new Vector2(16, 16), CursorMode.Auto);
     }
-    public void UpdateActionText(bool highlight, GameObject target, bool cursorOverButton) {
-        if (GameManager.Instance.playerIsDead || GameManager.Instance.InCutsceneLevel()) {
-            SetActionText("");
-            return;
-        }
-        if (!activeMenu && CutsceneManager.Instance.cutscene == null) {
-            if (activeElements.Count > 1) {
-                if (cursorOverButton) {
-                    SetActionText(actionButtonText);
-                } else {
-                    SetActionText(lastTarget);
-                }
-            } else {
-                if (cursorOverButton) {
-                    SetActionText(actionButtonText);
-                } else if (target != null) {
-                    lastTarget = Toolbox.Instance.GetName(target);
-                    switch (Controller.Instance.state) {
-                        case Controller.ControlState.swearSelect:
-                            SetActionText("Swear at " + lastTarget);
-                            break;
-                        case Controller.ControlState.insultSelect:
-                            SetActionText("Insult " + lastTarget);
-                            break;
-                        case Controller.ControlState.hypnosisSelect:
-                            SetActionText("Hypnotize " + lastTarget);
-                            break;
-                        default:
-                            SetActionText(lastTarget);
-                            break;
-                    }
-                } else {
-                    SetActionText("");
-                }
-            }
-        } else {
-            if (CutsceneManager.Instance.cutscene is CutscenePickleBottom) {
-                SetActionText("You have been visited by Peter Picklebottom");
-            } else {
-                SetActionText("");
-            }
-        }
-    }
+
     public void LateUpdateUIElements() {
         // handle pop ups, health bars, and display text
 
@@ -404,7 +430,7 @@ public class UINew : Singleton<UINew> {
         if (GameManager.Instance.playerObject == null)
             return;
         // speech button
-        if (GameManager.Instance.playerObject.GetComponent<Speech>()) {
+        if (GameManager.Instance.data.perks["swear"] && GameManager.Instance.playerObject.GetComponent<Speech>()) {
             speakButton.SetActive(true);
         }
         // hand action buttons and inventory button
