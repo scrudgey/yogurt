@@ -2,12 +2,13 @@
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
-public class Duplicatable : Interactive {
+public class Duplicatable : Interactive, ISaveable {
     public bool duplicatable = true;
     public bool nullifiable = true;
     public GameObject duplicationPrefab;
     public GameObject nullifyFX;
     public List<AudioClip> nullifySounds;
+    public string adoptedName = "";
     void Start() {
         if (nullifyFX == null)
             nullifyFX = Resources.Load("particles/nullify") as GameObject;
@@ -38,5 +39,11 @@ public class Duplicatable : Interactive {
         }
         ClaimsManager.Instance.WasDestroyed(gameObject);
         Destroy(gameObject);
+    }
+    public void SaveData(PersistentComponent data) {
+        data.strings["adopted"] = adoptedName;
+    }
+    public void LoadData(PersistentComponent data) {
+        adoptedName = data.strings["adopted"];
     }
 }
