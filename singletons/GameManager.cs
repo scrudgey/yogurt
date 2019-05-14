@@ -91,13 +91,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Camera cam;
     public GameObject playerObject;
     public float gravity = 3.0f;
-    private Commercial _activeCommercial;
-    public Commercial activeCommercial {
-        get { return _activeCommercial; }
-        set {
-            _activeCommercial = value;
-        }
-    }
+    public Commercial activeCommercial;
     public float sceneTime;
     private bool awaitNewDayPrompt;
     public float timeSinceLastSave = 0f;
