@@ -2,7 +2,15 @@
 using UnityEngine.UI;
 
 public class ActionButtonScript : MonoBehaviour {
-    public enum buttonType { none, Drop, Throw, Stash, Inventory, Action, Punch }
+    public enum buttonType {
+        none,
+        Drop,
+        Throw,
+        Stash,
+        Inventory,
+        Action,
+        Punch
+    }
     public buttonType bType = buttonType.Action;
     public Interaction action;
     public bool manualAction = false;
