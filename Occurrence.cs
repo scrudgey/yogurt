@@ -232,8 +232,12 @@ public class OccurrenceEat : OccurrenceData {
                 }
             }
         }
-        if (Toolbox.Instance.GetName(edible.gameObject) == "eggplant") {
+        string edibleName = Toolbox.Instance.GetName(edible.gameObject);
+        if (edibleName == "eggplant") {
             events.Add(Occurrence.Eggplant(eater));
+        }
+        if (edibleName == "yogurt") {
+            events.Add(Occurrence.Yogurt(eater));
         }
         if (edible.human) {
             events.Add(Occurrence.Cannibalism(eater));
