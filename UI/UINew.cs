@@ -71,6 +71,7 @@ public class UINew : Singleton<UINew> {
     private string lastTarget;
     public string actionButtonText;
     public UIHitIndicator hitIndicator;
+    public Transform objectivesContainer;
     public List<string> previousTopButtons = new List<string>();
     public void Start() {
         Awake();
@@ -307,6 +308,10 @@ public class UINew : Singleton<UINew> {
         oxygenbar = UICanvas.transform.Find("topright/oxygenbar/mask/fill").GetComponent<RectTransform>();
         topRightBar = UICanvas.transform.Find("topright").gameObject;
         hitIndicator = UICanvas.transform.Find("hitIndicator").GetComponent<UIHitIndicator>();
+        objectivesContainer = UICanvas.transform.Find("objectives");
+        foreach (Transform child in objectivesContainer) {
+            Destroy(child.gameObject);
+        }
         topRightRectTransform = topRightBar.GetComponent<RectTransform>();
         if (lifebarDefaultSize == Vector2.zero)
             lifebarDefaultSize = new Vector2(lifebar.rect.width, lifebar.rect.height);
@@ -522,6 +527,7 @@ public class UINew : Singleton<UINew> {
             poptext.initValueList.Add(initValue);
             poptext.finalValueList.Add(finalValue);
         }
+
     }
     public void PopupCollected(GameObject obj) {
         PopupCollected(new AchievementPopup.CollectedInfo(obj));
@@ -557,27 +563,30 @@ public class UINew : Singleton<UINew> {
     public void SetActionText(string text) {
         actionTextString = text;
     }
+    private actionButton CreateButton(Inventory inventory, string name, ActionButtonScript.buttonType bType) {
+        actionButton newbutton = SpawnButton(null);
+        newbutton.buttonScript.manualAction = true;
+        newbutton.buttonScript.inventory = inventory;
+        newbutton.buttonScript.bType = bType;
+        newbutton.buttonText.text = name;
+        newbutton.buttonScript.buttonText = name;
+        return newbutton;
+    }
     public void DisplayHandActions(Inventory inventory) {
         ClearWorldButtons();
         activeElements = new List<GameObject>();
         List<actionButton> buttons = new List<actionButton>();
-        for (int i = 1; i <= 3; i++) {
-            actionButton newbutton = SpawnButton(null);
-            newbutton.buttonScript.manualAction = true;
-            newbutton.buttonScript.inventory = inventory;
-            if (i == 1) {
-                newbutton.buttonScript.bType = ActionButtonScript.buttonType.Drop;
-                newbutton.buttonText.text = "Drop";
-                newbutton.buttonScript.buttonText = "Drop";
-            } else if (i == 2) {
-                newbutton.buttonScript.bType = ActionButtonScript.buttonType.Throw;
-                newbutton.buttonText.text = "Throw";
-                newbutton.buttonScript.buttonText = "Throw";
-            } else if (i == 3) {
-                newbutton.buttonScript.bType = ActionButtonScript.buttonType.Stash;
-                newbutton.buttonText.text = "Stash";
-                newbutton.buttonScript.buttonText = "Stash";
-            }
+
+        actionButton newbutton = CreateButton(inventory, "Drop", ActionButtonScript.buttonType.Drop);
+        activeElements.Add(newbutton.gameobject);
+        buttons.Add(newbutton);
+
+        newbutton = CreateButton(inventory, "Throw", ActionButtonScript.buttonType.Throw);
+        activeElements.Add(newbutton.gameobject);
+        buttons.Add(newbutton);
+
+        if (!inventory.holding.heavyObject) {
+            newbutton = CreateButton(inventory, "Stash", ActionButtonScript.buttonType.Stash);
             activeElements.Add(newbutton.gameobject);
             buttons.Add(newbutton);
         }
@@ -769,5 +778,24 @@ public class UINew : Singleton<UINew> {
     public void PlayUISound(string path) {
         CameraControl camControl = FindObjectOfType<CameraControl>();
         camControl.audioSource.PlayOneShot(Resources.Load(path) as AudioClip);
+    }
+    public ObjectiveIndicator AddObjective(CommercialProperty property) {
+        GameObject objectiveObject = GameManager.Instantiate(Resources.Load("UI/objective")) as GameObject;
+        objectiveObject.transform.SetParent(objectivesContainer, false);
+        ObjectiveIndicator script = objectiveObject.GetComponent<ObjectiveIndicator>();
+        script.description.text = property.objective;
+        script.targetProperty = property; // change this
+        return script;
+    }
+    public void ClearObjectives() {
+        foreach (Transform child in objectivesContainer) {
+            Destroy(child.gameObject);
+        }
+    }
+    public void UpdateObjectives(Commercial localCommercial) {
+        foreach (Transform child in objectivesContainer) {
+            ObjectiveIndicator indicator = child.GetComponent<ObjectiveIndicator>();
+            indicator.UpdateCheck(localCommercial);
+        }
     }
 }
