@@ -8,7 +8,7 @@ public class Container : Interactive, IExcludable, ISaveable {
     public bool disableContents = true;
     private bool isQuitting;
     virtual protected void Awake() {
-        Interaction stasher = new Interaction(this, "Stash", "Store");
+        Interaction stasher = new Interaction(this, "Put", "Store");
         stasher.validationFunction = true;
         interactions.Add(stasher);
         // good example of loop closure here
