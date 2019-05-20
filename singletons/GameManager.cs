@@ -83,7 +83,8 @@ public partial class GameManager : Singleton<GameManager> {
         {"vampire_house", "mansion"},
         {"mountain", "mountain"},
         {"clearing", "clearing"},
-        {"chamber", "meditation chamber"}
+        {"chamber", "meditation chamber"},
+        {"dungeon", "oubliette"}
     };
     public GameData data;
     public string saveGameName = "test";
@@ -209,9 +210,14 @@ public partial class GameManager : Singleton<GameManager> {
         Outfit playerOutfit = target.GetComponent<Outfit>();
         if (playerOutfit) {
             string prefabName = playerOutfit.wornUniformName;
-            GameObject uniform = Instantiate(Resources.Load("prefabs/" + prefabName)) as GameObject;
-            CheckItemCollection(uniform, playerObject);
-            DestroyImmediate(uniform);
+            if (prefabName != "nude") {
+                GameObject uniform = Instantiate(Resources.Load("prefabs/" + prefabName)) as GameObject;
+                CheckItemCollection(uniform, playerObject);
+                DestroyImmediate(uniform);
+            } else {
+                playerOutfit.GoNude();
+            }
+
         }
         Head playerHead = target.GetComponentInChildren<Head>();
         if (playerHead) {
@@ -354,6 +360,9 @@ public partial class GameManager : Singleton<GameManager> {
 
         if (sceneName == "cave1" || sceneName == "cave2") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneFall>();
+        }
+        if (sceneName == "dungeon") {
+            CutsceneManager.Instance.InitializeCutscene<CutsceneDungeonFall>();
         }
         if (sceneName == "space") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneSpace>();
@@ -707,17 +716,26 @@ public partial class GameManager : Singleton<GameManager> {
         string filename = Toolbox.Instance.CloneRemover(obj.name);
         return data.collectedObjects.Contains(filename);
     }
-    public void RetrieveCollectedItem(string name) {
+    public void RetrieveCollectedItem(string name, HomeCloset.ClosetType closetType) {
         if (data.itemCheckedOut[name])
             return;
         GameObject item = Instantiate(Resources.Load("prefabs/" + name), playerObject.transform.position, Quaternion.identity) as GameObject;
         Instantiate(Resources.Load("particles/poof"), playerObject.transform.position, Quaternion.identity);
         publicAudio.PlayOneShot(Resources.Load("sounds/pop", typeof(AudioClip)) as AudioClip);
         data.itemCheckedOut[name] = true;
-        Inventory playerInventory = playerObject.GetComponent<Inventory>();
-        Pickup itemPickup = item.GetComponent<Pickup>();
-        if (playerInventory != null && itemPickup != null) {
-            playerInventory.GetItem(itemPickup);
+        if (closetType == HomeCloset.ClosetType.clothing) {
+            Outfit playerOutfit = playerObject.GetComponent<Outfit>();
+            Uniform itemUniform = item.GetComponent<Uniform>();
+            if (playerOutfit != null && itemUniform != null) {
+                // playerInventory.GetItem(itemPickup);
+                playerOutfit.DonUniform(itemUniform);
+            }
+        } else {
+            Inventory playerInventory = playerObject.GetComponent<Inventory>();
+            Pickup itemPickup = item.GetComponent<Pickup>();
+            if (playerInventory != null && itemPickup != null) {
+                playerInventory.GetItem(itemPickup);
+            }
         }
     }
     public void IncrementStat(StatType statType, float value) {
