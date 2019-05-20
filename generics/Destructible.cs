@@ -8,7 +8,11 @@ public class Destructible : Damageable, ISaveable {
     public AudioClip[] destroySound;
     public float physicalMultiplier = 1f;
     public float fireMultiplier = 1f;
-    public override void NetIntrinsicsChanged(MessageNetIntrinsic intrins){
+    public AudioSource audioSource;
+    public void Start() {
+        audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
+    }
+    public override void NetIntrinsicsChanged(MessageNetIntrinsic intrins) {
         if (intrins.netBuffs[BuffType.bonusHealth].floatValue > bonusHealth) {
             health += intrins.netBuffs[BuffType.bonusHealth].floatValue;
         }
@@ -50,8 +54,9 @@ public class Destructible : Damageable, ISaveable {
         Destruct();
         if (destroySound.Length > 0) {
             GameObject speaker = Instantiate(Resources.Load("Speaker"), transform.position, Quaternion.identity) as GameObject;
-            speaker.GetComponent<AudioSource>().clip = destroySound[Random.Range(0, destroySound.Length)];
-            speaker.GetComponent<AudioSource>().Play();
+            // speaker.GetComponent<AudioSource>().clip = destroySound[Random.Range(0, destroySound.Length)];
+            // speaker.GetComponent<AudioSource>().Play();
+            audioSource.PlayOneShot(destroySound[Random.Range(0, destroySound.Length)]);
         }
         LiquidContainer container = GetComponent<LiquidContainer>();
         if (container && container.amount > 0) {
@@ -93,10 +98,11 @@ public class Destructible : Damageable, ISaveable {
             }
         }
         if (hitSound.Length > 0) {
-            GetComponent<AudioSource>().PlayOneShot(hitSound[Random.Range(0, hitSound.Length)]);
+            // GetComponent<AudioSource>().PlayOneShot(hitSound[Random.Range(0, hitSound.Length)]);
+            audioSource.PlayOneShot(hitSound[Random.Range(0, hitSound.Length)]);
         }
     }
-   
+
     public void SaveData(PersistentComponent data) {
         data.floats["health"] = health;
         data.ints["lastDamage"] = (int)lastDamage;
