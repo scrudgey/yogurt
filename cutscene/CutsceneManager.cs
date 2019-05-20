@@ -13,6 +13,80 @@ public abstract class Cutscene {
     public bool complete;
     public bool configured;
 }
+// public class CutsceneVampireTrap : Cutscene {
+//     public DoorwayZone trapdoor;
+//     public override void Configure() {
+//         trapdoor = GameObject.Find("trapdoor").GetComponent<DoorwayZone>();
+//         Debug.Log(trapdoor);
+//         configured = true;
+//     }
+//     public override void Update() {
+//         Debug.Log(trapdoor.disableInteractions);
+//         trapdoor.disableInteractions = false;
+//         Debug.Log(trapdoor.disableInteractions);
+//         complete = true;
+//     }
+// }
+// public class CutsceneVampire : Cutscene {
+//     //0.348 -0.138
+//     Controllable playerControllable;
+//     Speech playerSpeech;
+//     Speech vampireSpeech;
+//     Transform standPoint;
+//     bool walking;
+//     float initSpeed;
+//     Humanoid playerHumanoid;
+//     public override void Configure() {
+//         configured = true;
+//         standPoint = GameObject.Find("cutsceneStandPoint").transform;
+//         GameObject player = GameManager.Instance.playerObject;
+//         playerControllable = GameManager.Instance.playerObject.GetComponent<Controllable>();
+//         playerSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
+
+//         vampireSpeech = GameObject.Find("vampyr").GetComponent<Speech>();
+
+//         // if (playerControllable != null) {
+//         //     playerControllable.enabled = false;
+//         // }
+//         if (playerSpeech != null) {
+//             playerSpeech.enabled = false;
+//         }
+//         walking = true;
+
+//         playerHumanoid = GameManager.Instance.playerObject.GetComponent<Humanoid>();
+//         if (playerHumanoid) {
+//             initSpeed = playerHumanoid.maxSpeed;
+//             playerHumanoid.maxSpeed = 0.2f;
+//         }
+//     }
+//     public override void Update() {
+//         if (walking) {
+//             if (playerControllable.transform.position.x > standPoint.position.x) {
+//                 playerControllable.leftFlag = true;
+//             } else {
+//                 playerControllable.leftFlag = false;
+//                 if (playerControllable.transform.position.y < standPoint.position.y) {
+//                     playerControllable.upFlag = true;
+//                 } else {
+//                     playerControllable.upFlag = false;
+//                 }
+//             }
+//             if (playerControllable.transform.position.x <= standPoint.position.x && playerControllable.transform.position.y >= standPoint.position.y) {
+//                 walking = false;
+//             }
+//         } else {
+//             playerControllable.ResetInput();
+//             complete = true;
+//             vampireSpeech.SpeakWith();
+//         }
+//     }
+//     public override void CleanUp() {
+//         UINew.Instance.RefreshUI(active: true);
+//         if (playerHumanoid) {
+//             playerHumanoid.maxSpeed = initSpeed;
+//         }
+//     }
+// }
 public class CutsceneMoonLanding : Cutscene {
     private float timer;
     public Dictionary<Collider2D, PhysicsMaterial2D> materials;
@@ -383,14 +457,96 @@ public class CutsceneBoardroom : Cutscene {
         GameManager.Instance.NewDayCutscene();
     }
 }
+public class CutsceneDungeonFall : CutsceneFall {
+    override protected float fallDist() { return -3.236f; }
+    private float catchPoint = 0.317f;
+    private bool caught;
+    private bool dumping;
+    private float dumpTimer;
+    private float dumpInterval = 1f;
+    private Inventory playerInventory;
+    private Outfit playerOutfit;
+    private GameObject ejectorDump;
+    private Vector2 catchPosition;
+    private AudioClip dumpSound;
+    public override void Configure() {
+        base.Configure();
+        ejectorDump = Resources.Load("particles/ejectorDump") as GameObject;
+        dumpSound = Resources.Load("sounds/8bit_impact2") as AudioClip;
+        Toolbox.Instance.SwitchAudioListener(player);
+    }
+    public override void Update() {
+        if (!caught || (caught && !dumping)) {
+            base.Update();
+            if (player.transform.position.y < catchPoint && !caught) {
+                catchPosition = player.transform.position;
+                caught = true;
+                dumping = true;
+                playerInventory = player.GetComponent<Inventory>();
+                playerOutfit = player.GetComponent<Outfit>();
+                // stop fall
+                if (playerBody) {
+                    playerBody.gravityScale = 0f;
+                    playerBody.drag = initDrag;
+                    playerBody.velocity = Vector3.zero;
+                }
+            }
+        } else if (dumping) {
+            DumpUpdate();
+        }
+    }
+    public void DumpUpdate() {
+        dumpTimer += Time.deltaTime;
+        player.transform.position = catchPosition + UnityEngine.Random.insideUnitCircle * 0.01f;
+        // shake
+        // rotate
+        if (dumpTimer > dumpInterval) {
+            dumpTimer = 0;
+            if (playerInventory != null && playerInventory.holding != null) {
+                GameObject toDump = playerInventory.holding.gameObject;
+                playerInventory.SoftDropItem();
+                Dump(toDump);
+            } else if (playerInventory != null && playerInventory.items.Count > 0) {
+                GameObject pickup = playerInventory.items[0];
+                playerInventory.items.RemoveAt(0);
+                Dump(pickup);
+            } else if (playerOutfit != null && playerOutfit.wornUniformName != "nude") {
+                // dump outfit
+                GameObject removedUniform = playerOutfit.RemoveUniform();
+                playerOutfit.GoNude();
+                Dump(removedUniform);
+            } else {
+                player.transform.position = catchPosition;
+                dumping = false;
+                if (playerBody) {
+                    playerBody.gravityScale = 1f;
+                    playerBody.drag = 0;
+                }
+            }
+        }
+    }
+    void Dump(GameObject obj) {
+        // play sfx
+        SpriteRenderer objSprite = obj.GetComponent<SpriteRenderer>();
+        GameObject dumpObject = GameObject.Instantiate(ejectorDump);
+        dumpObject.transform.position = player.transform.position;
+        ParticleSystem system = dumpObject.GetComponent<ParticleSystem>();
+        system.randomSeed = (uint)UnityEngine.Random.Range(0, 9999999);
+        system.textureSheetAnimation.SetSprite(0, objSprite.sprite);
+        system.Play();
+        GameObject.Destroy(obj);
+        GameManager.Instance.PlayPublicSound(dumpSound);
+    }
+}
 public class CutsceneFall : Cutscene {
-    private GameObject player;
+    protected GameObject player;
     AdvancedAnimation playerAnimation;
     Collider2D playerCollider;
-    Rigidbody2D playerBody;
+    protected Rigidbody2D playerBody;
     Controllable playerControl;
     Hurtable playerHurtable;
-    float initDrag;
+    protected float initDrag;
+    protected virtual float fallDist() { return -0.3f; }
     public override void Configure() {
         player = GameManager.Instance.playerObject;
         playerAnimation = player.GetComponent<AdvancedAnimation>();
@@ -416,7 +572,7 @@ public class CutsceneFall : Cutscene {
         configured = true;
     }
     public override void Update() {
-        if (player.transform.position.y < -0.3f) {
+        if (player.transform.position.y < fallDist()) {
             Toolbox.Instance.AudioSpeaker("Poof 01", player.transform.position);
             if (playerAnimation)
                 playerAnimation.enabled = true;
