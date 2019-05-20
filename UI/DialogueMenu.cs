@@ -91,6 +91,8 @@ public class DialogueMenu : MonoBehaviour {
     public bool configured;
     public int blitCounter;
     public bool cutsceneDialogue;
+    private bool doTrapDoor;
+    private bool doVampireAttack;
     public void Start() {
         if (configured)
             return;
@@ -177,6 +179,10 @@ public class DialogueMenu : MonoBehaviour {
             monologue.speaker.gibberizer.StopPlay();
         instigator.inDialogue = false;
         target.inDialogue = false;
+        if (doVampireAttack)
+            VampireAttack();
+        if (doTrapDoor)
+            VampireTrap();
         if (targetControl)
             targetControl.disabled = false;
         if (instigatorControl)
@@ -187,7 +193,7 @@ public class DialogueMenu : MonoBehaviour {
             menuClosed();
     }
     public void LoadDialogueTree(string filename) {
-        if (filename == "polestar_first") {
+        if (filename == "polestar_first" || filename == "vampire") {
             cutsceneDialogue = true;
             EnableButtons();
         }
@@ -499,10 +505,34 @@ public class DialogueMenu : MonoBehaviour {
             monologue.NextLine();
             speechText.text = monologue.GetString();
         }
+        if (text == "VAMPIRETRAP") {
+            // VampireTrap();
+            doTrapDoor = true;
+            monologue.NextLine();
+            speechText.text = monologue.GetString();
+        }
+        if (text == "VAMPIREATTACK") {
+            // VampireAttack();
+            doVampireAttack = true;
+            monologue.NextLine();
+            speechText.text = monologue.GetString();
+        }
     }
     public void PoleStarCallback() {
         target.defaultMonologue = "polestar";
         GameManager.Instance.data.teleporterUnlocked = true;
         GameManager.Instance.data.cosmicName = GameManager.Instance.CosmicName();
+    }
+    public void VampireTrap() {
+        // CutsceneManager.Instance.InitializeCutscene<CutsceneVampireTrap>();
+        // CutsceneManager.Instance.cutscene.Configure();
+        TrapDoor trapdoor = GameObject.Find("trapdoor").GetComponent<TrapDoor>();
+        trapdoor.Activate();
+    }
+    public void VampireAttack() {
+        GameObject vampire = target.gameObject;
+        MessageInsult message = new MessageInsult();
+        Toolbox.Instance.SendMessage(vampire, instigator, message);
+        Toolbox.Instance.SendMessage(vampire, instigator, message);
     }
 }
