@@ -54,27 +54,29 @@ namespace AI {
                 slewTime -= Time.deltaTime;
                 return;
             }
-            try {
-                status routineStatus = routines[index].Update();
-                // Debug.Log(routines[index].GetType().ToString());
-                // Debug.Log(routineStatus);
-                if (routineStatus == status.failure) {
-                    control.ResetInput();
-                    index++;
-                    // get next routine, or fail.
-                    if (index < routines.Count) {
-                        slewTime = UnityEngine.Random.Range(0.1f, 0.5f);
-                    } else {
-                        // what do do? reset from the start maybe
-                        // index = routines.Count - 1;
-                        index = 0;
+            if (routines.Count > 0) {
+                try {
+                    status routineStatus = routines[index].Update();
+                    // Debug.Log(routines[index].GetType().ToString());
+                    // Debug.Log(routineStatus);
+                    if (routineStatus == status.failure) {
+                        control.ResetInput();
+                        index++;
+                        // get next routine, or fail.
+                        if (index < routines.Count) {
+                            slewTime = UnityEngine.Random.Range(0.1f, 0.5f);
+                        } else {
+                            // what do do? reset from the start maybe
+                            // index = routines.Count - 1;
+                            index = 0;
+                        }
+                        routines[index].Configure();
                     }
-                    routines[index].Configure();
                 }
-            }
-            catch (Exception e) {
-                Debug.Log(this.ToString() + " fail: " + e.Message);
-                Debug.Log(e.TargetSite);
+                catch (Exception e) {
+                    Debug.Log(this.ToString() + " fail: " + e.Message);
+                    Debug.Log(e.TargetSite);
+                }
             }
         }
     }
