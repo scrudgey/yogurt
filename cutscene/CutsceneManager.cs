@@ -13,86 +13,13 @@ public abstract class Cutscene {
     public bool complete;
     public bool configured;
 }
-// public class CutsceneVampireTrap : Cutscene {
-//     public DoorwayZone trapdoor;
-//     public override void Configure() {
-//         trapdoor = GameObject.Find("trapdoor").GetComponent<DoorwayZone>();
-//         Debug.Log(trapdoor);
-//         configured = true;
-//     }
-//     public override void Update() {
-//         Debug.Log(trapdoor.disableInteractions);
-//         trapdoor.disableInteractions = false;
-//         Debug.Log(trapdoor.disableInteractions);
-//         complete = true;
-//     }
-// }
-// public class CutsceneVampire : Cutscene {
-//     //0.348 -0.138
-//     Controllable playerControllable;
-//     Speech playerSpeech;
-//     Speech vampireSpeech;
-//     Transform standPoint;
-//     bool walking;
-//     float initSpeed;
-//     Humanoid playerHumanoid;
-//     public override void Configure() {
-//         configured = true;
-//         standPoint = GameObject.Find("cutsceneStandPoint").transform;
-//         GameObject player = GameManager.Instance.playerObject;
-//         playerControllable = GameManager.Instance.playerObject.GetComponent<Controllable>();
-//         playerSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
-
-//         vampireSpeech = GameObject.Find("vampyr").GetComponent<Speech>();
-
-//         // if (playerControllable != null) {
-//         //     playerControllable.enabled = false;
-//         // }
-//         if (playerSpeech != null) {
-//             playerSpeech.enabled = false;
-//         }
-//         walking = true;
-
-//         playerHumanoid = GameManager.Instance.playerObject.GetComponent<Humanoid>();
-//         if (playerHumanoid) {
-//             initSpeed = playerHumanoid.maxSpeed;
-//             playerHumanoid.maxSpeed = 0.2f;
-//         }
-//     }
-//     public override void Update() {
-//         if (walking) {
-//             if (playerControllable.transform.position.x > standPoint.position.x) {
-//                 playerControllable.leftFlag = true;
-//             } else {
-//                 playerControllable.leftFlag = false;
-//                 if (playerControllable.transform.position.y < standPoint.position.y) {
-//                     playerControllable.upFlag = true;
-//                 } else {
-//                     playerControllable.upFlag = false;
-//                 }
-//             }
-//             if (playerControllable.transform.position.x <= standPoint.position.x && playerControllable.transform.position.y >= standPoint.position.y) {
-//                 walking = false;
-//             }
-//         } else {
-//             playerControllable.ResetInput();
-//             complete = true;
-//             vampireSpeech.SpeakWith();
-//         }
-//     }
-//     public override void CleanUp() {
-//         UINew.Instance.RefreshUI(active: true);
-//         if (playerHumanoid) {
-//             playerHumanoid.maxSpeed = initSpeed;
-//         }
-//     }
-// }
 public class CutsceneMoonLanding : Cutscene {
     private float timer;
     public Dictionary<Collider2D, PhysicsMaterial2D> materials;
     Controllable playerControllable;
     AdvancedAnimation playerAnimation;
     HeadAnimation playerHeadAnimation;
+    Collider2D playerCollider;
     Speech playerSpeech;
     public override void Configure() {
         materials = new Dictionary<Collider2D, PhysicsMaterial2D>();
@@ -106,6 +33,7 @@ public class CutsceneMoonLanding : Cutscene {
         playerAnimation = GameManager.Instance.playerObject.GetComponent<AdvancedAnimation>();
         playerHeadAnimation = GameManager.Instance.playerObject.GetComponent<HeadAnimation>();
         playerSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
+        playerCollider = GameManager.Instance.playerObject.GetComponent<Collider2D>();
         if (playerControllable != null) {
             playerControllable.enabled = false;
         }
@@ -117,6 +45,9 @@ public class CutsceneMoonLanding : Cutscene {
         }
         if (playerSpeech != null) {
             playerSpeech.enabled = false;
+        }
+        if (playerCollider != null) {
+            playerCollider.enabled = false;
         }
         Rigidbody2D body = player.GetComponent<Rigidbody2D>();
         body.gravityScale = GameManager.Instance.gravity;
@@ -139,6 +70,10 @@ public class CutsceneMoonLanding : Cutscene {
             UINew.Instance.RefreshUI();
         }
         timer += Time.deltaTime;
+        // check to reenable collider
+        if (GameManager.Instance.playerObject.transform.position.y < -0.533 && playerCollider != null && !playerCollider.enabled) {
+            playerCollider.enabled = true;
+        }
         if (timer > 3f) {
             complete = true;
         }
@@ -469,11 +404,15 @@ public class CutsceneDungeonFall : CutsceneFall {
     private GameObject ejectorDump;
     private Vector2 catchPosition;
     private AudioClip dumpSound;
+    public ParticleSystem magicEffect;
+    public AudioSource magicAudio;
     public override void Configure() {
         base.Configure();
         ejectorDump = Resources.Load("particles/ejectorDump") as GameObject;
         dumpSound = Resources.Load("sounds/8bit_impact2") as AudioClip;
         Toolbox.Instance.SwitchAudioListener(player);
+        magicEffect = GameObject.Find("magic").GetComponent<ParticleSystem>();
+        magicAudio = GameObject.Find("magic").GetComponent<AudioSource>();
     }
     public override void Update() {
         if (!caught || (caught && !dumping)) {
@@ -482,6 +421,9 @@ public class CutsceneDungeonFall : CutsceneFall {
                 catchPosition = player.transform.position;
                 caught = true;
                 dumping = true;
+                magicEffect.Play();
+                magicAudio.Play();
+                magicEffect.transform.position = player.transform.position;
                 playerInventory = player.GetComponent<Inventory>();
                 playerOutfit = player.GetComponent<Outfit>();
                 // stop fall
@@ -518,6 +460,8 @@ public class CutsceneDungeonFall : CutsceneFall {
             } else {
                 player.transform.position = catchPosition;
                 dumping = false;
+                magicEffect.Stop();
+                magicAudio.Stop();
                 if (playerBody) {
                     playerBody.gravityScale = 1f;
                     playerBody.drag = 0;
