@@ -30,7 +30,8 @@ public class Outfit : Interactive, ISaveable {
             }
             Uniform uniform = uniObject.GetComponent<Uniform>();
             GameObject removedUniform = DonUniform(uniform, cleanStains: false);
-            Destroy(removedUniform);
+            if (removedUniform)
+                Destroy(removedUniform);
         }
     }
     public void StealUniform(Outfit otherOutfit) {
@@ -89,6 +90,8 @@ public class Outfit : Interactive, ISaveable {
         return "Wear " + uniformName;
     }
     public GameObject RemoveUniform() {
+        if (wornUniformName == "nude")
+            return null;
         string prefabName = wornUniformName;
         GameObject uniform = Instantiate(Resources.Load("prefabs/" + prefabName)) as GameObject;
         Toolbox.Instance.RemoveChildIntrinsics(gameObject, this);
@@ -103,7 +106,12 @@ public class Outfit : Interactive, ISaveable {
     }
     public void LoadData(PersistentComponent data) {
         wornUniformName = data.strings["worn"];
-        initUniform = Resources.Load("prefabs/" + data.strings["worn"]) as GameObject;
+        string wornuniform = data.strings["worn"];
+        if (wornuniform != "nude") {
+            initUniform = Resources.Load("prefabs/" + data.strings["worn"]) as GameObject;
+        } else {
+            GoNude();
+        }
         hitState = (Controllable.HitState)data.ints["hitstate"];
     }
 }
