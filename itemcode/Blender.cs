@@ -89,9 +89,9 @@ public class Blender : Container, ISaveable {
             base.Store(inv);
         }
     }
-    public override void Remove(Inventory inv, Pickup pickup){
+    public override void Remove(Inventory inv, Pickup pickup) {
         base.Remove(inv, pickup);
-        if (power){
+        if (power) {
             MessageDamage message = new MessageDamage(5f, damageType.cutting);
             Toolbox.Instance.SendMessage(inv.gameObject, this, message);
             MessageSpeech speech = new MessageSpeech("Ouch!");
@@ -104,6 +104,36 @@ public class Blender : Container, ISaveable {
         if (edible && edible.blendable) {
             liquidContainer.FillWithLiquid(edible.Liquify());
         }
+        Gibs[] gibses = obj.GetComponents<Gibs>();
+        if (gibses.Length > 0) {
+            Debug.Log(gibses[0]);
+        }
+        foreach (Gibs gibs in gibses) {
+            if (gibs.notPhysical)
+                continue;
+            // gibs.Emit(damageType.cutting, 3f * transform.up);
+            EmitParticle(gibs.particle);
+            Destroy(gibs);
+        }
+
+    }
+    public void EmitParticle(GameObject particle) {
+        GameObject bit = Instantiate(particle, transform.position, Quaternion.identity) as GameObject;
+        PhysicalBootstrapper bitPhys = Toolbox.GetOrCreateComponent<PhysicalBootstrapper>(bit);
+        PhysicalBootstrapper myBoot = GetComponent<PhysicalBootstrapper>();
+        bitPhys.impactsMiss = true;
+        bitPhys.noCollisions = true;
+        if (bitPhys.size == PhysicalBootstrapper.shadowSize.normal)
+            bitPhys.size = PhysicalBootstrapper.shadowSize.medium;
+        bitPhys.initHeight = Random.Range(0, 0.05f);
+        if (myBoot) {
+            if (myBoot.physical != null) {
+                bitPhys.initHeight = myBoot.physical.height;
+            }
+        }
+        Vector3 force = 3f * transform.up;
+        force.z = Random.Range(2f, 3f);
+        bitPhys.Set3Motion(force);
     }
     public override void SaveData(PersistentComponent data) {
         base.SaveData(data);
