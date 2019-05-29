@@ -46,6 +46,7 @@ public class GameData {
     public bool teleporterUnlocked;
     public string headSpriteSheet;
     public string cosmicName = "";
+    public bool loadedDay;
     public GameData() {
         days = 0;
         saveDate = System.DateTime.Now.ToString();
@@ -100,7 +101,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = true;
+    public bool debug = false;
     public bool failedLevelLoad = false;
     public void PlayPublicSound(AudioClip clip) {
         if (clip == null)
@@ -472,6 +473,7 @@ public partial class GameManager : Singleton<GameManager> {
     }
     public void NewDay() {
         Debug.Log("New day");
+        data.loadedDay = false;
         MySaver.CleanupSaves();
         MySaver.SaveObjectDatabase();
         List<string> keys = new List<string>(data.itemCheckedOut.Keys);
@@ -658,6 +660,7 @@ public partial class GameManager : Singleton<GameManager> {
         } else {
             SceneManager.LoadScene("house");
         }
+        data.loadedDay = true;
     }
     public GameData LoadGameData(string gameName) {
         GameData data = null;
