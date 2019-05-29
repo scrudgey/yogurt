@@ -29,7 +29,7 @@ public class TrapDoor : MonoBehaviour {
     void Update() {
         if (timer > 0) {
             timer += Time.deltaTime;
-            if (timer > 5f) {
+            if (timer > 3f) {
                 GameManager.Instance.publicAudio.PlayOneShot(leaveSound);
                 GameManager.Instance.LeaveScene("dungeon", 0);
             }
@@ -39,6 +39,8 @@ public class TrapDoor : MonoBehaviour {
         if (!active)
             return;
         if (collider.gameObject == GameManager.Instance.playerObject) {
+            Controller.Instance.state = Controller.ControlState.cutscene;
+            UINew.Instance.RefreshUI(active: false);
             timer = 0.1f;
             collider.gameObject.SetActive(false);
             Toolbox.Instance.SwitchAudioListener(gameObject);
