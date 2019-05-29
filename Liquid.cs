@@ -81,6 +81,20 @@ public class Liquid {
             buff.lifetime = 5f;
             l.buffs.Add(buff);
         }
+        if (data.ContainsKey("invulnerability")) {
+            Buff buff = new Buff();
+            buff.type = BuffType.invulnerable;
+            buff.boolValue = true;
+            buff.lifetime = 20f;
+            l.buffs.Add(buff);
+        }
+        if (data.ContainsKey("ethereal")) {
+            Buff buff = new Buff();
+            buff.type = BuffType.ethereal;
+            buff.boolValue = true;
+            buff.lifetime = 20f;
+            l.buffs.Add(buff);
+        }
         return l;
     }
     public static void MonoLiquidify(GameObject target, Liquid liquid, bool timeout = false) {
@@ -96,7 +110,7 @@ public class Liquid {
         monoLiquid.edible.vomit = liquid.vomit;
         if (liquid.flammable) {
             Flammable existingFlammable = target.transform.root.GetComponentInChildren<Flammable>();
-            if (existingFlammable == null){
+            if (existingFlammable == null) {
                 Flammable flam = target.AddComponent<Flammable>();
                 flam.flashpoint = 0.1f;
             }
