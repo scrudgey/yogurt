@@ -85,7 +85,9 @@ public partial class GameManager : Singleton<GameManager> {
         {"mountain", "mountain"},
         {"clearing", "clearing"},
         {"chamber", "meditation chamber"},
-        {"dungeon", "oubliette"}
+        {"dungeon", "oubliette"},
+        {"potion", "apothecary"},
+        {"cave3", "deathtrap cave III"},
     };
     public GameData data;
     public string saveGameName = "test";
@@ -101,7 +103,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = false;
+    public bool debug = true;
     public bool failedLevelLoad = false;
     public void PlayPublicSound(AudioClip clip) {
         if (clip == null)
@@ -371,11 +373,14 @@ public partial class GameManager : Singleton<GameManager> {
         if (sceneName == "moon1" && (data.entryID == 420 || data.entryID == 99)) {
             CutsceneManager.Instance.InitializeCutscene<CutsceneMoonLanding>();
         }
-        // if (sceneName == "house" && !data.teleporterUnlocked) {
-        //     GameObject.FindObjectOfType<Teleporter>().gameObject.SetActive(false);
-        // }
-
         PlayerEnter();
+        if (playerIsDead) {
+            UINew.Instance.RefreshUI(active: false);
+            Instantiate(Resources.Load("UI/deathMenu"));
+            CameraControl camControl = FindObjectOfType<CameraControl>();
+            camControl.audioSource.PlayOneShot(Resources.Load("sounds/xylophone/x4") as AudioClip);
+            Toolbox.Instance.SwitchAudioListener(GameObject.Find("Main Camera"));
+        }
     }
     public void InitializeNonPlayableLevel() {
         string sceneName = SceneManager.GetActiveScene().name;
