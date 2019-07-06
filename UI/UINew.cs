@@ -609,6 +609,7 @@ public class UINew : Singleton<UINew> {
         } else {
             clickedActions = Interactor.GetInteractions(GameManager.Instance.playerObject, clickedOn, rightClickMenu: true);
         }
+
         List<actionButton> actionButtons = CreateButtonsFromActions(clickedActions); ;
         foreach (actionButton button in actionButtons)
             activeElements.Add(button.gameobject);
