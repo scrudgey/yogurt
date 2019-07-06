@@ -15,6 +15,8 @@ public class CameraControl : MonoBehaviour {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
     }
     public void Shake(float intensity) {
+        if (intensity < 0.001f)
+            return;
         StartCoroutine(screenShake(intensity));
     }
     private IEnumerator screenShake(float intensity) {
@@ -23,6 +25,7 @@ public class CameraControl : MonoBehaviour {
             intensity = intensity * 0.95f;
             yield return null;
         }
+        shakeVector = Vector3.zero;
     }
     void FixedUpdate() {
         if (focus == null)
