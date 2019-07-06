@@ -105,17 +105,12 @@ public class Blender : Container, ISaveable {
             liquidContainer.FillWithLiquid(edible.Liquify());
         }
         Gibs[] gibses = obj.GetComponents<Gibs>();
-        if (gibses.Length > 0) {
-            Debug.Log(gibses[0]);
-        }
         foreach (Gibs gibs in gibses) {
             if (gibs.notPhysical)
                 continue;
-            // gibs.Emit(damageType.cutting, 3f * transform.up);
             EmitParticle(gibs.particle);
             Destroy(gibs);
         }
-
     }
     public void EmitParticle(GameObject particle) {
         GameObject bit = Instantiate(particle, transform.position, Quaternion.identity) as GameObject;
