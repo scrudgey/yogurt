@@ -154,9 +154,10 @@ public class DialogueMenu : MonoBehaviour {
         targetControl = target.GetComponent<Controllable>();
         instigatorControl = instigator.GetComponent<Controllable>();
         instigatorControl.SetDirection(target.transform.position - instigator.transform.position);
-        targetControl.SetDirection(instigator.transform.position - target.transform.position);
-        if (targetControl)
+        if (targetControl) {
+            targetControl.SetDirection(instigator.transform.position - target.transform.position);
             targetControl.disabled = true;
+        }
         if (instigatorControl)
             instigatorControl.disabled = true;
         if (interruptDefault) {
@@ -193,6 +194,8 @@ public class DialogueMenu : MonoBehaviour {
             menuClosed();
     }
     public void LoadDialogueTree(string filename) {
+
+        // CUTSCENE-STYLE DIALOGUE (NO INTERACTION)
         if (filename == "polestar_first" || filename == "vampire") {
             cutsceneDialogue = true;
             EnableButtons();
@@ -264,7 +267,6 @@ public class DialogueMenu : MonoBehaviour {
                 Say(target.Riposte(say: false));
                 DisableResponses();
                 if (CutsceneManager.Instance.cutscene is CutsceneMayor) {
-                    // GameManager.Instance.data.achievementStats.mayorsSassed += 1;
                     GameManager.Instance.IncrementStat(StatType.mayorsSassed, 1);
                 }
                 break;
@@ -516,6 +518,21 @@ public class DialogueMenu : MonoBehaviour {
             doVampireAttack = true;
             monologue.NextLine();
             speechText.text = monologue.GetString();
+        }
+        if (text == "IMPCALLBACK1") {
+            UINew.Instance.CloseActiveMenu();
+            CutsceneImp cutscene = (CutsceneImp)CutsceneManager.Instance.cutscene;
+            cutscene.FirstIngredient();
+        }
+        if (text == "IMPCALLBACK2") {
+            UINew.Instance.CloseActiveMenu();
+            CutsceneImp cutscene = (CutsceneImp)CutsceneManager.Instance.cutscene;
+            cutscene.SecondIngredient();
+        }
+        if (text == "IMPCALLBACK3") {
+            UINew.Instance.CloseActiveMenu();
+            CutsceneImp cutscene = (CutsceneImp)CutsceneManager.Instance.cutscene;
+            cutscene.Finish();
         }
     }
     public void PoleStarCallback() {
