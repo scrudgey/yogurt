@@ -85,6 +85,10 @@ public abstract class Damageable : MonoBehaviour {
                 return;
             if (message.type == damageType.fire && immuneToFire)
                 return;
+            if (message.type == damageType.cosmic && netBuffs[BuffType.ethereal].boolValue) {
+                message.type = damageType.cutting;
+                lastDamage = damageType.cutting;
+            }
             damage = CalculateDamage(message);
             if (damage > 0) {
                 if (message.strength) {
