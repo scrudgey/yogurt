@@ -19,6 +19,7 @@ public class CutsceneMoonLanding : Cutscene {
     Controllable playerControllable;
     AdvancedAnimation playerAnimation;
     HeadAnimation playerHeadAnimation;
+    Collider2D playerCollider;
     Speech playerSpeech;
     public override void Configure() {
         materials = new Dictionary<Collider2D, PhysicsMaterial2D>();
@@ -32,6 +33,7 @@ public class CutsceneMoonLanding : Cutscene {
         playerAnimation = GameManager.Instance.playerObject.GetComponent<AdvancedAnimation>();
         playerHeadAnimation = GameManager.Instance.playerObject.GetComponent<HeadAnimation>();
         playerSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
+        playerCollider = GameManager.Instance.playerObject.GetComponent<Collider2D>();
         if (playerControllable != null) {
             playerControllable.enabled = false;
         }
@@ -43,6 +45,9 @@ public class CutsceneMoonLanding : Cutscene {
         }
         if (playerSpeech != null) {
             playerSpeech.enabled = false;
+        }
+        if (playerCollider != null) {
+            playerCollider.enabled = false;
         }
         Rigidbody2D body = player.GetComponent<Rigidbody2D>();
         body.gravityScale = GameManager.Instance.gravity;
@@ -65,6 +70,10 @@ public class CutsceneMoonLanding : Cutscene {
             UINew.Instance.RefreshUI();
         }
         timer += Time.deltaTime;
+        // check to reenable collider
+        if (GameManager.Instance.playerObject.transform.position.y < -0.533 && playerCollider != null && !playerCollider.enabled) {
+            playerCollider.enabled = true;
+        }
         if (timer > 3f) {
             complete = true;
         }
@@ -383,14 +392,105 @@ public class CutsceneBoardroom : Cutscene {
         GameManager.Instance.NewDayCutscene();
     }
 }
+public class CutsceneDungeonFall : CutsceneFall {
+    override protected float fallDist() { return -3.236f; }
+    private float catchPoint = 0.317f;
+    private bool caught;
+    private bool dumping;
+    private float dumpTimer;
+    private float dumpInterval = 1f;
+    private Inventory playerInventory;
+    private Outfit playerOutfit;
+    private GameObject ejectorDump;
+    private Vector2 catchPosition;
+    private AudioClip dumpSound;
+    public ParticleSystem magicEffect;
+    public AudioSource magicAudio;
+    public override void Configure() {
+        base.Configure();
+        ejectorDump = Resources.Load("particles/ejectorDump") as GameObject;
+        dumpSound = Resources.Load("sounds/8bit_impact2") as AudioClip;
+        Toolbox.Instance.SwitchAudioListener(player);
+        magicEffect = GameObject.Find("magic").GetComponent<ParticleSystem>();
+        magicAudio = GameObject.Find("magic").GetComponent<AudioSource>();
+    }
+    public override void Update() {
+        if (!caught || (caught && !dumping)) {
+            base.Update();
+            if (player.transform.position.y < catchPoint && !caught) {
+                catchPosition = player.transform.position;
+                caught = true;
+                dumping = true;
+                magicEffect.Play();
+                magicAudio.Play();
+                magicEffect.transform.position = player.transform.position;
+                playerInventory = player.GetComponent<Inventory>();
+                playerOutfit = player.GetComponent<Outfit>();
+                // stop fall
+                if (playerBody) {
+                    playerBody.gravityScale = 0f;
+                    playerBody.drag = initDrag;
+                    playerBody.velocity = Vector3.zero;
+                }
+            }
+        } else if (dumping) {
+            DumpUpdate();
+        }
+    }
+    public void DumpUpdate() {
+        dumpTimer += Time.deltaTime;
+        player.transform.position = catchPosition + UnityEngine.Random.insideUnitCircle * 0.01f;
+        // shake
+        // rotate
+        if (dumpTimer > dumpInterval) {
+            dumpTimer = 0;
+            if (playerInventory != null && playerInventory.holding != null) {
+                GameObject toDump = playerInventory.holding.gameObject;
+                playerInventory.SoftDropItem();
+                Dump(toDump);
+            } else if (playerInventory != null && playerInventory.items.Count > 0) {
+                GameObject pickup = playerInventory.items[0];
+                playerInventory.items.RemoveAt(0);
+                Dump(pickup);
+            } else if (playerOutfit != null && playerOutfit.wornUniformName != "nude") {
+                // dump outfit
+                GameObject removedUniform = playerOutfit.RemoveUniform();
+                playerOutfit.GoNude();
+                Dump(removedUniform);
+            } else {
+                player.transform.position = catchPosition;
+                dumping = false;
+                magicEffect.Stop();
+                magicAudio.Stop();
+                if (playerBody) {
+                    playerBody.gravityScale = 1f;
+                    playerBody.drag = 0;
+                }
+            }
+        }
+    }
+    void Dump(GameObject obj) {
+        // play sfx
+        SpriteRenderer objSprite = obj.GetComponent<SpriteRenderer>();
+        GameObject dumpObject = GameObject.Instantiate(ejectorDump);
+        dumpObject.transform.position = player.transform.position;
+        ParticleSystem system = dumpObject.GetComponent<ParticleSystem>();
+        system.randomSeed = (uint)UnityEngine.Random.Range(0, 9999999);
+        system.textureSheetAnimation.SetSprite(0, objSprite.sprite);
+        system.Play();
+        GameObject.Destroy(obj);
+        GameManager.Instance.PlayPublicSound(dumpSound);
+    }
+}
 public class CutsceneFall : Cutscene {
-    private GameObject player;
+    protected GameObject player;
     AdvancedAnimation playerAnimation;
     Collider2D playerCollider;
-    Rigidbody2D playerBody;
+    protected Rigidbody2D playerBody;
     Controllable playerControl;
     Hurtable playerHurtable;
-    float initDrag;
+    protected float initDrag;
+    protected virtual float fallDist() { return -0.3f; }
     public override void Configure() {
         player = GameManager.Instance.playerObject;
         playerAnimation = player.GetComponent<AdvancedAnimation>();
@@ -416,7 +516,7 @@ public class CutsceneFall : Cutscene {
         configured = true;
     }
     public override void Update() {
-        if (player.transform.position.y < -0.3f) {
+        if (player.transform.position.y < fallDist()) {
             Toolbox.Instance.AudioSpeaker("Poof 01", player.transform.position);
             if (playerAnimation)
                 playerAnimation.enabled = true;
@@ -450,13 +550,7 @@ public class CutsceneMayor : Cutscene {
     public override void Configure() {
         configured = true;
         spawnPoint = GameObject.Find("mayorSpawnpoint");
-        // GameObject farmer = GameObject.Find("Farmer");
-        // if (farmer){
-        //     Debug.Log("disabling farmer");
-        //     farmer.GetComponent<Controllable>().control = Controllable.ControlType.none;
-        // }
         foreach (Controllable controllable in GameObject.FindObjectsOfType<Controllable>()) {
-            // controllable.
             initialState[controllable] = controllable.control;
             controllable.control = Controllable.ControlType.none;
         }
@@ -501,6 +595,7 @@ public class CutsceneMayor : Cutscene {
         UINew.Instance.RefreshUI(active: false);
     }
 }
+
 public class CutsceneNewDay : Cutscene {
     private float timer;
     Text tomText;
@@ -556,6 +651,9 @@ public class CutsceneManager : Singleton<CutsceneManager> {
         cutscene = new T();
         if (!lateConfigure.Contains(typeof(T)))
             cutscene.Configure();
+    }
+    public void InitializeCutscene(Cutscene cut) {
+        cutscene = cut;
     }
     public void LevelWasLoaded(Scene scene, LoadSceneMode mode) {
         if (cutscene == null)

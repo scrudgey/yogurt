@@ -51,7 +51,7 @@ public class Bed : Doorway {
         head.gameObject.SetActive(true);
         // change head sprite
         HeadAnimation playerHead = GameManager.Instance.playerObject.GetComponentInChildren<HeadAnimation>();
-        if (playerHead != null){
+        if (playerHead != null) {
             headSprites[0] = playerHead.sprites[0];
             headSprites[1] = playerHead.sprites[1];
             head.sprite = playerHead.sprites[0];
@@ -66,7 +66,7 @@ public class Bed : Doorway {
             if (dup.Nullifiable())
                 collectible++;
         }
-        if (collectible > 1 && GameManager.Instance.data.days > 1)
+        if (collectible > 1 && GameManager.Instance.data.days > 1 && !GameManager.Instance.data.loadedDay)
             CutsceneManager.Instance.InitializeCutscene<CutscenePickleBottom>();
         Update();
     }
@@ -94,16 +94,16 @@ public class Bed : Doorway {
                 GameManager.Instance.playerObject.SetActive(true);
                 Toolbox.Instance.SwitchAudioListener(GameManager.Instance.playerObject);
                 audioSource.PlayOneShot(beddingSound);
-                UINew.Instance.RefreshUI(active:true);
+                UINew.Instance.RefreshUI(active: true);
                 HeadAnimation playerHead = GameManager.Instance.playerObject.GetComponentInChildren<HeadAnimation>();
-                if (playerHead){
+                if (playerHead) {
                     playerHead.UpdateSequence();
                 }
                 CheckDiaryEntry();
             }
         }
     }
-    void CheckDiaryEntry(){
+    void CheckDiaryEntry() {
         if (GameManager.Instance.data.days == 1) {
             GameManager.Instance.ShowDiaryEntry("diaryNew");
             return;

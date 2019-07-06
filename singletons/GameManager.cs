@@ -46,6 +46,7 @@ public class GameData {
     public bool teleporterUnlocked;
     public string headSpriteSheet;
     public string cosmicName = "";
+    public bool loadedDay;
     public GameData() {
         days = 0;
         saveDate = System.DateTime.Now.ToString();
@@ -83,7 +84,10 @@ public partial class GameManager : Singleton<GameManager> {
         {"vampire_house", "mansion"},
         {"mountain", "mountain"},
         {"clearing", "clearing"},
-        {"chamber", "meditation chamber"}
+        {"chamber", "meditation chamber"},
+        {"dungeon", "oubliette"},
+        {"potion", "apothecary"},
+        {"cave3", "deathtrap cave III"},
     };
     public GameData data;
     public string saveGameName = "test";
@@ -91,13 +95,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Camera cam;
     public GameObject playerObject;
     public float gravity = 3.0f;
-    private Commercial _activeCommercial;
-    public Commercial activeCommercial {
-        get { return _activeCommercial; }
-        set {
-            _activeCommercial = value;
-        }
-    }
+    public Commercial activeCommercial;
     public float sceneTime;
     private bool awaitNewDayPrompt;
     public float timeSinceLastSave = 0f;
@@ -215,9 +213,14 @@ public partial class GameManager : Singleton<GameManager> {
         Outfit playerOutfit = target.GetComponent<Outfit>();
         if (playerOutfit) {
             string prefabName = playerOutfit.wornUniformName;
-            GameObject uniform = Instantiate(Resources.Load("prefabs/" + prefabName)) as GameObject;
-            CheckItemCollection(uniform, playerObject);
-            DestroyImmediate(uniform);
+            if (prefabName != "nude") {
+                GameObject uniform = Instantiate(Resources.Load("prefabs/" + prefabName)) as GameObject;
+                CheckItemCollection(uniform, playerObject);
+                DestroyImmediate(uniform);
+            } else {
+                playerOutfit.GoNude();
+            }
+
         }
         Head playerHead = target.GetComponentInChildren<Head>();
         if (playerHead) {
@@ -361,17 +364,23 @@ public partial class GameManager : Singleton<GameManager> {
         if (sceneName == "cave1" || sceneName == "cave2") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneFall>();
         }
+        if (sceneName == "dungeon") {
+            CutsceneManager.Instance.InitializeCutscene<CutsceneDungeonFall>();
+        }
         if (sceneName == "space") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneSpace>();
         }
         if (sceneName == "moon1" && (data.entryID == 420 || data.entryID == 99)) {
             CutsceneManager.Instance.InitializeCutscene<CutsceneMoonLanding>();
         }
-        // if (sceneName == "house" && !data.teleporterUnlocked) {
-        //     GameObject.FindObjectOfType<Teleporter>().gameObject.SetActive(false);
-        // }
-
         PlayerEnter();
+        if (playerIsDead) {
+            UINew.Instance.RefreshUI(active: false);
+            Instantiate(Resources.Load("UI/deathMenu"));
+            CameraControl camControl = FindObjectOfType<CameraControl>();
+            camControl.audioSource.PlayOneShot(Resources.Load("sounds/xylophone/x4") as AudioClip);
+            Toolbox.Instance.SwitchAudioListener(GameObject.Find("Main Camera"));
+        }
     }
     public void InitializeNonPlayableLevel() {
         string sceneName = SceneManager.GetActiveScene().name;
@@ -469,6 +478,7 @@ public partial class GameManager : Singleton<GameManager> {
     }
     public void NewDay() {
         Debug.Log("New day");
+        data.loadedDay = false;
         MySaver.CleanupSaves();
         MySaver.SaveObjectDatabase();
         List<string> keys = new List<string>(data.itemCheckedOut.Keys);
@@ -655,6 +665,7 @@ public partial class GameManager : Singleton<GameManager> {
         } else {
             SceneManager.LoadScene("house");
         }
+        data.loadedDay = true;
     }
     public GameData LoadGameData(string gameName) {
         GameData data = null;
@@ -713,17 +724,26 @@ public partial class GameManager : Singleton<GameManager> {
         string filename = Toolbox.Instance.CloneRemover(obj.name);
         return data.collectedObjects.Contains(filename);
     }
-    public void RetrieveCollectedItem(string name) {
+    public void RetrieveCollectedItem(string name, HomeCloset.ClosetType closetType) {
         if (data.itemCheckedOut[name])
             return;
         GameObject item = Instantiate(Resources.Load("prefabs/" + name), playerObject.transform.position, Quaternion.identity) as GameObject;
         Instantiate(Resources.Load("particles/poof"), playerObject.transform.position, Quaternion.identity);
         publicAudio.PlayOneShot(Resources.Load("sounds/pop", typeof(AudioClip)) as AudioClip);
         data.itemCheckedOut[name] = true;
-        Inventory playerInventory = playerObject.GetComponent<Inventory>();
-        Pickup itemPickup = item.GetComponent<Pickup>();
-        if (playerInventory != null && itemPickup != null) {
-            playerInventory.GetItem(itemPickup);
+        if (closetType == HomeCloset.ClosetType.clothing) {
+            Outfit playerOutfit = playerObject.GetComponent<Outfit>();
+            Uniform itemUniform = item.GetComponent<Uniform>();
+            if (playerOutfit != null && itemUniform != null) {
+                // playerInventory.GetItem(itemPickup);
+                playerOutfit.DonUniform(itemUniform);
+            }
+        } else {
+            Inventory playerInventory = playerObject.GetComponent<Inventory>();
+            Pickup itemPickup = item.GetComponent<Pickup>();
+            if (playerInventory != null && itemPickup != null) {
+                playerInventory.GetItem(itemPickup);
+            }
         }
     }
     public void IncrementStat(StatType statType, float value) {

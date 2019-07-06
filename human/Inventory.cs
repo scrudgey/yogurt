@@ -29,7 +29,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             }
             Toolbox.Instance.SendMessage(gameObject, this, invMessage);
             Toolbox.Instance.SendMessage(gameObject, this, directableMessage);
-            if (value != null)
+            if (value != null && !value.heavyObject)
                 GameManager.Instance.CheckItemCollection(value.gameObject, gameObject);
             // Controllable controllable = GetComponent<Controllable>();
             // if (controllable != null)

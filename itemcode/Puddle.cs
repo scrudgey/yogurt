@@ -22,7 +22,7 @@ public class Puddle : MonoBehaviour {
         }
     }
 
-    void OnTriggerStay2D(Collider2D coll) {
+    void OnTriggerEnter2D(Collider2D coll) {
         if (coll.gameObject.tag == "fire")
             return;
         if (ignoredObjects.Contains(coll.gameObject))

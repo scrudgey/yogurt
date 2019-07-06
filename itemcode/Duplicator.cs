@@ -31,7 +31,11 @@ public class Duplicator : Interactive, IDirectable {
             GameManager.Instance.IncrementStat(StatType.dollarsDuplicated, 1);
         }
         if (duplicatable.gameObject == GameManager.Instance.playerObject) {
-            dupObj.name = GameManager.Instance.saveGameName;
+            Duplicatable newDuplicatabale = dupObj.GetComponent<Duplicatable>();
+            if (newDuplicatabale) {
+                newDuplicatabale.adoptedName = GameManager.Instance.saveGameName;
+                // dupObj.name
+            }
         }
         if (particles != null) {
             particles.Play();

@@ -14,7 +14,6 @@ public class CommercialReportMenu : MonoBehaviour {
         canvas = GetComponent<Canvas>();
         canvas.worldCamera = GameManager.Instance.cam;
         SetRefs();
-        // Controller.Instance.suspendInput = true;
     }
     public void NewDayButton() {
         UINew.Instance.CloseActiveMenu();

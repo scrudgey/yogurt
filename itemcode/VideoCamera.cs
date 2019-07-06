@@ -11,7 +11,6 @@ public class VideoCamera : Interactive, ISaveable {
     public GameObject doneBubble;
     private GameObject regionIndicator;
     private HashSet<GameObject> seenFlags = new HashSet<GameObject>();
-
     void Awake() {
         doneBubble = transform.Find("doneBubble").gameObject;
         doneBubble.SetActive(false);
@@ -26,6 +25,11 @@ public class VideoCamera : Interactive, ISaveable {
         enableAct.descString = "Start commercial...";
         enableAct.validationFunction = true;
         interactions.Add(enableAct);
+
+        Interaction cancelAct = new Interaction(this, "Cancel", "Cancel");
+        cancelAct.descString = "Abort commercial...";
+        cancelAct.validationFunction = true;
+        interactions.Add(cancelAct);
     }
     public void EnableBubble() {
         doneBubble.SetActive(true);
@@ -92,6 +96,7 @@ public class VideoCamera : Interactive, ISaveable {
         foreach (OccurrenceData occurrence in oc.data) {
             foreach (EventData data in occurrence.events) {
                 commercial.IncrementValue(data);
+                UINew.Instance.UpdateObjectives(commercial);
             }
             commercial.eventData.AddRange(occurrence.events);
             foreach (EventData data in occurrence.events) {
@@ -106,6 +111,10 @@ public class VideoCamera : Interactive, ISaveable {
             live = true;
             regionIndicator.SetActive(true);
             UINew.Instance.UpdateRecordButtons(commercial);
+            foreach (KeyValuePair<string, CommercialProperty> kvp in GameManager.Instance.activeCommercial.properties) {
+                UINew.Instance.AddObjective(kvp.Value);
+                UINew.Instance.UpdateObjectives(commercial);
+            }
             StartCoroutine(WaitAndStartScript(1f));
         } else {
             live = false;
@@ -115,6 +124,18 @@ public class VideoCamera : Interactive, ISaveable {
     }
     public bool Enable_Validation() {
         return live == false;
+    }
+    public void Cancel() {
+        live = false;
+        GameManager.Instance.activeCommercial = null;
+        commercial = new Commercial();
+        UINew.Instance.ClearObjectives();
+        regionIndicator.SetActive(false);
+        UINew.Instance.UpdateRecordButtons(commercial);
+        DisableBubble();
+    }
+    public bool Cancel_Validation() {
+        return live;
     }
     public IEnumerator WaitAndStartScript(float waitTime) {
         yield return new WaitForSeconds(waitTime);

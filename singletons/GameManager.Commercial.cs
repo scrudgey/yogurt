@@ -42,6 +42,7 @@ public partial class GameManager : Singleton<GameManager> {
         if (success) {
             //process reward
             commercial.name = activeCommercial.name;
+            UINew.Instance.ClearObjectives();
             CommercialCompleted(commercial);
         } else {
             // do something to display why the commercial is not done yet

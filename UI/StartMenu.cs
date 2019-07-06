@@ -209,7 +209,6 @@ public class StartMenu : MonoBehaviour {
     public string SuggestANAme() {
         List<string> names = new List<string>(){
             "Shemp",
-            "Corona",
             "Frog",
             "Crogus",
             "Smitty",
@@ -233,7 +232,8 @@ public class StartMenu : MonoBehaviour {
             "Bippy",
             "Smits",
             "Oprah Noodlemantra",
-            "Hash Burnslide"
+            "Hash Burnslide",
+            "Bandit Slumbody"
         };
         return names[UnityEngine.Random.Range(0, names.Count)];
     }

@@ -21,15 +21,15 @@ public class Parallax : MonoBehaviour {
         for (int i = 0; i < layers.Count; i++) {
             ParallaxLayer layer = layers[i];
             layer.originalPosition = layers[i].transform.position;
-            if (applyOffsets) {
-                // Vector2 offset = new Vector2();
-                // offset.x = -1.0f * layerNeutralAtPosition.x * layers[i].speed;
-                // offset.y = -1.0f * layerNeutralAtPosition.y * layers[i].speed;
-                // layer.offset = offset;
-                layer.offset = -1f * layerNeutralAtPosition * layers[i].speed;
-            } else {
-                layer.offset = Vector2.zero;
-            }
+            // if (applyOffsets) {
+            //     // Vector2 offset = new Vector2();
+            //     // offset.x = -1.0f * layerNeutralAtPosition.x * layers[i].speed;
+            //     // offset.y = -1.0f * layerNeutralAtPosition.y * layers[i].speed;
+            //     // layer.offset = offset;
+            //     layer.offset = -1f * layerNeutralAtPosition * layers[i].speed;
+            // } else {
+            //     layer.offset = Vector2.zero;
+            // }
             layers[i] = layer;
         }
     }

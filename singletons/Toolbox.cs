@@ -250,6 +250,10 @@ public class Toolbox : Singleton<Toolbox> {
         if (obj == GameManager.Instance.playerObject) {
             return GameManager.Instance.saveGameName;
         }
+        Duplicatable dup = obj.GetComponent<Duplicatable>();
+        if (dup && dup.adoptedName != "") {
+            return dup.adoptedName;
+        }
         Item item = obj.GetComponent<Item>();
         if (item) {
             nameOut = item.itemName;

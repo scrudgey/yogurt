@@ -11,12 +11,9 @@ public class ClosetButtonHandler : MonoBehaviour {
     public Transform listContent;
     public UIButtonEffects effects;
     public Button closeButton;
-    // public Text titleText;
+    public HomeCloset.ClosetType closetType;
     void Start() {
         GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
-        // icon = transform.Find("menu/body/InfoPanel/ImagePanel/Icon").GetComponent<Image>();
-        // descriptionText = transform.Find("menu/body/InfoPanel/TextPanel/Description").GetComponent<Text>();
-        // nameText = transform.Find("menu/body/InfoPanel/TextPanel/Title").GetComponent<Text>();
         icon.sprite = null;
         icon.color = new Color(1f, 1f, 1f, 0f);
     }
@@ -25,15 +22,14 @@ public class ClosetButtonHandler : MonoBehaviour {
         return newObject.GetComponent<ItemEntryScript>();
     }
     public void PopulateItemList(HomeCloset.ClosetType type) {
+        closetType = type;
         effects = GetComponent<UIButtonEffects>();
         effects.buttons = new List<Button>() { closeButton };
         foreach (Transform childObject in listContent) {
             Destroy(childObject.gameObject);
         }
-        // GameObject listObject = transform.Find("menu/body/ItemList").gameObject;
         List<string> itemList = GameManager.Instance.data.collectedObjects;
 
-        // titleText = transform.Find("menu/menubar/titlebar").GetComponent<Text>();
         if (type == HomeCloset.ClosetType.clothing) {
             itemList = GameManager.Instance.data.collectedClothes;
             titleText.text = "Collected Clothing";
@@ -48,12 +44,9 @@ public class ClosetButtonHandler : MonoBehaviour {
         foreach (string name in itemList) {
             GameObject tempObject = Instantiate(Resources.Load("prefabs/" + name)) as GameObject;
             Item tempItem = tempObject.GetComponent<Item>();
-            // names.Add(tempItem.itemName);
             names[name] = tempItem.itemName;
             Destroy(tempObject);
         }
-        // docs = docs.OrderBy(d => docsIds.IndexOf(d.Id)).ToList();
-        // itemList.Sort();
         itemList = itemList.OrderBy(i => names[i]).ToList();
         foreach (string name in itemList) {
             ItemEntryScript script = spawnEntry();
@@ -67,7 +60,7 @@ public class ClosetButtonHandler : MonoBehaviour {
         UINew.Instance.CloseActiveMenu();
     }
     public void ItemClick(ItemEntryScript itemScript) {
-        GameManager.Instance.RetrieveCollectedItem(itemScript.prefabName);
+        GameManager.Instance.RetrieveCollectedItem(itemScript.prefabName, closetType);
         UINew.Instance.CloseActiveMenu();
     }
     public void ItemMouseover(ItemEntryScript itemScript) {
