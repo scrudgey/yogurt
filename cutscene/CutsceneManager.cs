@@ -550,13 +550,7 @@ public class CutsceneMayor : Cutscene {
     public override void Configure() {
         configured = true;
         spawnPoint = GameObject.Find("mayorSpawnpoint");
-        // GameObject farmer = GameObject.Find("Farmer");
-        // if (farmer){
-        //     Debug.Log("disabling farmer");
-        //     farmer.GetComponent<Controllable>().control = Controllable.ControlType.none;
-        // }
         foreach (Controllable controllable in GameObject.FindObjectsOfType<Controllable>()) {
-            // controllable.
             initialState[controllable] = controllable.control;
             controllable.control = Controllable.ControlType.none;
         }
@@ -601,6 +595,7 @@ public class CutsceneMayor : Cutscene {
         UINew.Instance.RefreshUI(active: false);
     }
 }
+
 public class CutsceneNewDay : Cutscene {
     private float timer;
     Text tomText;
@@ -656,6 +651,9 @@ public class CutsceneManager : Singleton<CutsceneManager> {
         cutscene = new T();
         if (!lateConfigure.Contains(typeof(T)))
             cutscene.Configure();
+    }
+    public void InitializeCutscene(Cutscene cut) {
+        cutscene = cut;
     }
     public void LevelWasLoaded(Scene scene, LoadSceneMode mode) {
         if (cutscene == null)
