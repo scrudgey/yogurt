@@ -37,32 +37,32 @@ public class MonoLiquid : MonoBehaviour {
                 splashSprite.color = liquid.color;
                 Transform rectTransform = splash.GetComponent<Transform>();
                 rectTransform.Rotate(new Vector3(0, 0, Random.Range(0f, 360f)));
-                
+
                 int numberStains = 0;
-                foreach(Transform child in coll.transform){
-                    if (child.name == "stain(Clone)"){
+                foreach (Transform child in coll.transform) {
+                    if (child.name == "stain(Clone)") {
                         numberStains += 1;
                         if (numberStains >= 5)
                             break;
                     }
                 }
-                if (numberStains < 5){
+                if (numberStains < 5) {
                     GameObject stain = CreateStain(coll.gameObject, transform.position);
                     SpriteRenderer stainRenderer = stain.GetComponent<SpriteRenderer>();
                     stainRenderer.color = liquid.color;
-                    Liquid.MonoLiquidify(stain, liquid);   
+                    Liquid.MonoLiquidify(stain, liquid);
 
                     EventData data = Toolbox.Instance.DataFlag(coll.gameObject, chaos: 1, disgusting: 1);
-                    data.whatHappened = liquid.name + " stained "+Toolbox.Instance.GetName(coll.gameObject);
-                    if (liquid.immoral){
+                    data.whatHappened = liquid.name + " stained " + Toolbox.Instance.GetName(coll.gameObject);
+                    if (liquid.immoral > 0) {
                         data.ratings[Rating.chaos] += 1;
                         data.ratings[Rating.disturbing] += 1;
                     }
-                    if (liquid.vomit){
+                    if (liquid.vomit) {
                         data.ratings[Rating.chaos] += 1;
                         data.ratings[Rating.disgusting] += 1;
                     }
-                    if (liquid.offal){
+                    if (liquid.offal > 0) {
                         data.ratings[Rating.chaos] += 1;
                         data.ratings[Rating.disgusting] += 1;
                     }
