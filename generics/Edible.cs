@@ -42,14 +42,15 @@ public class Edible : Interactive, ISaveable {
             returnLiquid = Liquid.LoadLiquid(blend_liquid_name);
         } else {
             returnLiquid = Liquid.LoadLiquid("juice");
-            returnLiquid.vegetable = vegetable;
-            returnLiquid.meat = meat;
-            returnLiquid.immoral = immoral;
+            returnLiquid.vegetable = vegetable ? 1 : 0;
+            returnLiquid.meat = meat ? 1 : 0;
+            returnLiquid.immoral = immoral ? 1 : 0;
             returnLiquid.nutrition = nutrition / 10;
             returnLiquid.color = pureeColor;
             returnLiquid.color.a = 255f;
             returnLiquid.name = Toolbox.Instance.GetName(gameObject) + " juice";
         }
+        returnLiquid.ingredients.Add(Toolbox.Instance.CloneRemover(gameObject.name));
         return returnLiquid;
     }
     public void SaveData(PersistentComponent data) {

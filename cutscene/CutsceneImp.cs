@@ -1,45 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 public class CutsceneImp : Cutscene {
-    public static Dictionary<BuffType, PotionData> buffToIngredientsMap = new Dictionary<BuffType, PotionData>() {
-        {BuffType.armor, new PotionData("armor",
-            new BuffData(loadSprite("vampireHeart"), "vampire heart"),
-            new BuffData(loadSprite("eggplant"), "moon water"))},
-        {BuffType.bonusHealth, new PotionData("vigor",
-            new BuffData(loadSprite("eggplant"), "???"),
-            new BuffData(loadSprite("eggplant"), "???"))},
-        {BuffType.coughing, new PotionData("coughing",
-            new BuffData(loadSprite("eggplant"), "???"),
-            new BuffData(loadSprite("eggplant"), "???"))},
-        {BuffType.ethereal, new PotionData("ethereal",
-            new BuffData(loadSprite("eggplant"), "???"),
-            new BuffData(loadSprite("eggplant"), "???"))},
-        {BuffType.fireproof, new PotionData("fireproof",
-            new BuffData(loadSprite("eggplant"), "mushroom"),
-            new BuffData(loadSprite("eggplant"), "ectoplasm"))},
-        {BuffType.invulnerable, new PotionData("invulnerability",
-            new BuffData(loadSprite("eggplant"), "???"),
-            new BuffData(loadSprite("eggplant"), "???"))},
-        {BuffType.noPhysicalDamage, new PotionData("intangibility",
-            new BuffData(loadSprite("eggplant"), "???"),
-            new BuffData(loadSprite("eggplant"), "???"))},
-        {BuffType.poison, new PotionData("poison",
-            new BuffData(loadSprite("eggplant"), "???"),
-            new BuffData(loadSprite("eggplant"), "???"))},
-        {BuffType.speed, new PotionData("speed",
-            new BuffData(loadSprite("eggplant"), "???"),
-            new BuffData(loadSprite("eggplant"), "???"))},
-        {BuffType.strength, new PotionData("strength",
-            new BuffData(loadSprite("eggplant"), "mushroom"),
-            new BuffData(loadSprite("eggplant"), "ectoplasm"))},
-        {BuffType.telepathy, new PotionData("telepath",
-            new BuffData(loadSprite("eggplant"), "???"),
-            new BuffData(loadSprite("eggplant"), "???"))},
-        {BuffType.vampirism, new PotionData("vampirism",
-            new BuffData(loadSprite("eggplant"), "???"),
-            new BuffData(loadSprite("eggplant"), "???"))},
-    };
-
     private enum State { start, first, describeFirst, second, describeSecond }
     private State state;
     GameObject analyzand;
@@ -94,7 +55,8 @@ public class CutsceneImp : Cutscene {
     }
     void StartAnalysis() {
         state = State.start;
-        PotionData dat = buffToIngredientsMap[buffType];
+        Dictionary<BuffType, PotionData> buffMap = PotionComponent.BuffToPotion();
+        PotionData dat = buffMap[buffType];
         DialogueNode newNode = new DialogueNode();
         newNode.text.Add("this is the introduction speech.");
         newNode.text.Add("your item is " + Toolbox.Instance.GetName(analyzand) + ".");
@@ -173,43 +135,18 @@ public class CutsceneImp : Cutscene {
 
     public bool GetIngredients() {
         Intrinsics intrinsics = analyzand.GetComponent<Intrinsics>();
+        Dictionary<BuffType, PotionData> buffMap = PotionComponent.BuffToPotion();
         if (intrinsics == null)
             return false;
         if (intrinsics.buffs.Count > 0) {
             buffType = intrinsics.buffs[0].type;
-            potionData = buffToIngredientsMap[buffType];
+            potionData = buffMap[buffType];
             return true;
         } else if (intrinsics.liveBuffs.Count > 0) {
             buffType = intrinsics.liveBuffs[0].type;
-            potionData = buffToIngredientsMap[buffType];
+            potionData = buffMap[buffType];
             return true;
         }
         return false;
-    }
-
-
-    public static Sprite loadSprite(string name) {
-        GameObject obj = GameObject.Instantiate(Resources.Load("prefabs/" + name) as GameObject);
-        Sprite sprite = obj.GetComponent<SpriteRenderer>().sprite;
-        GameObject.DestroyImmediate(obj);
-        return sprite;
-    }
-    public struct PotionData {
-        public string name;
-        public BuffData ingredient1;
-        public BuffData ingredient2;
-        public PotionData(string name, BuffData i1, BuffData i2) {
-            this.name = name;
-            this.ingredient1 = i1;
-            this.ingredient2 = i2;
-        }
-    }
-    public struct BuffData {
-        public Sprite icon;
-        public string name;
-        public BuffData(Sprite icon, string name) {
-            this.icon = icon;
-            this.name = name;
-        }
     }
 }
