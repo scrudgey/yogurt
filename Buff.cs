@@ -37,8 +37,6 @@ public class Buff {
         return changed;
     }
 }
-
-
 public enum BuffType {
     telepathy,
     speed,
@@ -53,7 +51,6 @@ public enum BuffType {
     ethereal,
     coughing
 }
-
 [System.Serializable]
 public struct BuffData {
     public Sprite icon;
