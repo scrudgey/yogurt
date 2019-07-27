@@ -8,9 +8,7 @@ public class PlaySoundOnGroundImpact : MonoBehaviour {
     }
     public void OnGroundImpact(Physical phys) {
         if (groundImpactSounds.Length > 0) {
-            GameObject speaker = Instantiate(Resources.Load("Speaker"), transform.position, Quaternion.identity) as GameObject;
-            speaker.GetComponent<AudioSource>().clip = groundImpactSounds[Random.Range(0, groundImpactSounds.Length)];
-            speaker.GetComponent<AudioSource>().Play();
+            Toolbox.Instance.AudioSpeaker(groundImpactSounds[Random.Range(0, groundImpactSounds.Length)], transform.position);
         }
     }
 }

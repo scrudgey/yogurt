@@ -53,10 +53,7 @@ public class Destructible : Damageable, ISaveable {
     public void Die() {
         Destruct();
         if (destroySound.Length > 0) {
-            GameObject speaker = Instantiate(Resources.Load("Speaker"), transform.position, Quaternion.identity) as GameObject;
-            // speaker.GetComponent<AudioSource>().clip = destroySound[Random.Range(0, destroySound.Length)];
-            // speaker.GetComponent<AudioSource>().Play();
-            audioSource.PlayOneShot(destroySound[Random.Range(0, destroySound.Length)]);
+            Toolbox.Instance.AudioSpeaker(destroySound[Random.Range(0, destroySound.Length)], transform.position);
         }
         LiquidContainer container = GetComponent<LiquidContainer>();
         if (container && container.amount > 0) {
