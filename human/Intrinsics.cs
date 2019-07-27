@@ -1,21 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public enum BuffType { 
-    telepathy, 
-    speed, 
-    bonusHealth, 
-    armor, 
-    fireproof, 
-    noPhysicalDamage, 
-    invulnerable, 
-    strength, 
-    poison, 
-    vampirism, 
-    ethereal,  
-    coughing
-    }
-
 public class Intrinsics : MonoBehaviour, ISaveable {
     public List<Buff> buffs = new List<Buff>();
     public List<Buff> liveBuffs = new List<Buff>();
@@ -43,9 +28,9 @@ public class Intrinsics : MonoBehaviour, ISaveable {
         }
         IntrinsicsChanged();
     }
-    public void AddNewLiveBuff(Buff newBuff){
-        foreach(Buff buff in liveBuffs){
-            if (buff.type == newBuff.type){
+    public void AddNewLiveBuff(Buff newBuff) {
+        foreach (Buff buff in liveBuffs) {
+            if (buff.type == newBuff.type) {
                 // do stuff
                 buff.floatValue = Mathf.Max(buff.floatValue, newBuff.floatValue);
                 buff.time = Mathf.Min(buff.time, newBuff.time);
@@ -55,11 +40,11 @@ public class Intrinsics : MonoBehaviour, ISaveable {
         }
         liveBuffs.Add(newBuff);
     }
-    public void AddNewPromotedLiveBuff(Buff newBuff){
+    public void AddNewPromotedLiveBuff(Buff newBuff) {
         newBuff.lifetime = 0;
         newBuff.time = 0;
-        foreach(Buff buff in liveBuffs){
-            if (buff.type == newBuff.type){
+        foreach (Buff buff in liveBuffs) {
+            if (buff.type == newBuff.type) {
                 // do stuff
                 buff.floatValue = Mathf.Max(buff.floatValue, newBuff.floatValue);
                 buff.time = 0;
@@ -113,7 +98,8 @@ public class Intrinsics : MonoBehaviour, ISaveable {
                             fader.spriteRenderers.Add(head.GetComponent<SpriteRenderer>());
                         }
                     } else {
-
+                        FadeAlpha fader = gameObject.GetComponent<FadeAlpha>();
+                        Destroy(fader);
                     }
                     break;
                 default:
@@ -160,7 +146,7 @@ public class Intrinsics : MonoBehaviour, ISaveable {
         returnBuffs.AddRange(liveBuffs);
         foreach (KeyValuePair<Component, List<Buff>> kvp in childBuffs) {
             returnBuffs.AddRange(kvp.Value);
-            if (kvp.Value.Count > 0){
+            if (kvp.Value.Count > 0) {
                 Buff b = kvp.Value[0];
                 // Debug.Log(gameObject.name + "> " + kvp.Key.ToString()+" : "+b.floatValue.ToString());
             }
@@ -185,7 +171,7 @@ public class Intrinsics : MonoBehaviour, ISaveable {
     public void IntrinsicsChanged() {
         // Debug.Log(gameObject.name+"> livebuffs: "+liveBuffs.Count.ToString()+", childs: "+childBuffs.Count.ToString());
         MessageNetIntrinsic message = new MessageNetIntrinsic(this);
-        Toolbox.Instance.SendMessage(gameObject, this, message, sendUpwards:false);
+        Toolbox.Instance.SendMessage(gameObject, this, message, sendUpwards: false);
         if (GameManager.Instance.playerObject == gameObject) {
             GameManager.Instance.FocusIntrinsicsChanged(this);
         }
@@ -206,31 +192,47 @@ public class Intrinsics : MonoBehaviour, ISaveable {
             IntrinsicsChanged();
     }
 }
-[System.Serializable]
-public class Buff {
-    public BuffType type;
-    public bool boolValue;
-    public float floatValue;
-    public float lifetime;
-    public float time;
-    public Buff() { }
-    public Buff(Buff otherBuff) {
-        this.type = otherBuff.type;
-        this.boolValue = otherBuff.boolValue;
-        this.floatValue = otherBuff.floatValue;
-        this.lifetime = otherBuff.lifetime;
-        this.time = otherBuff.time;
-    }
-    public bool Update() {
-        bool changed = false;
-        time += Time.deltaTime;
-        if (time > lifetime && lifetime > 0) {
-            boolValue = false;
-            floatValue = 0;
-            changed = true;
-        } else {
-            boolValue = true;
-        }
-        return changed;
-    }
-}
+
+
+// public class Buffs {
+//     public List<Buff> buffs;
+//     public Dictionary<BuffType, Buff> NetBuffs() {
+//         Dictionary<BuffType, Buff> netBuffs = new Dictionary<BuffType, Buff>();
+//         foreach (BuffType type in System.Enum.GetValues(typeof(BuffType))) {
+//             netBuffs[type] = new Buff();
+//             netBuffs[type].type = type;
+//         }
+//         return netBuffs;
+//     }
+//     public void AddNewBuff(Buff newBuff) {
+//         foreach (Buff buff in buffs) {
+//             if (buff.type == newBuff.type) {
+//                 // do stuff
+//                 buff.floatValue = Mathf.Max(buff.floatValue, newBuff.floatValue);
+//                 buff.time = Mathf.Min(buff.time, newBuff.time);
+//                 buff.boolValue = buff.boolValue || newBuff.boolValue;
+//                 buff.floatValue += newBuff.floatValue;
+//                 return;
+//             }
+//         }
+//         buffs.Add(newBuff);
+//     }
+//     public void AddNewPromotedBuff(Buff newBuff) {
+//         newBuff.lifetime = 0;
+//         newBuff.time = 0;
+//         foreach (Buff buff in buffs) {
+//             if (buff.type == newBuff.type) {
+//                 // do stuff
+//                 buff.floatValue = Mathf.Max(buff.floatValue, newBuff.floatValue);
+//                 buff.time = 0;
+//                 buff.lifetime = 0;
+//                 buff.boolValue = true;
+//                 return;
+//             }
+//         }
+//         buffs.Add(newBuff);
+//     }
+//     public void Add(Buffs other) {
+
+//     }
+// }

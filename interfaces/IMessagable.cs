@@ -5,13 +5,14 @@ public class Message {
     public Component messenger;
 }
 public class MessageAnimation : Message {
-    public enum AnimType { 
-        none, 
-        throwing, 
-        swinging, 
-        fighting, 
-        punching, 
-        outfit };
+    public enum AnimType {
+        none,
+        throwing,
+        swinging,
+        fighting,
+        punching,
+        outfit
+    };
     public AnimType type;
     public bool value;
     public string outfitName = "";
@@ -62,7 +63,7 @@ public class MessageDamage : Message {
     public damageType type;
     public Vector2 force;
     public AudioClip[] impactSounds = new AudioClip[0];
-    public bool silentImpact;
+    public bool suppressImpactSound;
     public bool impersonal;
     public PhysicalImpact impactor;
     public GameObject responsibleParty;
@@ -102,7 +103,7 @@ public class MessageOccurrence : Message {
 }
 public class MessageNoise : Message {
     public Vector2 location;
-    public MessageNoise(GameObject gameObject){
+    public MessageNoise(GameObject gameObject) {
         this.location = gameObject.transform.position;
     }
 }

@@ -14,14 +14,14 @@ public class ChemicalSpray : MonoBehaviour {
                 fireData.flamingObject = coll.gameObject;
                 fireData.extinguished = true;
 
-                Toolbox.Instance.OccurenceFlag(coll.gameObject, fireData, new HashSet<GameObject>(){coll.gameObject});
+                Toolbox.Instance.OccurenceFlag(coll.gameObject, fireData, new HashSet<GameObject>() { coll.gameObject });
             }
         }
         Toolbox.Instance.AddLiveBuffs(coll.gameObject, gameObject);
         MessageDamage impact = new MessageDamage();
         impact.amount = 0;
         impact.responsibleParty = responsibleParty;
-        impact.silentImpact = true;
+        impact.suppressImpactSound = true;
         Toolbox.Instance.SendMessage(coll.gameObject, this, impact);
         Destroy(gameObject);
     }

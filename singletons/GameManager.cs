@@ -79,7 +79,7 @@ public partial class GameManager : Singleton<GameManager> {
         {"studio", "yogurt commercial studio"},
         {"volcano", "volcano"},
         {"room2", "item room"},
-        {"moon_cave", "moon cave"},
+        {"moon_cave", "moon temple"},
         {"woods", "woods"},
         {"vampire_house", "mansion"},
         {"mountain", "mountain"},
@@ -795,11 +795,10 @@ public partial class GameManager : Singleton<GameManager> {
         GameObject diaryObject = UINew.Instance.activeMenu;
         if (UINew.Instance.activeMenu == null) {
             diaryObject = UINew.Instance.ShowMenu(UINew.MenuType.diary);
+        } else {
+            UINew.Instance.CloseActiveMenu();
+            diaryObject = UINew.Instance.ShowMenu(UINew.MenuType.diary);
         }
-        // } else {
-        //     UINew.Instance.CloseActiveMenu();
-        //     diaryObject = UINew.Instance.ShowMenu(UINew.MenuType.diary);
-        // }
         Diary diary = diaryObject.GetComponent<Diary>();
         diary.loadDiaryName = diaryName;
     }

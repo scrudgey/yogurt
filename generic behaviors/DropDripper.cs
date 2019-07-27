@@ -24,7 +24,7 @@ public class DropDripper : MonoBehaviour, ISaveable {
     void Update() {
         timer += Time.deltaTime;
         if (timer > interval) {
-            if (pBoot.physical != null) {
+            if (pBoot != null && pBoot.physical != null) {
                 if (pBoot.physical.height > 0.05) {
                     dripFX.SetActive(true);
                     Drip(pBoot.physical.height);

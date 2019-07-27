@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Linq;
 
 public class TeleportMenu : MonoBehaviour {
     public Transform buttonList;
@@ -28,7 +29,9 @@ public class TeleportMenu : MonoBehaviour {
     public void PopulateSceneList() {
         effects.buttons = new List<Button>(builtInButtons);
         SetReferences();
-        foreach (string scene in GameManager.Instance.data.unlockedScenes) {
+        List<string> sceneList = GameManager.Instance.data.unlockedScenes.ToList<string>();
+        sceneList.OrderBy(scene => GameManager.sceneNames[scene]);
+        foreach (string scene in sceneList.OrderBy(scene => GameManager.sceneNames[scene])) {
             GameObject buttonObject = Instantiate(Resources.Load("UI/SceneButton")) as GameObject;
             buttonObject.transform.SetParent(buttonList, false);
             SceneButton button = buttonObject.GetComponent<SceneButton>();

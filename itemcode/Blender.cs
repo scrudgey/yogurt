@@ -12,6 +12,7 @@ public class Blender : Container, ISaveable {
     public AudioClip lidOff;
     private LiquidContainer liquidContainer;
     private AudioSource audioSource;
+    private PhysicalBootstrapper pb;
     protected override void Awake() {
         base.Awake();
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -19,28 +20,47 @@ public class Blender : Container, ISaveable {
         interactions.Add(new Interaction(this, "Power", "Power"));
         interactions.Add(new Interaction(this, "Lid", "Lid"));
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
+        pb = GetComponent<PhysicalBootstrapper>();
     }
-    void Update() {
+    void FixedUpdate() {
         if (power) {
             if (!audioSource.isPlaying) {
                 audioSource.clip = blendNoise;
                 audioSource.Play();
             }
-            //vibrate the blender
+
+            // vibrate the blender
+            // i'm sorry for my garbage code
             Vector3 pos = transform.root.position;
+            Vector3 physicalPos = Vector3.zero;
+            if (pb != null && pb.physical != null) {
+                physicalPos = pb.physical.transform.position;
+            }
             vibrate = !vibrate;
             if (vibrate) {
-                pos.y = pos.y + 0.01f;
+                pos.y += 0.01f;
+                if (pb != null && pb.physical != null) {
+                    physicalPos.y += 0.01f;
+                }
             } else {
-                pos.y = pos.y - 0.01f;
+                pos.y -= 0.01f;
+                if (pb != null && pb.physical != null) {
+                    physicalPos.y -= 0.01f;
+                }
             }
             transform.root.position = pos;
+            if (pb != null && pb.physical != null) {
+                pb.physical.transform.position = physicalPos;
+            }
+
             //blend contained item
             if (items.Count > 0) {
                 MessageDamage message = new MessageDamage();
                 message.amount = Time.deltaTime * 10;
                 message.force = Vector2.zero;
                 message.type = damageType.physical;
+                message.suppressImpactSound = true;
+
                 Toolbox.Instance.SendMessage(items[0].gameObject, this, message, false);
             }
             if (liquidContainer.amount > 0 && !liquidContainer.lid) {
