@@ -11,10 +11,6 @@ public class CutsceneImp : Cutscene {
     AnimateFrames impAnimate;
     PotionSeller impSeller;
     SpriteRenderer impRenderer;
-    // Sprite firstIngredient;
-    // Sprite secondIngredient;
-    // string firstIngredientName;
-    // string secondIngredientName;
     float timer = 0;
     public void Configure(GameObject analyzand) {
         configured = true;
@@ -28,16 +24,7 @@ public class CutsceneImp : Cutscene {
         this.analyzand = analyzand;
         Controllable playerController = GameManager.Instance.playerObject.GetComponent<Controllable>();
         UINew.Instance.RefreshUI();
-
-        // if analyzable or not
-        // List<GameObject> ingredients = GetIngredients();
         if (GetIngredients()) {
-            // firstIngredient = ingredients[0].GetComponent<SpriteRenderer>().sprite;
-            // secondIngredient = ingredients[1].GetComponent<SpriteRenderer>().sprite;
-            // firstIngredientName = Toolbox.Instance.GetName(ingredients[0]);
-            // secondIngredientName = Toolbox.Instance.GetName(ingredients[1]);
-            // GameObject.DestroyImmediate(ingredients[0]);
-            // GameObject.DestroyImmediate(ingredients[1]);
             StartAnalysis();
         }
     }
@@ -58,10 +45,10 @@ public class CutsceneImp : Cutscene {
         Dictionary<BuffType, PotionData> buffMap = PotionComponent.BuffToPotion();
         PotionData dat = buffMap[buffType];
         DialogueNode newNode = new DialogueNode();
-        newNode.text.Add("this is the introduction speech.");
-        newNode.text.Add("your item is " + Toolbox.Instance.GetName(analyzand) + ".");
-        newNode.text.Add("your buff is " + dat.name + ".");
-        newNode.text.Add("the first ingredient is...");
+        newNode.text.Add("Gra ha ha ha... Show me your trinket....");
+        newNode.text.Add("What a lovely " + Toolbox.Instance.GetName(analyzand) + ".");
+        newNode.text.Add("Within it, I sense much " + dat.name + ".");
+        newNode.text.Add("The first ingredient is...");
         newNode.text.Add("IMPCALLBACK1");
         SetDialogue(newNode);
     }
@@ -106,7 +93,7 @@ public class CutsceneImp : Cutscene {
         state = State.describeFirst;
         DialogueNode newNode = new DialogueNode();
         newNode.text.Add(potionData.ingredient1.name + "!!!");
-        newNode.text.Add("the second ingredient is...");
+        newNode.text.Add("The second ingredient is...");
         newNode.text.Add("IMPCALLBACK2");
         SetDialogue(newNode);
         Controller.Instance.state = Controller.ControlState.cutscene;
@@ -121,7 +108,7 @@ public class CutsceneImp : Cutscene {
         state = State.describeFirst;
         DialogueNode newNode = new DialogueNode();
         newNode.text.Add(potionData.ingredient2.name + "!!!");
-        newNode.text.Add("Mix these ingredients well to create a potion of " + potionData.name + ".");
+        newNode.text.Add("Together they make potion of " + potionData.name + "!");
         newNode.text.Add("IMPCALLBACK3");
         SetDialogue(newNode);
         Controller.Instance.state = Controller.ControlState.cutscene;
