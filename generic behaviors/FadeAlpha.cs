@@ -18,4 +18,12 @@ public class FadeAlpha : MonoBehaviour {
             spriteRenderer.color = color;
         }
     }
+
+    void OnDestroy() {
+        foreach (SpriteRenderer spriteRenderer in spriteRenderers) {
+            Color color = spriteRenderer.color;
+            color.a = 1f;
+            spriteRenderer.color = color;
+        }
+    }
 }

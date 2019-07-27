@@ -53,6 +53,7 @@ public class LiquidContainer : Interactive, ISaveable {
         }
     }
     public void UpdateIntrinsics(Liquid l) {
+        // TODO: this seems a bit rough
         Intrinsics myIntrinsics = GetComponent<Intrinsics>();
         if (myIntrinsics != null) {
             Destroy(myIntrinsics);
@@ -60,6 +61,7 @@ public class LiquidContainer : Interactive, ISaveable {
         Intrinsics intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject);
         if (l.buffs.Count > 0) {
             intrinsics.buffs.AddRange(liquid.buffs);
+            intrinsics.IntrinsicsChanged();
         }
     }
     public void HandleDamage(MessageDamage message) {
@@ -107,6 +109,14 @@ public class LiquidContainer : Interactive, ISaveable {
     public void FillWithLiquid(Liquid l) {
         if (amount > 0) {
             l = Liquid.MixLiquids(liquid, l);
+
+            // not ideal to put this here instead of in MixLiquids, but we need monobehavior
+            Buff mixedBuff = Liquid.MixPotion(l);
+            if (mixedBuff != null) {
+                l.buffs.Add(mixedBuff);
+                // TODO: play special effect
+                GameObject.Instantiate(Resources.Load("particles/potionMixEffect"), transform.position, Quaternion.identity);
+            }
         }
         liquid = l;
         amount = fillCapacity;

@@ -98,7 +98,8 @@ public class Intrinsics : MonoBehaviour, ISaveable {
                             fader.spriteRenderers.Add(head.GetComponent<SpriteRenderer>());
                         }
                     } else {
-
+                        FadeAlpha fader = gameObject.GetComponent<FadeAlpha>();
+                        Destroy(fader);
                     }
                     break;
                 default:

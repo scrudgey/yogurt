@@ -49,12 +49,8 @@ public class Liquid {
 
         // TODO: smarter add here
         l1.buffs.AddRange(l2.buffs);
-        Buff mixedBuff = MixPotion(l1);
-        if (mixedBuff != null) {
-            l1.buffs.Add(mixedBuff);
-        }
+
         l1.name = GetName(l1);
-        // Toolbox.Instance.CloneRemover(gameObject.name))
         return returnLiquid;
     }
     public static Buff MixPotion(Liquid liq) {
@@ -192,18 +188,4 @@ public class Liquid {
             intrinsics.buffs.AddRange(liquid.buffs);
         }
     }
-    // public static List<PotionData> LoadAllPotions() {
-    //     List<PotionData> potions = new List<PotionData>();
-    //     GameObject[] achievementPrefabs = Resources.LoadAll("data/potions/", typeof(GameObject))
-    //         .Cast<GameObject>()
-    //         .ToArray();
-    //     foreach (GameObject prefab in achievementPrefabs) {
-    //         PotionComponent component = prefab.GetComponent<PotionComponent>();
-    //         if (component) {
-    //             // PotionData potionData = new Achievement(component.achivement);
-    //             potions.Add(component.potionData);
-    //         }
-    //     }
-    //     return potions;
-    // }
 }
