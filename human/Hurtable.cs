@@ -33,6 +33,14 @@ public class Hurtable : Damageable, ISaveable {
     public List<Collider2D> backgroundColliders = new List<Collider2D>();
     public float timeSinceLastCough;
     bool vibrate;
+    public void Reset() {
+        health = maxHealth;
+        oxygen = maxOxygen;
+        impulse = 0;
+        downedTimer = 0;
+        hitState = Controllable.HitState.none;
+        hitStunCounter = 0;
+    }
     public override void Awake() {
         base.Awake();
         backgroundColliders = new List<Collider2D>();
