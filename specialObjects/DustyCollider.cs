@@ -13,6 +13,8 @@ public class DustyCollider : MonoBehaviour {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
     }
     public void OnCollisionEnter2D(Collision2D coll) {
+        if (audioSource == null)
+            audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         if (GameManager.Instance.playerIsDead)
             return;
         particles.Play();
