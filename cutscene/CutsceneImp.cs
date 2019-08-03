@@ -45,7 +45,7 @@ public class CutsceneImp : Cutscene {
         Dictionary<BuffType, PotionData> buffMap = PotionComponent.BuffToPotion();
         PotionData dat = buffMap[buffType];
         DialogueNode newNode = new DialogueNode();
-        newNode.text.Add("Gra ha ha ha... Show me your trinket....");
+        newNode.text.Add("Gra ha ha ha... Yes, show me your trinket....");
         newNode.text.Add("What a lovely " + Toolbox.Instance.GetName(analyzand) + ".");
         newNode.text.Add("Within it, I sense much " + dat.name + ".");
         newNode.text.Add("The first ingredient is...");
@@ -135,5 +135,8 @@ public class CutsceneImp : Cutscene {
             return true;
         }
         return false;
+    }
+    public override void CleanUp() {
+        UINew.Instance.RefreshUI(active: true);
     }
 }
