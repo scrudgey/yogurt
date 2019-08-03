@@ -250,12 +250,9 @@ public class Toolbox : Singleton<Toolbox> {
         return underScoreFinder.Replace(input, " ");
     }
     public string GetName(GameObject obj) {
-        // TODO: include extra description, like "vomited up"
         // possibly also use intrinsics
-        // use player name, speech name
         string nameOut = "";
         if (obj == null) {
-            // Debug.Log("null name");
             return nameOut;
         }
         if (obj == GameManager.Instance.playerObject) {
@@ -271,15 +268,15 @@ public class Toolbox : Singleton<Toolbox> {
         } else {
             nameOut = obj.name;
         }
+        LiquidContainer container = obj.GetComponent<LiquidContainer>();
+        if (container) {
+            nameOut = container.descriptionName;
+        }
         Edible edible = obj.GetComponent<Edible>();
         if (edible) {
             if (edible.vomit)
                 nameOut = "vomited-up " + nameOut;
         }
-        // Speech speech = obj.GetComponent<Speech>();
-        // if (speech) {
-        //     nameOut = speech.name;
-        // }
         nameOut = CloneRemover(nameOut);
         nameOut = UnderscoreRemover(nameOut);
         return nameOut;
