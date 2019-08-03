@@ -44,6 +44,8 @@ public class TrapDoor : MonoBehaviour {
             timer = 0.1f;
             collider.gameObject.SetActive(false);
             Toolbox.Instance.SwitchAudioListener(gameObject);
+        } else {
+            collider.gameObject.SetActive(false);
         }
     }
 }
