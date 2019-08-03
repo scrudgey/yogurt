@@ -231,7 +231,7 @@ public class UINew : Singleton<UINew> {
         if (!achievementPopupInProgress && achievementStack.Count > 0) {
             PopupAchievement(achievementStack.Pop());
         }
-        if (Controller.Instance.focusHurtable != null) {
+        if (Controller.Instance.focusHurtable != null && !GameManager.Instance.playerIsDead) {
             float width = (Controller.Instance.focusHurtable.health / Controller.Instance.focusHurtable.maxHealth) * lifebarDefaultSize.x;
             lifebar.sizeDelta = new Vector2(width, lifebarDefaultSize.y);
             width = (Controller.Instance.focusHurtable.oxygen / Controller.Instance.focusHurtable.maxOxygen) * oxygenbarDefaultSize.x;
@@ -246,6 +246,9 @@ public class UINew : Singleton<UINew> {
             } else {
                 OxygenBarOff();
             }
+        } else {
+            HealthBarOff();
+            OxygenBarOff();
         }
         if (healthBarEasingDirection != EasingDirection.none) {
             healthBarEasingTimer += Time.deltaTime;
@@ -432,7 +435,7 @@ public class UINew : Singleton<UINew> {
     public void UpdateButtons() {
         if (UINew.Instance.activeMenuType != UINew.MenuType.none)
             return;
-        if (GameManager.Instance.playerObject == null)
+        if (GameManager.Instance.playerObject == null || GameManager.Instance.playerIsDead)
             return;
         // speech button
         if (GameManager.Instance.data.perks["swear"] && GameManager.Instance.playerObject.GetComponent<Speech>()) {

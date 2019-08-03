@@ -73,6 +73,10 @@ public class Hurtable : Damageable, ISaveable {
         bonusHealth = intrins.netBuffs[BuffType.bonusHealth].floatValue;
         armor = intrins.netBuffs[BuffType.armor].floatValue;
         coughing = intrins.netBuffs[BuffType.coughing].boolValue;
+        if (intrins.netBuffs[BuffType.death].boolValue) {
+            health = -1f;
+            Die(damageType.any);
+        }
     }
     public override float CalculateDamage(MessageDamage message) {
         if (message.responsibleParty != null) {
@@ -166,11 +170,11 @@ public class Hurtable : Damageable, ISaveable {
     public void Die(damageType type) {
         if (hitState == Controllable.HitState.dead)
             return;
+        Inventory inv = GetComponent<Inventory>();
+        if (inv) {
+            inv.DropItem();
+        }
         if (type == damageType.cosmic || type == damageType.fire) {
-            Inventory inv = GetComponent<Inventory>();
-            if (inv) {
-                inv.DropItem();
-            }
             Instantiate(Resources.Load("prefabs/skeleton"), transform.position, transform.rotation);
             Toolbox.Instance.AudioSpeaker("Flash Fire Ignite 01", transform.position);
             ClaimsManager.Instance.WasDestroyed(gameObject);

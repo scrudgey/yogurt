@@ -49,7 +49,8 @@ public enum BuffType {
     poison,
     undead,
     ethereal,
-    coughing
+    coughing,
+    death
 }
 [System.Serializable]
 public struct BuffData {
