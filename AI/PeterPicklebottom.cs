@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 using AI;
 
 public class PeterPicklebottom : MonoBehaviour {
-    public enum AIState { none, walkToTarget, slewAtTarget, leave }
+    public enum AIState { none, walkToTarget, slewAtTarget, leave, passive }
     public AIState state;
     public Controllable controllable;
     public Ref<Duplicatable> target;
@@ -19,27 +20,39 @@ public class PeterPicklebottom : MonoBehaviour {
         controllable = GetComponent<Controllable>();
         target = new Ref<Duplicatable>(null);
         objRef = new Ref<GameObject>(null);
-        if (targets == null) {
-            targets = new Stack<Duplicatable>();
-            foreach (Duplicatable dup in FindObjectsOfType<Duplicatable>()) {
-                targets.Push(dup);
+        if (SceneManager.GetActiveScene().name == "house") {
+            foreach (Doorway doorway in GameObject.FindObjectsOfType<Doorway>()) {
+                if (doorway.entryID == 0 && !doorway.spawnPoint) {
+                    door = doorway;
+                }
             }
+            if (targets == null) {
+                targets = new Stack<Duplicatable>();
+                foreach (Duplicatable dup in FindObjectsOfType<Duplicatable>()) {
+                    if (dup.PickleReady())
+                        targets.Push(dup);
+                }
+            }
+            if (targets.Count > 0) {
+                target.val = targets.Pop();
+                objRef.val = target.val.gameObject;
+            }
+            state = AIState.walkToTarget;
+            routine = new RoutineWalkToGameobject(gameObject, controllable, objRef);
+            routine.minDistance = 0.1f;
+            timer = -2f;
+            audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         }
-        if (targets.Count > 0) {
-            target.val = targets.Pop();
-            objRef.val = target.val.gameObject;
-        }
-        state = AIState.walkToTarget;
-        routine = new RoutineWalkToGameobject(gameObject, controllable, objRef);
-        routine.minDistance = 0.1f;
-        timer = -2f;
-        audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
+
+        state = AIState.passive;
     }
     public void PlayThemeSong() {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         audioSource.PlayOneShot(theme);
     }
     public void Update() {
+        if (state == AIState.passive)
+            return;
         timer += Time.deltaTime;
         if (timer < 0)
             return;
