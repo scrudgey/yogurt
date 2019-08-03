@@ -50,9 +50,12 @@ public class ClosetButtonHandler : MonoBehaviour {
         itemList = itemList.OrderBy(i => names[i]).ToList();
         foreach (string name in itemList) {
             ItemEntryScript script = spawnEntry();
-            effects.buttons.Add(script.GetComponentInChildren<Button>());
+            // effects.buttons.Add(script.GetComponentInChildren<Button>());
             script.Configure(name, type);
             script.transform.SetParent(listContent, false);
+
+            Button entryButton = script.gameObject.GetComponentInChildren<Button>();
+            effects.buttons.Add(entryButton);
         }
         effects.Configure();
     }
