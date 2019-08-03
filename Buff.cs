@@ -47,7 +47,7 @@ public enum BuffType {
     invulnerable,
     strength,
     poison,
-    vampirism,
+    undead,
     ethereal,
     coughing
 }
