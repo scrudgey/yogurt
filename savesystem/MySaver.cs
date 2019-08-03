@@ -268,17 +268,15 @@ public class MySaver {
             using (var sceneStream = new FileStream(scenePath, FileMode.Open)) {
                 sceneIDs = listSerializer.Deserialize(sceneStream) as List<int>;
             }
-            // sceneStream.Close();
             LoadObjects(sceneIDs);
         }
         if (File.Exists(playerPath)) {
             using (var playerStream = new FileStream(playerPath, FileMode.Open)) {
                 playerIDs = listSerializer.Deserialize(playerStream) as List<int>;
             }
-            // playerStream.Close();
             playerObject = LoadObjects(playerIDs);
         } else {
-            playerObject = GameObject.Instantiate(Resources.Load("prefabs/Tom")) as GameObject;
+            playerObject = GameManager.Instance.InstantiatePlayerPrefab();
         }
         HandleLoadedPersistents(sceneIDs);
         HandleLoadedPersistents(playerIDs);

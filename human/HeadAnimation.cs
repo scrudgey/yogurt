@@ -1,6 +1,14 @@
 ﻿using UnityEngine;
 
 public class HeadAnimation : MonoBehaviour, IDirectable, ISaveable {
+    public SkinColor _skinColor;
+    public SkinColor skinColor {
+        get { return _skinColor; }
+        set {
+            _skinColor = value;
+            LoadSprites();
+        }
+    }
     private bool speaking;
     private string _spriteSheet;
     public string spriteSheet {
@@ -36,7 +44,7 @@ public class HeadAnimation : MonoBehaviour, IDirectable, ISaveable {
     public Controllable.HitState hitState;
     private string lastPressed;
     void LoadSprites() {
-        sprites = Resources.LoadAll<Sprite>("spritesheets/" + spriteSheet);
+        sprites = Toolbox.ApplySkinToneToSpriteSheet(spriteSheet, skinColor);
     }
     public void UpdateSequence() {
         Animation animationComponent = GetComponent<Animation>();
@@ -139,10 +147,11 @@ public class HeadAnimation : MonoBehaviour, IDirectable, ISaveable {
     public void SaveData(PersistentComponent data) {
         data.ints["hitstate"] = (int)hitState;
         data.strings["baseName"] = baseName;
+        data.ints["skincolor"] = (int)skinColor;
     }
     public void LoadData(PersistentComponent data) {
         hitState = (Controllable.HitState)data.ints["hitstate"];
         baseName = data.strings["baseName"];
-        UpdateSequence();
+        skinColor = (SkinColor)data.ints["skincolor"];
     }
 }

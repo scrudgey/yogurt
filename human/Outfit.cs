@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
 public class Outfit : Interactive, ISaveable {
+    public Gender gender;
     public string wornUniformName;
     public string readableUniformName;
     public string pluralUniformType;
@@ -43,10 +44,16 @@ public class Outfit : Interactive, ISaveable {
     }
     public void GoNude() {
         MessageAnimation anim = new MessageAnimation();
-        anim.outfitName = "nude";
+        if (gender == Gender.male) {
+            anim.outfitName = "nude";
+            wornUniformName = "nude";
+            readableUniformName = "body";
+        } else {
+            anim.outfitName = "nude_female";
+            wornUniformName = "nude_female";
+            readableUniformName = "body";
+        }
         Toolbox.Instance.SendMessage(gameObject, this, anim);
-        wornUniformName = "nude";
-        readableUniformName = "body";
     }
     public bool StealUniform_Validation(Outfit otherOutfit) {
         if (otherOutfit == this)
@@ -103,6 +110,7 @@ public class Outfit : Interactive, ISaveable {
     public void SaveData(PersistentComponent data) {
         data.strings["worn"] = wornUniformName;
         data.ints["hitstate"] = (int)hitState;
+        data.ints["gender"] = (int)gender;
     }
     public void LoadData(PersistentComponent data) {
         wornUniformName = data.strings["worn"];
@@ -113,5 +121,6 @@ public class Outfit : Interactive, ISaveable {
             GoNude();
         }
         hitState = (Controllable.HitState)data.ints["hitstate"];
+        gender = (Gender)data.ints["gender"];
     }
 }

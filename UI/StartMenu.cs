@@ -18,7 +18,10 @@ public class StartMenu : MonoBehaviour {
     public GameObject alert;
     private enum menuState { anykey, main, startNew, load }
     private menuState state;
-
+    private Gender selectedGender;
+    private SkinColor selectedSkinColor;
+    public Sprite maleSprite;
+    public Sprite femaleSprite;
     void Start() {
         AudioSource source = GetComponent<AudioSource>();
         source.clip = music;
@@ -93,9 +96,9 @@ public class StartMenu : MonoBehaviour {
 
     private void OpenNewGameMenu() {
         newGameMenu.SetActive(true);
-        InputField input = newGameMenu.transform.Find("InputField").GetComponent<InputField>();
-        input.ActivateInputField();
-        input.text = SuggestANAme();
+
+        RandomizePlayer();
+        // TODO: randomize gender, skin color
     }
 
 
@@ -162,8 +165,14 @@ public class StartMenu : MonoBehaviour {
             ShowAlert(newName + " already exists...?");
             return;
         }
-        // GameManager.Instance.data = null;
         GameManager.Instance.data = GameManager.Instance.InitializedGameData();
+        GameManager.Instance.data.defaultGender = selectedGender;
+        GameManager.Instance.data.defaultSkinColor = selectedSkinColor;
+        if (selectedGender == Gender.female) {
+            GameManager.Instance.data.prefabName = "Tina";
+        } else {
+            GameManager.Instance.data.prefabName = "Tom";
+        }
         GameManager.Instance.saveGameName = newName;
         GameManager.Instance.SaveGameData();
         GameManager.Instance.NewGame();
@@ -206,7 +215,22 @@ public class StartMenu : MonoBehaviour {
         Text alertText = alert.transform.Find("Text").GetComponent<Text>();
         alertText.text = text;
     }
-    public string SuggestANAme() {
+    public void RandomizePlayer() {
+        InputField input = newGameMenu.transform.Find("InputField").GetComponent<InputField>();
+
+        Array genderValues = Enum.GetValues(typeof(Gender));
+        List<SkinColor> skinValues = new List<SkinColor>() { SkinColor.light, SkinColor.dark, SkinColor.darker };
+
+        Gender randomGender = (Gender)genderValues.GetValue(UnityEngine.Random.Range(0, genderValues.Length));
+        SkinColor randomSkin = skinValues[UnityEngine.Random.Range(0, skinValues.Count)];
+
+        GenderCallback(randomGender.ToString());
+        SkinCallback(randomSkin.ToString());
+
+        input.ActivateInputField();
+        input.text = SuggestAName();
+    }
+    public string SuggestAName() {
         List<string> names = new List<string>(){
             "Shemp",
             "Frog",
@@ -236,5 +260,46 @@ public class StartMenu : MonoBehaviour {
             "Bandit Slumbody"
         };
         return names[UnityEngine.Random.Range(0, names.Count)];
+    }
+    public void GenderCallback(string gender) {
+        switch (gender) {
+            case "female":
+                selectedGender = Gender.female;
+                break;
+            case "male":
+                selectedGender = Gender.male;
+                break;
+            default:
+                Debug.Log("malformed gender callback");
+                goto case "male";
+        }
+        UpdatePlayerPreview();
+    }
+    public void SkinCallback(string skinColor) {
+        switch (skinColor) {
+            case "light":
+                selectedSkinColor = SkinColor.light;
+                break;
+            case "dark":
+                selectedSkinColor = SkinColor.dark;
+                break;
+            case "darker":
+                selectedSkinColor = SkinColor.darker;
+                break;
+            default:
+                Debug.Log("malformed skincolor callback");
+                goto case "light";
+        }
+        UpdatePlayerPreview();
+    }
+    public void UpdatePlayerPreview() {
+        Image preview = newGameMenu.transform.Find("preview/bkg/Image").GetComponent<Image>();
+        Sprite newSprite = null;
+        if (selectedGender == Gender.male) {
+            newSprite = maleSprite;
+        } else {
+            newSprite = femaleSprite;
+        }
+        preview.sprite = Toolbox.ApplySkinToneToSprite(newSprite, selectedSkinColor);
     }
 }

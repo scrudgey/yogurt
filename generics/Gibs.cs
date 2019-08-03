@@ -5,12 +5,13 @@ public class Gibs : MonoBehaviour {
     public class LoHi {
         public float low;
         public float high;
-        public LoHi(): this(0.025f, 0.075f) { }
-        public LoHi(float low, float high){
+        public LoHi() : this(0.025f, 0.075f) { }
+        public LoHi(float low, float high) {
             this.low = low;
             this.high = high;
         }
     }
+    public bool applyAnimationSkinColor;
     public damageType damageCondition;
     public int number;
     public GameObject particle;
@@ -26,6 +27,13 @@ public class Gibs : MonoBehaviour {
             GameObject bit = Instantiate(particle, transform.position, Quaternion.identity) as GameObject;
             SpriteRenderer sprite = bit.GetComponent<SpriteRenderer>();
             sprite.color = color;
+            if (applyAnimationSkinColor) {
+                AdvancedAnimation advancedAnimation = GetComponent<AdvancedAnimation>();
+                SkinColorizer colorizer = Toolbox.GetOrCreateComponent<SkinColorizer>(bit);
+                if (advancedAnimation) {
+                    colorizer.skinColor = advancedAnimation.skinColor;
+                }
+            }
             Damageable damageable = bit.GetComponent<Damageable>();
             if (damageable) {
                 Toolbox.Instance.DisableAndReenable(damageable, 0.2f);
@@ -79,5 +87,6 @@ public class Gibs : MonoBehaviour {
         // forceMin = other.forceMin;
         // forceMax = other.forceMax;
         color = other.color;
+        applyAnimationSkinColor = other.applyAnimationSkinColor;
     }
 }

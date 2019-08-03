@@ -8,6 +8,9 @@ using System;
 
 [System.Serializable]
 public class GameData {
+    public string prefabName;
+    public Gender defaultGender;
+    public SkinColor defaultSkinColor;
     public float money;
     public List<string> collectedObjects;
     public List<string> collectedItems;
@@ -213,7 +216,7 @@ public partial class GameManager : Singleton<GameManager> {
         Outfit playerOutfit = target.GetComponent<Outfit>();
         if (playerOutfit) {
             string prefabName = playerOutfit.wornUniformName;
-            if (prefabName != "nude") {
+            if (prefabName != "nude" && prefabName != "nude_female") {
                 GameObject uniform = Instantiate(Resources.Load("prefabs/" + prefabName)) as GameObject;
                 CheckItemCollection(uniform, playerObject);
                 DestroyImmediate(uniform);
@@ -328,12 +331,12 @@ public partial class GameManager : Singleton<GameManager> {
             if (data == null)
                 data = InitializedGameData();
             // find or spawn the player character 
-            playerObject = GameObject.Find("Tom");
+            playerObject = GameObject.Find(data.prefabName);
             if (!playerObject) {
-                playerObject = GameObject.Find("Tom(Clone)");
+                playerObject = GameObject.Find(data.prefabName + "(Clone)");
             }
             if (!playerObject) {
-                playerObject = GameObject.Instantiate(Resources.Load("prefabs/Tom")) as GameObject;
+                playerObject = InstantiatePlayerPrefab();
             }
             data.entryID = 99;
         }
@@ -382,6 +385,11 @@ public partial class GameManager : Singleton<GameManager> {
             Toolbox.Instance.SwitchAudioListener(GameObject.Find("Main Camera"));
         }
     }
+    public GameObject InstantiatePlayerPrefab() {
+        GameObject obj = GameObject.Instantiate(Resources.Load("prefabs/" + data.prefabName)) as GameObject;
+        Toolbox.SetSkinColor(obj, data.defaultSkinColor);
+        return obj;
+    }
     public void InitializeNonPlayableLevel() {
         string sceneName = SceneManager.GetActiveScene().name;
         Controller.Instance.state = Controller.ControlState.cutscene;
@@ -401,11 +409,11 @@ public partial class GameManager : Singleton<GameManager> {
         // TODO: can probably make this nicer with LINQ
         foreach (Doorway doorway in doorways) {
             if ((doorway.entryID == data.entryID && !doorway.spawnPoint) || (doorway.spawnPoint && data.entryID == 99)) {
-                doorway.Enter(playerObject);
                 // if this is a bed entry, we've got a new day going on!
                 if (data.entryID == -99) {
                     WakeUpInBed();
                 }
+                doorway.Enter(playerObject);
                 if (data.entryID == 420) {
                     // teleport entry
                     AudioClip teleportEnter = Resources.Load("sounds/clown/clown4") as AudioClip;
@@ -417,6 +425,12 @@ public partial class GameManager : Singleton<GameManager> {
         }
     }
     void WakeUpInBed() {
+        Hurtable playerHurtable = playerObject.GetComponent<Hurtable>();
+        if (playerHurtable.hitState == Controllable.HitState.dead) {
+            Destroy(playerObject);
+            playerObject = InstantiatePlayerPrefab();
+            SetFocus(playerObject);
+        }
         Bed bed = GameObject.FindObjectOfType<Bed>();
         if (bed) {
             playerObject.SetActive(false);
@@ -434,11 +448,8 @@ public partial class GameManager : Singleton<GameManager> {
                 focusEater.nutrition = 0;
                 focusEater.nausea = 0;
             }
-            Hurtable playerHurtable = playerObject.GetComponent<Hurtable>();
             if (playerHurtable) {
-                playerHurtable.health = playerHurtable.maxHealth;
-                playerHurtable.oxygen = playerHurtable.maxOxygen;
-                // TODO: reset hitstate ?
+                playerHurtable.Reset();
             }
             Flammable playerFlammable = playerObject.GetComponent<Flammable>();
             if (playerFlammable) {
@@ -531,6 +542,9 @@ public partial class GameManager : Singleton<GameManager> {
     }
     public GameData InitializedGameData() {
         GameData data = new GameData();
+        data.defaultGender = Gender.male;
+        data.defaultSkinColor = SkinColor.light;
+        data.prefabName = "Tom";
         data.secondsPlayed = 0f;
         data.collectedItems = new List<string>();
         data.newCollectedItems = new List<string>();
@@ -573,9 +587,6 @@ public partial class GameManager : Singleton<GameManager> {
             data.perks["vomit"] = true;
             data.perks["eat_all"] = true;
             data.perks["swear"] = true;
-            // data.unlockedScenes.Add("moon_cave");
-            // data.unlockedScenes.Add("house");
-            // data.unlockedScenes.Add("forest");
             foreach (string sceneName in sceneNames.Keys) {
                 data.unlockedScenes.Add(sceneName);
             }
@@ -721,6 +732,8 @@ public partial class GameManager : Singleton<GameManager> {
         }
     }
     public bool IsItemCollected(GameObject obj) {
+        if (data == null)
+            return false;
         string filename = Toolbox.Instance.CloneRemover(obj.name);
         return data.collectedObjects.Contains(filename);
     }

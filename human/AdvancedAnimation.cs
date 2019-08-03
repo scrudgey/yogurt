@@ -1,6 +1,14 @@
 ﻿using UnityEngine;
 
 public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
+    public SkinColor _skinColor;
+    public SkinColor skinColor {
+        get { return _skinColor; }
+        set {
+            _skinColor = value;
+            LoadSprites();
+        }
+    }
     private string _sequence;
     public string sequence {
         get { return _sequence; }
@@ -105,8 +113,7 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
     }
     public void LoadSprites() {
         string spriteSheet = baseName + "_spritesheet";
-        sprites = Resources.LoadAll<Sprite>("spritesheets/" + spriteSheet);
-        // Debug.Log(gameObject.name + " loaded "+spriteSheet);
+        sprites = Toolbox.ApplySkinToneToSpriteSheet(spriteSheet, skinColor);
     }
     public void UpdateSequence() {
         // Debug.Log("updatesequence "+sequence);
@@ -243,11 +250,12 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
     public void SaveData(PersistentComponent data) {
         data.strings["baseName"] = baseName;
         data.ints["hitstate"] = (int)hitState;
+        data.ints["skincolor"] = (int)skinColor;
     }
     public void LoadData(PersistentComponent data) {
         hitState = (Controllable.HitState)data.ints["hitstate"];
         baseName = data.strings["baseName"];
-        LoadSprites();
+        skinColor = (SkinColor)data.ints["skincolor"];
     }
     public void DirectionChange(Vector2 newDirection) {
         lastPressed = Toolbox.Instance.DirectionToString(newDirection);
