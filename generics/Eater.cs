@@ -55,7 +55,7 @@ public class Eater : Interactive, ISaveable {
         } else {
             poisonNausea = false;
         }
-        if (message.netBuffs[BuffType.vampirism].boolValue) {
+        if (message.netBuffs[BuffType.undead].boolValue) {
             vegetablePreference = preference.dislikes;
             meatPreference = preference.dislikes;
             offalPreference = preference.dislikes;

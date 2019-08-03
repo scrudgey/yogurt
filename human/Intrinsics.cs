@@ -84,7 +84,7 @@ public class Intrinsics : MonoBehaviour, ISaveable {
     public void SetBuffFX() {
         foreach (KeyValuePair<BuffType, Buff> kvp in NetBuffs()) {
             switch (kvp.Key) {
-                case BuffType.vampirism:
+                case BuffType.undead:
                     UpdateBuffEffect(kvp.Value, "particles/vampire_particles");
                     break;
                 case BuffType.strength:

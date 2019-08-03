@@ -10,7 +10,7 @@ public abstract class Damageable : MonoBehaviour {
         {damageType.cutting, new List<BuffType>(){BuffType.noPhysicalDamage, BuffType.ethereal, BuffType.invulnerable}},
         {damageType.piercing, new List<BuffType>(){BuffType.noPhysicalDamage, BuffType.ethereal, BuffType.invulnerable}},
         {damageType.cosmic, new List<BuffType>(){BuffType.invulnerable}},
-        {damageType.asphyxiation, new List<BuffType>(){BuffType.vampirism}}
+        {damageType.asphyxiation, new List<BuffType>(){BuffType.undead}}
     };
     public bool immuneToFire;
     public bool immuneToPhysical;
@@ -85,7 +85,7 @@ public abstract class Damageable : MonoBehaviour {
                 return;
             if (message.type == damageType.fire && immuneToFire)
                 return;
-            if (message.type == damageType.cosmic && netBuffs[BuffType.ethereal].boolValue) {
+            if (message.type == damageType.cosmic && netBuffs != null && netBuffs[BuffType.ethereal].boolValue) {
                 message.type = damageType.cutting;
                 lastDamage = damageType.cutting;
             }
