@@ -42,9 +42,9 @@ public class PeterPicklebottom : MonoBehaviour {
             routine.minDistance = 0.1f;
             timer = -2f;
             audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
+        } else {
+            state = AIState.passive;
         }
-
-        state = AIState.passive;
     }
     public void PlayThemeSong() {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
