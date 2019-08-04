@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-// public class UIButtonEffects : MonoBehaviour { }
 public class UIButtonEffects : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler {
     public GameObject prefabSet;
 
@@ -27,11 +26,6 @@ public class UIButtonEffects : MonoBehaviour, IPointerDownHandler, IPointerEnter
             button.onClick.AddListener(PlayClickSound);
             UIButtonEffects bfx = button.gameObject.AddComponent<UIButtonEffects>();
             bfx.mouseOverSound = mouseOverSound;
-            // EventTrigger eventTrigger = button.gameObject.AddComponent<EventTrigger>();
-            // EventTrigger.Entry entry = new EventTrigger.Entry();
-            // entry.eventID = EventTriggerType.PointerEnter;
-            // entry.callback.AddListener((data) => { PlayMouseOverSound(); });
-            // eventTrigger.triggers.Add(entry);
         }
         foreach (InputField infield in inputs) {
             infield.onValueChanged.AddListener(delegate { PlayInputChangedSound(); });

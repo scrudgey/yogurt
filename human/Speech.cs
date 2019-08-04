@@ -167,7 +167,7 @@ public class Speech : Interactive, ISaveable {
         MessageSpeech message = new MessageSpeech();
         if (container) {
             if (container.amount > 0 && container.descriptionName != "") {
-                message.phrase = "It's a " + container.descriptionName + " of " + container.liquid.name + ".";
+                message.phrase = "It's a " + container.descriptionName + " full of " + container.liquid.name + ".";
             } else {
                 message.phrase = obj.description;
             }

@@ -163,6 +163,13 @@ public class Liquid {
             buff.lifetime = 20f;
             l.buffs.Add(buff);
         }
+        if (data.ContainsKey("death")) {
+            Buff buff = new Buff();
+            buff.type = BuffType.death;
+            buff.boolValue = true;
+            buff.lifetime = 20f;
+            l.buffs.Add(buff);
+        }
         return l;
     }
     public static void MonoLiquidify(GameObject target, Liquid liquid, bool timeout = false) {

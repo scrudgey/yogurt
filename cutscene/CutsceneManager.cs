@@ -21,6 +21,7 @@ public class CutsceneMoonLanding : Cutscene {
     HeadAnimation playerHeadAnimation;
     Collider2D playerCollider;
     Speech playerSpeech;
+    GameObject landingString;
     public override void Configure() {
         materials = new Dictionary<Collider2D, PhysicsMaterial2D>();
         Transform spawnPoint = GameObject.Find("cannonEntryPoint").transform;
@@ -58,12 +59,15 @@ public class CutsceneMoonLanding : Cutscene {
             materials[collider] = collider.sharedMaterial;
             collider.sharedMaterial = moonMaterial;
         }
-        // AudioSource playerAudio = Toolbox.GetOrCreateComponent<AudioSource>(GameManager.Instance.playerObject);
-        // AudioSource playerAudio = Toolbox.Instance.SetUpAudioSource(GameManager.Instance.playerObject);
         AudioClip charlierAugh = Resources.Load("sounds/auugh") as AudioClip;
-        // GameManager.Instance.PlayPublicSound(charlierAugh);
         Toolbox.Instance.AudioSpeaker(charlierAugh, new Vector3(0.38f, -0.65f, 0));
-        // playerAudio.PlayOneShot(charlierAugh);
+
+        // landingStrip = GameObject.Find("landingStrip");
+        // landingStrip.GetComponent<BoxCollider2D>().enabled = true;
+        // landingStrip.GetComponentInChildren<ParticleSystem>().Start();
+
+        landingString = GameObject.Instantiate(Resources.Load("cutscene/landingStrip")) as GameObject;
+        landingString.transform.position = new Vector3(0.08f, -0.88f, 1);
     }
     public override void Update() {
         if (timer == 0) {
@@ -101,15 +105,14 @@ public class CutsceneMoonLanding : Cutscene {
         if (playerHurable) {
             playerHurable.KnockDown();
         }
-        GameObject landingStrip = GameObject.Find("landingStrip");
-        landingStrip.GetComponent<BoxCollider2D>().enabled = false;
-        landingStrip.GetComponentInChildren<ParticleSystem>().Stop();
+        GameObject.Destroy(landingString);
     }
 }
 public class CutsceneSpace : Cutscene {
     private float timer;
+    GameObject player;
     public override void Configure() {
-        GameObject player = GameManager.Instance.playerObject;
+        player = GameManager.Instance.playerObject;
         configured = true;
         player.transform.localScale = new Vector3(-1f, 1f, 1f);
         player.transform.RotateAround(player.transform.position, new Vector3(0f, 0f, 1f), 90f);
@@ -125,6 +128,7 @@ public class CutsceneSpace : Cutscene {
     public override void Update() {
         if (timer == 0) {
             UINew.Instance.RefreshUI();
+            player.transform.position = Vector3.zero;
         }
         timer += Time.deltaTime;
         if (timer > 3.0f) {
@@ -224,7 +228,7 @@ public class CutscenePickleBottom : Cutscene {
         // random 2 / 3 items?
         peterAI.targets = new Stack<Duplicatable>();
         foreach (Duplicatable dup in GameObject.FindObjectsOfType<Duplicatable>()) {
-            if (dup.Nullifiable()) {
+            if (dup.PickleReady()) {
                 peterAI.targets.Push(dup);
             }
         }
@@ -239,7 +243,6 @@ public class CutscenePickleBottom : Cutscene {
     }
     public override void CleanUp() {
         camControl.focus = GameManager.Instance.playerObject;
-        UINew.Instance.RefreshUI(active: true);
         GameObject.Destroy(nightShade);
         peterAI.state = PeterPicklebottom.AIState.leave;
         UINew.Instance.SetActionText("");
@@ -584,7 +587,7 @@ public class CutsceneMayor : Cutscene {
         }
     }
     public override void CleanUp() {
-        UINew.Instance.RefreshUI(active: true);
+        // UINew.Instance.RefreshUI(active: true);
         foreach (KeyValuePair<Controllable, Controllable.ControlType> kvp in initialState) {
             kvp.Key.control = kvp.Value;
         }

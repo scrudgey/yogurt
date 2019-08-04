@@ -19,16 +19,20 @@ public class Duplicatable : Interactive, ISaveable {
         }
     }
     public bool Nullifiable() {
-        // todo: implement
         // don't nullify if it is an uncollected item in the apartment. everything else is fair game.
         if (SceneManager.GetActiveScene().name == "house") {
-            if (GameManager.Instance.IsItemCollected(gameObject)) {
-                return true;
-            } else {
-                return false;
+            if (gameObject.GetComponent<Pickup>()) {
+                if (GameManager.Instance.IsItemCollected(gameObject)) {
+                    return true;
+                } else {
+                    return false;
+                }
             }
         }
         return true;
+    }
+    public bool PickleReady() {
+        return Nullifiable() && gameObject.GetComponent<Pickup>();
     }
     public void Nullify() {
         if (nullifySounds.Count > 0) {

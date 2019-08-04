@@ -45,13 +45,8 @@ public class PersonalAssessment {
 }
 
 public class Awareness : MonoBehaviour, ISaveable, IDirectable {
-    // public class NewPeople {
-    //     // public float countDownTimer;
-    //     public Ref<GameObject> person;
-    // }
     public List<Ref<GameObject>> newPeopleList = new List<Ref<GameObject>>();
     public float socializationTimer;
-    // public Ref<GameObject> socializationTarget = new Ref<GameObject>(null);
     public static Dictionary<Rating, string> reactions = new Dictionary<Rating, string>(){
             {Rating.disgusting, "{grossreact}"},
             {Rating.disturbing, "{disturbreact}"},
@@ -572,7 +567,6 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             return storedAssessment;
         }
         PersonalAssessment assessment = new PersonalAssessment(knowledgebase[rootObject]);
-
         AddSocializationTarget(rootObject);
         people.Add(rootObject, assessment);
         return assessment;

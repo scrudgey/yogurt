@@ -118,7 +118,6 @@ public class AnchoriteDance : MonoBehaviour {
         }
     }
     public void EndDance(bool send = true) {
-
         StopDance();
         decisionMaker.enabled = true;
         controllable.enabled = true;
@@ -191,18 +190,14 @@ public class AnchoriteDance : MonoBehaviour {
             spriteIndex = 0;
             headIndex = 2;
         }
-
-
         spriteRenderer.sprite = spritesheet[spriteIndex];
         headRenderer.sprite = headSprites[headIndex];
-
         spriteIndex = Random.Range(0, spritesheet.Length);
         headIndex = Random.Range(0, headSprites.Length);
         if (reset) {
             spriteIndex = 0;
             headIndex = 2;
         }
-
         foreach (AnchoriteDance pupil in pupils) {
             if (pupil != null) {
                 pupil.spriteRenderer.sprite = pupil.spritesheet[spriteIndex];
@@ -210,9 +205,7 @@ public class AnchoriteDance : MonoBehaviour {
             }
         }
     }
-
     float Hop(float timer, float init, float delta, float interval) {
         return init + delta * Mathf.Sin((timer / interval) * Mathf.PI);
     }
-    // load pupils
 }

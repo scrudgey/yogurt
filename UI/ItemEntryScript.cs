@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class ItemEntryScript : MonoBehaviour {
+public class ItemEntryScript : MonoBehaviour, IPointerEnterHandler {
     public string itemName;
     public string prefabName;
     private bool _enableItem;
@@ -20,7 +21,7 @@ public class ItemEntryScript : MonoBehaviour {
         ClosetButtonHandler handler = GetComponentInParent<ClosetButtonHandler>();
         handler.ItemClick(this);
     }
-    public void MouseOver() {
+    public void OnPointerEnter(PointerEventData eventData) {
         ClosetButtonHandler handler = GetComponentInParent<ClosetButtonHandler>();
         handler.ItemMouseover(this);
     }

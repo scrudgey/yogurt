@@ -4,6 +4,17 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
+public enum SkinColor {
+    light,
+    dark,
+    darker,
+    undead,
+    clown
+}
+public enum Gender {
+    male,
+    female
+}
 public static class ExtensionMethods {
     public static TKey FindKeyByValue<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TValue value) {
         TKey returnkey = default(TKey);
@@ -239,12 +250,9 @@ public class Toolbox : Singleton<Toolbox> {
         return underScoreFinder.Replace(input, " ");
     }
     public string GetName(GameObject obj) {
-        // TODO: include extra description, like "vomited up"
         // possibly also use intrinsics
-        // use player name, speech name
         string nameOut = "";
         if (obj == null) {
-            // Debug.Log("null name");
             return nameOut;
         }
         if (obj == GameManager.Instance.playerObject) {
@@ -260,15 +268,15 @@ public class Toolbox : Singleton<Toolbox> {
         } else {
             nameOut = obj.name;
         }
+        LiquidContainer container = obj.GetComponent<LiquidContainer>();
+        if (container) {
+            nameOut = container.descriptionName;
+        }
         Edible edible = obj.GetComponent<Edible>();
         if (edible) {
             if (edible.vomit)
                 nameOut = "vomited-up " + nameOut;
         }
-        // Speech speech = obj.GetComponent<Speech>();
-        // if (speech) {
-        //     nameOut = speech.name;
-        // }
         nameOut = CloneRemover(nameOut);
         nameOut = UnderscoreRemover(nameOut);
         return nameOut;
@@ -342,5 +350,105 @@ public class Toolbox : Singleton<Toolbox> {
         }
         AudioListener targetListener = GetOrCreateComponent<AudioListener>(target);
         targetListener.enabled = true;
+    }
+    public static Texture2D CopyTexture2D(Texture2D copiedTexture, SkinColor skinColor) {
+        Dictionary<Color, Color> skinTheme = skinThemes[skinColor];
+        Texture2D texture = new Texture2D(copiedTexture.width, copiedTexture.height);
+        texture.filterMode = FilterMode.Point;
+        texture.wrapMode = TextureWrapMode.Clamp;
+        int y = 0;
+        while (y < texture.height) {
+            int x = 0;
+            while (x < texture.width) {
+                Color originalColor = copiedTexture.GetPixel(x, y);
+                if (skinTheme.ContainsKey(originalColor)) {
+                    texture.SetPixel(x, y, skinTheme[originalColor]);
+                } else {
+                    texture.SetPixel(x, y, originalColor);
+                }
+                ++x;
+            }
+            ++y;
+        }
+        texture.name = (copiedTexture.name + "_" + skinColor.ToString());
+        texture.Apply();
+        return texture;
+    }
+    public static Sprite[] ApplySkinToneToSpriteSheet(string sheetname, SkinColor skinColor) {
+        Sprite[] sprites = Resources.LoadAll<Sprite>("spritesheets/" + sheetname);
+        Texture2D modTexture = Toolbox.CopyTexture2D(sprites[0].texture, skinColor);
+        for (int i = 0; i < sprites.Length; i++) {
+            Sprite sprite = sprites[i];
+            sprites[i] = Sprite.Create(
+                modTexture,
+                sprite.rect,
+                new Vector2(0.5f, 0.5f),
+                sprite.pixelsPerUnit,
+                1,
+                SpriteMeshType.Tight,
+                sprite.border
+                );
+            sprites[i].name = modTexture.name;
+        }
+        return sprites;
+    }
+    public static Sprite ApplySkinToneToSprite(Sprite sprite, SkinColor skinColor) {
+        Texture2D modTexture = Toolbox.CopyTexture2D(sprite.texture, skinColor);
+        Sprite newSprite = Sprite.Create(
+            modTexture,
+            sprite.rect,
+            new Vector2(0.5f, 0.5f),
+            sprite.pixelsPerUnit,
+            1,
+            SpriteMeshType.Tight,
+            sprite.border
+            );
+        newSprite.name = modTexture.name;
+        return newSprite;
+    }
+    static Color skinDefault = new Color32(245, 127, 23, 255);
+    static Color skinDefaultDark = new Color32(230, 74, 25, 255);
+    static Dictionary<Color, Color> skinThemeLight = new Dictionary<Color, Color>(){
+        {skinDefault, skinDefault},
+        {skinDefaultDark, skinDefaultDark}
+    };
+    static Dictionary<Color, Color> skinThemeDark = new Dictionary<Color, Color>(){
+        {skinDefault, new Color32(146, 108, 49, 255)},
+        {skinDefaultDark, new Color32(120, 78, 34, 255)}
+    };
+    static Dictionary<Color, Color> skinThemeDarker = new Dictionary<Color, Color>(){
+        {skinDefault, new Color32(90, 66, 11, 255)},
+        {skinDefaultDark, new Color32(77, 45, 10, 255)}
+    };
+    static Dictionary<Color, Color> skinThemeUndead = new Dictionary<Color, Color>(){
+        {skinDefault, new Color32(197, 225, 164, 255)},
+        {skinDefaultDark, new Color32(174, 213, 129, 255)}
+    };
+    static Dictionary<Color, Color> skinThemeClown = new Dictionary<Color, Color>(){
+        {skinDefault, new Color32(238, 238, 238, 255)},
+        {skinDefaultDark, new Color32(238, 238, 238, 255)}
+    };
+
+    static Dictionary<SkinColor, Dictionary<Color, Color>> skinThemes = new Dictionary<SkinColor, Dictionary<Color, Color>>{
+        {SkinColor.light, skinThemeLight},
+        {SkinColor.dark, skinThemeDark},
+        {SkinColor.darker, skinThemeDarker},
+        {SkinColor.undead, skinThemeUndead},
+        {SkinColor.clown, skinThemeClown},
+    };
+    // this could be done with messages
+    public static void SetSkinColor(GameObject target, SkinColor color) {
+        AdvancedAnimation advancedAnimation = target.GetComponent<AdvancedAnimation>();
+        HeadAnimation headAnimation = target.GetComponentInChildren<HeadAnimation>();
+        if (advancedAnimation != null) {
+            advancedAnimation.skinColor = color;
+        }
+        if (headAnimation != null) {
+            headAnimation.skinColor = color;
+        }
+    }
+    public static void SetGender(GameObject target, Gender gender) {
+        Speech speech = target.GetComponent<Speech>();
+        HeadAnimation headAnimation = target.GetComponent<HeadAnimation>();
     }
 }

@@ -45,7 +45,7 @@ public class CutsceneImp : Cutscene {
         Dictionary<BuffType, PotionData> buffMap = PotionComponent.BuffToPotion();
         PotionData dat = buffMap[buffType];
         DialogueNode newNode = new DialogueNode();
-        newNode.text.Add("Gra ha ha ha... Show me your trinket....");
+        newNode.text.Add("Gra ha ha ha... Yes, show me your trinket....");
         newNode.text.Add("What a lovely " + Toolbox.Instance.GetName(analyzand) + ".");
         newNode.text.Add("Within it, I sense much " + dat.name + ".");
         newNode.text.Add("The first ingredient is...");
@@ -76,12 +76,16 @@ public class CutsceneImp : Cutscene {
     public void RevealFirstIngredient() {
         impSeller.PlayIngredientSound();
         impSeller.leftPoint.SetActive(true);
-        impSeller.leftPoint.GetComponent<SpriteRenderer>().sprite = potionData.ingredient1.icon;
+        SpriteRenderer leftPointSprite = impSeller.leftPoint.GetComponent<SpriteRenderer>();
+        leftPointSprite.sprite = potionData.ingredient1.icon;
+        leftPointSprite.color = potionData.ingredient1.spriteColor;
     }
     public void RevealSecondIngredient() {
         impSeller.PlayIngredientSound();
         impSeller.rightPoint.SetActive(true);
-        impSeller.rightPoint.GetComponent<SpriteRenderer>().sprite = potionData.ingredient2.icon;
+        SpriteRenderer rightPointSprite = impSeller.rightPoint.GetComponent<SpriteRenderer>();
+        rightPointSprite.sprite = potionData.ingredient2.icon;
+        rightPointSprite.color = potionData.ingredient2.spriteColor;
     }
     public void FirstIngredient() {
         state = State.first;
@@ -135,5 +139,8 @@ public class CutsceneImp : Cutscene {
             return true;
         }
         return false;
+    }
+    public override void CleanUp() {
+        UINew.Instance.RefreshUI(active: true);
     }
 }

@@ -47,18 +47,21 @@ public enum BuffType {
     invulnerable,
     strength,
     poison,
-    vampirism,
+    undead,
     ethereal,
-    coughing
+    coughing,
+    death
 }
 [System.Serializable]
-public struct BuffData {
+public class BuffData {
     public Sprite icon;
     public string name;
     public string prefabName;
-    public BuffData(Sprite icon, string name, string prefabName) {
+    public Color spriteColor = Color.white;
+    public BuffData(Sprite icon, string name, string prefabName, Color color) {
         this.icon = icon;
         this.name = name;
         this.prefabName = prefabName;
+        this.spriteColor = color;
     }
 }
