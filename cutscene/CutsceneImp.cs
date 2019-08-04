@@ -76,12 +76,16 @@ public class CutsceneImp : Cutscene {
     public void RevealFirstIngredient() {
         impSeller.PlayIngredientSound();
         impSeller.leftPoint.SetActive(true);
-        impSeller.leftPoint.GetComponent<SpriteRenderer>().sprite = potionData.ingredient1.icon;
+        SpriteRenderer leftPointSprite = impSeller.leftPoint.GetComponent<SpriteRenderer>();
+        leftPointSprite.sprite = potionData.ingredient1.icon;
+        leftPointSprite.color = potionData.ingredient1.spriteColor;
     }
     public void RevealSecondIngredient() {
         impSeller.PlayIngredientSound();
         impSeller.rightPoint.SetActive(true);
-        impSeller.rightPoint.GetComponent<SpriteRenderer>().sprite = potionData.ingredient2.icon;
+        SpriteRenderer rightPointSprite = impSeller.rightPoint.GetComponent<SpriteRenderer>();
+        rightPointSprite.sprite = potionData.ingredient2.icon;
+        rightPointSprite.color = potionData.ingredient2.spriteColor;
     }
     public void FirstIngredient() {
         state = State.first;
