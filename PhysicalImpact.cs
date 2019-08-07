@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 
 public class PhysicalImpact : MonoBehaviour {
-
     public List<Transform> impactedObjects = new List<Transform>();
     public float size = 0.08f;
     public MessageDamage message;
@@ -13,7 +12,7 @@ public class PhysicalImpact : MonoBehaviour {
         Destroy(gameObject, 0.05f);
         CircleCollider2D circle = GetComponent<CircleCollider2D>();
         circle.radius = size;
-        if (useBoxCollider){
+        if (useBoxCollider) {
             circle.enabled = false;
             box.enabled = true;
         } else {
