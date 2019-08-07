@@ -114,6 +114,7 @@ public class LiquidContainer : Interactive, ISaveable {
             Buff mixedBuff = Liquid.MixPotion(l);
             if (mixedBuff != null) {
                 l.buffs.Add(mixedBuff);
+                l.name = Liquid.GetName(l);
                 // TODO: play special effect
                 GameObject.Instantiate(Resources.Load("particles/potionMixEffect"), transform.position, Quaternion.identity);
             }
