@@ -93,21 +93,15 @@ public class Hurtable : Damageable, ISaveable {
         float armor = this.armor;
         if (message.strength || hitState == Controllable.HitState.dead)
             armor = 0;
-
         switch (message.type) {
             case damageType.piercing:
             case damageType.cutting:
-                damage = Mathf.Max(message.amount - armor, 0);
-                if (damage > 0) {
+                if (Mathf.Max(message.amount - armor, 0) > 0) {
                     Bleed(transform.position, message.force.normalized);
                 }
                 goto case damageType.physical;
             case damageType.physical:
                 damage = Mathf.Max(message.amount - armor, 0);
-                if (message.strength) {
-                    damage *= 2.5f;
-                    message.force *= 10f;
-                }
                 health -= damage;
                 impulse += damage;
                 break;

@@ -20,8 +20,8 @@ public class Gibs : MonoBehaviour {
     public LoHi initHeight = new LoHi(0.025f, 0.075f);
     public LoHi initVelocity = new LoHi(0.5f, 0.5f);
     public LoHi initAngleFromHorizontal = new LoHi(0.1f, 0.9f);
-    public void Emit(damageType dam, Vector2 baseDir) {
-        if (!DamageTypeMatch(damageCondition, dam))
+    public void Emit(MessageDamage message) {
+        if (!DamageTypeMatch(damageCondition, message.type))
             return;
         for (int i = 0; i < number; i++) {
             GameObject bit = Instantiate(particle, transform.position, Quaternion.identity) as GameObject;
@@ -58,13 +58,21 @@ public class Gibs : MonoBehaviour {
             bit.transform.position = transform.position + randomWalk;
 
             // TODO: figure this out
-            float magnitude = Random.Range(initVelocity.low, initVelocity.high);
-            // Debug.Log(baseDir.magnitude);
-            Vector3 force = magnitude * Toolbox.Instance.RandomVector(baseDir.normalized, 45f);
+            // TODO: allow strong impacts to affect
+            // emit in the direction between point of impact and center of mass
+            // if we both have physical, calculate z direction as well
+
+            // float magnitude = Random.Range(initVelocity.low, initVelocity.high);
+            // 
+            // float magnitude = Random.Range(baseDir.magnitude * initVelocity.low, baseDir.magnitude * initVelocity.high);
+            // Vector3 force = magnitude * Toolbox.Instance.RandomVector(baseDir.normalized, 45f);
+            Vector3 force = message.force * Random.Range(initVelocity.low, initVelocity.high) / 12f;
+            if (message.strength)
+                force *= 2f;
             float phi = Random.Range(initAngleFromHorizontal.low, initAngleFromHorizontal.high);
             force.x = force.x * Mathf.Cos(phi);
             force.y = force.y * Mathf.Cos(phi);
-            force.z = magnitude * Mathf.Sin(phi);
+            force.z = force.magnitude * Mathf.Sin(phi);
             bitPhys.Set3Motion(force);
         }
         // Debug.Break();
@@ -84,8 +92,8 @@ public class Gibs : MonoBehaviour {
         damageCondition = other.damageCondition;
         number = other.number;
         particle = other.particle;
-        // forceMin = other.forceMin;
-        // forceMax = other.forceMax;
+        initVelocity.low = other.initVelocity.low;
+        initVelocity.high = other.initVelocity.high;
         color = other.color;
         applyAnimationSkinColor = other.applyAnimationSkinColor;
     }
