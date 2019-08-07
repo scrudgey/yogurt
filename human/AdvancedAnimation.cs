@@ -13,8 +13,6 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
     public string sequence {
         get { return _sequence; }
         set {
-            // Debug.Log("setting sequence "+value);
-            // Debug.Log("old value: "+_sequence);
             if (_sequence != value) {
                 _sequence = value;
                 UpdateSequence();
@@ -37,17 +35,22 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
     private bool doubledOver;
     void Awake() {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        // controllable = GetComponent<Controllable>();
         animator = GetComponent<Animation>();
         LoadSprites();
         Toolbox.RegisterMessageCallback<MessageAnimation>(this, HandleAnimationMessage);
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
         Toolbox.RegisterMessageCallback<MessageInventoryChanged>(this, HandleInventoryMessage);
+        Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
     }
     void Start() {
         MessageDirectable message = new MessageDirectable();
         message.addDirectable.Add(this);
         Toolbox.Instance.SendMessage(gameObject, this, message);
+    }
+    public void HandleNetIntrinsic(MessageNetIntrinsic message) {
+        if (message.netBuffs[BuffType.undead].boolValue) {
+            skinColor = SkinColor.undead;
+        }
     }
     public void HandleInventoryMessage(MessageInventoryChanged message) {
         // bool oldHolding = holding;

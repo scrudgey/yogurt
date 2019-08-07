@@ -68,7 +68,13 @@ public class HeadAnimation : MonoBehaviour, IDirectable, ISaveable {
 
         Toolbox.RegisterMessageCallback<MessageHead>(this, HandleMessageHead);
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
+        Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
         Update();
+    }
+    public void HandleNetIntrinsic(MessageNetIntrinsic message) {
+        if (message.netBuffs[BuffType.undead].boolValue) {
+            skinColor = SkinColor.undead;
+        }
     }
     void HandleMessageHead(MessageHead message) {
         switch (message.type) {
