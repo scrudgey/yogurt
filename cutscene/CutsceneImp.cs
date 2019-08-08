@@ -26,7 +26,10 @@ public class CutsceneImp : Cutscene {
         UINew.Instance.RefreshUI();
         if (GetIngredients()) {
             StartAnalysis();
+        } else {
+            RefuseAnalysis();
         }
+        // TODO: else if special
     }
     void SetDialogue(DialogueNode newNode) {
         DialogueMenu menu = UINew.Instance.ShowMenu(UINew.MenuType.dialogue).GetComponent<DialogueMenu>();
@@ -50,6 +53,15 @@ public class CutsceneImp : Cutscene {
         newNode.text.Add("Within it, I sense much " + dat.name + ".");
         newNode.text.Add("The first ingredient is...");
         newNode.text.Add("IMPCALLBACK1");
+        SetDialogue(newNode);
+    }
+    void RefuseAnalysis() {
+        DialogueNode newNode = new DialogueNode();
+        newNode.text.Add("Gra ha ha ha... Yes, show me your trinket....");
+        newNode.text.Add("What a lovely " + Toolbox.Instance.GetName(analyzand) + ".");
+        newNode.text.Add("But it contains no magic.");
+        newNode.text.Add("Show me something else...");
+        newNode.text.Add("END");
         SetDialogue(newNode);
     }
     public override void Update() {
