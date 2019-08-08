@@ -105,7 +105,6 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
             baseName = anim.outfitName;
             LoadSprites();
             LateUpdate();
-            SetFrame(0);
         }
     }
     public void HandleHitStun(MessageHitstun message) {
@@ -117,6 +116,7 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
     public void LoadSprites() {
         string spriteSheet = baseName + "_spritesheet";
         sprites = Toolbox.ApplySkinToneToSpriteSheet(spriteSheet, skinColor);
+        SetFrame(0);
     }
     public void UpdateSequence() {
         // Debug.Log("updatesequence "+sequence);
