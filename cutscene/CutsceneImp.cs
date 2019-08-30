@@ -108,7 +108,7 @@ public class CutsceneImp : Cutscene {
     public void DescribeFirstIngredient() {
         state = State.describeFirst;
         DialogueNode newNode = new DialogueNode();
-        newNode.text.Add(potionData.ingredient1.name + "!!!");
+        newNode.text.Add(Toolbox.UppercaseFirst(potionData.ingredient1.name) + "!!!");
         newNode.text.Add("The second ingredient is...");
         newNode.text.Add("IMPCALLBACK2");
         SetDialogue(newNode);
@@ -123,7 +123,7 @@ public class CutsceneImp : Cutscene {
     public void DescribeSecondIngredient() {
         state = State.describeFirst;
         DialogueNode newNode = new DialogueNode();
-        newNode.text.Add(potionData.ingredient2.name + "!!!");
+        newNode.text.Add(Toolbox.UppercaseFirst(potionData.ingredient2.name) + "!!!");
         newNode.text.Add("Together they make potion of " + potionData.name + "!");
         newNode.text.Add("IMPCALLBACK3");
         SetDialogue(newNode);
