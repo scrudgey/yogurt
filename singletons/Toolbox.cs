@@ -74,6 +74,14 @@ public class Toolbox : Singleton<Toolbox> {
             array[i] = t;
         }
     }
+    public static string UppercaseFirst(string s) {
+        if (string.IsNullOrEmpty(s)) {
+            return string.Empty;
+        }
+        char[] a = s.ToCharArray();
+        a[0] = char.ToUpper(a[0]);
+        return new string(a);
+    }
     public Occurrence OccurenceFlag(GameObject spawner, OccurrenceData data, HashSet<GameObject> involvedParties) {
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
