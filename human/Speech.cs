@@ -16,6 +16,22 @@ public class Speech : Interactive, ISaveable {
         @"\bpiss\b",
         @"\bdick\b",
         @"\bass\b"};
+
+    struct BuffMessage {
+        public string On;
+        public string Off;
+        public BuffMessage(string on, string off) {
+            this.Off = off;
+            this.On = on;
+        }
+    }
+    static Dictionary<BuffType, BuffMessage> buffMessages = new Dictionary<BuffType, BuffMessage>(){
+            {BuffType.strength, new BuffMessage("I feel strong!", "I no longer feel strong!")},
+            {BuffType.telepathy, new BuffMessage("I can hear thoughts!", "I can no longer hear thoughts!")},
+            {BuffType.fireproof, new BuffMessage("I feel fireproof!", "I no longer feel fireproof!")},
+            {BuffType.undead, new BuffMessage("I feel kinda weird!", "I feel blessed!")},
+            {BuffType.poison, new BuffMessage("I don't feel so good!", "I feel much better!")},
+        };
     private string words;
     public bool speaking = false;
     public string[] randomPhrases;
@@ -36,12 +52,15 @@ public class Speech : Interactive, ISaveable {
     public SoundGibberizer gibberizer;
     public AudioClip bleepSound;
     public string flavor = "test";
-    private Dictionary<BuffType, Buff> lastNetIntrinsic;
     public Controllable.HitState hitState;
     public Sprite[] portrait;
     public string defaultMonologue;
     public bool disableSpeakWith;
     public bool inDialogue;
+    private Dictionary<BuffType, Buff> currentNetIntrinsic;
+    public Dictionary<BuffType, Buff> previousNetInstrinsic;
+    public bool doCompareIntrinsic;
+    public bool configured = false;
     void Awake() {
         Interaction speak = new Interaction(this, "Look", "Describe");
         speak.hideInManualActions = true;
@@ -115,9 +134,12 @@ public class Speech : Interactive, ISaveable {
         }
     }
     void HandleNetIntrinsic(MessageNetIntrinsic message) {
-        if (GameManager.Instance.playerObject == gameObject)
-            CompareLastNetIntrinsic(message.netBuffs);
-        lastNetIntrinsic = message.netBuffs;
+        if (GameManager.Instance.playerObject == gameObject) {
+            if (!doCompareIntrinsic)
+                previousNetInstrinsic = currentNetIntrinsic;
+            currentNetIntrinsic = message.netBuffs;
+            doCompareIntrinsic = true;
+        }
     }
     void HandleAnimation(MessageAnimation message) {
         if (message.type == MessageAnimation.AnimType.punching && message.value == true) {
@@ -181,6 +203,12 @@ public class Speech : Interactive, ISaveable {
     public string Describe_desc(Item obj) {
         string itemname = Toolbox.Instance.GetName(obj.gameObject);
         return "Look at " + itemname;
+    }
+    void FixedUpdate() {
+        if (doCompareIntrinsic) {
+            CompareIntrinsic();
+        }
+        configured = true;
     }
     void Update() {
         if (speakTime > 0) {
@@ -338,34 +366,33 @@ public class Speech : Interactive, ISaveable {
         MessageNoise noise = new MessageNoise(gameObject);
         Toolbox.Instance.SendMessage(target, this, noise);
     }
-    public void CompareLastNetIntrinsic(Dictionary<BuffType, Buff> net) {
-        if (lastNetIntrinsic == null)
+    void SayPhrase(string phrase) {
+        MessageSpeech message = new MessageSpeech();
+        message.phrase = phrase;
+        Say(message);
+    }
+    void CompareIntrinsic() {
+        doCompareIntrinsic = false;
+        if (!configured)
             return;
-        if (lastNetIntrinsic[BuffType.fireproof].boolValue != net[BuffType.fireproof].boolValue) {
-            MessageSpeech message = new MessageSpeech();
-            if (net[BuffType.fireproof].boolValue) {
-                message.phrase = "I feel fireproof!";
-            } else {
-                message.phrase = "I no longer feel fireproof!";
+        if (currentNetIntrinsic == null)
+            return;
+        if (previousNetInstrinsic == null) {
+            foreach (KeyValuePair<BuffType, BuffMessage> kvp in buffMessages) {
+                if (currentNetIntrinsic[kvp.Key].boolValue)
+                    SayPhrase(kvp.Value.On);
             }
-            Say(message);
-        }
-        if (lastNetIntrinsic[BuffType.telepathy].boolValue != net[BuffType.telepathy].boolValue) {
-            MessageSpeech message = new MessageSpeech();
-            if (net[BuffType.telepathy].boolValue)
-                message.phrase = "I can hear thoughts!";
-            Say(message);
-        }
-        if (lastNetIntrinsic[BuffType.strength].boolValue != net[BuffType.strength].boolValue) {
-            MessageSpeech message = new MessageSpeech();
-            if (net[BuffType.strength].boolValue) {
-                message.phrase = "I feel strong!";
-            } else {
-                message.phrase = "I no longer feel strong!";
+        } else {
+            foreach (KeyValuePair<BuffType, BuffMessage> kvp in buffMessages) {
+                if (currentNetIntrinsic[kvp.Key].boolValue != previousNetInstrinsic[kvp.Key].boolValue) {
+                    if (currentNetIntrinsic[kvp.Key].boolValue) {
+                        SayPhrase(kvp.Value.On);
+                    } else {
+                        SayPhrase(kvp.Value.Off);
+                    }
+                }
             }
-            Say(message);
         }
-
     }
     // double-exponential seat easing function
     public float DoubleSeat(float x, float a, float w, float max, float min) {
