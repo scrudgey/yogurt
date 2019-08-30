@@ -46,6 +46,7 @@ public class GameData {
     public List<string> packages;
     public bool firstTimeLeavingHouse;
     public bool mayorCutsceneHappened;
+    public bool visitedStudio;
     public bool teleporterUnlocked;
     public string headSpriteSheet;
     public string cosmicName = "";
@@ -363,7 +364,10 @@ public partial class GameManager : Singleton<GameManager> {
             }
             data.firstTimeLeavingHouse = false;
         }
-
+        if (sceneName == "studio" && !data.visitedStudio) {
+            data.visitedStudio = true;
+            ShowDiaryEntry("diaryStudio");
+        }
         if (sceneName == "cave1" || sceneName == "cave2") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneFall>();
         }
