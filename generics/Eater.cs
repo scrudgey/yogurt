@@ -241,8 +241,6 @@ public class Eater : Interactive, ISaveable {
                 mono.liquid.vomit = true;
                 mono.edible.vomit = true;
                 if (mono.liquid.name == "yogurt") {
-                    // GameManager.Instance.data.achievementStats.yogurtVomit += 1;
-                    // GameManager.Instance.CheckAchievements();
                     GameManager.Instance.IncrementStat(StatType.yogurtVomit, 1);
                 }
                 CircleCollider2D dropCollider = droplet.GetComponent<CircleCollider2D>();
