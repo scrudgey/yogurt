@@ -9,17 +9,13 @@ public class PerkBrowser : MonoBehaviour {
     public Text perkTitleText;
     public Text perkDescText;
     public Text requiredText;
-    // public Text levelText;
     public Button doneButton;
-    // public Button acceptButton;
-    // public bool perkChosen;
     public PerkButton selectedPerk;
     int numberCollected = 0;
     public Color unlockedPerkColor;
     public Color lockedPerkColor;
     public Color unlockedTextColor;
     public Color lockedTextColor;
-    // public List<Button> builtInButtons;
     public UIButtonEffects effects;
     public Text activeText;
     void Start() {
@@ -75,7 +71,7 @@ public class PerkBrowser : MonoBehaviour {
             Button perkButton = buttonObject.GetComponent<Button>();
             effects.buttons.Add(perkButton);
             ColorBlock colors = perkButton.colors;
-            if (numberCollected > component.perk.requiredPerks) {
+            if (GameManager.Instance.data.perks[perkScript.perk.name]) {
                 // colors.highlightedColor = unlockedPerkColor;
                 colors.normalColor = unlockedPerkColor;
             } else {
@@ -83,18 +79,11 @@ public class PerkBrowser : MonoBehaviour {
                 colors.normalColor = lockedPerkColor;
             }
             perkButton.colors = colors;
-            // if (GameManager.Instance.data.perks[component.perk.name]) {
-            //     // perkButton.interactable = false;
-            //     // perkButton.colors. = unlockedPerkColor;
-            // }
             if (!initialButton) {
                 initialButton = true;
                 PerkButtonClicked(perkScript);
             }
         }
-        // if (numberCollected == perkPrefabs.Count() + 1) {
-        //     doneButton.interactable = true;
-        // }
         effects.Configure();
     }
     public void PerkButtonClicked(PerkButton buttonScript) {
@@ -110,14 +99,14 @@ public class PerkBrowser : MonoBehaviour {
             // colors.normalColor = unlockedPerkColor;
             // activeText.color = unlockedPerkColor;
             activeText.color = unlockedTextColor;
-            activeText.text = "This perk is active.";
+            activeText.text = "This perk is active";
         } else {
             // colors.highlightedColor = lockedPerkColor;
             // colors.normalColor = lockedPerkColor;
             // activeText.color = lockedPerkColor;
             // activeText.color = lockedPerkColor;
             activeText.color = lockedTextColor;
-            activeText.text = "This perk is locked.";
+            activeText.text = "You haven't unlocked this perk yet";
         }
     }
     public void DoneButtonClick() {
