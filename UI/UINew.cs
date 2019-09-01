@@ -350,6 +350,8 @@ public class UINew : Singleton<UINew> {
         hitIndicator.Hit();
     }
     public void HealthBarOn() {
+        if (Controller.Instance.focusHurtable == null)
+            return;
         if (Controller.Instance.focusHurtable.oxygen >= Controller.Instance.focusHurtable.maxOxygen) {
             if (healthBarEasingDirection == EasingDirection.none) {
                 if (topRightRectTransform.anchoredPosition.y > 10f) {
@@ -360,6 +362,8 @@ public class UINew : Singleton<UINew> {
         }
     }
     public void HealthBarOff() {
+        if (Controller.Instance.focusHurtable == null)
+            return;
         if (Controller.Instance.focusHurtable.oxygen >= Controller.Instance.focusHurtable.maxOxygen) {
             if (healthBarEasingDirection == EasingDirection.none) {
                 if (topRightRectTransform.anchoredPosition.y < 40f) {
@@ -378,6 +382,8 @@ public class UINew : Singleton<UINew> {
         }
     }
     public void OxygenBarOff() {
+        if (Controller.Instance.focusHurtable == null)
+            return;
         if (Controller.Instance.focusHurtable.health >= Controller.Instance.focusHurtable.maxHealth) {
             if (oxygenBarEasingDirection == EasingDirection.none) {
                 if (topRightRectTransform.anchoredPosition.y < 40f) {
