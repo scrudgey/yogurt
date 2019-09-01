@@ -640,7 +640,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         data.people = new List<SerializedPersonalAssessment>();
         if (possession != null) {
             MySaver.UpdateGameObjectReference(possession, data, "possession", overWriteWithNull: false);
-            MySaver.AddToReferenceTree(data.id, possession);
+            // MySaver.AddToReferenceTree(data.id, possession);
         }
         foreach (KeyValuePair<GameObject, Knowledge> keyVal in knowledgebase) {
             SerializedKnowledge knowledge = SaveKnowledge(keyVal.Value);

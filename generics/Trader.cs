@@ -89,7 +89,7 @@ public class Trader : Interactive, ISaveable {
     public void SaveData(PersistentComponent data) {
         if (give != null) {
             MySaver.UpdateGameObjectReference(give, data, "give");
-            MySaver.AddToReferenceTree(data.id, give);
+            // MySaver.AddToReferenceTree(data.id, give);
         }
         data.strings["receive"] = receive;
     }
