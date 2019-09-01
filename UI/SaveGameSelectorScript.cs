@@ -39,9 +39,8 @@ public class SaveGameSelectorScript : MonoBehaviour {
         completionText.text = "Completion: " + SaveInspector.Completion(data).ToString("0") + "%";
         if (data.headSpriteSheet != null) {
             Sprite[] sprites = Resources.LoadAll<Sprite>("spritesheets/" + data.headSpriteSheet);
-            icon.sprite = sprites[0];
+            icon.sprite = Toolbox.ApplySkinToneToSprite(sprites[0], data.headSkinColor);
         }
-
     }
     public void Clicked() {
         startMenu.InspectSaveGame(this);
