@@ -103,7 +103,11 @@ public class Hurtable : Damageable, ISaveable {
             case damageType.physical:
                 damage = Mathf.Max(message.amount - armor, 0);
                 health -= damage;
-                impulse += damage;
+                if (message.strength) {
+                    impulse += damage * 2;
+                } else {
+                    impulse += damage;
+                }
                 break;
             case damageType.fire:
                 damage = message.amount * 10;
@@ -176,22 +180,14 @@ public class Hurtable : Damageable, ISaveable {
         } else {
             KnockDown();
         }
-        // todo: categorize death
-        if (GameManager.Instance.playerObject == gameObject) {
-            TypeOfDeath(type);
-            GameManager.Instance.PlayerDeath();
-        }
+        LogTypeOfDeath(type);
         if (dizzyEffect != null) {
             ClaimsManager.Instance.WasDestroyed(dizzyEffect);
             Destroy(dizzyEffect);
         }
         hitState = Controllable.AddHitState(hitState, Controllable.HitState.dead);
-        OccurrenceDeath occurrenceData = new OccurrenceDeath();
-        occurrenceData.dead = gameObject;
-        Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData, new HashSet<GameObject>() { gameObject });
     }
-    public void TypeOfDeath(damageType type) {
-
+    public void LogTypeOfDeath(damageType type) {
         bool suicide = false;
         bool damageZone = false;
         bool assailant = false;
@@ -205,31 +201,34 @@ public class Hurtable : Damageable, ISaveable {
             if (lastAttacker.GetComponent<Inventory>() != null)
                 assailant = true;
         }
-        if (type == damageType.fire) {
-            if (suicide) {
-                // GameManager.Instance.data.achievementStats.selfImmolations += 1;
-                GameManager.Instance.IncrementStat(StatType.selfImmolations, 1);
-                // Debug.Log("self immolation");
+
+        OccurrenceDeath occurrenceData = new OccurrenceDeath();
+        occurrenceData.dead = gameObject;
+        occurrenceData.suicide = suicide;
+        occurrenceData.damageZone = damageZone;
+        occurrenceData.assailant = assailant;
+        occurrenceData.lastAttacker = lastAttacker;
+        occurrenceData.lastDamage = type;
+        Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData, new HashSet<GameObject>() { gameObject });
+
+        if (GameManager.Instance.playerObject == gameObject) {
+            if (type == damageType.fire) {
+                if (suicide) {
+                    GameManager.Instance.IncrementStat(StatType.selfImmolations, 1);
+                }
+                GameManager.Instance.IncrementStat(StatType.immolations, 1);
             }
-            // GameManager.Instance.data.achievementStats.immolations += 1;
-            GameManager.Instance.IncrementStat(StatType.immolations, 1);
-            // Debug.Log("immolation");
+            if (type == damageType.asphyxiation) {
+                GameManager.Instance.IncrementStat(StatType.deathByAsphyxiation, 1);
+            }
+            if (damageZone) {
+                GameManager.Instance.IncrementStat(StatType.deathByMisadventure, 1);
+            }
+            if (assailant) {
+                GameManager.Instance.IncrementStat(StatType.deathByCombat, 1);
+            }
+            GameManager.Instance.PlayerDeath();
         }
-        if (type == damageType.asphyxiation) {
-            // GameManager.Instance.data.achievementStats.deathByAsphyxiation += 1;
-            GameManager.Instance.IncrementStat(StatType.deathByAsphyxiation, 1);
-        }
-        if (damageZone) {
-            // GameManager.Instance.data.achievementStats.deathByMisadventure += 1;
-            GameManager.Instance.IncrementStat(StatType.deathByMisadventure, 1);
-            // Debug.Log("death by misadventure");
-        }
-        if (assailant) {
-            // GameManager.Instance.data.achievementStats.deathByCombat += 1;
-            GameManager.Instance.IncrementStat(StatType.deathByCombat, 1);
-            // Debug.Log("death by combat");
-        }
-        // GameManager.Instance.CheckAchievements();
     }
 
     public void Update() {
