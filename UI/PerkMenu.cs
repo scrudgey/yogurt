@@ -19,10 +19,12 @@ public class PerkMenu : MonoBehaviour {
     public Color lockedPerkColor;
     public List<Button> builtInButtons;
     public UIButtonEffects effects;
+    public AspectRatioFitter aspectRatioFitter;
     void Start() {
         effects = GetComponent<UIButtonEffects>();
         GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
         perkImage = transform.Find("menu/body/infoPanel/imagePanel/Image").GetComponent<Image>();
+        aspectRatioFitter = perkImage.GetComponent<AspectRatioFitter>();
 
         perkDescText = transform.Find("menu/body/infoPanel/textPanel/desc").GetComponent<Text>();
         perkTitleText = transform.Find("menu/body/infoPanel/textPanel/title").GetComponent<Text>();
@@ -92,6 +94,7 @@ public class PerkMenu : MonoBehaviour {
         effects.Configure();
     }
     public void PerkButtonClicked(PerkButton buttonScript) {
+        aspectRatioFitter.aspectRatio = 1;
         selectedPerk = buttonScript;
         perkDescText.text = buttonScript.perk.desc;
         perkTitleText.text = buttonScript.perk.title;
