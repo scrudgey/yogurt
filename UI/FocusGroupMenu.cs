@@ -69,7 +69,7 @@ public class FocusGroupMenu : MonoBehaviour {
             builder.Append(ReactToEvent(eventd));
             builder.Append(eventd.whatHappened);
             builder.Append(".");
-            return builder.ToString();
+            return Toolbox.RemoveExtraPunctuation(builder.ToString());
         }
     }
     public Commercial commercial;
@@ -106,7 +106,7 @@ public class FocusGroupMenu : MonoBehaviour {
         index = 0;
     }
     public void Update() {
-        timer += Time.deltaTime;
+        timer += Time.unscaledDeltaTime;
         if (timer > 0.1f) {
             FocusGroupPersonality p = personalities[index];
             mouths[p] = !mouths[p];

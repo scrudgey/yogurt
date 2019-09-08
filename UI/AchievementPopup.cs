@@ -9,7 +9,7 @@ public class AchievementPopup : MonoBehaviour {
         public CollectedInfo(GameObject obj) {
             name = Toolbox.Instance.GetName(obj);
             Pickup pickup = obj.GetComponent<Pickup>();
-            if (pickup && pickup.icon != null){
+            if (pickup && pickup.icon != null) {
                 sprite = pickup.icon;
                 return;
             }
@@ -53,10 +53,16 @@ public class AchievementPopup : MonoBehaviour {
         audioSource.spatialBlend = 0;
         titleText.text = "Achievement Unlocked!";
         bodyText.text = achieve.title;
-        Sprite icon = Resources.Load<Sprite>("achievements/icons/"+achieve.icon) as Sprite;
+        Sprite icon = Resources.Load<Sprite>("achievements/icons/" + achieve.icon) as Sprite;
         image.sprite = icon;
         audioSource.PlayOneShot(collectedSound);
         StartCoroutine(Display());
+    }
+    public static IEnumerator WaitForRealSeconds(float time) {
+        float start = Time.realtimeSinceStartup;
+        while (Time.realtimeSinceStartup < start + time) {
+            yield return null;
+        }
     }
     IEnumerator Display() {
         RectTransform rectTransform = transform.Find("Panel").GetComponent<RectTransform>();
@@ -69,16 +75,17 @@ public class AchievementPopup : MonoBehaviour {
         float t = 0f;
         float y0 = -100f;
         while (t < intime) {
-            t += Time.deltaTime;
+            t += Time.unscaledDeltaTime;
             tempPos.y = (float)PennerDoubleAnimation.ExpoEaseOut(t, y0, 100f, intime);
             rectTransform.anchoredPosition = tempPos;
             yield return null;
         }
-        yield return new WaitForSeconds(hangtime);
+        // yield return new WaitForSeconds(hangtime);
+        yield return StartCoroutine(WaitForRealSeconds(hangtime));
         t = 0f;
         y0 = tempPos.y;
         while (t < outtime) {
-            t += Time.deltaTime;
+            t += Time.unscaledDeltaTime;
             tempPos.y = (float)PennerDoubleAnimation.ExpoEaseIn(t, y0, -100f, intime);
             rectTransform.anchoredPosition = tempPos;
             yield return null;

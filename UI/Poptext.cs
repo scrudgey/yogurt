@@ -44,7 +44,7 @@ public class Poptext : MonoBehaviour {
         float t = 0f;
         float y0 = tempPos.y;
         while (t < intime) {
-            t += Time.deltaTime;
+            t += Time.unscaledDeltaTime;
             tempPos.y = easing(t, y0, 70.0f, intime);
             rectTransform.anchoredPosition = tempPos;
             yield return null;
@@ -87,7 +87,7 @@ public class Poptext : MonoBehaviour {
         t = 0f;
         y0 = tempPos.y;
         while (t < outtime) {
-            t += Time.deltaTime;
+            t += Time.unscaledDeltaTime;
             tempPos.y = easing(t, 35, -70.0f, outtime);
             rectTransform.anchoredPosition = tempPos;
             yield return null;

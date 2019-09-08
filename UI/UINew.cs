@@ -258,7 +258,7 @@ public class UINew : Singleton<UINew> {
             OxygenBarOff();
         }
         if (healthBarEasingDirection != EasingDirection.none) {
-            healthBarEasingTimer += Time.deltaTime;
+            healthBarEasingTimer += Time.unscaledDeltaTime;
             Vector3 tempPos = topRightRectTransform.anchoredPosition;
             if (healthBarEasingTimer >= 1f) {
                 healthBarEasingDirection = EasingDirection.none;
@@ -274,7 +274,7 @@ public class UINew : Singleton<UINew> {
             }
         }
         if (oxygenBarEasingDirection != EasingDirection.none) {
-            oxygenBarEasingTimer += Time.deltaTime;
+            oxygenBarEasingTimer += Time.unscaledDeltaTime;
             Vector3 tempPos = topRightRectTransform.anchoredPosition;
             if (oxygenBarEasingTimer >= 1f) {
                 oxygenBarEasingDirection = EasingDirection.none;
