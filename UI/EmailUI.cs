@@ -15,8 +15,6 @@ public class EmailUI : MonoBehaviour {
     public UIButtonEffects effects;
     private Regex name_hook = new Regex(@"\$name");
     void Start() {
-
-
         GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
 
         emailButtons = new List<emailEntryButton>();
@@ -39,7 +37,10 @@ public class EmailUI : MonoBehaviour {
         effects.buttons = new List<Button>() { doneButton };
         // remove any existing entries
         // retrieve an email list, populate the list of buttons
-        Destroy(emailListObject.transform.GetChild(0).gameObject);
+        // Destroy(emailListObject.transform.GetChild(0).gameObject);
+        foreach (Transform child in emailListObject.transform) {
+            Destroy(child.gameObject);
+        }
 
         foreach (Email email in GameManager.Instance.data.emails) {
             GameObject entry = GameObject.Instantiate(Resources.Load("UI/emailEntry")) as GameObject;
