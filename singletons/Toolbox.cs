@@ -29,6 +29,9 @@ public class Toolbox : Singleton<Toolbox> {
     private CameraControl cameraControl;
     private GameObject tom;
     public int numberOfLiveSpeakers;
+    static Regex doublePunctuationRegex = new Regex(@"[/./?!][/./?!]");
+    static Regex cloneFinder = new Regex(@"(.+)\(Clone\)$", RegexOptions.Multiline);
+    static Regex underScoreFinder = new Regex(@"_", RegexOptions.Multiline);
     static public T GetOrCreateComponent<T>(GameObject g) where T : Component {
         T component = g.GetComponent<T>();
         if (component) {
@@ -81,6 +84,16 @@ public class Toolbox : Singleton<Toolbox> {
         char[] a = s.ToCharArray();
         a[0] = char.ToUpper(a[0]);
         return new string(a);
+    }
+    public static string RemoveExtraPunctuation(string s) {
+        if (s.Length < 2)
+            return s;
+        string lastTwo = s.Substring(s.Length - 2);
+        while (doublePunctuationRegex.IsMatch(lastTwo)) {
+            s = s.Remove(s.Length - 1);
+            lastTwo = s.Substring(s.Length - 2);
+        }
+        return s;
     }
     public Occurrence OccurenceFlag(GameObject spawner, OccurrenceData data, HashSet<GameObject> involvedParties) {
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
@@ -243,7 +256,7 @@ public class Toolbox : Singleton<Toolbox> {
     public string CloneRemover(string input) {
         string output = input;
         if (input != null) {
-            Regex cloneFinder = new Regex(@"(.+)\(Clone\)$", RegexOptions.Multiline);
+
             MatchCollection matches = cloneFinder.Matches(input);
             if (matches.Count > 0) {                                    // the object is a clone, capture just the normal name
                 foreach (Match match in matches) {
@@ -254,7 +267,7 @@ public class Toolbox : Singleton<Toolbox> {
         return output;
     }
     public string UnderscoreRemover(string input) {
-        Regex underScoreFinder = new Regex(@"_", RegexOptions.Multiline);
+
         return underScoreFinder.Replace(input, " ");
     }
     public string GetName(GameObject obj) {
@@ -458,5 +471,11 @@ public class Toolbox : Singleton<Toolbox> {
     public static void SetGender(GameObject target, Gender gender) {
         Speech speech = target.GetComponent<Speech>();
         HeadAnimation headAnimation = target.GetComponent<HeadAnimation>();
+    }
+
+    public void deactivateEventually(GameObject target) {
+        DestroyAfterTime dat = target.AddComponent<DestroyAfterTime>();
+        dat.deactivate = true;
+        dat.lifetime = 3f;
     }
 }
