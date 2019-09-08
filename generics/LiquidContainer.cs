@@ -52,11 +52,15 @@ public class LiquidContainer : Interactive, ISaveable {
             Toolbox.RegisterMessageCallback<MessageDamage>(this, HandleDamage);
         }
     }
+    public void OnEnable() {
+        if (liquid != null)
+            UpdateIntrinsics(liquid);
+    }
     public void UpdateIntrinsics(Liquid l) {
         // TODO: this seems a bit rough
         Intrinsics myIntrinsics = GetComponent<Intrinsics>();
         if (myIntrinsics != null) {
-            Destroy(myIntrinsics);
+            DestroyImmediate(myIntrinsics);
         }
         Intrinsics intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject);
         if (l.buffs.Count > 0) {
