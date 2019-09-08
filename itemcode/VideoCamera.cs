@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Serialization;
@@ -113,8 +114,11 @@ public class VideoCamera : Interactive, ISaveable {
             UINew.Instance.UpdateRecordButtons(commercial);
             foreach (KeyValuePair<string, CommercialProperty> kvp in GameManager.Instance.activeCommercial.properties) {
                 UINew.Instance.AddObjective(kvp.Value);
-                UINew.Instance.UpdateObjectives(commercial);
             }
+            foreach (string location in GameManager.Instance.activeCommercial.requiredLocations) {
+                UINew.Instance.AddLocationObjective(location);
+            }
+            UINew.Instance.UpdateObjectives(commercial);
             StartCoroutine(WaitAndStartScript(1f));
         } else {
             live = false;
@@ -124,6 +128,11 @@ public class VideoCamera : Interactive, ISaveable {
     }
     public bool Enable_Validation() {
         return live == false;
+    }
+    public void Update() {
+        if (live) {
+            commercial.visitedLocations.Add(SceneManager.GetActiveScene().name);
+        }
     }
     public void Cancel() {
         live = false;

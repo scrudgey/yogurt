@@ -810,6 +810,14 @@ public class UINew : Singleton<UINew> {
         script.targetProperty = property; // change this
         return script;
     }
+    public ObjectiveIndicator AddLocationObjective(string location) {
+        GameObject objectiveObject = GameManager.Instantiate(Resources.Load("UI/objective")) as GameObject;
+        objectiveObject.transform.SetParent(objectivesContainer, false);
+        ObjectiveIndicator script = objectiveObject.GetComponent<ObjectiveIndicator>();
+        script.location = location;
+        script.description.text = "shoot a scene in " + location;
+        return script;
+    }
     public void ClearObjectives() {
         foreach (Transform child in objectivesContainer) {
             Destroy(child.gameObject);

@@ -108,7 +108,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = false;
+    public bool debug = true;
     public bool failedLevelLoad = false;
     public void PlayPublicSound(AudioClip clip) {
         if (clip == null)
@@ -130,8 +130,7 @@ public partial class GameManager : Singleton<GameManager> {
             // ReceivePackage("kaiser_helmet");
             // ReceivePackage("duplicator");
             // ReceivePackage("golf_club");
-            if (debug)
-                data.mayorCutsceneHappened = true;
+
         }
         if (saveGameName == "test")
             MySaver.CleanupSaves();
@@ -597,6 +596,13 @@ public partial class GameManager : Singleton<GameManager> {
                 data.unlockedScenes.Add(sceneName);
             }
             data.teleporterUnlocked = true;
+            data.mayorCutsceneHappened = true;
+            data.visitedStudio = true;
+
+            data.collectedObjects.Add("package");
+            data.itemCheckedOut["package"] = false;
+            data.collectedObjects.Add("cosmic_nullifier");
+            data.itemCheckedOut["cosmic_nullifier"] = false;
         }
         data.completeCommercials = new HashSet<Commercial>();
         // initialize achievements
