@@ -61,7 +61,7 @@ public class CutsceneImp : Cutscene {
         newNode.text.Add("What a lovely " + Toolbox.Instance.GetName(analyzand) + ".");
         newNode.text.Add("But it contains no magic.");
         newNode.text.Add("Show me something else...");
-        newNode.text.Add("END");
+        newNode.text.Add("IMPCALLBACK3");
         SetDialogue(newNode);
     }
     public override void Update() {
@@ -132,8 +132,8 @@ public class CutsceneImp : Cutscene {
     public void Finish() {
         complete = true;
         impAnimate.enabled = true;
-        impSeller.leftPoint.SetActive(false);
-        impSeller.rightPoint.SetActive(false);
+        Toolbox.Instance.deactivateEventually(impSeller.leftPoint);
+        Toolbox.Instance.deactivateEventually(impSeller.rightPoint);
     }
 
     public bool GetIngredients() {
