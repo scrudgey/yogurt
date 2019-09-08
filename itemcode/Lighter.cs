@@ -11,6 +11,7 @@ public class Lighter : Interactive {
     void Start() {
         pickup = GetComponent<Pickup>();
         Interaction f = new Interaction(this, "Fire", "Fire", false, true);
+        f.descString = "Use lighter";
         f.defaultPriority = 1;
         interactions.Add(f);
         flameRadius = transform.Find("flameRadius").GetComponent<Collider2D>();
