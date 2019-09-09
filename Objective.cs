@@ -7,11 +7,11 @@ public abstract class Objective {
 }
 
 public class ObjectiveProperty : Objective {
+    // yogurt,≥,1,eat yogurt on camera
     public string key;
     public CommercialComparison comparison;
     public float val;
     public ObjectiveProperty(string[] bits) {
-        // yogurt,≥,1,eat yogurt on camera
         key = bits[0];
         val = float.Parse(bits[2]);
         desc = bits[3];
@@ -64,12 +64,32 @@ public class ObjectiveProperty : Objective {
 }
 
 public class ObjectiveLocation : Objective {
+    // location,krazy1,shoot a scene outside
     public string location;
     override public bool RequirementsMet(Commercial commercial) {
         return commercial.visitedLocations.Contains(location);
     }
     public ObjectiveLocation(string[] bits) {
         location = bits[1];
-        desc = "shoot a scene in " + location;
+        // desc = "shoot a scene in " + location;
+        desc = bits[2];
+    }
+}
+
+public class ObjectiveEat : Objective {
+    public string eaterOutfit;
+    public ObjectiveEat(string[] bits) {
+        eaterOutfit = bits[1];
+        desc = bits[2];
+    }
+    override public bool RequirementsMet(Commercial commercial) {
+        foreach (EventData data in commercial.eventData) {
+            EventDataYogurt ydat = data as EventDataYogurt;
+            if (ydat != null) {
+                if (ydat.eaterOutfitName == eaterOutfit)
+                    return true;
+            }
+        }
+        return false;
     }
 }

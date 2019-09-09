@@ -48,6 +48,8 @@ public class Commercial {
                 c.email = bits[1];
             } else if (key == "location") {
                 c.objectives.Add(new ObjectiveLocation(bits));
+            } else if (key == "outfit") {
+                c.objectives.Add(new ObjectiveEat(bits));
             } else c.objectives.Add(new ObjectiveProperty(bits));
         }
         return c;
