@@ -112,11 +112,8 @@ public class VideoCamera : Interactive, ISaveable {
             live = true;
             regionIndicator.SetActive(true);
             UINew.Instance.UpdateRecordButtons(commercial);
-            foreach (KeyValuePair<string, CommercialProperty> kvp in GameManager.Instance.activeCommercial.properties) {
-                UINew.Instance.AddObjective(kvp.Value);
-            }
-            foreach (string location in GameManager.Instance.activeCommercial.requiredLocations) {
-                UINew.Instance.AddLocationObjective(location);
+            foreach (Objective objective in GameManager.Instance.activeCommercial.objectives) {
+                UINew.Instance.AddObjective(objective);
             }
             UINew.Instance.UpdateObjectives(commercial);
             StartCoroutine(WaitAndStartScript(1f));
@@ -124,6 +121,7 @@ public class VideoCamera : Interactive, ISaveable {
             live = false;
             regionIndicator.SetActive(false);
             UINew.Instance.ShowMenu(UINew.MenuType.scriptSelect);
+
         }
     }
     public bool Enable_Validation() {

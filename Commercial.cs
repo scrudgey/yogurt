@@ -24,6 +24,8 @@ public class Commercial {
     public List<EventData> eventData = new List<EventData>();
     [XmlIgnore]
     public CommercialDescription analysis;
+    [XmlIgnore]
+    public List<Objective> objectives = new List<Objective>();
     public static Commercial LoadCommercialByFilename(string filename) {
         Commercial c = new Commercial();
         TextAsset dataFile = Resources.Load("data/commercials/" + filename) as TextAsset;
@@ -45,38 +47,8 @@ public class Commercial {
             } else if (key == "email") {
                 c.email = bits[1];
             } else if (key == "location") {
-                // add location objective
-                c.requiredLocations.Add(bits[1]);
-            } else {
-                // add property objective
-
-                string comparison = bits[1];
-                // yogurt,≥,1,eat yogurt on camera
-                prop.val = float.Parse(bits[2]);
-                switch (bits[1]) {
-                    case "=":
-                        prop.comp = CommercialComparison.equal;
-                        break;
-                    case ">":
-                        prop.comp = CommercialComparison.greater;
-                        break;
-                    case "<":
-                        prop.comp = CommercialComparison.less;
-                        break;
-                    case "≥":
-                        prop.comp = CommercialComparison.greaterEqual;
-                        break;
-                    case "≤":
-                        prop.comp = CommercialComparison.lessEqual;
-                        break;
-                    default:
-                        break;
-                }
-                // add description
-                prop.objective = bits[3];
-                prop.key = bits[0];
-                c.properties[bits[0]] = prop;
-            }
+                c.objectives.Add(new ObjectiveLocation(bits));
+            } else c.objectives.Add(new ObjectiveProperty(bits));
         }
         return c;
     }
@@ -128,26 +100,9 @@ public class Commercial {
     }
     public bool Evaluate(Commercial required) {
         bool requirementsMet = true;
-
-        foreach (KeyValuePair<string, CommercialProperty> kvp in required.properties) {
-            CommercialProperty myProperty = null;
-            CommercialProperty otherProperty = kvp.Value;
-            properties.TryGetValue(kvp.Key, out myProperty);
-            if (myProperty == null) {
-                requirementsMet = false;
-                break;
-            }
-            requirementsMet = myProperty.RequirementMet(otherProperty);
-            if (!requirementsMet)
-                break;
+        foreach (Objective objective in required.objectives) {
+            requirementsMet &= objective.RequirementsMet(this);
         }
-
-        foreach (string scene in required.requiredLocations) {
-            if (!visitedLocations.Contains(scene)) {
-                return false;
-            }
-        }
-
         return requirementsMet;
     }
     public string SentenceReview() {
@@ -203,32 +158,28 @@ public class CommercialProperty {
     public string key;
     public float val;
     public string desc;
-    public string objective;
-    public CommercialComparison comp;
+    // public string objective;
+    // public CommercialComparison comp;
     public CommercialProperty() {
         val = 0;
-        comp = CommercialComparison.equal;
+        // comp = CommercialComparison.equal;
     }
-    public CommercialProperty(float val, bool truth, CommercialComparison comp) {
-        this.val = val;
-        this.comp = comp;
-    }
-    public bool RequirementMet(CommercialProperty otherProperty) {
-        switch (otherProperty.comp) {
-            case CommercialComparison.equal:
-                return this.val == otherProperty.val;
-            case CommercialComparison.notequal:
-                return this.val != otherProperty.val;
-            case CommercialComparison.greater:
-                return this.val > otherProperty.val;
-            case CommercialComparison.less:
-                return this.val < otherProperty.val;
-            case CommercialComparison.greaterEqual:
-                return this.val >= otherProperty.val;
-            case CommercialComparison.lessEqual:
-                return this.val <= otherProperty.val;
-            default:
-                return true;
-        }
-    }
+    // public bool RequirementMet(CommercialProperty otherProperty) {
+    //     switch (otherProperty.comp) {
+    //         case CommercialComparison.equal:
+    //             return this.val == otherProperty.val;
+    //         case CommercialComparison.notequal:
+    //             return this.val != otherProperty.val;
+    //         case CommercialComparison.greater:
+    //             return this.val > otherProperty.val;
+    //         case CommercialComparison.less:
+    //             return this.val < otherProperty.val;
+    //         case CommercialComparison.greaterEqual:
+    //             return this.val >= otherProperty.val;
+    //         case CommercialComparison.lessEqual:
+    //             return this.val <= otherProperty.val;
+    //         default:
+    //             return true;
+    //     }
+    // }
 }
