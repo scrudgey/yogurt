@@ -17,12 +17,17 @@ public class Occurrence : MonoBehaviour {
     }
     public List<OccurrenceData> data = new List<OccurrenceData>();
     public static EventData Yogurt(GameObject eater) {
-        EventData data = new EventData(positive: 1);
+        EventDataYogurt data = new EventDataYogurt(positive: 1);
         data.key = "yogurt";
         data.val = 1f;
         data.popupDesc = "yogurts eaten";
         data.noun = "yogurt eating";
         data.whatHappened = Toolbox.Instance.GetName(eater) + " ate yogurt";
+        // data.other 
+        Outfit otherOutfit = eater.GetComponent<Outfit>();
+        if (otherOutfit != null) {
+            data.eaterOutfitName = otherOutfit.wornUniformName;
+        }
         return data;
     }
     public static EventData Vomit(GameObject vomiter, GameObject vomited) {
@@ -170,6 +175,13 @@ public class EventData {
         string key = rate.ToString() + "_" + severity.ToString();
         return grammar.Parse("{" + key + "}");
     }
+}
+[System.Serializable]
+public class EventDataYogurt : EventData {
+    public string eaterOutfitName;
+    public string eaterName;
+    public EventDataYogurt(float disturbing = 0, float disgusting = 0, float chaos = 0, float offensive = 0, float positive = 0) :
+        base(disturbing, disgusting, chaos, offensive, positive) { }
 }
 [System.Serializable]
 public class OccurrenceData {

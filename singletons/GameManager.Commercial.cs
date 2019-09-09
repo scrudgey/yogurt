@@ -41,8 +41,6 @@ public partial class GameManager : Singleton<GameManager> {
         }
         if (success) {
             //process reward
-            commercial.name = activeCommercial.name;
-            UINew.Instance.ClearObjectives();
             CommercialCompleted(commercial);
         } else {
             // do something to display why the commercial is not done yet
@@ -52,6 +50,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
     }
     public void CommercialCompleted(Commercial commercial) {
+        commercial.name = activeCommercial.name;
         data.completeCommercials.Add(commercial);
         foreach (string unlock in activeCommercial.unlockUponCompletion) {
             UnlockCommercial(unlock);
@@ -66,6 +65,7 @@ public partial class GameManager : Singleton<GameManager> {
         if (activeCommercial.email != "") {
             ReceiveEmail(activeCommercial.email);
         }
+        UINew.Instance.ClearObjectives();
         UINew.Instance.RefreshUI(active: false);
     }
 }

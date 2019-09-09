@@ -802,12 +802,12 @@ public class UINew : Singleton<UINew> {
         CameraControl camControl = FindObjectOfType<CameraControl>();
         camControl.audioSource.PlayOneShot(Resources.Load(path) as AudioClip);
     }
-    public ObjectiveIndicator AddObjective(CommercialProperty property) {
+    public ObjectiveIndicator AddObjective(Objective objective) {
         GameObject objectiveObject = GameManager.Instantiate(Resources.Load("UI/objective")) as GameObject;
         objectiveObject.transform.SetParent(objectivesContainer, false);
         ObjectiveIndicator script = objectiveObject.GetComponent<ObjectiveIndicator>();
-        script.description.text = property.objective;
-        script.targetProperty = property; // change this
+        script.objective = objective;
+        script.description.text = objective.desc;
         return script;
     }
     public void ClearObjectives() {
