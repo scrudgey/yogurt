@@ -109,7 +109,7 @@ namespace AI {
         }
         public override status Evaluate() {
             if (target.val) {
-                if (Vector2.Distance(target.val.transform.position, place.val) < 0.10){
+                if (Vector2.Distance(target.val.transform.position, place.val) < 0.10) {
                     return status.success;
                 }
                 return status.failure;
@@ -125,7 +125,7 @@ namespace AI {
             controllable = c;
         }
         public override status Evaluate() {
-            float angledif = Mathf.Abs(Vector2.SignedAngle(controllable.direction, (Vector2)target.val.transform.position - (Vector2)gameObject.transform.position));
+            float angledif = Vector2.Angle(controllable.direction, (Vector2)target.val.transform.position - (Vector2)gameObject.transform.position);
             if (angledif < 20) {
                 return status.success;
             } else {
@@ -141,12 +141,7 @@ namespace AI {
             controllable = c;
         }
         public override status Evaluate() {
-            // Vector2 dif = (Vector2)gameObject.transform.position - (Vector2)target.val.transform.position;
-            Vector2 dif = controllable.direction - dir;
-            Debug.Log(dif);
-            float angle = Toolbox.Instance.ProperAngle(dif.x, dif.y);
-            Debug.Log(angle);
-            if (Mathf.Abs(angle - controllable.directionAngle) < 20) {
+            if (Vector2.Angle(controllable.direction, dir) < 20) {
                 return status.success;
             } else {
                 return status.neutral;

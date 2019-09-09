@@ -11,6 +11,7 @@ namespace AI {
         }
     }
 
+    [System.Serializable]
     public class Goal {
         public List<Routine> routines = new List<Routine>();
         public int index = 0;
@@ -46,7 +47,7 @@ namespace AI {
                 }
             }
             if (fulfillingRequirements) {
-                // Debug.Log(control.gameObject.name + " " + this.ToString() + " requirements met");;
+                // Debug.Log(control.gameObject.name + " " + this.ToString() + " requirements met"); ;
                 control.ResetInput();
             }
             fulfillingRequirements = false;
@@ -86,7 +87,6 @@ namespace AI {
         public GoalUsePhone(GameObject g, Controllable c) : base(g, c) {
             successCondition = new ConditionBoolSwitch(g);
             Telephone phoneObject = GameObject.FindObjectOfType<Telephone>();
-            // Debug.Log(successCondition);
             if (phoneObject) {
                 Ref<GameObject> phoneRef = new Ref<GameObject>(phoneObject.gameObject);
                 telRoutine = new RoutineUseTelephone(g, c, phoneRef, (ConditionBoolSwitch)successCondition);
@@ -94,7 +94,6 @@ namespace AI {
             }
         }
         public override void Update() {
-            // Debug.Log(successCondition);
             base.Update();
             if (successCondition.Evaluate() == status.success && !phoneCalled) {
                 phoneCalled = true;
@@ -138,7 +137,6 @@ namespace AI {
             base.Update();
             if (index == 2 && !findingFail) {
                 findingFail = true;
-                // Debug.Log("finding fail");
             }
         }
     }
@@ -173,9 +171,32 @@ namespace AI {
             routines.Add(new RoutineLookAtObject(g, c, target));
         }
     }
+    public class GoalObserveObject : Goal {
+        public Ref<GameObject> target;
+        public GoalObserveObject(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c) {
+            goalThought = "I'm looking for something.";
+            this.target = target;
+            routines.Add(new Routine(g, c));
+            successCondition = new ConditionLookingAtObject(g, c, target);
+        }
+    }
+    public class GoalTriggerTrapdoor : Goal {
+        ConditionBoolSwitch successSwitch;
+        public GoalTriggerTrapdoor(GameObject g, Controllable c) : base(g, c) {
+            goalThought = "I'm sprining my trap.";
+            Speech speech = g.GetComponent<Speech>();
+
+            successSwitch = new ConditionBoolSwitch(g);
+            routines.Add(new RoutineTrapdoor(g, c, speech, successSwitch));
+
+            // successSwitch.conditionMet = true;
+            successCondition = successSwitch;
+        }
+    }
     public class GoalLookInDirection : Goal {
         public Vector2 dir;
         public GoalLookInDirection(GameObject g, Controllable c, Vector2 dir) : base(g, c) {
+            goalThought = "I'm looking over there.";
             this.dir = dir;
             successCondition = new ConditionLookingInDirection(g, c, dir);
             routines.Add(new RoutineLookInDirection(g, c, dir));
@@ -187,6 +208,7 @@ namespace AI {
     public class GoalWalkToPoint : Goal {
         public Ref<Vector2> target;
         public GoalWalkToPoint(GameObject g, Controllable c, Ref<Vector2> target, float minDistance) : base(g, c) {
+            goalThought = "I want to be over there.";
             this.target = target;
             ConditionLocation condition = new ConditionLocation(g, target);
             condition.minDistance = minDistance;

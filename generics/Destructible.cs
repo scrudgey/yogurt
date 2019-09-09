@@ -64,7 +64,7 @@ public class Destructible : Damageable, ISaveable {
         EventData data = Toolbox.Instance.DataFlag(gameObject, chaos: Random.Range(1, 2));
         data.noun = "destruction";
         data.whatHappened = Toolbox.Instance.CloneRemover(gameObject.name) + " was destroyed";
-        if (lastDamage == damageType.fire) {
+        if (lastMessage.type == damageType.fire) {
             if (Toolbox.Instance.CloneRemover(name) == "dollar") {
                 GameManager.Instance.IncrementStat(StatType.dollarsBurned, 1);
             }
@@ -72,7 +72,7 @@ public class Destructible : Damageable, ISaveable {
     }
     void OnCollisionEnter2D(Collision2D col) {
         float vel = col.relativeVelocity.magnitude;
-        if (vel > 1) {
+        if (vel > 0.5f) {
             //if we were hit hard, take a splatter damage
             //TODO: i should fix this to be more physical
             if (col.rigidbody) {
@@ -94,7 +94,8 @@ public class Destructible : Damageable, ISaveable {
                 // Debug.Log("Collision damage on " + gameObject.name + " to the tune of " + damage.ToString());
             }
         }
-        if (hitSound.Length > 0) {
+
+        if (vel > 0.1f && hitSound.Length > 0) {
             // GetComponent<AudioSource>().PlayOneShot(hitSound[Random.Range(0, hitSound.Length)]);
             audioSource.PlayOneShot(hitSound[Random.Range(0, hitSound.Length)]);
         }
@@ -102,10 +103,10 @@ public class Destructible : Damageable, ISaveable {
 
     public void SaveData(PersistentComponent data) {
         data.floats["health"] = health;
-        data.ints["lastDamage"] = (int)lastDamage;
+        // data.ints["lastDamage"] = (int)lastMessage;
     }
     public void LoadData(PersistentComponent data) {
         health = data.floats["health"];
-        lastDamage = (damageType)data.ints["lastDamage"];
+        // lastDamage = (damageType)data.ints["lastDamage"];
     }
 }

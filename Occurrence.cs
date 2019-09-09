@@ -20,7 +20,7 @@ public class Occurrence : MonoBehaviour {
         EventData data = new EventData(positive: 1);
         data.key = "yogurt";
         data.val = 1f;
-        data.desc = "yogurts eaten";
+        data.popupDesc = "yogurts eaten";
         data.noun = "yogurt eating";
         data.whatHappened = Toolbox.Instance.GetName(eater) + " ate yogurt";
         return data;
@@ -29,7 +29,7 @@ public class Occurrence : MonoBehaviour {
         EventData data = new EventData(disturbing: 1, disgusting: 2, chaos: 1);
         data.key = "vomit";
         data.val = 1f;
-        data.desc = "vomit events";
+        data.popupDesc = "vomit events";
         data.noun = "vomiting";
         data.whatHappened = Toolbox.Instance.GetName(vomiter) + " vomited up " + Toolbox.Instance.GetName(vomited);
         return data;
@@ -38,7 +38,7 @@ public class Occurrence : MonoBehaviour {
         EventData data = new EventData(disturbing: 1, disgusting: 2, chaos: 2, positive: -2);
         data.key = "yogurt_vomit";
         data.val = 1f;
-        data.desc = "yogurt emesis event";
+        data.popupDesc = "yogurt emesis event";
         data.noun = "vomiting yogurt";
         data.whatHappened = Toolbox.Instance.GetName(vomiter) + " vomited up yogurt";
         return data;
@@ -47,7 +47,7 @@ public class Occurrence : MonoBehaviour {
         EventData data = new EventData(disturbing: 2, disgusting: 2, chaos: 2);
         data.key = "vomit_eat";
         data.val = 1f;
-        data.desc = "vomit eaten";
+        data.popupDesc = "vomit eaten";
         data.noun = "eating vomit";
         data.whatHappened = Toolbox.Instance.GetName(eater) + " ate vomit";
         return data;
@@ -56,7 +56,7 @@ public class Occurrence : MonoBehaviour {
         EventData data = new EventData(disturbing: 2, disgusting: 2, chaos: 2, positive: -1);
         data.key = "yogurt_vomit_eat";
         data.val = 1f;
-        data.desc = "eating yogurt vomit";
+        data.popupDesc = "eating yogurt vomit";
         data.noun = "eating vomited-up yogurt";
         data.whatHappened = Toolbox.Instance.GetName(eater) + " ate vomited-up yogurt";
         return data;
@@ -65,7 +65,7 @@ public class Occurrence : MonoBehaviour {
         EventData data = new EventData(disgusting: 1, chaos: 1);
         data.key = "yogurt_floor";
         data.val = 1f;
-        data.desc = "yogurt eaten off the floor";
+        data.popupDesc = "yogurt eaten off the floor";
         data.noun = "eating of yogurt on the floor";
         data.whatHappened = Toolbox.Instance.GetName(eater) + " ate yogurt off the floor";
         return data;
@@ -74,7 +74,7 @@ public class Occurrence : MonoBehaviour {
         EventData data = new EventData(disturbing: 1, chaos: 2);
         data.key = "table_fire";
         data.val = 1f;
-        data.desc = "table set on fire";
+        data.popupDesc = "table set on fire";
         data.noun = "setting fire to the table";
         data.whatHappened = "the table was set on fire";
         return data;
@@ -83,16 +83,16 @@ public class Occurrence : MonoBehaviour {
         EventData data = new EventData(offensive: 4, disgusting: 3, disturbing: 3, chaos: 3, positive: -3);
         data.key = "cannibalism";
         data.val = 1f;
-        data.desc = "acts of cannibalism";
+        data.popupDesc = "acts of cannibalism";
         data.noun = "cannibalism";
         data.whatHappened = Toolbox.Instance.GetName(cannibal) + " commited cannibalism";
         return data;
     }
-    public static EventData Death(GameObject dead) {
+    public static EventData Death(GameObject dead, damageType lastDamage) {
         EventData data = new EventData(offensive: 4, disgusting: 3, disturbing: 4, chaos: 4, positive: -3);
         data.key = "death";
         data.val = 1f;
-        data.desc = "deaths";
+        data.popupDesc = "deaths";
         data.noun = "death";
         data.whatHappened = Toolbox.Instance.GetName(dead) + " died";
         return data;
@@ -101,7 +101,7 @@ public class Occurrence : MonoBehaviour {
         EventData data = new EventData(positive: 1);
         data.key = "eggplant";
         data.val = 1f;
-        data.desc = "eggplants eaten";
+        data.popupDesc = "eggplants eaten";
         data.noun = "eggplant eating";
         data.whatHappened = Toolbox.Instance.GetName(eater) + " ate an eggplant";
         return data;
@@ -112,7 +112,7 @@ public class Occurrence : MonoBehaviour {
 public class EventData {
     public string key;
     public float val;
-    public string desc;
+    public string popupDesc;
     public string whatHappened;
     public string transcriptLine;
     public string noun;
@@ -128,7 +128,7 @@ public class EventData {
     public EventData(EventData other) {
         this.key = other.key;
         this.val = other.val;
-        this.desc = other.desc;
+        this.popupDesc = other.popupDesc;
         this.whatHappened = other.whatHappened;
         this.transcriptLine = other.transcriptLine;
         this.noun = other.noun;
@@ -246,8 +246,48 @@ public class OccurrenceEat : OccurrenceData {
 }
 public class OccurrenceDeath : OccurrenceData {
     public GameObject dead;
+    public bool suicide;
+    public bool damageZone;
+    public bool assailant;
+    public GameObject lastAttacker;
+    public damageType lastDamage;
+    public OccurrenceDeath() { }
     public override void CalculateDescriptions(Occurrence parent) {
-        events.Add(Occurrence.Death(dead));
+        EventData data = Occurrence.Death(dead, damageType.any);
+        events.Add(data);
+        string victimName = Toolbox.Instance.GetName(dead);
+        if (suicide) {
+            data.whatHappened = victimName + " committed suicide";
+            data.noun = "suicide";
+            data.popupDesc = "suicides";
+            if (lastDamage == damageType.fire) {
+                data.whatHappened = victimName + " self-immolated";
+            }
+        } else if (assailant) {
+            string attackerName = Toolbox.Instance.GetName(lastAttacker);
+            data.whatHappened = attackerName + " murdered " + victimName;
+            data.noun = "murder";
+            data.popupDesc = "murders";
+            if (lastDamage == damageType.fire) {
+                data.whatHappened += " with fire";
+            } else if (lastDamage == damageType.asphyxiation) {
+                data.whatHappened = attackerName + " strangled " + victimName + " to death";
+            } else if (lastDamage == damageType.cosmic) {
+                data.whatHappened = attackerName + " annihilated " + victimName + " with cosmic energy";
+            }
+        } else {
+            data.noun = "death";
+            data.popupDesc = "deaths";
+            if (lastDamage == damageType.fire) {
+                data.whatHappened = victimName + " burned to death";
+            } else if (lastDamage == damageType.asphyxiation) {
+                data.whatHappened = victimName + " asphyxiated";
+            } else if (lastDamage == damageType.cosmic) {
+                data.whatHappened = victimName + " was annihilated by cosmic energy";
+            } else if (lastDamage == damageType.cutting || lastDamage == damageType.piercing) {
+                data.whatHappened = victimName + " was stabbed to death";
+            }
+        }
     }
 }
 public class OccurrenceVomit : OccurrenceData {
@@ -317,12 +357,21 @@ public class OccurrenceViolence : OccurrenceData {
     public GameObject attacker;
     public GameObject victim;
     public float amount;
+    public damageType type;
+    // TODO: make more elaborate
     public override void CalculateDescriptions(Occurrence parent) {
         string attackerName = Toolbox.Instance.GetName(attacker);
         string victimName = Toolbox.Instance.GetName(victim);
         EventData data = new EventData(disturbing: 2, chaos: 2);
         data.noun = "violence";
         data.whatHappened = attackerName + " attacked " + victimName;
+        if (type == damageType.cutting) {
+            data.whatHappened = attackerName + " stabbed " + victimName;
+        } else if (type == damageType.fire) {
+            data.whatHappened = attackerName + " burned " + victimName;
+        } else if (type == damageType.piercing) {
+            data.whatHappened = attackerName + " stabbed " + victimName;
+        }
         events.Add(data);
     }
 }

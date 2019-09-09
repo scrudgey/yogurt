@@ -4,6 +4,7 @@ using System;
 
 namespace AI {
     public enum status { neutral, success, failure }
+    [System.Serializable]
     public class Routine {
         public string routineThought = "I have no idea what I'm doing!";
         protected GameObject gameObject;
@@ -91,7 +92,6 @@ namespace AI {
         protected override status DoUpdate() {
             if (telephone && !condition.conditionMet) {
                 telephone.FireButtonCallback();
-                // Debug.Log("called FD");
                 condition.conditionMet = true;
                 return status.success;
             } else {
@@ -367,7 +367,6 @@ namespace AI {
             this.dir = dir;
         }
         protected override status DoUpdate() {
-            // Debug.Log("looking in direction "+dir.ToString());
             control.ResetInput();
             control.SetDirection(dir);
             return status.neutral;
@@ -541,7 +540,22 @@ namespace AI {
             return status.success;
         }
     }
-
+    public class RoutineTrapdoor : Routine {
+        public Speech vampireSpeech;
+        public ConditionBoolSwitch sw;
+        public RoutineTrapdoor(GameObject g, Controllable c, Speech vampireSpeech, ConditionBoolSwitch sw) : base(g, c) {
+            this.vampireSpeech = vampireSpeech;
+            this.sw = sw;
+        }
+        protected override status DoUpdate() {
+            if (!sw.conditionMet) {
+                vampireSpeech.SpeakWith();
+                sw.conditionMet = true;
+                return status.success;
+            } else
+                return status.neutral;
+        }
+    }
     public class RoutinePunchAt : Routine {
         Ref<GameObject> target;
         float timer;

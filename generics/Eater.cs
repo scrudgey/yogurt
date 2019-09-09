@@ -24,6 +24,7 @@ public class Eater : Interactive, ISaveable {
     private bool poisonNausea;
     private Queue<GameObject> eatenQueue;
     public float vomitCountDown;
+    public Dictionary<BuffType, Buff> netIntrinsics;
     private void CheckNausea() {
         //TODO: this is spawning lots of flags
         if (nausea > 15 && nausea < 30 && lastStatement != nauseaStatement.warning) {
@@ -56,11 +57,13 @@ public class Eater : Interactive, ISaveable {
             poisonNausea = false;
         }
         if (message.netBuffs[BuffType.undead].boolValue) {
-            vegetablePreference = preference.dislikes;
-            meatPreference = preference.dislikes;
-            offalPreference = preference.dislikes;
+            vegetablePreference = preference.likes;
+            meatPreference = preference.likes;
+            offalPreference = preference.likes;
             immoralPreference = preference.likes;
+            nausea = 0;
         }
+        netIntrinsics = message.netBuffs;
     }
     public void HandleOccurrence(MessageOccurrence message) {
         foreach (EventData data in message.data.events)
@@ -241,8 +244,6 @@ public class Eater : Interactive, ISaveable {
                 mono.liquid.vomit = true;
                 mono.edible.vomit = true;
                 if (mono.liquid.name == "yogurt") {
-                    // GameManager.Instance.data.achievementStats.yogurtVomit += 1;
-                    // GameManager.Instance.CheckAchievements();
                     GameManager.Instance.IncrementStat(StatType.yogurtVomit, 1);
                 }
                 CircleCollider2D dropCollider = droplet.GetComponent<CircleCollider2D>();
@@ -271,6 +272,8 @@ public class Eater : Interactive, ISaveable {
     }
 
     void ReactToOccurrence(EventData od) {
+        if (netIntrinsics[BuffType.undead].boolValue)
+            return;
         if (od.ratings[Rating.disgusting] > 1)
             nausea += 10f;
         if (od.ratings[Rating.disgusting] > 2)

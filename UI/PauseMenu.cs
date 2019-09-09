@@ -4,7 +4,7 @@ public class PauseMenu : MonoBehaviour {
         Canvas menuCanvas = GetComponent<Canvas>();
         menuCanvas.worldCamera = GameManager.Instance.cam;
     }
-    public void SaveClick() {
+    public void SaveAndQuitClick() {
         MySaver.Save();
         MySaver.SaveObjectDatabase();
         UINew.Instance.CloseActiveMenu();
@@ -16,5 +16,14 @@ public class PauseMenu : MonoBehaviour {
     }
     public void ContinueClick() {
         UINew.Instance.CloseActiveMenu();
+    }
+    public void SaveClick() {
+        MySaver.Save();
+        MySaver.SaveObjectDatabase();
+        UINew.Instance.CloseActiveMenu();
+    }
+    public void PerkClick() {
+        UINew.Instance.CloseActiveMenu();
+        UINew.Instance.ShowMenu(UINew.MenuType.perkBrowser);
     }
 }

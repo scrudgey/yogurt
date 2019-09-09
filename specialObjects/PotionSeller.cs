@@ -11,8 +11,6 @@ public class PotionSeller : Interactive {
     public AudioSource audioSource;
     public GameObject leftPoint;
     public GameObject rightPoint;
-    public SpriteRenderer leftSprite;
-    public SpriteRenderer rightSprite;
     void Start() {
         speech = GetComponent<Speech>();
         Interaction giveAct = new Interaction(this, "analyze", "Analyze");

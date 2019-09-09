@@ -303,7 +303,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         // the force is normal to the surface we impacted.
         ContactPoint2D contact = collision.contacts[0];
         // TODO: fix magnitude? z? amount?
-        message.force = contact.normal;
+        message.force = collision.relativeVelocity.magnitude * contact.normal;
         message.amount = collision.relativeVelocity.magnitude;
         if (physical)
             if (physical.currentMode == Physical.mode.zip)
@@ -339,20 +339,38 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         if (physical.currentMode == Physical.mode.zip) {
             Rebound();
         } else {
-            Vector2 force = message.force * message.amount;
-            if (force.magnitude / body.mass > 0.1f)
-                if (physical.currentMode != Physical.mode.fly)
-                    physical.FlyMode();
+            Vector2 force = message.force / 2f;
+            if (message.strength) {
+                thrownBy = gameObject;
+                // sprite.sortingLayerName = "main";
+                Vector2 tempPos = Vector2.zero;
+                Vector2 groundPos = transform.position;
+                float height = 0.15f;
+                tempPos.y = height;
+                groundPos.y -= height;
+                hingeObject.transform.localPosition = tempPos;
+                groundObject.transform.position = groundPos;
+                float vx = force.x / 10f;
+                float vy = force.y / 10f;
+                float vz = 0f;
+                physical.ZipMode();
+                Set3Motion(new Vector3(vx, vy, vz));
+            } else {
+                if (force.magnitude / body.mass > 0.1f) {
+                    if (physical.currentMode != Physical.mode.fly)
+                        physical.FlyMode();
+                }
+                // TODO: make this smarter
+                Vector3 impulse = new Vector3(force.x / body.mass, force.y / body.mass, 0);
+                if (physical.currentMode == Physical.mode.ground || physical.height < 0.1f) {
+                    impulse.z = Random.Range(0.01f, 0.40f) / body.mass;
+                }
+                impulse = impulse * (bounceCoefficient / 0.5f);
+                Add3Motion(impulse);
+            }
             if (impactSounds != null && impactSounds.Length > 0) {
                 audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
             }
-            // TODO: make this smarter
-            Vector3 impulse = new Vector3(force.x / body.mass, force.y / body.mass, 0);
-            if (physical.currentMode == Physical.mode.ground || physical.height < 0.1f) {
-                impulse.z = Random.Range(0.01f, 0.40f) / body.mass;
-            }
-            impulse = impulse * (bounceCoefficient / 0.5f);
-            Add3Motion(impulse);
         }
     }
     public void Rebound() {

@@ -587,7 +587,7 @@ public class CutsceneMayor : Cutscene {
         }
     }
     public override void CleanUp() {
-        // UINew.Instance.RefreshUI(active: true);
+        UINew.Instance.RefreshUI(active: true);
         foreach (KeyValuePair<Controllable, Controllable.ControlType> kvp in initialState) {
             kvp.Key.control = kvp.Value;
         }

@@ -17,7 +17,7 @@ public abstract class Damageable : MonoBehaviour {
     public AudioClip[] impactSounds;
     public AudioClip[] repelSounds;
     public AudioClip[] strongImpactSounds;
-    public damageType lastDamage;
+    // public damageType lastDamage;
     public MessageDamage lastMessage;
     public GameObject gibsContainerPrefab;
     public Dictionary<BuffType, Buff> netBuffs;
@@ -76,7 +76,7 @@ public abstract class Damageable : MonoBehaviour {
         if (message.amount == 0)
             return;
         lastMessage = message;
-        lastDamage = message.type;
+        // lastDamage = message.type;
         bool vulnerable = Damages(this, message.type, netBuffs);
         ImpactResult result = ImpactResult.normal;
         float damage = 0f;
@@ -87,17 +87,18 @@ public abstract class Damageable : MonoBehaviour {
                 return;
             if (message.type == damageType.cosmic && netBuffs != null && netBuffs[BuffType.ethereal].boolValue) {
                 message.type = damageType.cutting;
-                lastDamage = damageType.cutting;
+                // lastDamage = damageType.cutting;
             }
             damage = CalculateDamage(message);
-            if (damage > 0) {
-                if (message.strength) {
-                    result = ImpactResult.strong;
-                } else {
-                    result = ImpactResult.normal;
-                }
+            if (message.strength) {
+                result = ImpactResult.strong;
+                damage *= 2f;
             } else {
-                result = ImpactResult.repel;
+                if (damage > 0) {
+                    result = ImpactResult.normal;
+                } else {
+                    result = ImpactResult.repel;
+                }
             }
             // play impact sounds
             if ((message.impactSounds.Length > 0) || (message.type != damageType.fire && message.type != damageType.asphyxiation && message.type != damageType.cosmic))
@@ -123,7 +124,7 @@ public abstract class Damageable : MonoBehaviour {
         if (lastMessage == null)
             lastMessage = new MessageDamage(0.5f, damageType.physical);
         foreach (Gibs gib in GetComponents<Gibs>())
-            gib.Emit(lastDamage, lastMessage.force);
+            gib.Emit(lastMessage);
         PhysicalBootstrapper phys = GetComponent<PhysicalBootstrapper>();
         if (phys) {
             phys.DestroyPhysical();

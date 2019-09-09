@@ -46,8 +46,10 @@ public class GameData {
     public List<string> packages;
     public bool firstTimeLeavingHouse;
     public bool mayorCutsceneHappened;
+    public bool visitedStudio;
     public bool teleporterUnlocked;
     public string headSpriteSheet;
+    public SkinColor headSkinColor;
     public string cosmicName = "";
     public bool loadedDay;
     public GameData() {
@@ -128,8 +130,7 @@ public partial class GameManager : Singleton<GameManager> {
             // ReceivePackage("kaiser_helmet");
             // ReceivePackage("duplicator");
             // ReceivePackage("golf_club");
-            if (debug)
-                data.mayorCutsceneHappened = true;
+
         }
         if (saveGameName == "test")
             MySaver.CleanupSaves();
@@ -232,6 +233,7 @@ public partial class GameManager : Singleton<GameManager> {
             HeadAnimation headAnim = playerHead.GetComponent<HeadAnimation>();
             if (headAnim) {
                 data.headSpriteSheet = headAnim.spriteSheet;
+                data.headSkinColor = headAnim.skinColor;
             }
         }
         Inventory playerInv = target.GetComponent<Inventory>();
@@ -363,7 +365,10 @@ public partial class GameManager : Singleton<GameManager> {
             }
             data.firstTimeLeavingHouse = false;
         }
-
+        if (sceneName == "studio" && !data.visitedStudio) {
+            data.visitedStudio = true;
+            ShowDiaryEntry("diaryStudio");
+        }
         if (sceneName == "cave1" || sceneName == "cave2") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneFall>();
         }
@@ -591,6 +596,13 @@ public partial class GameManager : Singleton<GameManager> {
                 data.unlockedScenes.Add(sceneName);
             }
             data.teleporterUnlocked = true;
+            data.mayorCutsceneHappened = true;
+            data.visitedStudio = true;
+
+            data.collectedObjects.Add("package");
+            data.itemCheckedOut["package"] = false;
+            data.collectedObjects.Add("cosmic_nullifier");
+            data.itemCheckedOut["cosmic_nullifier"] = false;
         }
         data.completeCommercials = new HashSet<Commercial>();
         // initialize achievements

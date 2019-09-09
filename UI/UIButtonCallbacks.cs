@@ -13,13 +13,13 @@ public class UIButtonCallbacks : MonoBehaviour {
     public void InventoryButtonClick() {
         UINew.Instance.ShowInventoryMenu();
     }
-    public void FinishButtonClick() {
-        VideoCamera video = GameObject.FindObjectOfType<VideoCamera>();
-        video.live = false;
-        if (video) {
-            GameManager.Instance.EvaluateCommercial(video.commercial);
-        }
-    }
+    // public void FinishButtonClick() {
+    //     VideoCamera video = GameObject.FindObjectOfType<VideoCamera>();
+    //     video.live = false;
+    //     if (video) {
+    //         GameManager.Instance.EvaluateCommercial(video.commercial);
+    //     }
+    // }
     public void SaveButtonClick() {
         MySaver.Save();
         MySaver.SaveObjectDatabase();

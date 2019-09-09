@@ -12,8 +12,8 @@ public class PersistentComponent {
     public List<SerializedKnowledge> knowledgeBase;
     public List<SerializedPersonalAssessment> people;
     public SerializableDictionary<string, SerializedKnowledge> knowledges = new SerializableDictionary<string, SerializedKnowledge>();
-    public List<Buff> buffs;
-    public List<Commercial> commercials;
+    public List<Buff> buffs = new List<Buff>();
+    public List<Commercial> commercials = new List<Commercial>();
     public int id;
     public PersistentComponent() {
         // Needed for XML serialization

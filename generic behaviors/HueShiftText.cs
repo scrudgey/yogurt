@@ -18,7 +18,7 @@ public class HueShiftText : MonoBehaviour {
         color = HSBColor.FromColor(text.color);
     }
     void Update() {
-        color.h += Time.deltaTime / speedConst;
+        color.h += Time.unscaledDeltaTime / speedConst;
         if (color.h > 1)
             color.h -= 1f;
         text.color = color.ToColor();

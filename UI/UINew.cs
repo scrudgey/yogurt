@@ -5,7 +5,11 @@ using Easings;
 using UnityEngine.EventSystems;
 
 public class UINew : Singleton<UINew> {
-    public enum MenuType { none, escape, inventory, speech, closet, scriptSelect, commercialReport, newDayReport, email, diary, dialogue, phone, perk, teleport, tv }
+    public enum MenuType {
+        none, escape, inventory, speech, closet,
+        scriptSelect, commercialReport, newDayReport, email,
+        diary, dialogue, phone, perk, teleport, tv, perkBrowser
+    }
     private enum EasingDirection { none, up, down }
     private Dictionary<MenuType, string> menuPrefabs = new Dictionary<MenuType, string>{
         {MenuType.escape,                   "UI/PauseMenu"},
@@ -21,7 +25,8 @@ public class UINew : Singleton<UINew> {
         {MenuType.phone,                    "UI/PhoneMenu"},
         {MenuType.perk,                     "UI/PerkMenu"},
         {MenuType.teleport,                 "UI/TeleportMenu"},
-        {MenuType.tv,                       "UI/TVMenu"}
+        {MenuType.tv,                       "UI/TVMenu"},
+        {MenuType.perkBrowser,              "UI/PerkBrowser"}
     };
     private static List<MenuType> actionRequired = new List<MenuType> { MenuType.commercialReport, MenuType.diary, MenuType.perk, MenuType.dialogue };
     public GameObject activeMenu;
@@ -36,6 +41,7 @@ public class UINew : Singleton<UINew> {
     private List<GameObject> bottomElements = new List<GameObject>();
     private GameObject inventoryButton;
     private GameObject fightButton;
+    private Text fightButtonText;
     private GameObject punchButton;
     private GameObject speakButton;
     private GameObject saveButton;
@@ -72,6 +78,7 @@ public class UINew : Singleton<UINew> {
     public string actionButtonText;
     public UIHitIndicator hitIndicator;
     public Transform objectivesContainer;
+    public GameObject buttonAnchor;
     public List<string> previousTopButtons = new List<string>();
     public void Start() {
         Awake();
@@ -251,7 +258,7 @@ public class UINew : Singleton<UINew> {
             OxygenBarOff();
         }
         if (healthBarEasingDirection != EasingDirection.none) {
-            healthBarEasingTimer += Time.deltaTime;
+            healthBarEasingTimer += Time.unscaledDeltaTime;
             Vector3 tempPos = topRightRectTransform.anchoredPosition;
             if (healthBarEasingTimer >= 1f) {
                 healthBarEasingDirection = EasingDirection.none;
@@ -267,7 +274,7 @@ public class UINew : Singleton<UINew> {
             }
         }
         if (oxygenBarEasingDirection != EasingDirection.none) {
-            oxygenBarEasingTimer += Time.deltaTime;
+            oxygenBarEasingTimer += Time.unscaledDeltaTime;
             Vector3 tempPos = topRightRectTransform.anchoredPosition;
             if (oxygenBarEasingTimer >= 1f) {
                 oxygenBarEasingDirection = EasingDirection.none;
@@ -294,6 +301,7 @@ public class UINew : Singleton<UINew> {
         UICanvas.GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
         inventoryButton = UICanvas.transform.Find("topdock/InventoryButton").gameObject;
         fightButton = UICanvas.transform.Find("topdock/FightButton").gameObject;
+        fightButtonText = fightButton.GetComponentInChildren<Text>();
         punchButton = UICanvas.transform.Find("topdock/PunchButton").gameObject;
         speakButton = UICanvas.transform.Find("topdock/SpeakButton").gameObject;
         hypnosisButton = UICanvas.transform.Find("topdock/HypnosisButton").gameObject;
@@ -342,6 +350,8 @@ public class UINew : Singleton<UINew> {
         hitIndicator.Hit();
     }
     public void HealthBarOn() {
+        if (Controller.Instance.focusHurtable == null)
+            return;
         if (Controller.Instance.focusHurtable.oxygen >= Controller.Instance.focusHurtable.maxOxygen) {
             if (healthBarEasingDirection == EasingDirection.none) {
                 if (topRightRectTransform.anchoredPosition.y > 10f) {
@@ -352,6 +362,8 @@ public class UINew : Singleton<UINew> {
         }
     }
     public void HealthBarOff() {
+        if (Controller.Instance.focusHurtable == null)
+            return;
         if (Controller.Instance.focusHurtable.oxygen >= Controller.Instance.focusHurtable.maxOxygen) {
             if (healthBarEasingDirection == EasingDirection.none) {
                 if (topRightRectTransform.anchoredPosition.y < 40f) {
@@ -370,6 +382,8 @@ public class UINew : Singleton<UINew> {
         }
     }
     public void OxygenBarOff() {
+        if (Controller.Instance.focusHurtable == null)
+            return;
         if (Controller.Instance.focusHurtable.health >= Controller.Instance.focusHurtable.maxHealth) {
             if (oxygenBarEasingDirection == EasingDirection.none) {
                 if (topRightRectTransform.anchoredPosition.y < 40f) {
@@ -406,6 +420,7 @@ public class UINew : Singleton<UINew> {
         } else {
             Controller.Instance.state = Controller.ControlState.inMenu;
         }
+        Time.timeScale = 0f;
         return activeMenu;
     }
     public void CloseActiveMenu() {
@@ -507,9 +522,13 @@ public class UINew : Singleton<UINew> {
         }
     }
     public void ShowPunchButton() {
+        // set fight button to stop fight
+        fightButtonText.text = "Stop Fighting";
         punchButton.SetActive(true);
     }
     public void HidePunchButton() {
+        // set fight button to fight
+        fightButtonText.text = "Fight";
         punchButton.SetActive(false);
     }
     public void PopupCounter(string text, float initValue, float finalValue, Commercial commercial) {
@@ -654,7 +673,7 @@ public class UINew : Singleton<UINew> {
         float angle = 0f;
         RectTransform canvasRect = UICanvas.GetComponent<RectTransform>();
         Camera renderingCamera = UICanvas.GetComponent<Canvas>().worldCamera;
-        GameObject buttonAnchor = Instantiate(Resources.Load("UI/ButtonAnchor"), UICanvas.transform.position, Quaternion.identity) as GameObject;
+        buttonAnchor = Instantiate(Resources.Load("UI/ButtonAnchor"), UICanvas.transform.position, Quaternion.identity) as GameObject;
         Rigidbody2D firstBody = null;
         Rigidbody2D priorBody = null;
         int n = 0;
@@ -783,12 +802,12 @@ public class UINew : Singleton<UINew> {
         CameraControl camControl = FindObjectOfType<CameraControl>();
         camControl.audioSource.PlayOneShot(Resources.Load(path) as AudioClip);
     }
-    public ObjectiveIndicator AddObjective(CommercialProperty property) {
+    public ObjectiveIndicator AddObjective(Objective objective) {
         GameObject objectiveObject = GameManager.Instantiate(Resources.Load("UI/objective")) as GameObject;
         objectiveObject.transform.SetParent(objectivesContainer, false);
         ObjectiveIndicator script = objectiveObject.GetComponent<ObjectiveIndicator>();
-        script.description.text = property.objective;
-        script.targetProperty = property; // change this
+        script.objective = objective;
+        script.description.text = objective.desc;
         return script;
     }
     public void ClearObjectives() {

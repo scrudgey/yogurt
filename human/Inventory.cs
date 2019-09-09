@@ -364,11 +364,11 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         if (weapon.impactSounds.Length > 0) {
             message.impactSounds = weapon.impactSounds;
         }
-        message.force = new Vector2(direction.x * weapon.damage / 100f, direction.y * weapon.damage / 100f);
+        message.force = weapon.damage * direction;
+        message.amount = weapon.damage;
         message.responsibleParty = gameObject;
         message.strength = netBuffs[BuffType.strength].boolValue;
         message.type = weapon.damageType;
-        message.amount = weapon.damage;
         s.message = message;
     }
     public void DropMessage(GameObject obj) {
@@ -400,22 +400,17 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         startPoint.y += direction.normalized.y / 7f + 0.01f;
         GameObject slash = Instantiate(Resources.Load("PhysicalImpact"), startPoint, holdpoint.rotation) as GameObject;
         PhysicalImpact impact = slash.GetComponent<PhysicalImpact>();
-        MessageDamage message = new MessageDamage(10f, damageType.physical);
-        if (netBuffs[BuffType.strength].boolValue) {
-            message.force = new Vector2(direction.x * 2f, direction.y * 2f);
-        } else {
-            message.force = new Vector2(direction.x / 2f, direction.y / 2f);
-        }
+        MessageDamage message = new MessageDamage(20f, damageType.physical);
+        message.force = 20f * direction;
+        message.amount = 20f;
         message.responsibleParty = gameObject;
         message.strength = netBuffs[BuffType.strength].boolValue;
         message.type = damageType.physical;
-        message.amount = 20f;
         impact.message = message;
         Collider2D slashCollider = slash.GetComponent<Collider2D>();
         foreach (Collider2D tomCollider in GetComponentsInChildren<Collider2D>()) {
             Physics2D.IgnoreCollision(tomCollider, slashCollider, true);
         }
-        // Debug.Break();
     }
     public void EndPunch() {
         MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.punching, false);

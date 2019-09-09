@@ -8,118 +8,6 @@ using System.Text;
 public enum CommercialComparison {
     equal, notequal, greater, less, greaterEqual, lessEqual
 }
-public class CommercialDescription {
-    public List<EventData> allEvents;
-    public List<EventData> maxDisturbing = new List<EventData>();
-    public List<EventData> maxDisgusting = new List<EventData>();
-    public List<EventData> maxChaos = new List<EventData>();
-    public List<EventData> maxOffense = new List<EventData>();
-    public List<EventData> maxPositive = new List<EventData>();
-    public List<EventData> notableEvents = new List<EventData>();
-    public List<EventData> outlierEvents = new List<EventData>();
-    public List<string> FrequentNouns(List<EventData> events) {
-        List<string> frequentNouns = new List<string>();
-        var nouns = events.GroupBy(i => i.noun);
-        Dictionary<string, float> nounCounts = new Dictionary<string, float>();
-        foreach (var grp in nouns) {
-            nounCounts[grp.Key] = grp.Count();
-        }
-        var sortedNounCounts = nounCounts.ToList();
-        sortedNounCounts.Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
-        sortedNounCounts.Reverse();
-        foreach (KeyValuePair<string, float> kvp in sortedNounCounts) {
-            frequentNouns.Add(kvp.Key);
-        }
-        return frequentNouns;
-    }
-    public CommercialDescription(List<EventData> inputEvents) {
-        allEvents = inputEvents;
-        HashSet<EventData> events = new HashSet<EventData>(inputEvents);
-        // initialize dataset
-        maxDisturbing = events.OrderBy(o => o.ratings[Rating.disturbing]).ToList();
-        maxDisgusting = events.OrderBy(o => o.ratings[Rating.disgusting]).ToList();
-        maxChaos = events.OrderBy(o => o.ratings[Rating.chaos]).ToList();
-        maxOffense = events.OrderBy(o => o.ratings[Rating.offensive]).ToList();
-        maxPositive = events.OrderBy(o => o.ratings[Rating.positive]).ToList();
-
-        Dictionary<EventData, int> occurrencesInTop3 = new Dictionary<EventData, int>();
-        foreach (EventData e in events) {
-            occurrencesInTop3[e] = 0;
-        }
-
-        Dictionary<Rating, List<EventData>> maxLists = new Dictionary<Rating, List<EventData>>{
-            {Rating.disturbing, maxDisturbing},
-            {Rating.disgusting, maxDisgusting},
-            {Rating.chaos, maxChaos},
-            {Rating.offensive, maxOffense},
-            {Rating.positive, maxPositive}
-        };
-
-        // calculate frequency of top3s
-        foreach (List<EventData> list in maxLists.Values) {
-            list.Reverse();
-            for (int i = 0; i < 3; i++) {
-                occurrencesInTop3[list[i]] += 1;
-            }
-        }
-
-        // calculate the events that most frequently show up in the top 3
-        var sortedFrequency = occurrencesInTop3.ToList();
-        sortedFrequency.Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
-        sortedFrequency.Reverse();
-        foreach (KeyValuePair<EventData, int> kvp in sortedFrequency) {
-            // Debug.Log(kvp.Key.whatHappened + " " + kvp.Value.ToString());
-            notableEvents.Add(kvp.Key);
-        }
-
-        Dictionary<EventData, float> largestDeltas = new Dictionary<EventData, float>();
-        // calculate the 3 events with the highest deltas
-        foreach (Rating key in maxLists.Keys) {
-            List<EventData> list = maxLists[key];
-            Dictionary<EventData, float> deltas = new Dictionary<EventData, float>();
-            // calc deltas
-            for (int i = 0; i < list.Count - 1; i++) {
-                deltas[list[i + 1]] = list[i].ratings[key] - list[i + 1].ratings[key];
-            }
-            // populate list of event, highest delta
-            foreach (EventData eventData in deltas.Keys) {
-                float delta = -1f;
-                if (largestDeltas.TryGetValue(eventData, out delta)) {
-                    if (delta < deltas[eventData]) {
-                        largestDeltas[eventData] = deltas[eventData];
-                    }
-                } else {
-                    largestDeltas[eventData] = deltas[eventData];
-                }
-            }
-        }
-        // reverse list, take highest n
-        var sortedDeltas = largestDeltas.ToList();
-        sortedDeltas.Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
-        sortedDeltas.Reverse();
-        foreach (KeyValuePair<EventData, float> kvp in sortedDeltas) {
-            outlierEvents.Add(kvp.Key);
-        }
-    }
-    public void DebugLists() {
-        // calculate the 3 most common type of event
-        List<string> commonTypes = FrequentNouns(allEvents);
-        Debug.Log("top 3 notable");
-        Debug.Log(notableEvents[0].whatHappened);
-        Debug.Log(notableEvents[1].whatHappened);
-        Debug.Log(notableEvents[2].whatHappened);
-
-        Debug.Log("top 3 outliers");
-        Debug.Log(outlierEvents[0].whatHappened);
-        Debug.Log(outlierEvents[1].whatHappened);
-        Debug.Log(outlierEvents[2].whatHappened);
-
-        Debug.Log("top 3 most common types");
-        Debug.Log(commonTypes[0]);
-        Debug.Log(commonTypes[1]);
-        Debug.Log(commonTypes[2]);
-    }
-}
 
 [System.Serializable]
 [XmlRoot("Commercial")]
@@ -129,11 +17,15 @@ public class Commercial {
     public string cutscene = "default";
     public SerializableDictionary<string, CommercialProperty> properties = new SerializableDictionary<string, CommercialProperty>();
     public List<string> unlockUponCompletion;
+    public List<string> requiredLocations = new List<string>();
+    public HashSet<string> visitedLocations = new HashSet<string>();
     public string unlockItem = "";
     public string email = "";
     public List<EventData> eventData = new List<EventData>();
     [XmlIgnore]
     public CommercialDescription analysis;
+    [XmlIgnore]
+    public List<Objective> objectives = new List<Objective>();
     public static Commercial LoadCommercialByFilename(string filename) {
         Commercial c = new Commercial();
         TextAsset dataFile = Resources.Load("data/commercials/" + filename) as TextAsset;
@@ -147,39 +39,16 @@ public class Commercial {
             CommercialProperty prop = new CommercialProperty();
             string line = lines.Pop();
             string[] bits = line.Split(',');
-            if (bits[0] == "unlock") {
+            string key = bits[0];
+            if (key == "unlock") {
                 c.unlockUponCompletion.Add(bits[1]);
-            } else if (bits[0] == "item") {
+            } else if (key == "item") {
                 c.unlockItem = bits[1];
-            } else if (bits[0] == "email") {
+            } else if (key == "email") {
                 c.email = bits[1];
-            } else {
-                // yogurt,≥,1,eat yogurt on camera
-                prop.val = float.Parse(bits[2]);
-                switch (bits[1]) {
-                    case "=":
-                        prop.comp = CommercialComparison.equal;
-                        break;
-                    case ">":
-                        prop.comp = CommercialComparison.greater;
-                        break;
-                    case "<":
-                        prop.comp = CommercialComparison.less;
-                        break;
-                    case "≥":
-                        prop.comp = CommercialComparison.greaterEqual;
-                        break;
-                    case "≤":
-                        prop.comp = CommercialComparison.lessEqual;
-                        break;
-                    default:
-                        break;
-                }
-                // add description
-                prop.objective = bits[3];
-                prop.key = bits[0];
-                c.properties[bits[0]] = prop;
-            }
+            } else if (key == "location") {
+                c.objectives.Add(new ObjectiveLocation(bits));
+            } else c.objectives.Add(new ObjectiveProperty(bits));
         }
         return c;
     }
@@ -203,14 +72,14 @@ public class Commercial {
         properties.TryGetValue(data.key, out property);
         if (property == null) {
             properties[data.key] = new CommercialProperty();
-            properties[data.key].desc = data.desc;
+            properties[data.key].desc = data.popupDesc;
         }
         float initvalue = properties[data.key].val;
         float finalvalue = initvalue + data.val;
         if (data.key == "table_fire" & initvalue > 0) {
             return;
         }
-        UINew.Instance.PopupCounter(data.desc, initvalue, finalvalue, this);
+        UINew.Instance.PopupCounter(data.popupDesc, initvalue, finalvalue, this);
         properties[data.key].val = finalvalue;
     }
     public void WriteReport() {
@@ -229,19 +98,10 @@ public class Commercial {
         writer.Close();
         analysis = new CommercialDescription(eventData);
     }
-    public bool Evaluate(Commercial other) {
+    public bool Evaluate(Commercial required) {
         bool requirementsMet = true;
-        foreach (KeyValuePair<string, CommercialProperty> kvp in other.properties) {
-            CommercialProperty myProperty = null;
-            CommercialProperty otherProperty = kvp.Value;
-            properties.TryGetValue(kvp.Key, out myProperty);
-            if (myProperty == null) {
-                requirementsMet = false;
-                break;
-            }
-            requirementsMet = myProperty.RequirementMet(otherProperty);
-            if (!requirementsMet)
-                break;
+        foreach (Objective objective in required.objectives) {
+            requirementsMet &= objective.RequirementsMet(this);
         }
         return requirementsMet;
     }
@@ -298,32 +158,4 @@ public class CommercialProperty {
     public string key;
     public float val;
     public string desc;
-    public string objective;
-    public CommercialComparison comp;
-    public CommercialProperty() {
-        val = 0;
-        comp = CommercialComparison.equal;
-    }
-    public CommercialProperty(float val, bool truth, CommercialComparison comp) {
-        this.val = val;
-        this.comp = comp;
-    }
-    public bool RequirementMet(CommercialProperty otherProperty) {
-        switch (otherProperty.comp) {
-            case CommercialComparison.equal:
-                return this.val == otherProperty.val;
-            case CommercialComparison.notequal:
-                return this.val != otherProperty.val;
-            case CommercialComparison.greater:
-                return this.val > otherProperty.val;
-            case CommercialComparison.less:
-                return this.val < otherProperty.val;
-            case CommercialComparison.greaterEqual:
-                return this.val >= otherProperty.val;
-            case CommercialComparison.lessEqual:
-                return this.val <= otherProperty.val;
-            default:
-                return true;
-        }
-    }
 }

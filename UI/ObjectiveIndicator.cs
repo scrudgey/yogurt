@@ -8,16 +8,12 @@ public class ObjectiveIndicator : MonoBehaviour {
     public Text description;
     public Sprite unfinishedSprite;
     public Sprite finishedSprite;
-    public CommercialProperty targetProperty;
+    // public CommercialProperty targetProperty;
+    public string location;
+    public Objective objective;
 
     public void UpdateCheck(Commercial localCommercial) {
-        CommercialProperty localProperty = null;
-        localCommercial.properties.TryGetValue(targetProperty.key, out localProperty);
-        if (localProperty == null) {
-            SetCheck(false);
-        } else {
-            SetCheck(localProperty.RequirementMet(targetProperty));
-        }
+        SetCheck(objective.RequirementsMet(localCommercial));
     }
     public void SetCheck(bool value) {
         if (value) {

@@ -26,7 +26,10 @@ public class CutsceneImp : Cutscene {
         UINew.Instance.RefreshUI();
         if (GetIngredients()) {
             StartAnalysis();
+        } else {
+            RefuseAnalysis();
         }
+        // TODO: else if special
     }
     void SetDialogue(DialogueNode newNode) {
         DialogueMenu menu = UINew.Instance.ShowMenu(UINew.MenuType.dialogue).GetComponent<DialogueMenu>();
@@ -50,6 +53,15 @@ public class CutsceneImp : Cutscene {
         newNode.text.Add("Within it, I sense much " + dat.name + ".");
         newNode.text.Add("The first ingredient is...");
         newNode.text.Add("IMPCALLBACK1");
+        SetDialogue(newNode);
+    }
+    void RefuseAnalysis() {
+        DialogueNode newNode = new DialogueNode();
+        newNode.text.Add("Gra ha ha ha... Yes, show me your trinket....");
+        newNode.text.Add("What a lovely " + Toolbox.Instance.GetName(analyzand) + ".");
+        newNode.text.Add("But it contains no magic.");
+        newNode.text.Add("Show me something else...");
+        newNode.text.Add("IMPCALLBACK3");
         SetDialogue(newNode);
     }
     public override void Update() {
@@ -96,7 +108,7 @@ public class CutsceneImp : Cutscene {
     public void DescribeFirstIngredient() {
         state = State.describeFirst;
         DialogueNode newNode = new DialogueNode();
-        newNode.text.Add(potionData.ingredient1.name + "!!!");
+        newNode.text.Add(Toolbox.UppercaseFirst(potionData.ingredient1.name) + "!!!");
         newNode.text.Add("The second ingredient is...");
         newNode.text.Add("IMPCALLBACK2");
         SetDialogue(newNode);
@@ -111,7 +123,7 @@ public class CutsceneImp : Cutscene {
     public void DescribeSecondIngredient() {
         state = State.describeFirst;
         DialogueNode newNode = new DialogueNode();
-        newNode.text.Add(potionData.ingredient2.name + "!!!");
+        newNode.text.Add(Toolbox.UppercaseFirst(potionData.ingredient2.name) + "!!!");
         newNode.text.Add("Together they make potion of " + potionData.name + "!");
         newNode.text.Add("IMPCALLBACK3");
         SetDialogue(newNode);
@@ -120,8 +132,8 @@ public class CutsceneImp : Cutscene {
     public void Finish() {
         complete = true;
         impAnimate.enabled = true;
-        impSeller.leftPoint.SetActive(false);
-        impSeller.rightPoint.SetActive(false);
+        Toolbox.Instance.deactivateEventually(impSeller.leftPoint);
+        Toolbox.Instance.deactivateEventually(impSeller.rightPoint);
     }
 
     public bool GetIngredients() {
