@@ -158,28 +158,4 @@ public class CommercialProperty {
     public string key;
     public float val;
     public string desc;
-    // public string objective;
-    // public CommercialComparison comp;
-    public CommercialProperty() {
-        val = 0;
-        // comp = CommercialComparison.equal;
-    }
-    // public bool RequirementMet(CommercialProperty otherProperty) {
-    //     switch (otherProperty.comp) {
-    //         case CommercialComparison.equal:
-    //             return this.val == otherProperty.val;
-    //         case CommercialComparison.notequal:
-    //             return this.val != otherProperty.val;
-    //         case CommercialComparison.greater:
-    //             return this.val > otherProperty.val;
-    //         case CommercialComparison.less:
-    //             return this.val < otherProperty.val;
-    //         case CommercialComparison.greaterEqual:
-    //             return this.val >= otherProperty.val;
-    //         case CommercialComparison.lessEqual:
-    //             return this.val <= otherProperty.val;
-    //         default:
-    //             return true;
-    //     }
-    // }
 }
