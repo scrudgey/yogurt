@@ -142,10 +142,13 @@ public partial class GameManager : Singleton<GameManager> {
         // publicAudio = Toolbox.Instance.SetUpAudioSource(cam.gameObject);
         SceneManager.sceneLoaded += SceneWasLoaded;
         // these bits are for debug!
-        if (SceneManager.GetActiveScene().name == "boardroom_cutscene") {
+        Scene scene = SceneManager.GetActiveScene();
+        if (scene.name == "boardroom_cutscene") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneBoardroom>();
             CutsceneManager.Instance.cutscene.Configure();
         }
+
+        MusicController.Instance.SceneChange(scene.name);
     }
     void Update() {
         timeSinceLastSave += Time.deltaTime;
@@ -272,6 +275,8 @@ public partial class GameManager : Singleton<GameManager> {
                 return;
             }
         }
+
+        MusicController.Instance.SceneChange(scene.name);
     }
     void ResetGameState() {
         try {
