@@ -257,7 +257,11 @@ public class StartMenu : MonoBehaviour {
             "Smits",
             "Oprah Noodlemantra",
             "Hash Burnslide",
-            "Bandit Slumbody"
+            "Bandit Slumbody",
+            "Regina Phalange",
+            "Horngus",
+            "Scrungle",
+            "Nutte"
         };
         return names[UnityEngine.Random.Range(0, names.Count)];
     }
