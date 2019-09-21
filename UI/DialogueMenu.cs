@@ -48,6 +48,7 @@ public class Monologue {
 }
 
 public class DialogueMenu : MonoBehaviour {
+    public enum TextSize { normal, large };
     private AudioSource audioSource;
     public Speech instigator;
     public Speech target;
@@ -63,6 +64,15 @@ public class DialogueMenu : MonoBehaviour {
     public GameObject portraitContainer1;
     public GameObject portraitContainer2;
     public Text speechText;
+    public Text largeText;
+    public TextSize textSize {
+        get { return _activeText; }
+        set {
+            _activeText = value;
+            UpdateActiveText();
+        }
+    }
+    private TextSize _activeText;
     public Text choice1Text;
     public Text choice2Text;
     public Text choice3Text;
@@ -105,6 +115,8 @@ public class DialogueMenu : MonoBehaviour {
         portraitContainer2 = transform.Find("base/dialogueElements/main/portrait2").gameObject;
 
         speechText = transform.Find("base/dialogueElements/main/speechPanel/speechText").GetComponent<Text>();
+        largeText = transform.Find("base/dialogueElements/main/speechPanel/largeSpeechText").GetComponent<Text>();
+
         promptText = transform.Find("base/dialogueElements/main/speechPanel/textPrompt").GetComponent<Text>();
         choice1Text = transform.Find("base/dialogueElements/choicePanel/choice1/Text").GetComponent<Text>();
         choice2Text = transform.Find("base/dialogueElements/choicePanel/choice2/Text").GetComponent<Text>();
@@ -122,10 +134,20 @@ public class DialogueMenu : MonoBehaviour {
         endButton = transform.Find("base/buttons/End").GetComponent<Button>();
         buttons.AddRange(new Button[] { giveButton, insultButton, threatenButton, suggestButton, followButton, endButton });
 
-        speechText.text = "";
+        largeText.gameObject.SetActive(false);
+        SetText(newText: "");
         promptText.text = "";
         promptText.text = "[A]";
         Canvas.ForceUpdateCanvases();
+    }
+    public void SetText(string newText = "DEFAULT") {
+        if (newText == "DEFAULT") {
+            speechText.text = monologue.GetString();
+            largeText.text = monologue.text.Peek();
+        } else {
+            speechText.text = newText;
+            largeText.text = newText;
+        }
     }
 
     public void Configure(Speech instigator, Speech target, bool interruptDefault = false) {
@@ -192,6 +214,20 @@ public class DialogueMenu : MonoBehaviour {
             targetAnchoriteDance.StartDance();
         if (menuClosed != null)
             menuClosed();
+    }
+    public void UpdateActiveText() {
+        switch (textSize) {
+            case TextSize.normal:
+                speechText.enabled = true;
+                largeText.gameObject.SetActive(false);
+                break;
+            case TextSize.large:
+                speechText.enabled = false;
+                largeText.gameObject.SetActive(true);
+                break;
+            default:
+                break;
+        }
     }
     public void LoadDialogueTree(string filename) {
 
@@ -405,8 +441,7 @@ public class DialogueMenu : MonoBehaviour {
             portraitContainer2.SetActive(false);
             portraitContainer1.SetActive(true);
         }
-        if (monologue.text.Peek() == "END")
-            UINew.Instance.CloseActiveMenu();
+        CheckForCommands(monologue.text.Peek());
     }
     public void EnableButtons() {
         if (cutsceneDialogue) {
@@ -417,10 +452,8 @@ public class DialogueMenu : MonoBehaviour {
         } else {
             foreach (Button button in buttons)
                 button.interactable = true;
-
             if (instigatorInv == null || targetInv == null) {
                 giveButton.gameObject.SetActive(false);
-                // demandButton.gameObject.SetActive(false);
             }
             if (CutsceneManager.Instance.cutscene != null) {
                 if (CutsceneManager.Instance.cutscene.GetType() == typeof(CutsceneMayor)) {
@@ -432,7 +465,6 @@ public class DialogueMenu : MonoBehaviour {
             choicePanel.SetActive(true);
         }
         Canvas.ForceUpdateCanvases();
-        // Debug.Break();
     }
     public void DisableButtons() {
         foreach (Button button in buttons)
@@ -444,13 +476,7 @@ public class DialogueMenu : MonoBehaviour {
             if (waitForKeyPress) {
                 waitForKeyPress = false;
                 advancedKeyPressed = true;
-                if (monologue.text.Count > 0) {
-                    monologue.NextLine();
-                    CheckForCommands(monologue.text.Peek());
-                } else if (dialogue.Count > 0) {
-                    SetMonologue(dialogue.Pop());
-                    CheckForCommands(monologue.text.Peek());
-                }
+                NextLine();
             }
         }
 
@@ -468,7 +494,7 @@ public class DialogueMenu : MonoBehaviour {
         }
         if (monologue.MoreToSay()) {
             DisableButtons();
-            speechText.text = monologue.GetString();
+            SetText();
             blitCounter += 1;
             monologue.speaker.gibberizer.StartPlay();
             promptText.text = "";
@@ -498,27 +524,15 @@ public class DialogueMenu : MonoBehaviour {
             blitCounter = 0;
         }
     }
-
+    public void NextLine() {
+        if (monologue.text.Count > 0) {
+            monologue.NextLine();
+        } else if (dialogue.Count > 0) {
+            SetMonologue(dialogue.Pop());
+        }
+        CheckForCommands(monologue.text.Peek());
+    }
     public void CheckForCommands(string text) {
-        if (text == "END")
-            UINew.Instance.CloseActiveMenu();
-        if (text == "POLESTARCALLBACK") {
-            PoleStarCallback();
-            monologue.NextLine();
-            speechText.text = monologue.GetString();
-        }
-        if (text == "VAMPIRETRAP") {
-            // VampireTrap();
-            doTrapDoor = true;
-            monologue.NextLine();
-            speechText.text = monologue.GetString();
-        }
-        if (text == "VAMPIREATTACK") {
-            // VampireAttack();
-            doVampireAttack = true;
-            monologue.NextLine();
-            speechText.text = monologue.GetString();
-        }
         if (text == "IMPCALLBACK1") {
             UINew.Instance.CloseActiveMenu();
             CutsceneImp cutscene = (CutsceneImp)CutsceneManager.Instance.cutscene;
@@ -534,6 +548,33 @@ public class DialogueMenu : MonoBehaviour {
             CutsceneImp cutscene = (CutsceneImp)CutsceneManager.Instance.cutscene;
             cutscene.Finish();
         }
+
+        // while (nextLine) {
+        bool nextLine = false;
+        if (text == "END")
+            UINew.Instance.CloseActiveMenu();
+        if (text == "POLESTARCALLBACK") {
+            PoleStarCallback();
+            nextLine = true;
+        }
+        if (text == "VAMPIRETRAP") {
+            doTrapDoor = true;
+            nextLine = true;
+        }
+        if (text == "VAMPIREATTACK") {
+            doVampireAttack = true;
+            nextLine = true;
+        }
+        if (text == "TEXTSIZE:NORMAL") {
+            textSize = TextSize.normal;
+            nextLine = true;
+        }
+        if (text == "TEXTSIZE:LARGE") {
+            textSize = TextSize.large;
+            nextLine = true;
+        }
+        if (nextLine)
+            NextLine();
     }
     public void PoleStarCallback() {
         target.defaultMonologue = "polestar";
@@ -541,8 +582,6 @@ public class DialogueMenu : MonoBehaviour {
         GameManager.Instance.data.cosmicName = GameManager.Instance.CosmicName();
     }
     public void VampireTrap() {
-        // CutsceneManager.Instance.InitializeCutscene<CutsceneVampireTrap>();
-        // CutsceneManager.Instance.cutscene.Configure();
         TrapDoor trapdoor = GameObject.Find("trapdoor").GetComponent<TrapDoor>();
         trapdoor.Activate();
     }
