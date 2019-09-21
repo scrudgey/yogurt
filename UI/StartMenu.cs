@@ -14,9 +14,10 @@ public class StartMenu : MonoBehaviour {
     public ItemCollectionInspector itemCollectionInspector;
     public AchievementBrowser achievementBrowser;
     public StatsBrowser statsBrowser;
+    public GameObject settingsMenu;
     public GameObject prompt;
     public GameObject alert;
-    private enum menuState { anykey, main, startNew, load }
+    private enum menuState { anykey, main, startNew, load, settings }
     private menuState state;
     private Gender selectedGender;
     private SkinColor selectedSkinColor;
@@ -78,6 +79,7 @@ public class StartMenu : MonoBehaviour {
         loadGameMenu.gameObject.SetActive(false);
         mainMenu.SetActive(false);
         saveInspector.gameObject.SetActive(false);
+        settingsMenu.SetActive(false);
         state = switchTo;
         switch (switchTo) {
             case menuState.startNew:
@@ -86,6 +88,9 @@ public class StartMenu : MonoBehaviour {
             case menuState.load:
                 loadGameMenu.gameObject.SetActive(true);
                 loadGameMenu.ConfigLoadMenu(this);
+                break;
+            case menuState.settings:
+                settingsMenu.gameObject.SetActive(true);
                 break;
             default:
                 mainMenu.SetActive(true);
@@ -114,6 +119,12 @@ public class StartMenu : MonoBehaviour {
     public void LoadGameCancel() {
         SwitchMenu(menuState.main);
     }
+    public void SettingsButton() {
+        SwitchMenu(menuState.settings);
+    }
+    public void CloseSettingsMenu() {
+        SwitchMenu(menuState.main);
+    }
     public void ContinueButton() {
         // TODO: catch if there is no save game
         Dictionary<string, GameData> dataDirs = new Dictionary<string, GameData>();
@@ -133,9 +144,7 @@ public class StartMenu : MonoBehaviour {
         Debug.Log(datas[0]);
         GameManager.Instance.LoadGameDataIntoMemory(datas[0]);
     }
-    public void SettingsButton() {
-        Debug.Log("pressed Settings");
-    }
+
     public void QuitButton() {
         Application.Quit();
     }
@@ -210,6 +219,7 @@ public class StartMenu : MonoBehaviour {
         statsBrowser.gameObject.SetActive(false);
         saveInspector.gameObject.SetActive(true);
     }
+
     public void ShowAlert(string text) {
         alert.SetActive(true);
         Text alertText = alert.transform.Find("Text").GetComponent<Text>();

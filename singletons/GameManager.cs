@@ -72,6 +72,18 @@ public class GameData {
         return completeAchievements;
     }
 }
+public class GlobalSettings {
+    private bool _musicOn = true;
+    public bool musicOn {
+        get { return _musicOn; }
+        set {
+            _musicOn = value;
+            MusicController.Instance.UpdateTrack();
+        }
+    }
+    public float sfxVolume;
+    public float musicVolume;
+}
 public partial class GameManager : Singleton<GameManager> {
     protected GameManager() { }
     static public Dictionary<string, string> sceneNames = new Dictionary<string, string>(){
@@ -95,6 +107,7 @@ public partial class GameManager : Singleton<GameManager> {
         {"cave3", "deathtrap cave III"},
     };
     public GameData data;
+    public static GlobalSettings settings = new GlobalSettings();
     public string saveGameName = "test";
     private CameraControl cameraControl;
     public Camera cam;
@@ -608,6 +621,7 @@ public partial class GameManager : Singleton<GameManager> {
             data.itemCheckedOut["package"] = false;
             data.collectedObjects.Add("cosmic_nullifier");
             data.itemCheckedOut["cosmic_nullifier"] = false;
+            data.cosmicName = GameManager.Instance.CosmicName();
         }
         data.completeCommercials = new HashSet<Commercial>();
         // initialize achievements

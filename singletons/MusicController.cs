@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public enum MusicTrack {
     none,
@@ -30,8 +32,8 @@ public class MusicController : Singleton<MusicController> {
     };
     private Dictionary<string, MusicTrack> sceneTracks = new Dictionary<string, MusicTrack>(){
         {"title", MusicTrack.mainTitle},
-        {"house", MusicTrack.creepyAmbient}, // testing
-        {"krazy1", MusicTrack.creepyAmbient}, // testing
+        // {"house", MusicTrack.creepyAmbient}, // testing
+        // {"krazy1", MusicTrack.creepyAmbient}, // testing
         {"chamber", MusicTrack.lithophone},
     };
 
@@ -42,12 +44,10 @@ public class MusicController : Singleton<MusicController> {
     public void Start() {
         SetCamera();
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
-
         // populate tracks
         foreach (KeyValuePair<MusicTrack, string> kvp in trackFiles) {
-            Debug.Log("loading music/" + kvp.Value + " ...");
+            // Debug.Log("loading music/" + kvp.Value + " ...");
             AudioClip clip = Resources.Load("music/" + kvp.Value) as AudioClip;
-            Debug.Log(clip);
             tracks[kvp.Key] = clip;
         }
     }
@@ -67,7 +67,6 @@ public class MusicController : Singleton<MusicController> {
         audioSource.clip = tracks[track];
         audioSource.loop = true;
         audioSource.Play();
-        Debug.Log(audioSource.clip);
         nowPlaying = track;
     }
 
@@ -80,9 +79,16 @@ public class MusicController : Singleton<MusicController> {
 
     public void SceneChange(string sceneName) {
         SetCamera();
-        Debug.Log("music scene change: " + sceneName);
-        if (sceneTracks.ContainsKey(sceneName)) {
-            PlayTrack(sceneTracks[sceneName]);
+        UpdateTrack();
+    }
+    public void UpdateTrack() {
+        Scene scene = SceneManager.GetActiveScene();
+        if (GameManager.settings.musicOn) {
+            if (sceneTracks.ContainsKey(scene.name)) {
+                PlayTrack(sceneTracks[scene.name]);
+            } else {
+                StopTrack();
+            }
         } else {
             StopTrack();
         }
