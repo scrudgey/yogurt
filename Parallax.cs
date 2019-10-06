@@ -20,7 +20,7 @@ public class Parallax : MonoBehaviour {
         originalPosition = cameraTransform.position;
         for (int i = 0; i < layers.Count; i++) {
             ParallaxLayer layer = layers[i];
-            layer.originalPosition = layers[i].transform.position;
+            layer.originalPosition = layers[i].transform.localPosition;
             // if (applyOffsets) {
             //     // Vector2 offset = new Vector2();
             //     // offset.x = -1.0f * layerNeutralAtPosition.x * layers[i].speed;
