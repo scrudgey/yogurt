@@ -225,6 +225,9 @@ public class Controller : Singleton<Controller> {
             if (currentChild.tag == "Physical") {
                 return currentChild.gameObject;
             }
+            if (currentChild.GetComponent<ItemBoundary>()) {
+                return currentChild.gameObject;
+            }
             if (currentChild.parent == null) {
                 return currentChild.gameObject;
             }
@@ -334,12 +337,24 @@ public class Controller : Singleton<Controller> {
             return false;
         if (i.unlimitedRange)
             return true;
-        // GameObject focus = focus;
         Transform focusTransform = focus.transform;
+        Collider2D focusCollider = null;
         if (commandTarget != null) {
+            focusCollider = commandTarget.GetComponent<Collider2D>();
             focusTransform = commandTarget.transform;
+        } else {
+            focusCollider = focus.GetComponent<Collider2D>();
         }
-        float dist = Vector3.SqrMagnitude(lastLeftClicked.transform.position - focusTransform.position);
+        Collider2D clickedCollider = lastLeftClicked.GetComponent<Collider2D>();
+        float dist = 0;
+
+        if (clickedCollider != null && focusCollider != null) {
+            dist = clickedCollider.Distance(focusCollider).distance;
+        } else {
+            dist = Vector3.SqrMagnitude(lastLeftClicked.transform.position - focusTransform.position);
+        }
+
+        // float dist = Vector3.SqrMagnitude(lastLeftClicked.transform.position - focusTransform.position);
         if (dist < i.range) {
             return true;
         } else {
