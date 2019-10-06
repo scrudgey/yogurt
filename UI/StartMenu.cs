@@ -80,7 +80,6 @@ public class StartMenu : MonoBehaviour {
         mainMenu.SetActive(false);
         saveInspector.gameObject.SetActive(false);
         settingsMenu.SetActive(false);
-        state = switchTo;
         switch (switchTo) {
             case menuState.startNew:
                 OpenNewGameMenu();
@@ -97,12 +96,16 @@ public class StartMenu : MonoBehaviour {
                 state = menuState.main;
                 break;
         }
+        state = switchTo;
     }
 
     private void OpenNewGameMenu() {
         newGameMenu.SetActive(true);
-
-        RandomizePlayer();
+        if (state != menuState.settings) {
+            RandomizePlayer();
+        } else {
+            RandomizeName();
+        }
         // TODO: randomize gender, skin color
     }
 
@@ -236,6 +239,12 @@ public class StartMenu : MonoBehaviour {
 
         GenderCallback(randomGender.ToString());
         SkinCallback(randomSkin.ToString());
+
+        input.ActivateInputField();
+        input.text = SuggestAName();
+    }
+    public void RandomizeName() {
+        InputField input = newGameMenu.transform.Find("InputField").GetComponent<InputField>();
 
         input.ActivateInputField();
         input.text = SuggestAName();
