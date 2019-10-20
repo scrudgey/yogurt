@@ -338,23 +338,27 @@ public class Controller : Singleton<Controller> {
         if (i.unlimitedRange)
             return true;
         Transform focusTransform = focus.transform;
-        Collider2D focusCollider = null;
+        Collider2D[] focusColliders = null;
         if (commandTarget != null) {
-            focusCollider = commandTarget.GetComponent<Collider2D>();
+            focusColliders = commandTarget.GetComponentsInChildren<Collider2D>();
             focusTransform = commandTarget.transform;
         } else {
-            focusCollider = focus.GetComponent<Collider2D>();
+            focusColliders = focus.GetComponentsInChildren<Collider2D>();
         }
         Collider2D clickedCollider = lastLeftClicked.GetComponent<Collider2D>();
-        float dist = 0;
-
-        if (clickedCollider != null && focusCollider != null) {
-            dist = clickedCollider.Distance(focusCollider).distance;
-        } else {
+        float dist = float.MaxValue;
+        if (clickedCollider != null && focusColliders.Length > 0) {
+            foreach (Collider2D focusCollider in focusColliders) {
+                if (forbiddenColliders.Contains(focusCollider.tag))
+                    continue;
+                if (focusCollider.enabled == false)
+                    continue;
+                dist = Mathf.Min(dist, clickedCollider.Distance(focusCollider).distance);
+            }
+        }
+        if (dist == float.MaxValue) {
             dist = Vector3.SqrMagnitude(lastLeftClicked.transform.position - focusTransform.position);
         }
-
-        // float dist = Vector3.SqrMagnitude(lastLeftClicked.transform.position - focusTransform.position);
         if (dist < i.range) {
             return true;
         } else {
