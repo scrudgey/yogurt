@@ -44,7 +44,11 @@ public class CameraControl : MonoBehaviour {
         upperRightWorld = GetComponent<Camera>().ScreenToWorldPoint(new Vector2(GetComponent<Camera>().pixelWidth, GetComponent<Camera>().pixelHeight));
         screenWidthWorld = upperRightWorld.x - lowerLeftWorld.x;
         screenHeightWorld = upperRightWorld.y - lowerLeftWorld.y;
-        tempVector = Vector3.SmoothDamp(transform.position, focus.transform.position, ref smoothVelocity, 0.1f);
+
+        // TODO: why is this weird? can we do it a better way?
+        Vector2 initPos = new Vector2(transform.position.x, transform.position.y + screenHeightWorld / 35f);
+        // Vector2 initPos = transform.position;
+        tempVector = Vector3.SmoothDamp(initPos, focus.transform.position, ref smoothVelocity, 0.1f);
 
         //check for edge of level
         if (screenWidthWorld > maxXY.x - minXY.x) {
