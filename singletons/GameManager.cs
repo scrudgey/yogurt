@@ -52,6 +52,7 @@ public class GameData {
     public SkinColor headSkinColor;
     public string cosmicName = "";
     public bool loadedDay;
+    public Int16 ghostsKilled;
     public GameData() {
         days = 0;
         saveDate = System.DateTime.Now.ToString();
@@ -91,7 +92,7 @@ public partial class GameManager : Singleton<GameManager> {
         {"cave2", "deathtrap cave II"},
         {"forest", "forest"},
         {"house", "house"},
-        {"krazy1", "outdoors"},
+        // {"krazy1", "outdoors"},
         {"moon1", "moon"},
         {"studio", "yogurt commercial studio"},
         {"volcano", "volcano"},
@@ -105,6 +106,11 @@ public partial class GameManager : Singleton<GameManager> {
         {"dungeon", "oubliette"},
         {"potion", "apothecary"},
         {"cave3", "deathtrap cave III"},
+        {"moon_pool", "moon pool"},
+        {"moon_town", "moon town"},
+        {"neighborhood", "outdoors"},
+        {"mayors_house", "mayor's house"},
+        {"mayors_attic", "attic"},
     };
     public GameData data;
     public static GlobalSettings settings = new GlobalSettings();
