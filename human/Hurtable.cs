@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class Hurtable : Damageable, ISaveable {
     private Controllable.HitState _hitState;
@@ -33,6 +34,8 @@ public class Hurtable : Damageable, ISaveable {
     public List<Collider2D> backgroundColliders = new List<Collider2D>();
     public float timeSinceLastCough;
     bool vibrate;
+    public bool bleeds = true; // if true, bleed on cutting / piercing damage
+    public bool monster = false; // if true, death of this hurtable is not shocking or disturbing
     public void Reset() {
         health = maxHealth;
         oxygen = maxOxygen;
@@ -138,9 +141,11 @@ public class Hurtable : Damageable, ISaveable {
         }
         if (health <= -0.75 * maxHealth && message.type == damageType.cutting) {
             Destruct();
-            EventData data = Toolbox.Instance.DataFlag(gameObject, chaos: 3, disturbing: 4, disgusting: 4, positive: -2, offensive: -2);
-            data.noun = "corpse desecration";
-            data.whatHappened = "the corpse of " + Toolbox.Instance.GetName(gameObject) + " was desecrated";
+            if (!monster) {
+                EventData data = Toolbox.Instance.DataFlag(gameObject, chaos: 3, disturbing: 4, disgusting: 4, positive: -2, offensive: -2);
+                data.noun = "corpse desecration";
+                data.whatHappened = "the corpse of " + Toolbox.Instance.GetName(gameObject) + " was desecrated";
+            }
         }
         if (message.type != damageType.fire && message.type != damageType.cosmic) {
             hitState = Controllable.AddHitState(hitState, Controllable.HitState.stun);
@@ -202,7 +207,7 @@ public class Hurtable : Damageable, ISaveable {
                 assailant = true;
         }
 
-        OccurrenceDeath occurrenceData = new OccurrenceDeath();
+        OccurrenceDeath occurrenceData = new OccurrenceDeath(monster);
         occurrenceData.dead = gameObject;
         occurrenceData.suicide = suicide;
         occurrenceData.damageZone = damageZone;
@@ -211,6 +216,7 @@ public class Hurtable : Damageable, ISaveable {
         occurrenceData.lastDamage = type;
         Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData, new HashSet<GameObject>() { gameObject });
 
+        // TODO: could this logic belong to eventdata / occurrence ?
         if (GameManager.Instance.playerObject == gameObject) {
             if (type == damageType.fire) {
                 if (suicide) {
@@ -228,6 +234,10 @@ public class Hurtable : Damageable, ISaveable {
                 GameManager.Instance.IncrementStat(StatType.deathByCombat, 1);
             }
             GameManager.Instance.PlayerDeath();
+        }
+        if (gameObject.name == "ghost" && SceneManager.GetActiveScene().name == "mayors_attic") {
+            GameManager.Instance.data.ghostsKilled += 1;
+            Debug.Log(GameManager.Instance.data.ghostsKilled);
         }
     }
 
@@ -359,6 +369,9 @@ public class Hurtable : Damageable, ISaveable {
         }
     }
     public void Bleed(Vector3 position, Vector3 direction) {
+        if (!bleeds)
+            return;
+
         Liquid blood = Liquid.LoadLiquid("blood");
         float initHeight = (position.y - transform.position.y) + 0.15f;
         GameObject drop = Toolbox.Instance.SpawnDroplet(blood, 0.3f, gameObject, initHeight, direction.normalized);
