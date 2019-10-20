@@ -17,6 +17,8 @@ public class Flammable : MonoBehaviour, ISaveable {
     public Pickup pickup;
     public float fireRetardantBuffer = 2f;
     public bool fireproof;
+    public bool silent; // if true, flammable will not generate occurrence flags
+    // public bool coldFire;
     void Start() {
         pickup = GetComponent<Pickup>();
 
@@ -68,6 +70,7 @@ public class Flammable : MonoBehaviour, ISaveable {
     public void HandleDamageMessage(MessageDamage message) {
         if (message.type == damageType.fire) {
             heat += message.amount;
+            responsibleParty = message.responsibleParty;
         }
         if (message.type == damageType.asphyxiation) {
             heat = -999f;
@@ -127,7 +130,7 @@ public class Flammable : MonoBehaviour, ISaveable {
             flagTimer += Time.deltaTime;
             if (flagTimer > 0.5f) {
                 flagTimer = 0;
-                if (!fireSource) {
+                if (!fireSource && !silent) {
                     OccurrenceFire fireData = new OccurrenceFire();
                     fireData.flamingObject = gameObject;
                     Toolbox.Instance.OccurenceFlag(gameObject, fireData, involvedParties);

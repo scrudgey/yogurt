@@ -373,35 +373,40 @@ namespace AI {
         }
     }
     public class RoutineWalkToPoint : Routine {
+        public bool invert;
         public float minDistance;
         public Ref<Vector2> target = new Ref<Vector2>(Vector2.zero);
-        public RoutineWalkToPoint(GameObject g, Controllable c, Ref<Vector2> t, float minDistance) : base(g, c) {
+        public RoutineWalkToPoint(GameObject g, Controllable c, Ref<Vector2> t, float minDistance, bool invert = false) : base(g, c) {
             routineThought = "I'm walking to a spot.";
             target = t;
             this.minDistance = minDistance;
+            this.invert = invert;
         }
         public RoutineWalkToPoint(GameObject g, Controllable c, Ref<Vector2> t) : this(g, c, t, 0.1f) { }
         protected override status DoUpdate() {
             float distToTarget = Vector2.Distance(gameObject.transform.position, target.val);
             control.ResetInput();
-            if (distToTarget < 0.2f) {
+            if (distToTarget < minDistance) {
                 return status.success;
             } else {
-                if (Math.Abs(gameObject.transform.position.x - target.val.x) > minDistance) {
-                    if (gameObject.transform.position.x < target.val.x) {
-                        control.rightFlag = true;
-                    }
-                    if (gameObject.transform.position.x > target.val.x) {
-                        control.leftFlag = true;
-                    }
+                Vector2 comparator = Vector2.zero;
+
+                if (invert) {
+                    comparator = target.val - (Vector2)transform.position;
+                } else {
+                    comparator = (Vector2)transform.position - target.val;
                 }
-                if (Math.Abs(gameObject.transform.position.y - target.val.y) > minDistance) {
-                    if (gameObject.transform.position.y < target.val.y) {
-                        control.upFlag = true;
-                    }
-                    if (gameObject.transform.position.y > target.val.y) {
-                        control.downFlag = true;
-                    }
+
+                if (comparator.x > 0) {
+                    control.leftFlag = true;
+                } else if (comparator.x < 0) {
+                    control.rightFlag = true;
+                }
+
+                if (comparator.y > 0) {
+                    control.downFlag = true;
+                } else if (comparator.y < 0) {
+                    control.upFlag = true;
                 }
                 return status.neutral;
             }
@@ -426,6 +431,7 @@ namespace AI {
     }
 
     public class RoutineWalkToGameobject : Routine {
+        public bool invert;
         public Ref<GameObject> target;
         private Transform cachedTransform;
         private GameObject cachedGameObject;
@@ -446,9 +452,10 @@ namespace AI {
                 }
             }
         }
-        public RoutineWalkToGameobject(GameObject g, Controllable c, Ref<GameObject> targetObject) : base(g, c) {
+        public RoutineWalkToGameobject(GameObject g, Controllable c, Ref<GameObject> targetObject, bool invert = false) : base(g, c) {
             routineThought = "I'm walking over to the " + g.name + ".";
             target = targetObject;
+            this.invert = invert;
         }
         protected override status DoUpdate() {
             if (target.val) {
@@ -457,78 +464,31 @@ namespace AI {
                 if (distToTarget <= minDistance) {
                     return status.success;
                 } else {
-                    // if (Math.Abs(transform.position.x - targetTransform.position.x) > 0) {
-                    if (transform.position.x < targetTransform.position.x) {
+                    Vector2 comparator = Vector2.zero;
+
+                    if (invert) {
+                        comparator = targetTransform.position - transform.position;
+                    } else {
+                        comparator = transform.position - targetTransform.position;
+                    }
+
+                    if (comparator.x > 0) {
+                        control.leftFlag = true;
+                    } else if (comparator.x < 0) {
                         control.rightFlag = true;
                     }
-                    if (transform.position.x > targetTransform.position.x) {
-                        control.leftFlag = true;
-                    }
-                    // }
-                    // if (Math.Abs(transform.position.y - targetTransform.position.y) > 0) {
-                    if (transform.position.y < targetTransform.position.y) {
+
+                    if (comparator.y > 0) {
+                        control.downFlag = true;
+                    } else if (comparator.y < 0) {
                         control.upFlag = true;
                     }
-                    if (transform.position.y > targetTransform.position.y) {
-                        control.downFlag = true;
-                    }
-                    // }
+
                     return status.neutral;
                 }
             } else {
                 return status.failure;
             }
-        }
-    }
-
-    public class RoutineAvoidGameObject : Routine {
-        public Ref<GameObject> threat;
-        private Transform cachedTransform;
-        private GameObject cachedGameObject;
-        //TODO: make use of lastSeenPosition
-        // private Vector3 lastSeenPosition;
-        public Transform threatTransform {
-            get {
-                if (cachedGameObject == threat.val) {
-                    if (cachedTransform != null) {
-                        return cachedTransform;
-                    } else {
-                        cachedTransform = threat.val.transform;
-                        return cachedTransform;
-                    }
-                } else {
-                    cachedGameObject = threat.val;
-                    cachedTransform = threat.val.transform;
-                    return cachedTransform;
-                }
-            }
-        }
-        public RoutineAvoidGameObject(GameObject g, Controllable c, Ref<GameObject> threatObject) : base(g, c) {
-            routineThought = "Get me away from that " + g.name + " !";
-            threat = threatObject;
-        }
-        protected override status DoUpdate() {
-            if (threat.val) {
-                control.leftFlag = control.rightFlag = control.upFlag = control.downFlag = false;
-                // lastSeenPosition = threatTransform.position;
-                if (Math.Abs(transform.position.x - threatTransform.position.x) > 0.1f) {
-                    if (transform.position.x < threatTransform.position.x) {
-                        control.leftFlag = true;
-                    }
-                    if (transform.position.x > threatTransform.position.x) {
-                        control.rightFlag = true;
-                    }
-                }
-                if (Math.Abs(transform.position.y - threatTransform.position.y) > 0.1f) {
-                    if (transform.position.y < threatTransform.position.y) {
-                        control.downFlag = true;
-                    }
-                    if (transform.position.y > threatTransform.position.y) {
-                        control.upFlag = true;
-                    }
-                }
-            }
-            return status.neutral;
         }
     }
     public class RoutineToggleFightMode : Routine {

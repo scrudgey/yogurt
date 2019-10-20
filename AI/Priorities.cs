@@ -255,15 +255,26 @@ namespace AI {
     }
     public class PriorityRunAway : Priority {
         public Ref<GameObject> lastAttacker = new Ref<GameObject>(null);
+        public Ref<Vector2> lastDamageArea = new Ref<Vector2>(Vector2.zero);
+        private GoalWalkToObject goalRunFromObject;
+        // private GoalWalkToPoint goalRunFromPoint;
         public PriorityRunAway(GameObject g, Controllable c) : base(g, c) {
             priorityName = "run away";
-            goal = new GoalRunFromObject(gameObject, control, lastAttacker);
+            goalRunFromObject = new GoalWalkToObject(gameObject, control, lastAttacker, invert: true);
+            // goalRunFromPoint = new GoalWalkToPoint(gameObject, control, lastDamageArea, invert: true);
+            goal = goalRunFromObject;
         }
         public override void ReceiveMessage(Message incoming) {
+            // TODO: switch goals 
             if (incoming is MessageDamage) {
                 MessageDamage dam = (MessageDamage)incoming;
                 lastAttacker.val = dam.messenger.gameObject;
-                urgency += Priority.urgencyMinor;
+
+                if (dam.type == damageType.fire) {
+                    urgency = Priority.urgencyLarge;
+                } else {
+                    urgency += Priority.urgencyMinor;
+                }
             }
             if (incoming is MessageInsult) {
                 urgency += Priority.urgencyMinor;
@@ -276,7 +287,6 @@ namespace AI {
             if (personality.bravery == Personality.Bravery.brave) {
                 return urgency / 10f;
             }
-            // return urgency / 100f;
             if (personality.bravery == Personality.Bravery.cowardly)
                 return urgency * 2f;
             return urgency;
@@ -328,7 +338,9 @@ namespace AI {
         }
         public override void ReceiveMessage(Message incoming) {
             if (incoming is MessageDamage) {
-                urgency += Priority.urgencyLarge;
+                MessageDamage message = (MessageDamage)incoming;
+                if (!message.impersonal)
+                    urgency += Priority.urgencyLarge;
             }
             if (incoming is MessageInsult) {
                 urgency += Priority.urgencySmall;

@@ -3,48 +3,48 @@ using System.Collections.Generic;
 
 public class Fire : MonoBehaviour {
     public Flammable flammable;
-    private Dictionary<GameObject, Flammable> flammables = new Dictionary<GameObject, Flammable>();
-    private MessageDamage message;
-    // private HashSet<GameObject> damageQueue = new HashSet<GameObject>();
+    static private Dictionary<GameObject, Flammable> flammables = new Dictionary<GameObject, Flammable>();
+    private MessageDamage message = new MessageDamage();
+    private HashSet<GameObject> damageQueue = new HashSet<GameObject>();
     // private HashSet<GameObject> collidedObjects = new HashSet<GameObject>();
-    // private float damageTimer;
+    private float damageTimer;
     static List<string> forbiddenTags = new List<string>(new string[] { "occurrenceFlag", "background", "sightcone" });
     void Start() {
-        message = new MessageDamage(1f, damageType.fire);
+        message = new MessageDamage(0.15f, damageType.fire);
     }
-    // void Update() {
-    // if (flammable)
-    //     if (flammable.noDamage)
-    //         return;
-    // damageTimer += Time.deltaTime;
-    // if (damageTimer > 0.05f) {
-    //     damageTimer = 0;
-    // if (flammable)
-    //     message.responsibleParty = flammable.responsibleParty;
-    // process the objects in the damage queue.
-    // do not send a damage message to anything above me in the transform tree: 
-    // this is so that the player can hold a flaming object without being hurt.
-    // foreach (GameObject obj in collidedObjects){
-    //     if (flammables.ContainsKey(obj)) {
-    //         Flammable targetFlam = flammables[obj];
-    //         targetFlam.heat += Time.deltaTime * 2f;
-    //         if (flammable.responsibleParty != null) {
-    //             targetFlam.responsibleParty = flammable.responsibleParty;
-    //         }
-    //     }
-    // }
-    // collidedObjects = new HashSet<GameObject>();
-    // }
-    // foreach (GameObject obj in damageQueue) {
-    //         if (obj == null)
-    //             continue;
-    //         if (transform.IsChildOf(obj.transform.root))
-    //             continue;
-    //         if (obj != null) {
-    //             Toolbox.Instance.SendMessage(obj, this, message);
-    //         }
-    //     }
-    // damageQueue = new HashSet<GameObject>();
+    void Update() {
+        damageTimer += Time.deltaTime;
+        if (damageTimer > 0.15f) {
+            damageTimer = 0;
+            if (flammable)
+                message.responsibleParty = flammable.responsibleParty;
+            message.impersonal = true;
+            // foreach (GameObject obj in collidedObjects) {
+            //     if (flammables.ContainsKey(obj)) {
+            //         Flammable targetFlam = flammables[obj];
+            //         // targetFlam.heat += Time.deltaTime * 2f;
+            //         // if (flammable.responsibleParty != null) {
+            //         //     targetFlam.responsibleParty = flammable.responsibleParty;
+            //         // }
+            //     }
+            // }
+            // collidedObjects = new HashSet<GameObject>();
+
+            // process the objects in the damage queue.
+            // do not send a damage message to anything above me in the transform tree:
+            // this is so that the player can hold a flaming object without being hurt.
+            foreach (GameObject obj in damageQueue) {
+                if (obj == null)
+                    continue;
+                if (transform.IsChildOf(obj.transform.root))
+                    continue;
+                if (obj != null) {
+                    Toolbox.Instance.SendMessage(obj, this, message);
+                }
+            }
+            damageQueue = new HashSet<GameObject>();
+        }
+    }
 
     // }
     // void Update(){
@@ -72,6 +72,7 @@ public class Fire : MonoBehaviour {
         if (coll.transform.IsChildOf(transform.root))
             return;
         Flammable flam = null;
+        damageQueue.Add(coll.gameObject);
         if (flammables.TryGetValue(coll.gameObject, out flam)) {
             flam.heat += Time.deltaTime;
             if (flammable.responsibleParty != null) {
