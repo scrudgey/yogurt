@@ -53,6 +53,7 @@ public class GameData {
     public string cosmicName = "";
     public bool loadedDay;
     public Int16 ghostsKilled;
+    public bool mayorAwardToday;
     public GameData() {
         days = 0;
         saveDate = System.DateTime.Now.ToString();
@@ -405,6 +406,14 @@ public partial class GameManager : Singleton<GameManager> {
         if (sceneName == "moon1" && (data.entryID == 420 || data.entryID == 99)) {
             CutsceneManager.Instance.InitializeCutscene<CutsceneMoonLanding>();
         }
+        if (sceneName == "mayors_house" && data.ghostsKilled >= 3 && !data.collectedItems.Contains("key_to_city") && !data.mayorAwardToday) {
+            GameObject mayor = GameObject.Find("Mayor");
+            if (mayor != null) {
+                Speech mayorSpeech = mayor.GetComponent<Speech>();
+                if (mayorSpeech != null)
+                    mayorSpeech.defaultMonologue = "mayor_award";
+            }
+        }
         PlayerEnter();
         if (playerIsDead) {
             UINew.Instance.RefreshUI(active: false);
@@ -530,6 +539,7 @@ public partial class GameManager : Singleton<GameManager> {
         sceneTime = 0f;
         data.entryID = -99;
         data.firstTimeLeavingHouse = true;
+        data.mayorAwardToday = false;
         activeCommercial = null;
     }
     public void DetermineClosetNews() {

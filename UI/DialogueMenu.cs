@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -573,6 +574,10 @@ public class DialogueMenu : MonoBehaviour {
             textSize = TextSize.large;
             nextLine = true;
         }
+        if (text == "MAYORAWARDCALLBACK") {
+            MayorAward();
+            nextLine = true;
+        }
         if (nextLine)
             NextLine();
     }
@@ -590,5 +595,40 @@ public class DialogueMenu : MonoBehaviour {
         MessageInsult message = new MessageInsult();
         Toolbox.Instance.SendMessage(vampire, instigator, message);
         Toolbox.Instance.SendMessage(vampire, instigator, message);
+    }
+    public void MayorAward() {
+        GameObject mayor = GameObject.Find("Mayor");
+        if (mayor != null) {
+            Inventory mayorInventory = mayor.GetComponent<Inventory>();
+            Controllable mayorControl = mayor.GetComponent<Controllable>();
+            Speech mayorSpeech = mayor.GetComponent<Speech>();
+            GameObject key = GameObject.Instantiate(Resources.Load("prefabs/key_to_city"), mayor.transform.position, Quaternion.identity) as GameObject;
+            Pickup keyPickup = key.GetComponent<Pickup>();
+            mayorInventory.GetItem(keyPickup);
+            mayorSpeech.defaultMonologue = "mayor_normal";
+            GameManager.Instance.data.mayorAwardToday = true;
+            GameManager.Instance.StartCoroutine(AwardRoutine(mayorControl, mayorInventory));
+        }
+    }
+    IEnumerator AwardRoutine(Controllable controllable, Inventory inv) {
+        yield return new WaitForSeconds(0.1f);
+        controllable.ResetInput();
+        controllable.LookAtPoint(GameManager.Instance.playerObject.transform.position);
+        controllable.disabled = true;
+        yield return new WaitForSeconds(1.0f);
+        AudioClip congratsClip = Resources.Load("music/Short CONGRATS YC3") as AudioClip;
+        GameObject confetti = Resources.Load("particles/confetti explosion") as GameObject;
+        Toolbox.Instance.AudioSpeaker(congratsClip, controllable.transform.position);
+        GameObject.Instantiate(confetti, controllable.transform.position, Quaternion.identity);
+        yield return new WaitForSeconds(3f);
+        controllable.LookAtPoint(GameManager.Instance.playerObject.transform.position);
+        inv.DropItem();
+        yield return new WaitForSeconds(0.5f);
+        if (controllable == Controller.Instance.focus) {
+            controllable.control = Controllable.ControlType.player;
+        } else {
+            controllable.control = Controllable.ControlType.AI;
+        }
+        controllable.disabled = false;
     }
 }
