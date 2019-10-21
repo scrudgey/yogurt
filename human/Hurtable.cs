@@ -237,7 +237,6 @@ public class Hurtable : Damageable, ISaveable {
         }
         if (gameObject.name == "ghost" && SceneManager.GetActiveScene().name == "mayors_attic") {
             GameManager.Instance.data.ghostsKilled += 1;
-            Debug.Log(GameManager.Instance.data.ghostsKilled);
         }
     }
 
