@@ -104,7 +104,6 @@ public class Occurrence : MonoBehaviour {
         EventData data = null;
         string victimName = Toolbox.Instance.GetName(dead);
         if (monster) {
-            Debug.Log("monster death");
             data = new EventData(offensive: 1, disgusting: 1, disturbing: 0, chaos: 0, positive: 2);
             data.key = "killing";
             data.val = 1f;
