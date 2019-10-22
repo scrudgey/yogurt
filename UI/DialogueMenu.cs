@@ -616,6 +616,7 @@ public class DialogueMenu : MonoBehaviour {
         controllable.LookAtPoint(GameManager.Instance.playerObject.transform.position);
         controllable.disabled = true;
         yield return new WaitForSeconds(1.0f);
+        controllable.LookAtPoint(GameManager.Instance.playerObject.transform.position);
         AudioClip congratsClip = Resources.Load("music/Short CONGRATS YC3") as AudioClip;
         GameObject confetti = Resources.Load("particles/confetti explosion") as GameObject;
         Toolbox.Instance.AudioSpeaker(congratsClip, controllable.transform.position);
