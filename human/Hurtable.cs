@@ -76,11 +76,19 @@ public class Hurtable : Damageable, ISaveable {
         bonusHealth = intrins.netBuffs[BuffType.bonusHealth].floatValue;
         armor = intrins.netBuffs[BuffType.armor].floatValue;
         coughing = intrins.netBuffs[BuffType.coughing].boolValue;
-        if (intrins.netBuffs[BuffType.death].boolValue) {
-            health = -1f;
-            Die(damageType.any);
+        if (intrins.netBuffs[BuffType.death].active()) {
+            // health = -1f;
+            // Die(damageType.any);
+            health = float.MinValue;
+            Die(damageType.cosmic);
         }
     }
+    // override public void HandleNetIntrinsic(MessageNetIntrinsic message) {
+    //     base.HandleNetIntrinsic(message);
+    //     if (message.netBuffs[BuffType.death].active()) {
+    //         Die(damageType.cosmic);
+    //     }
+    // }
     public override float CalculateDamage(MessageDamage message) {
         if (message.responsibleParty != null) {
             lastAttacker = message.responsibleParty;
@@ -103,6 +111,7 @@ public class Hurtable : Damageable, ISaveable {
                     Bleed(transform.position, message.force.normalized);
                 }
                 goto case damageType.physical;
+            default:
             case damageType.physical:
                 damage = Mathf.Max(message.amount - armor, 0);
                 health -= damage;
@@ -117,8 +126,6 @@ public class Hurtable : Damageable, ISaveable {
                 break;
             case damageType.cosmic:
                 damage = message.amount;
-                break;
-            default:
                 break;
         }
         health -= damage;
@@ -170,6 +177,7 @@ public class Hurtable : Damageable, ISaveable {
         }
         return damage;
     }
+
     public void Die(damageType type) {
         if (hitState == Controllable.HitState.dead)
             return;
@@ -196,25 +204,6 @@ public class Hurtable : Damageable, ISaveable {
         bool suicide = false;
         bool damageZone = false;
         bool assailant = false;
-        if (lastAttacker == null)
-            return;
-        if (lastAttacker == gameObject) {
-            suicide = true;
-        } else {
-            if (lastAttacker.GetComponent<DamageZone>() != null)
-                damageZone = true;
-            if (lastAttacker.GetComponent<Inventory>() != null)
-                assailant = true;
-        }
-
-        OccurrenceDeath occurrenceData = new OccurrenceDeath(monster);
-        occurrenceData.dead = gameObject;
-        occurrenceData.suicide = suicide;
-        occurrenceData.damageZone = damageZone;
-        occurrenceData.assailant = assailant;
-        occurrenceData.lastAttacker = lastAttacker;
-        occurrenceData.lastDamage = type;
-        Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData, new HashSet<GameObject>() { gameObject });
 
         // TODO: could this logic belong to eventdata / occurrence ?
         if (GameManager.Instance.playerObject == gameObject) {
@@ -238,9 +227,32 @@ public class Hurtable : Damageable, ISaveable {
         if (gameObject.name == "ghost" && SceneManager.GetActiveScene().name == "mayors_attic") {
             GameManager.Instance.data.ghostsKilled += 1;
         }
+
+        if (lastAttacker == null)
+            return;
+        if (lastAttacker == gameObject) {
+            suicide = true;
+        } else {
+            if (lastAttacker.GetComponent<DamageZone>() != null)
+                damageZone = true;
+            if (lastAttacker.GetComponent<Inventory>() != null)
+                assailant = true;
+        }
+
+        OccurrenceDeath occurrenceData = new OccurrenceDeath(monster);
+        occurrenceData.dead = gameObject;
+        occurrenceData.suicide = suicide;
+        occurrenceData.damageZone = damageZone;
+        occurrenceData.assailant = assailant;
+        occurrenceData.lastAttacker = lastAttacker;
+        occurrenceData.lastDamage = type;
+        Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData, new HashSet<GameObject>() { gameObject });
+
+
     }
 
-    public void Update() {
+    override protected void Update() {
+        base.Update();
         if (impulse > 0) {
             impulse -= Time.deltaTime * 25f;
         }

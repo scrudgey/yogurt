@@ -167,7 +167,7 @@ public class Liquid {
             Buff buff = new Buff();
             buff.type = BuffType.death;
             buff.boolValue = true;
-            buff.lifetime = 20f;
+            // buff.lifetime = 20f;
             l.buffs.Add(buff);
         }
         return l;
