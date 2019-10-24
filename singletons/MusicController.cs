@@ -12,7 +12,10 @@ public enum MusicTrack {
     moonCave,
     moonWarp,
     fillerBeat,
-    tweakDelay
+    tweakDelay,
+    dracIntro,
+    dracLoop,
+    chela,
 }
 
 
@@ -54,6 +57,9 @@ public class MusicController : Singleton<MusicController> {
         {MusicTrack.moonWarp, "Moon WARP Loop YC3"},
         {MusicTrack.fillerBeat, "Filler Beat YC3"},
         {MusicTrack.tweakDelay, "tweakDelay YC3"},
+        {MusicTrack.chela, "Chela Theme YC3"},
+        {MusicTrack.dracIntro, "Dracula Mansion INTRO YC3"},
+        {MusicTrack.dracLoop, "Dracula Mansion LOOP YC3"},
     };
     private Dictionary<string, MusicSpec> sceneTracks = new Dictionary<string, MusicSpec>(){
         {"title", new MusicSpec(MusicTrack.mainTitle)},
