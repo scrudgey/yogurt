@@ -19,7 +19,8 @@ public class Destructible : Damageable, ISaveable {
         bonusHealth = intrins.netBuffs[BuffType.bonusHealth].floatValue;
     }
 
-    void Update() {
+    override protected void Update() {
+        base.Update();
         if (health < 0) {
             Die();
         }

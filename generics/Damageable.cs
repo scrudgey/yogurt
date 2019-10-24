@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public enum damageType { physical, fire, any, cutting, piercing, cosmic, asphyxiation }
+public enum damageType { physical, fire, any, cutting, piercing, cosmic, asphyxiation, explosion }
 public enum ImpactResult { normal, repel, strong }
 public abstract class Damageable : MonoBehaviour {
     public static Dictionary<damageType, List<BuffType>> blockedBy = new Dictionary<damageType, List<BuffType>>(){
@@ -23,6 +23,8 @@ public abstract class Damageable : MonoBehaviour {
     public Dictionary<BuffType, Buff> netBuffs;
     new public Rigidbody2D rigidbody2D;
     public Controllable controllable;
+    public MessageDamage cacheFiredMessage;
+    private float cachedTime;
     public static bool Damages(Damageable damageable, damageType type, Dictionary<BuffType, Buff> netBuffs) {
         // no buffs means no immunities
         if (netBuffs == null)
@@ -64,14 +66,32 @@ public abstract class Damageable : MonoBehaviour {
         rigidbody2D = Toolbox.GetOrCreateComponent<Rigidbody2D>(gameObject);
         rigidbody2D.gravityScale = 0;
         controllable = GetComponent<Controllable>();
-        Toolbox.RegisterMessageCallback<MessageDamage>(this, TakeDamage);
+        Toolbox.RegisterMessageCallback<MessageDamage>(this, HandleMessageDamage);
         Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
     }
-    void HandleNetIntrinsic(MessageNetIntrinsic message) {
+    public virtual void HandleNetIntrinsic(MessageNetIntrinsic message) {
         netBuffs = message.netBuffs;
         NetIntrinsicsChanged(message);
     }
     public abstract void NetIntrinsicsChanged(MessageNetIntrinsic message);
+    private void HandleMessageDamage(MessageDamage message) {
+        if (message.type == damageType.fire) {
+            cacheFiredMessage = message;
+            return;
+        } else {
+            TakeDamage(message);
+        }
+    }
+    protected virtual void Update() {
+        cachedTime += Time.deltaTime;
+        if (cachedTime > 0.2f) {
+            cachedTime = 0f;
+            if (cacheFiredMessage != null) {
+                TakeDamage(cacheFiredMessage);
+                cacheFiredMessage = null;
+            }
+        }
+    }
     public virtual void TakeDamage(MessageDamage message) {
         if (message.amount == 0)
             return;
