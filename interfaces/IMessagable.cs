@@ -68,10 +68,23 @@ public class MessageDamage : Message {
     public PhysicalImpact impactor;
     public GameObject responsibleParty;
     public bool strength;
+    public float angleAboveHorizontal;
     public MessageDamage() { }
     public MessageDamage(float amount, damageType type) {
         this.amount = amount;
         this.type = type;
+    }
+    public MessageDamage(MessageDamage other) {
+        this.amount = other.amount;
+        this.type = other.type;
+        this.force = other.force;
+        this.impactSounds = other.impactSounds;
+        this.suppressImpactSound = other.suppressImpactSound;
+        this.impersonal = other.impersonal;
+        this.impactor = other.impactor;
+        this.responsibleParty = other.responsibleParty;
+        this.strength = other.strength;
+        this.angleAboveHorizontal = other.angleAboveHorizontal;
     }
 }
 public class MessageHitstun : Message {

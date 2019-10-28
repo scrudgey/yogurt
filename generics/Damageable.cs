@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
 public enum damageType { physical, fire, any, cutting, piercing, cosmic, asphyxiation, explosion }
@@ -10,7 +11,8 @@ public abstract class Damageable : MonoBehaviour {
         {damageType.cutting, new List<BuffType>(){BuffType.noPhysicalDamage, BuffType.ethereal, BuffType.invulnerable}},
         {damageType.piercing, new List<BuffType>(){BuffType.noPhysicalDamage, BuffType.ethereal, BuffType.invulnerable}},
         {damageType.cosmic, new List<BuffType>(){BuffType.invulnerable}},
-        {damageType.asphyxiation, new List<BuffType>(){BuffType.undead}}
+        {damageType.asphyxiation, new List<BuffType>(){BuffType.undead}},
+        {damageType.explosion, new List<BuffType>(){BuffType.noPhysicalDamage, BuffType.ethereal, BuffType.invulnerable}}
     };
     public bool immuneToFire;
     public bool immuneToPhysical;
@@ -141,6 +143,9 @@ public abstract class Damageable : MonoBehaviour {
     }
     public abstract float CalculateDamage(MessageDamage message);
     public virtual void Destruct() {
+        if (gameObject.name == "ghost" && SceneManager.GetActiveScene().name == "mayors_attic") {
+            GameManager.Instance.data.ghostsKilled += 1;
+        }
         if (lastMessage == null)
             lastMessage = new MessageDamage(0.5f, damageType.physical);
         foreach (Gibs gib in GetComponents<Gibs>())
@@ -155,6 +160,8 @@ public abstract class Damageable : MonoBehaviour {
 
     public void PlayImpactSound(ImpactResult impactType, MessageDamage message) {
         if (message.suppressImpactSound)
+            return;
+        if (message.type == damageType.explosion)
             return;
         AudioClip[] sounds = new AudioClip[0];
         switch (impactType) {

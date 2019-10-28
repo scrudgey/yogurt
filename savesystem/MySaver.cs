@@ -332,6 +332,10 @@ public class MySaver {
             return;
         if (savedObjects.ContainsKey(child) && savedObjects.ContainsKey(parent)) {
             AddToReferenceTree(savedObjects[parent], savedObjects[child]);
+        } else {
+            Debug.LogError("failed to add object to reference tree");
+            Debug.LogError(parent);
+            Debug.LogError(child);
         }
     }
     public static void AddToReferenceTree(GameObject parent, int child) {

@@ -273,8 +273,14 @@ public class Controller : Singleton<Controller> {
                 if (hypnoTop != null) {
                     state = ControlState.normal;
                     GameObject target = Controller.Instance.GetBaseInteractive(hypnoTop.transform);
+                    Intrinsics targetIntrinsics = target.GetComponent<Intrinsics>();
+                    if (targetIntrinsics.NetBuffs()[BuffType.clearHeaded].boolValue) {
+                        UINew.Instance.SetActionText("");
+                        MessageSpeech message = new MessageSpeech("Something prevents my hypnotic power!");
+                        Toolbox.Instance.SendMessage(GameManager.Instance.playerObject, this, message);
+                        return;
+                    }
                     Controllable controllable = target.GetComponent<Controllable>();
-
                     GameObject hypnosisEffect = Instantiate(Resources.Load("prefabs/fx/hypnosisEffect"), GameManager.Instance.playerObject.transform.position, Quaternion.identity) as GameObject;
                     HypnosisEffect fx = hypnosisEffect.GetComponent<HypnosisEffect>();
                     fx.target = target;

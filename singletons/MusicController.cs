@@ -82,7 +82,7 @@ public class MusicController : Singleton<MusicController> {
     public Camera cam;
     public bool deathMusic;
     public string lastLoadedSceneName;
-    public void Start() {
+    public void Awake() {
         SetCamera();
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         // populate tracks

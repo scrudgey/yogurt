@@ -6,19 +6,19 @@ public enum targetType { inert, player, other };
 public class Interactor {
     // maybe the most important method, it tells all available actions
     // from the perspective of a player or whatever
-    static public HashSet<Interaction> GetInteractions(GameObject focus, GameObject target, bool rightClickMenu=false, bool manualActions=false) {
-        HashSet<Interaction> actionDictionary = GetAllEnabledInteractions(target, focus, rightClickMenu:rightClickMenu, manualActions:manualActions);
-        actionDictionary.UnionWith(GetAllEnabledInteractions(focus, target, rightClickMenu:rightClickMenu, manualActions:manualActions));
+    static public HashSet<Interaction> GetInteractions(GameObject focus, GameObject target, bool rightClickMenu = false, bool manualActions = false) {
+        HashSet<Interaction> actionDictionary = GetAllEnabledInteractions(target, focus, rightClickMenu: rightClickMenu, manualActions: manualActions);
+        actionDictionary.UnionWith(GetAllEnabledInteractions(focus, target, rightClickMenu: rightClickMenu, manualActions: manualActions));
         return actionDictionary;
     }
-    static HashSet<Interaction> GetAllEnabledInteractions(GameObject targ, GameObject source, bool rightClickMenu=false, bool manualActions=false) {
+    static HashSet<Interaction> GetAllEnabledInteractions(GameObject targ, GameObject source, bool rightClickMenu = false, bool manualActions = false) {
         HashSet<Interaction> returnDictionary = new HashSet<Interaction>();
         foreach (Interactive interactive in GetInteractorTree(source)) {
-            returnDictionary.UnionWith(GetEnabledInteractions(interactive, targ, rightClickMenu:rightClickMenu, manualActions:manualActions));
+            returnDictionary.UnionWith(GetEnabledInteractions(interactive, targ, rightClickMenu: rightClickMenu, manualActions: manualActions));
         }
         return returnDictionary;
     }
-    static HashSet<Interaction> GetEnabledInteractions(Interactive sourceInteractive, GameObject targ, bool rightClickMenu=false, bool manualActions=false) {
+    static HashSet<Interaction> GetEnabledInteractions(Interactive sourceInteractive, GameObject targ, bool rightClickMenu = false, bool manualActions = false) {
         HashSet<Interaction> returnList = new HashSet<Interaction>();
         List<Interactive> targetInteractives = Interactor.GetInteractorTree(targ);
         targetType targType = Interactor.TypeOfTarget(targ);
@@ -28,7 +28,7 @@ public class Interactor {
             where iBase.disableInteractions == false
             select iBase;
         List<object> objectParams = new List<object>();
-        foreach(Interactive interactive in actives)
+        foreach (Interactive interactive in actives)
             objectParams.Add((object)interactive);
         objectParams.Add(targ);
         foreach (Interaction interaction in sourceInteractive.interactions) {
@@ -57,7 +57,7 @@ public class Interactor {
                 enabled = false;
                 continue;
             }
-            if (enabled && interaction.parameterTypes.Count > 0){
+            if (enabled && interaction.parameterTypes.Count > 0) {
                 if (interaction.debug)
                     Debug.Log("interaction enabled : " + enabled);
                 returnList.Add(interaction);
@@ -116,7 +116,7 @@ public class Interactor {
     }
     static public targetType TypeOfTarget(GameObject target) {
         targetType returnType = targetType.inert;
-        if (GameManager.Instance.playerObject != null){
+        if (GameManager.Instance.playerObject != null) {
             if (GameManager.Instance.playerObject == target)
                 returnType = targetType.player;
             if (target.transform.IsChildOf(GameManager.Instance.playerObject.transform)) {
@@ -124,7 +124,7 @@ public class Interactor {
             }
         }
         List<DecisionMaker> AIs = new List<DecisionMaker>(target.GetComponentsInParent<DecisionMaker>());
-        foreach (DecisionMaker dm in AIs){
+        foreach (DecisionMaker dm in AIs) {
             if (dm.enabled)
                 returnType = targetType.other;
         }

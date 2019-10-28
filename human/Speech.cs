@@ -417,10 +417,25 @@ public class Speech : Interactive, ISaveable {
         GameObject mainTarget = Controller.Instance.GetBaseInteractive(target.transform);
         string targetname = Toolbox.Instance.GetName(mainTarget);
         Insult("that shazbotting " + targetname + "!", target);
+
+        // TODO: actually convey insult, etc.
         MessageNoise noise = new MessageNoise(gameObject);
         Toolbox.Instance.SendMessage(target, this, noise);
+
         Controllable control = GetComponent<Controllable>();
         control.LookAtPoint(target.transform.position);
+
+        if (GameManager.Instance.data.perks["burn"]) {
+            MessageDamage burnNotice = new MessageDamage(10f, damageType.fire);
+            Toolbox.Instance.SendMessage(target, this, burnNotice);
+            Flammable targetFlammable = target.transform.root.GetComponentInChildren<Flammable>();
+            if (targetFlammable) {
+                targetFlammable.heat += 100f;
+                targetFlammable.burnTimer = 1f;
+                targetFlammable.fireRetardantBuffer = 0f;
+                targetFlammable.onFire = true;
+            }
+        }
     }
     public Monologue InsultMonologue(GameObject target) {
         if (hitState >= Controllable.HitState.stun)

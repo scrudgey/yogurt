@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
+public class PhysicalBootstrapper : Interactive, ISaveable {
     public enum shadowSize { normal, medium, small };
     public bool silentImpact;
     public AudioClip[] impactSounds;
@@ -177,7 +177,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
         groundVelocity.y = initialVelocity.y;
         objectVelocity.x = initialVelocity.x;
         objectVelocity.y = initialVelocity.y;
-        objectVelocity.y = initialVelocity.z;
+        objectVelocity.y += initialVelocity.z;
         physical.objectBody.velocity = objectVelocity;
         groundBody.velocity = groundVelocity;
     }
@@ -236,8 +236,7 @@ public class PhysicalBootstrapper : MonoBehaviour, ISaveable {
                 groundVelocity.x = setV.x;
                 groundVelocity.y = setV.y;
                 objectVelocity.x = setV.x;
-                objectVelocity.y = setV.y;
-                objectVelocity.y = setV.z;
+                objectVelocity.y = setV.y + setV.z;
                 setV = Vector3.zero;
             }
             if (addV != Vector3.zero) {

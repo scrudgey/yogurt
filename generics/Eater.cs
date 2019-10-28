@@ -172,7 +172,7 @@ public class Eater : Interactive, ISaveable {
                 // container.li
                 GameObject sip = new GameObject();
                 Liquid.MonoLiquidify(sip, container.liquid);
-                Toolbox.Instance.AddPromotedLiveBuffs(gameObject, sip);
+                Toolbox.Instance.AddLiveBuffs(gameObject, sip);
                 Destroy(sip);
             }
         }
@@ -180,7 +180,7 @@ public class Eater : Interactive, ISaveable {
         if (reservoir) {
             GameObject sip = new GameObject();
             Liquid.MonoLiquidify(sip, reservoir.liquid);
-            Toolbox.Instance.AddPromotedLiveBuffs(gameObject, sip);
+            Toolbox.Instance.AddLiveBuffs(gameObject, sip);
             Destroy(sip);
         }
         if (Toolbox.Instance.CloneRemover(food.name) == "sword") {

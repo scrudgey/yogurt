@@ -160,7 +160,7 @@ public class CutsceneCannon : Cutscene {
         timer += Time.deltaTime;
         if (timer > 2.5f && !shot) {
             shot = true;
-            cannon.Shoot();
+            cannon.ShootPlayer();
             Toolbox.Instance.SwitchAudioListener(GameManager.Instance.playerObject);
             GameManager.Instance.playerObject.SetActive(true);
             RotateTowardMotion rot = GameManager.Instance.playerObject.AddComponent<RotateTowardMotion>();

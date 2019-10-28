@@ -22,6 +22,11 @@ public class Blender : Container, ISaveable {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         pb = GetComponent<PhysicalBootstrapper>();
     }
+    protected override void PopulateContentActions() {
+        base.PopulateContentActions();
+        interactions.Add(new Interaction(this, "Power", "Power"));
+        interactions.Add(new Interaction(this, "Lid", "Lid"));
+    }
     void FixedUpdate() {
         if (power) {
             if (!audioSource.isPlaying) {

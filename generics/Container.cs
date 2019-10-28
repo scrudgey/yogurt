@@ -2,16 +2,34 @@
 using System.Collections.Generic;
 using System;
 
-public class Container : Interactive, IExcludable, ISaveable {
+public class Container : MayorLock, IExcludable, ISaveable {
     public List<Pickup> items = new List<Pickup>();
     public int maxNumber;
     public bool disableContents = true;
     private bool isQuitting;
+    public GameObject lockObject;
+    public Sprite openSprite;
+    public List<Pickup> initItems = new List<Pickup>();
     virtual protected void Awake() {
         Interaction stasher = new Interaction(this, "Put", "Store");
         stasher.validationFunction = true;
         interactions.Add(stasher);
-        // good example of loop closure here
+    }
+    void Start() {
+        foreach (Pickup item in initItems) {
+            if (item != null)
+                AddItem(item);
+        }
+        PopulateContentActions();
+    }
+    virtual protected void PopulateContentActions() {
+        if (lockObject != null)
+            return;
+        interactions = new List<Interaction>();
+
+        Interaction stasher = new Interaction(this, "Put", "Store");
+        stasher.validationFunction = true;
+        interactions.Add(stasher);
         foreach (Pickup pickup in items) {
             Pickup closurePickup = pickup;
             Action<Component> removeIt = (comp) => {
@@ -30,6 +48,12 @@ public class Container : Interactive, IExcludable, ISaveable {
             }
         }
     }
+    protected void RemoveAllRetrieveActions() {
+        interactions = new List<Interaction>();
+        Interaction stasher = new Interaction(this, "Put", "Store");
+        stasher.validationFunction = true;
+        interactions.Add(stasher);
+    }
     protected void RemoveRetrieveAction(Pickup pickup) {
         Interaction removeThis = null;
         foreach (Interaction interaction in interactions) {
@@ -47,6 +71,8 @@ public class Container : Interactive, IExcludable, ISaveable {
             interactions.Remove(removeThis);
     }
     public bool Store_Validation(Inventory inv) {
+        if (lockObject != null)
+            return false;
         if (inv.holding) {
             if (inv.holding.gameObject != gameObject) {
                 return true;
@@ -61,19 +87,13 @@ public class Container : Interactive, IExcludable, ISaveable {
         if (maxNumber == 0 || items.Count < maxNumber) {
             inv.SoftDropItem();
             AddItem(pickup);
-            Action<Component> removeIt = (comp) => {
-                Inventory i = comp as Inventory;
-                Remove(i, pickup);
-            };
-            Interaction newInteraction = new Interaction(this, pickup.itemName, removeIt);
-            newInteraction.actionDelegate = removeIt;
-            newInteraction.parameterTypes = new List<Type>();
-            newInteraction.parameterTypes.Add(typeof(Inventory));
-            newInteraction.descString = "Retrieve " + Toolbox.Instance.GetName(pickup.gameObject) + " from " + Toolbox.Instance.GetName(gameObject);
-            interactions.Add(newInteraction);
+
         } else {
             Toolbox.Instance.SendMessage(inv.gameObject, this, new MessageSpeech("It's full.") as Message);
         }
+    }
+    private void Stash(Item item) {
+
     }
     public string Store_desc(Inventory inv) {
         if (inv.holding) {
@@ -113,6 +133,18 @@ public class Container : Interactive, IExcludable, ISaveable {
         // make rigidbody kinematic
         if (pickup.GetComponent<Rigidbody2D>())
             pickup.GetComponent<Rigidbody2D>().isKinematic = true;
+
+        Action<Component> removeIt = (comp) => {
+            Inventory i = comp as Inventory;
+            Remove(i, pickup);
+        };
+        // Interaction newInteraction = new Interaction(this, pickup.itemName, removeIt);
+        // newInteraction.actionDelegate = removeIt;
+        // newInteraction.parameterTypes = new List<Type>();
+        // newInteraction.parameterTypes.Add(typeof(Inventory));
+        // newInteraction.descString = "Retrieve " + Toolbox.Instance.GetName(pickup.gameObject) + " from " + Toolbox.Instance.GetName(gameObject);
+        // interactions.Add(newInteraction);
+        PopulateContentActions();
     }
     public virtual void Remove(Inventory inv, Pickup pickup) {
         Vector3 pos = inv.transform.position;
@@ -199,11 +231,13 @@ public class Container : Interactive, IExcludable, ISaveable {
         data.ints["maxItems"] = maxNumber;
         data.bools["disableContents"] = disableContents;
         data.ints["itemCount"] = items.Count;
+        data.bools["locked"] = lockObject != null;
         if (items.Count > 0) {
             for (int i = 0; i < items.Count; i++) {
                 // data.ints["item"+i.ToString()] = MySaver.GameObjectToID(instance.items[i].gameObject);
                 MySaver.UpdateGameObjectReference(items[i].gameObject, data, "item" + i.ToString());
                 MySaver.AddToReferenceTree(data.id, items[i].gameObject);
+                MySaver.AddToReferenceTree(gameObject, items[i].gameObject);
             }
         }
     }
@@ -222,5 +256,22 @@ public class Container : Interactive, IExcludable, ISaveable {
                 // Debug.Log("container containing "+MySaver.loadedObjects[data.ints["item"+i.ToString()]].name);
             }
         }
+        if (!data.bools["locked"]) {
+            // if (lockObject != null) {
+            Unlock();
+            // }
+        }
+    }
+    override public void Unlock() {
+        Destroy(lockObject);
+        lockObject = null;
+        PopulateContentActions();
+        if (openSprite != null) {
+            SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+            spriteRenderer.sprite = openSprite;
+        }
+    }
+    override public bool Unlockable() {
+        return lockObject != null;
     }
 }

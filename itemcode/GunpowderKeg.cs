@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GunpowderKeg : MonoBehaviour {
+public class GunpowderKeg : Interactive {
     public GameObject gunpowder;
     private PhysicalBootstrapper pBoot;
     private Pickup pickup;
@@ -26,7 +26,6 @@ public class GunpowderKeg : MonoBehaviour {
                 Drip(pickup.holder.dropHeight);
             }
             lastDropPoint = transform.position;
-            return;
         }
     }
     void Drip(float height) {

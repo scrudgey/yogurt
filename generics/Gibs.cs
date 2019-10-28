@@ -35,6 +35,7 @@ public class Gibs : MonoBehaviour {
                 }
             }
             Damageable damageable = bit.GetComponent<Damageable>();
+            // TODO: this is to be fixed
             if (damageable) {
                 Toolbox.Instance.DisableAndReenable(damageable, 0.2f);
             }
@@ -66,14 +67,22 @@ public class Gibs : MonoBehaviour {
             // 
             // float magnitude = Random.Range(baseDir.magnitude * initVelocity.low, baseDir.magnitude * initVelocity.high);
             // Vector3 force = magnitude * Toolbox.Instance.RandomVector(baseDir.normalized, 45f);
+            // Debug.Log(message.force);
             Vector3 force = message.force * Random.Range(initVelocity.low, initVelocity.high) / 12f;
             if (message.strength)
                 force *= 2f;
+            if (message.angleAboveHorizontal != 0) {
+                initAngleFromHorizontal.low = message.angleAboveHorizontal;
+                initAngleFromHorizontal.high = message.angleAboveHorizontal;
+            }
             float phi = Random.Range(initAngleFromHorizontal.low, initAngleFromHorizontal.high);
+            force.z = force.magnitude * Mathf.Sin(phi);
             force.x = force.x * Mathf.Cos(phi);
             force.y = force.y * Mathf.Cos(phi);
-            force.z = force.magnitude * Mathf.Sin(phi);
             bitPhys.Set3Motion(force);
+            // Debug.Log(force.x);
+            // Debug.Log(force.y);
+            // Debug.Log(force.z);
         }
         // Debug.Break();
     }
@@ -89,12 +98,17 @@ public class Gibs : MonoBehaviour {
         return false;
     }
     public void CopyFrom(Gibs other) {
+        applyAnimationSkinColor = other.applyAnimationSkinColor;
         damageCondition = other.damageCondition;
         number = other.number;
         particle = other.particle;
+        color = other.color;
+        notPhysical = other.notPhysical;
+        initHeight.low = other.initHeight.low;
+        initHeight.high = other.initHeight.high;
         initVelocity.low = other.initVelocity.low;
         initVelocity.high = other.initVelocity.high;
-        color = other.color;
-        applyAnimationSkinColor = other.applyAnimationSkinColor;
+        initAngleFromHorizontal.low = other.initAngleFromHorizontal.low;
+        initAngleFromHorizontal.high = other.initAngleFromHorizontal.high;
     }
 }

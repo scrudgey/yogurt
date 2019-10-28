@@ -31,7 +31,7 @@ public class Hurtable : Damageable, ISaveable {
     private float ouchFrequency = 0.1f;
     public GameObject dizzyEffect;
     public GameObject lastAttacker;
-    public List<Collider2D> backgroundColliders = new List<Collider2D>();
+    // public List<Collider2D> backgroundColliders = new List<Collider2D>();
     public float timeSinceLastCough;
     bool vibrate;
     public bool bleeds = true; // if true, bleed on cutting / piercing damage
@@ -46,13 +46,6 @@ public class Hurtable : Damageable, ISaveable {
     }
     public override void Awake() {
         base.Awake();
-        backgroundColliders = new List<Collider2D>();
-        foreach (Transform transform in transform.root.GetComponentsInChildren<Transform>()) {
-            if (transform.gameObject.layer == 8) {
-                Collider2D[] colliders = transform.GetComponents<Collider2D>();
-                backgroundColliders.AddRange(colliders);
-            }
-        }
         oxygen = maxOxygen;
         Toolbox.RegisterMessageCallback<MessageHead>(this, HandleHead);
         Toolbox.RegisterMessageCallback<MessageStun>(this, HandleStun);
@@ -181,6 +174,7 @@ public class Hurtable : Damageable, ISaveable {
     public void Die(damageType type) {
         if (hitState == Controllable.HitState.dead)
             return;
+
         Inventory inv = GetComponent<Inventory>();
         if (inv) {
             inv.DropItem();
@@ -190,6 +184,8 @@ public class Hurtable : Damageable, ISaveable {
             Toolbox.Instance.AudioSpeaker("Flash Fire Ignite 01", transform.position);
             ClaimsManager.Instance.WasDestroyed(gameObject);
             Destroy(gameObject);
+        } else if (type == damageType.explosion) {
+            Destruct();
         } else {
             KnockDown();
         }
@@ -223,9 +219,6 @@ public class Hurtable : Damageable, ISaveable {
                 GameManager.Instance.IncrementStat(StatType.deathByCombat, 1);
             }
             GameManager.Instance.PlayerDeath();
-        }
-        if (gameObject.name == "ghost" && SceneManager.GetActiveScene().name == "mayors_attic") {
-            GameManager.Instance.data.ghostsKilled += 1;
         }
 
         if (lastAttacker == null)

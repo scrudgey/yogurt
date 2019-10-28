@@ -53,7 +53,8 @@ public enum BuffType {
     undead,
     ethereal,
     coughing,
-    death
+    death,
+    clearHeaded
 }
 [System.Serializable]
 public class BuffData {

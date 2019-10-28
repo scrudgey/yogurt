@@ -112,6 +112,7 @@ public partial class GameManager : Singleton<GameManager> {
         {"neighborhood", "outdoors"},
         {"mayors_house", "mayor's house"},
         {"mayors_attic", "attic"},
+        {"anti_mayors_house", "anti mayor's house"},
     };
     public GameData data;
     public static GlobalSettings settings = new GlobalSettings();
@@ -145,8 +146,8 @@ public partial class GameManager : Singleton<GameManager> {
     public void Start() {
         if (data == null) {
             data = InitializedGameData();
-            ReceiveEmail("duplicator");
-            ReceiveEmail("golf_club");
+            // ReceiveEmail("duplicator");
+            // ReceiveEmail("golf_club");
             // ReceivePackage("kaiser_helmet");
             // ReceivePackage("duplicator");
             // ReceivePackage("golf_club");
@@ -189,7 +190,7 @@ public partial class GameManager : Singleton<GameManager> {
             UINew.Instance.ShowMenu(UINew.MenuType.newDayReport);
         }
         string sceneName = SceneManager.GetActiveScene().name;
-        if (sceneTime > 0.1f && !data.unlockedScenes.Contains(sceneName) && !InCutsceneLevel()) {
+        if (sceneTime > 0.1f && !data.unlockedScenes.Contains(sceneName) && !InCutsceneLevel() && GameManager.sceneNames.ContainsKey(sceneName)) {
             data.unlockedScenes.Add(sceneName);
             UINew.Instance.ShowSceneText("- " + GameManager.sceneNames[sceneName] + " -");
         }
@@ -493,12 +494,11 @@ public partial class GameManager : Singleton<GameManager> {
             if (playerFlammable) {
                 playerFlammable.onFire = false;
                 playerFlammable.heat = 0;
+                playerFlammable.burnTimer = 0f;
             }
             Intrinsics playerIntrinsics = playerObject.GetComponent<Intrinsics>();
             if (playerIntrinsics) {
-                // Debug.Log(playerIntrinsics.liveBuffs);
                 playerIntrinsics.liveBuffs = new List<Buff>();
-                // playerIntrinsics.
             }
             data.teleportedToday = false;
             MySaver.Save();
@@ -599,7 +599,9 @@ public partial class GameManager : Singleton<GameManager> {
             {"vomit", false},
             {"eat_all", false},
             {"hypnosis", false},
-            {"swear", false}
+            {"swear", false},
+            {"potion", false},
+            {"burn", false},
         };
         data.collectedClothes.Add("blue_shirt");
         data.collectedClothes.Add("pajamas");
@@ -626,6 +628,8 @@ public partial class GameManager : Singleton<GameManager> {
             data.perks["vomit"] = true;
             data.perks["eat_all"] = true;
             data.perks["swear"] = true;
+            data.perks["potion"] = false;
+            data.perks["burn"] = false;
             foreach (string sceneName in sceneNames.Keys) {
                 data.unlockedScenes.Add(sceneName);
             }
