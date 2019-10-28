@@ -131,7 +131,7 @@ public class CutsceneSpace : Cutscene {
             player.transform.position = Vector3.zero;
         }
         timer += Time.deltaTime;
-        if (timer > 3.0f) {
+        if (timer > 5.0f) {
             complete = true;
             SceneManager.LoadScene("moon1");
             GameManager.Instance.data.entryID = 420;
@@ -160,7 +160,7 @@ public class CutsceneCannon : Cutscene {
         timer += Time.deltaTime;
         if (timer > 2.5f && !shot) {
             shot = true;
-            cannon.Shoot();
+            cannon.ShootPlayer();
             Toolbox.Instance.SwitchAudioListener(GameManager.Instance.playerObject);
             GameManager.Instance.playerObject.SetActive(true);
             RotateTowardMotion rot = GameManager.Instance.playerObject.AddComponent<RotateTowardMotion>();
@@ -186,12 +186,13 @@ public class CutsceneCannon : Cutscene {
                 playerControllable.enabled = false;
             }
             Rigidbody2D playerBody = GameManager.Instance.playerObject.GetComponent<Rigidbody2D>();
-            playerBody.gravityScale = GameManager.Instance.gravity;
+            playerBody.gravityScale = GameManager.Instance.gravity * 0.8f;
+            playerBody.drag = 0f;
             AudioSource playerAudio = Toolbox.GetOrCreateComponent<AudioSource>(GameManager.Instance.playerObject);
             AudioClip charlierAugh = Resources.Load("sounds/auugh") as AudioClip;
             playerAudio.PlayOneShot(charlierAugh);
 
-            playerBody.AddForce(10000f * ejectionPoint.up, ForceMode2D.Force);
+            playerBody.AddForce(12000f * ejectionPoint.up, ForceMode2D.Force);
             camControl.Shake(0.25f);
         }
         if (timer > 4f) {

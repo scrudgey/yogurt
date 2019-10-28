@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class Hurtable : Damageable, ISaveable {
     private Controllable.HitState _hitState;
@@ -30,9 +31,11 @@ public class Hurtable : Damageable, ISaveable {
     private float ouchFrequency = 0.1f;
     public GameObject dizzyEffect;
     public GameObject lastAttacker;
-    public List<Collider2D> backgroundColliders = new List<Collider2D>();
+    // public List<Collider2D> backgroundColliders = new List<Collider2D>();
     public float timeSinceLastCough;
     bool vibrate;
+    public bool bleeds = true; // if true, bleed on cutting / piercing damage
+    public bool monster = false; // if true, death of this hurtable is not shocking or disturbing
     public void Reset() {
         health = maxHealth;
         oxygen = maxOxygen;
@@ -43,13 +46,6 @@ public class Hurtable : Damageable, ISaveable {
     }
     public override void Awake() {
         base.Awake();
-        backgroundColliders = new List<Collider2D>();
-        foreach (Transform transform in transform.root.GetComponentsInChildren<Transform>()) {
-            if (transform.gameObject.layer == 8) {
-                Collider2D[] colliders = transform.GetComponents<Collider2D>();
-                backgroundColliders.AddRange(colliders);
-            }
-        }
         oxygen = maxOxygen;
         Toolbox.RegisterMessageCallback<MessageHead>(this, HandleHead);
         Toolbox.RegisterMessageCallback<MessageStun>(this, HandleStun);
@@ -73,11 +69,19 @@ public class Hurtable : Damageable, ISaveable {
         bonusHealth = intrins.netBuffs[BuffType.bonusHealth].floatValue;
         armor = intrins.netBuffs[BuffType.armor].floatValue;
         coughing = intrins.netBuffs[BuffType.coughing].boolValue;
-        if (intrins.netBuffs[BuffType.death].boolValue) {
-            health = -1f;
-            Die(damageType.any);
+        if (intrins.netBuffs[BuffType.death].active()) {
+            // health = -1f;
+            // Die(damageType.any);
+            health = float.MinValue;
+            Die(damageType.cosmic);
         }
     }
+    // override public void HandleNetIntrinsic(MessageNetIntrinsic message) {
+    //     base.HandleNetIntrinsic(message);
+    //     if (message.netBuffs[BuffType.death].active()) {
+    //         Die(damageType.cosmic);
+    //     }
+    // }
     public override float CalculateDamage(MessageDamage message) {
         if (message.responsibleParty != null) {
             lastAttacker = message.responsibleParty;
@@ -100,6 +104,7 @@ public class Hurtable : Damageable, ISaveable {
                     Bleed(transform.position, message.force.normalized);
                 }
                 goto case damageType.physical;
+            default:
             case damageType.physical:
                 damage = Mathf.Max(message.amount - armor, 0);
                 health -= damage;
@@ -114,8 +119,6 @@ public class Hurtable : Damageable, ISaveable {
                 break;
             case damageType.cosmic:
                 damage = message.amount;
-                break;
-            default:
                 break;
         }
         health -= damage;
@@ -138,9 +141,11 @@ public class Hurtable : Damageable, ISaveable {
         }
         if (health <= -0.75 * maxHealth && message.type == damageType.cutting) {
             Destruct();
-            EventData data = Toolbox.Instance.DataFlag(gameObject, chaos: 3, disturbing: 4, disgusting: 4, positive: -2, offensive: -2);
-            data.noun = "corpse desecration";
-            data.whatHappened = "the corpse of " + Toolbox.Instance.GetName(gameObject) + " was desecrated";
+            if (!monster) {
+                EventData data = Toolbox.Instance.DataFlag(gameObject, chaos: 3, disturbing: 4, disgusting: 4, positive: -2, offensive: -2);
+                data.noun = "corpse desecration";
+                data.whatHappened = "the corpse of " + Toolbox.Instance.GetName(gameObject) + " was desecrated";
+            }
         }
         if (message.type != damageType.fire && message.type != damageType.cosmic) {
             hitState = Controllable.AddHitState(hitState, Controllable.HitState.stun);
@@ -165,9 +170,11 @@ public class Hurtable : Damageable, ISaveable {
         }
         return damage;
     }
+
     public void Die(damageType type) {
         if (hitState == Controllable.HitState.dead)
             return;
+
         Inventory inv = GetComponent<Inventory>();
         if (inv) {
             inv.DropItem();
@@ -177,6 +184,8 @@ public class Hurtable : Damageable, ISaveable {
             Toolbox.Instance.AudioSpeaker("Flash Fire Ignite 01", transform.position);
             ClaimsManager.Instance.WasDestroyed(gameObject);
             Destroy(gameObject);
+        } else if (type == damageType.explosion) {
+            Destruct();
         } else {
             KnockDown();
         }
@@ -191,26 +200,8 @@ public class Hurtable : Damageable, ISaveable {
         bool suicide = false;
         bool damageZone = false;
         bool assailant = false;
-        if (lastAttacker == null)
-            return;
-        if (lastAttacker == gameObject) {
-            suicide = true;
-        } else {
-            if (lastAttacker.GetComponent<DamageZone>() != null)
-                damageZone = true;
-            if (lastAttacker.GetComponent<Inventory>() != null)
-                assailant = true;
-        }
 
-        OccurrenceDeath occurrenceData = new OccurrenceDeath();
-        occurrenceData.dead = gameObject;
-        occurrenceData.suicide = suicide;
-        occurrenceData.damageZone = damageZone;
-        occurrenceData.assailant = assailant;
-        occurrenceData.lastAttacker = lastAttacker;
-        occurrenceData.lastDamage = type;
-        Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData, new HashSet<GameObject>() { gameObject });
-
+        // TODO: could this logic belong to eventdata / occurrence ?
         if (GameManager.Instance.playerObject == gameObject) {
             if (type == damageType.fire) {
                 if (suicide) {
@@ -229,9 +220,32 @@ public class Hurtable : Damageable, ISaveable {
             }
             GameManager.Instance.PlayerDeath();
         }
+
+        if (lastAttacker == null)
+            return;
+        if (lastAttacker == gameObject) {
+            suicide = true;
+        } else {
+            if (lastAttacker.GetComponent<DamageZone>() != null)
+                damageZone = true;
+            if (lastAttacker.GetComponent<Inventory>() != null)
+                assailant = true;
+        }
+
+        OccurrenceDeath occurrenceData = new OccurrenceDeath(monster);
+        occurrenceData.dead = gameObject;
+        occurrenceData.suicide = suicide;
+        occurrenceData.damageZone = damageZone;
+        occurrenceData.assailant = assailant;
+        occurrenceData.lastAttacker = lastAttacker;
+        occurrenceData.lastDamage = type;
+        Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData, new HashSet<GameObject>() { gameObject });
+
+
     }
 
-    public void Update() {
+    override protected void Update() {
+        base.Update();
         if (impulse > 0) {
             impulse -= Time.deltaTime * 25f;
         }
@@ -359,6 +373,9 @@ public class Hurtable : Damageable, ISaveable {
         }
     }
     public void Bleed(Vector3 position, Vector3 direction) {
+        if (!bleeds)
+            return;
+
         Liquid blood = Liquid.LoadLiquid("blood");
         float initHeight = (position.y - transform.position.y) + 0.15f;
         GameObject drop = Toolbox.Instance.SpawnDroplet(blood, 0.3f, gameObject, initHeight, direction.normalized);

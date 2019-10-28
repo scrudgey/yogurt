@@ -32,14 +32,27 @@ public class PhysicalImpact : MonoBehaviour {
             victim = collider.transform.parent.gameObject;
         }
         impactedObjects.Add(collider.transform.root);
-        message.impactor = this;
-        Toolbox.Instance.SendMessage(victim, this, message);
+        MessageDamage messageToSend = new MessageDamage(message);
+        if (messageToSend.force == Vector2.zero) {
+            // this might have unintended side effects
+            messageToSend.force = collider.transform.position - transform.position;
+            messageToSend.force = messageToSend.force.normalized;
+            float distance = Vector2.Distance(transform.position, collider.transform.position);
+            messageToSend.force *= (1f / distance) * 10f;
+            messageToSend.angleAboveHorizontal = Mathf.Atan(0.2f / Vector2.Distance(transform.position, collider.transform.position));
+        }
+        messageToSend.impactor = this;
+        Toolbox.Instance.SendMessage(victim, this, messageToSend);
         OccurrenceViolence violence = new OccurrenceViolence();
-        violence.amount = message.amount;
-        violence.attacker = message.responsibleParty;
+        violence.amount = messageToSend.amount;
+        violence.attacker = messageToSend.responsibleParty;
         violence.victim = victim;
-        violence.type = message.type;
-        HashSet<GameObject> involvedParties = new HashSet<GameObject>() { message.responsibleParty, victim };
-        Toolbox.Instance.OccurenceFlag(message.responsibleParty, violence, involvedParties);
+        violence.type = messageToSend.type;
+        HashSet<GameObject> involvedParties = new HashSet<GameObject>() { messageToSend.responsibleParty, victim };
+        if (messageToSend.responsibleParty != null) {
+            Toolbox.Instance.OccurenceFlag(messageToSend.responsibleParty, violence, involvedParties);
+        } else {
+            Toolbox.Instance.OccurenceFlag(gameObject, violence, involvedParties);
+        }
     }
 }

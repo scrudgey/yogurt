@@ -24,6 +24,9 @@ public class Buff {
         this.lifetime = otherBuff.lifetime;
         this.time = otherBuff.time;
     }
+    public bool active() {
+        return boolValue || (time < lifetime);
+    }
     public bool Update() {
         bool changed = false;
         time += Time.deltaTime;
@@ -50,7 +53,8 @@ public enum BuffType {
     undead,
     ethereal,
     coughing,
-    death
+    death,
+    clearHeaded
 }
 [System.Serializable]
 public class BuffData {

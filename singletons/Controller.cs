@@ -225,6 +225,9 @@ public class Controller : Singleton<Controller> {
             if (currentChild.tag == "Physical") {
                 return currentChild.gameObject;
             }
+            if (currentChild.GetComponent<ItemBoundary>()) {
+                return currentChild.gameObject;
+            }
             if (currentChild.parent == null) {
                 return currentChild.gameObject;
             }
@@ -270,8 +273,14 @@ public class Controller : Singleton<Controller> {
                 if (hypnoTop != null) {
                     state = ControlState.normal;
                     GameObject target = Controller.Instance.GetBaseInteractive(hypnoTop.transform);
+                    Intrinsics targetIntrinsics = target.GetComponent<Intrinsics>();
+                    if (targetIntrinsics.NetBuffs()[BuffType.clearHeaded].boolValue) {
+                        UINew.Instance.SetActionText("");
+                        MessageSpeech message = new MessageSpeech("Something prevents my hypnotic power!");
+                        Toolbox.Instance.SendMessage(GameManager.Instance.playerObject, this, message);
+                        return;
+                    }
                     Controllable controllable = target.GetComponent<Controllable>();
-
                     GameObject hypnosisEffect = Instantiate(Resources.Load("prefabs/fx/hypnosisEffect"), GameManager.Instance.playerObject.transform.position, Quaternion.identity) as GameObject;
                     HypnosisEffect fx = hypnosisEffect.GetComponent<HypnosisEffect>();
                     fx.target = target;
@@ -334,12 +343,28 @@ public class Controller : Singleton<Controller> {
             return false;
         if (i.unlimitedRange)
             return true;
-        // GameObject focus = focus;
         Transform focusTransform = focus.transform;
+        Collider2D[] focusColliders = null;
         if (commandTarget != null) {
+            focusColliders = commandTarget.GetComponentsInChildren<Collider2D>();
             focusTransform = commandTarget.transform;
+        } else {
+            focusColliders = focus.GetComponentsInChildren<Collider2D>();
         }
-        float dist = Vector3.SqrMagnitude(lastLeftClicked.transform.position - focusTransform.position);
+        Collider2D clickedCollider = lastLeftClicked.GetComponent<Collider2D>();
+        float dist = float.MaxValue;
+        if (clickedCollider != null && focusColliders.Length > 0) {
+            foreach (Collider2D focusCollider in focusColliders) {
+                if (forbiddenColliders.Contains(focusCollider.tag))
+                    continue;
+                if (focusCollider.enabled == false)
+                    continue;
+                dist = Mathf.Min(dist, clickedCollider.Distance(focusCollider).distance);
+            }
+        }
+        if (dist == float.MaxValue) {
+            dist = Vector3.SqrMagnitude(lastLeftClicked.transform.position - focusTransform.position);
+        }
         if (dist < i.range) {
             return true;
         } else {

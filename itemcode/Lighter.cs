@@ -12,7 +12,7 @@ public class Lighter : Interactive {
         pickup = GetComponent<Pickup>();
         Interaction f = new Interaction(this, "Fire", "Fire", false, true);
         f.descString = "Use lighter";
-        f.defaultPriority = 1;
+        f.defaultPriority = 2;
         interactions.Add(f);
         flameRadius = transform.Find("flameRadius").GetComponent<Collider2D>();
         flameRadius.enabled = false;
@@ -42,7 +42,8 @@ public class Lighter : Interactive {
         if (coll.transform.IsChildOf(transform.root))
             return;
         if (flammables.ContainsKey(coll.gameObject) && flameRadius.enabled) {
-            flammables[coll.gameObject].heat += Time.deltaTime * 2f;
+            // flammables[coll.gameObject].heat += Time.deltaTime * 2f;
+            flammables[coll.gameObject].burnTimer = 1f;
             if (pickup != null) {
                 if (pickup.holder != null) {
                     flammables[coll.gameObject].responsibleParty = pickup.holder.gameObject;

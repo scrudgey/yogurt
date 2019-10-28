@@ -172,7 +172,7 @@ public class Eater : Interactive, ISaveable {
                 // container.li
                 GameObject sip = new GameObject();
                 Liquid.MonoLiquidify(sip, container.liquid);
-                Toolbox.Instance.AddPromotedLiveBuffs(gameObject, sip);
+                Toolbox.Instance.AddLiveBuffs(gameObject, sip);
                 Destroy(sip);
             }
         }
@@ -180,7 +180,7 @@ public class Eater : Interactive, ISaveable {
         if (reservoir) {
             GameObject sip = new GameObject();
             Liquid.MonoLiquidify(sip, reservoir.liquid);
-            Toolbox.Instance.AddPromotedLiveBuffs(gameObject, sip);
+            Toolbox.Instance.AddLiveBuffs(gameObject, sip);
             Destroy(sip);
         }
         if (Toolbox.Instance.CloneRemover(food.name) == "sword") {
@@ -274,6 +274,10 @@ public class Eater : Interactive, ISaveable {
     void ReactToOccurrence(EventData od) {
         if (netIntrinsics[BuffType.undead].boolValue)
             return;
+        // Debug.Log(od.whatHappened);
+        // foreach (KeyValuePair<Rating, float> kvp in od.ratings) {
+        //     Debug.Log(kvp.Key.ToString() + ": " + kvp.Value.ToString());
+        // }
         if (od.ratings[Rating.disgusting] > 1)
             nausea += 10f;
         if (od.ratings[Rating.disgusting] > 2)

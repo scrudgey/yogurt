@@ -93,13 +93,61 @@ public class Occurrence : MonoBehaviour {
         data.whatHappened = Toolbox.Instance.GetName(cannibal) + " commited cannibalism";
         return data;
     }
-    public static EventData Death(GameObject dead, damageType lastDamage) {
-        EventData data = new EventData(offensive: 4, disgusting: 3, disturbing: 4, chaos: 4, positive: -3);
-        data.key = "death";
-        data.val = 1f;
-        data.popupDesc = "deaths";
-        data.noun = "death";
-        data.whatHappened = Toolbox.Instance.GetName(dead) + " died";
+    public static EventData Death(
+        GameObject dead,
+        GameObject lastAttacker,
+        damageType lastDamage,
+        bool monster,
+        bool suicide,
+        bool assailant
+        ) {
+        EventData data = null;
+        string victimName = Toolbox.Instance.GetName(dead);
+        if (monster) {
+            data = new EventData(offensive: 1, disgusting: 1, disturbing: 0, chaos: 0, positive: 2);
+            data.key = "killing";
+            data.val = 1f;
+            data.popupDesc = "deaths";
+            data.noun = "death";
+            data.whatHappened = Toolbox.Instance.GetName(dead) + " was killed";
+        } else {
+            data = new EventData(offensive: 4, disgusting: 3, disturbing: 4, chaos: 4, positive: -3);
+            data.key = "death";
+            data.val = 1f;
+            data.popupDesc = "deaths";
+            data.noun = "death";
+            data.popupDesc = "deaths";
+            if (assailant) {
+                string attackerName = Toolbox.Instance.GetName(lastAttacker);
+                data.whatHappened = attackerName + " murdered " + victimName;
+                data.noun = "murder";
+                data.popupDesc = "murders";
+                if (lastDamage == damageType.fire) {
+                    data.whatHappened += " with fire";
+                } else if (lastDamage == damageType.asphyxiation) {
+                    data.whatHappened = attackerName + " strangled " + victimName + " to death";
+                } else if (lastDamage == damageType.cosmic) {
+                    data.whatHappened = attackerName + " annihilated " + victimName + " with cosmic energy";
+                }
+            }
+            if (lastDamage == damageType.fire) {
+                data.whatHappened = victimName + " burned to death";
+            } else if (lastDamage == damageType.asphyxiation) {
+                data.whatHappened = victimName + " asphyxiated";
+            } else if (lastDamage == damageType.cosmic) {
+                data.whatHappened = victimName + " was annihilated by cosmic energy";
+            } else if (lastDamage == damageType.cutting || lastDamage == damageType.piercing) {
+                data.whatHappened = victimName + " was stabbed to death";
+            }
+        }
+        if (suicide) {
+            data.whatHappened = victimName + " committed suicide";
+            data.noun = "suicide";
+            data.popupDesc = "suicides";
+            if (lastDamage == damageType.fire) {
+                data.whatHappened = victimName + " self-immolated";
+            }
+        }
         return data;
     }
     public static EventData Eggplant(GameObject eater) {
@@ -263,43 +311,12 @@ public class OccurrenceDeath : OccurrenceData {
     public bool assailant;
     public GameObject lastAttacker;
     public damageType lastDamage;
-    public OccurrenceDeath() { }
+    public bool monster;
+    public OccurrenceDeath(bool monster) {
+        this.monster = monster;
+    }
     public override void CalculateDescriptions(Occurrence parent) {
-        EventData data = Occurrence.Death(dead, damageType.any);
-        events.Add(data);
-        string victimName = Toolbox.Instance.GetName(dead);
-        if (suicide) {
-            data.whatHappened = victimName + " committed suicide";
-            data.noun = "suicide";
-            data.popupDesc = "suicides";
-            if (lastDamage == damageType.fire) {
-                data.whatHappened = victimName + " self-immolated";
-            }
-        } else if (assailant) {
-            string attackerName = Toolbox.Instance.GetName(lastAttacker);
-            data.whatHappened = attackerName + " murdered " + victimName;
-            data.noun = "murder";
-            data.popupDesc = "murders";
-            if (lastDamage == damageType.fire) {
-                data.whatHappened += " with fire";
-            } else if (lastDamage == damageType.asphyxiation) {
-                data.whatHappened = attackerName + " strangled " + victimName + " to death";
-            } else if (lastDamage == damageType.cosmic) {
-                data.whatHappened = attackerName + " annihilated " + victimName + " with cosmic energy";
-            }
-        } else {
-            data.noun = "death";
-            data.popupDesc = "deaths";
-            if (lastDamage == damageType.fire) {
-                data.whatHappened = victimName + " burned to death";
-            } else if (lastDamage == damageType.asphyxiation) {
-                data.whatHappened = victimName + " asphyxiated";
-            } else if (lastDamage == damageType.cosmic) {
-                data.whatHappened = victimName + " was annihilated by cosmic energy";
-            } else if (lastDamage == damageType.cutting || lastDamage == damageType.piercing) {
-                data.whatHappened = victimName + " was stabbed to death";
-            }
-        }
+        events.Add(Occurrence.Death(dead, lastAttacker, lastDamage, monster, suicide, assailant));
     }
 }
 public class OccurrenceVomit : OccurrenceData {

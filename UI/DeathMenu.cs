@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 public class DeathMenu : MonoBehaviour {
     public bool buttonVisible;
@@ -30,9 +31,16 @@ public class DeathMenu : MonoBehaviour {
             Collider2D letterCollider = letter.GetComponent<Collider2D>();
             Physics2D.IgnoreCollision(letterCollider, UICollider, true);
         }
+        GameManager.Instance.StartCoroutine(ChangeMusic());
     }
     public void ButtonCallback() {
         GameManager.Instance.NewDayCutscene();
+    }
+    IEnumerator ChangeMusic() {
+        MusicController.Instance.StopTrack();
+        yield return new WaitForSeconds(2f);
+        if (MusicController.Instance.nowPlaying == MusicTrack.none)
+            MusicController.Instance.PlayTrack(MusicTrack.tweakDelay);
     }
     void Update() {
         timer += Time.deltaTime;

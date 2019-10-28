@@ -17,6 +17,9 @@ public class Flammable : MonoBehaviour, ISaveable {
     public Pickup pickup;
     public float fireRetardantBuffer = 2f;
     public bool fireproof;
+    public bool silent; // if true, flammable will not generate occurrence flags
+    // public bool coldFire;
+    public float burnTimer;
     void Start() {
         pickup = GetComponent<Pickup>();
 
@@ -66,8 +69,11 @@ public class Flammable : MonoBehaviour, ISaveable {
         }
     }
     public void HandleDamageMessage(MessageDamage message) {
+        // TODO: rate limit this step
         if (message.type == damageType.fire) {
-            heat += message.amount;
+            // heat += message.amount;
+            burnTimer = 1f;
+            responsibleParty = message.responsibleParty;
         }
         if (message.type == damageType.asphyxiation) {
             heat = -999f;
@@ -75,6 +81,10 @@ public class Flammable : MonoBehaviour, ISaveable {
         }
     }
     void Update() {
+        if (burnTimer > 0) {
+            burnTimer -= Time.deltaTime;
+            heat += 2f * Time.deltaTime;
+        }
         if (fireSource) {
             onFire = true;
             heat = 100;
@@ -89,10 +99,6 @@ public class Flammable : MonoBehaviour, ISaveable {
         }
         if (heat < (-1f * fireRetardantBuffer - 1f)) {
             heat += Time.deltaTime;
-        }
-        if (!onFire && fireParticles.isPlaying) {
-            fireParticles.Stop();
-            audioSource.Stop();
         }
         if (heat <= (-1f * fireRetardantBuffer) && smoke.isPlaying) {
             smoke.Stop();
@@ -127,20 +133,25 @@ public class Flammable : MonoBehaviour, ISaveable {
             flagTimer += Time.deltaTime;
             if (flagTimer > 0.5f) {
                 flagTimer = 0;
-                if (!fireSource) {
+                if (!fireSource && !silent) {
                     OccurrenceFire fireData = new OccurrenceFire();
                     fireData.flamingObject = gameObject;
                     Toolbox.Instance.OccurenceFlag(gameObject, fireData, involvedParties);
                 }
             }
             // if i am on fire, i take damage.
-            MessageDamage message = new MessageDamage(Time.deltaTime, damageType.fire);
+            MessageDamage message = new MessageDamage(0.1f, damageType.fire);
             message.responsibleParty = gameObject;
             Toolbox.Instance.SendMessage(gameObject, this, message, sendUpwards: false);
             if (Random.Range(0, 100f) < 1) {
                 MessageSpeech speechMessage = new MessageSpeech();
                 speechMessage.phrase = "this " + gameObject.name + " is hot!";
                 Toolbox.Instance.SendMessage(gameObject, this, speechMessage, sendUpwards: true);
+            }
+        } else {
+            if (fireParticles.isPlaying) {
+                fireParticles.Stop();
+                audioSource.Stop();
             }
         }
     }

@@ -59,7 +59,11 @@ public class Liquid {
             if (potion.Satisfied(liq.ingredients)) {
                 liq.ingredients.Remove(potion.ingredient1.prefabName);
                 liq.ingredients.Remove(potion.ingredient2.prefabName);
-                return potion.buff;
+                Buff newBuff = potion.buff;
+                if (GameManager.Instance.data.perks["potion"]) {
+                    newBuff.lifetime = 0;
+                }
+                return newBuff;
             }
         }
         return null;
@@ -167,7 +171,7 @@ public class Liquid {
             Buff buff = new Buff();
             buff.type = BuffType.death;
             buff.boolValue = true;
-            buff.lifetime = 20f;
+            // buff.lifetime = 20f;
             l.buffs.Add(buff);
         }
         return l;

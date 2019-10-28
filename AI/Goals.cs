@@ -145,10 +145,11 @@ namespace AI {
         public new string goalThought {
             get { return "I'm going to check out that " + target.val.name + "."; }
         }
-        public GoalWalkToObject(GameObject g, Controllable c, Ref<GameObject> t, float range = 0.2f) : base(g, c) {
+        public GoalWalkToObject(GameObject g, Controllable c, Ref<GameObject> t, float range = 0.2f, bool invert = false) : base(g, c) {
             target = t;
+            // TODO: if invert, change success condition
             successCondition = new ConditionCloseToObject(g, target, range);
-            routines.Add(new RoutineWalkToGameobject(g, c, target));
+            routines.Add(new RoutineWalkToGameobject(g, c, target, invert: invert));
         }
         public GoalWalkToObject(GameObject g, Controllable c, Type objType, float range = 0.2f) : base(g, c) {
             // GameObject targetObject = GameObject.FindObjectOfType<typeof(objType)>();
@@ -162,6 +163,20 @@ namespace AI {
                 successCondition = new ConditionCloseToObject(g, target, range);
             }
         }
+    }
+
+    public class GoalWalkToPoint : Goal {
+        public Ref<Vector2> target;
+        public GoalWalkToPoint(GameObject g, Controllable c, Ref<Vector2> target, float minDistance = 0.2f, bool invert = false) : base(g, c) {
+            goalThought = "I want to be over there.";
+            this.target = target;
+            ConditionLocation condition = new ConditionLocation(g, target);
+            condition.minDistance = minDistance;
+            successCondition = condition;
+
+            routines.Add(new RoutineWalkToPoint(g, c, target, minDistance, invert: invert));
+        }
+        public GoalWalkToPoint(GameObject g, Controllable c, Ref<Vector2> target) : this(g, c, target, minDistance: 0.2f, invert: false) { }
     }
     public class GoalLookAtObject : Goal {
         public Ref<GameObject> target;
@@ -204,19 +219,6 @@ namespace AI {
         public override void Update() {
             base.Update();
         }
-    }
-    public class GoalWalkToPoint : Goal {
-        public Ref<Vector2> target;
-        public GoalWalkToPoint(GameObject g, Controllable c, Ref<Vector2> target, float minDistance) : base(g, c) {
-            goalThought = "I want to be over there.";
-            this.target = target;
-            ConditionLocation condition = new ConditionLocation(g, target);
-            condition.minDistance = minDistance;
-            successCondition = condition;
-
-            routines.Add(new RoutineWalkToPoint(g, c, target, minDistance));
-        }
-        public GoalWalkToPoint(GameObject g, Controllable c, Ref<Vector2> target) : this(g, c, target, 0.2f) { }
     }
     public class GoalHoseDown : Goal {
         public Ref<GameObject> target;
@@ -275,14 +277,7 @@ namespace AI {
             }
         }
     }
-    public class GoalRunFromObject : Goal {
-        public GoalRunFromObject(GameObject g, Controllable c, Ref<GameObject> threat) : base(g, c) {
-            goalThought = "I'm trying to avoid a bad thing.";
-            // successCondition = new ConditionLocation(g, new Ref<Vector2>(Vector2.zero));
-            successCondition = new ConditionLocation(g, new Ref<Vector2>(new Vector2(-999f, -999f)));
-            routines.Add(new RoutineAvoidGameObject(g, c, threat));
-        }
-    }
+
     public class GoalDukesUp : Goal {
         public GoalDukesUp(GameObject g, Controllable c, Inventory i) : base(g, c) {
             successCondition = new ConditionInFightMode(g, control);

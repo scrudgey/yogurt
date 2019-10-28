@@ -52,6 +52,8 @@ public class GameData {
     public SkinColor headSkinColor;
     public string cosmicName = "";
     public bool loadedDay;
+    public Int16 ghostsKilled;
+    public bool mayorAwardToday;
     public GameData() {
         days = 0;
         saveDate = System.DateTime.Now.ToString();
@@ -72,6 +74,18 @@ public class GameData {
         return completeAchievements;
     }
 }
+public class GlobalSettings {
+    private bool _musicOn = true;
+    public bool musicOn {
+        get { return _musicOn; }
+        set {
+            _musicOn = value;
+            MusicController.Instance.UpdateTrack();
+        }
+    }
+    public float sfxVolume;
+    public float musicVolume;
+}
 public partial class GameManager : Singleton<GameManager> {
     protected GameManager() { }
     static public Dictionary<string, string> sceneNames = new Dictionary<string, string>(){
@@ -79,7 +93,7 @@ public partial class GameManager : Singleton<GameManager> {
         {"cave2", "deathtrap cave II"},
         {"forest", "forest"},
         {"house", "house"},
-        {"krazy1", "outdoors"},
+        // {"krazy1", "outdoors"},
         {"moon1", "moon"},
         {"studio", "yogurt commercial studio"},
         {"volcano", "volcano"},
@@ -93,8 +107,15 @@ public partial class GameManager : Singleton<GameManager> {
         {"dungeon", "oubliette"},
         {"potion", "apothecary"},
         {"cave3", "deathtrap cave III"},
+        {"moon_pool", "moon pool"},
+        {"moon_town", "moon town"},
+        {"neighborhood", "outdoors"},
+        {"mayors_house", "mayor's house"},
+        {"mayors_attic", "attic"},
+        {"anti_mayors_house", "anti mayor's house"},
     };
     public GameData data;
+    public static GlobalSettings settings = new GlobalSettings();
     public string saveGameName = "test";
     private CameraControl cameraControl;
     public Camera cam;
@@ -125,8 +146,8 @@ public partial class GameManager : Singleton<GameManager> {
     public void Start() {
         if (data == null) {
             data = InitializedGameData();
-            ReceiveEmail("duplicator");
-            ReceiveEmail("golf_club");
+            // ReceiveEmail("duplicator");
+            // ReceiveEmail("golf_club");
             // ReceivePackage("kaiser_helmet");
             // ReceivePackage("duplicator");
             // ReceivePackage("golf_club");
@@ -169,7 +190,7 @@ public partial class GameManager : Singleton<GameManager> {
             UINew.Instance.ShowMenu(UINew.MenuType.newDayReport);
         }
         string sceneName = SceneManager.GetActiveScene().name;
-        if (sceneTime > 0.1f && !data.unlockedScenes.Contains(sceneName) && !InCutsceneLevel()) {
+        if (sceneTime > 0.1f && !data.unlockedScenes.Contains(sceneName) && !InCutsceneLevel() && GameManager.sceneNames.ContainsKey(sceneName)) {
             data.unlockedScenes.Add(sceneName);
             UINew.Instance.ShowSceneText("- " + GameManager.sceneNames[sceneName] + " -");
         }
@@ -386,6 +407,14 @@ public partial class GameManager : Singleton<GameManager> {
         if (sceneName == "moon1" && (data.entryID == 420 || data.entryID == 99)) {
             CutsceneManager.Instance.InitializeCutscene<CutsceneMoonLanding>();
         }
+        if (sceneName == "mayors_house" && data.ghostsKilled >= 3 && !data.collectedItems.Contains("key_to_city") && !data.mayorAwardToday) {
+            GameObject mayor = GameObject.Find("Mayor");
+            if (mayor != null) {
+                Speech mayorSpeech = mayor.GetComponent<Speech>();
+                if (mayorSpeech != null)
+                    mayorSpeech.defaultMonologue = "mayor_award";
+            }
+        }
         PlayerEnter();
         if (playerIsDead) {
             UINew.Instance.RefreshUI(active: false);
@@ -465,12 +494,11 @@ public partial class GameManager : Singleton<GameManager> {
             if (playerFlammable) {
                 playerFlammable.onFire = false;
                 playerFlammable.heat = 0;
+                playerFlammable.burnTimer = 0f;
             }
             Intrinsics playerIntrinsics = playerObject.GetComponent<Intrinsics>();
             if (playerIntrinsics) {
-                // Debug.Log(playerIntrinsics.liveBuffs);
                 playerIntrinsics.liveBuffs = new List<Buff>();
-                // playerIntrinsics.
             }
             data.teleportedToday = false;
             MySaver.Save();
@@ -511,6 +539,7 @@ public partial class GameManager : Singleton<GameManager> {
         sceneTime = 0f;
         data.entryID = -99;
         data.firstTimeLeavingHouse = true;
+        data.mayorAwardToday = false;
         activeCommercial = null;
     }
     public void DetermineClosetNews() {
@@ -570,7 +599,9 @@ public partial class GameManager : Singleton<GameManager> {
             {"vomit", false},
             {"eat_all", false},
             {"hypnosis", false},
-            {"swear", false}
+            {"swear", false},
+            {"potion", false},
+            {"burn", false},
         };
         data.collectedClothes.Add("blue_shirt");
         data.collectedClothes.Add("pajamas");
@@ -597,6 +628,8 @@ public partial class GameManager : Singleton<GameManager> {
             data.perks["vomit"] = true;
             data.perks["eat_all"] = true;
             data.perks["swear"] = true;
+            data.perks["potion"] = false;
+            data.perks["burn"] = false;
             foreach (string sceneName in sceneNames.Keys) {
                 data.unlockedScenes.Add(sceneName);
             }
@@ -608,6 +641,7 @@ public partial class GameManager : Singleton<GameManager> {
             data.itemCheckedOut["package"] = false;
             data.collectedObjects.Add("cosmic_nullifier");
             data.itemCheckedOut["cosmic_nullifier"] = false;
+            data.cosmicName = GameManager.Instance.CosmicName();
         }
         data.completeCommercials = new HashSet<Commercial>();
         // initialize achievements
