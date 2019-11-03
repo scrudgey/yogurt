@@ -102,6 +102,24 @@ public class Intrinsics : MonoBehaviour, ISaveable {
                         Destroy(fader);
                     }
                     break;
+                case BuffType.invulnerable:
+                    if (kvp.Value.boolValue || kvp.Value.floatValue > 0) {
+                        Transform head = transform.Find("head");
+                        if (head) {
+                            GameObject halo = GameObject.Instantiate(Resources.Load("particles/halo")) as GameObject;
+                            halo.transform.SetParent(head, false);
+                            halo.transform.localPosition = Vector3.zero;
+                        }
+                    } else {
+                        // TODO: fix
+                        Transform head = transform.Find("head");
+                        if (head) {
+                            Transform halo = head.Find("halo(Clone)");
+                            if (halo != null)
+                                Destroy(halo.gameObject);
+                        }
+                    }
+                    break;
                 default:
                     break;
             }
