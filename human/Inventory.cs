@@ -7,6 +7,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     public Controllable.HitState hitstate;
     public List<GameObject> items;
     public GameObject initHolding;
+    public List<GameObject> initItems;
     public bool strong;
     public Pickup holding {
         get { return _holding; }
@@ -124,6 +125,23 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
                 GetItem(pickup);
             }
         }
+        foreach (GameObject item in initItems) {
+            if (item == null)
+                continue;
+            ClaimsManager.Instance.ClaimObject(item, this);
+            PhysicalBootstrapper phys = item.GetComponent<PhysicalBootstrapper>();
+            if (phys)
+                phys.DestroyPhysical();
+            item.transform.position = holdpoint.position;
+            item.transform.SetParent(holdpoint, false);
+            item.transform.rotation = Quaternion.identity;
+            item.transform.localPosition = Vector3.zero;
+            item.GetComponent<Rigidbody2D>().isKinematic = true;
+            item.GetComponent<Collider2D>().isTrigger = true;
+            // item.holder = this;
+            item.GetComponent<Pickup>().holder = this;
+            StashItem(item);
+        }
     }
     public void DirectionChange(Vector2 dir) {
         direction = dir;
@@ -171,7 +189,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     }
     public void StashItem(GameObject item) {
         items.Add(item);
-        if (item == holding.gameObject)
+        if (holding != null && item == holding.gameObject)
             SoftDropItem();
         item.SetActive(false);
     }
