@@ -10,6 +10,7 @@ public class CameraControl : MonoBehaviour {
     public Vector2 minXY;
     private Camera mainCamera;
     public AudioSource audioSource;
+    public Vector3 offset;
     void Start() {
         mainCamera = GetComponent<Camera>();
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
@@ -45,10 +46,8 @@ public class CameraControl : MonoBehaviour {
         screenWidthWorld = upperRightWorld.x - lowerLeftWorld.x;
         screenHeightWorld = upperRightWorld.y - lowerLeftWorld.y;
 
-        // TODO: why is this weird? can we do it a better way?
-        // Vector2 initPos = new Vector2(transform.position.x, transform.position.y + screenHeightWorld / 35f);
         Vector2 initPos = transform.position;
-        tempVector = Vector3.SmoothDamp(initPos, focus.transform.position + new Vector3(0, 0.15f, 0), ref smoothVelocity, 0.1f);
+        tempVector = Vector3.SmoothDamp(initPos, focus.transform.position + offset, ref smoothVelocity, 0.1f);
 
         //check for edge of level
         if (screenWidthWorld > maxXY.x - minXY.x) {
