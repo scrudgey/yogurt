@@ -159,6 +159,18 @@ public class Occurrence : MonoBehaviour {
         data.whatHappened = Toolbox.Instance.GetName(eater) + " ate an eggplant";
         return data;
     }
+    public static EventData EldritchHorror() {
+        EventData data = new EventData(disturbing: 3, disgusting: 1, chaos: 1, offensive: 2, positive: -2);
+        data.key = "horror";
+        data.val = 1f;
+        data.popupDesc = "horrors";
+        data.noun = "horrors";
+
+        Grammar grammar = new Grammar();
+        grammar.Load("horror");
+        data.whatHappened = grammar.Parse("{main}");
+        return data;
+    }
 }
 
 [System.Serializable]
@@ -316,6 +328,16 @@ public class OccurrenceDeath : OccurrenceData {
         this.monster = monster;
     }
     public override void CalculateDescriptions(Occurrence parent) {
+        if (lastAttacker == null)
+            return;
+        if (lastAttacker == dead) {
+            suicide = true;
+        } else {
+            if (lastAttacker.GetComponent<DamageZone>() != null)
+                damageZone = true;
+            if (lastAttacker.GetComponent<Inventory>() != null)
+                assailant = true;
+        }
         events.Add(Occurrence.Death(dead, lastAttacker, lastDamage, monster, suicide, assailant));
     }
 }
@@ -336,6 +358,12 @@ public class OccurrenceVomit : OccurrenceData {
                     events.Add(Occurrence.VomitYogurt(vomiter));
             }
         }
+    }
+}
+public class OccurrenceNecronomicon : OccurrenceData {
+    public override void CalculateDescriptions(Occurrence parent) {
+        EventData data = Occurrence.EldritchHorror();
+        events.Add(data);
     }
 }
 public class OccurrenceSpeech : OccurrenceData {

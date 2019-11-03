@@ -85,6 +85,23 @@ public class Toolbox : Singleton<Toolbox> {
         a[0] = char.ToUpper(a[0]);
         return new string(a);
     }
+    static public Vector3 RandomPointInBox(Bounds bounds, Vector2 target, float radius = 1.5f) {
+        int tries = 0;
+        Vector3 pos = bounds.center + new Vector3(
+           (UnityEngine.Random.value - 0.5f) * bounds.size.x,
+           (UnityEngine.Random.value - 0.5f) * bounds.size.y,
+           (UnityEngine.Random.value - 0.5f) * bounds.size.z
+        );
+        while (tries < 20 && Vector2.Distance(target, pos) > radius) {
+            tries++;
+            pos = bounds.center + new Vector3(
+                (UnityEngine.Random.value - 0.5f) * bounds.size.x,
+                (UnityEngine.Random.value - 0.5f) * bounds.size.y,
+                (UnityEngine.Random.value - 0.5f) * bounds.size.z
+            );
+        }
+        return pos;
+    }
     public static string RemoveExtraPunctuation(string s) {
         if (s.Length < 2)
             return s;
