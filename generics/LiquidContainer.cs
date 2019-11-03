@@ -15,7 +15,7 @@ public class LiquidContainer : Interactive, ISaveable {
     }
     public float fillCapacity;
     private float spillTimeout = 0.075f;
-    private bool empty;
+    protected bool empty;
     public bool lid;
     private bool doSpill = false;
     private float spillSeverity;
@@ -31,7 +31,7 @@ public class LiquidContainer : Interactive, ISaveable {
             Spill();
         }
     }
-    void Awake() {
+    virtual public void Awake() {
         if (!configured) {
             configured = true;
             Interaction fillReservoir = new Interaction(this, "Fill", "FillFromReservoir");

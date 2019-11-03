@@ -48,6 +48,7 @@ public class MonoLiquid : MonoBehaviour {
                 }
                 if (numberStains < 5) {
                     GameObject stain = CreateStain(coll.gameObject, transform.position);
+                    Toolbox.Instance.AddLiveBuffs(coll.gameObject, gameObject);
                     SpriteRenderer stainRenderer = stain.GetComponent<SpriteRenderer>();
                     stainRenderer.color = liquid.color;
                     Liquid.MonoLiquidify(stain, liquid);
