@@ -70,18 +70,10 @@ public class Hurtable : Damageable, ISaveable {
         armor = intrins.netBuffs[BuffType.armor].floatValue;
         coughing = intrins.netBuffs[BuffType.coughing].boolValue;
         if (intrins.netBuffs[BuffType.death].active()) {
-            // health = -1f;
-            // Die(damageType.any);
             health = float.MinValue;
-            Die(damageType.cosmic);
+            Die(damageType.physical);
         }
     }
-    // override public void HandleNetIntrinsic(MessageNetIntrinsic message) {
-    //     base.HandleNetIntrinsic(message);
-    //     if (message.netBuffs[BuffType.death].active()) {
-    //         Die(damageType.cosmic);
-    //     }
-    // }
     public override float CalculateDamage(MessageDamage message) {
         if (message.responsibleParty != null) {
             lastAttacker = message.responsibleParty;
@@ -219,17 +211,6 @@ public class Hurtable : Damageable, ISaveable {
                 GameManager.Instance.IncrementStat(StatType.deathByCombat, 1);
             }
             GameManager.Instance.PlayerDeath();
-        }
-
-        if (lastAttacker == null)
-            return;
-        if (lastAttacker == gameObject) {
-            suicide = true;
-        } else {
-            if (lastAttacker.GetComponent<DamageZone>() != null)
-                damageZone = true;
-            if (lastAttacker.GetComponent<Inventory>() != null)
-                assailant = true;
         }
 
         OccurrenceDeath occurrenceData = new OccurrenceDeath(monster);
