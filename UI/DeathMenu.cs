@@ -37,9 +37,9 @@ public class DeathMenu : MonoBehaviour {
         GameManager.Instance.NewDayCutscene();
     }
     IEnumerator ChangeMusic() {
-        MusicController.Instance.StopTrack();
+        MusicController.Instance.StopMusic();
         yield return new WaitForSeconds(2f);
-        if (MusicController.Instance.nowPlaying == MusicTrack.none)
+        if (MusicController.Instance.nowPlaying == null)
             MusicController.Instance.PlayTrack(MusicTrack.tweakDelay);
     }
     void Update() {
