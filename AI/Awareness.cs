@@ -89,7 +89,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
     public bool imOnFire;
     public SerializableDictionary<GameObject, Knowledge> knowledgebase = new SerializableDictionary<GameObject, Knowledge>();
     public SerializableDictionary<GameObject, PersonalAssessment> people = new SerializableDictionary<GameObject, PersonalAssessment>();
-
+    private Intrinsics intrinsics;
     void Start() {
         // Debug.Log(name + "awareness starting");
         // Debug.Log(initialAwareness);
@@ -118,7 +118,20 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         Toolbox.RegisterMessageCallback<MessageThreaten>(this, ProcessThreat);
         Toolbox.RegisterMessageCallback<MessageInventoryChanged>(this, ProcessInventoryChanged);
         Toolbox.RegisterMessageCallback<MessageSpeech>(this, HandleSpeech);
+        Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsics);
+        intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject);
     }
+    void HandleNetIntrinsics(MessageNetIntrinsic message) {
+        if (message.netBuffs[BuffType.enraged].active()) {
+            // all people become enemies
+            foreach (KeyValuePair<GameObject, PersonalAssessment> kvp in people) {
+                Hurtable otherHurtable = kvp.Key.GetComponent<Hurtable>();
+                if (otherHurtable != null && !otherHurtable.monster)
+                    kvp.Value.status = PersonalAssessment.friendStatus.enemy;
+            }
+        }
+    }
+
     void HandleSpeech(MessageSpeech message) {
         foreach (GameObject party in message.involvedParties) {
             PersonalAssessment assessment = FormPersonalAssessment(party);
@@ -306,6 +319,8 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         return "I remember when " + memory.whatHappened;
     }
     void ProcessOccurrenceFlag(GameObject flag) {
+        if (intrinsics.NetBuffs()[BuffType.enraged].active())
+            return;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
         if (occurrence == null)
             return;
@@ -564,9 +579,19 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             if ((interval > 10f && decisionMaker.personality.social == Personality.Social.chatty) || (interval > 25f && decisionMaker.personality.social == Personality.Social.normal)) {
                 AddSocializationTarget(rootObject);
             }
+            if (intrinsics.NetBuffs()[BuffType.enraged].active()) {
+                Hurtable otherHurtable = rootControllable.GetComponent<Hurtable>();
+                if (otherHurtable != null && !otherHurtable.monster)
+                    storedAssessment.status = PersonalAssessment.friendStatus.enemy;
+            }
             return storedAssessment;
         }
         PersonalAssessment assessment = new PersonalAssessment(knowledgebase[rootObject]);
+        if (intrinsics.NetBuffs()[BuffType.enraged].active()) {
+            Hurtable otherHurtable = rootControllable.GetComponent<Hurtable>();
+            if (otherHurtable != null && !otherHurtable.monster)
+                assessment.status = PersonalAssessment.friendStatus.enemy;
+        }
         AddSocializationTarget(rootObject);
         people.Add(rootObject, assessment);
         return assessment;
@@ -584,6 +609,8 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         if (hitState >= Controllable.HitState.unconscious)
             return;
         if (message.impersonal)
+            return;
+        if (intrinsics.NetBuffs()[BuffType.enraged].active())
             return;
         // adjust reaction depending on magnitude
         if (message.amount <= 15) {

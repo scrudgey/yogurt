@@ -319,6 +319,7 @@ namespace AI {
     public class PriorityAttack : Priority {
         private Inventory inventory;
         private float updateInterval;
+        private Intrinsics intrinsics;
         public PriorityAttack(GameObject g, Controllable c) : base(g, c) {
             priorityName = "attack";
             inventory = gameObject.GetComponent<Inventory>();
@@ -335,6 +336,8 @@ namespace AI {
             punchGoal.requirements.Add(approachGoal);
 
             goal = punchGoal;
+
+            intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(g);
         }
         public override void ReceiveMessage(Message incoming) {
             if (incoming is MessageDamage) {
@@ -363,6 +366,8 @@ namespace AI {
                 urgency -= Time.deltaTime / 10f;
         }
         public override float Urgency(Personality personality) {
+            if (intrinsics.NetBuffs()[BuffType.enraged].active())
+                return Priority.urgencyLarge;
             if (personality.bravery == Personality.Bravery.brave)
                 return urgency * 2f;
             if (personality.bravery == Personality.Bravery.cowardly)
