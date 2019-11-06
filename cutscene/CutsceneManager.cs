@@ -626,6 +626,11 @@ public class CutsceneNeconomicon : Cutscene {
                     state = State.hovering;
                     hoverInitPosition = player.transform.position;
                     cameraControl.Shake(0.01f);
+
+                    Hurtable[] hurtables = GameObject.FindObjectsOfType<Hurtable>();
+                    foreach (Hurtable hurtable in hurtables) {
+                        hurtable.Resurrect();
+                    }
                 }
                 break;
             case State.hovering:

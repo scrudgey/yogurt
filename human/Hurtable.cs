@@ -188,6 +188,25 @@ public class Hurtable : Damageable, ISaveable {
         }
         hitState = Controllable.AddHitState(hitState, Controllable.HitState.dead);
     }
+
+    public void Resurrect() {
+        if (hitState != Controllable.HitState.dead)
+            return;
+        health = maxHealth;
+        Reset();
+        GetUp();
+        Intrinsics hostIntrins = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject);
+        // add mindless?
+        hostIntrins.AddNewPromotedLiveBuff(new Buff(BuffType.undead, true, 0, 0));
+        hostIntrins.AddNewPromotedLiveBuff(new Buff(BuffType.enraged, true, 0, 0));
+        hostIntrins.IntrinsicsChanged();
+        monster = true;
+        Speech speech = GetComponent<Speech>();
+        if (speech) {
+            speech.enabled = false;
+            speech.disableSpeakWith = true;
+        }
+    }
     public void LogTypeOfDeath(damageType type) {
         bool suicide = false;
         bool damageZone = false;
