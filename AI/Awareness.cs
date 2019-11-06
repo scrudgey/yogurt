@@ -67,6 +67,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
     private HashSet<GameObject> seenFlags = new HashSet<GameObject>();
     Transform cachedTransform;
     FixedSizedQueue<string> lastNEvents = new FixedSizedQueue<string>();
+    private Dictionary<BuffType, Buff> netBuffs = new Dictionary<BuffType, Buff>();
     public new Transform transform {
         get {
             if (cachedTransform == null) {
@@ -89,7 +90,6 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
     public bool imOnFire;
     public SerializableDictionary<GameObject, Knowledge> knowledgebase = new SerializableDictionary<GameObject, Knowledge>();
     public SerializableDictionary<GameObject, PersonalAssessment> people = new SerializableDictionary<GameObject, PersonalAssessment>();
-    private Intrinsics intrinsics;
     void Start() {
         // Debug.Log(name + "awareness starting");
         // Debug.Log(initialAwareness);
@@ -119,9 +119,9 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         Toolbox.RegisterMessageCallback<MessageInventoryChanged>(this, ProcessInventoryChanged);
         Toolbox.RegisterMessageCallback<MessageSpeech>(this, HandleSpeech);
         Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsics);
-        intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject);
     }
     void HandleNetIntrinsics(MessageNetIntrinsic message) {
+        netBuffs = message.netBuffs;
         if (message.netBuffs[BuffType.enraged].active()) {
             // all people become enemies
             foreach (KeyValuePair<GameObject, PersonalAssessment> kvp in people) {
@@ -319,7 +319,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         return "I remember when " + memory.whatHappened;
     }
     void ProcessOccurrenceFlag(GameObject flag) {
-        if (intrinsics.NetBuffs()[BuffType.enraged].active())
+        if (netBuffs != null && netBuffs.ContainsKey(BuffType.enraged) && netBuffs[BuffType.enraged].active())
             return;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
         if (occurrence == null)
@@ -579,7 +579,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             if ((interval > 10f && decisionMaker.personality.social == Personality.Social.chatty) || (interval > 25f && decisionMaker.personality.social == Personality.Social.normal)) {
                 AddSocializationTarget(rootObject);
             }
-            if (intrinsics.NetBuffs()[BuffType.enraged].active()) {
+            if (netBuffs != null && netBuffs.ContainsKey(BuffType.enraged) && netBuffs[BuffType.enraged].active()) {
                 Hurtable otherHurtable = rootControllable.GetComponent<Hurtable>();
                 if (otherHurtable != null && !otherHurtable.monster)
                     storedAssessment.status = PersonalAssessment.friendStatus.enemy;
@@ -587,7 +587,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             return storedAssessment;
         }
         PersonalAssessment assessment = new PersonalAssessment(knowledgebase[rootObject]);
-        if (intrinsics.NetBuffs()[BuffType.enraged].active()) {
+        if (netBuffs != null && netBuffs.ContainsKey(BuffType.enraged) && netBuffs[BuffType.enraged].active()) {
             Hurtable otherHurtable = rootControllable.GetComponent<Hurtable>();
             if (otherHurtable != null && !otherHurtable.monster)
                 assessment.status = PersonalAssessment.friendStatus.enemy;
@@ -610,8 +610,12 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             return;
         if (message.impersonal)
             return;
-        if (intrinsics.NetBuffs()[BuffType.enraged].active())
-            return;
+        if (netBuffs != null) {
+            if (netBuffs.ContainsKey(BuffType.enraged) && netBuffs[BuffType.enraged].active())
+                return;
+            if (netBuffs.ContainsKey(BuffType.invulnerable) && netBuffs[BuffType.invulnerable].active() && message.type == damageType.fire)
+                return;
+        }
         // adjust reaction depending on magnitude
         if (message.amount <= 15) {
             // minor nusiance

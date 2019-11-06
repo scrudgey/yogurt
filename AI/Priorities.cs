@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 namespace AI {
     [System.Serializable]
@@ -271,7 +272,7 @@ namespace AI {
                 lastAttacker.val = dam.messenger.gameObject;
 
                 if (dam.type == damageType.fire) {
-                    urgency = Priority.urgencyLarge;
+                    urgency = Priority.urgencySmall;
                 } else {
                     urgency += Priority.urgencyMinor;
                 }
@@ -293,7 +294,7 @@ namespace AI {
         }
         public override void Update() {
             if (awareness.nearestEnemy.val == null)
-                urgency -= Time.deltaTime / 10f;
+                urgency -= Time.deltaTime / 2f;
         }
     }
     public class PriorityInvestigateNoise : Priority {
@@ -319,7 +320,7 @@ namespace AI {
     public class PriorityAttack : Priority {
         private Inventory inventory;
         private float updateInterval;
-        private Intrinsics intrinsics;
+        private Dictionary<BuffType, Buff> netBuffs = new Dictionary<BuffType, Buff>();
         public PriorityAttack(GameObject g, Controllable c) : base(g, c) {
             priorityName = "attack";
             inventory = gameObject.GetComponent<Inventory>();
@@ -336,8 +337,6 @@ namespace AI {
             punchGoal.requirements.Add(approachGoal);
 
             goal = punchGoal;
-
-            intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(g);
         }
         public override void ReceiveMessage(Message incoming) {
             if (incoming is MessageDamage) {
@@ -360,13 +359,17 @@ namespace AI {
                     urgency += Priority.urgencyMinor;
                 }
             }
+            if (incoming is MessageNetIntrinsic) {
+                MessageNetIntrinsic message = (MessageNetIntrinsic)incoming;
+                netBuffs = message.netBuffs;
+            }
         }
         public override void Update() {
             if (awareness.nearestEnemy.val == null)
                 urgency -= Time.deltaTime / 10f;
         }
         public override float Urgency(Personality personality) {
-            if (intrinsics.NetBuffs()[BuffType.enraged].active())
+            if (netBuffs != null && netBuffs.ContainsKey(BuffType.enraged) && netBuffs[BuffType.enraged].active())
                 return Priority.urgencyLarge;
             if (personality.bravery == Personality.Bravery.brave)
                 return urgency * 2f;
