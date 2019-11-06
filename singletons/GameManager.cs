@@ -80,7 +80,11 @@ public class GlobalSettings {
         get { return _musicOn; }
         set {
             _musicOn = value;
-            MusicController.Instance.UpdateTrack();
+            if (value) {
+                MusicController.Instance.SetMusic(MusicController.Instance.nowPlayingMusic);
+            } else {
+                MusicController.Instance.StopTrack();
+            }
         }
     }
     public float sfxVolume;

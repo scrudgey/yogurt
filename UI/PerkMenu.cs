@@ -46,6 +46,8 @@ public class PerkMenu : MonoBehaviour {
         }
         levelText.text = "Level: " + numberCollected.ToString();
         PopulatePerkList();
+
+        MusicController.Instance.EnqueueMusic(new MusicChela());
     }
     void PopulatePerkList() {
         effects.buttons = new List<Button>(builtInButtons);
@@ -131,6 +133,7 @@ public class PerkMenu : MonoBehaviour {
     }
     public void DoneButtonClick() {
         UINew.Instance.CloseActiveMenu();
+        MusicController.Instance.End();
     }
 
 }
