@@ -15,6 +15,9 @@ public class Package : Interactive, ISaveable {
     public void Open() {
         Destructible destructo = GetComponent<Destructible>();
         destructo.Die();
+        if (!GameManager.Instance.data.collectedObjects.Contains(contents)) {
+            MusicController.Instance.EnqueueMusic(new MusicItem());
+        }
     }
     public string Open_desc() {
         return "Open package";
