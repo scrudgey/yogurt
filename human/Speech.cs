@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using Nimrod;
 
 public class Speech : Interactive, ISaveable {
+    public string speechName;
     static string[] swearWords = new string[]{
         @"\bshit\b",
         @"\bfucked\b",
