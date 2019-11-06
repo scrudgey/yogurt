@@ -44,7 +44,8 @@ public class HeadAnimation : MonoBehaviour, IDirectable, ISaveable {
     public Controllable.HitState hitState;
     private string lastPressed;
     void LoadSprites() {
-        sprites = Toolbox.ApplySkinToneToSpriteSheet(spriteSheet, skinColor);
+        // sprites = Toolbox.ApplySkinToneToSpriteSheet(spriteSheet, skinColor);
+        sprites = Toolbox.MemoizedSkinTone(spriteSheet, skinColor);
     }
     public void UpdateSequence() {
         Animation animationComponent = GetComponent<Animation>();

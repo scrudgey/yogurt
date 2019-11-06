@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-
+using Realtime.Messaging.Internal;
 public enum SkinColor {
     light,
     dark,
@@ -315,6 +315,11 @@ public class Toolbox : Singleton<Toolbox> {
             if (edible.vomit)
                 nameOut = "vomited-up " + nameOut;
         }
+        Speech speech = obj.GetComponent<Speech>();
+        if (speech) {
+            if (speech.speechName != "")
+                nameOut = speech.speechName;
+        }
         nameOut = CloneRemover(nameOut);
         nameOut = UnderscoreRemover(nameOut);
         return nameOut;
@@ -412,6 +417,18 @@ public class Toolbox : Singleton<Toolbox> {
         texture.Apply();
         return texture;
     }
+    public static Func<TSource1, TSource2, TReturn> Memoize<TSource1, TSource2, TReturn>(Func<TSource1, TSource2, TReturn> func) {
+        var cache = new Dictionary<string, TReturn>();
+        return (s1, s2) => {
+            var key = s1.GetHashCode().ToString() + s2.GetHashCode().ToString();
+            if (!cache.ContainsKey(key)) {
+                cache[key] = func(s1, s2);
+            }
+            return cache[key];
+        };
+    }
+    static Dictionary<string, Sprite[]> skinToneCache = new Dictionary<string, Sprite[]>();
+    public static Func<string, SkinColor, Sprite[]> MemoizedSkinTone = Memoize<string, SkinColor, Sprite[]>(ApplySkinToneToSpriteSheet);
     public static Sprite[] ApplySkinToneToSpriteSheet(string sheetname, SkinColor skinColor) {
         Sprite[] sprites = Resources.LoadAll<Sprite>("spritesheets/" + sheetname);
         Texture2D modTexture = Toolbox.CopyTexture2D(sprites[0].texture, skinColor);
@@ -487,7 +504,22 @@ public class Toolbox : Singleton<Toolbox> {
     }
     public static void SetGender(GameObject target, Gender gender) {
         Speech speech = target.GetComponent<Speech>();
-        HeadAnimation headAnimation = target.GetComponent<HeadAnimation>();
+        HeadAnimation headAnimation = target.GetComponentInChildren<HeadAnimation>();
+        Outfit outfit = target.GetComponent<Outfit>();
+
+        switch (gender) {
+            case Gender.male:
+                headAnimation.spriteSheet = "generic3_head";
+                headAnimation.baseName = "generic3";
+                break;
+            case Gender.female:
+                headAnimation.spriteSheet = "girl_head";
+                headAnimation.baseName = "girl";
+                break;
+            default:
+                break;
+        }
+        outfit.gender = gender;
     }
 
     public void deactivateEventually(GameObject target) {

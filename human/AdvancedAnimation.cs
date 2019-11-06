@@ -52,6 +52,7 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
     public void HandleNetIntrinsic(MessageNetIntrinsic message) {
         if (message.netBuffs[BuffType.undead].boolValue) {
             skinColor = SkinColor.undead;
+            LoadSprites();
         }
     }
     public void HandleInventoryMessage(MessageInventoryChanged message) {
@@ -117,7 +118,8 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
     }
     public void LoadSprites() {
         string spriteSheet = baseName + "_spritesheet";
-        sprites = Toolbox.ApplySkinToneToSpriteSheet(spriteSheet, skinColor);
+        // sprites = Toolbox.ApplySkinToneToSpriteSheet(spriteSheet, skinColor);
+        sprites = Toolbox.MemoizedSkinTone(spriteSheet, skinColor);
         SetFrame(0);
     }
     public void UpdateSequence() {
