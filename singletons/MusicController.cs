@@ -148,6 +148,7 @@ public class MusicController : Singleton<MusicController> {
     public Track nowPlayingTrack;
     public Music nowPlayingMusic;
     public Stack<Track> stack = new Stack<Track>();
+    public Coroutine endCoroutine;
     public void Awake() {
         SetCamera();
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
@@ -184,7 +185,9 @@ public class MusicController : Singleton<MusicController> {
         if (nowPlayingMusic != null && newMusic.GetType() == nowPlayingMusic.GetType()) {
             return;
         }
-        CancelInvoke();
+        // CancelInvoke();
+        if (endCoroutine != null)
+            StopCoroutine(endCoroutine);
         stack = newMusic.tracks;
         nowPlayingMusic = newMusic;
         PlayNextTrack();
@@ -230,6 +233,10 @@ public class MusicController : Singleton<MusicController> {
             PlayTrack(stack.Peek());
     }
     public void PlayTrack(Track track) {
+        if (!GameManager.settings.musicOn) {
+            StopTrack();
+            return;
+        }
         // Debug.Log("PlayTrack");
         // Debug.Log(track.trackName);
         // if playime > 0, resume
@@ -249,8 +256,13 @@ public class MusicController : Singleton<MusicController> {
         audioSource.loop = track.loop;
         if (!track.loop) {
             // TODO: unscaled time
-            Invoke("End", audioSource.clip.length);
+            // Invoke("End", audioSource.clip.length);
+            endCoroutine = StartCoroutine(endRoutine(audioSource.clip.length));
         }
+    }
+    private IEnumerator endRoutine(float time) {
+        yield return new WaitForSecondsRealtime(time);
+        End();
     }
     public void StopTrack() {
         // Debug.Log("StopTrack");

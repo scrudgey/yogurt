@@ -27,6 +27,7 @@ public class DamageThreshhold {
     }
 }
 public class Explosive : MonoBehaviour {
+    public bool exploding = false;
     public List<DamageThreshhold> threshHolds = new List<DamageThreshhold>();
     void Start() {
         Toolbox.RegisterMessageCallback<MessageDamage>(this, HandleMessageDamage);
@@ -44,7 +45,9 @@ public class Explosive : MonoBehaviour {
         }
     }
     public void Explode() {
-
+        if (exploding)
+            return;
+        exploding = true;
         GameObject explosion = GameObject.Instantiate(Resources.Load("PhysicalImpact"), transform.position, Quaternion.identity) as GameObject;
         PhysicalImpact impact = explosion.GetComponent<PhysicalImpact>();
         MessageDamage message = new MessageDamage(500f, damageType.explosion);
@@ -82,6 +85,6 @@ public class Explosive : MonoBehaviour {
         }
 
         ClaimsManager.Instance.WasDestroyed(gameObject);
-        DestroyImmediate(gameObject);
+        Destroy(gameObject);
     }
 }

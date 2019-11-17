@@ -231,7 +231,7 @@ public class DialogueMenu : MonoBehaviour {
         }
     }
     public void LoadDialogueTree(string filename) {
-
+        Debug.Log("load " + filename);
         // CUTSCENE-STYLE DIALOGUE (NO INTERACTION)
         if (filename == "polestar_first" || filename == "vampire") {
             cutsceneDialogue = true;
@@ -284,6 +284,7 @@ public class DialogueMenu : MonoBehaviour {
         Say(new Monologue(target, node.text.ToArray()));
     }
     public void ChoiceCallback(int choiceNumber) {
+        textSize = TextSize.normal;
         Say(instigator, node.responses[choiceNumber - 1]);
         ParseNode(dialogueTree[node.responseLinks[choiceNumber - 1]]);
     }

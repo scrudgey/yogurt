@@ -7,9 +7,14 @@ public class Toilet : Container {
     public AudioClip flushSound;
     private float timeout;
     public float refractoryPeriod;
-    protected override void Awake() {
+    override protected void Awake() {
         base.Awake();
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
+        Interaction flushAct = new Interaction(this, "Flush", "Flush");
+        interactions.Add(flushAct);
+    }
+    override protected void PopulateContentActions() {
+        base.PopulateContentActions();
         Interaction flushAct = new Interaction(this, "Flush", "Flush");
         interactions.Add(flushAct);
     }
@@ -31,9 +36,9 @@ public class Toilet : Container {
         timeout = refractoryPeriod;
         for (int i = 0; i < 3; i++) {
             GameObject droplet = Toolbox.Instance.SpawnDroplet(Liquid.LoadLiquid("toilet_water"), 0.5f, gameObject, 0.2f);
-            if (i < 2){
+            if (i < 2) {
                 Collider2D dropletCollider = droplet.GetComponent<Collider2D>();
-                foreach(Collider2D playerCollider in Controller.Instance.focus.GetComponentsInChildren<Collider2D>()){
+                foreach (Collider2D playerCollider in Controller.Instance.focus.GetComponentsInChildren<Collider2D>()) {
                     Physics2D.IgnoreCollision(dropletCollider, playerCollider, true);
                 }
             }

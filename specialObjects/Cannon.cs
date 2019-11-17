@@ -61,7 +61,7 @@ public class Cannon : Interactive, ISaveable {
     }
     public void ChargeCannon(GunpowderKeg keg) {
         if (charged) {
-            Debug.Log("it's full");
+            // Debug.Log("it's full");
         } else {
             charged = true;
         }

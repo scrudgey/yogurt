@@ -174,7 +174,7 @@ public class Toolbox : Singleton<Toolbox> {
         return SpawnDroplet(pos, l, initialVelocity);
     }
     public GameObject SpawnDroplet(Vector3 pos, Liquid l, Vector3 initialVelocity) {
-        GameObject droplet = Instantiate(Resources.Load("droplet"), pos, Quaternion.identity) as GameObject;
+        GameObject droplet = Instantiate(Resources.Load("prefabs/droplet"), pos, Quaternion.identity) as GameObject;
         PhysicalBootstrapper phys = droplet.GetComponent<PhysicalBootstrapper>();
         phys.initHeight = pos.z;
         phys.impactsMiss = true;
@@ -208,7 +208,7 @@ public class Toolbox : Singleton<Toolbox> {
             initialVelocity = initVelocity;
         }
 
-        GameObject droplet = Instantiate(Resources.Load("droplet"), transform.position, Quaternion.identity) as GameObject;
+        GameObject droplet = Instantiate(Resources.Load("prefabs/droplet"), transform.position, Quaternion.identity) as GameObject;
         PhysicalBootstrapper phys = droplet.GetComponent<PhysicalBootstrapper>();
         phys.impactsMiss = true;
         Vector2 initpos = spiller.transform.position;
@@ -262,6 +262,20 @@ public class Toolbox : Singleton<Toolbox> {
         v.y = (cos * ty) + (sin * tx);
 
         return v;
+    }
+    public static List<T> Shuffle<T>(List<T> list) {
+        System.Random random = new System.Random();
+        List<T> newList = new List<T>(list);
+        int n = list.Count;
+
+        for (int i = list.Count - 1; i > 1; i--) {
+            int rnd = random.Next(i + 1);
+
+            T value = list[rnd];
+            newList[rnd] = list[i];
+            newList[i] = value;
+        }
+        return newList;
     }
     public float ProperAngle(float x, float y) {
         float angle = Mathf.Atan2(y, x) * Mathf.Rad2Deg;

@@ -187,6 +187,7 @@ public class Speech : Interactive, ISaveable {
     public void Describe(Item obj) {
         LiquidContainer container = obj.GetComponent<LiquidContainer>();
         MonoLiquid mono = obj.GetComponent<MonoLiquid>();
+        BookPickup book = obj.GetComponent<BookPickup>();
         MessageSpeech message = new MessageSpeech();
         if (container) {
             if (container.amount > 0 && container.descriptionName != "") {
@@ -196,6 +197,8 @@ public class Speech : Interactive, ISaveable {
             }
         } else if (mono) {
             message.phrase = "It's " + mono.liquid.name + ".";
+        } else if (book) {
+            message.phrase = book.book.Describe();
         } else {
             message.phrase = obj.description;
         }

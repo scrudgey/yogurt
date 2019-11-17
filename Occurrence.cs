@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 //TODO: not all of these things need static constructors?
+[System.Serializable]
 public enum Rating { disturbing, disgusting, chaos, offensive, positive };
 public class Occurrence : MonoBehaviour {
     // An occurrence is a little bit of code that lives on a temporarily persistent flag in the world

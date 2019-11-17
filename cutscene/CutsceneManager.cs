@@ -198,6 +198,7 @@ public class CutsceneCannon : Cutscene {
         if (timer > 4f) {
             // switch scenes
             complete = true;
+            GameManager.Instance.data.entryID = 1;
             SceneManager.LoadScene("space");
         }
     }
@@ -717,6 +718,7 @@ public class CutsceneMayor : Cutscene {
         mayorControl = mayor.GetComponent<Humanoid>();
         mayorAI = mayor.GetComponent<DecisionMaker>();
         mayorSpeech = mayor.GetComponent<Speech>();
+        mayorSpeech.defaultMonologue = "mayor";
         mayorAI.enabled = false;
         Controllable playerController = GameManager.Instance.playerObject.GetComponent<Controllable>();
         playerController.SetDirection(Vector2.down);
@@ -731,7 +733,6 @@ public class CutsceneMayor : Cutscene {
             mayorControl.ResetInput();
             DialogueMenu menu = mayorSpeech.SpeakWith();
             menu.menuClosed += MenuWasClosed;
-            menu.LoadDialogueTree("mayor");
         }
         if (walkingAway) {
             mayorControl.leftFlag = true;

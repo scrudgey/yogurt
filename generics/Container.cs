@@ -48,12 +48,12 @@ public class Container : MayorLock, IExcludable, ISaveable {
             }
         }
     }
-    protected void RemoveAllRetrieveActions() {
-        interactions = new List<Interaction>();
-        Interaction stasher = new Interaction(this, "Put", "Store");
-        stasher.validationFunction = true;
-        interactions.Add(stasher);
-    }
+    // protected void RemoveAllRetrieveActions() {
+    //     interactions = new List<Interaction>();
+    //     Interaction stasher = new Interaction(this, "Put", "Store");
+    //     stasher.validationFunction = true;
+    //     interactions.Add(stasher);
+    // }
     protected void RemoveRetrieveAction(Pickup pickup) {
         Interaction removeThis = null;
         foreach (Interaction interaction in interactions) {

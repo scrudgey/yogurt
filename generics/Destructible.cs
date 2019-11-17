@@ -9,6 +9,8 @@ public class Destructible : Damageable, ISaveable {
     public float physicalMultiplier = 1f;
     public float fireMultiplier = 1f;
     public AudioSource audioSource;
+    // public bool useCustomEventData;
+    // public EventData destructionData;
     public void Start() {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
     }

@@ -48,7 +48,8 @@ public class Gibs : MonoBehaviour {
             bitPhys.noCollisions = true;
             if (bitPhys.size == PhysicalBootstrapper.shadowSize.normal)
                 bitPhys.size = PhysicalBootstrapper.shadowSize.medium;
-            bitPhys.initHeight = Random.Range(initHeight.low, initHeight.high);
+            float height = Random.Range(initHeight.low, initHeight.high);
+            bitPhys.initHeight = height;
             if (myBoot) {
                 if (myBoot.physical != null) {
                     bitPhys.initHeight = myBoot.physical.height;
@@ -56,7 +57,7 @@ public class Gibs : MonoBehaviour {
             }
             Vector3 randomWalk = 0.05f * Random.insideUnitCircle.normalized;
             randomWalk.z = 0;
-            bit.transform.position = transform.position + randomWalk;
+            bit.transform.position = transform.position + randomWalk + new Vector3(0, height, 0);
 
             // TODO: figure this out
             // TODO: allow strong impacts to affect

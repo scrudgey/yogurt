@@ -133,7 +133,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = true;
+    public bool debug = false;
     public bool failedLevelLoad = false;
     public void PlayPublicSound(AudioClip clip) {
         if (clip == null)
@@ -377,14 +377,16 @@ public partial class GameManager : Singleton<GameManager> {
         Controller.Instance.state = Controller.ControlState.normal;
         UINew.Instance.RefreshUI(active: true);
 
-        if (sceneName == "krazy1") {
+        if (sceneName == "neighborhood") {
             GameObject packageSpawnPoint = GameObject.Find("packageSpawnPoint");
             if (data.firstTimeLeavingHouse) {
                 foreach (string package in data.packages) {
+                    Debug.Log(package);
                     if (!data.collectedItems.Contains(package)) {
                         GameObject packageObject = Instantiate(Resources.Load("prefabs/package"), packageSpawnPoint.transform.position, Quaternion.identity) as GameObject;
                         Package pack = packageObject.GetComponent<Package>();
                         pack.contents = package;
+                        Debug.Log(packageObject);
                     }
                 }
             }
@@ -402,7 +404,7 @@ public partial class GameManager : Singleton<GameManager> {
         if (sceneName == "cave1" || sceneName == "cave2") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneFall>();
         }
-        if (sceneName == "dungeon") {
+        if (sceneName == "dungeon" && data.entryID != 2) {
             CutsceneManager.Instance.InitializeCutscene<CutsceneDungeonFall>();
         }
         if (sceneName == "space") {
@@ -429,6 +431,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
     }
     public GameObject InstantiatePlayerPrefab() {
+        Debug.Log("instantiate player");
         GameObject obj = GameObject.Instantiate(Resources.Load("prefabs/" + data.prefabName)) as GameObject;
         Toolbox.SetSkinColor(obj, data.defaultSkinColor);
         return obj;

@@ -229,7 +229,7 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
     }
 
     void FixedUpdate() {
-        if (setV != Vector3.zero || addV != Vector3.zero) {
+        if ((setV != Vector3.zero || addV != Vector3.zero) && physical != null) {
             Vector2 objectVelocity = physical.objectBody.velocity;
             Vector2 groundVelocity = groundBody.velocity;
             if (setV != Vector3.zero) {

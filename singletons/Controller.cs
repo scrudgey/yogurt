@@ -275,7 +275,8 @@ public class Controller : Singleton<Controller> {
                 if (hypnoTop != null) {
                     state = ControlState.normal;
                     GameObject target = Controller.Instance.GetBaseInteractive(hypnoTop.transform);
-                    Intrinsics targetIntrinsics = target.GetComponent<Intrinsics>();
+                    Intrinsics targetIntrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(target);
+                    // Intrinsics targetIntrinsics = target.GetComponent<Intrinsics>();
                     if (targetIntrinsics.NetBuffs()[BuffType.clearHeaded].boolValue) {
                         UINew.Instance.SetActionText("");
                         MessageSpeech message = new MessageSpeech("Something prevents my hypnotic power!");

@@ -80,7 +80,7 @@ public class DancingGod : MonoBehaviour {
         audioSource.PlayOneShot(landSound);
 
         float dist = Vector3.Distance(transform.position, cam.transform.position);
-        cam.Shake(0.0325f / (Mathf.Pow(dist, 2)));
+        cam.Shake(0.0425f / (Mathf.Pow(dist, 2)));
     }
     void FinishPause() {
         numberOfJumps = 3;

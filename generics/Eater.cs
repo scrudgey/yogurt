@@ -169,19 +169,23 @@ public class Eater : Interactive, ISaveable {
         LiquidContainer container = food.GetComponent<LiquidContainer>();
         if (container) {
             if (container.amount > 0) {
-                // container.li
-                GameObject sip = new GameObject();
+                GameObject sip = Instantiate(Resources.Load("prefabs/droplet"), transform.position, Quaternion.identity) as GameObject;
                 Liquid.MonoLiquidify(sip, container.liquid);
                 Toolbox.Instance.AddLiveBuffs(gameObject, sip);
-                Destroy(sip);
+                eatenQueue.Enqueue(sip);
+                sip.SetActive(false);
             }
         }
         LiquidResevoir reservoir = food.GetComponent<LiquidResevoir>();
         if (reservoir) {
-            GameObject sip = new GameObject();
+            // GameObject sip = new GameObject();
+            GameObject sip = Instantiate(Resources.Load("prefabs/droplet"), transform.position, Quaternion.identity) as GameObject;
             Liquid.MonoLiquidify(sip, reservoir.liquid);
             Toolbox.Instance.AddLiveBuffs(gameObject, sip);
-            Destroy(sip);
+            // Destroy(sip);
+            eatenQueue.Enqueue(sip);
+            sip.SetActive(false);
+            MySaver.disabledPersistents.Add(sip);
         }
         if (Toolbox.Instance.CloneRemover(food.name) == "sword") {
             GameManager.Instance.IncrementStat(StatType.swordsEaten, 1);
@@ -272,7 +276,7 @@ public class Eater : Interactive, ISaveable {
     }
 
     void ReactToOccurrence(EventData od) {
-        if (netIntrinsics[BuffType.undead].boolValue)
+        if (netIntrinsics != null && netIntrinsics[BuffType.undead].boolValue)
             return;
         // Debug.Log(od.whatHappened);
         // foreach (KeyValuePair<Rating, float> kvp in od.ratings) {

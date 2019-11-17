@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-public class MonoLiquid : MonoBehaviour {
+public class MonoLiquid : MonoBehaviour, ISaveable {
     public Liquid liquid;
     public Edible edible;
     public PhysicalBootstrapper physB;
@@ -95,5 +95,11 @@ public class MonoLiquid : MonoBehaviour {
         }
         Destroy(gameObject);
         ClaimsManager.Instance.WasDestroyed(gameObject);
+    }
+    public void SaveData(PersistentComponent data) {
+        // data
+    }
+    public void LoadData(PersistentComponent data) {
+
     }
 }
