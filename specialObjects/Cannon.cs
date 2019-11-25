@@ -88,40 +88,16 @@ public class Cannon : Interactive, ISaveable {
         // pb.initHeight = 0.15f;
         pb.InitPhysical(0.15f, ejectionPoint.up * 5f);
 
+        // disable 
+
         shootEffect.Play();
         audioSource.PlayOneShot(shootSound);
         disableInteractions = false;
-        // pb.Set3Motion(ejectionPoint.up * 50f);
-        // GameManager.Instance.playerObject.SetActive(true);
-        //     RotateTowardMotion rot = GameManager.Instance.playerObject.AddComponent<RotateTowardMotion>();
-        //     rot.angleOffset = 270f;
-        //     camControl.focus = GameManager.Instance.playerObject;
-        //     foreach (Collider2D collider in GameManager.Instance.playerObject.GetComponentsInChildren<Collider2D>()) {
-        //         collider.enabled = false;
-        //     }
-        //     GameManager.Instance.playerObject.transform.position = ejectionPoint.position;
-        //     GameManager.Instance.playerObject.transform.rotation = ejectionPoint.rotation;
-        //     AdvancedAnimation playerAnimation = GameManager.Instance.playerObject.GetComponent<AdvancedAnimation>();
-        //     if (playerAnimation != null) {
-        //         playerAnimation.SetFrame(14);
-        //         playerAnimation.enabled = false;
-        //     }
-        //     HeadAnimation playerHeadAnimation = GameManager.Instance.playerObject.GetComponent<HeadAnimation>();
-        //     if (playerHeadAnimation != null) {
-        //         playerHeadAnimation.SetFrame(4);
-        //         playerHeadAnimation.enabled = false;
-        //     }
-        //     Controllable playerControllable = GameManager.Instance.playerObject.GetComponent<Controllable>();
-        //     if (playerControllable != null) {
-        //         playerControllable.enabled = false;
-        //     }
-        //     Rigidbody2D playerBody = GameManager.Instance.playerObject.GetComponent<Rigidbody2D>();
-        //     playerBody.gravityScale = GameManager.Instance.gravity * 0.8f;
-        //     playerBody.drag = 0f;
-        //     AudioSource playerAudio = Toolbox.GetOrCreateComponent<AudioSource>(GameManager.Instance.playerObject);
-        //     AudioClip charlierAugh = Resources.Load("sounds/auugh") as AudioClip;
-        //     playerAudio.PlayOneShot(charlierAugh);
-
-        //     playerBody.AddForce(12000f * ejectionPoint.up, ForceMode2D.Force);
+        yield return new WaitForSeconds(0.3f);
+        pb.DestroyPhysical();
+        CutsceneDancingGod cutscene = new CutsceneDancingGod();
+        cutscene.Configure(pb);
+        CutsceneManager.Instance.InitializeCutscene(cutscene);
+        // CutsceneDancingGod cutscene = CutsceneManager.Instance.InitializeCutscene<CutsceneDancingGod>();
     }
 }

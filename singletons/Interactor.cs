@@ -20,6 +20,8 @@ public class Interactor {
     }
     static HashSet<Interaction> GetEnabledInteractions(Interactive sourceInteractive, GameObject targ, bool rightClickMenu = false, bool manualActions = false) {
         HashSet<Interaction> returnList = new HashSet<Interaction>();
+        if (sourceInteractive.disableInteractions)
+            return returnList;
         List<Interactive> targetInteractives = Interactor.GetInteractorTree(targ);
         targetType targType = Interactor.TypeOfTarget(targ);
         targetType sourceType = Interactor.TypeOfTarget(sourceInteractive.gameObject);

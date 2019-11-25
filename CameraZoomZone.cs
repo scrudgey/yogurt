@@ -12,7 +12,9 @@ public class CameraZoomZone : MonoBehaviour {
     public void OnTriggerStay2D(Collider2D other) {
         if (other.gameObject == GameManager.Instance.playerObject) {
             float distance = Vector2.Distance(other.transform.position, transform.position);
-            float zoom = (float)PennerDoubleAnimation.QuadEaseIn(circle.radius - distance, minZoom, maxZoom, circle.radius);
+            float zoom = (float)PennerDoubleAnimation.Linear(circle.radius - distance, minZoom, maxZoom - minZoom, circle.radius);
+            // zoom = Mathf.Max(zoom, minZoom);
+            // zoom = Mathf.Min(zoom, maxZoom);
             control.maxSize = zoom;
         }
     }

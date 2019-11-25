@@ -44,7 +44,9 @@ public class ClosetButtonHandler : MonoBehaviour {
         foreach (string name in itemList) {
             GameObject tempObject = Instantiate(Resources.Load("prefabs/" + name)) as GameObject;
             Item tempItem = tempObject.GetComponent<Item>();
-            names[name] = tempItem.itemName;
+            if (tempItem) {
+                names[name] = tempItem.itemName;
+            } else names[name] = name;
             Destroy(tempObject);
         }
         itemList = itemList.OrderBy(i => names[i]).ToList();

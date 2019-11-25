@@ -6,7 +6,7 @@ using UnityEngine;
 //         description = pickup.description;
 //         longDescription = pickup.longDescription;
 
-public class GrabbableBook : Grabbable {
+public class GrabbableBook : Grabbable, ISaveable {
     private Book _book;
     public Book book {
         get {
@@ -37,5 +37,14 @@ public class GrabbableBook : Grabbable {
     public void SetDesc() {
         itemName = "book";
         description = book.Describe();
+    }
+    public void SaveData(PersistentComponent data) {
+        data.strings["title"] = book.title;
+        data.strings["author"] = book.author;
+        data.strings["comments"] = book.comments;
+        data.strings["reading"] = book.reading;
+    }
+    public void LoadData(PersistentComponent data) {
+        book = new Book(data.strings["title"], data.strings["author"], data.strings["comments"], data.strings["reading"]);
     }
 }

@@ -9,8 +9,6 @@ public class Destructible : Damageable, ISaveable {
     public float physicalMultiplier = 1f;
     public float fireMultiplier = 1f;
     public AudioSource audioSource;
-    // public bool useCustomEventData;
-    // public EventData destructionData;
     public void Start() {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
     }
@@ -41,6 +39,7 @@ public class Destructible : Damageable, ISaveable {
             case damageType.fire:
                 damage = message.amount * fireMultiplier;
                 break;
+            case damageType.explosion:
             case damageType.cosmic:
                 damage = message.amount;
                 break;

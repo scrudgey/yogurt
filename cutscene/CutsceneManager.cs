@@ -106,6 +106,10 @@ public class CutsceneMoonLanding : Cutscene {
             playerHurable.KnockDown();
         }
         GameObject.Destroy(landingString);
+        if (!GameManager.Instance.data.visitedMoon) {
+            GameManager.Instance.data.visitedMoon = true;
+            GameManager.Instance.ShowDiaryEntry("moon");
+        }
     }
 }
 public class CutsceneSpace : Cutscene {
@@ -411,6 +415,11 @@ public class CutsceneDungeonFall : CutsceneFall {
     private AudioClip dumpSound;
     public ParticleSystem magicEffect;
     public AudioSource magicAudio;
+    public bool rejecting;
+    public float rejectTimer;
+    public GameObject hench;
+    public Speech henchSpeech;
+    public bool henchSpeechHappened;
     public override void Configure() {
         base.Configure();
         ejectorDump = Resources.Load("particles/ejectorDump") as GameObject;
@@ -418,28 +427,49 @@ public class CutsceneDungeonFall : CutsceneFall {
         Toolbox.Instance.SwitchAudioListener(player);
         magicEffect = GameObject.Find("magic").GetComponent<ParticleSystem>();
         magicAudio = GameObject.Find("magic").GetComponent<AudioSource>();
+        hench = GameObject.Find("hench") as GameObject;
+        hench.SetActive(false);
+        henchSpeech = hench.GetComponent<Speech>();
     }
     public override void Update() {
-        if (!caught || (caught && !dumping)) {
+        if (rejecting) {
+            RejectUpdate();
+        } else if (!caught || (caught && !dumping)) {
             base.Update();
             if (player.transform.position.y < catchPoint && !caught) {
                 catchPosition = player.transform.position;
                 caught = true;
-                dumping = true;
-                magicEffect.Play();
-                magicAudio.Play();
-                magicEffect.transform.position = player.transform.position;
-                playerInventory = player.GetComponent<Inventory>();
-                playerOutfit = player.GetComponent<Outfit>();
                 // stop fall
                 if (playerBody) {
                     playerBody.gravityScale = 0f;
                     playerBody.drag = initDrag;
                     playerBody.velocity = Vector3.zero;
                 }
+                if (Toolbox.Instance.CloneRemover(GameManager.Instance.playerObject.name) == "vampyr") {
+                    // reject dracula
+                    rejecting = true;
+                } else {
+                    dumping = true;
+                    magicEffect.Play();
+                    magicAudio.Play();
+                    magicEffect.transform.position = player.transform.position;
+                    playerInventory = player.GetComponent<Inventory>();
+                    playerOutfit = player.GetComponent<Outfit>();
+                }
             }
         } else if (dumping) {
             DumpUpdate();
+        }
+    }
+    public void RejectUpdate() {
+        rejectTimer += Time.deltaTime;
+        player.transform.position = catchPosition;
+        if (rejectTimer > 1f && !hench.activeInHierarchy) {
+            hench.SetActive(true);
+        } else if (rejectTimer > 4f && !henchSpeechHappened) {
+            DialogueMenu menu = henchSpeech.SpeakWith();
+            menu.menuClosed += MenuWasClosed;
+            henchSpeechHappened = true;
         }
     }
     public void DumpUpdate() {
@@ -485,6 +515,9 @@ public class CutsceneDungeonFall : CutsceneFall {
         system.Play();
         GameObject.Destroy(obj);
         GameManager.Instance.PlayPublicSound(dumpSound);
+    }
+    public void MenuWasClosed() {
+        SceneManager.LoadScene("vampire_house");
     }
 }
 public class CutsceneFall : Cutscene {
@@ -627,10 +660,11 @@ public class CutsceneNeconomicon : Cutscene {
                     state = State.hovering;
                     hoverInitPosition = player.transform.position;
                     cameraControl.Shake(0.01f);
-
-                    Hurtable[] hurtables = GameObject.FindObjectsOfType<Hurtable>();
-                    foreach (Hurtable hurtable in hurtables) {
+                    foreach (Hurtable hurtable in GameObject.FindObjectsOfType<Hurtable>()) {
                         hurtable.Resurrect();
+                    }
+                    foreach (NecroGate necroGate in GameObject.FindObjectsOfType<NecroGate>()) {
+                        necroGate.Unlock();
                     }
                 }
                 break;

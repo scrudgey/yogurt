@@ -47,6 +47,7 @@ public class GameData {
     public bool firstTimeLeavingHouse;
     public bool mayorCutsceneHappened;
     public bool visitedStudio;
+    public bool visitedMoon;
     public bool teleporterUnlocked;
     public string headSpriteSheet;
     public SkinColor headSkinColor;
@@ -54,6 +55,7 @@ public class GameData {
     public bool loadedDay;
     public Int16 ghostsKilled;
     public bool mayorAwardToday;
+    public bool mayorLibraryShuffled;
     public GameData() {
         days = 0;
         saveDate = System.DateTime.Now.ToString();
@@ -117,6 +119,7 @@ public partial class GameManager : Singleton<GameManager> {
         {"mayors_house", "mayor's house"},
         {"mayors_attic", "attic"},
         {"anti_mayors_house", "anti mayor's house"},
+        {"tower", "tower"}
     };
     public GameData data;
     public static GlobalSettings settings = new GlobalSettings();
@@ -431,7 +434,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
     }
     public GameObject InstantiatePlayerPrefab() {
-        Debug.Log("instantiate player");
+        // Debug.Log("instantiate player");
         GameObject obj = GameObject.Instantiate(Resources.Load("prefabs/" + data.prefabName)) as GameObject;
         Toolbox.SetSkinColor(obj, data.defaultSkinColor);
         return obj;
@@ -547,6 +550,7 @@ public partial class GameManager : Singleton<GameManager> {
         data.entryID = -99;
         data.firstTimeLeavingHouse = true;
         data.mayorAwardToday = false;
+        data.mayorLibraryShuffled = false;
         activeCommercial = null;
     }
     public void DetermineClosetNews() {
@@ -643,6 +647,7 @@ public partial class GameManager : Singleton<GameManager> {
             data.teleporterUnlocked = true;
             data.mayorCutsceneHappened = true;
             data.visitedStudio = true;
+            data.visitedMoon = true;
 
             data.collectedObjects.Add("package");
             data.itemCheckedOut["package"] = false;
@@ -761,10 +766,13 @@ public partial class GameManager : Singleton<GameManager> {
         if (owner != playerObject)
             return;
         string filename = Toolbox.Instance.CloneRemover(obj.name);
+        if (filename == "droplet")
+            return;
         // filename = Toolbox.Instance.ReplaceUnderscore(filename);
         if (data.collectedObjects.Contains(filename))
             return;
         UnityEngine.Object testPrefab = Resources.Load("prefabs/" + filename);
+        Debug.Log(filename);
         if (testPrefab != null) {
             data.collectedObjects.Add(filename);
             data.itemCheckedOut[filename] = true;

@@ -182,6 +182,8 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         groundBody.velocity = groundVelocity;
     }
     void OnCollisionStay2D(Collision2D coll) {
+        if (horizon == null)
+            return;
         if (coll.gameObject == horizon && physical.currentMode != Physical.mode.ground) {
             physical.StartGroundMode();
         }

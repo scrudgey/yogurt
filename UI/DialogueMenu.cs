@@ -231,9 +231,9 @@ public class DialogueMenu : MonoBehaviour {
         }
     }
     public void LoadDialogueTree(string filename) {
-        Debug.Log("load " + filename);
+        // Debug.Log("load " + filename);
         // CUTSCENE-STYLE DIALOGUE (NO INTERACTION)
-        if (filename == "polestar_first" || filename == "vampire") {
+        if (filename == "polestar_first" || filename == "vampire" || filename == "dancing_god" || filename == "dancing_god_bless" || filename == "dancing_god_destroy") {
             cutsceneDialogue = true;
             EnableButtons();
         }
@@ -578,6 +578,14 @@ public class DialogueMenu : MonoBehaviour {
         if (text == "MAYORAWARDCALLBACK") {
             MayorAward();
             nextLine = true;
+        }
+        if (text == "GODBLESS") {
+            target.GetComponent<Godhead>().Bless();
+            UINew.Instance.CloseActiveMenu();
+        }
+        if (text == "GODDESTROY") {
+            target.GetComponent<Godhead>().Destroy();
+            UINew.Instance.CloseActiveMenu();
         }
         if (nextLine)
             NextLine();

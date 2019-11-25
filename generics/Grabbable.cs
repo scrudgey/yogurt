@@ -31,4 +31,7 @@ public class Grabbable : Item {
         Destroy(gameObject);
         return item;
     }
+    public string Get_desc(Inventory inventory) {
+        return "Get " + itemName;
+    }
 }

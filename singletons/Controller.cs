@@ -362,7 +362,9 @@ public class Controller : Singleton<Controller> {
                     continue;
                 if (focusCollider.enabled == false)
                     continue;
-                dist = Mathf.Min(dist, clickedCollider.Distance(focusCollider).distance);
+                if (clickedCollider != focusCollider)
+                    dist = Mathf.Min(dist, clickedCollider.Distance(focusCollider).distance);
+                else dist = 0;
             }
         }
         if (dist == float.MaxValue) {

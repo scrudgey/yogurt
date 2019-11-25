@@ -266,13 +266,13 @@ public class Toolbox : Singleton<Toolbox> {
     public static List<T> Shuffle<T>(List<T> list) {
         System.Random random = new System.Random();
         List<T> newList = new List<T>(list);
-        int n = list.Count;
+        int n = newList.Count;
 
-        for (int i = list.Count - 1; i > 1; i--) {
+        for (int i = newList.Count - 1; i > 1; i--) {
             int rnd = random.Next(i + 1);
 
-            T value = list[rnd];
-            newList[rnd] = list[i];
+            T value = newList[rnd];
+            newList[rnd] = newList[i];
             newList[i] = value;
         }
         return newList;
