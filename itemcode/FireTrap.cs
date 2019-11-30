@@ -24,12 +24,16 @@ public class FireTrap : MonoBehaviour {
             timer = 0;
             particles.Stop();
             zone.enabled = false;
+            source.clip = clip;
+            source.loop = true;
             source.Stop();
         } else if (!on && timer > offTime) {
             on = !on;
             timer = 0;
             particles.Play();
             zone.enabled = true;
+            source.clip = clip;
+            source.loop = true;
             source.Play();
         }
     }

@@ -580,6 +580,7 @@ public class CutsceneNeconomicon : Cutscene {
     private enum State { start, rising, hovering, falling, end };
     private State state;
     protected GameObject player;
+    protected Transform footPoint;
     Awareness playerAwareness;
     AdvancedAnimation playerAnimation;
     Collider2D playerCollider;
@@ -589,6 +590,7 @@ public class CutsceneNeconomicon : Cutscene {
     public Vector3 initPosition;
     public Vector3 targetPosition;
     public Vector3 hoverInitPosition;
+    public Vector3 footpointInitPosition;
     public CameraControl cameraControl;
     public float timer;
     public Necronomicon necronomicon;
@@ -609,6 +611,8 @@ public class CutsceneNeconomicon : Cutscene {
         occurrenceTimer = UnityEngine.Random.Range(0.25f, 1.0f);
         necronomicon.StartFx();
         player = GameManager.Instance.playerObject;
+        footPoint = player.transform.Find("footPoint");
+        footpointInitPosition = footPoint.position;
         Controller.Instance.suspendInput = true;
         playerAnimation = player.GetComponent<AdvancedAnimation>();
         playerCollider = player.GetComponent<Collider2D>();
@@ -663,9 +667,13 @@ public class CutsceneNeconomicon : Cutscene {
                     foreach (Hurtable hurtable in GameObject.FindObjectsOfType<Hurtable>()) {
                         hurtable.Resurrect();
                     }
+                    bool necroGates = false;
                     foreach (NecroGate necroGate in GameObject.FindObjectsOfType<NecroGate>()) {
                         necroGate.Unlock();
+                        necroGates = true;
                     }
+                    if (necroGates)
+                        MusicController.Instance.EnqueueMusic(new MusicSpace());
                 }
                 break;
             case State.hovering:
@@ -707,6 +715,7 @@ public class CutsceneNeconomicon : Cutscene {
             default:
                 break;
         }
+        footPoint.position = footpointInitPosition;
     }
     void End() {
         Controller.Instance.suspendInput = false;

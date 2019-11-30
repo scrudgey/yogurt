@@ -200,7 +200,7 @@ public class Speech : Interactive, ISaveable {
         } else if (book) {
             message.phrase = book.book.Describe();
         } else {
-            message.phrase = obj.description;
+            message.phrase = Monologue.replaceHooks(obj.description);
         }
         Say(message);
     }

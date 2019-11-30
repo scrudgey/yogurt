@@ -65,6 +65,9 @@ public class Toilet : Container {
         }
         Dump(target.GetComponent<Pickup>());
         ClaimsManager.Instance.WasDestroyed(target.gameObject);
+        MySaver.Save();
+        MyMarker marker = target.GetComponent<MyMarker>();
+        GameManager.Instance.data.toiletItems.Add(marker.id);
         Destroy(target.gameObject);
     }
 }

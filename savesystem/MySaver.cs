@@ -324,6 +324,8 @@ public class MySaver {
             AddToReferenceTree(savedObjects[parent], savedObjects[child]);
         } else {
             Debug.LogError("failed to add object to reference tree");
+            Debug.Log(parent);
+            Debug.Log(child);
             Debug.LogError(savedObjects.ContainsKey(parent));
             Debug.LogError(savedObjects.ContainsKey(child));
         }

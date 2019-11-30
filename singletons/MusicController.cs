@@ -133,6 +133,7 @@ public class MusicController : Singleton<MusicController> {
         {"moon_town", () => new MusicMoon()},
         {"moon_cave", () => new MusicMoon()},
         {"anti_mayors_house",() => new MusicMoon()},
+        {"tower", () => new MusicMoon()},
         {"boardroom_cutscene", () => new MusicBeat()},
         // {"morning_cutscene", musicBeat},
         {"forest", () => new MusicCreepy()},
@@ -179,13 +180,9 @@ public class MusicController : Singleton<MusicController> {
         }
     }
     public void SetMusic(Music newMusic) {
-        // replace queue with music queue, 
-        // playNext
-        // set music
         if (nowPlayingMusic != null && newMusic.GetType() == nowPlayingMusic.GetType()) {
             return;
         }
-        // CancelInvoke();
         if (endCoroutine != null)
             StopCoroutine(endCoroutine);
         stack = newMusic.tracks;
@@ -193,41 +190,19 @@ public class MusicController : Singleton<MusicController> {
         PlayNextTrack();
     }
     public void EnqueueMusic(Music music) {
-        // Debug.Log("enqueue ");
-
-        // what to do with nowPlayingMusic?
-        // if (music == nowPlayingMusic) {
-        //     return;
-        // }
-
         while (music.tracks.Count > 0) {
-            // Track track = music.tracks.Pop();
-            // Debug.Log(track.trackName);
-            // stack.Push(track);
             stack.Push(music.tracks.Pop());
-            // Debug.Log(stack.Peek().trackName);
         }
         // PAUSE current track
         StopTrack();
         PlayNextTrack();
     }
     public void End() {
-        // Debug.Log("end");
-        // Debug.Log(nowPlayingTrack.trackName);
-        // pop queue
-        // stoptrack
-        // playNext
         stack.Pop();
         StopTrack();
         PlayNextTrack();
     }
     public void PlayNextTrack() {
-        // Debug.Log("PlayNextTrack");
-        // if (nowPlayingTrack != null)
-        //     Debug.Log(nowPlayingTrack.trackName);
-        // stoptrack
-        // peek next
-        // play track
         StopTrack();
         if (stack.Count > 0)
             PlayTrack(stack.Peek());
@@ -237,15 +212,6 @@ public class MusicController : Singleton<MusicController> {
             StopTrack();
             return;
         }
-        // Debug.Log("PlayTrack");
-        // Debug.Log(track.trackName);
-        // if playime > 0, resume
-        // else, play from start
-
-        // start audio
-        // set nowplaying
-        // if not looping, invoke end with timer
-
         if (track.trackName == TrackName.none)
             return;
 
@@ -255,8 +221,6 @@ public class MusicController : Singleton<MusicController> {
         audioSource.time = track.playTime;
         audioSource.loop = track.loop;
         if (!track.loop) {
-            // TODO: unscaled time
-            // Invoke("End", audioSource.clip.length);
             endCoroutine = StartCoroutine(endRoutine(audioSource.clip.length));
         }
     }
@@ -265,17 +229,8 @@ public class MusicController : Singleton<MusicController> {
         End();
     }
     public void StopTrack() {
-        // Debug.Log("StopTrack");
-        // if (nowPlayingTrack != null)
-        //     Debug.Log(nowPlayingTrack.trackName);
-        // nowPlayingTrack;
-        // track is nowplaying
-        // set its playtime
-        // stop audio
-        // remove nowplaying
         if (nowPlayingTrack == null)
             return;
-        // nowPlayingTrack.playTime = 1f;
         audioSource.Stop();
         nowPlayingTrack = null;
     }

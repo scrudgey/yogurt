@@ -56,6 +56,7 @@ public class GameData {
     public Int16 ghostsKilled;
     public bool mayorAwardToday;
     public bool mayorLibraryShuffled;
+    public List<int> toiletItems = new List<int>();
     public GameData() {
         days = 0;
         saveDate = System.DateTime.Now.ToString();
@@ -112,14 +113,15 @@ public partial class GameManager : Singleton<GameManager> {
         {"chamber", "meditation chamber"},
         {"dungeon", "oubliette"},
         {"potion", "apothecary"},
-        {"cave3", "deathtrap cave III"},
+        {"cave3", "sewer"},
         {"moon_pool", "moon pool"},
         {"moon_town", "moon town"},
         {"neighborhood", "outdoors"},
         {"mayors_house", "mayor's house"},
         {"mayors_attic", "attic"},
         {"anti_mayors_house", "anti mayor's house"},
-        {"tower", "tower"}
+        {"tower", "tower"},
+        {"cave4", "tomb"},
     };
     public GameData data;
     public static GlobalSettings settings = new GlobalSettings();
@@ -136,7 +138,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = false;
+    public bool debug = true;
     public bool failedLevelLoad = false;
     public void PlayPublicSound(AudioClip clip) {
         if (clip == null)
@@ -384,12 +386,10 @@ public partial class GameManager : Singleton<GameManager> {
             GameObject packageSpawnPoint = GameObject.Find("packageSpawnPoint");
             if (data.firstTimeLeavingHouse) {
                 foreach (string package in data.packages) {
-                    Debug.Log(package);
                     if (!data.collectedItems.Contains(package)) {
                         GameObject packageObject = Instantiate(Resources.Load("prefabs/package"), packageSpawnPoint.transform.position, Quaternion.identity) as GameObject;
                         Package pack = packageObject.GetComponent<Package>();
                         pack.contents = package;
-                        Debug.Log(packageObject);
                     }
                 }
             }
@@ -404,7 +404,7 @@ public partial class GameManager : Singleton<GameManager> {
             data.visitedStudio = true;
             ShowDiaryEntry("diaryStudio");
         }
-        if (sceneName == "cave1" || sceneName == "cave2") {
+        if (sceneName == "cave1" || sceneName == "cave2" || (sceneName == "cave3" && data.entryID == 3) || sceneName == "cave4") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneFall>();
         }
         if (sceneName == "dungeon" && data.entryID != 2) {
@@ -423,6 +423,21 @@ public partial class GameManager : Singleton<GameManager> {
                 if (mayorSpeech != null)
                     mayorSpeech.defaultMonologue = "mayor_award";
             }
+        }
+        if (sceneName == "cave3" && data.toiletItems.Count > 0) {
+            Collider2D toiletZone = GameObject.Find("toiletZone").GetComponent<Collider2D>();
+            Bounds bounds = toiletZone.bounds;
+            MySaver.LoadObjects(data.toiletItems);
+            foreach (MyMarker marker in GameObject.FindObjectsOfType<MyMarker>()) {
+                if (data.toiletItems.Contains(marker.id)) {
+                    marker.transform.position = bounds.center + new Vector3(
+                        (UnityEngine.Random.value - 0.5f) * bounds.size.x,
+                        (UnityEngine.Random.value - 0.5f) * bounds.size.y,
+                        (UnityEngine.Random.value - 0.5f) * bounds.size.z
+                    );
+                }
+            }
+            data.toiletItems = new List<int>();
         }
         PlayerEnter();
         if (playerIsDead) {
@@ -772,7 +787,6 @@ public partial class GameManager : Singleton<GameManager> {
         if (data.collectedObjects.Contains(filename))
             return;
         UnityEngine.Object testPrefab = Resources.Load("prefabs/" + filename);
-        Debug.Log(filename);
         if (testPrefab != null) {
             data.collectedObjects.Add(filename);
             data.itemCheckedOut[filename] = true;

@@ -279,6 +279,10 @@ namespace AI {
             // TODO: switch goals 
             if (incoming is MessageDamage) {
                 MessageDamage dam = (MessageDamage)incoming;
+
+                if (dam.type == damageType.asphyxiation)
+                    return;
+
                 lastAttacker.val = dam.messenger.gameObject;
 
                 if (dam.type == damageType.fire) {
