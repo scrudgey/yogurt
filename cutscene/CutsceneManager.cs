@@ -430,6 +430,8 @@ public class CutsceneDungeonFall : CutsceneFall {
         hench = GameObject.Find("hench") as GameObject;
         hench.SetActive(false);
         henchSpeech = hench.GetComponent<Speech>();
+        playerInventory = player.GetComponent<Inventory>();
+        playerOutfit = player.GetComponent<Outfit>();
     }
     public override void Update() {
         if (rejecting) {
@@ -453,8 +455,6 @@ public class CutsceneDungeonFall : CutsceneFall {
                     magicEffect.Play();
                     magicAudio.Play();
                     magicEffect.transform.position = player.transform.position;
-                    playerInventory = player.GetComponent<Inventory>();
-                    playerOutfit = player.GetComponent<Outfit>();
                 }
             }
         } else if (dumping) {
@@ -497,7 +497,7 @@ public class CutsceneDungeonFall : CutsceneFall {
                 dumping = false;
                 magicEffect.Stop();
                 magicAudio.Stop();
-                if (playerBody) {
+                if (playerBody != null) {
                     playerBody.gravityScale = 1f;
                     playerBody.drag = 0;
                 }

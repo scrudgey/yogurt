@@ -16,6 +16,7 @@ public class MonoLiquid : MonoBehaviour, ISaveable {
         if (!edible)
             edible = gameObject.AddComponent<Edible>();
         physB = GetComponent<PhysicalBootstrapper>();
+        liquid = Liquid.LoadLiquid("water");
     }
     void Start() {
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
@@ -70,7 +71,6 @@ public class MonoLiquid : MonoBehaviour, ISaveable {
                     data.noun = "staining";
                 }
                 ClaimsManager.Instance.WasDestroyed(gameObject);
-                Destroy(gameObject);
             }
     }
     public void LoadLiquid(string type) {
@@ -81,8 +81,7 @@ public class MonoLiquid : MonoBehaviour, ISaveable {
         EventData data = Toolbox.Instance.DataFlag(gameObject, chaos: 1, disgusting: 1);
         data.whatHappened = liquid.name + " was spilled";
         data.noun = "spilling";
-
-        GameObject puddle = Instantiate(Resources.Load("Puddle"), transform.position, Quaternion.identity) as GameObject;
+        GameObject puddle = Instantiate(Resources.Load("prefabs/Puddle"), transform.position, Quaternion.identity) as GameObject;
         puddle.layer = 9;
         PhysicalBootstrapper pb = GetComponent<PhysicalBootstrapper>();
         pb.DestroyPhysical();

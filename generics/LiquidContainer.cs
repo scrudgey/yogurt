@@ -177,7 +177,7 @@ public class LiquidContainer : Interactive, ISaveable {
     public void Drink(Eater eater) {
         if (eater) {
             GameObject sip = Instantiate(Resources.Load("prefabs/droplet"), transform.position, Quaternion.identity) as GameObject;
-            sip.AddComponent<MonoLiquid>();
+            // sip.AddComponent<MonoLiquid>();
             Liquid.MonoLiquidify(sip, liquid);
             eater.Eat(sip.GetComponent<Edible>());
             amount -= 1f;

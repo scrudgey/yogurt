@@ -10,7 +10,7 @@ public class Liquid {
     public float colorG;
     public float colorB;
     public float colorA;
-    public Color color;
+    public Color color = Color.white;
     public float nutrition;
     public int vegetable;
     public int meat;
@@ -177,6 +177,8 @@ public class Liquid {
         return l;
     }
     public static void MonoLiquidify(GameObject target, Liquid liquid, bool timeout = false) {
+        // Debug.Log(target);
+        // Debug.Log(liquid == null);
         // TODO: create intrinsics on gameobject and add liquid intrinsic
         MonoLiquid monoLiquid = Toolbox.GetOrCreateComponent<MonoLiquid>(target);
         monoLiquid.liquid = liquid;
