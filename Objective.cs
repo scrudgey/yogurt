@@ -83,13 +83,6 @@ public class ObjectiveEat : Objective {
         desc = bits[2];
     }
     override public bool RequirementsMet(Commercial commercial) {
-        foreach (EventData data in commercial.eventData) {
-            EventDataYogurt ydat = data as EventDataYogurt;
-            if (ydat != null) {
-                if (ydat.eaterOutfitName == eaterOutfit)
-                    return true;
-            }
-        }
-        return false;
+        return commercial.yogurtEaterOutfits.Contains(eaterOutfit);
     }
 }

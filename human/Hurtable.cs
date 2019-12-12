@@ -239,9 +239,7 @@ public class Hurtable : Damageable, ISaveable {
         occurrenceData.assailant = assailant;
         occurrenceData.lastAttacker = lastAttacker;
         occurrenceData.lastDamage = type;
-        Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData, new HashSet<GameObject>() { gameObject });
-
-
+        Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData);
     }
 
     override protected void Update() {

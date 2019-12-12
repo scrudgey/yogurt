@@ -10,13 +10,13 @@ public class Qualities : MonoBehaviour {
     public float positive;
     public EventData ToEvent() {
         EventData data = new EventData(
-            disgusting:disgusting,
-            disturbing:disturbing,
-            chaos:chaos,
-            offensive:offensive,
-            positive:positive
+            disgusting: disgusting,
+            disturbing: disturbing,
+            chaos: chaos,
+            offensive: offensive,
+            positive: positive
         );
-        data.whatHappened = "I saw "+Toolbox.Instance.GetName(gameObject);
+        data.whatHappened = "I saw " + Toolbox.Instance.GetName(gameObject);
         data.noun = "observation";
         return data;
     }

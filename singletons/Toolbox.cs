@@ -111,23 +111,18 @@ public class Toolbox : Singleton<Toolbox> {
         }
         return s;
     }
-    public Occurrence OccurenceFlag(GameObject spawner, OccurrenceData data, HashSet<GameObject> involvedParties) {
+    public void OccurenceFlag(GameObject spawner, OccurrenceData data) {
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
-        occurrence.involvedParties.UnionWith(involvedParties);
-        occurrence.data.Add(data);
+        occurrence.data = data;
         occurrence.CalculateDescriptions();
-        GameObject noiseFlagObject = GameObject.Instantiate(Resources.Load("NoiseFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
-        Occurrence noiseFlag = noiseFlagObject.GetComponent<Occurrence>();
-        noiseFlag.involvedParties = occurrence.involvedParties;
-        // noiseFlag.occurrenceFlag = occurrence;
-        return occurrence;
+        GameObject.Instantiate(Resources.Load("NoiseFlag"), spawner.transform.position, Quaternion.identity);
     }
     public EventData DataFlag(GameObject spawner, float chaos = 0, float disgusting = 0, float disturbing = 0, float offensive = 0, float positive = 0) {
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
-        OccurrenceData data = new OccurrenceData();
-        occurrence.data.Add(data);
+        OccurrenceData data = new OccurrenceGeneric();
+        occurrence.data = data;
 
         EventData eventData = new EventData(chaos: chaos, disgusting: disgusting, disturbing: disturbing, offensive: offensive, positive: positive);
         data.events.Add(eventData);

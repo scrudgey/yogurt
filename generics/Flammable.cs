@@ -117,17 +117,15 @@ public class Flammable : MonoBehaviour, ISaveable {
             }
             OccurrenceFire fireData = new OccurrenceFire();
             fireData.flamingObject = gameObject;
-            Toolbox.Instance.OccurenceFlag(gameObject, fireData, new HashSet<GameObject>() { gameObject });
+            Toolbox.Instance.OccurenceFlag(gameObject, fireData);
             if (responsibleParty == GameManager.Instance.playerObject && gameObject != GameManager.Instance.playerObject) {
                 GameManager.Instance.IncrementStat(StatType.othersSetOnFire, 1);
             }
         }
         if (onFire) {
-            HashSet<GameObject> involvedParties = new HashSet<GameObject>() { gameObject };
             if (pickup) {
                 if (pickup.holder != null) {
                     responsibleParty = pickup.holder.gameObject;
-                    involvedParties.Add(pickup.holder.gameObject);
                 }
             }
             flagTimer += Time.deltaTime;
@@ -136,7 +134,7 @@ public class Flammable : MonoBehaviour, ISaveable {
                 if (!fireSource && !silent) {
                     OccurrenceFire fireData = new OccurrenceFire();
                     fireData.flamingObject = gameObject;
-                    Toolbox.Instance.OccurenceFlag(gameObject, fireData, involvedParties);
+                    Toolbox.Instance.OccurenceFlag(gameObject, fireData);
                 }
             }
             // if i am on fire, i take damage.

@@ -24,6 +24,6 @@ public class Necronomicon : Interactive {
     }
     public void EldritchOccurrence() {
         OccurrenceNecronomicon data = new OccurrenceNecronomicon();
-        Toolbox.Instance.OccurenceFlag(gameObject, data, new HashSet<GameObject>());
+        Toolbox.Instance.OccurenceFlag(gameObject, data);
     }
 }

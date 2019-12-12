@@ -300,11 +300,6 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                     fieldOfView.Add(otherHead.hat.gameObject);
         }
     }
-
-    void ProcessNoise(GameObject flag) {
-        MessageNoise message = new MessageNoise(flag);
-        Toolbox.Instance.SendMessage(gameObject, this, message);
-    }
     public string RecallMemory() {
         if (shortTermMemory.Count() == 0) {
             return "I am a blank slate.";
@@ -324,9 +319,8 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         Occurrence occurrence = flag.GetComponent<Occurrence>();
         if (occurrence == null)
             return;
-        foreach (OccurrenceData od in occurrence.data) {
-            WitnessOccurrence(od, occurrence.involvedParties);
-        }
+        if (occurrence.data != null)
+            WitnessOccurrence(occurrence.data);
     }
     void OnTriggerEnter2D(Collider2D other) {
         if (hitState >= Controllable.HitState.unconscious)
@@ -337,31 +331,27 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             ProcessOccurrenceFlag(other.gameObject);
         }
         if (other.tag == "occurrenceSound") {
-            Occurrence flag = other.GetComponent<Occurrence>();
-            if (!flag.involvedParties.Contains(gameObject)) {
-                // react to noise
-                ProcessNoise(other.gameObject);
-            }
+            MessageNoise message = new MessageNoise(other.gameObject);
+            Toolbox.Instance.SendMessage(gameObject, this, message);
         }
         Qualities qualities = other.GetComponent<Qualities>();
         if (qualities) {
-            // TODO: no messageoccurrence??
             EventData data = qualities.ToEvent();
-            OccurrenceData oD = new OccurrenceData();
+            ReactToEvent(data, new HashSet<GameObject>());
+
+            OccurrenceData oD = new OccurrenceGeneric();
             oD.events.Add(data);
             MessageOccurrence message = new MessageOccurrence(oD);
-
             Toolbox.Instance.SendMessage(gameObject, this, message);
-            ReactToEvent(qualities.ToEvent(), new HashSet<GameObject>());
         }
         seenFlags.Add(other.gameObject);
     }
-    void WitnessOccurrence(OccurrenceData od, HashSet<GameObject> involvedParties) {
+    void WitnessOccurrence(OccurrenceData od) {
         Toolbox.Instance.SendMessage(gameObject, this, new MessageOccurrence(od));
         if (od is OccurrenceViolence)
             WitnessViolence((OccurrenceViolence)od);
         foreach (EventData e in od.events) {
-            ReactToEvent(e, involvedParties);
+            ReactToEvent(e, od.involvedParties());
         }
     }
     void ReactToEvent(EventData dat, HashSet<GameObject> involvedParties) {

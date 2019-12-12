@@ -15,7 +15,7 @@ public class ChemicalSpray : MonoBehaviour {
                 fireData.flamingObject = coll.gameObject;
                 fireData.extinguished = true;
 
-                Toolbox.Instance.OccurenceFlag(coll.gameObject, fireData, new HashSet<GameObject>() { coll.gameObject });
+                Toolbox.Instance.OccurenceFlag(coll.gameObject, fireData);
             }
         }
         Toolbox.Instance.AddLiveBuffs(coll.gameObject, gameObject);

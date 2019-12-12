@@ -321,19 +321,15 @@ public class Speech : Interactive, ISaveable {
         speakTime = DoubleSeat(message.phrase.Length, 2f, 50f, 5f, 2f);
         speakTimeTotal = speakTime;
         speakSpeed = message.phrase.Length / speakTime;
-        HashSet<GameObject> involvedParties = new HashSet<GameObject>() { gameObject };
         if (message.insultTarget != null) {
             speechData.insult = true;
             speechData.target = message.insultTarget;
-            involvedParties.Add(message.insultTarget);
         }
         if (message.threatTarget != null) {
             speechData.threat = true;
             speechData.target = message.threatTarget;
-            involvedParties.Add(message.threatTarget);
         }
-        involvedParties.UnionWith(message.involvedParties);
-        Toolbox.Instance.OccurenceFlag(gameObject, speechData, involvedParties);
+        Toolbox.Instance.OccurenceFlag(gameObject, speechData);
         return speechData;
     }
     public string CensorSwears(string phrase) {

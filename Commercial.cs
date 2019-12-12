@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Serialization;
+using UnityEngine.SceneManagement;
 using UnityEngine;
 using System.IO;
 using System.Linq;
@@ -22,6 +23,8 @@ public class Commercial {
     public string unlockItem = "";
     public string email = "";
     public List<EventData> eventData = new List<EventData>();
+    public HashSet<string> yogurtEaterOutfits = new HashSet<string>();
+    public HashSet<string> outfits = new HashSet<string>();
     [XmlIgnore]
     public CommercialDescription analysis;
     [XmlIgnore]
@@ -53,6 +56,39 @@ public class Commercial {
             } else c.objectives.Add(new ObjectiveProperty(bits));
         }
         return c;
+    }
+    public void ProcessOccurrence(Occurrence oc) {
+        // add scenes
+        visitedLocations.Add(SceneManager.GetActiveScene().name);
+        OccurrenceData occurrence = oc.data;
+        if (occurrence == null)
+            return;
+        // add outfits?
+        foreach (GameObject obj in oc.involvedParties()) {
+            if (obj == null)
+                continue;
+            Outfit outfit = obj.GetComponent<Outfit>();
+            if (outfit != null) {
+                outfits.Add(outfit.wornUniformName);
+            }
+        }
+
+        OccurrenceEat eatOccurrence = occurrence as OccurrenceEat;
+        if (eatOccurrence != null) {
+            if (eatOccurrence.yogurt)
+                yogurtEaterOutfits.Add(eatOccurrence.eaterOutfitName);
+        }
+
+        foreach (EventData data in occurrence.events) {
+            IncrementValue(data);
+            UINew.Instance.UpdateObjectives(this);
+        }
+        eventData.AddRange(occurrence.events);
+        foreach (EventData data in occurrence.events) {
+            if (data.transcriptLine != null) {
+                transcript.Add(data.transcriptLine);
+            }
+        }
     }
     public Commercial() {
         unlockUponCompletion = new List<string>();

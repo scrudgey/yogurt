@@ -199,8 +199,7 @@ public class Eater : Interactive, ISaveable {
         if (food.human) {
             GameManager.Instance.IncrementStat(StatType.actsOfCannibalism, 1);
         }
-        HashSet<GameObject> involvedParties = new HashSet<GameObject>() { gameObject, food.gameObject };
-        Toolbox.Instance.OccurenceFlag(gameObject, eatData, involvedParties);
+        Toolbox.Instance.OccurenceFlag(gameObject, eatData);
         // play eat sound
         if (food.eatSound != null) {
             Toolbox.Instance.AudioSpeaker(food.eatSound, transform.position);
@@ -230,11 +229,9 @@ public class Eater : Interactive, ISaveable {
 
         OccurrenceVomit data = new OccurrenceVomit();
         data.vomiter = gameObject;
-        HashSet<GameObject> involvedParties = new HashSet<GameObject>() { gameObject };
         if (eatenQueue.Count > 0) {
             GameObject eaten = eatenQueue.Dequeue();
             data.vomit = eaten.gameObject;
-            involvedParties.Add(eaten.gameObject);
             eaten.SetActive(true);
             eaten.transform.position = transform.position;
             PhysicalBootstrapper phys = eaten.GetComponent<PhysicalBootstrapper>();
@@ -261,7 +258,7 @@ public class Eater : Interactive, ISaveable {
             }
             eaten = null;
         }
-        Toolbox.Instance.OccurenceFlag(gameObject, data, involvedParties);
+        Toolbox.Instance.OccurenceFlag(gameObject, data);
         MessageHead head = new MessageHead();
         head.type = MessageHead.HeadType.vomiting;
         head.value = true;
