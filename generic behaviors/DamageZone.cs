@@ -15,6 +15,8 @@ public class DamageZone : MonoBehaviour {
         audioSource.clip = damageSound;
     }
     void OnTriggerStay2D(Collider2D other) {
+        if (enabled == false)
+            return;
         float timerVal = 0;
         if (other.tag == "fire")
             return;

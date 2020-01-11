@@ -8,6 +8,7 @@ public class Intrinsics : MonoBehaviour, ISaveable {
     // think of it as accessible slots
     public Dictionary<Component, List<Buff>> childBuffs = new Dictionary<Component, List<Buff>>();
     public Dictionary<BuffType, GameObject> intrinsicFX;
+    public bool blessed;
     public void AddChild(Component owner, Intrinsics donor) {
         childBuffs[owner] = donor.buffs;
         IntrinsicsChanged();
@@ -102,6 +103,27 @@ public class Intrinsics : MonoBehaviour, ISaveable {
                         Destroy(fader);
                     }
                     break;
+                case BuffType.invulnerable:
+                    if (kvp.Value.boolValue || kvp.Value.floatValue > 0) {
+                        Transform head = transform.Find("head");
+                        GameObject halo = GameObject.Instantiate(Resources.Load("particles/halo")) as GameObject;
+                        if (head) {
+                            halo.transform.SetParent(head, false);
+                            halo.transform.localPosition = Vector3.zero;
+                        } else {
+                            halo.transform.SetParent(transform, false);
+                            halo.transform.localPosition = Vector3.zero;
+                        }
+                    } else {
+                        Transform head = transform.Find("head");
+                        Transform halo = transform.Find("halo(Clone)");
+                        if (head) {
+                            halo = head.Find("halo(Clone)");
+                        }
+                        if (halo != null)
+                            Destroy(halo.gameObject);
+                    }
+                    break;
                 default:
                     break;
             }
@@ -182,13 +204,20 @@ public class Intrinsics : MonoBehaviour, ISaveable {
         foreach (Buff b in liveBuffs) {
             data.buffs.Add(new Buff(b));
         }
+        data.bools["blessed"] = blessed;
     }
     public void LoadData(PersistentComponent data) {
         liveBuffs = new List<Buff>();
         foreach (Buff b in data.buffs) {
             liveBuffs.Add(new Buff(b));
         }
-        if (data.buffs.Count > 0)
+        if (data.bools.ContainsKey("blessed"))
+            blessed = data.bools["blessed"];
+        if (blessed) {
+            Buff blessing = new Buff(BuffType.invulnerable, true, 0, 3);
+            buffs.Add(blessing);
+        }
+        if (data.buffs.Count > 0 || blessed)
             IntrinsicsChanged();
     }
 }

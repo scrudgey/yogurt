@@ -33,6 +33,7 @@ public class Starfield : MonoBehaviour {
         newStar.transform.parent = transform;
         SpriteRenderer starRenderer = newStar.GetComponent<SpriteRenderer>();
         starRenderer.sortingLayerName = "background";
+        starRenderer.sortingOrder = -100;
         starRenderer.color = colors[Random.Range(0, colors.Count)];
         if (init) {
             Destroy(newStar, Random.Range(0f, maxTime));

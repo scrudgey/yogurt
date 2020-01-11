@@ -66,14 +66,19 @@ public class ItemEntryScript : MonoBehaviour, IPointerEnterHandler {
         GameObject tempObject = Instantiate(Resources.Load("prefabs/" + name)) as GameObject;
         Item tempItem = tempObject.GetComponent<Item>();
         sprite = tempObject.GetComponent<SpriteRenderer>().sprite;
-        itemName = tempItem.itemName;
-        prefabName = name;
-        if (tempItem.longDescription != "") {
-            description = tempItem.longDescription;
+        if (tempItem != null) {
+            if (tempItem.longDescription != "") {
+                description = tempItem.longDescription;
+            } else {
+                description = tempItem.description;
+            }
+            itemName = tempItem.itemName;
         } else {
-            description = tempItem.description;
+            itemName = name;
+            description = "";
         }
-        entryText.text = tempItem.itemName;
+        prefabName = name;
+        entryText.text = itemName;
         Destroy(tempObject);
     }
 }

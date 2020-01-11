@@ -48,11 +48,10 @@ public class PhysicalImpact : MonoBehaviour {
         violence.attacker = messageToSend.responsibleParty;
         violence.victim = victim;
         violence.type = messageToSend.type;
-        HashSet<GameObject> involvedParties = new HashSet<GameObject>() { messageToSend.responsibleParty, victim };
         if (messageToSend.responsibleParty != null) {
-            Toolbox.Instance.OccurenceFlag(messageToSend.responsibleParty, violence, involvedParties);
+            Toolbox.Instance.OccurenceFlag(messageToSend.responsibleParty, violence);
         } else {
-            Toolbox.Instance.OccurenceFlag(gameObject, violence, involvedParties);
+            Toolbox.Instance.OccurenceFlag(gameObject, violence);
         }
     }
 }

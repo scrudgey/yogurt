@@ -94,8 +94,8 @@ public class Trader : Interactive, ISaveable {
         data.strings["receive"] = receive;
     }
     public void LoadData(PersistentComponent data) {
-        if (data.ints.ContainsKey("give")) {
-            give = MySaver.IDToGameObject(data.ints["give"]);
+        if (data.GUIDs.ContainsKey("give")) {
+            give = MySaver.IDToGameObject(data.GUIDs["give"]);
         }
         receive = data.strings["receive"];
     }

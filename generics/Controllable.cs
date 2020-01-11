@@ -187,6 +187,7 @@ public class Controllable : MonoBehaviour {
             if (defaultInteraction != null) {
                 defaultInteraction.DoAction(customParameters: defaultParameters);
             }
+            UINew.Instance.UpdateButtons();
         }
     }
     public void ShootHeld() {

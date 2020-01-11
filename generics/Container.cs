@@ -48,12 +48,12 @@ public class Container : MayorLock, IExcludable, ISaveable {
             }
         }
     }
-    protected void RemoveAllRetrieveActions() {
-        interactions = new List<Interaction>();
-        Interaction stasher = new Interaction(this, "Put", "Store");
-        stasher.validationFunction = true;
-        interactions.Add(stasher);
-    }
+    // protected void RemoveAllRetrieveActions() {
+    //     interactions = new List<Interaction>();
+    //     Interaction stasher = new Interaction(this, "Put", "Store");
+    //     stasher.validationFunction = true;
+    //     interactions.Add(stasher);
+    // }
     protected void RemoveRetrieveAction(Pickup pickup) {
         Interaction removeThis = null;
         foreach (Interaction interaction in interactions) {
@@ -246,7 +246,7 @@ public class Container : MayorLock, IExcludable, ISaveable {
         disableContents = data.bools["disableContents"];
         if (data.ints["itemCount"] > 0) {
             for (int i = 0; i < data.ints["itemCount"]; i++) {
-                GameObject go = MySaver.IDToGameObject(data.ints["item" + i.ToString()]);
+                GameObject go = MySaver.IDToGameObject(data.GUIDs["item" + i.ToString()]);
                 if (go != null) {
                     AddItem(go.GetComponent<Pickup>());
                     PhysicalBootstrapper phys = go.GetComponent<PhysicalBootstrapper>();

@@ -67,6 +67,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
     private HashSet<GameObject> seenFlags = new HashSet<GameObject>();
     Transform cachedTransform;
     FixedSizedQueue<string> lastNEvents = new FixedSizedQueue<string>();
+    private Dictionary<BuffType, Buff> netBuffs = new Dictionary<BuffType, Buff>();
     public new Transform transform {
         get {
             if (cachedTransform == null) {
@@ -89,7 +90,6 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
     public bool imOnFire;
     public SerializableDictionary<GameObject, Knowledge> knowledgebase = new SerializableDictionary<GameObject, Knowledge>();
     public SerializableDictionary<GameObject, PersonalAssessment> people = new SerializableDictionary<GameObject, PersonalAssessment>();
-
     void Start() {
         // Debug.Log(name + "awareness starting");
         // Debug.Log(initialAwareness);
@@ -118,7 +118,20 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         Toolbox.RegisterMessageCallback<MessageThreaten>(this, ProcessThreat);
         Toolbox.RegisterMessageCallback<MessageInventoryChanged>(this, ProcessInventoryChanged);
         Toolbox.RegisterMessageCallback<MessageSpeech>(this, HandleSpeech);
+        Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsics);
     }
+    void HandleNetIntrinsics(MessageNetIntrinsic message) {
+        netBuffs = message.netBuffs;
+        if (message.netBuffs[BuffType.enraged].active()) {
+            // all people become enemies
+            foreach (KeyValuePair<GameObject, PersonalAssessment> kvp in people) {
+                Hurtable otherHurtable = kvp.Key.GetComponent<Hurtable>();
+                if (otherHurtable != null && !otherHurtable.monster)
+                    kvp.Value.status = PersonalAssessment.friendStatus.enemy;
+            }
+        }
+    }
+
     void HandleSpeech(MessageSpeech message) {
         foreach (GameObject party in message.involvedParties) {
             PersonalAssessment assessment = FormPersonalAssessment(party);
@@ -287,11 +300,6 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                     fieldOfView.Add(otherHead.hat.gameObject);
         }
     }
-
-    void ProcessNoise(GameObject flag) {
-        MessageNoise message = new MessageNoise(flag);
-        Toolbox.Instance.SendMessage(gameObject, this, message);
-    }
     public string RecallMemory() {
         if (shortTermMemory.Count() == 0) {
             return "I am a blank slate.";
@@ -306,12 +314,13 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         return "I remember when " + memory.whatHappened;
     }
     void ProcessOccurrenceFlag(GameObject flag) {
+        if (netBuffs != null && netBuffs.ContainsKey(BuffType.enraged) && netBuffs[BuffType.enraged].active())
+            return;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
         if (occurrence == null)
             return;
-        foreach (OccurrenceData od in occurrence.data) {
-            WitnessOccurrence(od, occurrence.involvedParties);
-        }
+        if (occurrence.data != null)
+            WitnessOccurrence(occurrence.data);
     }
     void OnTriggerEnter2D(Collider2D other) {
         if (hitState >= Controllable.HitState.unconscious)
@@ -322,34 +331,35 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             ProcessOccurrenceFlag(other.gameObject);
         }
         if (other.tag == "occurrenceSound") {
-            Occurrence flag = other.GetComponent<Occurrence>();
-            if (!flag.involvedParties.Contains(gameObject)) {
-                // react to noise
-                ProcessNoise(other.gameObject);
+            Occurrence noiseOccurrence = other.GetComponent<Occurrence>();
+            if (noiseOccurrence.involvedParties().Contains(gameObject)) {
+                return;
             }
+            MessageNoise message = new MessageNoise(other.gameObject);
+            Toolbox.Instance.SendMessage(gameObject, this, message);
         }
         Qualities qualities = other.GetComponent<Qualities>();
         if (qualities) {
-            // TODO: no messageoccurrence??
             EventData data = qualities.ToEvent();
-            OccurrenceData oD = new OccurrenceData();
+            ReactToEvent(data, new HashSet<GameObject>());
+
+            OccurrenceData oD = new OccurrenceGeneric();
             oD.events.Add(data);
             MessageOccurrence message = new MessageOccurrence(oD);
-
             Toolbox.Instance.SendMessage(gameObject, this, message);
-            ReactToEvent(qualities.ToEvent(), new HashSet<GameObject>());
         }
         seenFlags.Add(other.gameObject);
     }
-    void WitnessOccurrence(OccurrenceData od, HashSet<GameObject> involvedParties) {
+    void WitnessOccurrence(OccurrenceData od) {
         Toolbox.Instance.SendMessage(gameObject, this, new MessageOccurrence(od));
         if (od is OccurrenceViolence)
             WitnessViolence((OccurrenceViolence)od);
         foreach (EventData e in od.events) {
-            ReactToEvent(e, involvedParties);
+            ReactToEvent(e, od.involvedParties());
         }
     }
     void ReactToEvent(EventData dat, HashSet<GameObject> involvedParties) {
+        // Debug.Log(involvedParties);
         // store memory
         EventData memory = new EventData(dat);
         shortTermMemory.Push(memory);
@@ -564,9 +574,19 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             if ((interval > 10f && decisionMaker.personality.social == Personality.Social.chatty) || (interval > 25f && decisionMaker.personality.social == Personality.Social.normal)) {
                 AddSocializationTarget(rootObject);
             }
+            if (netBuffs != null && netBuffs.ContainsKey(BuffType.enraged) && netBuffs[BuffType.enraged].active()) {
+                Hurtable otherHurtable = rootControllable.GetComponent<Hurtable>();
+                if (otherHurtable != null && !otherHurtable.monster)
+                    storedAssessment.status = PersonalAssessment.friendStatus.enemy;
+            }
             return storedAssessment;
         }
         PersonalAssessment assessment = new PersonalAssessment(knowledgebase[rootObject]);
+        if (netBuffs != null && netBuffs.ContainsKey(BuffType.enraged) && netBuffs[BuffType.enraged].active()) {
+            Hurtable otherHurtable = rootControllable.GetComponent<Hurtable>();
+            if (otherHurtable != null && !otherHurtable.monster)
+                assessment.status = PersonalAssessment.friendStatus.enemy;
+        }
         AddSocializationTarget(rootObject);
         people.Add(rootObject, assessment);
         return assessment;
@@ -585,6 +605,12 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             return;
         if (message.impersonal)
             return;
+        if (netBuffs != null) {
+            if (netBuffs.ContainsKey(BuffType.enraged) && netBuffs[BuffType.enraged].active())
+                return;
+            if (netBuffs.ContainsKey(BuffType.invulnerable) && netBuffs[BuffType.invulnerable].active() && message.type == damageType.fire)
+                return;
+        }
         // adjust reaction depending on magnitude
         if (message.amount <= 15) {
             // minor nusiance
@@ -644,13 +670,13 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         }
         foreach (KeyValuePair<GameObject, Knowledge> keyVal in knowledgebase) {
             SerializedKnowledge knowledge = SaveKnowledge(keyVal.Value);
-            if (knowledge.gameObjectID == -1)
+            if (knowledge.gameObjectID == System.Guid.Empty)
                 continue;
             data.knowledgeBase.Add(knowledge);
         }
         if (possessionDefaultState != null) {
             SerializedKnowledge knowledge = SaveKnowledge(possessionDefaultState);
-            if (knowledge.gameObjectID != -1)
+            if (knowledge.gameObjectID != System.Guid.Empty)
                 data.knowledges["defaultState"] = knowledge;
         }
         foreach (KeyValuePair<GameObject, PersonalAssessment> keyVal in people) {
@@ -658,8 +684,8 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         }
     }
     public void LoadData(PersistentComponent data) {
-        if (data.ints.ContainsKey("possession")) {
-            possession = MySaver.IDToGameObject(data.ints["possession"]);
+        if (data.GUIDs.ContainsKey("possession")) {
+            possession = MySaver.IDToGameObject(data.GUIDs["possession"]);
         }
         hitState = (Controllable.HitState)data.ints["hitstate"];
         foreach (SerializedKnowledge knowledge in data.knowledgeBase) {
@@ -686,7 +712,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         SerializedKnowledge data = new SerializedKnowledge();
         data.lastSeenPosition = input.lastSeenPosition;
         data.lastSeenTime = input.lastSeenTime;
-        data.gameObjectID = -1;
+        data.gameObjectID = System.Guid.Empty;
         if (input.obj != null) {
             MySaver.savedObjects.TryGetValue(input.obj, out data.gameObjectID);
         }
@@ -708,7 +734,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         data.status = input.status;
         data.HitState = input.hitstate;
         if (!MySaver.savedObjects.TryGetValue(input.knowledge.obj, out data.gameObjectID)) {
-            data.gameObjectID = -1;
+            data.gameObjectID = System.Guid.Empty;
         }
         return data;
     }

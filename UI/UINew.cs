@@ -45,6 +45,7 @@ public class UINew : Singleton<UINew> {
     private GameObject punchButton;
     private GameObject speakButton;
     private GameObject saveButton;
+    private GameObject musicToggle;
     private GameObject loadButton;
     private GameObject testButton;
     private GameObject hypnosisButton;
@@ -97,7 +98,7 @@ public class UINew : Singleton<UINew> {
         bool highlight = false;
         RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
         foreach (RaycastHit2D hit in hits) {
-            if (hit.collider != null && !Controller.forbiddenColliders.Contains(hit.collider.tag)) {
+            if (hit.collider != null && !Controller.forbiddenTags.Contains(hit.collider.tag)) {
                 highlight = true;
             }
         }
@@ -310,6 +311,7 @@ public class UINew : Singleton<UINew> {
         saveButton = UICanvas.transform.Find("save").gameObject;
         loadButton = UICanvas.transform.Find("load").gameObject;
         testButton = UICanvas.transform.Find("test").gameObject;
+        musicToggle = UICanvas.transform.Find("musicToggle").gameObject;
         cursorText = UICanvas.transform.Find("cursorText").gameObject;
         cursorTextText = cursorText.GetComponent<Text>();
         actionTextObject = UICanvas.transform.Find("ActionText").GetComponent<Text>();
@@ -344,6 +346,8 @@ public class UINew : Singleton<UINew> {
                 loadButton.SetActive(false);
             if (testButton)
                 testButton.SetActive(false);
+            if (musicToggle)
+                musicToggle.SetActive(false);
         }
     }
     public void Hit() {
@@ -490,7 +494,7 @@ public class UINew : Singleton<UINew> {
             return;
         } else {
             HidePunchButton();
-            if (Controller.Instance.focus.defaultInteraction != null) {
+            if (Controller.Instance.focus.defaultInteraction != null && Controller.Instance.focus.defaultInteraction.IsValid()) {
                 foreach (actionButton button in actionButtons) {
                     if (button.buttonScript.action == Controller.Instance.focus.defaultInteraction)
                         MakeButtonDefault(button);

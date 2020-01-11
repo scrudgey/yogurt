@@ -85,7 +85,12 @@ public class Bed : Doorway {
                     audioSource.PlayOneShot(snoreSound);
                 }
             }
-            if (Input.anyKey && Controller.Instance.state != Controller.ControlState.cutscene) {
+            if (Input.anyKey &&
+            (Controller.Instance.state != Controller.ControlState.cutscene &&
+            Controller.Instance.state != Controller.ControlState.inMenu &&
+            Controller.Instance.state != Controller.ControlState.waitForMenu
+            )
+            ) {
                 sleeping = false;
                 unmade = true;
                 spriteRenderer.sprite = bedSprites[1];
@@ -94,6 +99,7 @@ public class Bed : Doorway {
                 GameManager.Instance.playerObject.SetActive(true);
                 Toolbox.Instance.SwitchAudioListener(GameManager.Instance.playerObject);
                 audioSource.PlayOneShot(beddingSound);
+                UINew.Instance.CloseActiveMenu();
                 UINew.Instance.RefreshUI(active: true);
                 HeadAnimation playerHead = GameManager.Instance.playerObject.GetComponentInChildren<HeadAnimation>();
                 if (playerHead) {

@@ -12,7 +12,7 @@ public class ClosetButtonHandler : MonoBehaviour {
     public UIButtonEffects effects;
     public Button closeButton;
     public HomeCloset.ClosetType closetType;
-    void Start() {
+    void Awake() {
         GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
         icon.sprite = null;
         icon.color = new Color(1f, 1f, 1f, 0f);
@@ -44,10 +44,13 @@ public class ClosetButtonHandler : MonoBehaviour {
         foreach (string name in itemList) {
             GameObject tempObject = Instantiate(Resources.Load("prefabs/" + name)) as GameObject;
             Item tempItem = tempObject.GetComponent<Item>();
-            names[name] = tempItem.itemName;
+            if (tempItem) {
+                names[name] = tempItem.itemName;
+            } else names[name] = name;
             Destroy(tempObject);
         }
         itemList = itemList.OrderBy(i => names[i]).ToList();
+        bool mousedOver = false;
         foreach (string name in itemList) {
             ItemEntryScript script = spawnEntry();
             // effects.buttons.Add(script.GetComponentInChildren<Button>());
@@ -56,6 +59,10 @@ public class ClosetButtonHandler : MonoBehaviour {
 
             Button entryButton = script.gameObject.GetComponentInChildren<Button>();
             effects.buttons.Add(entryButton);
+            if (!mousedOver) {
+                mousedOver = true;
+                ItemMouseover(script);
+            }
         }
         effects.Configure();
     }

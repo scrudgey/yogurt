@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using Nimrod;
 
 public class Speech : Interactive, ISaveable {
+    public string speechName;
     static string[] swearWords = new string[]{
         @"\bshit\b",
         @"\bfucked\b",
@@ -186,6 +187,7 @@ public class Speech : Interactive, ISaveable {
     public void Describe(Item obj) {
         LiquidContainer container = obj.GetComponent<LiquidContainer>();
         MonoLiquid mono = obj.GetComponent<MonoLiquid>();
+        BookPickup book = obj.GetComponent<BookPickup>();
         MessageSpeech message = new MessageSpeech();
         if (container) {
             if (container.amount > 0 && container.descriptionName != "") {
@@ -195,8 +197,10 @@ public class Speech : Interactive, ISaveable {
             }
         } else if (mono) {
             message.phrase = "It's " + mono.liquid.name + ".";
+        } else if (book) {
+            message.phrase = book.book.Describe();
         } else {
-            message.phrase = obj.description;
+            message.phrase = Monologue.replaceHooks(obj.description);
         }
         Say(message);
     }
@@ -317,19 +321,15 @@ public class Speech : Interactive, ISaveable {
         speakTime = DoubleSeat(message.phrase.Length, 2f, 50f, 5f, 2f);
         speakTimeTotal = speakTime;
         speakSpeed = message.phrase.Length / speakTime;
-        HashSet<GameObject> involvedParties = new HashSet<GameObject>() { gameObject };
         if (message.insultTarget != null) {
             speechData.insult = true;
             speechData.target = message.insultTarget;
-            involvedParties.Add(message.insultTarget);
         }
         if (message.threatTarget != null) {
             speechData.threat = true;
             speechData.target = message.threatTarget;
-            involvedParties.Add(message.threatTarget);
         }
-        involvedParties.UnionWith(message.involvedParties);
-        Toolbox.Instance.OccurenceFlag(gameObject, speechData, involvedParties);
+        Toolbox.Instance.OccurenceFlag(gameObject, speechData);
         return speechData;
     }
     public string CensorSwears(string phrase) {

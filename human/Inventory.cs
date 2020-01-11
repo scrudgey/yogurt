@@ -7,6 +7,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     public Controllable.HitState hitstate;
     public List<GameObject> items;
     public GameObject initHolding;
+    public List<GameObject> initItems;
     public bool strong;
     public Pickup holding {
         get { return _holding; }
@@ -124,6 +125,23 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
                 GetItem(pickup);
             }
         }
+        foreach (GameObject item in initItems) {
+            if (item == null)
+                continue;
+            ClaimsManager.Instance.ClaimObject(item, this);
+            PhysicalBootstrapper phys = item.GetComponent<PhysicalBootstrapper>();
+            if (phys)
+                phys.DestroyPhysical();
+            item.transform.position = holdpoint.position;
+            item.transform.SetParent(holdpoint, false);
+            item.transform.rotation = Quaternion.identity;
+            item.transform.localPosition = Vector3.zero;
+            item.GetComponent<Rigidbody2D>().isKinematic = true;
+            item.GetComponent<Collider2D>().isTrigger = true;
+            // item.holder = this;
+            item.GetComponent<Pickup>().holder = this;
+            StashItem(item);
+        }
     }
     public void DirectionChange(Vector2 dir) {
         direction = dir;
@@ -171,7 +189,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     }
     public void StashItem(GameObject item) {
         items.Add(item);
-        if (item == holding.gameObject)
+        if (holding != null && item == holding.gameObject)
             SoftDropItem();
         item.SetActive(false);
     }
@@ -427,7 +445,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             MySaver.UpdateGameObjectReference(holding.gameObject, data, "holdingID");
             MySaver.AddToReferenceTree(data.id, holding.gameObject);
         } else {
-            data.ints["holdingID"] = -1;
+            data.GUIDs["holdingID"] = System.Guid.Empty;
         }
         data.ints["itemCount"] = items.Count;
         if (items.Count > 0) {
@@ -440,8 +458,8 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     }
     public void LoadData(PersistentComponent data) {
         direction = data.vectors["direction"];
-        if (data.ints["holdingID"] != -1) {
-            GameObject go = MySaver.IDToGameObject(data.ints["holdingID"]);
+        if (data.GUIDs.ContainsKey("holdingID") && data.GUIDs["holdingID"] != System.Guid.Empty) {
+            GameObject go = MySaver.IDToGameObject(data.GUIDs["holdingID"]);
             if (go != null) {
                 GetItem(go.GetComponent<Pickup>());
             } else {
@@ -452,7 +470,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         // so PROTECT YA NECK!!!
         if (data.ints["itemCount"] > 0) {
             for (int i = 0; i < data.ints["itemCount"]; i++) {
-                GameObject theItem = MySaver.IDToGameObject(data.ints["item" + i.ToString()]);
+                GameObject theItem = MySaver.IDToGameObject(data.GUIDs["item" + i.ToString()]);
                 if (theItem == null)
                     continue;
                 items.Add(theItem);

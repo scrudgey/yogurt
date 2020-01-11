@@ -20,7 +20,7 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
         }
     }
     private SpriteRenderer spriteRenderer;
-    private string lastPressed = "right";
+    public string lastPressed = "right";
     private bool swinging;
     private bool holding;
     private bool throwing;
@@ -32,6 +32,7 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
     private int frame;
     public Animation animator;
     public Controllable.HitState hitState;
+    public Rigidbody2D body;
     private bool doubledOver;
     void Awake() {
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -41,6 +42,7 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
         Toolbox.RegisterMessageCallback<MessageInventoryChanged>(this, HandleInventoryMessage);
         Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
+        body = GetComponent<Rigidbody2D>();
     }
     void Start() {
         MessageDirectable message = new MessageDirectable();
@@ -50,6 +52,7 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
     public void HandleNetIntrinsic(MessageNetIntrinsic message) {
         if (message.netBuffs[BuffType.undead].boolValue) {
             skinColor = SkinColor.undead;
+            LoadSprites();
         }
     }
     public void HandleInventoryMessage(MessageInventoryChanged message) {
@@ -115,7 +118,8 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
     }
     public void LoadSprites() {
         string spriteSheet = baseName + "_spritesheet";
-        sprites = Toolbox.ApplySkinToneToSpriteSheet(spriteSheet, skinColor);
+        // sprites = Toolbox.ApplySkinToneToSpriteSheet(spriteSheet, skinColor);
+        sprites = Toolbox.MemoizedSkinTone(spriteSheet, skinColor);
         SetFrame(0);
     }
     public void UpdateSequence() {
@@ -135,7 +139,7 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
         } else if (punching) {
             updateSequence = GetFightState(updateSequence);
         } else {
-            if (fighting && GetComponent<Rigidbody2D>().velocity.magnitude < 0.1) {
+            if (fighting && body.velocity.magnitude < 0.1) {
                 updateSequence = GetFightState(updateSequence);
             } else {
                 updateSequence = GetWalkState(updateSequence);
@@ -194,7 +198,7 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
         if (holding) {
             baseFrame += 21;
         }
-        if (GetComponent<Rigidbody2D>().velocity.magnitude > 0.1) {
+        if (body.velocity.magnitude > 0.1) {
             updateSequence = updateSequence + "_run_" + lastPressed; ;
             baseFrame += 1;
         } else {

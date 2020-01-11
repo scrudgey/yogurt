@@ -70,18 +70,10 @@ public class Hurtable : Damageable, ISaveable {
         armor = intrins.netBuffs[BuffType.armor].floatValue;
         coughing = intrins.netBuffs[BuffType.coughing].boolValue;
         if (intrins.netBuffs[BuffType.death].active()) {
-            // health = -1f;
-            // Die(damageType.any);
             health = float.MinValue;
-            Die(damageType.cosmic);
+            Die(damageType.physical);
         }
     }
-    // override public void HandleNetIntrinsic(MessageNetIntrinsic message) {
-    //     base.HandleNetIntrinsic(message);
-    //     if (message.netBuffs[BuffType.death].active()) {
-    //         Die(damageType.cosmic);
-    //     }
-    // }
     public override float CalculateDamage(MessageDamage message) {
         if (message.responsibleParty != null) {
             lastAttacker = message.responsibleParty;
@@ -196,6 +188,25 @@ public class Hurtable : Damageable, ISaveable {
         }
         hitState = Controllable.AddHitState(hitState, Controllable.HitState.dead);
     }
+
+    public void Resurrect() {
+        if (hitState != Controllable.HitState.dead)
+            return;
+        health = maxHealth;
+        Reset();
+        GetUp();
+        Intrinsics hostIntrins = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject);
+        // add mindless?
+        hostIntrins.AddNewPromotedLiveBuff(new Buff(BuffType.undead, true, 0, 0));
+        hostIntrins.AddNewPromotedLiveBuff(new Buff(BuffType.enraged, true, 0, 0));
+        hostIntrins.IntrinsicsChanged();
+        monster = true;
+        Speech speech = GetComponent<Speech>();
+        if (speech) {
+            speech.enabled = false;
+            speech.disableSpeakWith = true;
+        }
+    }
     public void LogTypeOfDeath(damageType type) {
         bool suicide = false;
         bool damageZone = false;
@@ -221,17 +232,6 @@ public class Hurtable : Damageable, ISaveable {
             GameManager.Instance.PlayerDeath();
         }
 
-        if (lastAttacker == null)
-            return;
-        if (lastAttacker == gameObject) {
-            suicide = true;
-        } else {
-            if (lastAttacker.GetComponent<DamageZone>() != null)
-                damageZone = true;
-            if (lastAttacker.GetComponent<Inventory>() != null)
-                assailant = true;
-        }
-
         OccurrenceDeath occurrenceData = new OccurrenceDeath(monster);
         occurrenceData.dead = gameObject;
         occurrenceData.suicide = suicide;
@@ -239,9 +239,7 @@ public class Hurtable : Damageable, ISaveable {
         occurrenceData.assailant = assailant;
         occurrenceData.lastAttacker = lastAttacker;
         occurrenceData.lastDamage = type;
-        Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData, new HashSet<GameObject>() { gameObject });
-
-
+        Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData);
     }
 
     override protected void Update() {

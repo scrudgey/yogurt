@@ -106,6 +106,10 @@ public class CutsceneMoonLanding : Cutscene {
             playerHurable.KnockDown();
         }
         GameObject.Destroy(landingString);
+        if (!GameManager.Instance.data.visitedMoon) {
+            GameManager.Instance.data.visitedMoon = true;
+            GameManager.Instance.ShowDiaryEntry("moon");
+        }
     }
 }
 public class CutsceneSpace : Cutscene {
@@ -198,6 +202,7 @@ public class CutsceneCannon : Cutscene {
         if (timer > 4f) {
             // switch scenes
             complete = true;
+            GameManager.Instance.data.entryID = 1;
             SceneManager.LoadScene("space");
         }
     }
@@ -410,6 +415,11 @@ public class CutsceneDungeonFall : CutsceneFall {
     private AudioClip dumpSound;
     public ParticleSystem magicEffect;
     public AudioSource magicAudio;
+    public bool rejecting;
+    public float rejectTimer;
+    public GameObject hench;
+    public Speech henchSpeech;
+    public bool henchSpeechHappened;
     public override void Configure() {
         base.Configure();
         ejectorDump = Resources.Load("particles/ejectorDump") as GameObject;
@@ -417,28 +427,49 @@ public class CutsceneDungeonFall : CutsceneFall {
         Toolbox.Instance.SwitchAudioListener(player);
         magicEffect = GameObject.Find("magic").GetComponent<ParticleSystem>();
         magicAudio = GameObject.Find("magic").GetComponent<AudioSource>();
+        hench = GameObject.Find("hench") as GameObject;
+        hench.SetActive(false);
+        henchSpeech = hench.GetComponent<Speech>();
+        playerInventory = player.GetComponent<Inventory>();
+        playerOutfit = player.GetComponent<Outfit>();
     }
     public override void Update() {
-        if (!caught || (caught && !dumping)) {
+        if (rejecting) {
+            RejectUpdate();
+        } else if (!caught || (caught && !dumping)) {
             base.Update();
             if (player.transform.position.y < catchPoint && !caught) {
                 catchPosition = player.transform.position;
                 caught = true;
-                dumping = true;
-                magicEffect.Play();
-                magicAudio.Play();
-                magicEffect.transform.position = player.transform.position;
-                playerInventory = player.GetComponent<Inventory>();
-                playerOutfit = player.GetComponent<Outfit>();
                 // stop fall
                 if (playerBody) {
                     playerBody.gravityScale = 0f;
                     playerBody.drag = initDrag;
                     playerBody.velocity = Vector3.zero;
                 }
+                if (Toolbox.Instance.CloneRemover(GameManager.Instance.playerObject.name) == "vampyr") {
+                    // reject dracula
+                    rejecting = true;
+                } else {
+                    dumping = true;
+                    magicEffect.Play();
+                    magicAudio.Play();
+                    magicEffect.transform.position = player.transform.position;
+                }
             }
         } else if (dumping) {
             DumpUpdate();
+        }
+    }
+    public void RejectUpdate() {
+        rejectTimer += Time.deltaTime;
+        player.transform.position = catchPosition;
+        if (rejectTimer > 1f && !hench.activeInHierarchy) {
+            hench.SetActive(true);
+        } else if (rejectTimer > 4f && !henchSpeechHappened) {
+            DialogueMenu menu = henchSpeech.SpeakWith();
+            menu.menuClosed += MenuWasClosed;
+            henchSpeechHappened = true;
         }
     }
     public void DumpUpdate() {
@@ -466,7 +497,7 @@ public class CutsceneDungeonFall : CutsceneFall {
                 dumping = false;
                 magicEffect.Stop();
                 magicAudio.Stop();
-                if (playerBody) {
+                if (playerBody != null) {
                     playerBody.gravityScale = 1f;
                     playerBody.drag = 0;
                 }
@@ -484,6 +515,9 @@ public class CutsceneDungeonFall : CutsceneFall {
         system.Play();
         GameObject.Destroy(obj);
         GameManager.Instance.PlayPublicSound(dumpSound);
+    }
+    public void MenuWasClosed() {
+        SceneManager.LoadScene("vampire_house");
     }
 }
 public class CutsceneFall : Cutscene {
@@ -542,6 +576,171 @@ public class CutsceneFall : Cutscene {
         }
     }
 }
+public class CutsceneNeconomicon : Cutscene {
+    private enum State { start, rising, hovering, falling, end };
+    private State state;
+    protected GameObject player;
+    protected Transform footPoint;
+    Awareness playerAwareness;
+    AdvancedAnimation playerAnimation;
+    Collider2D playerCollider;
+    // protected Rigidbody2D playerBody;
+    Controllable playerControl;
+    Hurtable playerHurtable;
+    public Vector3 initPosition;
+    public Vector3 targetPosition;
+    public Vector3 hoverInitPosition;
+    public Vector3 footpointInitPosition;
+    public CameraControl cameraControl;
+    public float timer;
+    public Necronomicon necronomicon;
+    Collider2D zombieZonezone;
+    float zombieTimer;
+    float occurrenceTimer;
+    public List<Collider2D> colliders = new List<Collider2D>();
+    public override void Configure() {
+        cameraControl = GameObject.FindObjectOfType<CameraControl>();
+        necronomicon = GameObject.FindObjectOfType<Necronomicon>();
+        GameObject zone = GameObject.FindWithTag("zombieSpawnZone");
+        if (zone == null) {
+            Debug.LogError("no zombie zone in this scene!!");
+            End();
+        }
+        zombieZonezone = zone.GetComponent<Collider2D>();
+        zombieTimer = UnityEngine.Random.Range(0.25f, 1.0f);
+        occurrenceTimer = UnityEngine.Random.Range(0.25f, 1.0f);
+        necronomicon.StartFx();
+        player = GameManager.Instance.playerObject;
+        footPoint = player.transform.Find("footPoint");
+        footpointInitPosition = footPoint.position;
+        Controller.Instance.suspendInput = true;
+        playerAnimation = player.GetComponent<AdvancedAnimation>();
+        playerCollider = player.GetComponent<Collider2D>();
+        playerControl = player.GetComponent<Humanoid>();
+        playerHurtable = player.GetComponent<Hurtable>();
+        playerAwareness = player.GetComponent<Awareness>();
+        if (playerAnimation) {
+            playerAnimation.sequence = "generic3_idle_" + playerAnimation.lastPressed;
+            playerAnimation.enabled = false;
+        }
+        if (playerCollider)
+            playerCollider.enabled = false;
+        if (playerControl) {
+            playerControl.enabled = false;
+        }
+        if (playerAwareness) {
+            playerAwareness.enabled = false;
+        }
+        UINew.Instance.RefreshUI();
+        initPosition = player.transform.position;
+        targetPosition = initPosition + new Vector3(0, 0.25f, 0);
+
+        // animate head
+        MessageHead messageOn = new MessageHead();
+        messageOn.type = MessageHead.HeadType.speaking;
+        messageOn.value = true;
+        Toolbox.Instance.SendMessage(player, CutsceneManager.Instance, messageOn, sendUpwards: true);
+
+        foreach (Collider2D collider in player.GetComponentsInChildren<Collider2D>()) {
+            if (collider.enabled) {
+                colliders.Add(collider);
+                collider.enabled = false;
+            }
+        }
+
+        UINew.Instance.RefreshUI(active: false);
+        state = State.rising;
+        configured = true;
+        Toolbox.Instance.AudioSpeaker("ominous", player.transform.position);
+    }
+    public override void Update() {
+        timer += Time.deltaTime;
+        switch (state) {
+            case State.rising:
+                UINew.Instance.RefreshUI(active: false);
+                player.transform.position = Vector3.Lerp(player.transform.position, targetPosition, 0.1f);
+                if (timer > 1f) {
+                    timer = 0f;
+                    state = State.hovering;
+                    hoverInitPosition = player.transform.position;
+                    cameraControl.Shake(0.01f);
+                    foreach (Hurtable hurtable in GameObject.FindObjectsOfType<Hurtable>()) {
+                        hurtable.Resurrect();
+                    }
+                    bool necroGates = false;
+                    foreach (NecroGate necroGate in GameObject.FindObjectsOfType<NecroGate>()) {
+                        necroGate.Unlock();
+                        necroGates = true;
+                    }
+                    if (necroGates)
+                        MusicController.Instance.EnqueueMusic(new MusicSpace());
+                }
+                break;
+            case State.hovering:
+                zombieTimer -= Time.deltaTime;
+                occurrenceTimer -= Time.deltaTime;
+                // lights dim
+                // effect kicks in
+                // raise zombies
+                float sinusoid = 0.04f * Mathf.Sin(timer * 3.14f);
+                Vector3 newPos = new Vector3(hoverInitPosition.x, hoverInitPosition.y + sinusoid, hoverInitPosition.z);
+                player.transform.position = newPos;
+                if (zombieTimer <= 0f) {
+                    zombieTimer = UnityEngine.Random.Range(0.45f, 1.0f);
+                    SpawnZombie(player);
+                }
+                if (occurrenceTimer <= 0f) {
+                    occurrenceTimer = UnityEngine.Random.Range(0.25f, 1.0f);
+                    necronomicon.EldritchOccurrence();
+                }
+                if (timer > 5f) {
+                    timer = 0f;
+                    state = State.falling;
+                    MessageHead messageOff = new MessageHead();
+                    messageOff.type = MessageHead.HeadType.speaking;
+                    messageOff.value = false;
+                    Toolbox.Instance.SendMessage(player, CutsceneManager.Instance, messageOff, sendUpwards: true);
+                    necronomicon.StopFx();
+                }
+                break;
+            case State.falling:
+                // lerp back to init position
+                player.transform.position = Vector3.Lerp(player.transform.position, initPosition, 0.1f);
+                if (timer > 1f) {
+                    timer = 0f;
+                    state = State.end;
+                    End();
+                }
+                break;
+            default:
+                break;
+        }
+        footPoint.position = footpointInitPosition;
+    }
+    void End() {
+        Controller.Instance.suspendInput = false;
+        UINew.Instance.RefreshUI(active: true);
+        if (playerAnimation)
+            playerAnimation.enabled = true;
+        if (playerCollider)
+            playerCollider.enabled = true;
+        if (playerControl) {
+            playerControl.enabled = true;
+        }
+        if (playerAwareness) {
+            playerAwareness.enabled = true;
+        }
+        foreach (Collider2D collider in colliders) {
+            collider.enabled = true;
+        }
+        UINew.Instance.RefreshUI(active: true);
+        complete = true;
+    }
+    public void SpawnZombie(GameObject player) {
+        Vector3 position = Toolbox.RandomPointInBox(zombieZonezone.bounds, player.transform.position);
+        GameObject.Instantiate(Resources.Load("zombieSpawner"), position, Quaternion.identity);
+    }
+}
 public class CutsceneMayor : Cutscene {
     private GameObject spawnPoint;
     private GameObject mayor;
@@ -562,6 +761,7 @@ public class CutsceneMayor : Cutscene {
         mayorControl = mayor.GetComponent<Humanoid>();
         mayorAI = mayor.GetComponent<DecisionMaker>();
         mayorSpeech = mayor.GetComponent<Speech>();
+        mayorSpeech.defaultMonologue = "mayor";
         mayorAI.enabled = false;
         Controllable playerController = GameManager.Instance.playerObject.GetComponent<Controllable>();
         playerController.SetDirection(Vector2.down);
@@ -576,7 +776,6 @@ public class CutsceneMayor : Cutscene {
             mayorControl.ResetInput();
             DialogueMenu menu = mayorSpeech.SpeakWith();
             menu.menuClosed += MenuWasClosed;
-            menu.LoadDialogueTree("mayor");
         }
         if (walkingAway) {
             mayorControl.leftFlag = true;

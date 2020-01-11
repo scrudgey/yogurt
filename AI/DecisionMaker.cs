@@ -200,15 +200,16 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         hitState = (Controllable.HitState)data.ints["hitstate"];
         initialAwareness = new List<GameObject>();
         guardPoint = data.vectors["guardPoint"];
-        if (data.ints.ContainsKey("protectID")) {
-            GameObject protectObject = MySaver.IDToGameObject(data.ints["protectID"]);
+        if (data.GUIDs.ContainsKey("protectID")) {
+            GameObject protectObject = MySaver.IDToGameObject(data.GUIDs["protectID"]);
             if (protectObject != null) {
                 awareness.protectZone = protectObject.GetComponent<BoxCollider2D>();
                 protectionZone = (BoxCollider2D)awareness.protectZone;
             }
         }
-        if (data.ints.ContainsKey("warnID")) {
-            GameObject warnObject = MySaver.IDToGameObject(data.ints["warnID"]);
+        if (data.GUIDs.ContainsKey("warnID")) {
+            GameObject protectObject = MySaver.IDToGameObject(data.GUIDs["protectID"]);
+            GameObject warnObject = MySaver.IDToGameObject(data.GUIDs["warnID"]);
             if (warnObject != null) {
                 awareness.warnZone = warnObject.GetComponent<Collider2D>();
                 warnZone = awareness.warnZone;

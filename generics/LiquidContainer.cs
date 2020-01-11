@@ -15,7 +15,7 @@ public class LiquidContainer : Interactive, ISaveable {
     }
     public float fillCapacity;
     private float spillTimeout = 0.075f;
-    private bool empty;
+    protected bool empty;
     public bool lid;
     private bool doSpill = false;
     private float spillSeverity;
@@ -31,7 +31,7 @@ public class LiquidContainer : Interactive, ISaveable {
             Spill();
         }
     }
-    void Awake() {
+    virtual public void Awake() {
         if (!configured) {
             configured = true;
             Interaction fillReservoir = new Interaction(this, "Fill", "FillFromReservoir");
@@ -176,8 +176,8 @@ public class LiquidContainer : Interactive, ISaveable {
     }
     public void Drink(Eater eater) {
         if (eater) {
-            GameObject sip = new GameObject();
-            sip.AddComponent<MonoLiquid>();
+            GameObject sip = Instantiate(Resources.Load("prefabs/droplet"), transform.position, Quaternion.identity) as GameObject;
+            // sip.AddComponent<MonoLiquid>();
             Liquid.MonoLiquidify(sip, liquid);
             eater.Eat(sip.GetComponent<Edible>());
             amount -= 1f;

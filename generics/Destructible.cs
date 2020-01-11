@@ -39,6 +39,7 @@ public class Destructible : Damageable, ISaveable {
             case damageType.fire:
                 damage = message.amount * fireMultiplier;
                 break;
+            case damageType.explosion:
             case damageType.cosmic:
                 damage = message.amount;
                 break;

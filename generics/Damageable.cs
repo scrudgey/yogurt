@@ -2,6 +2,12 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
+[System.Serializable]
+public class ImpactGibs {
+    public float probability;
+    public Gibs gibs;
+}
+
 public enum damageType { physical, fire, any, cutting, piercing, cosmic, asphyxiation, explosion }
 public enum ImpactResult { normal, repel, strong }
 public abstract class Damageable : MonoBehaviour {
@@ -27,6 +33,7 @@ public abstract class Damageable : MonoBehaviour {
     public Controllable controllable;
     public MessageDamage cacheFiredMessage;
     private float cachedTime;
+    public List<ImpactGibs> impactGibs = new List<ImpactGibs>();
     public static bool Damages(Damageable damageable, damageType type, Dictionary<BuffType, Buff> netBuffs) {
         // no buffs means no immunities
         if (netBuffs == null)
@@ -97,6 +104,10 @@ public abstract class Damageable : MonoBehaviour {
     public virtual void TakeDamage(MessageDamage message) {
         if (message.amount == 0)
             return;
+        foreach (ImpactGibs impactGib in impactGibs) {
+            if (Random.Range(0, 1f) <= impactGib.probability)
+                impactGib.gibs.Emit(message);
+        }
         lastMessage = message;
         // lastDamage = message.type;
         bool vulnerable = Damages(this, message.type, netBuffs);

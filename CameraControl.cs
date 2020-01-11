@@ -10,6 +10,8 @@ public class CameraControl : MonoBehaviour {
     public Vector2 minXY;
     private Camera mainCamera;
     public AudioSource audioSource;
+    public Vector3 offset;
+    public float intensity;
     void Start() {
         mainCamera = GetComponent<Camera>();
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
@@ -17,15 +19,7 @@ public class CameraControl : MonoBehaviour {
     public void Shake(float intensity) {
         if (intensity < 0.001f)
             return;
-        StartCoroutine(screenShake(intensity));
-    }
-    private IEnumerator screenShake(float intensity) {
-        while (intensity > 0.01) {
-            shakeVector = Random.insideUnitCircle * intensity;
-            intensity = intensity * 0.95f;
-            yield return null;
-        }
-        shakeVector = Vector3.zero;
+        this.intensity = intensity;
     }
     void FixedUpdate() {
         if (focus == null)
@@ -45,10 +39,8 @@ public class CameraControl : MonoBehaviour {
         screenWidthWorld = upperRightWorld.x - lowerLeftWorld.x;
         screenHeightWorld = upperRightWorld.y - lowerLeftWorld.y;
 
-        // TODO: why is this weird? can we do it a better way?
-        // Vector2 initPos = new Vector2(transform.position.x, transform.position.y + screenHeightWorld / 35f);
         Vector2 initPos = transform.position;
-        tempVector = Vector3.SmoothDamp(initPos, focus.transform.position + new Vector3(0, 0.15f, 0), ref smoothVelocity, 0.1f);
+        tempVector = Vector3.SmoothDamp(initPos, focus.transform.position + offset, ref smoothVelocity, 0.1f);
 
         //check for edge of level
         if (screenWidthWorld > maxXY.x - minXY.x) {
@@ -77,5 +69,10 @@ public class CameraControl : MonoBehaviour {
         // update camera position
         tempVector.z = -1f;
         transform.position = tempVector;
+
+        if (intensity > 0.01) {
+            shakeVector = Random.insideUnitCircle * intensity;
+            intensity = intensity * 0.95f;
+        } else shakeVector = Vector3.zero;
     }
 }

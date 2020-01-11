@@ -5,16 +5,21 @@ public class Package : Interactive, ISaveable {
     void Awake() {
         if (contents == "none")
             return;
+        Interaction openAct = new Interaction(this, "Open", "Open");
+        interactions.Add(openAct);
+    }
+    void Start() {
         Gibs gibs = gameObject.AddComponent<Gibs>();
         gibs.particle = Resources.Load("prefabs/" + contents) as GameObject;
         gibs.number = 1;
         gibs.damageCondition = damageType.any;
-        Interaction openAct = new Interaction(this, "Open", "Open");
-        interactions.Add(openAct);
     }
     public void Open() {
         Destructible destructo = GetComponent<Destructible>();
         destructo.Die();
+        if (!GameManager.Instance.data.collectedObjects.Contains(contents)) {
+            MusicController.Instance.EnqueueMusic(new MusicItem());
+        }
     }
     public string Open_desc() {
         return "Open package";

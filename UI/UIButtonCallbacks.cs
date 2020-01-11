@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.IO;
+using UnityEngine.UI;
 public class UIButtonCallbacks : MonoBehaviour {
     public void FightButtonClick() {
         if (Controller.Instance.state == Controller.ControlState.inMenu)
@@ -55,5 +56,9 @@ public class UIButtonCallbacks : MonoBehaviour {
         GameObject menuObject = UINew.Instance.ShowMenu(UINew.MenuType.teleport);
         TeleportMenu menu = menuObject.GetComponent<TeleportMenu>();
         menu.PopulateSceneList();
+    }
+
+    public void MusicToggleChanged(bool selected) {
+        GameManager.settings.musicOn = selected;
     }
 }

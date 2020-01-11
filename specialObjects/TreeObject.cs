@@ -21,7 +21,8 @@ public class TreeObject : Damageable {
     public override void NetIntrinsicsChanged(MessageNetIntrinsic message) {
 
     }
-    public void Update() {
+    override protected void Update() {
+        base.Update();
         if (doShake) {
             timer += Time.deltaTime;
             if (timer > 1) {

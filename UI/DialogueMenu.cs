@@ -102,6 +102,7 @@ public class DialogueMenu : MonoBehaviour {
     public bool configured;
     public int blitCounter;
     public bool cutsceneDialogue;
+    public bool disableCommand;
     private bool doTrapDoor;
     private bool doVampireAttack;
     public void Start() {
@@ -231,10 +232,14 @@ public class DialogueMenu : MonoBehaviour {
         }
     }
     public void LoadDialogueTree(string filename) {
-
+        // Debug.Log("load " + filename);
         // CUTSCENE-STYLE DIALOGUE (NO INTERACTION)
-        if (filename == "polestar_first" || filename == "vampire") {
+        if (filename == "polestar_first" || filename == "vampire" || filename == "dancing_god" || filename == "dancing_god_bless" || filename == "dancing_god_destroy") {
             cutsceneDialogue = true;
+            EnableButtons();
+        }
+        if (filename == "imp") {
+            disableCommand = true;
             EnableButtons();
         }
 
@@ -284,6 +289,7 @@ public class DialogueMenu : MonoBehaviour {
         Say(new Monologue(target, node.text.ToArray()));
     }
     public void ChoiceCallback(int choiceNumber) {
+        textSize = TextSize.normal;
         Say(instigator, node.responses[choiceNumber - 1]);
         ParseNode(dialogueTree[node.responseLinks[choiceNumber - 1]]);
     }
@@ -465,6 +471,9 @@ public class DialogueMenu : MonoBehaviour {
         if (choice1Text.gameObject.activeSelf) {
             choicePanel.SetActive(true);
         }
+        if (disableCommand) {
+            suggestButton.interactable = false;
+        }
         Canvas.ForceUpdateCanvases();
     }
     public void DisableButtons() {
@@ -486,7 +495,7 @@ public class DialogueMenu : MonoBehaviour {
             if (dialogue.Count > 0 && !waitForKeyPress) {
                 waitForKeyPress = true;
                 if (dialogue.Peek().text.Peek() == "END") {
-                    promptText.text = "[END]";
+                    promptText.text = "[PRESS A TO END]";
                 } else {
                     promptText.text = "[PRESS A]";
                 }
@@ -578,6 +587,14 @@ public class DialogueMenu : MonoBehaviour {
             MayorAward();
             nextLine = true;
         }
+        if (text == "GODBLESS") {
+            target.GetComponent<Godhead>().Bless();
+            UINew.Instance.CloseActiveMenu();
+        }
+        if (text == "GODDESTROY") {
+            target.GetComponent<Godhead>().Destroy();
+            UINew.Instance.CloseActiveMenu();
+        }
         if (nextLine)
             NextLine();
     }
@@ -617,9 +634,10 @@ public class DialogueMenu : MonoBehaviour {
         controllable.disabled = true;
         yield return new WaitForSeconds(1.0f);
         controllable.LookAtPoint(GameManager.Instance.playerObject.transform.position);
-        AudioClip congratsClip = Resources.Load("music/Short CONGRATS YC3") as AudioClip;
+        // AudioClip congratsClip = Resources.Load("music/Short CONGRATS YC3") as AudioClip;
+        MusicController.Instance.EnqueueMusic(new MusicCongrats());
         GameObject confetti = Resources.Load("particles/confetti explosion") as GameObject;
-        Toolbox.Instance.AudioSpeaker(congratsClip, controllable.transform.position);
+        // Toolbox.Instance.AudioSpeaker(congratsClip, controllable.transform.position);
         GameObject.Instantiate(confetti, controllable.transform.position, Quaternion.identity);
         yield return new WaitForSeconds(3f);
         controllable.LookAtPoint(GameManager.Instance.playerObject.transform.position);

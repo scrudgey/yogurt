@@ -20,10 +20,11 @@ public class LiquidResevoir : Interactive {
     }
     public void Drink(Eater eater) {
         if (eater) {
-            GameObject sip = new GameObject();
-            sip.AddComponent<MonoLiquid>();
+            GameObject sip = Instantiate(Resources.Load("prefabs/droplet"), transform.position, Quaternion.identity) as GameObject;
+            // sip.AddComponent<MonoLiquid>();
             Liquid.MonoLiquidify(sip, liquid);
             eater.Eat(sip.GetComponent<Edible>());
+
             if (drinkSounds.Length > 0) {
                 Toolbox.Instance.AudioSpeaker(drinkSounds[Random.Range(0, drinkSounds.Length - 1)], transform.position);
             }

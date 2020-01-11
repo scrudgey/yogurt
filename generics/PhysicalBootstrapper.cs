@@ -182,6 +182,8 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         groundBody.velocity = groundVelocity;
     }
     void OnCollisionStay2D(Collision2D coll) {
+        if (horizon == null || physical == null)
+            return;
         if (coll.gameObject == horizon && physical.currentMode != Physical.mode.ground) {
             physical.StartGroundMode();
         }
@@ -229,7 +231,7 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
     }
 
     void FixedUpdate() {
-        if (setV != Vector3.zero || addV != Vector3.zero) {
+        if ((setV != Vector3.zero || addV != Vector3.zero) && physical != null) {
             Vector2 objectVelocity = physical.objectBody.velocity;
             Vector2 groundVelocity = groundBody.velocity;
             if (setV != Vector3.zero) {

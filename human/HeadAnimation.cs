@@ -43,8 +43,9 @@ public class HeadAnimation : MonoBehaviour, IDirectable, ISaveable {
     private float eatingCountDown;
     public Controllable.HitState hitState;
     private string lastPressed;
-    void LoadSprites() {
-        sprites = Toolbox.ApplySkinToneToSpriteSheet(spriteSheet, skinColor);
+    public void LoadSprites() {
+        // sprites = Toolbox.ApplySkinToneToSpriteSheet(spriteSheet, skinColor);
+        sprites = Toolbox.MemoizedSkinTone(spriteSheet, skinColor);
     }
     public void UpdateSequence() {
         Animation animationComponent = GetComponent<Animation>();

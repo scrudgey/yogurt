@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-public class MonoLiquid : MonoBehaviour {
+public class MonoLiquid : MonoBehaviour, ISaveable {
     public Liquid liquid;
     public Edible edible;
     public PhysicalBootstrapper physB;
@@ -16,6 +16,7 @@ public class MonoLiquid : MonoBehaviour {
         if (!edible)
             edible = gameObject.AddComponent<Edible>();
         physB = GetComponent<PhysicalBootstrapper>();
+        liquid = Liquid.LoadLiquid("water");
     }
     void Start() {
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
@@ -48,6 +49,7 @@ public class MonoLiquid : MonoBehaviour {
                 }
                 if (numberStains < 5) {
                     GameObject stain = CreateStain(coll.gameObject, transform.position);
+                    Toolbox.Instance.AddLiveBuffs(coll.gameObject, gameObject);
                     SpriteRenderer stainRenderer = stain.GetComponent<SpriteRenderer>();
                     stainRenderer.color = liquid.color;
                     Liquid.MonoLiquidify(stain, liquid);
@@ -69,7 +71,6 @@ public class MonoLiquid : MonoBehaviour {
                     data.noun = "staining";
                 }
                 ClaimsManager.Instance.WasDestroyed(gameObject);
-                Destroy(gameObject);
             }
     }
     public void LoadLiquid(string type) {
@@ -80,8 +81,7 @@ public class MonoLiquid : MonoBehaviour {
         EventData data = Toolbox.Instance.DataFlag(gameObject, chaos: 1, disgusting: 1);
         data.whatHappened = liquid.name + " was spilled";
         data.noun = "spilling";
-
-        GameObject puddle = Instantiate(Resources.Load("Puddle"), transform.position, Quaternion.identity) as GameObject;
+        GameObject puddle = Instantiate(Resources.Load("prefabs/Puddle"), transform.position, Quaternion.identity) as GameObject;
         puddle.layer = 9;
         PhysicalBootstrapper pb = GetComponent<PhysicalBootstrapper>();
         pb.DestroyPhysical();
@@ -94,5 +94,12 @@ public class MonoLiquid : MonoBehaviour {
         }
         Destroy(gameObject);
         ClaimsManager.Instance.WasDestroyed(gameObject);
+    }
+    public void SaveData(PersistentComponent data) {
+        // data
+        data.liquids["liquid"] = liquid;
+    }
+    public void LoadData(PersistentComponent data) {
+        Liquid.MonoLiquidify(gameObject, data.liquids["liquid"]);
     }
 }

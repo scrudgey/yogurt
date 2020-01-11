@@ -31,10 +31,10 @@ public enum StatType {
 public class Stat {
     public StatType type;
     public float value;
-    public Stat(){
+    public Stat() {
 
     }
-    public Stat(StatType t){
+    public Stat(StatType t) {
         this.type = t;
     }
 }
@@ -44,18 +44,18 @@ public class Achievement {
     public string icon;
     public bool complete;
     public System.DateTime completedTime;
-    [TextArea(3,10)]
+    [TextArea(3, 10)]
     public string title;
-    [TextArea(3,10)]
+    [TextArea(3, 10)]
     public string description;
-    [TextArea(3,10)]
+    [TextArea(3, 10)]
     public string directive;
     public List<Stat> statList = new List<Stat>();
     public SerializableDictionary<StatType, Stat> statDict {
         get {
-            if (_statDict == null){
+            if (_statDict == null) {
                 _statDict = SetStatDict();
-            } 
+            }
             return _statDict;
         }
         set {
@@ -63,23 +63,23 @@ public class Achievement {
         }
     }
     private SerializableDictionary<StatType, Stat> _statDict;
-    private SerializableDictionary<StatType, Stat> SetStatDict(){
+    private SerializableDictionary<StatType, Stat> SetStatDict() {
         SerializableDictionary<StatType, Stat> dict = new SerializableDictionary<StatType, Stat>();
-        foreach(Stat stat in statList){
+        foreach (Stat stat in statList) {
             dict[stat.type] = stat;
         }
         return dict;
     }
     public bool Evaluate(Dictionary<StatType, Stat> otherStats) {
-        if (statDict.Count == 0){
+        if (statDict.Count == 0) {
             return false;
         }
         bool pass = true;
-        if (statDict == null){
+        if (statDict == null) {
             statDict = SetStatDict();
         }
-        foreach(KeyValuePair<StatType, Stat> kvp in statDict){
-            if (!otherStats.ContainsKey(kvp.Key)){
+        foreach (KeyValuePair<StatType, Stat> kvp in statDict) {
+            if (!otherStats.ContainsKey(kvp.Key)) {
                 return false;
             }
             pass = pass && otherStats[kvp.Key].value >= kvp.Value.value;

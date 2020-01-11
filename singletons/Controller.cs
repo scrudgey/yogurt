@@ -29,14 +29,16 @@ public class Controller : Singleton<Controller> {
         }
     }
     private GameObject lastLeftClicked;
-    public static List<string> forbiddenColliders = new List<string>() {
+    public static List<string> forbiddenTags = new List<string>() {
         "fire",
         "sightcone",
         "table",
         "background",
         "occurrenceFlag",
         "occurrenceSound",
-        "footprint"};
+        "footprint",
+        "zombieSpawnZone"
+        };
     public static List<ControlState> selectionStates = new List<ControlState>(){Controller.ControlState.swearSelect,
                                                                                 Controller.ControlState.insultSelect,
                                                                                 Controller.ControlState.hypnosisSelect};
@@ -150,7 +152,7 @@ public class Controller : Singleton<Controller> {
         //detect if we clicked anything
         RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
         foreach (RaycastHit2D hit in hits) {
-            if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)) {
+            if (hit.collider != null && !forbiddenTags.Contains(hit.collider.tag)) {
                 focus.lastRightClicked = hit.collider.gameObject;
             }
         }
@@ -186,7 +188,7 @@ public class Controller : Singleton<Controller> {
         foreach (RaycastHit2D hit in hits) {
             if (debug)
                 Debug.Log(hit.collider.gameObject);
-            if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)) {
+            if (hit.collider != null && !forbiddenTags.Contains(hit.collider.tag)) {
                 candidates.Add(hit.collider.gameObject);
             }
         }
@@ -247,7 +249,7 @@ public class Controller : Singleton<Controller> {
         switch (state) {
             case ControlState.swearSelect:
                 foreach (RaycastHit2D hit in hits) {
-                    if (hit.collider != null && !forbiddenColliders.Contains(hit.collider.tag)) {
+                    if (hit.collider != null && !forbiddenTags.Contains(hit.collider.tag)) {
                         state = ControlState.normal;
                         MessageSpeech message = new MessageSpeech();
                         message.swearTarget = hit.collider.gameObject;
@@ -273,7 +275,8 @@ public class Controller : Singleton<Controller> {
                 if (hypnoTop != null) {
                     state = ControlState.normal;
                     GameObject target = Controller.Instance.GetBaseInteractive(hypnoTop.transform);
-                    Intrinsics targetIntrinsics = target.GetComponent<Intrinsics>();
+                    Intrinsics targetIntrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(target);
+                    // Intrinsics targetIntrinsics = target.GetComponent<Intrinsics>();
                     if (targetIntrinsics.NetBuffs()[BuffType.clearHeaded].boolValue) {
                         UINew.Instance.SetActionText("");
                         MessageSpeech message = new MessageSpeech("Something prevents my hypnotic power!");
@@ -355,11 +358,13 @@ public class Controller : Singleton<Controller> {
         float dist = float.MaxValue;
         if (clickedCollider != null && focusColliders.Length > 0) {
             foreach (Collider2D focusCollider in focusColliders) {
-                if (forbiddenColliders.Contains(focusCollider.tag))
+                if (forbiddenTags.Contains(focusCollider.tag))
                     continue;
                 if (focusCollider.enabled == false)
                     continue;
-                dist = Mathf.Min(dist, clickedCollider.Distance(focusCollider).distance);
+                if (clickedCollider != focusCollider)
+                    dist = Mathf.Min(dist, clickedCollider.Distance(focusCollider).distance);
+                else dist = 0;
             }
         }
         if (dist == float.MaxValue) {

@@ -47,6 +47,7 @@ public class GameData {
     public bool firstTimeLeavingHouse;
     public bool mayorCutsceneHappened;
     public bool visitedStudio;
+    public bool visitedMoon;
     public bool teleporterUnlocked;
     public string headSpriteSheet;
     public SkinColor headSkinColor;
@@ -54,6 +55,8 @@ public class GameData {
     public bool loadedDay;
     public Int16 ghostsKilled;
     public bool mayorAwardToday;
+    public bool mayorLibraryShuffled;
+    public List<System.Guid> toiletItems = new List<System.Guid>();
     public GameData() {
         days = 0;
         saveDate = System.DateTime.Now.ToString();
@@ -80,7 +83,11 @@ public class GlobalSettings {
         get { return _musicOn; }
         set {
             _musicOn = value;
-            MusicController.Instance.UpdateTrack();
+            if (value) {
+                MusicController.Instance.SetMusic(MusicController.Instance.nowPlayingMusic);
+            } else {
+                MusicController.Instance.StopTrack();
+            }
         }
     }
     public float sfxVolume;
@@ -106,13 +113,15 @@ public partial class GameManager : Singleton<GameManager> {
         {"chamber", "meditation chamber"},
         {"dungeon", "oubliette"},
         {"potion", "apothecary"},
-        {"cave3", "deathtrap cave III"},
+        {"cave3", "sewer"},
         {"moon_pool", "moon pool"},
         {"moon_town", "moon town"},
         {"neighborhood", "outdoors"},
         {"mayors_house", "mayor's house"},
         {"mayors_attic", "attic"},
         {"anti_mayors_house", "anti mayor's house"},
+        {"tower", "tower"},
+        {"cave4", "tomb"},
     };
     public GameData data;
     public static GlobalSettings settings = new GlobalSettings();
@@ -129,7 +138,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = true;
+    public bool debug = false;
     public bool failedLevelLoad = false;
     public void PlayPublicSound(AudioClip clip) {
         if (clip == null)
@@ -146,8 +155,8 @@ public partial class GameManager : Singleton<GameManager> {
     public void Start() {
         if (data == null) {
             data = InitializedGameData();
-            // ReceiveEmail("duplicator");
-            // ReceiveEmail("golf_club");
+            ReceiveEmail("duplicator");
+            ReceiveEmail("golf_club");
             // ReceivePackage("kaiser_helmet");
             // ReceivePackage("duplicator");
             // ReceivePackage("golf_club");
@@ -373,7 +382,7 @@ public partial class GameManager : Singleton<GameManager> {
         Controller.Instance.state = Controller.ControlState.normal;
         UINew.Instance.RefreshUI(active: true);
 
-        if (sceneName == "krazy1") {
+        if (sceneName == "neighborhood") {
             GameObject packageSpawnPoint = GameObject.Find("packageSpawnPoint");
             if (data.firstTimeLeavingHouse) {
                 foreach (string package in data.packages) {
@@ -395,10 +404,10 @@ public partial class GameManager : Singleton<GameManager> {
             data.visitedStudio = true;
             ShowDiaryEntry("diaryStudio");
         }
-        if (sceneName == "cave1" || sceneName == "cave2") {
+        if (sceneName == "cave1" || sceneName == "cave2" || (sceneName == "cave3" && data.entryID == 3) || sceneName == "cave4") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneFall>();
         }
-        if (sceneName == "dungeon") {
+        if (sceneName == "dungeon" && data.entryID != 2) {
             CutsceneManager.Instance.InitializeCutscene<CutsceneDungeonFall>();
         }
         if (sceneName == "space") {
@@ -415,6 +424,21 @@ public partial class GameManager : Singleton<GameManager> {
                     mayorSpeech.defaultMonologue = "mayor_award";
             }
         }
+        if (sceneName == "cave3" && data.toiletItems.Count > 0) {
+            Collider2D toiletZone = GameObject.Find("toiletZone").GetComponent<Collider2D>();
+            Bounds bounds = toiletZone.bounds;
+            MySaver.LoadObjects(data.toiletItems);
+            foreach (MyMarker marker in GameObject.FindObjectsOfType<MyMarker>()) {
+                if (data.toiletItems.Contains(marker.id)) {
+                    marker.transform.position = bounds.center + new Vector3(
+                        (UnityEngine.Random.value - 0.5f) * bounds.size.x,
+                        (UnityEngine.Random.value - 0.5f) * bounds.size.y,
+                        (UnityEngine.Random.value - 0.5f) * bounds.size.z
+                    );
+                }
+            }
+            data.toiletItems = new List<System.Guid>();
+        }
         PlayerEnter();
         if (playerIsDead) {
             UINew.Instance.RefreshUI(active: false);
@@ -425,6 +449,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
     }
     public GameObject InstantiatePlayerPrefab() {
+        // Debug.Log("instantiate player");
         GameObject obj = GameObject.Instantiate(Resources.Load("prefabs/" + data.prefabName)) as GameObject;
         Toolbox.SetSkinColor(obj, data.defaultSkinColor);
         return obj;
@@ -499,7 +524,25 @@ public partial class GameManager : Singleton<GameManager> {
             Intrinsics playerIntrinsics = playerObject.GetComponent<Intrinsics>();
             if (playerIntrinsics) {
                 playerIntrinsics.liveBuffs = new List<Buff>();
+
+                Dictionary<BuffType, Buff> netBuffs = playerIntrinsics.NetBuffs();
+                if (!netBuffs[BuffType.undead].active()) {
+                    HeadAnimation headAnim = playerObject.GetComponentInChildren<HeadAnimation>();
+                    AdvancedAnimation advAnim = playerObject.GetComponent<AdvancedAnimation>();
+
+                    if (headAnim && headAnim.skinColor == SkinColor.undead) {
+                        Debug.Log("setting head to " + data.defaultSkinColor.ToString());
+                        headAnim.skinColor = data.defaultSkinColor;
+                        headAnim.LoadSprites();
+                    }
+                    if (advAnim && advAnim.skinColor == SkinColor.undead) {
+                        Debug.Log("setting adv anim to " + data.defaultSkinColor.ToString());
+                        advAnim.skinColor = data.defaultSkinColor;
+                        advAnim.LoadSprites();
+                    }
+                }
             }
+
             data.teleportedToday = false;
             MySaver.Save();
             awaitNewDayPrompt = CheckNewDayPrompt();
@@ -540,6 +583,7 @@ public partial class GameManager : Singleton<GameManager> {
         data.entryID = -99;
         data.firstTimeLeavingHouse = true;
         data.mayorAwardToday = false;
+        data.mayorLibraryShuffled = false;
         activeCommercial = null;
     }
     public void DetermineClosetNews() {
@@ -630,12 +674,16 @@ public partial class GameManager : Singleton<GameManager> {
             data.perks["swear"] = true;
             data.perks["potion"] = false;
             data.perks["burn"] = false;
+            data.collectedObjects.Add("crown");
+            data.collectedClothes.Add("crown");
+            data.itemCheckedOut["crown"] = false;
             foreach (string sceneName in sceneNames.Keys) {
                 data.unlockedScenes.Add(sceneName);
             }
             data.teleporterUnlocked = true;
             data.mayorCutsceneHappened = true;
             data.visitedStudio = true;
+            data.visitedMoon = true;
 
             data.collectedObjects.Add("package");
             data.itemCheckedOut["package"] = false;
@@ -754,6 +802,8 @@ public partial class GameManager : Singleton<GameManager> {
         if (owner != playerObject)
             return;
         string filename = Toolbox.Instance.CloneRemover(obj.name);
+        if (filename.ToLower() == "droplet" || filename.ToLower() == "puddle")
+            return;
         // filename = Toolbox.Instance.ReplaceUnderscore(filename);
         if (data.collectedObjects.Contains(filename))
             return;
@@ -801,7 +851,16 @@ public partial class GameManager : Singleton<GameManager> {
             if (playerOutfit != null && itemUniform != null) {
                 // playerInventory.GetItem(itemPickup);
                 playerOutfit.DonUniform(itemUniform);
+                return;
             }
+
+            Head playerHead = playerObject.GetComponentInChildren<Head>();
+            Hat itemHat = item.GetComponent<Hat>();
+            if (playerHead != null && itemHat != null) {
+                playerHead.DonHat(itemHat);
+                return;
+            }
+
         } else {
             Inventory playerInventory = playerObject.GetComponent<Inventory>();
             Pickup itemPickup = item.GetComponent<Pickup>();

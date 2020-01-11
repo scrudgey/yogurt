@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-
 public enum SkinColor {
     light,
     dark,
@@ -85,6 +84,23 @@ public class Toolbox : Singleton<Toolbox> {
         a[0] = char.ToUpper(a[0]);
         return new string(a);
     }
+    static public Vector3 RandomPointInBox(Bounds bounds, Vector2 target, float radius = 1.5f) {
+        int tries = 0;
+        Vector3 pos = bounds.center + new Vector3(
+           (UnityEngine.Random.value - 0.5f) * bounds.size.x,
+           (UnityEngine.Random.value - 0.5f) * bounds.size.y,
+           (UnityEngine.Random.value - 0.5f) * bounds.size.z
+        );
+        while (tries < 20 && Vector2.Distance(target, pos) > radius) {
+            tries++;
+            pos = bounds.center + new Vector3(
+                (UnityEngine.Random.value - 0.5f) * bounds.size.x,
+                (UnityEngine.Random.value - 0.5f) * bounds.size.y,
+                (UnityEngine.Random.value - 0.5f) * bounds.size.z
+            );
+        }
+        return pos;
+    }
     public static string RemoveExtraPunctuation(string s) {
         if (s.Length < 2)
             return s;
@@ -95,26 +111,25 @@ public class Toolbox : Singleton<Toolbox> {
         }
         return s;
     }
-    public Occurrence OccurenceFlag(GameObject spawner, OccurrenceData data, HashSet<GameObject> involvedParties) {
+    public void OccurenceFlag(GameObject spawner, OccurrenceData data) {
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
+        GameObject noise = GameObject.Instantiate(Resources.Load("NoiseFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
-        occurrence.involvedParties.UnionWith(involvedParties);
-        occurrence.data.Add(data);
-        occurrence.CalculateDescriptions();
-        GameObject noiseFlagObject = GameObject.Instantiate(Resources.Load("NoiseFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
-        Occurrence noiseFlag = noiseFlagObject.GetComponent<Occurrence>();
-        noiseFlag.involvedParties = occurrence.involvedParties;
-        // noiseFlag.occurrenceFlag = occurrence;
-        return occurrence;
+        Occurrence noiseOccurrence = noise.GetComponent<Occurrence>();
+        occurrence.data = data;
+        noiseOccurrence.data = data;
+        data.CalculateDescriptions();
     }
     public EventData DataFlag(GameObject spawner, float chaos = 0, float disgusting = 0, float disturbing = 0, float offensive = 0, float positive = 0) {
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
-        OccurrenceData data = new OccurrenceData();
-        occurrence.data.Add(data);
-
+        OccurrenceData data = new OccurrenceGeneric();
         EventData eventData = new EventData(chaos: chaos, disgusting: disgusting, disturbing: disturbing, offensive: offensive, positive: positive);
+
+        occurrence.data = data;
         data.events.Add(eventData);
+        occurrence.data.CalculateDescriptions();
+
         return eventData;
     }
     public AudioSource SetUpAudioSource(GameObject g) {
@@ -150,6 +165,7 @@ public class Toolbox : Singleton<Toolbox> {
     ///Spawn a droplet of liquid l at poisition pos.
     ///</summary>
     public GameObject SpawnDroplet(Vector3 pos, Liquid l) {
+        // Debug.Log(l == null);
         /// this is a test
         Vector2 initialVelocity = Vector2.zero;
         initialVelocity = UnityEngine.Random.insideUnitCircle;
@@ -158,7 +174,8 @@ public class Toolbox : Singleton<Toolbox> {
         return SpawnDroplet(pos, l, initialVelocity);
     }
     public GameObject SpawnDroplet(Vector3 pos, Liquid l, Vector3 initialVelocity) {
-        GameObject droplet = Instantiate(Resources.Load("droplet"), pos, Quaternion.identity) as GameObject;
+        // Debug.Log(l == null);
+        GameObject droplet = Instantiate(Resources.Load("prefabs/droplet"), pos, Quaternion.identity) as GameObject;
         PhysicalBootstrapper phys = droplet.GetComponent<PhysicalBootstrapper>();
         phys.initHeight = pos.z;
         phys.impactsMiss = true;
@@ -168,9 +185,11 @@ public class Toolbox : Singleton<Toolbox> {
         return droplet;
     }
     public GameObject SpawnDroplet(Liquid l, float severity, GameObject spiller) {
+        // Debug.Log(l == null);
         return SpawnDroplet(l, severity, spiller, 0.01f);
     }
     public GameObject SpawnDroplet(Liquid l, float severity, GameObject spiller, float initHeight, bool noCollision = true) {
+        // Debug.Log(l == null);
         Vector3 initialVelocity = Vector2.zero;
         Vector3 randomVelocity = spiller.transform.right * UnityEngine.Random.Range(-0.2f, 0.2f);
         initialVelocity.x = spiller.transform.up.x * UnityEngine.Random.Range(0.8f, 1.3f);
@@ -180,7 +199,7 @@ public class Toolbox : Singleton<Toolbox> {
         return SpawnDroplet(l, severity, spiller, initHeight, initialVelocity, noCollision: noCollision);
     }
     public GameObject SpawnDroplet(Liquid l, float severity, GameObject spiller, float initHeight, Vector3 initVelocity, bool noCollision = true) {
-
+        // Debug.Log(l == null);
         Vector3 initialVelocity = Vector2.zero;
         if (initVelocity == Vector3.zero) {
             Vector3 randomVelocity = spiller.transform.right * UnityEngine.Random.Range(-0.2f, 0.2f);
@@ -192,7 +211,7 @@ public class Toolbox : Singleton<Toolbox> {
             initialVelocity = initVelocity;
         }
 
-        GameObject droplet = Instantiate(Resources.Load("droplet"), transform.position, Quaternion.identity) as GameObject;
+        GameObject droplet = Instantiate(Resources.Load("prefabs/droplet"), transform.position, Quaternion.identity) as GameObject;
         PhysicalBootstrapper phys = droplet.GetComponent<PhysicalBootstrapper>();
         phys.impactsMiss = true;
         Vector2 initpos = spiller.transform.position;
@@ -247,6 +266,20 @@ public class Toolbox : Singleton<Toolbox> {
 
         return v;
     }
+    public static List<T> Shuffle<T>(List<T> list) {
+        System.Random random = new System.Random();
+        List<T> newList = new List<T>(list);
+        int n = newList.Count;
+
+        for (int i = newList.Count - 1; i > 1; i--) {
+            int rnd = random.Next(i + 1);
+
+            T value = newList[rnd];
+            newList[rnd] = newList[i];
+            newList[i] = value;
+        }
+        return newList;
+    }
     public float ProperAngle(float x, float y) {
         float angle = Mathf.Atan2(y, x) * Mathf.Rad2Deg;
         if (angle < 0)
@@ -298,8 +331,16 @@ public class Toolbox : Singleton<Toolbox> {
             if (edible.vomit)
                 nameOut = "vomited-up " + nameOut;
         }
+        Speech speech = obj.GetComponent<Speech>();
+        if (speech) {
+            if (speech.speechName != "")
+                nameOut = speech.speechName;
+        }
         nameOut = CloneRemover(nameOut);
         nameOut = UnderscoreRemover(nameOut);
+        if (new List<String> { "blf", "blm", "brf", "Brm", "Tom" }.Contains(nameOut)) {
+            return GameManager.Instance.saveGameName;
+        }
         return nameOut;
     }
     public void SendMessage(GameObject host, Component messenger, Message message, bool sendUpwards = true) {
@@ -395,6 +436,18 @@ public class Toolbox : Singleton<Toolbox> {
         texture.Apply();
         return texture;
     }
+    public static Func<TSource1, TSource2, TReturn> Memoize<TSource1, TSource2, TReturn>(Func<TSource1, TSource2, TReturn> func) {
+        var cache = new Dictionary<string, TReturn>();
+        return (s1, s2) => {
+            var key = s1.GetHashCode().ToString() + s2.GetHashCode().ToString();
+            if (!cache.ContainsKey(key)) {
+                cache[key] = func(s1, s2);
+            }
+            return cache[key];
+        };
+    }
+    static Dictionary<string, Sprite[]> skinToneCache = new Dictionary<string, Sprite[]>();
+    public static Func<string, SkinColor, Sprite[]> MemoizedSkinTone = Memoize<string, SkinColor, Sprite[]>(ApplySkinToneToSpriteSheet);
     public static Sprite[] ApplySkinToneToSpriteSheet(string sheetname, SkinColor skinColor) {
         Sprite[] sprites = Resources.LoadAll<Sprite>("spritesheets/" + sheetname);
         Texture2D modTexture = Toolbox.CopyTexture2D(sprites[0].texture, skinColor);
@@ -470,7 +523,22 @@ public class Toolbox : Singleton<Toolbox> {
     }
     public static void SetGender(GameObject target, Gender gender) {
         Speech speech = target.GetComponent<Speech>();
-        HeadAnimation headAnimation = target.GetComponent<HeadAnimation>();
+        HeadAnimation headAnimation = target.GetComponentInChildren<HeadAnimation>();
+        Outfit outfit = target.GetComponent<Outfit>();
+
+        switch (gender) {
+            case Gender.male:
+                headAnimation.spriteSheet = "generic3_head";
+                headAnimation.baseName = "generic3";
+                break;
+            case Gender.female:
+                headAnimation.spriteSheet = "girl_head";
+                headAnimation.baseName = "girl";
+                break;
+            default:
+                break;
+        }
+        outfit.gender = gender;
     }
 
     public void deactivateEventually(GameObject target) {

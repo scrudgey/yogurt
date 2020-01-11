@@ -18,8 +18,9 @@ public class DancingGod : MonoBehaviour {
     private SpriteRenderer spriteRenderer;
     public AudioClip jumpSound;
     public AudioClip landSound;
-    private Vector3 initPosition;
+    public Vector3 initPosition;
     private CameraControl cam;
+    public Vector3 jumpUpPosition;
     void Start() {
         spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer == null) {
@@ -66,7 +67,7 @@ public class DancingGod : MonoBehaviour {
         state = State.jump;
         audioSource.PlayOneShot(jumpSound);
     }
-    void FinishJump() {
+    public void FinishJump() {
         transform.localPosition = initPosition;
         nextFrame();
         numberOfJumps -= 1;
@@ -80,7 +81,7 @@ public class DancingGod : MonoBehaviour {
         audioSource.PlayOneShot(landSound);
 
         float dist = Vector3.Distance(transform.position, cam.transform.position);
-        cam.Shake(0.0325f / (Mathf.Pow(dist, 2)));
+        cam.Shake(0.0425f / (Mathf.Pow(dist, 2)));
     }
     void FinishPause() {
         numberOfJumps = 3;

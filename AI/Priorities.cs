@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 namespace AI {
     [System.Serializable]
@@ -42,6 +43,7 @@ namespace AI {
         GoalGetItem getExt;
         GoalUsePhone callFD;
         Goal useFireExtinguisher;
+        private Dictionary<BuffType, Buff> netBuffs = new Dictionary<BuffType, Buff>();
         public PriorityFightFire(GameObject g, Controllable c) : base(g, c) {
             priorityName = "fight fire";
             getExt = new GoalGetItem(gameObject, control, "fire_extinguisher");
@@ -64,7 +66,10 @@ namespace AI {
         }
         public override void Update() {
             if (awareness.nearestFire.val != null) {
-                urgency = Priority.urgencyPressing;
+                if (netBuffs != null && netBuffs.ContainsKey(BuffType.enraged) && netBuffs[BuffType.enraged].active())
+                    urgency = Priority.urgencyMinor;
+                else
+                    urgency = Priority.urgencyPressing;
             } else {
                 if (urgency > 0) {
                     urgency -= Time.deltaTime;
@@ -75,6 +80,12 @@ namespace AI {
             }
             if (goal == callFD && callFD.phoneCalled) {
                 goal = useFireExtinguisher;
+            }
+        }
+        public override void ReceiveMessage(Message incoming) {
+            if (incoming is MessageNetIntrinsic) {
+                MessageNetIntrinsic message = (MessageNetIntrinsic)incoming;
+                netBuffs = message.netBuffs;
             }
         }
     }
@@ -268,10 +279,14 @@ namespace AI {
             // TODO: switch goals 
             if (incoming is MessageDamage) {
                 MessageDamage dam = (MessageDamage)incoming;
+
+                if (dam.type == damageType.asphyxiation)
+                    return;
+
                 lastAttacker.val = dam.messenger.gameObject;
 
                 if (dam.type == damageType.fire) {
-                    urgency = Priority.urgencyLarge;
+                    urgency = Priority.urgencySmall;
                 } else {
                     urgency += Priority.urgencyMinor;
                 }
@@ -293,7 +308,7 @@ namespace AI {
         }
         public override void Update() {
             if (awareness.nearestEnemy.val == null)
-                urgency -= Time.deltaTime / 10f;
+                urgency -= Time.deltaTime / 2f;
         }
     }
     public class PriorityInvestigateNoise : Priority {
@@ -319,6 +334,7 @@ namespace AI {
     public class PriorityAttack : Priority {
         private Inventory inventory;
         private float updateInterval;
+        private Dictionary<BuffType, Buff> netBuffs = new Dictionary<BuffType, Buff>();
         public PriorityAttack(GameObject g, Controllable c) : base(g, c) {
             priorityName = "attack";
             inventory = gameObject.GetComponent<Inventory>();
@@ -357,12 +373,18 @@ namespace AI {
                     urgency += Priority.urgencyMinor;
                 }
             }
+            if (incoming is MessageNetIntrinsic) {
+                MessageNetIntrinsic message = (MessageNetIntrinsic)incoming;
+                netBuffs = message.netBuffs;
+            }
         }
         public override void Update() {
             if (awareness.nearestEnemy.val == null)
                 urgency -= Time.deltaTime / 10f;
         }
         public override float Urgency(Personality personality) {
+            if (netBuffs != null && netBuffs.ContainsKey(BuffType.enraged) && netBuffs[BuffType.enraged].active())
+                return Priority.urgencyLarge;
             if (personality.bravery == Personality.Bravery.brave)
                 return urgency * 2f;
             if (personality.bravery == Personality.Bravery.cowardly)

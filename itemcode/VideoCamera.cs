@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Serialization;
@@ -80,9 +79,11 @@ public class VideoCamera : Interactive, ISaveable {
     void OnTriggerEnter2D(Collider2D col) {
         if (!live)
             return;
-        if (seenFlags.Contains(col.gameObject))
+        if (seenFlags.Contains(col.transform.root.gameObject))
             return;
-        seenFlags.Add(col.gameObject);
+        if (col.tag == "occurrenceSound")
+            return;
+        seenFlags.Add(col.transform.root.gameObject);
         Qualities qualities = col.GetComponent<Qualities>();
         if (qualities != null) {
             // TODO: no messageoccurrence??
@@ -91,22 +92,9 @@ public class VideoCamera : Interactive, ISaveable {
         }
         Occurrence occurrence = col.gameObject.GetComponent<Occurrence>();
         if (occurrence != null)
-            ProcessOccurrence(occurrence);
+            commercial.ProcessOccurrence(occurrence);
     }
-    void ProcessOccurrence(Occurrence oc) {
-        foreach (OccurrenceData occurrence in oc.data) {
-            foreach (EventData data in occurrence.events) {
-                commercial.IncrementValue(data);
-                UINew.Instance.UpdateObjectives(commercial);
-            }
-            commercial.eventData.AddRange(occurrence.events);
-            foreach (EventData data in occurrence.events) {
-                if (data.transcriptLine != null) {
-                    commercial.transcript.Add(data.transcriptLine);
-                }
-            }
-        }
-    }
+
     public void Enable() {
         if (GameManager.Instance.activeCommercial != null) {
             live = true;
@@ -126,11 +114,6 @@ public class VideoCamera : Interactive, ISaveable {
     }
     public bool Enable_Validation() {
         return live == false;
-    }
-    public void Update() {
-        if (live) {
-            commercial.visitedLocations.Add(SceneManager.GetActiveScene().name);
-        }
     }
     public void Cancel() {
         live = false;
