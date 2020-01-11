@@ -36,8 +36,8 @@ public class Stain : MonoBehaviour, ISaveable {
             data.strings["liquid"] = stainLiquid.liquid.filename;
     }
     public void LoadData(PersistentComponent data) {
-        if (data.ints["parentID"] != -1) {
-            ConfigureParentObject(MySaver.IDToGameObject(data.ints["parentID"]));
+        if (data.GUIDs["parentID"] != System.Guid.Empty) {
+            ConfigureParentObject(MySaver.IDToGameObject(data.GUIDs["parentID"]));
             if (data.strings.ContainsKey("liquid")) {
                 Liquid.MonoLiquidify(gameObject, Liquid.LoadLiquid(data.strings["liquid"]));
             }

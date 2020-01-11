@@ -97,8 +97,9 @@ public class MonoLiquid : MonoBehaviour, ISaveable {
     }
     public void SaveData(PersistentComponent data) {
         // data
+        data.liquids["liquid"] = liquid;
     }
     public void LoadData(PersistentComponent data) {
-
+        Liquid.MonoLiquidify(gameObject, data.liquids["liquid"]);
     }
 }

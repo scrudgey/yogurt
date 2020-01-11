@@ -176,7 +176,7 @@ public class Liquid {
         }
         return l;
     }
-    public static void MonoLiquidify(GameObject target, Liquid liquid, bool timeout = false) {
+    public static void MonoLiquidify(GameObject target, Liquid liquid) {
         // Debug.Log(target);
         // Debug.Log(liquid == null);
         // TODO: create intrinsics on gameobject and add liquid intrinsic

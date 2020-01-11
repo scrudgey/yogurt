@@ -113,19 +113,23 @@ public class Toolbox : Singleton<Toolbox> {
     }
     public void OccurenceFlag(GameObject spawner, OccurrenceData data) {
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
+        GameObject noise = GameObject.Instantiate(Resources.Load("NoiseFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
+        Occurrence noiseOccurrence = noise.GetComponent<Occurrence>();
         occurrence.data = data;
-        occurrence.CalculateDescriptions();
-        GameObject.Instantiate(Resources.Load("NoiseFlag"), spawner.transform.position, Quaternion.identity);
+        noiseOccurrence.data = data;
+        data.CalculateDescriptions();
     }
     public EventData DataFlag(GameObject spawner, float chaos = 0, float disgusting = 0, float disturbing = 0, float offensive = 0, float positive = 0) {
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
         OccurrenceData data = new OccurrenceGeneric();
-        occurrence.data = data;
-
         EventData eventData = new EventData(chaos: chaos, disgusting: disgusting, disturbing: disturbing, offensive: offensive, positive: positive);
+
+        occurrence.data = data;
         data.events.Add(eventData);
+        occurrence.data.CalculateDescriptions();
+
         return eventData;
     }
     public AudioSource SetUpAudioSource(GameObject g) {
@@ -334,6 +338,9 @@ public class Toolbox : Singleton<Toolbox> {
         }
         nameOut = CloneRemover(nameOut);
         nameOut = UnderscoreRemover(nameOut);
+        if (new List<String> { "blf", "blm", "brf", "Brm", "Tom" }.Contains(nameOut)) {
+            return GameManager.Instance.saveGameName;
+        }
         return nameOut;
     }
     public void SendMessage(GameObject host, Component messenger, Message message, bool sendUpwards = true) {

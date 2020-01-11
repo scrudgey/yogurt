@@ -78,7 +78,6 @@ public class Commercial {
             if (eatOccurrence.yogurt)
                 yogurtEaterOutfits.Add(eatOccurrence.eaterOutfitName);
         }
-
         foreach (EventData data in occurrence.events) {
             IncrementValue(data);
             UINew.Instance.UpdateObjectives(this);
@@ -130,7 +129,7 @@ public class Commercial {
         filename = Path.Combine(Application.persistentDataPath, "commercial_events.txt");
         writer = new StreamWriter(filename, false);
         foreach (EventData data in eventData) {
-            string line = data.noun + " " + data.ratings[Rating.disturbing].ToString() + " " + data.ratings[Rating.disgusting].ToString() + " " + data.ratings[Rating.chaos].ToString() + " " + data.ratings[Rating.offensive].ToString() + " " + data.ratings[Rating.positive].ToString();
+            string line = data.id + ";" + data.noun + ";" + data.ratings[Rating.disturbing].ToString() + ";" + data.ratings[Rating.disgusting].ToString() + ";" + data.ratings[Rating.chaos].ToString() + ";" + data.ratings[Rating.offensive].ToString() + ";" + data.ratings[Rating.positive].ToString() + ";" + data.whatHappened;
             writer.WriteLine(line);
         }
         writer.Close();

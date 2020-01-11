@@ -2,18 +2,26 @@ using Nimrod;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-// [System.Serializable]
+
+[System.Serializable]
 public abstract class OccurrenceData {
+    public System.Guid id = System.Guid.NewGuid();
     public List<EventData> events = new List<EventData>();
     public abstract HashSet<GameObject> involvedParties();
-    public virtual void CalculateDescriptions() {
-        Debug.Log("base calculatedescriptions was called.");
+    public void CalculateDescriptions() {
+        events = new List<EventData>();
+        Descriptions();
+        foreach (EventData eDat in events) {
+            eDat.id = this.id.ToString();
+        }
     }
+    public abstract void Descriptions();
 }
 public class OccurrenceGeneric : OccurrenceData {
     public override HashSet<GameObject> involvedParties() {
         return new HashSet<GameObject> { };
     }
+    override public void Descriptions() { }
 }
 public class OccurrenceFire : OccurrenceData {
     public GameObject flamingObject;
@@ -21,7 +29,7 @@ public class OccurrenceFire : OccurrenceData {
     public override HashSet<GameObject> involvedParties() {
         return new HashSet<GameObject> { flamingObject };
     }
-    public override void CalculateDescriptions() {
+    public override void Descriptions() {
         EventData data = new EventData(chaos: 2);
         string objectName = Toolbox.Instance.GetName(flamingObject);
         data.noun = "fire";
@@ -43,7 +51,7 @@ public class OccurrenceEat : OccurrenceData {
     public override HashSet<GameObject> involvedParties() {
         return new HashSet<GameObject> { eater, edible.gameObject };
     }
-    public override void CalculateDescriptions() {
+    public override void Descriptions() {
         EventData data = new EventData();
         MonoLiquid monoLiquid = edible.GetComponent<MonoLiquid>();
         if (monoLiquid) {
@@ -106,7 +114,7 @@ public class OccurrenceDeath : OccurrenceData {
     public override HashSet<GameObject> involvedParties() {
         return new HashSet<GameObject> { dead, lastAttacker };
     }
-    public override void CalculateDescriptions() {
+    public override void Descriptions() {
         if (lastAttacker == null)
             return;
         if (lastAttacker == dead) {
@@ -126,7 +134,7 @@ public class OccurrenceVomit : OccurrenceData {
     public override HashSet<GameObject> involvedParties() {
         return new HashSet<GameObject> { vomit, vomiter };
     }
-    public override void CalculateDescriptions() {
+    public override void Descriptions() {
         if (vomit == null & vomiter == null)
             return;
         EventData data = EventData.Vomit(vomiter, vomit);
@@ -146,7 +154,7 @@ public class OccurrenceNecronomicon : OccurrenceData {
     public override HashSet<GameObject> involvedParties() {
         return new HashSet<GameObject> { };
     }
-    public override void CalculateDescriptions() {
+    public override void Descriptions() {
         EventData data = EventData.EldritchHorror();
         events.Add(data);
     }
@@ -162,7 +170,7 @@ public class OccurrenceSpeech : OccurrenceData {
     public override HashSet<GameObject> involvedParties() {
         return new HashSet<GameObject> { speaker, target };
     }
-    public override void CalculateDescriptions() {
+    public override void Descriptions() {
         string speakerName = Toolbox.Instance.GetName(speaker);
         string targetName = "";
         if (target != null)
@@ -206,7 +214,7 @@ public class OccurrenceViolence : OccurrenceData {
     public override HashSet<GameObject> involvedParties() {
         return new HashSet<GameObject> { attacker, victim };
     }
-    public override void CalculateDescriptions() {
+    public override void Descriptions() {
         string attackerName = Toolbox.Instance.GetName(attacker);
         string victimName = Toolbox.Instance.GetName(victim);
         EventData data = new EventData(disturbing: 2, chaos: 2);

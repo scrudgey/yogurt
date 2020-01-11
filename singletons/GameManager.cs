@@ -56,7 +56,7 @@ public class GameData {
     public Int16 ghostsKilled;
     public bool mayorAwardToday;
     public bool mayorLibraryShuffled;
-    public List<int> toiletItems = new List<int>();
+    public List<System.Guid> toiletItems = new List<System.Guid>();
     public GameData() {
         days = 0;
         saveDate = System.DateTime.Now.ToString();
@@ -138,7 +138,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = true;
+    public bool debug = false;
     public bool failedLevelLoad = false;
     public void PlayPublicSound(AudioClip clip) {
         if (clip == null)
@@ -155,8 +155,8 @@ public partial class GameManager : Singleton<GameManager> {
     public void Start() {
         if (data == null) {
             data = InitializedGameData();
-            // ReceiveEmail("duplicator");
-            // ReceiveEmail("golf_club");
+            ReceiveEmail("duplicator");
+            ReceiveEmail("golf_club");
             // ReceivePackage("kaiser_helmet");
             // ReceivePackage("duplicator");
             // ReceivePackage("golf_club");
@@ -437,7 +437,7 @@ public partial class GameManager : Singleton<GameManager> {
                     );
                 }
             }
-            data.toiletItems = new List<int>();
+            data.toiletItems = new List<System.Guid>();
         }
         PlayerEnter();
         if (playerIsDead) {
@@ -524,7 +524,25 @@ public partial class GameManager : Singleton<GameManager> {
             Intrinsics playerIntrinsics = playerObject.GetComponent<Intrinsics>();
             if (playerIntrinsics) {
                 playerIntrinsics.liveBuffs = new List<Buff>();
+
+                Dictionary<BuffType, Buff> netBuffs = playerIntrinsics.NetBuffs();
+                if (!netBuffs[BuffType.undead].active()) {
+                    HeadAnimation headAnim = playerObject.GetComponentInChildren<HeadAnimation>();
+                    AdvancedAnimation advAnim = playerObject.GetComponent<AdvancedAnimation>();
+
+                    if (headAnim && headAnim.skinColor == SkinColor.undead) {
+                        Debug.Log("setting head to " + data.defaultSkinColor.ToString());
+                        headAnim.skinColor = data.defaultSkinColor;
+                        headAnim.LoadSprites();
+                    }
+                    if (advAnim && advAnim.skinColor == SkinColor.undead) {
+                        Debug.Log("setting adv anim to " + data.defaultSkinColor.ToString());
+                        advAnim.skinColor = data.defaultSkinColor;
+                        advAnim.LoadSprites();
+                    }
+                }
             }
+
             data.teleportedToday = false;
             MySaver.Save();
             awaitNewDayPrompt = CheckNewDayPrompt();
@@ -656,6 +674,9 @@ public partial class GameManager : Singleton<GameManager> {
             data.perks["swear"] = true;
             data.perks["potion"] = false;
             data.perks["burn"] = false;
+            data.collectedObjects.Add("crown");
+            data.collectedClothes.Add("crown");
+            data.itemCheckedOut["crown"] = false;
             foreach (string sceneName in sceneNames.Keys) {
                 data.unlockedScenes.Add(sceneName);
             }
@@ -781,7 +802,7 @@ public partial class GameManager : Singleton<GameManager> {
         if (owner != playerObject)
             return;
         string filename = Toolbox.Instance.CloneRemover(obj.name);
-        if (filename == "droplet")
+        if (filename.ToLower() == "droplet" || filename.ToLower() == "puddle")
             return;
         // filename = Toolbox.Instance.ReplaceUnderscore(filename);
         if (data.collectedObjects.Contains(filename))
@@ -830,7 +851,16 @@ public partial class GameManager : Singleton<GameManager> {
             if (playerOutfit != null && itemUniform != null) {
                 // playerInventory.GetItem(itemPickup);
                 playerOutfit.DonUniform(itemUniform);
+                return;
             }
+
+            Head playerHead = playerObject.GetComponentInChildren<Head>();
+            Hat itemHat = item.GetComponent<Hat>();
+            if (playerHead != null && itemHat != null) {
+                playerHead.DonHat(itemHat);
+                return;
+            }
+
         } else {
             Inventory playerInventory = playerObject.GetComponent<Inventory>();
             Pickup itemPickup = item.GetComponent<Pickup>();

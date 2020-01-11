@@ -18,9 +18,6 @@ public class Occurrence : MonoBehaviour {
         }
         return data.involvedParties();
     }
-    public void CalculateDescriptions() {
-        data.CalculateDescriptions();
-    }
     public Occurrence(OccurrenceData data) {
         this.data = data;
     }

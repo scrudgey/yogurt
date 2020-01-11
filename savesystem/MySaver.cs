@@ -4,12 +4,13 @@ using System.IO;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.Linq;
+using static System.Guid;
 
 public class MySaver {
-    public static SerializableDictionary<int, PersistentObject> objectDataBase;
-    private static Dictionary<int, List<int>> referenceTree = new Dictionary<int, List<int>>();
-    public static Dictionary<int, GameObject> loadedObjects = new Dictionary<int, GameObject>();
-    public static Dictionary<GameObject, int> savedObjects = new Dictionary<GameObject, int>();
+    public static SerializableDictionary<Guid, PersistentObject> objectDataBase;
+    private static Dictionary<Guid, List<Guid>> referenceTree = new Dictionary<Guid, List<Guid>>();
+    public static Dictionary<Guid, GameObject> loadedObjects = new Dictionary<Guid, GameObject>();
+    public static Dictionary<GameObject, Guid> savedObjects = new Dictionary<GameObject, Guid>();
     public static List<GameObject> disabledPersistents = new List<GameObject>();
     public static List<Type> LoadOrder = new List<Type>{
         typeof(Intrinsics),
@@ -46,19 +47,19 @@ public class MySaver {
         }
         // GARBAGE COLLECTION
         // TODO: maybe a smarter algorithm here?
-        var listSerializer = new XmlSerializer(typeof(List<int>));
-        List<int> playerIDs = new List<int>();
+        var listSerializer = new XmlSerializer(typeof(List<Guid>));
+        List<Guid> playerIDs = new List<Guid>();
         string playerPath = GameManager.Instance.data.lastSavedPlayerPath;
-        Stack<int> removeEntries = new Stack<int>();
+        Stack<Guid> removeEntries = new Stack<Guid>();
         if (File.Exists(playerPath)) {
             using (var playerStream = new FileStream(playerPath, FileMode.Open)) {
-                playerIDs = listSerializer.Deserialize(playerStream) as List<int>;
+                playerIDs = listSerializer.Deserialize(playerStream) as List<Guid>;
             }
             // var playerStream = new FileStream(playerPath, FileMode.Open);
             // playerIDs = listSerializer.Deserialize(playerStream) as List<int>;
             // playerStream.Close();
             if (objectDataBase != null) {
-                foreach (KeyValuePair<int, PersistentObject> kvp in objectDataBase) {
+                foreach (KeyValuePair<Guid, PersistentObject> kvp in objectDataBase) {
                     if (kvp.Value.sceneName != "house") {
                         if (!playerIDs.Contains(kvp.Key))
                             removeEntries.Push(kvp.Key);
@@ -67,7 +68,7 @@ public class MySaver {
             }
         } else {
             if (objectDataBase != null) {
-                foreach (KeyValuePair<int, PersistentObject> kvp in objectDataBase) {
+                foreach (KeyValuePair<Guid, PersistentObject> kvp in objectDataBase) {
                     if (kvp.Value.sceneName != "house") {
                         removeEntries.Push(kvp.Key);
                     }
@@ -75,7 +76,7 @@ public class MySaver {
             }
         }
         while (removeEntries.Count > 0) {
-            int entry = removeEntries.Pop();
+            Guid entry = removeEntries.Pop();
             objectDataBase.Remove(entry);
         }
     }
@@ -97,19 +98,19 @@ public class MySaver {
 
     }
     public static void Save() {
-        referenceTree = new Dictionary<int, List<int>>();
-        savedObjects = new Dictionary<GameObject, int>();
-        var listSerializer = new XmlSerializer(typeof(List<int>));
+        referenceTree = new Dictionary<Guid, List<Guid>>();
+        savedObjects = new Dictionary<GameObject, Guid>();
+        var listSerializer = new XmlSerializer(typeof(List<Guid>));
         string objectsPath = GameManager.Instance.ObjectsSavePath();
         string scenePath = GameManager.Instance.LevelSavePath();
         string playerPath = GameManager.Instance.PlayerSavePath();
         if (File.Exists(objectsPath)) {
             if (objectDataBase == null) {
-                var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<int, PersistentObject>));
+                var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<Guid, PersistentObject>));
                 Debug.Log("loading existing " + objectsPath + " ...");
                 // System.IO.Stream objectsStream = new FileStream(objectsPath, FileMode.Open);
                 using (System.IO.Stream objectsStream = new FileStream(objectsPath, FileMode.Open)) {
-                    objectDataBase = persistentSerializer.Deserialize(objectsStream) as SerializableDictionary<int, PersistentObject>;
+                    objectDataBase = persistentSerializer.Deserialize(objectsStream) as SerializableDictionary<Guid, PersistentObject>;
                 }
                 // objectDataBase = persistentSerializer.Deserialize(objectsStream) as SerializableDictionary<int, PersistentObject>;
                 // objectsStream.Close();
@@ -117,7 +118,7 @@ public class MySaver {
             }
         } else {
             Debug.Log("NOTE: creating new object database!");
-            objectDataBase = new SerializableDictionary<int, PersistentObject>();
+            objectDataBase = new SerializableDictionary<Guid, PersistentObject>();
         }
         // retrieve all persistent objects
         HashSet<GameObject> objectList = new HashSet<GameObject>();
@@ -129,8 +130,8 @@ public class MySaver {
         foreach (MyMarker mark in GameObject.FindObjectsOfType<MyMarker>()) {
             objectList.Add(mark.gameObject);
         }
-        Dictionary<GameObject, int> objectIDs = new Dictionary<GameObject, int>();
-        HashSet<int> savedIDs = new HashSet<int>();
+        Dictionary<GameObject, Guid> objectIDs = new Dictionary<GameObject, Guid>();
+        HashSet<Guid> savedIDs = new HashSet<Guid>();
         // create a persistent for each gameobject with the appropriate data
         foreach (GameObject gameObject in objectList) {
             MyMarker marker = gameObject.GetComponent<MyMarker>();
@@ -153,7 +154,7 @@ public class MySaver {
             kvp.Value.HandleSave(kvp.Key);
         }
         // separate lists of persistent objects for the scene and the player
-        HashSet<int> playerTree = new HashSet<int>();
+        HashSet<Guid> playerTree = new HashSet<Guid>();
         if (GameManager.Instance.playerObject != null) {
             RecursivelyAddTree(playerTree, objectIDs[GameManager.Instance.playerObject]);
             foreach (PersistentObject childPersistent in persistents[GameManager.Instance.playerObject].persistentChildren.Values) {
@@ -167,10 +168,10 @@ public class MySaver {
         }
         // remove all children objects from player tree. they are included in prefab.
         // note: the order of operations here means that child objects aren't in the scene or player trees.
-        Stack<int> playerChildObjects = new Stack<int>();
+        Stack<Guid> playerChildObjects = new Stack<Guid>();
         if (playerTree == null)
             Debug.Log("null player tree! wtf");
-        foreach (int idn in playerTree) {
+        foreach (Guid idn in playerTree) {
             if (objectDataBase.ContainsKey(idn)) {
                 if (objectDataBase[idn].childObject) {
                     playerChildObjects.Push(idn);
@@ -199,7 +200,7 @@ public class MySaver {
     public static void SaveObjectDatabase() {
         if (objectDataBase == null)
             return;
-        var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<int, PersistentObject>));
+        var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<Guid, PersistentObject>));
         string objectsPath = GameManager.Instance.ObjectsSavePath();
 
         // Debug.Log("saving "+objectsPath+" ...");
@@ -212,7 +213,7 @@ public class MySaver {
     public static GameObject LoadScene() {
         UINew.Instance.ClearWorldButtons();
         GameObject playerObject = null;
-        loadedObjects = new Dictionary<int, GameObject>();
+        loadedObjects = new Dictionary<Guid, GameObject>();
 
         string objectsPath = GameManager.Instance.ObjectsSavePath();
         string scenePath = GameManager.Instance.LevelSavePath();
@@ -221,14 +222,14 @@ public class MySaver {
         if (File.Exists(objectsPath)) {
             // Debug.Log("loading "+objectsPath+" ...");
             if (objectDataBase == null) {
-                var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<int, PersistentObject>));
+                var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<Guid, PersistentObject>));
                 using (System.IO.Stream objectsStream = new FileStream(objectsPath, FileMode.Open)) {
-                    objectDataBase = persistentSerializer.Deserialize(objectsStream) as SerializableDictionary<int, PersistentObject>;
+                    objectDataBase = persistentSerializer.Deserialize(objectsStream) as SerializableDictionary<Guid, PersistentObject>;
                 }
             }
         } else {
             Debug.Log("WEIRD: no existing object database on Load!");
-            objectDataBase = new SerializableDictionary<int, PersistentObject>();
+            objectDataBase = new SerializableDictionary<Guid, PersistentObject>();
         }
         // destroy any currently existing permanent object
         // this should only be done if there exists a savestate for the level.
@@ -251,18 +252,18 @@ public class MySaver {
             }
         }
         disabledPersistents = new List<GameObject>();
-        List<int> sceneIDs = new List<int>();
-        List<int> playerIDs = new List<int>();
-        var listSerializer = new XmlSerializer(typeof(List<int>));
+        List<Guid> sceneIDs = new List<Guid>();
+        List<Guid> playerIDs = new List<Guid>();
+        var listSerializer = new XmlSerializer(typeof(List<Guid>));
         if (File.Exists(scenePath)) {
             using (var sceneStream = new FileStream(scenePath, FileMode.Open)) {
-                sceneIDs = listSerializer.Deserialize(sceneStream) as List<int>;
+                sceneIDs = listSerializer.Deserialize(sceneStream) as List<Guid>;
             }
             LoadObjects(sceneIDs);
         }
         if (File.Exists(playerPath)) {
             using (var playerStream = new FileStream(playerPath, FileMode.Open)) {
-                playerIDs = listSerializer.Deserialize(playerStream) as List<int>;
+                playerIDs = listSerializer.Deserialize(playerStream) as List<Guid>;
             }
             playerObject = LoadObjects(playerIDs);
         } else {
@@ -273,9 +274,9 @@ public class MySaver {
 
         return playerObject;
     }
-    public static void HandleLoadedPersistents(List<int> ids) {
+    public static void HandleLoadedPersistents(List<Guid> ids) {
         // TODO: smarter check?
-        foreach (int idn in ids) {
+        foreach (Guid idn in ids) {
             PersistentObject persistent = null;
             if (objectDataBase.TryGetValue(idn, out persistent)) {
                 // TODO: handle update instead of replacement
@@ -284,9 +285,9 @@ public class MySaver {
             }
         }
     }
-    public static GameObject LoadObjects(List<int> ids) {
+    public static GameObject LoadObjects(List<Guid> ids) {
         GameObject rootObject = null;
-        foreach (int idn in ids) {
+        foreach (Guid idn in ids) {
             PersistentObject persistent = null;
             if (objectDataBase.TryGetValue(idn, out persistent)) {
                 // TODO: do something smarter to find the child object
@@ -312,7 +313,7 @@ public class MySaver {
                     marker.id = persistent.id;
                 }
             } else {
-                Debug.Log("ERROR: object " + idn.ToString() + " not found in database!");
+                Debug.LogError("object " + idn.ToString() + " not found in database");
             }
         }
         return rootObject;
@@ -324,38 +325,50 @@ public class MySaver {
             AddToReferenceTree(savedObjects[parent], savedObjects[child]);
         } else {
             Debug.LogError("failed to add object to reference tree");
-            Debug.Log(parent);
-            Debug.Log(child);
+            Debug.LogError(parent);
+            Debug.LogError(child);
             Debug.LogError(savedObjects.ContainsKey(parent));
             Debug.LogError(savedObjects.ContainsKey(child));
         }
     }
-    public static void AddToReferenceTree(GameObject parent, int child) {
-        if (child == -1 || parent == null)
+    public static void AddToReferenceTree(GameObject parent, Guid child) {
+        if (child == Guid.Empty || parent == null) {
+            Debug.LogWarning("tried to add null GUID to reference tree");
+            Debug.LogWarning("child: " + child.ToString());
+            Debug.LogWarning("parent: " + parent.ToString());
             return;
+        }
         if (savedObjects.ContainsKey(parent)) {
             AddToReferenceTree(savedObjects[parent], child);
         }
     }
-    public static void AddToReferenceTree(int parent, GameObject child) {
-        if (parent == -1 || child == null)
+    public static void AddToReferenceTree(Guid parent, GameObject child) {
+        if (parent == Guid.Empty || child == null) {
+            Debug.LogWarning("tried to add null GUID to reference tree");
+            Debug.LogWarning("child: " + child.ToString());
+            Debug.LogWarning("parent: " + parent.ToString());
             return;
+        }
         if (savedObjects.ContainsKey(child)) {
             AddToReferenceTree(parent, savedObjects[child]);
         }
     }
-    public static void AddToReferenceTree(int parent, int child) {
-        if (child == -1 || parent == -1)
+    public static void AddToReferenceTree(Guid parent, Guid child) {
+        if (child == Guid.Empty || parent == Guid.Empty) {
+            Debug.LogWarning("tried to add null GUID to reference tree");
+            Debug.LogWarning("child: " + child.ToString());
+            Debug.LogWarning("parent: " + parent.ToString());
             return;
+        }
         // Debug.Log("adding " + child.ToString() + " under " + parent.ToString());
         if (!referenceTree.ContainsKey(parent))
-            referenceTree[parent] = new List<int>();
+            referenceTree[parent] = new List<Guid>();
         referenceTree[parent].Add(child);
     }
-    public static void RecursivelyAddTree(HashSet<int> tree, int node) {
+    public static void RecursivelyAddTree(HashSet<Guid> tree, Guid node) {
         tree.Add(node);
         if (referenceTree.ContainsKey(node)) {
-            foreach (int idn in referenceTree[node]) {
+            foreach (Guid idn in referenceTree[node]) {
                 if (!tree.Contains(idn)) {
                     RecursivelyAddTree(tree, idn);
                 }
@@ -372,29 +385,31 @@ public class MySaver {
                 return;
             }
         }
-        int i = -1;
+        Guid i = Guid.Empty;
         // is the non-null object in the saved objects?
         if (savedObjects.TryGetValue(referent, out i)) {
-            data.ints[key] = i;
+            data.GUIDs[key] = i;
         } else {
             if (overWriteWithNull) {
-                data.ints[key] = -1;
+                data.GUIDs[key] = Guid.Empty;
             }
         }
     }
-    public static GameObject IDToGameObject(int idn) {
-        if (idn == -1)
+    public static GameObject IDToGameObject(Guid idn) {
+        if (idn == Guid.Empty) {
+            Debug.LogWarning("tried to convert null GUID to Gameobject");
             return null;
+        }
         GameObject returnObject;
         loadedObjects.TryGetValue(idn, out returnObject);
         return returnObject;
     }
-    public static int NextIDNumber() {
-        IEnumerable<int> ids = Enumerable.Range(0, objectDataBase.Count);
-        foreach (int idn in ids) {
-            if (!objectDataBase.ContainsKey(idn))
-                return idn;
-        }
-        return objectDataBase.Count + 1;
-    }
+    // public static int NextIDNumber() {
+    //     IEnumerable<int> ids = Enumerable.Range(0, objectDataBase.Count);
+    //     foreach (int idn in ids) {
+    //         if (!objectDataBase.ContainsKey(idn))
+    //             return idn;
+    //     }
+    //     return objectDataBase.Count + 1;
+    // }
 }

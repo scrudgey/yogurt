@@ -104,13 +104,13 @@ public class Head : Interactive, IExcludable, ISaveable {
             MySaver.UpdateGameObjectReference(hat.gameObject, data, "hat");
             MySaver.AddToReferenceTree(data.id, hat.gameObject);
         } else {
-            data.ints["hat"] = -1;
+            data.GUIDs["hat"] = System.Guid.Empty;
         }
     }
     public void LoadData(PersistentComponent data) {
         initHat = null;
-        if (data.ints["hat"] != -1) {
-            GameObject hat = MySaver.IDToGameObject(data.ints["hat"]);
+        if (data.GUIDs["hat"] != System.Guid.Empty) {
+            GameObject hat = MySaver.IDToGameObject(data.GUIDs["hat"]);
             if (hat != null) {
                 DonHat(hat.GetComponent<Hat>());
             }

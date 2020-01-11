@@ -246,7 +246,7 @@ public class Container : MayorLock, IExcludable, ISaveable {
         disableContents = data.bools["disableContents"];
         if (data.ints["itemCount"] > 0) {
             for (int i = 0; i < data.ints["itemCount"]; i++) {
-                GameObject go = MySaver.IDToGameObject(data.ints["item" + i.ToString()]);
+                GameObject go = MySaver.IDToGameObject(data.GUIDs["item" + i.ToString()]);
                 if (go != null) {
                     AddItem(go.GetComponent<Pickup>());
                     PhysicalBootstrapper phys = go.GetComponent<PhysicalBootstrapper>();

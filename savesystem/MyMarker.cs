@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 public class MyMarker : MonoBehaviour, IExcludable {
-    public int id = -1;
+    public System.Guid id = System.Guid.Empty;
     public List<GameObject> persistentChildren;
     public bool staticObject;
     void OnDisable() {

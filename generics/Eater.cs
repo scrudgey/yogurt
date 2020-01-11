@@ -126,8 +126,7 @@ public class Eater : Interactive, ISaveable {
         head.value = true;
         head.crumbColor = food.pureeColor;
         Toolbox.Instance.SendMessage(gameObject, this, head);
-        // randomly store a clone of the object for later vomiting
-        // GameObject eaten = Instantiate(food.gameObject) as GameObject;
+
         GameObject eaten = food.gameObject;
         eaten.name = Toolbox.Instance.CloneRemover(eaten.name);
         eatenQueue.Enqueue(eaten);
@@ -137,6 +136,7 @@ public class Eater : Interactive, ISaveable {
             ClaimsManager.Instance.WasDestroyed(oldEaten);
             Destroy(oldEaten);
         }
+
         //update our status based on our reaction to the food
         int reaction = CheckReaction(food);
         if (reaction > 0) {
@@ -145,6 +145,9 @@ public class Eater : Interactive, ISaveable {
         if (reaction < 0) {
             nausea += 30;
             Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Yuck", eventData: new EventData(positive: -1)));
+        }
+        if (reaction == 0) {
+            Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Refreshing!", eventData: new EventData(positive: 1)));
         }
         if (nutrition > 50) {
             Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I'm full!"));
@@ -241,6 +244,7 @@ public class Eater : Interactive, ISaveable {
             }
             MonoLiquid mono = eaten.GetComponent<MonoLiquid>();
             if (mono) {
+                Destroy(eaten);
                 GameObject droplet = Toolbox.Instance.SpawnDroplet(mono.liquid, 0f, gameObject, 0.15f);
                 mono.liquid.vomit = true;
                 mono.edible.vomit = true;
@@ -300,8 +304,8 @@ public class Eater : Interactive, ISaveable {
         nutrition = data.floats["nutrition"];
         nausea = data.floats["nausea"];
         vomitCountDown = data.floats["vomitCountDown"];
-        if (data.ints.ContainsKey("eaten1")) {
-            GameObject eaten = MySaver.IDToGameObject(data.ints["eaten1"]);
+        if (data.GUIDs.ContainsKey("eaten1")) {
+            GameObject eaten = MySaver.IDToGameObject(data.GUIDs["eaten1"]);
             if (eaten != null) {
                 eatenQueue.Enqueue(eaten);
                 eaten.SetActive(false);
@@ -309,8 +313,8 @@ public class Eater : Interactive, ISaveable {
                 // Debug.Log("eaten1 is null");
             }
         }
-        if (data.ints.ContainsKey("eaten0")) {
-            GameObject eaten = MySaver.IDToGameObject(data.ints["eaten0"]);
+        if (data.GUIDs.ContainsKey("eaten0")) {
+            GameObject eaten = MySaver.IDToGameObject(data.GUIDs["eaten0"]);
             if (eaten != null) {
                 eatenQueue.Enqueue(eaten);
                 eaten.SetActive(false);

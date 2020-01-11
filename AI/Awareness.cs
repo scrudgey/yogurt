@@ -331,6 +331,10 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             ProcessOccurrenceFlag(other.gameObject);
         }
         if (other.tag == "occurrenceSound") {
+            Occurrence noiseOccurrence = other.GetComponent<Occurrence>();
+            if (noiseOccurrence.involvedParties().Contains(gameObject)) {
+                return;
+            }
             MessageNoise message = new MessageNoise(other.gameObject);
             Toolbox.Instance.SendMessage(gameObject, this, message);
         }
@@ -355,6 +359,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         }
     }
     void ReactToEvent(EventData dat, HashSet<GameObject> involvedParties) {
+        // Debug.Log(involvedParties);
         // store memory
         EventData memory = new EventData(dat);
         shortTermMemory.Push(memory);
@@ -665,13 +670,13 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         }
         foreach (KeyValuePair<GameObject, Knowledge> keyVal in knowledgebase) {
             SerializedKnowledge knowledge = SaveKnowledge(keyVal.Value);
-            if (knowledge.gameObjectID == -1)
+            if (knowledge.gameObjectID == System.Guid.Empty)
                 continue;
             data.knowledgeBase.Add(knowledge);
         }
         if (possessionDefaultState != null) {
             SerializedKnowledge knowledge = SaveKnowledge(possessionDefaultState);
-            if (knowledge.gameObjectID != -1)
+            if (knowledge.gameObjectID != System.Guid.Empty)
                 data.knowledges["defaultState"] = knowledge;
         }
         foreach (KeyValuePair<GameObject, PersonalAssessment> keyVal in people) {
@@ -679,8 +684,8 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         }
     }
     public void LoadData(PersistentComponent data) {
-        if (data.ints.ContainsKey("possession")) {
-            possession = MySaver.IDToGameObject(data.ints["possession"]);
+        if (data.GUIDs.ContainsKey("possession")) {
+            possession = MySaver.IDToGameObject(data.GUIDs["possession"]);
         }
         hitState = (Controllable.HitState)data.ints["hitstate"];
         foreach (SerializedKnowledge knowledge in data.knowledgeBase) {
@@ -707,7 +712,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         SerializedKnowledge data = new SerializedKnowledge();
         data.lastSeenPosition = input.lastSeenPosition;
         data.lastSeenTime = input.lastSeenTime;
-        data.gameObjectID = -1;
+        data.gameObjectID = System.Guid.Empty;
         if (input.obj != null) {
             MySaver.savedObjects.TryGetValue(input.obj, out data.gameObjectID);
         }
@@ -729,7 +734,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         data.status = input.status;
         data.HitState = input.hitstate;
         if (!MySaver.savedObjects.TryGetValue(input.knowledge.obj, out data.gameObjectID)) {
-            data.gameObjectID = -1;
+            data.gameObjectID = System.Guid.Empty;
         }
         return data;
     }

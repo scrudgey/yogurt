@@ -122,7 +122,6 @@ public class MusicController : Singleton<MusicController> {
         {TrackName.congrats, "Short CONGRATS YC3"},
     };
 
-
     static Dictionary<string, Func<Music>> sceneMusic = new Dictionary<string, Func<Music>>() {
         {"title", () => new MusicTitle()},
         {"chamber", () => new MusicChamber()},
@@ -234,5 +233,4 @@ public class MusicController : Singleton<MusicController> {
         audioSource.Stop();
         nowPlayingTrack = null;
     }
-
 }

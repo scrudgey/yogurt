@@ -23,7 +23,7 @@ public class EmailUI : MonoBehaviour {
         toText = transform.Find("main/window/emailView/info/to").GetComponent<Text>();
         fromText = transform.Find("main/window/emailView/info/from").GetComponent<Text>();
         subjectText = transform.Find("main/window/emailView/info/subject").GetComponent<Text>();
-        emailText = transform.Find("main/window/emailView/text/scrollview/Viewport/content").GetComponent<Text>();
+        emailText = transform.Find("main/window/emailView/text/sv/Viewport/Content").GetComponent<Text>();
 
         toText.text = "To:";
         fromText.text = "From:";

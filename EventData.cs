@@ -5,6 +5,7 @@ using System.Linq;
 
 [System.Serializable]
 public class EventData {
+    public string id = System.Guid.Empty.ToString();
     public string key;
     public float val;
     public string popupDesc;

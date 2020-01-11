@@ -11,7 +11,7 @@ public class PersistentObject {
     public string prefabPath;
     public bool noPrefab;
     public bool childObject;
-    public int id;
+    public System.Guid id;
     public Vector3 transformPosition;
     public Vector3 transformScale;
     public Quaternion transformRotation;
@@ -34,7 +34,8 @@ public class PersistentObject {
         sceneName = SceneManager.GetActiveScene().name;
     }
     public PersistentObject(GameObject gameObject) {
-        id = MySaver.NextIDNumber();
+        // id = MySaver.NextIDNumber();
+        id = System.Guid.NewGuid();
         MySaver.objectDataBase[id] = this;
         creationDate = GameManager.Instance.data.days;
 

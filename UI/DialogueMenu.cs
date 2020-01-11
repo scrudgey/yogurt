@@ -102,6 +102,7 @@ public class DialogueMenu : MonoBehaviour {
     public bool configured;
     public int blitCounter;
     public bool cutsceneDialogue;
+    public bool disableCommand;
     private bool doTrapDoor;
     private bool doVampireAttack;
     public void Start() {
@@ -235,6 +236,10 @@ public class DialogueMenu : MonoBehaviour {
         // CUTSCENE-STYLE DIALOGUE (NO INTERACTION)
         if (filename == "polestar_first" || filename == "vampire" || filename == "dancing_god" || filename == "dancing_god_bless" || filename == "dancing_god_destroy") {
             cutsceneDialogue = true;
+            EnableButtons();
+        }
+        if (filename == "imp") {
+            disableCommand = true;
             EnableButtons();
         }
 
@@ -466,6 +471,9 @@ public class DialogueMenu : MonoBehaviour {
         if (choice1Text.gameObject.activeSelf) {
             choicePanel.SetActive(true);
         }
+        if (disableCommand) {
+            suggestButton.interactable = false;
+        }
         Canvas.ForceUpdateCanvases();
     }
     public void DisableButtons() {
@@ -487,7 +495,7 @@ public class DialogueMenu : MonoBehaviour {
             if (dialogue.Count > 0 && !waitForKeyPress) {
                 waitForKeyPress = true;
                 if (dialogue.Peek().text.Peek() == "END") {
-                    promptText.text = "[END]";
+                    promptText.text = "[PRESS A TO END]";
                 } else {
                     promptText.text = "[PRESS A]";
                 }

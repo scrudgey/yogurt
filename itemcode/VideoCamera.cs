@@ -79,9 +79,11 @@ public class VideoCamera : Interactive, ISaveable {
     void OnTriggerEnter2D(Collider2D col) {
         if (!live)
             return;
-        if (seenFlags.Contains(col.gameObject))
+        if (seenFlags.Contains(col.transform.root.gameObject))
             return;
-        seenFlags.Add(col.gameObject);
+        if (col.tag == "occurrenceSound")
+            return;
+        seenFlags.Add(col.transform.root.gameObject);
         Qualities qualities = col.GetComponent<Qualities>();
         if (qualities != null) {
             // TODO: no messageoccurrence??
