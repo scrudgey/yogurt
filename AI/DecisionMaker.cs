@@ -20,6 +20,15 @@ public class Personality {
     public Suggestible suggestible;
     public Social social;
     public CombatProfficiency combatProficiency;
+    public Personality(Bravery bravery, Actor actor, Stoicism stoicism, BattleStyle battleStyle, Suggestible suggestible, Social social, CombatProfficiency combatProficiency) {
+        this.bravery = bravery;
+        this.actor = actor;
+        this.stoicism = stoicism;
+        this.battleStyle = battleStyle;
+        this.suggestible = suggestible;
+        this.social = social;
+        this.combatProficiency = combatProficiency;
+    }
 }
 
 public class DecisionMaker : MonoBehaviour, ISaveable {
