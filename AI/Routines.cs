@@ -121,6 +121,29 @@ namespace AI {
             }
         }
     }
+    public class RoutineSpeechWithPerson : Routine {
+        public Ref<GameObject> target;
+        private ConditionBoolSwitch condition;
+        private Speech speech;
+        public RoutineSpeechWithPerson(GameObject g, Controllable c, Ref<GameObject> target, ConditionBoolSwitch condition) : base(g, c) {
+            this.target = target;
+            this.condition = condition;
+            this.speech = g.GetComponent<Speech>();
+        }
+        protected override status DoUpdate() {
+            if (target.val == null)
+                return status.neutral;
+            if (!condition.conditionMet) {
+                // awareness.ReactToPerson(target.val);
+                // awareness.socializationTimer = -30;
+                speech.SpeakWith();
+                condition.conditionMet = true;
+                return status.success;
+            } else {
+                return status.failure;
+            }
+        }
+    }
     public class RoutineGetNamedFromEnvironment : Routine {
         private Inventory inv;
         private Awareness awareness;

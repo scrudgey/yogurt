@@ -9,18 +9,21 @@ public class Personality {
     public enum Bravery { neutral, cowardly, brave };
     public enum Stoicism { neutral, fragile, noble };
     public enum BattleStyle { normal, bloodthirsty };
-    public enum Actor { no, yes };
     public enum Suggestible { normal, suggestible, stubborn };
     public enum Social { normal, chatty, reserved };
     public enum CombatProfficiency { normal, poor, expert };
+
+    public enum Actor { no, yes };
+    public enum PizzaDeliverer { no, yes };
     public Bravery bravery;
-    public Actor actor;
     public Stoicism stoicism;
     public BattleStyle battleStyle;
     public Suggestible suggestible;
     public Social social;
     public CombatProfficiency combatProficiency;
-    public Personality(Bravery bravery, Actor actor, Stoicism stoicism, BattleStyle battleStyle, Suggestible suggestible, Social social, CombatProfficiency combatProficiency) {
+    public Actor actor;
+    public PizzaDeliverer pizzaDeliverer;
+    public Personality(Bravery bravery, Actor actor, Stoicism stoicism, BattleStyle battleStyle, Suggestible suggestible, Social social, CombatProfficiency combatProficiency, PizzaDeliverer pizzaDeliverer) {
         this.bravery = bravery;
         this.actor = actor;
         this.stoicism = stoicism;
@@ -28,6 +31,7 @@ public class Personality {
         this.suggestible = suggestible;
         this.social = social;
         this.combatProficiency = combatProficiency;
+        this.pizzaDeliverer = pizzaDeliverer;
     }
 }
 
@@ -36,7 +40,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         Attack, FightFire, ProtectPossessions,
         ReadScript, RunAway, Wander, ProtectZone,
         MakeBalloonAnimals, InvestigateNoise, PrioritySocialize,
-        Panic, Sentry, Trapdoor
+        Panic, Sentry, Trapdoor, DeliverPizza
     }
     // the ONLY reason we need this redundant structure is so that I can expose
     // a selectable default priority type in unity editor.
@@ -53,7 +57,8 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         {typeof(PrioritySocialize), PriorityType.PrioritySocialize},
         {typeof(PriorityPanic), PriorityType.Panic},
         {typeof(PrioritySentry), PriorityType.Sentry},
-        {typeof(PriorityTrapdoor), PriorityType.Trapdoor}
+        {typeof(PriorityTrapdoor), PriorityType.Trapdoor},
+        {typeof(PriorityDeliverPizza), PriorityType.DeliverPizza},
     };
     public string activePriorityName;
     public PriorityType defaultPriorityType;
@@ -118,6 +123,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         if (personality.actor == Personality.Actor.yes) {
             InitializePriority(new PriorityReadScript(gameObject, control), typeof(PriorityReadScript));
         }
+
         if (protectionZone != null) {
             InitializePriority(new PriorityProtectZone(gameObject, control, protectionZone, guardPoint), typeof(PriorityProtectZone));
         }
@@ -129,6 +135,10 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         }
         if (defaultPriorityType == PriorityType.Trapdoor) {
             InitializePriority(new PriorityTrapdoor(gameObject, control, transform.position), typeof(PriorityTrapdoor));
+        }
+
+        if (personality.pizzaDeliverer == Personality.PizzaDeliverer.yes) {
+            InitializePriority(new PriorityDeliverPizza(gameObject, control), typeof(PriorityDeliverPizza));
         }
 
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);

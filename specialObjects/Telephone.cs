@@ -5,6 +5,7 @@ public class Telephone : Item {
     public Doorway enterDoor;
     public float fireTime;
     public float clownTime;
+    public float pizzaTime;
     public AudioClip phoneUp;
     public AudioClip phoneDown;
     void Start() {
@@ -47,6 +48,18 @@ public class Telephone : Item {
             Toolbox.Instance.SendMessage(gameObject, this, message);
         }
     }
+    public void PizzaCallback() {
+        if (pizzaTime <= 0) {
+            MessageSpeech message = new MessageSpeech();
+            message.phrase = "One large pizza, coming up!";
+            Toolbox.Instance.SendMessage(gameObject, this, message);
+            pizzaTime = 10f;
+        } else {
+            MessageSpeech message = new MessageSpeech();
+            message.phrase = "Chill out buddy, the pizza's on its way! Chill!";
+            Toolbox.Instance.SendMessage(gameObject, this, message);
+        }
+    }
     public void Update() {
         if (fireTime > 0) {
             fireTime -= Time.deltaTime;
@@ -68,6 +81,16 @@ public class Telephone : Item {
                 enterDoor.PlayEnterSound();
             }
         }
+        if (pizzaTime > 0) {
+            pizzaTime -= Time.deltaTime;
+            if (pizzaTime <= 0) {
+                //do clown spawn
+                Vector3 tempPos = enterDoor.transform.position;
+                tempPos.y = tempPos.y - 0.05f;
+                Instantiate(Resources.Load("prefabs/pizza_deliveryboy"), tempPos, Quaternion.identity);
+                enterDoor.PlayEnterSound();
+            }
+        }
     }
     public void MenuCallback(PhoneNumberButton.phoneNumber type) {
         switch (type) {
@@ -76,6 +99,9 @@ public class Telephone : Item {
                 break;
             case PhoneNumberButton.phoneNumber.clown:
                 ClownCallback();
+                break;
+            case PhoneNumberButton.phoneNumber.pizza:
+                PizzaCallback();
                 break;
             default:
                 break;

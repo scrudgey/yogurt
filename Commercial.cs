@@ -53,6 +53,8 @@ public class Commercial {
                 c.objectives.Add(new ObjectiveLocation(bits));
             } else if (key == "outfit") {
                 c.objectives.Add(new ObjectiveEat(bits));
+            } else if (key == "killScorpion") {
+                c.objectives.Add(new ObjectiveScorpion());
             } else c.objectives.Add(new ObjectiveProperty(bits));
         }
         return c;

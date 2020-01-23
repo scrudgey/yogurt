@@ -506,9 +506,11 @@ public class Speech : Interactive, ISaveable {
 
     public void SaveData(PersistentComponent data) {
         data.ints["hitstate"] = (int)hitState;
+        data.strings["name"] = speechName;
     }
     public void LoadData(PersistentComponent data) {
         hitState = (Controllable.HitState)data.ints["hitstate"];
+        speechName = data.strings["name"];
     }
 }
 

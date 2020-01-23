@@ -17,8 +17,15 @@ public class Container : MayorLock, IExcludable, ISaveable {
     }
     void Start() {
         foreach (Pickup item in initItems) {
-            if (item != null)
-                AddItem(item);
+            if (item != null) {
+                if (item.gameObject.scene.rootCount == 0) {
+                    // it's a prefab
+                    GameObject newObj = GameObject.Instantiate(item.gameObject, transform.position, Quaternion.identity);
+                    AddItem(newObj.GetComponent<Pickup>());
+                } else {
+                    AddItem(item);
+                }
+            }
         }
         PopulateContentActions();
     }
@@ -163,6 +170,11 @@ public class Container : MayorLock, IExcludable, ISaveable {
         pickup.transform.position = pos;
         inv.GetItem(pickup);
 
+        if (openSprite != null) {
+            SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+            spriteRenderer.sprite = openSprite;
+        }
+
         if (disableContents)
             pickup.gameObject.SetActive(true);
         ClaimsManager.Instance.DisclaimObject(pickup.gameObject, this);
@@ -222,9 +234,14 @@ public class Container : MayorLock, IExcludable, ISaveable {
         if (isQuitting)
             return;
         while (items.Count > 0) {
-            foreach (MonoBehaviour component in items[0].GetComponents<MonoBehaviour>())
-                component.enabled = true;
-            Dump(items[0]);
+            if (items[0] == null) {
+                // Dump(items[0]);
+                items.RemoveAt(0);
+            } else {
+                foreach (MonoBehaviour component in items[0].GetComponents<MonoBehaviour>())
+                    component.enabled = true;
+                Dump(items[0]);
+            }
         }
     }
     public virtual void SaveData(PersistentComponent data) {
@@ -242,6 +259,7 @@ public class Container : MayorLock, IExcludable, ISaveable {
         }
     }
     public virtual void LoadData(PersistentComponent data) {
+        initItems = new List<Pickup>();
         maxNumber = data.ints["maxItems"];
         disableContents = data.bools["disableContents"];
         if (data.ints["itemCount"] > 0) {

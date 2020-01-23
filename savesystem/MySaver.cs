@@ -60,7 +60,7 @@ public class MySaver {
             // playerStream.Close();
             if (objectDataBase != null) {
                 foreach (KeyValuePair<Guid, PersistentObject> kvp in objectDataBase) {
-                    if (kvp.Value.sceneName != "house") {
+                    if (kvp.Value.sceneName != "apartment") {
                         if (!playerIDs.Contains(kvp.Key))
                             removeEntries.Push(kvp.Key);
                     }
@@ -69,7 +69,7 @@ public class MySaver {
         } else {
             if (objectDataBase != null) {
                 foreach (KeyValuePair<Guid, PersistentObject> kvp in objectDataBase) {
-                    if (kvp.Value.sceneName != "house") {
+                    if (kvp.Value.sceneName != "apartment") {
                         removeEntries.Push(kvp.Key);
                     }
                 }

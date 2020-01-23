@@ -110,6 +110,20 @@ namespace AI {
             routines.Add(talkRoutine);
         }
     }
+    public class GoalDeliverPizza : Goal {
+        public Ref<GameObject> target;
+        public ConditionBoolSwitch boolSwitch;
+        public GoalDeliverPizza(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c) {
+            this.target = target;
+            successCondition = new ConditionBoolSwitch(g);
+            boolSwitch = new ConditionBoolSwitch(g);
+            successCondition = boolSwitch;
+            RoutineSpeechWithPerson talkRoutine = new RoutineSpeechWithPerson(g, c, target, (ConditionBoolSwitch)successCondition);
+            routines.Add(talkRoutine);
+            // RoutineTalkToPerson talkRoutine = new RoutineTalkToPerson(g, c, target, (ConditionBoolSwitch)successCondition, awareness);
+            // routines.Add(talkRoutine);
+        }
+    }
     public class GoalGetItem : Goal {
         public bool findingFail;
         public GoalGetItem(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c) {

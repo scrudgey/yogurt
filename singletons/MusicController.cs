@@ -141,6 +141,8 @@ public class MusicController : Singleton<MusicController> {
         {"vampire_house", () => new MusicVamp()},
         {"dungeon", () => new MusicVamp()},
         {"house", () => new MusicNone()},
+        {"apartment", () => new MusicNone()},
+        {"neighborhood", () => new MusicNone()},
     };
     public static Dictionary<TrackName, AudioClip> tracks = new Dictionary<TrackName, AudioClip>();
     public Camera cam; // TOOD: make obsolete

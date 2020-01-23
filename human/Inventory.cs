@@ -253,9 +253,11 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
                 items[i].transform.SetParent(holdpoint);
                 items[i].GetComponent<Rigidbody2D>().isKinematic = true;
                 items[i].GetComponent<Collider2D>().isTrigger = true;
+                items[i].GetComponent<Pickup>().holder = this;
                 ClaimsManager.Instance.ClaimObject(items[i].gameObject, this);
                 holding = items[i].GetComponent<Pickup>();
                 items.RemoveAt(i);
+
                 break;
             }
         }

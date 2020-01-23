@@ -56,6 +56,7 @@ public class GameData {
     public Int16 ghostsKilled;
     public bool mayorAwardToday;
     public bool mayorLibraryShuffled;
+    public int gangMembersDefeated;
     public List<System.Guid> toiletItems = new List<System.Guid>();
     public GameData() {
         days = 0;
@@ -100,7 +101,6 @@ public partial class GameManager : Singleton<GameManager> {
         {"cave2", "deathtrap cave II"},
         {"forest", "forest"},
         {"house", "house"},
-        // {"krazy1", "outdoors"},
         {"moon1", "moon"},
         {"studio", "yogurt commercial studio"},
         {"volcano", "volcano"},
@@ -122,6 +122,7 @@ public partial class GameManager : Singleton<GameManager> {
         {"anti_mayors_house", "anti mayor's house"},
         {"tower", "tower"},
         {"cave4", "tomb"},
+        {"apartment", "apartment"},
     };
     public GameData data;
     public static GlobalSettings settings = new GlobalSettings();
@@ -138,7 +139,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = false;
+    public bool debug = true;
     public bool failedLevelLoad = false;
     public void PlayPublicSound(AudioClip clip) {
         if (clip == null)
@@ -578,12 +579,13 @@ public partial class GameManager : Singleton<GameManager> {
             data.itemCheckedOut[key] = false;
         }
         DetermineClosetNews();
-        SceneManager.LoadScene("house");
+        SceneManager.LoadScene("apartment");
         sceneTime = 0f;
         data.entryID = -99;
         data.firstTimeLeavingHouse = true;
         data.mayorAwardToday = false;
         data.mayorLibraryShuffled = false;
+        data.gangMembersDefeated = 0;
         activeCommercial = null;
     }
     public void DetermineClosetNews() {
@@ -649,10 +651,16 @@ public partial class GameManager : Singleton<GameManager> {
         };
         data.collectedClothes.Add("blue_shirt");
         data.collectedClothes.Add("pajamas");
+
         data.collectedObjects.Add("glass_jar");
         data.collectedObjects.Add("blue_shirt");
         data.collectedObjects.Add("pajamas");
+        data.collectedObjects.Add("egg");
+
+        data.collectedFood.Add("egg");
+
         data.itemCheckedOut["pajamas"] = false;
+        data.itemCheckedOut["egg"] = false;
         data.itemCheckedOut["blue_shirt"] = false;
         data.itemCheckedOut["glass_jar"] = false;
         data.firstTimeLeavingHouse = true;
@@ -668,6 +676,7 @@ public partial class GameManager : Singleton<GameManager> {
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eggplant1"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eggplant10"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("fireman"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("badboy"));
             data.perks["hypnosis"] = true;
             data.perks["vomit"] = true;
             data.perks["eat_all"] = true;
@@ -773,7 +782,7 @@ public partial class GameManager : Singleton<GameManager> {
         if (data.lastScene != null) {
             SceneManager.LoadScene(data.lastScene);
         } else {
-            SceneManager.LoadScene("house");
+            SceneManager.LoadScene("apartment");
         }
         data.loadedDay = true;
     }

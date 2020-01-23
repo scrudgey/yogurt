@@ -240,6 +240,13 @@ public class Hurtable : Damageable, ISaveable {
         occurrenceData.lastAttacker = lastAttacker;
         occurrenceData.lastDamage = type;
         Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData);
+
+        if (gameObject.name.StartsWith("greaser")) {
+            GameManager.Instance.data.gangMembersDefeated += 1;
+            foreach (VideoCamera vid in GameObject.FindObjectsOfType<VideoCamera>()) {
+                UINew.Instance.UpdateObjectives(vid.commercial);
+            }
+        }
     }
 
     override protected void Update() {

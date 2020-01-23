@@ -86,3 +86,15 @@ public class ObjectiveEat : Objective {
         return commercial.yogurtEaterOutfits.Contains(eaterOutfit);
     }
 }
+public class ObjectiveScorpion : Objective {
+    public string eaterOutfit;
+    public ObjectiveScorpion() {
+        // eaterOutfit = bits[1];
+        // desc = bits[2];
+        this.desc = "defeat the Scorpion Gang";
+    }
+    override public bool RequirementsMet(Commercial commercial) {
+        // return commercial.yogurtEaterOutfits.Contains(eaterOutfit);
+        return GameManager.Instance.data.gangMembersDefeated >= 5;
+    }
+}

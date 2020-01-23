@@ -8,7 +8,7 @@ public class Droplet : MonoBehaviour {
     void OnGroundImpact(Physical phys) {
         MonoLiquid monoLiquid = GetComponent<MonoLiquid>();
         GameObject puddle = Instantiate(Resources.Load("prefabs/Puddle"), transform.position, Quaternion.identity) as GameObject;
-        puddle.layer = 9;
+        // puddle.layer = 4;
         PhysicalBootstrapper pb = GetComponent<PhysicalBootstrapper>();
         pb.DestroyPhysical();
         Liquid.MonoLiquidify(puddle, monoLiquid.liquid);

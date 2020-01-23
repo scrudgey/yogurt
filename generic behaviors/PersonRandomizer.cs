@@ -109,7 +109,8 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
                 (Personality.BattleStyle)battleStyles.GetValue(random.Next(battleStyles.Length)),
                 (Personality.Suggestible)suggestibles.GetValue(random.Next(suggestibles.Length)),
                 (Personality.Social)socials.GetValue(random.Next(socials.Length)),
-                (Personality.CombatProfficiency)combatProfficiencies.GetValue(random.Next(combatProfficiencies.Length))
+                (Personality.CombatProfficiency)combatProfficiencies.GetValue(random.Next(combatProfficiencies.Length)),
+                Personality.PizzaDeliverer.no
             );
 
             DecisionMaker decisionMaker = GetComponent<DecisionMaker>();
@@ -135,7 +136,7 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
         if (randomizeSpeech) {
             Speech speech = GetComponent<Speech>();
             string name = StartMenu.SuggestAName();
-            gameObject.name = name;
+            // gameObject.name = name;
             speech.speechName = name;
         }
 
