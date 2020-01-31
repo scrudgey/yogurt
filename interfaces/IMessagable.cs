@@ -120,3 +120,9 @@ public class MessageNoise : Message {
         this.location = gameObject.transform.position;
     }
 }
+public class MessageOnCamera : Message {
+    public bool value;
+    public MessageOnCamera(bool value) {
+        this.value = value;
+    }
+}

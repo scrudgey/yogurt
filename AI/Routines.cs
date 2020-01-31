@@ -134,9 +134,31 @@ namespace AI {
             if (target.val == null)
                 return status.neutral;
             if (!condition.conditionMet) {
-                // awareness.ReactToPerson(target.val);
-                // awareness.socializationTimer = -30;
+                condition.conditionMet = true;
                 speech.SpeakWith();
+                Inventory myInv = gameObject.GetComponent<Inventory>();
+                Inventory theirInv = target.val.GetComponent<Inventory>();
+                if (myInv.holding != null) {
+                    theirInv.GetItem(myInv.holding);
+                }
+                return status.success;
+            } else {
+                return status.failure;
+            }
+        }
+    }
+    public class RoutineSayLine : Routine {
+        public MessageSpeech message;
+        private ConditionBoolSwitch condition;
+        public RoutineSayLine(GameObject g, Controllable c, MessageSpeech message, ConditionBoolSwitch condition) : base(g, c) {
+            this.message = message;
+            this.condition = condition;
+        }
+        protected override status DoUpdate() {
+            if (message == null)
+                return status.neutral;
+            if (!condition.conditionMet) {
+                Toolbox.Instance.SendMessage(gameObject, control, message);
                 condition.conditionMet = true;
                 return status.success;
             } else {
@@ -459,6 +481,7 @@ namespace AI {
         private Transform cachedTransform;
         private GameObject cachedGameObject;
         public float minDistance = 0.2f;
+        public Vector2 localOffset;
         public Transform targetTransform {
             get {
                 if (cachedGameObject == target.val) {
@@ -475,14 +498,18 @@ namespace AI {
                 }
             }
         }
-        public RoutineWalkToGameobject(GameObject g, Controllable c, Ref<GameObject> targetObject, bool invert = false) : base(g, c) {
+        public RoutineWalkToGameobject(GameObject g, Controllable c, Ref<GameObject> targetObject, bool invert = false, Vector2 localOffset = new Vector2()) : base(g, c) {
             routineThought = "I'm walking over to the " + g.name + ".";
             target = targetObject;
             this.invert = invert;
+            this.localOffset = localOffset;
         }
         protected override status DoUpdate() {
             if (target.val) {
-                float distToTarget = Vector2.Distance(transform.position, targetTransform.position);
+                Vector2 localizedOffset = new Vector2(targetTransform.lossyScale.x * localOffset.x, targetTransform.lossyScale.y * localOffset.y);
+
+                Vector2 targetPosition = (Vector2)targetTransform.position + localizedOffset;
+                float distToTarget = Vector2.Distance(transform.position, targetPosition);
                 control.leftFlag = control.rightFlag = control.upFlag = control.downFlag = false;
                 if (distToTarget <= minDistance) {
                     return status.success;
@@ -490,11 +517,10 @@ namespace AI {
                     Vector2 comparator = Vector2.zero;
 
                     if (invert) {
-                        comparator = targetTransform.position - transform.position;
+                        comparator = targetPosition - (Vector2)transform.position;
                     } else {
-                        comparator = transform.position - targetTransform.position;
+                        comparator = (Vector2)transform.position - targetPosition;
                     }
-
                     if (comparator.x > 0) {
                         control.leftFlag = true;
                     } else if (comparator.x < 0) {

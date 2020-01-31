@@ -95,7 +95,7 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
             System.Random random = new System.Random();
 
             Array braveries = Enum.GetValues(typeof(Personality.Bravery));
-            Array actors = Enum.GetValues(typeof(Personality.Actor));
+            Array actors = Enum.GetValues(typeof(Personality.CameraPreference));
             Array stoicisms = Enum.GetValues(typeof(Personality.Stoicism));
             Array battleStyles = Enum.GetValues(typeof(Personality.BattleStyle));
             Array suggestibles = Enum.GetValues(typeof(Personality.Suggestible));
@@ -104,7 +104,8 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
 
             Personality personality = new Personality(
                 (Personality.Bravery)braveries.GetValue(random.Next(braveries.Length)),
-                (Personality.Actor)actors.GetValue(random.Next(actors.Length)),
+                Personality.CameraPreference.none,
+                // (Personality.CameraPreference)actors.GetValue(random.Next(actors.Length)),
                 (Personality.Stoicism)stoicisms.GetValue(random.Next(stoicisms.Length)),
                 (Personality.BattleStyle)battleStyles.GetValue(random.Next(battleStyles.Length)),
                 (Personality.Suggestible)suggestibles.GetValue(random.Next(suggestibles.Length)),

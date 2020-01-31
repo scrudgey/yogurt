@@ -10,6 +10,30 @@ namespace AI {
             val = t;
         }
     }
+    public class WorldRef<T> : Ref<T> where T : Component {
+        new public T val {
+            get {
+                if (_val == null) {
+                    UpdateRef();
+                }
+                return _val;
+            }
+            set {
+                _val = value;
+            }
+        }
+        private T _val;
+        public Ref<GameObject> gameObject = new Ref<GameObject>(null);
+        public WorldRef(T t) : base(t) {
+            if (t == null)
+                UpdateRef();
+        }
+        void UpdateRef() {
+            _val = GameObject.FindObjectOfType<T>();
+            if (_val != null)
+                gameObject.val = _val.gameObject;
+        }
+    }
 
     [System.Serializable]
     public class Goal {
@@ -110,6 +134,15 @@ namespace AI {
             routines.Add(talkRoutine);
         }
     }
+    public class GoalSayLine : Goal {
+        public ConditionBoolSwitch boolSwitch;
+        public GoalSayLine(GameObject g, Controllable c, MessageSpeech message) : base(g, c) {
+            boolSwitch = new ConditionBoolSwitch(g);
+            RoutineSayLine routine = new RoutineSayLine(g, c, message, boolSwitch);
+            successCondition = boolSwitch;
+            routines.Add(routine);
+        }
+    }
     public class GoalDeliverPizza : Goal {
         public Ref<GameObject> target;
         public ConditionBoolSwitch boolSwitch;
@@ -120,8 +153,6 @@ namespace AI {
             successCondition = boolSwitch;
             RoutineSpeechWithPerson talkRoutine = new RoutineSpeechWithPerson(g, c, target, (ConditionBoolSwitch)successCondition);
             routines.Add(talkRoutine);
-            // RoutineTalkToPerson talkRoutine = new RoutineTalkToPerson(g, c, target, (ConditionBoolSwitch)successCondition, awareness);
-            // routines.Add(talkRoutine);
         }
     }
     public class GoalGetItem : Goal {
@@ -159,11 +190,11 @@ namespace AI {
         public new string goalThought {
             get { return "I'm going to check out that " + target.val.name + "."; }
         }
-        public GoalWalkToObject(GameObject g, Controllable c, Ref<GameObject> t, float range = 0.2f, bool invert = false) : base(g, c) {
+        public GoalWalkToObject(GameObject g, Controllable c, Ref<GameObject> t, float range = 0.2f, bool invert = false, Vector2 localOffset = new Vector2()) : base(g, c) {
             target = t;
             // TODO: if invert, change success condition
-            successCondition = new ConditionCloseToObject(g, target, range);
-            routines.Add(new RoutineWalkToGameobject(g, c, target, invert: invert));
+            successCondition = new ConditionCloseToObject(g, target, range, localOffset: localOffset);
+            routines.Add(new RoutineWalkToGameobject(g, c, target, invert: invert, localOffset: localOffset));
         }
         public GoalWalkToObject(GameObject g, Controllable c, Type objType, float range = 0.2f) : base(g, c) {
             // GameObject targetObject = GameObject.FindObjectOfType<typeof(objType)>();

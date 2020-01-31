@@ -119,6 +119,14 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         Toolbox.RegisterMessageCallback<MessageInventoryChanged>(this, ProcessInventoryChanged);
         Toolbox.RegisterMessageCallback<MessageSpeech>(this, HandleSpeech);
         Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsics);
+        Toolbox.RegisterMessageCallback<MessageOnCamera>(this, HandleOnCamera);
+        GameManager.onRecordingChange += OnRecordingChange;
+    }
+    void OnRecordingChange(bool value) {
+        if (!value) {
+            MessageOnCamera message = new MessageOnCamera(value);
+            Toolbox.Instance.SendMessage(gameObject, this, message);
+        }
     }
     void HandleNetIntrinsics(MessageNetIntrinsic message) {
         netBuffs = message.netBuffs;
@@ -130,6 +138,9 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                     kvp.Value.status = PersonalAssessment.friendStatus.enemy;
             }
         }
+    }
+    void HandleOnCamera(MessageOnCamera message) {
+
     }
 
     void HandleSpeech(MessageSpeech message) {
@@ -299,6 +310,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                 if (otherHead.hat != null)
                     fieldOfView.Add(otherHead.hat.gameObject);
         }
+
     }
     public string RecallMemory() {
         if (shortTermMemory.Count() == 0) {
@@ -346,6 +358,10 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             OccurrenceData oD = new OccurrenceGeneric();
             oD.events.Add(data);
             MessageOccurrence message = new MessageOccurrence(oD);
+            Toolbox.Instance.SendMessage(gameObject, this, message);
+        }
+        if (other.name == "CameraRegion") {
+            MessageOnCamera message = new MessageOnCamera(true);
             Toolbox.Instance.SendMessage(gameObject, this, message);
         }
         seenFlags.Add(other.gameObject);

@@ -62,10 +62,10 @@ public class CutsceneBoardroom : Cutscene {
                 settingText.gameObject.SetActive(false);
                 timer = 0;
                 globalTimer = 0;
-                if (GameManager.Instance.activeCommercial == null) {
+                if (GameManager.Instance.data.activeCommercial == null) {
                     LoadScript("eat1");
                 } else {
-                    if (!LoadScript(GameManager.Instance.activeCommercial.cutscene))
+                    if (!LoadScript(GameManager.Instance.data.activeCommercial.cutscene))
                         LoadScript("test");
                 }
             }

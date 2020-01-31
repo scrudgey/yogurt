@@ -112,6 +112,11 @@ public class Speech : Interactive, ISaveable {
         Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
         Toolbox.RegisterMessageCallback<MessageAnimation>(this, HandleAnimation);
         Toolbox.RegisterMessageCallback<MessageHead>(this, HandleHead);
+        Toolbox.RegisterMessageCallback<MessageOnCamera>(this, HandleOnCamera);
+    }
+    void HandleOnCamera(MessageOnCamera message) {
+        // TODO
+        // change default monologue
     }
     void HandleSpeech(MessageSpeech message) {
         if (message.swearTarget != null) {

@@ -75,7 +75,7 @@ public class Poptext : MonoBehaviour {
             }
             if (commercial != null) {
                 // UI check if commercial is complete      
-                UINew.Instance.UpdateRecordButtons(commercial);
+                UINew.Instance.UpdateObjectives();
             }
 
             yield return new WaitForSeconds(hangtime);

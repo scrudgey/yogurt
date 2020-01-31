@@ -57,6 +57,10 @@ public class GameData {
     public bool mayorAwardToday;
     public bool mayorLibraryShuffled;
     public int gangMembersDefeated;
+
+    public Commercial activeCommercial;
+    public bool recordingCommercial;
+
     public List<System.Guid> toiletItems = new List<System.Guid>();
     public GameData() {
         days = 0;
@@ -131,7 +135,6 @@ public partial class GameManager : Singleton<GameManager> {
     public Camera cam;
     public GameObject playerObject;
     public float gravity = 3.0f;
-    public Commercial activeCommercial;
     public float sceneTime;
     private bool awaitNewDayPrompt;
     public float timeSinceLastSave = 0f;
@@ -141,6 +144,10 @@ public partial class GameManager : Singleton<GameManager> {
     public bool playerIsDead;
     public bool debug = true;
     public bool failedLevelLoad = false;
+
+    public delegate void BooleanObserver(bool value);
+    public static BooleanObserver onRecordingChange;
+
     public void PlayPublicSound(AudioClip clip) {
         if (clip == null)
             return;
@@ -182,6 +189,9 @@ public partial class GameManager : Singleton<GameManager> {
         MusicController.Instance.SceneChange(scene.name);
     }
     void Update() {
+        if (data == null)
+            return;
+        string sceneName = SceneManager.GetActiveScene().name;
         timeSinceLastSave += Time.deltaTime;
         intervalTimer += Time.deltaTime;
         if (!InCutsceneLevel()) {
@@ -199,7 +209,6 @@ public partial class GameManager : Singleton<GameManager> {
             awaitNewDayPrompt = false;
             UINew.Instance.ShowMenu(UINew.MenuType.newDayReport);
         }
-        string sceneName = SceneManager.GetActiveScene().name;
         if (sceneTime > 0.1f && !data.unlockedScenes.Contains(sceneName) && !InCutsceneLevel() && GameManager.sceneNames.ContainsKey(sceneName)) {
             data.unlockedScenes.Add(sceneName);
             UINew.Instance.ShowSceneText("- " + GameManager.sceneNames[sceneName] + " -");
@@ -586,7 +595,9 @@ public partial class GameManager : Singleton<GameManager> {
         data.mayorAwardToday = false;
         data.mayorLibraryShuffled = false;
         data.gangMembersDefeated = 0;
-        activeCommercial = null;
+        data.activeCommercial = null;
+        // data.recordingCommercial = false;
+        SetRecordingStatus(false);
     }
     public void DetermineClosetNews() {
         closetHasNew[HomeCloset.ClosetType.items] = false;
@@ -623,6 +634,7 @@ public partial class GameManager : Singleton<GameManager> {
         data.entryID = -99;
     }
     public void TitleScreen() {
+        data = null;
         SceneManager.LoadScene("title");
     }
     public GameData InitializedGameData() {
@@ -677,6 +689,7 @@ public partial class GameManager : Singleton<GameManager> {
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eggplant10"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("fireman"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("badboy"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("mayor"));
             data.perks["hypnosis"] = true;
             data.perks["vomit"] = true;
             data.perks["eat_all"] = true;
@@ -773,6 +786,18 @@ public partial class GameManager : Singleton<GameManager> {
         }
         // sceneStream.Close();
         timeSinceLastSave = 0f;
+
+        SaveCommercial();
+    }
+    public void SaveCommercial() {
+        if (data.activeCommercial == null)
+            return;
+        var serializer = new XmlSerializer(typeof(Commercial));
+        string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
+        path = Path.Combine(path, "commercial.xml");
+        using (FileStream sceneStream = File.Create(path)) {
+            serializer.Serialize(sceneStream, data.activeCommercial);
+        }
     }
     public void LoadGameDataIntoMemory(string gameName) {
         MySaver.objectDataBase = null;
@@ -785,6 +810,9 @@ public partial class GameManager : Singleton<GameManager> {
             SceneManager.LoadScene("apartment");
         }
         data.loadedDay = true;
+        if (data.activeCommercial != null && data.recordingCommercial) {
+            GameManager.Instance.StartCommercial(data.activeCommercial);
+        }
     }
     public GameData LoadGameData(string gameName) {
         GameData data = null;
@@ -796,7 +824,6 @@ public partial class GameManager : Singleton<GameManager> {
                 using (var dataStream = new FileStream(path, FileMode.Open)) {
                     data = serializer.Deserialize(dataStream) as GameData;
                 }
-                // dataStream.Close();
             }
             catch (Exception e) {
                 Debug.Log("Error loading game data: " + path);

@@ -243,9 +243,7 @@ public class Hurtable : Damageable, ISaveable {
 
         if (gameObject.name.StartsWith("greaser")) {
             GameManager.Instance.data.gangMembersDefeated += 1;
-            foreach (VideoCamera vid in GameObject.FindObjectsOfType<VideoCamera>()) {
-                UINew.Instance.UpdateObjectives(vid.commercial);
-            }
+            UINew.Instance.UpdateObjectives();
         }
     }
 

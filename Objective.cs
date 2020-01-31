@@ -1,14 +1,26 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System.Xml.Serialization;
 
+[System.Serializable]
+[XmlInclude(typeof(ObjectiveProperty))]
+[XmlInclude(typeof(ObjectiveEat))]
+[XmlInclude(typeof(ObjectiveLocation))]
+[XmlInclude(typeof(ObjectiveEatName))]
+[XmlInclude(typeof(ObjectiveScorpion))]
 public abstract class Objective {
     public string desc;
     public abstract bool RequirementsMet(Commercial commercial);
+    public Objective() {
+
+    }
 }
 
+[System.Serializable]
 public class ObjectiveProperty : Objective {
     // yogurt,≥,1,eat yogurt on camera
     public string key;
+
     public CommercialComparison comparison;
     public float val;
     public ObjectiveProperty(string[] bits) {
@@ -35,6 +47,7 @@ public class ObjectiveProperty : Objective {
                 break;
         }
     }
+    public ObjectiveProperty() { } // required for serialization 
     override public bool RequirementsMet(Commercial commercial) {
         CommercialProperty property = null;
         commercial.properties.TryGetValue(key, out property);
@@ -63,6 +76,7 @@ public class ObjectiveProperty : Objective {
     }
 }
 
+[System.Serializable]
 public class ObjectiveLocation : Objective {
     // location,krazy1,shoot a scene outside
     public string location;
@@ -74,8 +88,10 @@ public class ObjectiveLocation : Objective {
         // desc = "shoot a scene in " + location;
         desc = bits[2];
     }
+    public ObjectiveLocation() { } // required for serialization 
 }
 
+[System.Serializable]
 public class ObjectiveEat : Objective {
     public string eaterOutfit;
     public ObjectiveEat(string[] bits) {
@@ -85,7 +101,27 @@ public class ObjectiveEat : Objective {
     override public bool RequirementsMet(Commercial commercial) {
         return commercial.yogurtEaterOutfits.Contains(eaterOutfit);
     }
+    public ObjectiveEat() { } // required for serialization 
 }
+
+[System.Serializable]
+public class ObjectiveEatName : Objective {
+    public string eaterName;
+    public ObjectiveEatName(string[] bits) {
+        eaterName = bits[1];
+        desc = bits[2];
+    }
+    override public bool RequirementsMet(Commercial commercial) {
+        foreach (string namo in commercial.yogurtEaterNames) {
+            if (namo.StartsWith(eaterName))
+                return true;
+        }
+        return false;
+    }
+    public ObjectiveEatName() { } // required for serialization 
+}
+
+[System.Serializable]
 public class ObjectiveScorpion : Objective {
     public string eaterOutfit;
     public ObjectiveScorpion() {

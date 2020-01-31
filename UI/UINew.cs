@@ -322,9 +322,9 @@ public class UINew : Singleton<UINew> {
         topRightBar = UICanvas.transform.Find("topright").gameObject;
         hitIndicator = UICanvas.transform.Find("hitIndicator").GetComponent<UIHitIndicator>();
         objectivesContainer = UICanvas.transform.Find("objectives");
-        foreach (Transform child in objectivesContainer) {
-            Destroy(child.gameObject);
-        }
+        // foreach (Transform child in objectivesContainer) {
+        //     Destroy(child.gameObject);
+        // }
         topRightRectTransform = topRightBar.GetComponent<RectTransform>();
         if (lifebarDefaultSize == Vector2.zero)
             lifebarDefaultSize = new Vector2(lifebar.rect.width, lifebar.rect.height);
@@ -450,6 +450,7 @@ public class UINew : Singleton<UINew> {
         }
         if (active)
             UpdateButtons();
+        UpdateObjectives();
     }
     public void UpdateButtons() {
         if (UINew.Instance.activeMenuType != UINew.MenuType.none)
@@ -503,17 +504,7 @@ public class UINew : Singleton<UINew> {
         }
 
     }
-    public void UpdateRecordButtons(Commercial commercial) {
-        if (GameManager.Instance.activeCommercial == null) {
-            return;
-        }
-        VideoCamera videoCam = GameObject.FindObjectOfType<VideoCamera>();
-        if (commercial.Evaluate(GameManager.Instance.activeCommercial)) {
-            videoCam.EnableBubble();
-        } else {
-            videoCam.DisableBubble();
-        }
-    }
+
     public void UpdateInventoryButton(Inventory inventory) {
         if (inventory.items.Count > 0) {
             inventoryButton.SetActive(true);
@@ -819,10 +810,20 @@ public class UINew : Singleton<UINew> {
             Destroy(child.gameObject);
         }
     }
-    public void UpdateObjectives(Commercial localCommercial) {
+    public void UpdateObjectives() {
+        // Debug.Log(GameManager.Instance.data);
+        // Debug.Log(GameManager.Instance.data.activeCommercial);
+        // Debug.Log(GameManager.Instance.data.recordingCommercial);
+        if (GameManager.Instance.data == null || GameManager.Instance.data.activeCommercial == null || !GameManager.Instance.data.recordingCommercial) {
+            ClearObjectives();
+            return;
+        }
         foreach (Transform child in objectivesContainer) {
             ObjectiveIndicator indicator = child.GetComponent<ObjectiveIndicator>();
-            indicator.UpdateCheck(localCommercial);
+            indicator.UpdateCheck();
+        }
+        foreach (VideoCamera vid in GameObject.FindObjectsOfType<VideoCamera>()) {
+            vid.UpdateStatus();
         }
     }
 }

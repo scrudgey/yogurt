@@ -19,7 +19,7 @@ public class CommercialReportMenu : MonoBehaviour {
         UINew.Instance.CloseActiveMenu();
         MySaver.Save();
         // MySaver.SaveObjectDatabase();
-        if (GameManager.Instance.activeCommercial.cutscene != "none") {
+        if (GameManager.Instance.data.activeCommercial.cutscene != "none") {
             GameManager.Instance.BoardRoomCutscene();
         } else {
             GameManager.Instance.NewDayCutscene();

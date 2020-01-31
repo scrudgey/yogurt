@@ -56,12 +56,7 @@ public class ScriptSelectionMenu : MonoBehaviour {
     }
     public void ClickedOkay() {
         if (lastClicked) {
-            GameManager.Instance.activeCommercial = lastClicked.commercial;
-            VideoCamera director = GameObject.FindObjectOfType<VideoCamera>();
-            director.Enable();
-            if (lastClicked.commercial.name == "1950s Greaser Beatdown") {
-                CutsceneManager.Instance.InitializeCutscene<CutsceneScorpion>();
-            }
+            GameManager.Instance.StartCommercial(new Commercial(lastClicked.commercial));
         }
         UINew.Instance.CloseActiveMenu();
     }

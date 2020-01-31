@@ -5,7 +5,9 @@ using UnityEngine;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization.Formatters.Binary;
 
+[System.Serializable]
 public enum CommercialComparison {
     equal, notequal, greater, less, greaterEqual, lessEqual
 }
@@ -18,17 +20,28 @@ public class Commercial {
     public string cutscene = "default";
     public SerializableDictionary<string, CommercialProperty> properties = new SerializableDictionary<string, CommercialProperty>();
     public List<string> unlockUponCompletion;
-    public List<string> requiredLocations = new List<string>();
-    public HashSet<string> visitedLocations = new HashSet<string>();
     public string unlockItem = "";
     public string email = "";
     public List<EventData> eventData = new List<EventData>();
     public HashSet<string> yogurtEaterOutfits = new HashSet<string>();
+    public HashSet<string> yogurtEaterNames = new HashSet<string>();
+    public HashSet<string> visitedLocations = new HashSet<string>();
     public HashSet<string> outfits = new HashSet<string>();
     [XmlIgnore]
     public CommercialDescription analysis;
-    [XmlIgnore]
+    // [XmlIgnore]
     public List<Objective> objectives = new List<Objective>();
+    public Commercial(Commercial other) {
+        this.name = other.name;
+        this.description = other.description;
+        this.cutscene = other.cutscene;
+        this.properties = new SerializableDictionary<string, CommercialProperty>();
+        this.unlockUponCompletion = new List<string>(other.unlockUponCompletion);
+        this.objectives = other.objectives;
+        // this.visitedLocations = new HashSet<string>(other.visitedLocations);
+        this.unlockItem = other.unlockItem;
+        this.email = other.email;
+    }
     public static Commercial LoadCommercialByFilename(string filename) {
         Commercial c = new Commercial();
         TextAsset dataFile = Resources.Load("data/commercials/" + filename) as TextAsset;
@@ -53,6 +66,8 @@ public class Commercial {
                 c.objectives.Add(new ObjectiveLocation(bits));
             } else if (key == "outfit") {
                 c.objectives.Add(new ObjectiveEat(bits));
+            } else if (key == "eatName") {
+                c.objectives.Add(new ObjectiveEatName(bits));
             } else if (key == "killScorpion") {
                 c.objectives.Add(new ObjectiveScorpion());
             } else c.objectives.Add(new ObjectiveProperty(bits));
@@ -77,12 +92,13 @@ public class Commercial {
 
         OccurrenceEat eatOccurrence = occurrence as OccurrenceEat;
         if (eatOccurrence != null) {
-            if (eatOccurrence.yogurt)
+            if (eatOccurrence.yogurt) {
                 yogurtEaterOutfits.Add(eatOccurrence.eaterOutfitName);
+                yogurtEaterNames.Add(eatOccurrence.eaterName);
+            }
         }
         foreach (EventData data in occurrence.events) {
             IncrementValue(data);
-            UINew.Instance.UpdateObjectives(this);
         }
         eventData.AddRange(occurrence.events);
         foreach (EventData data in occurrence.events) {
@@ -90,6 +106,7 @@ public class Commercial {
                 transcript.Add(data.transcriptLine);
             }
         }
+        UINew.Instance.UpdateObjectives();
     }
     public Commercial() {
         unlockUponCompletion = new List<string>();
@@ -137,9 +154,9 @@ public class Commercial {
         writer.Close();
         analysis = new CommercialDescription(eventData);
     }
-    public bool Evaluate(Commercial required) {
+    public bool Evaluate() {
         bool requirementsMet = true;
-        foreach (Objective objective in required.objectives) {
+        foreach (Objective objective in objectives) {
             requirementsMet &= objective.RequirementsMet(this);
         }
         return requirementsMet;
@@ -191,6 +208,8 @@ public class Commercial {
         builder.Append(".");
         return builder.ToString();
     }
+
+
 }
 [System.Serializable]
 public class CommercialProperty {

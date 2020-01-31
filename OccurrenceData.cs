@@ -47,6 +47,7 @@ public class OccurrenceEat : OccurrenceData {
     public Edible edible;
     public GameObject eater;
     public string eaterOutfitName;
+    public string eaterName;
     public bool yogurt;
     public override HashSet<GameObject> involvedParties() {
         return new HashSet<GameObject> { eater, edible.gameObject };
@@ -63,6 +64,7 @@ public class OccurrenceEat : OccurrenceData {
         if (otherOutfit != null) {
             eaterOutfitName = otherOutfit.wornUniformName;
         }
+        eaterName = eater.name;
         data.noun = "eating";
         if (edible.offal) {
             data.ratings[Rating.disgusting] = 2;
