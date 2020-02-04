@@ -4,6 +4,7 @@ using System.Collections;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using System;
+using UnityEngine.Audio;
 
 [System.Serializable]
 public enum TrackName {
@@ -153,7 +154,9 @@ public class MusicController : Singleton<MusicController> {
     public Coroutine endCoroutine;
     public void Awake() {
         SetCamera();
-        audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
+        audioSource = Toolbox.GetOrCreateComponent<AudioSource>(gameObject);
+        AudioMixer mixer = Resources.Load("mixers/MusicMixer") as AudioMixer;
+        audioSource.outputAudioMixerGroup = mixer.FindMatchingGroups("Master")[0];
         // load tracks
         foreach (KeyValuePair<TrackName, string> kvp in trackFiles) {
             // Debug.Log("loading music/" + kvp.Value + " ...");

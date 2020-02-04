@@ -82,7 +82,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         if (!initialized)
             Initialize();
     }
-    void Initialize() {
+    public void Initialize() {
 
         // Debug.Log("decision maker initialize");
         initialized = true;

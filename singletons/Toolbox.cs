@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using UnityEngine.Audio;
 public enum SkinColor {
     light,
     dark,
@@ -31,6 +32,10 @@ public class Toolbox : Singleton<Toolbox> {
     static Regex doublePunctuationRegex = new Regex(@"[/./?!][/./?!]");
     static Regex cloneFinder = new Regex(@"(.+)\(Clone\)$", RegexOptions.Multiline);
     static Regex underScoreFinder = new Regex(@"_", RegexOptions.Multiline);
+    AudioMixer sfxMixer;
+    void Start() {
+        sfxMixer = Resources.Load("mixers/SoundEffectMixer") as AudioMixer;
+    }
     static public T GetOrCreateComponent<T>(GameObject g) where T : Component {
         T component = g.GetComponent<T>();
         if (component) {
@@ -60,6 +65,9 @@ public class Toolbox : Singleton<Toolbox> {
             }
         }
         return d[n, m];
+    }
+    public static float RGBDistance(Color x, Color y) {
+        return Math.Abs(x.r - y.r) + Math.Abs(x.g - y.g) + Math.Abs(x.b - y.b);
     }
     public static float Gompertz(float x, float a = 1, float b = 1, float c = 1) {
         return (float)(a * Math.Exp(b * Math.Exp(-c * x)));
@@ -137,11 +145,16 @@ public class Toolbox : Singleton<Toolbox> {
         if (!source) {
             source = g.AddComponent<AudioSource>();
         }
+        if (sfxMixer == null) {
+            sfxMixer = Resources.Load("mixers/SoundEffectMixer") as AudioMixer;
+        }
         source.rolloffMode = AudioRolloffMode.Logarithmic;
         // source.minDistance = 0.4f;
         source.minDistance = 1f;
         source.maxDistance = 5.42f;
         source.spatialBlend = 1;
+
+        source.outputAudioMixerGroup = sfxMixer.FindMatchingGroups("Master")[0];
         return source;
     }
     public void AudioSpeaker(string clipName, Vector3 position) {

@@ -123,6 +123,8 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         GameManager.onRecordingChange += OnRecordingChange;
     }
     void OnRecordingChange(bool value) {
+        if (this == null)
+            return;
         if (!value) {
             MessageOnCamera message = new MessageOnCamera(value);
             Toolbox.Instance.SendMessage(gameObject, this, message);

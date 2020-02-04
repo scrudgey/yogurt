@@ -102,10 +102,16 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
             Array socials = Enum.GetValues(typeof(Personality.Social));
             Array combatProfficiencies = Enum.GetValues(typeof(Personality.CombatProfficiency));
 
+            List<Personality.CameraPreference> camPrefs = new List<Personality.CameraPreference>{
+                Personality.CameraPreference.ambivalent,
+                Personality.CameraPreference.avoidant,
+                Personality.CameraPreference.excited,
+                Personality.CameraPreference.none,
+                };
+
             Personality personality = new Personality(
                 (Personality.Bravery)braveries.GetValue(random.Next(braveries.Length)),
-                Personality.CameraPreference.none,
-                // (Personality.CameraPreference)actors.GetValue(random.Next(actors.Length)),
+                camPrefs[random.Next(camPrefs.Count)],
                 (Personality.Stoicism)stoicisms.GetValue(random.Next(stoicisms.Length)),
                 (Personality.BattleStyle)battleStyles.GetValue(random.Next(battleStyles.Length)),
                 (Personality.Suggestible)suggestibles.GetValue(random.Next(suggestibles.Length)),
@@ -116,6 +122,7 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
 
             DecisionMaker decisionMaker = GetComponent<DecisionMaker>();
             decisionMaker.personality = personality;
+            decisionMaker.Initialize();
         }
 
         if (randomItems != null) {

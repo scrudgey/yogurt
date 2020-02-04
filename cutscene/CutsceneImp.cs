@@ -1,8 +1,31 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Nimrod;
+using System;
+
 public class CutsceneImp : Cutscene {
-    private enum State { start, first, describeFirst, second, describeSecond }
-    private State state;
+    static public List<BuffType> buffPriority = new List<BuffType>(){
+        BuffType.telepathy,
+        BuffType.poison,
+        BuffType.coughing,
+        BuffType.undead,
+        BuffType.bonusHealth,
+        BuffType.armor,
+        BuffType.fireproof,
+        BuffType.clearHeaded,
+        BuffType.enraged,
+        BuffType.noPhysicalDamage,
+        BuffType.strength,
+        BuffType.speed,
+        BuffType.ethereal,
+        BuffType.invulnerable,
+        BuffType.death,
+    };
+
+    private enum CutsceneState { none, describePotion, describeIngredient }
+    private enum PotionState { start, first, describeFirst, second, describeSecond }
+    private CutsceneState cutsceneState;
+    private PotionState state;
     GameObject analyzand;
     BuffType buffType;
     PotionData potionData;
@@ -11,8 +34,12 @@ public class CutsceneImp : Cutscene {
     AnimateFrames impAnimate;
     PotionSeller impSeller;
     SpriteRenderer impRenderer;
+    Dictionary<BuffType, PotionData> buffMap = PotionComponent.BuffToPotion();
+    Grammar grammar = new Grammar();
+    public string ingredient;
     float timer = 0;
     public void Configure(GameObject analyzand) {
+        grammar.Load("imp");
         configured = true;
         imp = GameObject.Find("imp");
         impSpeech = imp.GetComponent<Speech>();
@@ -25,7 +52,11 @@ public class CutsceneImp : Cutscene {
         Controllable playerController = GameManager.Instance.playerObject.GetComponent<Controllable>();
         UINew.Instance.RefreshUI();
         if (GetIngredients()) {
+            cutsceneState = CutsceneState.describePotion;
             StartAnalysis();
+        } else if (GetPotion()) {
+            cutsceneState = CutsceneState.describeIngredient;
+            StartIngredientAnalysis();
         } else {
             RefuseAnalysis();
         }
@@ -43,9 +74,20 @@ public class CutsceneImp : Cutscene {
         menu.dialogueTree.Add(newNode);
         menu.ParseNode(newNode);
     }
+    void StartIngredientAnalysis() {
+
+        // message.phrase = grammar.Parse(message.phrase);
+
+        DialogueNode newNode = new DialogueNode();
+        newNode.text.Add("Gra ha ha ha... Yes, show me your trinket....");
+        newNode.text.Add(ingredient);
+        newNode.text.Add(grammar.Parse("{ingredientDesc}"));
+        newNode.text.Add("It can be used in potion of " + potionData.name + "!");
+        newNode.text.Add("IMPCALLBACK3");
+        SetDialogue(newNode);
+    }
     void StartAnalysis() {
-        state = State.start;
-        Dictionary<BuffType, PotionData> buffMap = PotionComponent.BuffToPotion();
+        state = PotionState.start;
         PotionData dat = buffMap[buffType];
         DialogueNode newNode = new DialogueNode();
         newNode.text.Add("Gra ha ha ha... Yes, show me your trinket....");
@@ -66,23 +108,27 @@ public class CutsceneImp : Cutscene {
     }
     public override void Update() {
         timer += Time.deltaTime;
-        if (state == State.first) {
-            if (timer > 1 && impRenderer.sprite == impSeller.leftWave[0]) {
-                impRenderer.sprite = impSeller.leftWave[1];
-                RevealFirstIngredient();
+        if (cutsceneState == CutsceneState.describePotion) {
+            if (state == PotionState.first) {
+                if (timer > 1 && impRenderer.sprite == impSeller.leftWave[0]) {
+                    impRenderer.sprite = impSeller.leftWave[1];
+                    RevealFirstIngredient();
+                }
+                if (timer > 3) {
+                    DescribeFirstIngredient();
+                }
             }
-            if (timer > 3) {
-                DescribeFirstIngredient();
+            if (state == PotionState.second) {
+                if (timer > 1 && impRenderer.sprite == impSeller.rightWave[0]) {
+                    impRenderer.sprite = impSeller.rightWave[1];
+                    RevealSecondIngredient();
+                }
+                if (timer > 3) {
+                    DescribeSecondIngredient();
+                }
             }
-        }
-        if (state == State.second) {
-            if (timer > 1 && impRenderer.sprite == impSeller.rightWave[0]) {
-                impRenderer.sprite = impSeller.rightWave[1];
-                RevealSecondIngredient();
-            }
-            if (timer > 3) {
-                DescribeSecondIngredient();
-            }
+        } else if (cutsceneState == CutsceneState.describeIngredient) {
+
         }
     }
     public void RevealFirstIngredient() {
@@ -100,13 +146,13 @@ public class CutsceneImp : Cutscene {
         rightPointSprite.color = potionData.ingredient2.spriteColor;
     }
     public void FirstIngredient() {
-        state = State.first;
+        state = PotionState.first;
         timer = 0;
         impRenderer.sprite = impSeller.leftWave[0];
         Controller.Instance.state = Controller.ControlState.cutscene;
     }
     public void DescribeFirstIngredient() {
-        state = State.describeFirst;
+        state = PotionState.describeFirst;
         DialogueNode newNode = new DialogueNode();
         newNode.text.Add("TEXTSIZE:LARGE");
         newNode.text.Add(Toolbox.UppercaseFirst(potionData.ingredient1.name) + "!!!");
@@ -117,13 +163,13 @@ public class CutsceneImp : Cutscene {
         Controller.Instance.state = Controller.ControlState.cutscene;
     }
     public void SecondIngredient() {
-        state = State.second;
+        state = PotionState.second;
         timer = 0;
         impRenderer.sprite = impSeller.rightWave[0];
         Controller.Instance.state = Controller.ControlState.cutscene;
     }
     public void DescribeSecondIngredient() {
-        state = State.describeFirst;
+        state = PotionState.describeFirst;
         DialogueNode newNode = new DialogueNode();
         newNode.text.Add("TEXTSIZE:LARGE");
         newNode.text.Add(Toolbox.UppercaseFirst(potionData.ingredient2.name) + "!!!");
@@ -142,17 +188,47 @@ public class CutsceneImp : Cutscene {
 
     public bool GetIngredients() {
         Intrinsics intrinsics = analyzand.GetComponent<Intrinsics>();
-        Dictionary<BuffType, PotionData> buffMap = PotionComponent.BuffToPotion();
+
+        Comparison<Buff> comparison = (Buff x, Buff y) => {
+            // Less than 0	x is less than y.
+            // 0	x equals y.
+            // Greater than 0	x is greater than y.
+            if (buffPriority.IndexOf(x.type) < buffPriority.IndexOf(y.type)) {
+                return 1;
+            } else if (buffPriority.IndexOf(x.type) == buffPriority.IndexOf(y.type)) {
+                return 0;
+            } else if (buffPriority.IndexOf(x.type) > buffPriority.IndexOf(y.type)) {
+                return -1;
+            }
+            return 0;
+        };
         if (intrinsics == null)
             return false;
+        intrinsics.buffs.Sort(comparison);
         if (intrinsics.buffs.Count > 0) {
-            buffType = intrinsics.buffs[0].type;
+            buffType = intrinsics.buffs[0].type; // TODO: change
             potionData = buffMap[buffType];
             return true;
         } else if (intrinsics.liveBuffs.Count > 0) {
-            buffType = intrinsics.liveBuffs[0].type;
+            buffType = intrinsics.liveBuffs[0].type; // TODO: change
             potionData = buffMap[buffType];
             return true;
+        }
+        return false;
+    }
+    public bool GetPotion() {
+        LiquidContainer liquidContainer = analyzand.GetComponent<LiquidContainer>();
+        foreach (KeyValuePair<BuffType, PotionData> kvp in buffMap) {
+            if (kvp.Value.ingredient1.prefabName == analyzand.name || kvp.Value.ingredient2.prefabName == analyzand.name) {
+                potionData = kvp.Value;
+                ingredient = "What a lovely " + Toolbox.Instance.GetName(analyzand) + ".";
+                return true;
+            }
+            if (liquidContainer != null && (kvp.Value.ingredient1.prefabName == liquidContainer.liquid.name || kvp.Value.ingredient2.prefabName == liquidContainer.liquid.name)) {
+                potionData = kvp.Value;
+                ingredient = "I see you have brought me " + liquidContainer.liquid.name + ".";
+                return true;
+            }
         }
         return false;
     }

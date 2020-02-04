@@ -85,7 +85,8 @@ public partial class GameManager : Singleton<GameManager> {
     }
     public void SetRecordingStatus(bool value) {
         data.recordingCommercial = value;
-        GameManager.onRecordingChange(value);
+        if (GameManager.onRecordingChange != null)
+            GameManager.onRecordingChange(value);
     }
 }
 

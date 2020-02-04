@@ -159,8 +159,9 @@ public abstract class Damageable : MonoBehaviour {
         }
         if (lastMessage == null)
             lastMessage = new MessageDamage(0.5f, damageType.physical);
+        Intrinsics myIntrinsics = GetComponent<Intrinsics>();
         foreach (Gibs gib in GetComponents<Gibs>())
-            gib.Emit(lastMessage);
+            gib.Emit(lastMessage, intrinsics: myIntrinsics);
         PhysicalBootstrapper phys = GetComponent<PhysicalBootstrapper>();
         if (phys) {
             phys.DestroyPhysical();

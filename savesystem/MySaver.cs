@@ -42,7 +42,7 @@ public class MySaver {
                 continue;
             if (file.FullName == GameManager.Instance.data.lastSavedPlayerPath)
                 continue;
-            if (file.Name != "house_state.xml")
+            if (file.Name != "apartment_state.xml")
                 File.Delete(file.FullName);
         }
         // GARBAGE COLLECTION

@@ -22,11 +22,17 @@ public class VideoCamera : Interactive {
         Interaction enableAct = new Interaction(this, "Start New", "Enable");
         enableAct.descString = "Start new commercial";
         enableAct.validationFunction = true;
+        enableAct.inertOnPlayerConsent = false;
+        enableAct.otherOnPlayerConsent = false;
+        // enableAct.playerOnOtherConsent = false;
         interactions.Add(enableAct);
 
         Interaction cancelAct = new Interaction(this, "Stop", "Cancel");
         cancelAct.descString = "Abort commercial";
         cancelAct.validationFunction = true;
+        cancelAct.inertOnPlayerConsent = false;
+        cancelAct.otherOnPlayerConsent = false;
+        // cancelAct.playerOnOtherConsent = false;
         interactions.Add(cancelAct);
 
         // add a "restart / start new" interaction
@@ -71,6 +77,8 @@ public class VideoCamera : Interactive {
     // TODO: there could be an issue here with the same occurrence triggering
     // multiple collisions. I will have to handle that eventually.
     void OnTriggerEnter2D(Collider2D col) {
+        if (GameManager.Instance.data == null)
+            return;
         if (!GameManager.Instance.data.recordingCommercial)
             return;
         if (seenFlags.Contains(col.transform.root.gameObject))
@@ -90,17 +98,18 @@ public class VideoCamera : Interactive {
     }
 
     public void UpdateStatus() {
+        if (GameManager.Instance.data == null) {
+            return;
+        }
         if (GameManager.Instance.data.recordingCommercial) {
             regionIndicator.SetActive(true);
-
         } else {
             regionIndicator.SetActive(false);
         }
 
         if (GameManager.Instance.data.activeCommercial == null) {
             return;
-        }
-        if (GameManager.Instance.data.activeCommercial.Evaluate()) {
+        } else if (GameManager.Instance.data.activeCommercial.Evaluate()) {
             EnableBubble();
         } else {
             DisableBubble();
@@ -113,7 +122,6 @@ public class VideoCamera : Interactive {
         return !GameManager.Instance.data.recordingCommercial;
     }
     public void Cancel() {
-        // GameManager.Instance.data.recordingCommercial = false;
         GameManager.Instance.SetRecordingStatus(false);
         UINew.Instance.ClearObjectives();
         regionIndicator.SetActive(false);

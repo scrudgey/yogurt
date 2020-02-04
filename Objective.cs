@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Xml.Serialization;
+using System.Linq;
 
 [System.Serializable]
 [XmlInclude(typeof(ObjectiveProperty))]
@@ -79,14 +80,17 @@ public class ObjectiveProperty : Objective {
 [System.Serializable]
 public class ObjectiveLocation : Objective {
     // location,krazy1,shoot a scene outside
-    public string location;
+    public List<string> locations;
     override public bool RequirementsMet(Commercial commercial) {
-        return commercial.visitedLocations.Contains(location);
+        foreach (string location in locations) {
+            if (commercial.visitedLocations.Contains(location))
+                return true;
+        }
+        return false;
     }
     public ObjectiveLocation(string[] bits) {
-        location = bits[1];
-        // desc = "shoot a scene in " + location;
-        desc = bits[2];
+        desc = bits[1];
+        locations = new List<string>(bits.Skip(1).Take(bits.Length - 1));
     }
     public ObjectiveLocation() { } // required for serialization 
 }

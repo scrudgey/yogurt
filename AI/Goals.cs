@@ -4,38 +4,6 @@ using System.Collections.Generic;
 
 namespace AI {
     [System.Serializable]
-    public class Ref<T> {
-        public T val;
-        public Ref(T t) {
-            val = t;
-        }
-    }
-    public class WorldRef<T> : Ref<T> where T : Component {
-        new public T val {
-            get {
-                if (_val == null) {
-                    UpdateRef();
-                }
-                return _val;
-            }
-            set {
-                _val = value;
-            }
-        }
-        private T _val;
-        public Ref<GameObject> gameObject = new Ref<GameObject>(null);
-        public WorldRef(T t) : base(t) {
-            if (t == null)
-                UpdateRef();
-        }
-        void UpdateRef() {
-            _val = GameObject.FindObjectOfType<T>();
-            if (_val != null)
-                gameObject.val = _val.gameObject;
-        }
-    }
-
-    [System.Serializable]
     public class Goal {
         public List<Routine> routines = new List<Routine>();
         public int index = 0;
@@ -46,14 +14,15 @@ namespace AI {
         public float slewTime;
         private bool fulfillingRequirements = true;
         public string goalThought = "I'm just doing my thing.";
+        public bool ignoreRequirementsIfConditionMet;
         public Goal(GameObject g, Controllable c) {
             gameObject = g;
             control = c;
             slewTime = UnityEngine.Random.Range(0.1f, 0.5f);
         }
         public status Evaluate() {
-            // if (successCondition.Evaluate() == status.success)
-            //     return status.success;
+            if (ignoreRequirementsIfConditionMet && successCondition.Evaluate() == status.success)
+                return status.success;
             foreach (Goal requirement in requirements) {
                 if (requirement.Evaluate() != status.success) {
                     return status.failure;
@@ -62,14 +31,18 @@ namespace AI {
             return successCondition.Evaluate();
         }
         public virtual void Update() {
+
             // if i have any unmet requirements, my update goes to the first unmet one.
-            foreach (Goal requirement in requirements) {
-                if (requirement.Evaluate() != status.success) {
-                    fulfillingRequirements = true;
-                    requirement.Update();
-                    return;
+            if (!(ignoreRequirementsIfConditionMet && successCondition.Evaluate() == status.success)) {
+                foreach (Goal requirement in requirements) {
+                    if (requirement.Evaluate() != status.success) {
+                        fulfillingRequirements = true;
+                        requirement.Update();
+                        return;
+                    }
                 }
             }
+
             if (fulfillingRequirements) {
                 // Debug.Log(control.gameObject.name + " " + this.ToString() + " requirements met"); ;
                 control.ResetInput();
@@ -99,8 +72,9 @@ namespace AI {
                     }
                 }
                 catch (Exception e) {
-                    Debug.Log(this.ToString() + " fail: " + e.Message);
-                    Debug.Log(e.TargetSite);
+                    Debug.LogError(this.ToString() + " fail: " + e.Message);
+                    Debug.LogError(e.StackTrace);
+                    // Debug.Log(e.TargetSite);
                 }
             }
         }
@@ -155,6 +129,17 @@ namespace AI {
             routines.Add(talkRoutine);
         }
     }
+    public class GoalUseItem : Goal {
+        public Inventory inventory;
+        public ConditionBoolSwitch boolSwitch;
+        public GoalUseItem(GameObject g, Controllable c) : base(g, c) {
+            inventory = g.GetComponent<Inventory>();
+            boolSwitch = new ConditionBoolSwitch(g);
+            successCondition = boolSwitch;
+            RoutinePressF routinePressF = new RoutinePressF(g, c, boolSwitch, count: 2, interval: 5f);
+            routines.Add(routinePressF);
+        }
+    }
     public class GoalGetItem : Goal {
         public bool findingFail;
         public GoalGetItem(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c) {
@@ -162,7 +147,6 @@ namespace AI {
             successCondition = new ConditionHoldingSpecificObject(g, target);
             routines.Add(new RoutineRetrieveRefFromInv(g, c, target));
             routines.Add(new RoutineGetRefFromEnvironment(g, c, target));
-
         }
         public GoalGetItem(GameObject g, Controllable c, string target) : base(g, c) {
             goalThought = "I need a " + target + ".";

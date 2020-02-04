@@ -153,7 +153,8 @@ public partial class GameManager : Singleton<GameManager> {
             return;
         if (publicAudio == null) {
             cam = GameObject.FindObjectOfType<Camera>();
-            publicAudio = Toolbox.Instance.SetUpAudioSource(cam.gameObject);
+            // publicAudio = Toolbox.Instance.SetUpAudioSource(cam.gameObject);
+            publicAudio = Toolbox.GetOrCreateComponent<AudioSource>(gameObject);
             if (cam) {
                 Toolbox.GetOrCreateComponent<CameraControl>(cam.gameObject);
             }
@@ -366,7 +367,8 @@ public partial class GameManager : Singleton<GameManager> {
         }
 
         cam = GameObject.FindObjectOfType<Camera>();
-        publicAudio = Toolbox.Instance.SetUpAudioSource(cam.gameObject);
+        // publicAudio = Toolbox.Instance.SetUpAudioSource(cam.gameObject);
+        publicAudio = Toolbox.GetOrCreateComponent<AudioSource>(gameObject);
         if (cam) {
             Toolbox.GetOrCreateComponent<CameraControl>(cam.gameObject);
         }
@@ -690,6 +692,8 @@ public partial class GameManager : Singleton<GameManager> {
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("fireman"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("badboy"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("mayor"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("moon"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("vampire"));
             data.perks["hypnosis"] = true;
             data.perks["vomit"] = true;
             data.perks["eat_all"] = true;

@@ -34,6 +34,7 @@ namespace AI {
         // this bit first checks for a timeout, then calls a routine
         // that is specific to the child class.
         public status Update() {
+            // Debug.Log("")
             runTime += Time.deltaTime;
             if (timeLimit > 0 && runTime > timeLimit) {
                 runTime = 0;
@@ -207,21 +208,16 @@ namespace AI {
     }
     public class RoutineGetRefFromEnvironment : Routine {
         private Inventory inv;
-        // private Awareness awareness;
-        private Ref<GameObject> target;
+        private Ref<GameObject> target = new Ref<GameObject>(null);
         private RoutineWalkToGameobject walkToRoutine;
         public RoutineGetRefFromEnvironment(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c) {
             // routineThought = "I'm going to pick up that " + t + ".";
             this.target = target;
             inv = gameObject.GetComponent<Inventory>();
-            // awareness = gameObject.GetComponent<Awareness>();
             Configure();
         }
         public override void Configure() {
-            // List<GameObject> objs = new List<GameObject>();
-            if (target.val && target.val.activeInHierarchy) {
-                walkToRoutine = new RoutineWalkToGameobject(gameObject, control, target);
-            }
+            walkToRoutine = new RoutineWalkToGameobject(gameObject, control, target);
         }
         protected override status DoUpdate() {
             if (target.val && target.val.activeInHierarchy) {
@@ -380,6 +376,34 @@ namespace AI {
             return status.neutral;
         }
     }
+    public class RoutinePressF : Routine {
+        public ConditionBoolSwitch boolSwitch;
+        public int count;
+        public float interval;
+        public float timer;
+        public int numberTimesPressed;
+        public RoutinePressF(GameObject g, Controllable c, ConditionBoolSwitch boolSwitch, int count = 1, float interval = 1f) : base(g, c) {
+            this.boolSwitch = boolSwitch;
+            this.count = count;
+            this.interval = interval;
+            this.timer = interval;
+        }
+        protected override status DoUpdate() {
+            timer += Time.deltaTime;
+            if (timer > interval) {
+                timer = 0;
+                if (numberTimesPressed < count) {
+                    numberTimesPressed += 1;
+                    control.ShootPressed();
+                    return status.neutral;
+                } else {
+                    boolSwitch.conditionMet = true;
+                    return status.success;
+                }
+            }
+            return status.neutral;
+        }
+    }
     public class RoutineWanderAndPressF : RoutineWander {
         public float timeSinceF;
         public RoutineWanderAndPressF(GameObject g, Controllable c) : base(g, c) {
@@ -500,12 +524,12 @@ namespace AI {
         }
         public RoutineWalkToGameobject(GameObject g, Controllable c, Ref<GameObject> targetObject, bool invert = false, Vector2 localOffset = new Vector2()) : base(g, c) {
             routineThought = "I'm walking over to the " + g.name + ".";
-            target = targetObject;
+            this.target = targetObject;
             this.invert = invert;
             this.localOffset = localOffset;
         }
         protected override status DoUpdate() {
-            if (target.val) {
+            if (target.val != null) {
                 Vector2 localizedOffset = new Vector2(targetTransform.lossyScale.x * localOffset.x, targetTransform.lossyScale.y * localOffset.y);
 
                 Vector2 targetPosition = (Vector2)targetTransform.position + localizedOffset;
@@ -536,6 +560,7 @@ namespace AI {
                     return status.neutral;
                 }
             } else {
+                // Debug.Log("target val is null");
                 return status.failure;
             }
         }

@@ -39,6 +39,7 @@ public class LiquidContainer : Interactive, ISaveable {
             Interaction drinker = new Interaction(this, "Drink", "Drink");
             drinker.validationFunction = true;
             drinker.playerOnOtherConsent = false;
+            drinker.defaultPriority = 5;
             fillContainer.validationFunction = true;
             interactions.Add(drinker);
             interactions.Add(fillContainer);

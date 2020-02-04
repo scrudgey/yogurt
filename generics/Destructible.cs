@@ -9,7 +9,7 @@ public class Destructible : Damageable, ISaveable {
     public float physicalMultiplier = 1f;
     public float fireMultiplier = 1f;
     public AudioSource audioSource;
-    public void Start() {
+    public void Awake() {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
     }
     public override void NetIntrinsicsChanged(MessageNetIntrinsic intrins) {
