@@ -54,7 +54,7 @@ public class Controller : Singleton<Controller> {
     }
     public GameObject commandTarget;
     public bool doCommand;
-    public Interaction commandAct = null;
+    public InteractionParam commandAct = null;
     public ActionButtonScript.buttonType commandButtonType = ActionButtonScript.buttonType.none;
     void ChangeState(ControlState previousState) {
         // TODO: code for transitioning between states
@@ -385,7 +385,7 @@ public class Controller : Singleton<Controller> {
         if (state != ControlState.commandSelect) {
             if (button.bType == ActionButtonScript.buttonType.Action) {
                 if (InteractionIsWithinRange(button.action) || button.manualAction) {
-                    button.action.DoAction();
+                    button.action.DoAction(button.parameters);
                     if (!button.action.dontWipeInterface) {
                         UINew.Instance.RefreshUI(active: true);
                         ResetLastLeftClicked();
@@ -402,8 +402,8 @@ public class Controller : Singleton<Controller> {
         // handle commands clicked
         if (button.bType == ActionButtonScript.buttonType.Action) {
             if (InteractionIsWithinRange(button.action) || button.manualAction) {
-                commandAct = button.action;
-                DialogueCommand().CommandCallback(button.action);
+                commandAct = new InteractionParam(button.action, button.parameters);
+                DialogueCommand().CommandCallback(commandAct);
             }
         } else {
             commandButtonType = button.bType;

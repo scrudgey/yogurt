@@ -8,11 +8,7 @@ public partial class UINew : Singleton<UINew> {
 
     private enum EasingDirection { none, up, down }
 
-    private struct ActionButton {
-        public GameObject gameobject;
-        public ActionButtonScript buttonScript;
-        public Text buttonText;
-    }
+
     public GameObject UICanvas;
     private List<GameObject> activeWorldButtons = new List<GameObject>();
     private List<GameObject> activeTopButtons = new List<GameObject>();

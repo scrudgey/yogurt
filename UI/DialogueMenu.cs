@@ -337,13 +337,13 @@ public class DialogueMenu : MonoBehaviour {
         Controller.Instance.state = Controller.ControlState.commandSelect;
         UINew.Instance.CloseActiveMenu();
     }
-    public void CommandCallback(Interaction action) {
+    public void CommandCallback(InteractionParam ip) {
         Speech playerSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
         Speech targetSpeech = Controller.Instance.commandTarget.GetComponent<Speech>();
         Configure(playerSpeech, targetSpeech, interruptDefault: true);
-        desire desireToAct = action.GetDesire(Controller.Instance.commandTarget, GameManager.Instance.playerObject);
+        desire desireToAct = ip.interaction.GetDesire(Controller.Instance.commandTarget, GameManager.Instance.playerObject);
 
-        PromptCommand(action.Description());
+        PromptCommand(ip.Description());
         if (desireToAct == desire.decline) {
             DeclineCommand();
             Controller.Instance.ResetCommandState();

@@ -43,7 +43,8 @@ public class Eater : Interactive, ISaveable {
         Interaction eatAction = new Interaction(this, "Eat", "Eat");
         // eatAction.defaultPriority = 1;
         eatAction.dontWipeInterface = false;
-        eatAction.otherOnPlayerConsent = false;
+        eatAction.otherOnSelfConsent = false;
+        eatAction.holdingOnOtherConsent = false;
         eatAction.validationFunction = true;
         interactions.Add(eatAction);
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);

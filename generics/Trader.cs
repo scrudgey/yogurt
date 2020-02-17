@@ -8,8 +8,9 @@ public class Trader : Interactive, ISaveable {
     void Start() {
         inv = GetComponent<Inventory>();
         Interaction tradeAct = new Interaction(this, "Buy...", "Trade");
-        tradeAct.hideInTopMenu = true;
-        tradeAct.playerOnOtherConsent = false;
+        // tradeAct.hideInTopMenu = true;
+        tradeAct.selfOnOtherConsent = false;
+        tradeAct.selfOnSelfConsent = false;
         interactions.Add(tradeAct);
     }
     // TODO: adjust responses, incorporate nimrod

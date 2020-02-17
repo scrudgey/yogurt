@@ -19,14 +19,21 @@ public class SquirtGun : LiquidContainer, IDirectable {
             fillContainer.validationFunction = true;
             interactions.Add(fillContainer);
             interactions.Add(fillReservoir);
-            Interaction squirtAction = new Interaction(this, "Shoot", "Squirt", false, true);
+
+            Interaction squirtAction = new Interaction(this, "Shoot", "Squirt");//, false, true);
+            squirtAction.selfOnOtherConsent = false;
+            squirtAction.otherOnSelfConsent = false;
             squirtAction.defaultPriority = 6;
             squirtAction.validationFunction = true;
             interactions.Add(squirtAction);
-            Interaction spray2 = new Interaction(this, "Shoot", "SprayObject", true, false);
+
+            Interaction spray2 = new Interaction(this, "Shoot", "SprayObject");//, true, false);
+            spray2.selfOnSelfConsent = false;
+            spray2.otherOnSelfConsent = false;
             spray2.unlimitedRange = true;
             spray2.dontWipeInterface = true;
             spray2.validationFunction = true;
+
             interactions.Add(spray2);
             if (liquidSprite)
                 liquidSprite.enabled = false;

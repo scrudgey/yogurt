@@ -23,6 +23,7 @@ public class VideoCamera : Interactive {
         enableAct.descString = "Start new commercial";
         enableAct.validationFunction = true;
         interactions.Add(enableAct);
+        enableAct.holdingOnOtherConsent = false;
 
         Interaction cancelAct = new Interaction(this, "Stop", "Cancel");
         cancelAct.descString = "Abort commercial";

@@ -17,15 +17,19 @@ public class Blender : Container, ISaveable {
         base.Awake();
         spriteRenderer = GetComponent<SpriteRenderer>();
         liquidContainer = GetComponent<LiquidContainer>();
-        interactions.Add(new Interaction(this, "Power", "Power"));
-        interactions.Add(new Interaction(this, "Lid", "Lid"));
+        PopulateContentActions();
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         pb = GetComponent<PhysicalBootstrapper>();
     }
     protected override void PopulateContentActions() {
         base.PopulateContentActions();
-        interactions.Add(new Interaction(this, "Power", "Power"));
-        interactions.Add(new Interaction(this, "Lid", "Lid"));
+        Interaction powerAct = new Interaction(this, "Power", "Power");
+        Interaction lidAct = new Interaction(this, "Lid", "Lid");
+        powerAct.holdingOnOtherConsent = false;
+        lidAct.holdingOnOtherConsent = false;
+
+        interactions.Add(powerAct);
+        interactions.Add(lidAct);
     }
     void FixedUpdate() {
         if (power) {

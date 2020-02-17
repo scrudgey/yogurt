@@ -24,8 +24,8 @@ public class Cannon : Interactive, ISaveable {
 
         chargeAction = new Interaction(this, "Fill", "ChargeCannon");
         chargeAction.descString = "Fill cannon with gunpowder";
-        chargeAction.inertOnPlayerConsent = true;
-        chargeAction.otherOnPlayerConsent = true;
+        // chargeAction.inertOnPlayerConsent = true;
+        // chargeAction.otherOnPlayerConsent = true;
         interactions.Add(chargeAction);
 
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);

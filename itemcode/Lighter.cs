@@ -10,7 +10,8 @@ public class Lighter : Interactive {
     static List<string> forbiddenTags = new List<string>(new string[] { "occurrenceFlag", "background", "sightcone" });
     void Start() {
         pickup = GetComponent<Pickup>();
-        Interaction f = new Interaction(this, "Fire", "Fire", false, true);
+        Interaction f = new Interaction(this, "Fire", "Fire");
+        f.otherOnSelfConsent = false;
         f.descString = "Use lighter";
         f.defaultPriority = 2;
         interactions.Add(f);

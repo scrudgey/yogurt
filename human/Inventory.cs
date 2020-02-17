@@ -58,13 +58,17 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         holdpoint = transform.Find("holdpoint");
         holdSortGroup = holdpoint.GetComponent<SortingGroup>();
-        Interaction getAction = new Interaction(this, "Get", "GetItem", true, false);
-        // getAction.hideInTopMenu = true;
+        Interaction getAction = new Interaction(this, "Get", "GetItem");
         getAction.dontWipeInterface = false;
-        getAction.otherOnPlayerConsent = false;
-        getAction.playerOnOtherConsent = false;
+        getAction.otherOnSelfConsent = false;
+        getAction.selfOnSelfConsent = false;
+        getAction.holdingOnOtherConsent = false;
         interactions.Add(getAction);
-        Interaction swingAction = new Interaction(this, "Swing", "SwingItem", false, true);
+
+        Interaction swingAction = new Interaction(this, "Swing", "SwingItem");
+        swingAction.selfOnOtherConsent = false;
+        swingAction.otherOnSelfConsent = false;
+
         swingAction.defaultPriority = 5;
         interactions.Add(swingAction);
         direction = Vector2.right;

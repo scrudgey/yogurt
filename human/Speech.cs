@@ -104,11 +104,13 @@ public class Speech : Interactive, ISaveable {
         }
 
         Interaction speak = new Interaction(this, "Look", "Describe");
-        speak.hideInTopMenu = true;
+        // speak.hideInTopMenu = true;
         speak.unlimitedRange = true;
-        speak.otherOnPlayerConsent = false;
-        speak.playerOnOtherConsent = false;
-        speak.inertOnPlayerConsent = false;
+        speak.otherOnSelfConsent = false;
+        speak.selfOnSelfConsent = false;
+        speak.holdingOnOtherConsent = false;
+        // speak.playerOnOtherConsent = faltruese;
+        // speak.inertOnPlayerConsent = false;
         speak.dontWipeInterface = false;
         interactions.Add(speak);
         if (!disableSpeakWith) {

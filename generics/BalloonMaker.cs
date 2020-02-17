@@ -10,10 +10,10 @@ public class BalloonMaker : Interactive {
     void Awake() {
         Interaction balloon = new Interaction(this, "Balloon", "MakeBalloon");
         balloon.defaultPriority = 1;
-        balloon.hideInClickMenu = true;
-        balloon.otherOnPlayerConsent = false;
-        balloon.playerOnOtherConsent = false;
-        balloon.inertOnPlayerConsent = false;
+        // balloon.hideInClickMenu = true;
+        balloon.otherOnSelfConsent = false;
+        balloon.selfOnOtherConsent = false;
+        // balloon.inertOnPlayerConsent = false;
         interactions.Add(balloon);
     }
     public void MakeBalloon() {

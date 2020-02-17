@@ -10,10 +10,9 @@ public class Container : MayorLock, IExcludable, ISaveable {
     public GameObject lockObject;
     public Sprite openSprite;
     public List<Pickup> initItems = new List<Pickup>();
+    public Dictionary<Pickup, Interaction> retrieveActions = new Dictionary<Pickup, Interaction>();
     virtual protected void Awake() {
-        Interaction stasher = new Interaction(this, "Put", "Store");
-        stasher.validationFunction = true;
-        interactions.Add(stasher);
+        PopulateContentActions();
     }
     void Start() {
         foreach (Pickup item in initItems) {
@@ -37,6 +36,8 @@ public class Container : MayorLock, IExcludable, ISaveable {
         Interaction stasher = new Interaction(this, "Put", "Store");
         stasher.validationFunction = true;
         interactions.Add(stasher);
+
+        retrieveActions = new Dictionary<Pickup, Interaction>();
         foreach (Pickup pickup in items) {
             Pickup closurePickup = pickup;
             Action<Component> removeIt = (comp) => {
@@ -53,29 +54,17 @@ public class Container : MayorLock, IExcludable, ISaveable {
             if (bs) {
                 bs.doInit = false;
             }
+            retrieveActions[pickup] = newInteraction;
         }
     }
-    // protected void RemoveAllRetrieveActions() {
-    //     interactions = new List<Interaction>();
-    //     Interaction stasher = new Interaction(this, "Put", "Store");
-    //     stasher.validationFunction = true;
-    //     interactions.Add(stasher);
-    // }
+    protected void RemoveAllRetrieveActions() {
+        interactions = new List<Interaction>();
+        Interaction stasher = new Interaction(this, "Put", "Store");
+        stasher.validationFunction = true;
+        interactions.Add(stasher);
+    }
     protected void RemoveRetrieveAction(Pickup pickup) {
-        Interaction removeThis = null;
-        foreach (Interaction interaction in interactions) {
-            if (interaction.parameters == null) {
-                removeThis = interaction;
-            } else {
-                if (interaction.parameters.Count == 2)
-                    if ((Pickup)interaction.parameters[1] == pickup)
-                        removeThis = interaction;
-                if (interaction.actionName == pickup.itemName)
-                    removeThis = interaction;
-            }
-        }
-        if (removeThis != null)
-            interactions.Remove(removeThis);
+        interactions.Remove(retrieveActions[pickup]);
     }
     public bool Store_Validation(Inventory inv) {
         if (lockObject != null)
@@ -145,12 +134,6 @@ public class Container : MayorLock, IExcludable, ISaveable {
             Inventory i = comp as Inventory;
             Remove(i, pickup);
         };
-        // Interaction newInteraction = new Interaction(this, pickup.itemName, removeIt);
-        // newInteraction.actionDelegate = removeIt;
-        // newInteraction.parameterTypes = new List<Type>();
-        // newInteraction.parameterTypes.Add(typeof(Inventory));
-        // newInteraction.descString = "Retrieve " + Toolbox.Instance.GetName(pickup.gameObject) + " from " + Toolbox.Instance.GetName(gameObject);
-        // interactions.Add(newInteraction);
         PopulateContentActions();
     }
     public virtual void Remove(Inventory inv, Pickup pickup) {

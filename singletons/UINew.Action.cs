@@ -6,24 +6,18 @@ using UnityEngine.EventSystems;
 
 public partial class UINew : Singleton<UINew> {
 
-    private List<ActionButton> ActionButtonsForClick(GameObject clickedOn) {
-        HashSet<Interaction> clickedActions = new HashSet<Interaction>();
-        if (Controller.Instance.commandTarget != null) {
-            clickedActions = Interactor.GetInteractions(Controller.Instance.commandTarget, clickedOn, showOnlyClickActions: showOnlyClickActions, showOnlyTopActions: showOnlyTopActions);//, manualActions: true);//, rightClickMenu: true);
-        } else {
-            clickedActions = Interactor.GetInteractions(GameManager.Instance.playerObject, clickedOn, showOnlyClickActions: showOnlyClickActions, showOnlyTopActions: showOnlyTopActions);//, manualActions: true);//, rightClickMenu: true);
-        }
-
-        return CreateButtonsFromActions(clickedActions); ;
-    }
-
     public void ShowActionsForWorldClick(GameObject clickedOn, GameObject clickSite) {
         // this method displays actions when the player clicks on something in the game world
 
         ClearWorldButtons();
         activeWorldButtons = new List<GameObject>();
+        List<ActionButton> actionButtons = null;
+        if (Controller.Instance.commandTarget != null) {
+            actionButtons = CreateButtonsFromActions(Interactor.SelfOnOtherInteractions(Controller.Instance.commandTarget, clickedOn));
+        } else {
+            actionButtons = CreateButtonsFromActions(Interactor.SelfOnOtherInteractions(GameManager.Instance.playerObject, clickedOn));
+        }
 
-        List<ActionButton> actionButtons = ActionButtonsForClick(clickedOn, showOnlyClickActions: true);
         foreach (ActionButton button in actionButtons)
             activeWorldButtons.Add(button.gameobject);
         activeWorldButtons.Add(CircularizeButtons(actionButtons, clickSite));
@@ -37,11 +31,14 @@ public partial class UINew : Singleton<UINew> {
         Inventory inventory = actor.GetComponent<Inventory>();
         if (inventory && inventory.holding) {
 
-            // TODO: display all actions.
-
             activeWorldButtons = new List<GameObject>();
-            // List<ActionButton> buttons = new List<ActionButton>();
-            List<ActionButton> buttons = ActionButtonsForClick(actor, showOnlyClickActions: true);
+            List<ActionButton> buttons = null;
+            if (Controller.Instance.commandTarget != null) {
+                buttons = CreateButtonsFromActions(Interactor.SelfOnSelfInteractions(Controller.Instance.commandTarget));
+            } else {
+                buttons = CreateButtonsFromActions(Interactor.SelfOnSelfInteractions(GameManager.Instance.playerObject));
+            }
+
             foreach (ActionButton button in buttons) {
                 activeWorldButtons.Add(button.gameobject);
             }
@@ -65,8 +62,6 @@ public partial class UINew : Singleton<UINew> {
         }
     }
 
-
-
     private ActionButton CreateActionButton(Inventory inventory, string name, ActionButtonScript.buttonType bType) {
         ActionButton newbutton = SpawnButton(null);
         newbutton.buttonScript.manualAction = true;
@@ -77,10 +72,10 @@ public partial class UINew : Singleton<UINew> {
         return newbutton;
     }
 
-    private List<ActionButton> CreateButtonsFromActions(HashSet<Interaction> interactions, bool removeColliders = false) {
+    static public List<ActionButton> CreateButtonsFromActions(HashSet<InteractionParam> interactions, bool removeColliders = false) {
         List<ActionButton> returnList = new List<ActionButton>();
-        foreach (Interaction interaction in interactions) {
-            ActionButton newButton = SpawnButton(interaction);
+        foreach (InteractionParam ip in interactions) {
+            ActionButton newButton = SpawnButton(ip);
             if (removeColliders) {
                 Destroy(newButton.gameobject.GetComponent<CircleCollider2D>());
                 Destroy(newButton.gameobject.GetComponent<Rigidbody2D>());
@@ -89,7 +84,7 @@ public partial class UINew : Singleton<UINew> {
         }
         return returnList;
     }
-    ActionButton SpawnButton(Interaction interaction) {
+    static ActionButton SpawnButton(InteractionParam ip) {
         GameObject newButton = Instantiate(Resources.Load("UI/NeoActionButton"), Vector2.zero, Quaternion.identity) as GameObject;
         ActionButtonScript buttonScript = newButton.GetComponent<ActionButtonScript>();
         buttonScript.button = newButton.GetComponent<Button>();
@@ -98,9 +93,12 @@ public partial class UINew : Singleton<UINew> {
         returnbut.gameobject = newButton;
         returnbut.buttonScript = buttonScript;
         returnbut.buttonText = buttonText;
-        returnbut.buttonScript.action = interaction;
-        if (interaction != null)
-            returnbut.buttonText.text = interaction.actionName;
+        if (ip != null) {
+            returnbut.buttonScript.action = ip.interaction;
+            returnbut.buttonScript.parameters = ip.parameters;
+            returnbut.buttonText.text = ip.interaction.actionName;
+        }
+
         return returnbut;
     }
     private GameObject CircularizeButtons(List<ActionButton> buttons, GameObject target) {
@@ -166,10 +164,9 @@ public partial class UINew : Singleton<UINew> {
     }
 
     public void UpdateTopActionButtons() {
-        // top action buttons are everything self-self (including holding).
-        // TODO: include throw, drop, stash in top level buttons.
-
         // This method updates the buttons on the top action bar
+        // top action buttons are everything self-self (including holding).
+
         if (activeMenuType != MenuType.none)
             return;
         if (GameManager.Instance.playerObject == null || GameManager.Instance.playerIsDead)
@@ -177,15 +174,10 @@ public partial class UINew : Singleton<UINew> {
 
         ClearTopButtons();
 
-        // // HashSet<Interaction> manualActions = Controller.Instance.focus.UpdateDefaultInteraction();
-        // Interaction defaultAction = Controller.Instance.focus.UpdateDefaultInteraction();
-        // List<ActionButton> actionButtons = CreateActionButtons(new HashSet<Interaction> { defaultAction });
-
-
-        Interaction defaultAction = Controller.Instance.focus.UpdateDefaultInteraction();
+        InteractionParam defaultAction = Controller.Instance.focus.UpdateDefaultInteraction();
         List<ActionButton> actionButtons = new List<ActionButton>();
         if (defaultAction != null) {
-            actionButtons = CreateActionButtons(new HashSet<Interaction> { defaultAction });
+            actionButtons = CreateActionButtons(new HashSet<InteractionParam> { defaultAction });
         }
 
         // punch button
@@ -196,7 +188,7 @@ public partial class UINew : Singleton<UINew> {
             HidePunchButton();
             if (Controller.Instance.focus.defaultInteraction != null && Controller.Instance.focus.defaultInteraction.IsValid()) {
                 foreach (ActionButton button in actionButtons) {
-                    if (button.buttonScript.action == Controller.Instance.focus.defaultInteraction) {
+                    if (button.buttonScript.action == Controller.Instance.focus.defaultInteraction.interaction) {
                         GameObject indicator = Instantiate(Resources.Load("UI/defaultButtonIndicator")) as GameObject;
                         indicator.transform.SetParent(button.gameobject.transform, false);
                         indicator.transform.SetAsLastSibling();
@@ -242,7 +234,7 @@ public partial class UINew : Singleton<UINew> {
             teleportButton.SetActive(false);
         }
     }
-    private List<ActionButton> CreateActionButtons(HashSet<Interaction> manualActions) {
+    private List<ActionButton> CreateActionButtons(HashSet<InteractionParam> manualActions) {
 
         List<ActionButton> manualButtons = CreateButtonsFromActions(manualActions, true);
         foreach (ActionButton button in manualButtons) {
