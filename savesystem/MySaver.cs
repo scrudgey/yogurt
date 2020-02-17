@@ -312,6 +312,7 @@ public class MySaver {
                 if (marker) {
                     marker.id = persistent.id;
                 }
+                Toolbox.GetOrCreateComponent<Intrinsics>(go);
             } else {
                 Debug.LogError("object " + idn.ToString() + " not found in database");
             }

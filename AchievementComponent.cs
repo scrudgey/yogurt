@@ -20,6 +20,7 @@ public enum StatType {
     deathByCombat,
     deathByMisadventure,
     deathByAsphyxiation,
+    deathByExplosion,
     mayorsSassed,
     actsOfCannibalism,
     heartsEaten,

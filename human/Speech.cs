@@ -18,6 +18,37 @@ public class Speech : Interactive, ISaveable {
         @"\bdick\b",
         @"\bass\b"};
 
+    public static string ParseGender(string instring) {
+        //Use named capturing groups to make life easier
+        // var pattern = "(?<label>\"formatter\"): ([\"])(?<tag>.*)([\"])";
+        string genderHook = @"\[\[(?<male>.+)\|(?<female>.+)\]\]";
+
+        //Create a substitution pattern for the Replace method
+        string replacePattern = "";
+        if (GameManager.Instance.playerGender == Gender.male) {
+            replacePattern = "${male}";
+        } else if (GameManager.Instance.playerGender == Gender.female) {
+            replacePattern = "${female}";
+        }
+
+        return Regex.Replace(instring, genderHook, replacePattern, RegexOptions.IgnoreCase);
+    }
+
+    public static string ProcessDialogue(string phrase) {
+        string finalPhrase = phrase;
+        foreach (string swear in swearWords) {
+            StringBuilder builder = new StringBuilder();
+            foreach (char c in swear.Substring(2, swear.Length - 4)) {
+                builder.Append("∎");
+            }
+            string mask = builder.ToString();
+            finalPhrase = Regex.Replace(finalPhrase, swear, mask);
+        }
+
+        finalPhrase = ParseGender(finalPhrase);
+        return finalPhrase;
+    }
+
     struct BuffMessage {
         public string On;
         public string Off;
@@ -62,9 +93,18 @@ public class Speech : Interactive, ISaveable {
     public Dictionary<BuffType, Buff> previousNetInstrinsic;
     public bool doCompareIntrinsic;
     public bool configured = false;
+    public Grammar grammar = new Grammar();
+    public List<string> otherNimrodDefs;
     void Awake() {
+        grammar.Load("structure");
+        grammar.Load("flavor_test");
+        grammar.Load("flavor_" + flavor);
+        foreach (string otherFile in otherNimrodDefs) {
+            grammar.Load(otherFile);
+        }
+
         Interaction speak = new Interaction(this, "Look", "Describe");
-        speak.hideInManualActions = true;
+        speak.hideInTopMenu = true;
         speak.unlimitedRange = true;
         speak.otherOnPlayerConsent = false;
         speak.playerOnOtherConsent = false;
@@ -296,10 +336,6 @@ public class Speech : Interactive, ISaveable {
             return null;
         }
         if (message.nimrod) {
-            Grammar grammar = new Grammar();
-            grammar.Load("structure");
-            grammar.Load("flavor_test");
-            grammar.Load("flavor_" + flavor);
             message.phrase = grammar.Parse(message.phrase);
             if (message.phrase == "")
                 return null;
@@ -309,7 +345,7 @@ public class Speech : Interactive, ISaveable {
         if (message.eventData == null)
             message.eventData = new EventData();
         speechData.events.Add(message.eventData);
-        string censoredPhrase = CensorSwears(message.phrase);
+        string censoredPhrase = ProcessDialogue(message.phrase);
         speechData.profanity = Toolbox.LevenshteinDistance(message.phrase, censoredPhrase);
         swearMask = new bool[message.phrase.Length];
         for (int i = 0; i < message.phrase.Length; i++) {
@@ -337,18 +373,7 @@ public class Speech : Interactive, ISaveable {
         Toolbox.Instance.OccurenceFlag(gameObject, speechData);
         return speechData;
     }
-    public string CensorSwears(string phrase) {
-        string censoredPhrase = phrase;
-        foreach (string swear in swearWords) {
-            StringBuilder builder = new StringBuilder();
-            foreach (char c in swear.Substring(2, swear.Length - 4)) {
-                builder.Append("∎");
-            }
-            string mask = builder.ToString();
-            censoredPhrase = Regex.Replace(censoredPhrase, swear, mask);
-        }
-        return censoredPhrase;
-    }
+
     public void Insult(string phrase, GameObject target, EventData data = null) {
         MessageSpeech message = new MessageSpeech(phrase);
         message.eventData = new EventData();
@@ -451,7 +476,7 @@ public class Speech : Interactive, ISaveable {
 
         EventData data = new EventData(chaos: 2, disturbing: 1, positive: -2, offensive: Random.Range(2, 3));
         Insult(content, target, data: data);
-        string censoredContent = CensorSwears(content);
+        string censoredContent = ProcessDialogue(content);
         List<string> strings = new List<string>() { censoredContent };
         Monologue mono = new Monologue(this, strings.ToArray());
 
@@ -463,14 +488,11 @@ public class Speech : Interactive, ISaveable {
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
 
-        Grammar grammar = new Grammar();
-        grammar.Load("structure");
-        grammar.Load("flavor_" + flavor);
         string content = grammar.Parse("{threat}");
 
         EventData data = new EventData(chaos: 2, disturbing: 1, positive: -2, offensive: Random.Range(2, 3));
         Threaten(content, target, data: data);
-        string censoredContent = CensorSwears(content);
+        string censoredContent = ProcessDialogue(content);
         List<string> strings = new List<string>() { censoredContent };
         Monologue mono = new Monologue(this, strings.ToArray());
 

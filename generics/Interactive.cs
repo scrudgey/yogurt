@@ -16,8 +16,8 @@ public class Interaction {
     public GameObject defaultTarget;
     public List<object> parameters;
     public List<Component> defaultParameters;
-    public bool hideInManualActions;
-    public bool hideInRightClickMenu;
+    // public bool hideInTopMenu;
+    // public bool hideInClickMenu;
     public int defaultPriority;
     public float range = Mathf.Pow(0.35f, 2f);
     public bool unlimitedRange = false;
@@ -47,8 +47,8 @@ public class Interaction {
         this.action = functionName;
         this.actionName = name;
         this.parent = o;
-        this.hideInManualActions = manualHide;
-        this.hideInRightClickMenu = rightHide;
+        this.hideInTopMenu = manualHide;
+        this.hideInClickMenu = rightHide;
         methodInfo = parent.GetType().GetMethod(functionName);
         if (methodInfo != null) {
             System.Reflection.ParameterInfo[] pars = methodInfo.GetParameters();
@@ -111,8 +111,7 @@ public class Interaction {
             }
         }
         if (parameterMatches == parameterTypes.Count) {
-            if (debug)
-                Debug.Log("enabled");
+
             enabled = true;
             // if a validation function is specified, we have to also check to see whether it 
             // is okay with being enabled.
@@ -123,6 +122,8 @@ public class Interaction {
                 if (!validation)
                     enabled = false;
             }
+            if (debug)
+                Debug.Log("enabled: " + enabled.ToString());
         } else {
             if (debug)
                 Debug.Log("disabled");

@@ -47,6 +47,7 @@ public class GameData {
     public bool firstTimeLeavingHouse;
     public bool mayorCutsceneHappened;
     public bool visitedStudio;
+    public bool finishedCommercial;
     public bool visitedMoon;
     public bool teleporterUnlocked;
     public string headSpriteSheet;
@@ -127,6 +128,7 @@ public partial class GameManager : Singleton<GameManager> {
         {"tower", "tower"},
         {"cave4", "tomb"},
         {"apartment", "apartment"},
+        {"boardroom", "yogurt HQ"},
     };
     public GameData data;
     public static GlobalSettings settings = new GlobalSettings();
@@ -144,6 +146,7 @@ public partial class GameManager : Singleton<GameManager> {
     public bool playerIsDead;
     public bool debug = true;
     public bool failedLevelLoad = false;
+    public Gender playerGender;
 
     public delegate void BooleanObserver(bool value);
     public static BooleanObserver onRecordingChange;
@@ -153,7 +156,6 @@ public partial class GameManager : Singleton<GameManager> {
             return;
         if (publicAudio == null) {
             cam = GameObject.FindObjectOfType<Camera>();
-            // publicAudio = Toolbox.Instance.SetUpAudioSource(cam.gameObject);
             publicAudio = Toolbox.GetOrCreateComponent<AudioSource>(gameObject);
             if (cam) {
                 Toolbox.GetOrCreateComponent<CameraControl>(cam.gameObject);
@@ -169,7 +171,6 @@ public partial class GameManager : Singleton<GameManager> {
             // ReceivePackage("kaiser_helmet");
             // ReceivePackage("duplicator");
             // ReceivePackage("golf_club");
-
         }
         if (saveGameName == "test")
             MySaver.CleanupSaves();
@@ -178,7 +179,6 @@ public partial class GameManager : Singleton<GameManager> {
         } else {
             InitializeNonPlayableLevel();
         }
-        // publicAudio = Toolbox.Instance.SetUpAudioSource(cam.gameObject);
         SceneManager.sceneLoaded += SceneWasLoaded;
         // these bits are for debug!
         Scene scene = SceneManager.GetActiveScene();
@@ -201,9 +201,7 @@ public partial class GameManager : Singleton<GameManager> {
             }
         }
         if (intervalTimer > 3f) {
-            // data.achievementStats.secondsPlayed = timeSinceLastSave;
             SetStat(StatType.secondsPlayed, data.secondsPlayed);
-            // SetStat(StatType.secondsPlayed, data.stats[StatType.secondsPlayed].value+timeSinceLastSave);
             intervalTimer = 0;
         }
         if (awaitNewDayPrompt && sceneTime > 2f) {
@@ -213,6 +211,27 @@ public partial class GameManager : Singleton<GameManager> {
         if (sceneTime > 0.1f && !data.unlockedScenes.Contains(sceneName) && !InCutsceneLevel() && GameManager.sceneNames.ContainsKey(sceneName)) {
             data.unlockedScenes.Add(sceneName);
             UINew.Instance.ShowSceneText("- " + GameManager.sceneNames[sceneName] + " -");
+        }
+    }
+    public void ExplodeHead() {
+        Head head = playerObject.GetComponentInChildren<Head>();
+        if (head != null) {
+            AudioClip boom = Resources.Load("sounds/explosion/cannon") as AudioClip;
+            PlayPublicSound(boom);
+
+            GameObject headGibs = Resources.Load("prefabs/gibs/headGibsContainer") as GameObject;
+            MessageDamage message = new MessageDamage(100f, damageType.physical);
+            Vector2 rand = UnityEngine.Random.insideUnitCircle;
+            message.force = new Vector3(rand.x, rand.y, 2f).normalized;
+            foreach (Gibs gib in headGibs.GetComponents<Gibs>()) {
+                Gibs newGib = head.gameObject.AddComponent<Gibs>();
+                newGib.CopyFrom(gib);
+                newGib.Emit(message);
+            }
+
+            Destroy(head.gameObject);
+            Hurtable hurtable = playerObject.GetComponent<Hurtable>();
+            hurtable.Die(damageType.physical);
         }
     }
     public bool InCutsceneLevel() {
@@ -260,6 +279,7 @@ public partial class GameManager : Singleton<GameManager> {
         // check collections for new focus outfit, holding, and hat
         Outfit playerOutfit = target.GetComponent<Outfit>();
         if (playerOutfit) {
+            playerGender = playerOutfit.gender;
             string prefabName = playerOutfit.wornUniformName;
             if (prefabName != "nude" && prefabName != "nude_female") {
                 GameObject uniform = Instantiate(Resources.Load("prefabs/" + prefabName)) as GameObject;
@@ -268,7 +288,6 @@ public partial class GameManager : Singleton<GameManager> {
             } else {
                 playerOutfit.GoNude();
             }
-
         }
         Head playerHead = target.GetComponentInChildren<Head>();
         if (playerHead) {
@@ -296,6 +315,7 @@ public partial class GameManager : Singleton<GameManager> {
     void SceneWasLoaded(Scene scene, LoadSceneMode mode) {
         // Debug.Log("on level was loaded");
         Toolbox.Instance.numberOfLiveSpeakers = 0;
+        publicAudio.Stop();
         sceneTime = 0f;
         if (InCutsceneLevel()) {
             InitializeNonPlayableLevel();
@@ -321,20 +341,14 @@ public partial class GameManager : Singleton<GameManager> {
     }
     void ResetGameState() {
         try {
-            // string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
-            // if (!System.IO.Directory.Exists(path))
-            //     return;
-            // path = Path.Combine(path, GameManager.Instance.saveGameName + ".xml");
             FileInfo playerFile = new FileInfo(GameManager.Instance.data.lastSavedPlayerPath);
             if (playerFile.Exists) {
                 playerFile.Delete();
             }
-            // Debug.Log("cleaning up saves");
-            // Debug.Break();
             MySaver.CleanupSaves();
 
             string housePath = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
-            housePath = Path.Combine(housePath, "house_state.xml");
+            housePath = Path.Combine(housePath, "apartment_state.xml");
             string[] paths = new string[] { housePath, GameManager.Instance.data.lastSavedPlayerPath };
 
             foreach (string path in paths) {
@@ -346,10 +360,9 @@ public partial class GameManager : Singleton<GameManager> {
             NewGame();
         }
         catch (Exception e) {
-            Debug.Log("reset game state failed");
-            // Debug.Log(e.Message);
-            // Debug.Log(e.StackTrace);
-            Debug.LogException(e);
+            Debug.LogError("reset game state failed");
+            Debug.LogError(e.Message);
+            Debug.LogError(e.StackTrace);
         }
     }
     public void InitializePlayableLevel(bool loadLevel = false) {
@@ -367,7 +380,6 @@ public partial class GameManager : Singleton<GameManager> {
         }
 
         cam = GameObject.FindObjectOfType<Camera>();
-        // publicAudio = Toolbox.Instance.SetUpAudioSource(cam.gameObject);
         publicAudio = Toolbox.GetOrCreateComponent<AudioSource>(gameObject);
         if (cam) {
             Toolbox.GetOrCreateComponent<CameraControl>(cam.gameObject);
@@ -414,6 +426,12 @@ public partial class GameManager : Singleton<GameManager> {
         }
         if (sceneName == "studio" && !data.visitedStudio) {
             data.visitedStudio = true;
+            VideoCamera videoCamera = GameObject.FindObjectOfType<VideoCamera>();
+            if (videoCamera != null) {
+                CameraTutorialText ctt = videoCamera.GetComponent<CameraTutorialText>();
+                if (ctt != null)
+                    ctt.Enable();
+            }
             ShowDiaryEntry("diaryStudio");
         }
         if (sceneName == "cave1" || sceneName == "cave2" || (sceneName == "cave3" && data.entryID == 3) || sceneName == "cave4") {
@@ -507,6 +525,9 @@ public partial class GameManager : Singleton<GameManager> {
             playerObject = InstantiatePlayerPrefab();
             SetFocus(playerObject);
         }
+        foreach (Puddle puddle in GameObject.FindObjectsOfType<Puddle>()) {
+            Destroy(puddle.gameObject);
+        }
         Bed bed = GameObject.FindObjectOfType<Bed>();
         if (bed) {
             playerObject.SetActive(false);
@@ -517,12 +538,16 @@ public partial class GameManager : Singleton<GameManager> {
             Inventory focusInv = playerObject.GetComponent<Inventory>();
             if (focusInv) {
                 focusInv.ClearInventory();
-                UINew.Instance.UpdateInventoryButton(focusInv);
+                UINew.Instance.UpdateTopActionButtons();
             }
             Eater focusEater = playerObject.GetComponent<Eater>();
             if (focusEater) {
                 focusEater.nutrition = 0;
                 focusEater.nausea = 0;
+                while (focusEater.eatenQueue.Count > 0) {
+                    GameObject eaten = focusEater.eatenQueue.Dequeue();
+                    Destroy(eaten);
+                }
             }
             if (playerHurtable) {
                 playerHurtable.Reset();
@@ -557,15 +582,17 @@ public partial class GameManager : Singleton<GameManager> {
 
             data.teleportedToday = false;
             MySaver.Save();
-            awaitNewDayPrompt = CheckNewDayPrompt();
+
+            if (data.days > 1) {
+                awaitNewDayPrompt = data.itemsCollectedToday + data.foodCollectedToday + data.clothesCollectedToday + data.newUnlockedCommercials.Count > 0;
+            } else {
+                awaitNewDayPrompt = false;
+            }
+
             bed.SleepCutscene();
         }
     }
-    public bool CheckNewDayPrompt() {
-        if (data.days <= 1)
-            return false;
-        return data.itemsCollectedToday + data.foodCollectedToday + data.clothesCollectedToday + data.newUnlockedCommercials.Count > 0;
-    }
+
     public void NewGame(bool switchlevel = true) {
         Debug.Log("New game");
         if (data == null)
@@ -694,6 +721,7 @@ public partial class GameManager : Singleton<GameManager> {
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("mayor"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("moon"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("vampire"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("boardroom"));
             data.perks["hypnosis"] = true;
             data.perks["vomit"] = true;
             data.perks["eat_all"] = true;
@@ -710,6 +738,7 @@ public partial class GameManager : Singleton<GameManager> {
             data.mayorCutsceneHappened = true;
             data.visitedStudio = true;
             data.visitedMoon = true;
+            data.finishedCommercial = true;
 
             data.collectedObjects.Add("package");
             data.itemCheckedOut["package"] = false;
@@ -717,6 +746,7 @@ public partial class GameManager : Singleton<GameManager> {
             data.itemCheckedOut["cosmic_nullifier"] = false;
             data.cosmicName = GameManager.Instance.CosmicName();
         }
+        data.recordingCommercial = false;
         data.completeCommercials = new HashSet<Commercial>();
         // initialize achievements
         data.achievements = new List<Achievement>();
@@ -851,7 +881,7 @@ public partial class GameManager : Singleton<GameManager> {
         if (testPrefab != null) {
             data.collectedObjects.Add(filename);
             data.itemCheckedOut[filename] = true;
-            UINew.Instance.PopupCollected(obj);
+            Poptext.PopupCollected(obj);
             Edible objectEdible = obj.GetComponent<Edible>();
             if (objectEdible != null) {
                 if (!objectEdible.inedible) {
@@ -928,7 +958,7 @@ public partial class GameManager : Singleton<GameManager> {
             return;
         List<Achievement> completeAchievements = data.CheckAchievements();
         foreach (Achievement achievement in completeAchievements) {
-            UINew.Instance.PopupAchievement(achievement);
+            Poptext.PopupAchievement(achievement);
         }
     }
     public void ReceiveEmail(string emailName) {
@@ -984,7 +1014,9 @@ public partial class GameManager : Singleton<GameManager> {
             "Northstar Megarainbow",
             "Hyperplane Godhead",
             "Ignotum P. Ignotius",
-            "Magna Morti"
+            "Magna Morti",
+            "Quadriceps Potentia",
+            "Pontifex Prime"
         };
         return names[UnityEngine.Random.Range(0, names.Count)];
     }

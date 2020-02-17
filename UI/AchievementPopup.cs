@@ -91,7 +91,7 @@ public class AchievementPopup : MonoBehaviour {
             yield return null;
         }
         Destroy(gameObject);
-        UINew.Instance.achievementPopupInProgress = false;
+        Poptext.achievementPopupInProgress = false;
         yield return null;
     }
 }

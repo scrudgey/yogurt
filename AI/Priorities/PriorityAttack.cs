@@ -16,9 +16,12 @@ namespace AI {
             approachGoal.successCondition = new ConditionCloseToObject(gameObject, awareness.nearestEnemy);
             approachGoal.requirements.Add(dukesUp);
 
-            Goal punchGoal = new Goal(gameObject, control);
-            punchGoal.routines.Add(new RoutinePunchAt(gameObject, control, awareness.nearestEnemy, awareness.decisionMaker.personality.combatProficiency));
+            Goal punchGoal = new GoalPunch(gameObject, control, awareness.nearestEnemy, awareness.decisionMaker.personality.combatProficiency);
             punchGoal.requirements.Add(approachGoal);
+
+            // Goal punchGoal = new Goal(gameObject, control);
+            // punchGoal.routines.Add(new RoutinePunchAt(gameObject, control, awareness.nearestEnemy, awareness.decisionMaker.personality.combatProficiency));
+
 
             goal = punchGoal;
         }

@@ -28,8 +28,6 @@ public class SquirtGun : LiquidContainer, IDirectable {
             spray2.dontWipeInterface = true;
             spray2.validationFunction = true;
             interactions.Add(spray2);
-
-            empty = true;
             if (liquidSprite)
                 liquidSprite.enabled = false;
             if (initLiquid != "") {

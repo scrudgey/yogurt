@@ -75,7 +75,7 @@ namespace AI {
                 return -1;
             }
 
-            if (!GameManager.Instance.data.recordingCommercial)
+            if (GameManager.Instance.data != null && !GameManager.Instance.data.recordingCommercial)
                 return -1;
 
             if (camPref == Personality.CameraPreference.actor || camPref == Personality.CameraPreference.eater) {

@@ -63,7 +63,7 @@ public class CutsceneBoardroom : Cutscene {
                 timer = 0;
                 globalTimer = 0;
                 if (GameManager.Instance.data.activeCommercial == null) {
-                    LoadScript("eat1");
+                    LoadScript("auto");
                 } else {
                     if (!LoadScript(GameManager.Instance.data.activeCommercial.cutscene))
                         LoadScript("test");

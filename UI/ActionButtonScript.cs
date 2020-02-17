@@ -78,7 +78,7 @@ public class ActionButtonScript : MonoBehaviour {
             case buttonType.Stash:
                 inventory.StashItem(inventory.holding.gameObject);
                 UINew.Instance.ClearWorldButtons();
-                UINew.Instance.UpdateInventoryButton(inventory);
+                UINew.Instance.UpdateTopActionButtons();
                 break;
 
             case buttonType.Punch:

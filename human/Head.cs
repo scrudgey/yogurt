@@ -8,6 +8,7 @@ public class Head : Interactive, IExcludable, ISaveable {
         hatPoint = transform.Find("hatPoint").gameObject;
         spriteRenderer = GetComponent<SpriteRenderer>();
         Interaction wearAct = new Interaction(this, "Wear", "DonHat");
+        // wearAct.debug = true;
         wearAct.dontWipeInterface = false;
         wearAct.validationFunction = true;
         wearAct.playerOnOtherConsent = false;
@@ -27,6 +28,7 @@ public class Head : Interactive, IExcludable, ISaveable {
     public void DonHat(Hat h) {
         if (hat)
             RemoveHat();
+        h.head = this;
         ClaimsManager.Instance.ClaimObject(h.gameObject, this);
         hat = h;
         PhysicalBootstrapper phys = h.GetComponent<PhysicalBootstrapper>();
@@ -60,12 +62,13 @@ public class Head : Interactive, IExcludable, ISaveable {
         return "Wear " + Toolbox.Instance.GetName(h.gameObject);
     }
     public bool DonHat_Validation(Hat h) {
-        return !ClaimsManager.Instance.claimedItems.ContainsKey(h.gameObject);
+        return h.head == null;
     }
     void RemoveHat() {
         if (hat.helmet) {
             spriteRenderer.enabled = true;
         }
+        hat.head = null;
         Toolbox.Instance.RemoveChildIntrinsics(GetComponentInParent<Intrinsics>().gameObject, this);
         ClaimsManager.Instance.DisclaimObject(hat.gameObject, this);
         HatAnimation hatAnimator = hat.GetComponent<HatAnimation>();

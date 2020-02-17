@@ -36,7 +36,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             // if (controllable != null)
             //     controllable.UpdateDefaultInteraction();
             if (GameManager.Instance.playerObject == gameObject)
-                UINew.Instance.UpdateButtons();
+                UINew.Instance.UpdateTopActionButtons();
         }
     }
     private Pickup _holding;
@@ -59,6 +59,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         holdpoint = transform.Find("holdpoint");
         holdSortGroup = holdpoint.GetComponent<SortingGroup>();
         Interaction getAction = new Interaction(this, "Get", "GetItem", true, false);
+        // getAction.hideInTopMenu = true;
         getAction.dontWipeInterface = false;
         getAction.otherOnPlayerConsent = false;
         getAction.playerOnOtherConsent = false;
@@ -168,19 +169,19 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             }
             //make the object the current holding.
             ClaimsManager.Instance.ClaimObject(pickup.gameObject, this);
-            holding = pickup;
-            PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
+            PhysicalBootstrapper phys = pickup.gameObject.GetComponent<PhysicalBootstrapper>();
             if (phys)
                 phys.DestroyPhysical();
-            holding.transform.position = holdpoint.position;
-            holding.transform.SetParent(holdpoint, false);
-            holding.transform.rotation = Quaternion.identity;
-            holding.transform.localPosition = Vector3.zero;
-            holding.GetComponent<Rigidbody2D>().isKinematic = true;
-            holding.GetComponent<Collider2D>().isTrigger = true;
-            holding.holder = this;
-            if (holding.pickupSounds.Length > 0)
-                GetComponent<AudioSource>().PlayOneShot(holding.pickupSounds[Random.Range(0, holding.pickupSounds.Length)]);
+            pickup.transform.position = holdpoint.position;
+            pickup.transform.SetParent(holdpoint, false);
+            pickup.transform.rotation = Quaternion.identity;
+            pickup.transform.localPosition = Vector3.zero;
+            pickup.GetComponent<Rigidbody2D>().isKinematic = true;
+            pickup.GetComponent<Collider2D>().isTrigger = true;
+            pickup.holder = this;
+            if (pickup.pickupSounds.Length > 0)
+                GetComponent<AudioSource>().PlayOneShot(pickup.pickupSounds[Random.Range(0, pickup.pickupSounds.Length)]);
+            holding = pickup;
         }
     }
     public string GetItem_desc(Pickup pickup) {
@@ -484,5 +485,24 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             }
         }
         initHolding = null;
+    }
+    public void ButtonCallback(ActionButtonScript.buttonType commandButtonType) {
+        switch (commandButtonType) {
+            case ActionButtonScript.buttonType.Drop:
+                DropItem();
+                UINew.Instance.ClearWorldButtons();
+                break;
+            case ActionButtonScript.buttonType.Throw:
+                ThrowItem();
+                UINew.Instance.ClearWorldButtons();
+                break;
+            case ActionButtonScript.buttonType.Stash:
+                StashItem(holding.gameObject);
+                UINew.Instance.ClearWorldButtons();
+                UINew.Instance.UpdateTopActionButtons();
+                break;
+            default:
+                break;
+        }
     }
 }

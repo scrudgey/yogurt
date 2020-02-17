@@ -135,7 +135,7 @@ public class Commercial {
         if (data.key == "table_fire" & initvalue > 0) {
             return;
         }
-        UINew.Instance.PopupCounter(data.popupDesc, initvalue, finalvalue, this);
+        Poptext.PopupCounter(data.popupDesc, initvalue, finalvalue, this);
         properties[data.key].val = finalvalue;
     }
     public void WriteReport() {

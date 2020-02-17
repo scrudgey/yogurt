@@ -605,11 +605,11 @@ namespace AI {
                 control.SetDirection(Vector2.ClampMagnitude(target.val.transform.position - gameObject.transform.position, 1f));
                 if (timer < 0) {
                     if (proficiency == Personality.CombatProfficiency.normal) {
-                        timer = 0.65f + UnityEngine.Random.Range(0, 0.25f);
+                        timer = 0.75f + UnityEngine.Random.Range(0, 0.25f);
                     } else if (proficiency == Personality.CombatProfficiency.expert) {
                         timer = 0.5f + UnityEngine.Random.Range(0, 0.2f);
                     } else if (proficiency == Personality.CombatProfficiency.poor) {
-                        timer = 0.8f + UnityEngine.Random.Range(0, 0.25f);
+                        timer = 0.9f + UnityEngine.Random.Range(0, 0.25f);
                     }
                     control.ShootPressed();
                 } else {

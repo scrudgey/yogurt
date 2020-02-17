@@ -22,17 +22,11 @@ public class VideoCamera : Interactive {
         Interaction enableAct = new Interaction(this, "Start New", "Enable");
         enableAct.descString = "Start new commercial";
         enableAct.validationFunction = true;
-        enableAct.inertOnPlayerConsent = false;
-        enableAct.otherOnPlayerConsent = false;
-        // enableAct.playerOnOtherConsent = false;
         interactions.Add(enableAct);
 
         Interaction cancelAct = new Interaction(this, "Stop", "Cancel");
         cancelAct.descString = "Abort commercial";
         cancelAct.validationFunction = true;
-        cancelAct.inertOnPlayerConsent = false;
-        cancelAct.otherOnPlayerConsent = false;
-        // cancelAct.playerOnOtherConsent = false;
         interactions.Add(cancelAct);
 
         // add a "restart / start new" interaction
@@ -41,10 +35,17 @@ public class VideoCamera : Interactive {
         UpdateStatus();
     }
     public void EnableBubble() {
-        // Debug.Log("enable buttons");
         doneBubble.SetActive(true);
         Transform bubbleImage = doneBubble.transform.Find("bubbleFrame1/Image");
         StartCoroutine(EaseIn(bubbleImage));
+        if (!GameManager.Instance.data.finishedCommercial) {
+            GameManager.Instance.data.finishedCommercial = true;
+            StartCoroutine(ShowDiary());
+        }
+    }
+    IEnumerator ShowDiary() {
+        yield return new WaitForSeconds(1f);
+        GameManager.Instance.ShowDiaryEntry("firstCommercial");
     }
     IEnumerator EaseIn(Transform target) {
         float t = 0;
@@ -119,6 +120,9 @@ public class VideoCamera : Interactive {
         UINew.Instance.ShowMenu(UINew.MenuType.scriptSelect);
     }
     public bool Enable_Validation() {
+        CameraTutorialText ctt = GetComponent<CameraTutorialText>();
+        if (ctt != null)
+            ctt.Disable();
         return !GameManager.Instance.data.recordingCommercial;
     }
     public void Cancel() {

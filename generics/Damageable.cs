@@ -125,7 +125,7 @@ public abstract class Damageable : MonoBehaviour {
             damage = CalculateDamage(message);
             if (message.strength) {
                 result = ImpactResult.strong;
-                damage *= 2f;
+                damage *= 10f;
             } else {
                 if (damage > 0) {
                     result = ImpactResult.normal;
@@ -134,7 +134,7 @@ public abstract class Damageable : MonoBehaviour {
                 }
             }
             // play impact sounds
-            if ((message.impactSounds.Length > 0) || (message.type != damageType.fire && message.type != damageType.asphyxiation && message.type != damageType.cosmic))
+            if ((message.impactSounds.Length > 0) || (message.type != damageType.fire && message.type != damageType.asphyxiation))
                 PlayImpactSound(result, message);
             if (message.messenger != null)
                 message.messenger.SendMessage("ImpactReceived", result, SendMessageOptions.DontRequireReceiver);
@@ -146,7 +146,7 @@ public abstract class Damageable : MonoBehaviour {
         if (gameObject == GameManager.Instance.playerObject) {
             UINew.Instance.Hit();
         }
-        if (message.type == damageType.fire || message.type == damageType.cosmic || message.type == damageType.asphyxiation)
+        if (message.type == damageType.fire || message.type == damageType.asphyxiation)
             return;
         if (controllable) {
             controllable.direction = -1f * message.force;

@@ -14,7 +14,6 @@ namespace AI {
     public class LambdaRef<T> : Ref<T> {
         override public T val {
             get {
-                // Debug.Log("someone is getting val " + _val.ToString());
                 if (_val == null) {
                     _val = func();
                 }

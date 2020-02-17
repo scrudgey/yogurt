@@ -18,11 +18,16 @@ public class HomeCloset : Interactive {
             newBubbleAnimation.DisableFrames();
     }
     public void OpenCloset() {
-        GameObject menuObject = UINew.Instance.ShowMenu(UINew.MenuType.closet);
-        ClosetButtonHandler menu = menuObject.GetComponent<ClosetButtonHandler>();
-        menu.PopulateItemList(type);
-        GameManager.Instance.DetermineClosetNews();
-        CheckBubble();
+        if (Controller.Instance.state != Controller.ControlState.cutscene &&
+            Controller.Instance.state != Controller.ControlState.inMenu &&
+            Controller.Instance.state != Controller.ControlState.waitForMenu
+            ) {
+            GameObject menuObject = UINew.Instance.ShowMenu(UINew.MenuType.closet);
+            ClosetButtonHandler menu = menuObject.GetComponent<ClosetButtonHandler>();
+            menu.PopulateItemList(type);
+            GameManager.Instance.DetermineClosetNews();
+            CheckBubble();
+        }
     }
     public string OpenCloset_desc() {
         switch (type) {

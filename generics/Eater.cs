@@ -22,7 +22,7 @@ public class Eater : Interactive, ISaveable {
         }
     }
     private bool poisonNausea;
-    private Queue<GameObject> eatenQueue;
+    public Queue<GameObject> eatenQueue;
     public float vomitCountDown;
     public Dictionary<BuffType, Buff> netIntrinsics;
     private void CheckNausea() {
@@ -41,7 +41,7 @@ public class Eater : Interactive, ISaveable {
     void Awake() {
         eatenQueue = new Queue<GameObject>();
         Interaction eatAction = new Interaction(this, "Eat", "Eat");
-        eatAction.defaultPriority = 1;
+        // eatAction.defaultPriority = 1;
         eatAction.dontWipeInterface = false;
         eatAction.otherOnPlayerConsent = false;
         eatAction.validationFunction = true;

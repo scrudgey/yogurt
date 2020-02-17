@@ -90,7 +90,7 @@ public class Gibs : MonoBehaviour {
             // Debug.Log(message.force);
             Vector3 force = message.force * Random.Range(initVelocity.low, initVelocity.high) / 12f;
             if (message.strength)
-                force *= 2f;
+                force *= 4f;
             if (message.angleAboveHorizontal != 0) {
                 initAngleFromHorizontal.low = message.angleAboveHorizontal;
                 initAngleFromHorizontal.high = message.angleAboveHorizontal;

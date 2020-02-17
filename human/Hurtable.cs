@@ -31,7 +31,6 @@ public class Hurtable : Damageable, ISaveable {
     private float ouchFrequency = 0.1f;
     public GameObject dizzyEffect;
     public GameObject lastAttacker;
-    // public List<Collider2D> backgroundColliders = new List<Collider2D>();
     public float timeSinceLastCough;
     bool vibrate;
     public bool bleeds = true; // if true, bleed on cutting / piercing damage
@@ -139,7 +138,7 @@ public class Hurtable : Damageable, ISaveable {
                 data.whatHappened = "the corpse of " + Toolbox.Instance.GetName(gameObject) + " was desecrated";
             }
         }
-        if (message.type != damageType.fire && message.type != damageType.cosmic) {
+        if (message.type != damageType.fire && message.type != damageType.asphyxiation) {
             hitState = Controllable.AddHitState(hitState, Controllable.HitState.stun);
             hitStunCounter = Random.Range(0.2f, 0.25f);
         }
@@ -223,6 +222,9 @@ public class Hurtable : Damageable, ISaveable {
             if (type == damageType.asphyxiation) {
                 GameManager.Instance.IncrementStat(StatType.deathByAsphyxiation, 1);
             }
+            if (type == damageType.explosion) {
+                GameManager.Instance.IncrementStat(StatType.deathByExplosion, 1);
+            }
             if (damageZone) {
                 GameManager.Instance.IncrementStat(StatType.deathByMisadventure, 1);
             }
@@ -276,9 +278,7 @@ public class Hurtable : Damageable, ISaveable {
         }
         if (health < 0.5 * maxHealth) {
             if (gameObject == GameManager.Instance.playerObject) {
-                health += Time.deltaTime * 3f;
-            } else {
-                health += Time.deltaTime;
+                health += Time.deltaTime * 6f;
             }
         }
         if (oxygen <= maxOxygen) {

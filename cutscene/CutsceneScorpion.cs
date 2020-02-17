@@ -12,6 +12,7 @@ public class CutsceneScorpion : Cutscene {
     private GameObject greaserPrefab;
     private List<GameObject> greasers = new List<GameObject>();
     Speech speech;
+    private int numSwitchblades = 0;
     public override void Configure() {
         configured = true;
         state = State.spawn;
@@ -43,7 +44,7 @@ public class CutsceneScorpion : Cutscene {
         }
     }
     private IEnumerator walkCoroutine() {
-        Vector2 random = Random.insideUnitCircle;
+        Vector2 random = Random.insideUnitCircle.normalized;
         random.y = -1 * Mathf.Abs(random.y);
         Vector2 target = (Vector2)doorway.transform.position + random;
 
@@ -59,6 +60,7 @@ public class CutsceneScorpion : Cutscene {
         }
         Controllable control = greaser.GetComponent<Controllable>();
         Ref<Vector2> walkRef = new Ref<Vector2>(target);
+        // Debug.Log(target - (Vector2)doorway.transform.position);
 
         walkRoutine = new RoutineWalkToPoint(greaser, control, walkRef, 0.1f);
         float walkTime = 0f;
@@ -76,13 +78,12 @@ public class CutsceneScorpion : Cutscene {
             DecisionMaker ai = greaser.GetComponent<DecisionMaker>();
             ai.enabled = true;
 
-            if (Random.Range(0f, 1f) < 0.15f) {
-                Debug.Log("random switchblade");
-                Debug.Log(greaser);
+            if ((Random.Range(0f, 1f) < 0.15f) || (greasers.Count == 0 && numSwitchblades == 0)) {
                 GameObject switchBlade = GameObject.Instantiate(Resources.Load("prefabs/switchblade"), greaser.transform.position, Quaternion.identity) as GameObject;
                 Inventory inv = greaser.GetComponent<Inventory>();
                 Pickup pickup = switchBlade.GetComponent<Pickup>();
                 inv.GetItem(pickup);
+                numSwitchblades += 1;
             }
         }
         UINew.Instance.RefreshUI(active: true);

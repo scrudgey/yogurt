@@ -138,7 +138,7 @@ public class Flammable : MonoBehaviour, ISaveable {
                 }
             }
             // if i am on fire, i take damage.
-            MessageDamage message = new MessageDamage(0.5f, damageType.fire);
+            MessageDamage message = new MessageDamage(0.55f, damageType.fire);
             message.responsibleParty = gameObject;
             Toolbox.Instance.SendMessage(gameObject, this, message, sendUpwards: false);
             if (Random.Range(0, 100f) < 1) {

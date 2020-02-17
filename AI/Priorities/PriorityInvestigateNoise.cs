@@ -6,7 +6,7 @@ namespace AI {
         public PriorityInvestigateNoise(GameObject g, Controllable c) : base(g, c) {
             priorityName = "investigate noise";
 
-            GoalWalkToPoint walkTo = new GoalWalkToPoint(g, c, lastHeardNoise, 0.3f);
+            GoalWalkToPoint walkTo = new GoalWalkToPoint(g, c, lastHeardNoise, 0.3f, jitter: true);
 
             goal = walkTo;
         }
@@ -14,7 +14,7 @@ namespace AI {
             if (incoming is MessageNoise) {
                 MessageNoise message = (MessageNoise)incoming;
                 lastHeardNoise.val = message.location;
-                urgency = Priority.urgencyLarge;
+                urgency = Priority.urgencySmall;
             }
         }
         public override void Update() {

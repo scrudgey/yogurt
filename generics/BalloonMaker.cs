@@ -10,8 +10,7 @@ public class BalloonMaker : Interactive {
     void Awake() {
         Interaction balloon = new Interaction(this, "Balloon", "MakeBalloon");
         balloon.defaultPriority = 1;
-        balloon.hideInManualActions = false;
-        balloon.hideInRightClickMenu = true;
+        balloon.hideInClickMenu = true;
         balloon.otherOnPlayerConsent = false;
         balloon.playerOnOtherConsent = false;
         balloon.inertOnPlayerConsent = false;

@@ -58,9 +58,9 @@ public class FocusGroupMenu : MonoBehaviour {
                     opinion = pref.pref;
             }
             if (opinion == PreferenceType.hates) {
-                return "I did not like when ";
+                return "\"I did not like when ";
             }
-            return "I liked when ";
+            return "\"I liked when ";
         }
         public string DescribeEvent(Commercial commercial, int n) {
             StringBuilder builder = new StringBuilder();
@@ -68,7 +68,7 @@ public class FocusGroupMenu : MonoBehaviour {
 
             builder.Append(ReactToEvent(eventd));
             builder.Append(eventd.whatHappened);
-            builder.Append(".");
+            builder.Append(".\"");
             return Toolbox.RemoveExtraPunctuation(builder.ToString());
         }
     }

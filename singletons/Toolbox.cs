@@ -169,6 +169,7 @@ public class Toolbox : Singleton<Toolbox> {
         GameObject speaker = Instantiate(Resources.Load("Speaker"), position, Quaternion.identity) as GameObject;
         AudioSource speakerSource = speaker.GetComponent<AudioSource>();
         speakerSource.clip = clip;
+        speakerSource.pitch = UnityEngine.Random.Range(0.95f, 1.05f);
         speakerSource.Play();
         DestroyOnceQuiet doq = speaker.GetComponent<DestroyOnceQuiet>();
         doq.instantiatedByToolbox = true;

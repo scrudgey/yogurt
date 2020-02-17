@@ -8,7 +8,7 @@ public class Trader : Interactive, ISaveable {
     void Start() {
         inv = GetComponent<Inventory>();
         Interaction tradeAct = new Interaction(this, "Buy...", "Trade");
-        tradeAct.hideInManualActions = true;
+        tradeAct.hideInTopMenu = true;
         tradeAct.playerOnOtherConsent = false;
         interactions.Add(tradeAct);
     }

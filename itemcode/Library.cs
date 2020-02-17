@@ -92,7 +92,7 @@ public class Library : MonoBehaviour {
     public static Stack<Book> bookBag = new Stack<Book>();
 
     void LateUpdate() {
-        if (GameManager.Instance.data.mayorLibraryShuffled)
+        if (GameManager.Instance.data != null && GameManager.Instance.data.mayorLibraryShuffled)
             return;
         GameManager.Instance.data.mayorLibraryShuffled = true;
         List<GrabbableBook> grabbables = new List<GrabbableBook>(GameObject.FindObjectsOfType<GrabbableBook>());
