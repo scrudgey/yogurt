@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 
 namespace AI {
-    [System.Serializable]
     public class Goal {
         public List<Routine> routines = new List<Routine>();
         public int index = 0;

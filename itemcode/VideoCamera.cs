@@ -17,17 +17,19 @@ public class VideoCamera : Interactive {
         Interaction finish = new Interaction(this, "Finish", "FinishButtonClick");
         finish.validationFunction = true;
         finish.unlimitedRange = true;
+        finish.holdingOnOtherConsent = false;
         interactions.Add(finish);
 
         Interaction enableAct = new Interaction(this, "Start New", "Enable");
         enableAct.descString = "Start new commercial";
         enableAct.validationFunction = true;
-        interactions.Add(enableAct);
         enableAct.holdingOnOtherConsent = false;
+        interactions.Add(enableAct);
 
         Interaction cancelAct = new Interaction(this, "Stop", "Cancel");
         cancelAct.descString = "Abort commercial";
         cancelAct.validationFunction = true;
+        cancelAct.holdingOnOtherConsent = false;
         interactions.Add(cancelAct);
 
         // add a "restart / start new" interaction
@@ -118,6 +120,7 @@ public class VideoCamera : Interactive {
         }
     }
     public void Enable() {
+        Debug.Log("start camera");
         UINew.Instance.ShowMenu(UINew.MenuType.scriptSelect);
     }
     public bool Enable_Validation() {

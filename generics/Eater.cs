@@ -168,6 +168,9 @@ public class Eater : Interactive, ISaveable {
                 if (mliquid.liquid.name == "yogurt") {
                     GameManager.Instance.IncrementStat(StatType.yogurtEaten, 1);
                 }
+                if (mliquid.liquid.name == "yogurt") {
+                    GameManager.Instance.IncrementStat(StatType.yogurtEaten, 1);
+                }
             }
         }
         LiquidContainer container = food.GetComponent<LiquidContainer>();

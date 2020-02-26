@@ -4,7 +4,7 @@ using System;
 
 namespace AI {
     public enum status { neutral, success, failure }
-    [System.Serializable]
+
     public class Routine {
         public string routineThought = "I have no idea what I'm doing!";
         protected GameObject gameObject;

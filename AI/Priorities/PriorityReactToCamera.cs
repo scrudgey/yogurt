@@ -24,8 +24,14 @@ namespace AI {
             this.camPref = camPref;
 
             // TODO: split this into subclasses.
-            if (camPref == Personality.CameraPreference.actor) {
-                MessageSpeech message = new MessageSpeech("Bob yogurt is so good, we bet a passer-by will really like it!");
+            if (camPref == Personality.CameraPreference.actor || camPref == Personality.CameraPreference.gravy) {
+                MessageSpeech message = null;
+                if (camPref == Personality.CameraPreference.actor) {
+                    message = new MessageSpeech("Bob yogurt is so good, we bet a passer-by will really like it!");
+                } else if (camPref == Personality.CameraPreference.gravy) {
+                    message = new MessageSpeech("Yee hee heee!! Try some Scram Gravy, dearie?");
+                }
+
                 Goal goalWalkTo = new GoalWalkToObject(g, c, video, localOffset: new Vector2(1f, 0f));
                 Goal lookGoal = new GoalLookAtObject(g, c, video);
                 GoalSayLine sayLine = new GoalSayLine(g, c, message);
@@ -78,7 +84,7 @@ namespace AI {
             if (GameManager.Instance.data != null && !GameManager.Instance.data.recordingCommercial)
                 return -1;
 
-            if (camPref == Personality.CameraPreference.actor || camPref == Personality.CameraPreference.eater) {
+            if (camPref == Personality.CameraPreference.actor || camPref == Personality.CameraPreference.eater || camPref == Personality.CameraPreference.gravy) {
                 if (boolSwitchCondition.conditionMet) {
                     return Priority.urgencyMinor;
                 } else {

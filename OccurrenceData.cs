@@ -49,6 +49,7 @@ public class OccurrenceEat : OccurrenceData {
     public string eaterOutfitName;
     public string eaterName;
     public bool yogurt;
+    public bool gravy;
     public override HashSet<GameObject> involvedParties() {
         return new HashSet<GameObject> { eater, edible.gameObject };
     }
@@ -80,12 +81,8 @@ public class OccurrenceEat : OccurrenceData {
             events.Add(EventData.VomitEat(eater));
         }
         string edibleName = Toolbox.Instance.GetName(edible.gameObject);
-        if (
-            (liquid != null && (liquid.name == "yogurt" || liquid.ingredients.Contains("yogurt")))
-             || edibleName == "yogurt"
-             ) {
+        if ((liquid != null && (liquid.name == "yogurt" || liquid.ingredients.Contains("yogurt"))) || edibleName == "yogurt") {
             yogurt = true;
-            // adjust
             events.Add(EventData.Yogurt(eater));
             if (liquid.vomit) {
                 events.Add(EventData.YogurtVomitEat(eater));
@@ -93,6 +90,10 @@ public class OccurrenceEat : OccurrenceData {
             if (edible.gameObject.name == "Puddle(Clone)") {
                 events.Add(EventData.YogurtFloor(eater));
             }
+        }
+        if ((liquid != null && (liquid.name == "gravy" || liquid.ingredients.Contains("gravy"))) || edibleName == "gravy") {
+            gravy = true;
+            events.Add(EventData.Gravy(eater));
         }
         if (edibleName == "eggplant") {
             events.Add(EventData.Eggplant(eater));

@@ -157,8 +157,9 @@ public abstract class Damageable : MonoBehaviour {
         if (gameObject.name == "ghost" && SceneManager.GetActiveScene().name == "mayors_attic") {
             GameManager.Instance.data.ghostsKilled += 1;
         }
-        if (lastMessage == null)
+        if (lastMessage == null) {
             lastMessage = new MessageDamage(0.5f, damageType.physical);
+        }
         Intrinsics myIntrinsics = GetComponent<Intrinsics>();
         foreach (Gibs gib in GetComponents<Gibs>())
             gib.Emit(lastMessage, intrinsics: myIntrinsics);

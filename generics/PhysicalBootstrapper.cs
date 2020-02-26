@@ -203,6 +203,9 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
             if (physical == null)
                 return;
             if (physical.currentMode == Physical.mode.zip) {
+                if (coll.otherCollider.transform.root == transform.root) {
+                    return;
+                }
                 Collision(coll);
             }
         }
@@ -299,10 +302,11 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         }
     }
     public void Collision(Collision2D collision) {
-        if (collision.otherCollider.transform.root == transform.root) {
+        if (collision.otherCollider.transform.root == collision.collider.transform.root) {
             return;
         }
-        // Debug.Log("physical collision: "+gameObject.name+" + "+collision.gameObject.name);
+
+        // Debug.Log("physical collision: " + gameObject.name + " + " + collision.gameObject.name);
         // Debug.Log(collision.relativeVelocity.magnitude);
         MessageDamage message = new MessageDamage();
         if (thrownBy != null) {

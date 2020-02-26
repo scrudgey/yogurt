@@ -21,7 +21,9 @@ public class Monologue {
     public static string replaceHooks(string inString) {
         string line = name_hook.Replace(inString, GameManager.Instance.saveGameName);
         line = cosmic_name_hook.Replace(line, GameManager.Instance.data.cosmicName);
-        line = Speech.ProcessDialogue(line);
+        List<bool> swearList = new List<bool>();
+        line = Speech.ProcessDialogue(line, ref swearList);
+        //  swearMask = swearList.ToArray();
         return line;
     }
     public Monologue(Speech speaker, string[] texts) {
@@ -236,14 +238,14 @@ public class DialogueMenu : MonoBehaviour {
     public void LoadDialogueTree(string filename) {
         // Debug.Log("load " + filename);
         // CUTSCENE-STYLE DIALOGUE (NO INTERACTION)
-        if (filename == "polestar_first" || filename == "vampire" || filename == "dancing_god" || filename == "dancing_god_bless" || filename == "dancing_god_destroy" || filename == "imp") {
+        if (filename == "polestar_first" || filename == "vampire" || filename == "dancing_god" || filename == "dancing_god_bless" || filename == "dancing_god_destroy") {
             cutsceneDialogue = true;
             EnableButtons();
         }
-        // if (filename == "imp") {
-        //     disableCommand = true;
-        //     EnableButtons();
-        // }
+        if (filename == "imp") {
+            disableCommand = true;
+            EnableButtons();
+        }
 
         Regex node_hook = new Regex(@"^(\d+)>(.+)", RegexOptions.Multiline);
         Regex response_hook = new Regex(@"^(\d+)\)(.+)");
@@ -563,8 +565,10 @@ public class DialogueMenu : MonoBehaviour {
 
         // while (nextLine) {
         bool nextLine = false;
-        if (text == "END")
-            UINew.Instance.CloseActiveMenu();
+        if (text == "END") {
+            if (UINew.Instance.activeMenuType == UINew.MenuType.dialogue)
+                UINew.Instance.CloseActiveMenu();
+        }
         if (text == "POLESTARCALLBACK") {
             PoleStarCallback();
             nextLine = true;

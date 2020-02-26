@@ -166,8 +166,8 @@ public partial class GameManager : Singleton<GameManager> {
     public void Start() {
         if (data == null) {
             data = InitializedGameData();
-            ReceiveEmail("duplicator");
-            ReceiveEmail("golf_club");
+            // ReceiveEmail("duplicator");
+            // ReceiveEmail("golf_club");
             // ReceivePackage("kaiser_helmet");
             // ReceivePackage("duplicator");
             // ReceivePackage("golf_club");
@@ -184,6 +184,10 @@ public partial class GameManager : Singleton<GameManager> {
         Scene scene = SceneManager.GetActiveScene();
         if (scene.name == "boardroom_cutscene") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneBoardroom>();
+            CutsceneManager.Instance.cutscene.Configure();
+        }
+        if (scene.name == "anti_mayor_cutscene") {
+            CutsceneManager.Instance.InitializeCutscene<CutsceneAntiMayor>();
             CutsceneManager.Instance.cutscene.Configure();
         }
 
@@ -235,11 +239,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
     }
     public bool InCutsceneLevel() {
-        if (SceneManager.GetActiveScene().buildIndex > 2) {
-            return false;
-        } else {
-            return true;
-        }
+        return SceneManager.GetActiveScene().buildIndex <= 3;
     }
     public void FocusIntrinsicsChanged(Intrinsics intrinsics) {
         Dictionary<BuffType, Buff> netBuffs = intrinsics.NetBuffs();
@@ -495,6 +495,9 @@ public partial class GameManager : Singleton<GameManager> {
         if (sceneName == "boardroom_cutscene") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneBoardroom>();
         }
+        if (sceneName == "anti_mayor_cutscene") {
+            CutsceneManager.Instance.InitializeCutscene<CutsceneAntiMayor>();
+        }
     }
     void PlayerEnter() {
         if (playerObject == null)
@@ -587,9 +590,15 @@ public partial class GameManager : Singleton<GameManager> {
                 awaitNewDayPrompt = data.itemsCollectedToday + data.foodCollectedToday + data.clothesCollectedToday + data.newUnlockedCommercials.Count > 0;
             } else {
                 awaitNewDayPrompt = false;
+                // show WASD
+                GameObject.Instantiate(Resources.Load("UI/WASD"), new Vector3(0.183f, -0.703f, 0f), Quaternion.identity);
             }
 
             bed.SleepCutscene();
+        }
+        Computer computer = GameObject.FindObjectOfType<Computer>();
+        if (computer != null) {
+            computer.CheckBubble();
         }
     }
 
@@ -662,6 +671,11 @@ public partial class GameManager : Singleton<GameManager> {
         sceneTime = 0f;
         data.entryID = -99;
     }
+    public void AntiMayorCutscene() {
+        SceneManager.LoadScene("anti_mayor_cutscene");
+        sceneTime = 0f;
+        data.entryID = -99;
+    }
     public void TitleScreen() {
         data = null;
         SceneManager.LoadScene("title");
@@ -711,6 +725,8 @@ public partial class GameManager : Singleton<GameManager> {
         data.newUnlockedCommercials = new HashSet<Commercial>();
         data.unlockedScenes = new HashSet<string>();
         data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eat1"));
+        data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("gravy1"));
+        data.unlockedScenes.Add("studio");
         if (debug) {
             data.days = 5;
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eat2"));
@@ -828,7 +844,8 @@ public partial class GameManager : Singleton<GameManager> {
             return;
         var serializer = new XmlSerializer(typeof(Commercial));
         string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
-        path = Path.Combine(path, "commercial.xml");
+        string outName = "commercial" + System.Guid.NewGuid().ToString() + ".xml";
+        path = Path.Combine(path, outName);
         using (FileStream sceneStream = File.Create(path)) {
             serializer.Serialize(sceneStream, data.activeCommercial);
         }

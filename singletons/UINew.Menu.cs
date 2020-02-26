@@ -30,7 +30,7 @@ public partial class UINew : Singleton<UINew> {
 
     private static List<MenuType> actionRequired = new List<MenuType> { MenuType.commercialReport, MenuType.diary, MenuType.perk, MenuType.dialogue };
     public GameObject activeMenu;
-    private MenuType activeMenuType;
+    public MenuType activeMenuType;
 
 
     public GameObject ShowMenu(MenuType typeMenu) {
@@ -62,6 +62,7 @@ public partial class UINew : Singleton<UINew> {
             Destroy(activeMenu);
             activeMenu.SendMessage("OnDestroy", options: SendMessageOptions.DontRequireReceiver);
             Time.timeScale = 1f;
+            activeMenu = null;
             Controller.Instance.MenuClosedCallback();
         }
     }

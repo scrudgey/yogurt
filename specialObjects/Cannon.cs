@@ -16,6 +16,7 @@ public class Cannon : Interactive, ISaveable {
 
         shootPlayerAction = new Interaction(this, "Enter", "StartShootPlayer");
         shootPlayerAction.descString = "Climb into cannon";
+        shootPlayerAction.AddDesireFunction(DesireToShootPlayer);
         interactions.Add(shootPlayerAction);
 
         shootItemAction = new Interaction(this, "Shoot", "StartShootItem");
@@ -33,6 +34,9 @@ public class Cannon : Interactive, ISaveable {
     public void ShootPlayer() {
         shootEffect.Play();
         audioSource.PlayOneShot(shootSound);
+    }
+    public desire DesireToShootPlayer(Personality myPersonality, GameObject requester) {
+        return desire.decline;
     }
     public void StartShootPlayer() {
         if (charged) {

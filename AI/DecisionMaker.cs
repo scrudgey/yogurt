@@ -12,8 +12,7 @@ public class Personality {
     public enum Suggestible { normal, suggestible, stubborn };
     public enum Social { normal, chatty, reserved };
     public enum CombatProfficiency { normal, poor, expert };
-
-    public enum CameraPreference { none, actor, avoidant, ambivalent, excited, eater };
+    public enum CameraPreference { none, actor, avoidant, ambivalent, excited, eater, gravy };
     public enum PizzaDeliverer { no, yes };
     public Bravery bravery;
     public Stoicism stoicism;
@@ -77,7 +76,6 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
     public Collider2D warnZone = null;
     public Vector3 guardPoint;
     public bool initialized = false;
-    // public priorityType
     void Awake() {
         if (!initialized)
             Initialize();

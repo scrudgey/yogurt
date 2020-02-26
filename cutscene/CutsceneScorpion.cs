@@ -60,7 +60,6 @@ public class CutsceneScorpion : Cutscene {
         }
         Controllable control = greaser.GetComponent<Controllable>();
         Ref<Vector2> walkRef = new Ref<Vector2>(target);
-        // Debug.Log(target - (Vector2)doorway.transform.position);
 
         walkRoutine = new RoutineWalkToPoint(greaser, control, walkRef, 0.1f);
         float walkTime = 0f;

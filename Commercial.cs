@@ -27,6 +27,7 @@ public class Commercial {
     public HashSet<string> yogurtEaterNames = new HashSet<string>();
     public HashSet<string> visitedLocations = new HashSet<string>();
     public HashSet<string> outfits = new HashSet<string>();
+    public bool gravy;
     [XmlIgnore]
     public CommercialDescription analysis;
     // [XmlIgnore]
@@ -41,6 +42,7 @@ public class Commercial {
         // this.visitedLocations = new HashSet<string>(other.visitedLocations);
         this.unlockItem = other.unlockItem;
         this.email = other.email;
+        this.gravy = other.gravy;
     }
     public static Commercial LoadCommercialByFilename(string filename) {
         Commercial c = new Commercial();
@@ -70,6 +72,8 @@ public class Commercial {
                 c.objectives.Add(new ObjectiveEatName(bits));
             } else if (key == "killScorpion") {
                 c.objectives.Add(new ObjectiveScorpion());
+            } else if (key == "gravyCommercial") {
+                c.gravy = true;
             } else c.objectives.Add(new ObjectiveProperty(bits));
         }
         return c;
@@ -139,13 +143,15 @@ public class Commercial {
         properties[data.key].val = finalvalue;
     }
     public void WriteReport() {
-        string filename = Path.Combine(Application.persistentDataPath, "commercial_history.txt");
+        System.Guid guid = System.Guid.NewGuid();
+        // string outName = "commercial_history_" + guid.ToString() + ".xml";
+        string filename = Path.Combine(Application.persistentDataPath, "commercial_history_" + guid.ToString() + ".txt");
         StreamWriter writer = new StreamWriter(filename, false);
         foreach (EventData data in eventData) {
             writer.WriteLine(data.whatHappened);
         }
         writer.Close();
-        filename = Path.Combine(Application.persistentDataPath, "commercial_events.txt");
+        filename = Path.Combine(Application.persistentDataPath, "commercial_events_" + guid.ToString() + ".txt");
         writer = new StreamWriter(filename, false);
         foreach (EventData data in eventData) {
             string line = data.id + ";" + data.noun + ";" + data.ratings[Rating.disturbing].ToString() + ";" + data.ratings[Rating.disgusting].ToString() + ";" + data.ratings[Rating.chaos].ToString() + ";" + data.ratings[Rating.offensive].ToString() + ";" + data.ratings[Rating.positive].ToString() + ";" + data.whatHappened;

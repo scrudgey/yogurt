@@ -69,6 +69,7 @@ public class MessageDamage : Message {
     public GameObject responsibleParty;
     public bool strength;
     public float angleAboveHorizontal;
+    public bool suppressGibs;
     public MessageDamage() { }
     public MessageDamage(float amount, damageType type) {
         this.amount = amount;

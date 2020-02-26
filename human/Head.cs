@@ -11,7 +11,7 @@ public class Head : Interactive, IExcludable, ISaveable {
         // wearAct.debug = true;
         wearAct.dontWipeInterface = false;
         wearAct.validationFunction = true;
-        wearAct.selfOnOtherConsent = false;
+        // wearAct.selfOnOtherConsent = true;
         wearAct.selfOnSelfConsent = false;
         interactions.Add(wearAct);
     }

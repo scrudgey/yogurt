@@ -19,7 +19,9 @@ public class CutsceneManager : Singleton<CutsceneManager> {
     public List<Type> lateConfigure = new List<Type>(){
         typeof(CutsceneNewDay),
         typeof(CutsceneBoardroom),
-        typeof(CutsceneFall)};
+        typeof(CutsceneFall),
+        typeof(CutsceneAntiMayor)
+        };
     public Cutscene cutscene;
     void Start() {
         SceneManager.sceneLoaded += LevelWasLoaded;

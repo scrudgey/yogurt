@@ -2,24 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-    // secondsPlayed,
-    // yogurtEaten,
-    // vomit,
-    // yogurtVomit,
-    // dollarsFlushed,
-    // dollarsDuplicated,
-    // dollarsBurned,
-    // swordsEaten,
-    // hatsEaten,
-    // immolations,
-    // selfImmolations,
-    // deathByCombat,
-    // deathByMisadventure,
-    // deathByAsphyxiation,
-    // mayorsSassed,
-    // actsOfCannibalism,
-    // heartsEaten,
-    // nullifications
 public class StatsBrowser : MonoBehaviour {
     public Dictionary<StatType, string> statDescriptions = new Dictionary<StatType, string>(){
         {StatType.secondsPlayed, "seconds played"},
@@ -39,18 +21,22 @@ public class StatsBrowser : MonoBehaviour {
         {StatType.mayorsSassed, "mayors sassed"},
         {StatType.actsOfCannibalism, "acts of cannibalism"},
         {StatType.heartsEaten, "hearts eaten"},
-        {StatType.nullifications, "self nullifications"}
+        {StatType.nullifications, "self nullifications"},
+        {StatType.othersSetOnFire, "others set on fire"},
+        {StatType.monstersKilled, "monsters killed"},
+        {StatType.murders, "murders"},
+        {StatType.deathByExplosion, "death by explosion"},
     };
     public Text title;
     public Text content;
     public Text count;
     public StartMenu startMenu;
-    public void Initialize(GameData data){
+    public void Initialize(GameData data) {
         content.text = "";
         count.text = "";
-        foreach(KeyValuePair<StatType, string> kvp in statDescriptions){
+        foreach (KeyValuePair<StatType, string> kvp in statDescriptions) {
             content.text = content.text + kvp.Value.ToString() + "\n";
-            if (data.stats.ContainsKey(kvp.Key)){
+            if (data.stats.ContainsKey(kvp.Key)) {
                 int value = (int)data.stats[kvp.Key].value;
                 count.text = count.text + value.ToString() + "\n";
             } else {
@@ -58,7 +44,7 @@ public class StatsBrowser : MonoBehaviour {
             }
         }
     }
-    public void CloseButtonCallback(){
+    public void CloseButtonCallback() {
         startMenu.CloseStatsBrowser();
     }
 }

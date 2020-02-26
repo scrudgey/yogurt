@@ -318,6 +318,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         data.noun = "throwing";
         data.whatHappened = Toolbox.Instance.GetName(gameObject) + " threw a " + Toolbox.Instance.GetName(throwObject);
         throwObject = null;
+        // Debug.Break();
     }
     void FixedUpdate() {
         // do the throwing action in fixed update if we have gotten the command to throw

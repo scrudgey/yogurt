@@ -12,21 +12,20 @@ public class Portrait {
 
 public class PersonRandomizer : MonoBehaviour, ISaveable {
     public Gender defaultGender;
-    public bool randomizeGender; // done
-    public bool randomizeHead; // done
-    public bool randomizePersonality; // done
-    public bool randomizeSkinColor; // done
-    public bool randomizeDirection; // done
-    public bool randomizeSpeech; // +
-    public List<Uniform> randomOutfits; // done
-    public List<Pickup> randomItems; // +
-    public List<Hat> randomHats; // +
-
-    // public Sprite maleHead;
-    // public SerializableDictionary<Sprite, string> randomMalePortraitHeads;
-    // public SerializableDictionary<Sprite, string> randomFemalePortraitHeads;
-    public List<PortraitComponent> maleHeads; // +
-    public List<PortraitComponent> femaleHeads; // +
+    public bool normalName;
+    public bool randomizeGender;
+    public bool randomizeHead;
+    public bool randomizePersonality;
+    public bool randomizeSkinColor;
+    public bool randomizeDirection;
+    public bool randomizeSpeech;
+    public List<Uniform> randomOutfits;
+    public List<Pickup> randomItems;
+    public List<Hat> randomHats;
+    public List<PortraitComponent> maleHeads;
+    public List<PortraitComponent> femaleHeads;
+    public List<Voice> randomVoices;
+    public List<String> randomFlavor;
     public float randomHatProbability;
     public float randomItemProbability;
     public float deleteProbability;
@@ -143,9 +142,28 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
 
         if (randomizeSpeech) {
             Speech speech = GetComponent<Speech>();
-            string name = StartMenu.SuggestAName();
-            // gameObject.name = name;
-            speech.speechName = name;
+            speech.flavor = randomFlavor[UnityEngine.Random.Range(0, randomFlavor.Count)];
+            speech.LoadGrammar();
+            if (normalName) {
+                speech.speechName = Toolbox.SuggestNormalName(gender);
+            } else {
+                speech.speechName = Toolbox.SuggestWeirdName();
+            }
+            Voice voice = randomVoices[UnityEngine.Random.Range(0, randomVoices.Count)];
+            speech.voice = voice.speechSet;
+            speech.speakSounds = voice.sounds.ToArray();
+            float pitchLow = UnityEngine.Random.Range(voice.randomPitchLow.low, voice.randomPitchLow.high);
+            float pitchHigh = UnityEngine.Random.Range(voice.randomPitchHigh.low, voice.randomPitchHigh.high);
+            float spacingLow = UnityEngine.Random.Range(voice.randomSpacingLow.low, voice.randomSpacingLow.high);
+            float spacingHigh = UnityEngine.Random.Range(voice.randomSpacingHigh.low, voice.randomSpacingHigh.high);
+
+            speech.pitchRange = new Vector2(pitchLow, pitchHigh);
+            speech.spacingRange = new Vector2(spacingLow, spacingHigh);
+
+            SoundGibberizer gibberizer = GetComponent<SoundGibberizer>();
+            gibberizer.pitchRange = speech.pitchRange;
+            gibberizer.spacingRange = speech.spacingRange;
+            gibberizer.sounds = speech.speakSounds;
         }
 
         configured = true;

@@ -75,6 +75,15 @@ public class EventData {
         data.whatHappened = Toolbox.Instance.GetName(eater) + " ate yogurt";
         return data;
     }
+    public static EventData Gravy(GameObject eater) {
+        EventData data = new EventData(positive: 1);
+        data.key = "gravy";
+        data.val = 1f;
+        data.popupDesc = "gravy eaten";
+        data.noun = "gravy eating";
+        data.whatHappened = Toolbox.Instance.GetName(eater) + " ate gravy";
+        return data;
+    }
     public static EventData Vomit(GameObject vomiter, GameObject vomited) {
         EventData data = new EventData(disturbing: 1, disgusting: 2, chaos: 1);
         data.key = "vomit";
@@ -155,14 +164,23 @@ public class EventData {
             data.popupDesc = "deaths";
             data.noun = "death";
             data.whatHappened = Toolbox.Instance.GetName(dead) + " was killed";
+            GameManager.Instance.IncrementStat(StatType.monstersKilled, 1);
+        } else if (suicide) {
+            data.whatHappened = victimName + " committed suicide";
+            data.noun = "suicide";
+            data.popupDesc = "suicides";
+            if (lastDamage == damageType.fire) {
+                data.whatHappened = victimName + " self-immolated";
+                GameManager.Instance.IncrementStat(StatType.immolations, 1);
+                GameManager.Instance.IncrementStat(StatType.selfImmolations, 1);
+            }
         } else {
+
             data = new EventData(offensive: 4, disgusting: 3, disturbing: 4, chaos: 4, positive: -3);
             data.key = "death";
             data.val = 1f;
-            data.popupDesc = "deaths";
-            data.noun = "death";
-            data.popupDesc = "deaths";
             if (assailant) {
+                GameManager.Instance.IncrementStat(StatType.murders, 1);
                 string attackerName = Toolbox.Instance.GetName(lastAttacker);
                 data.whatHappened = attackerName + " murdered " + victimName;
                 data.noun = "murder";
@@ -174,23 +192,19 @@ public class EventData {
                 } else if (lastDamage == damageType.cosmic) {
                     data.whatHappened = attackerName + " annihilated " + victimName + " with cosmic energy";
                 }
-            }
-            if (lastDamage == damageType.fire) {
-                data.whatHappened = victimName + " burned to death";
-            } else if (lastDamage == damageType.asphyxiation) {
-                data.whatHappened = victimName + " asphyxiated";
-            } else if (lastDamage == damageType.cosmic) {
-                data.whatHappened = victimName + " was annihilated by cosmic energy";
-            } else if (lastDamage == damageType.cutting || lastDamage == damageType.piercing) {
-                data.whatHappened = victimName + " was stabbed to death";
-            }
-        }
-        if (suicide) {
-            data.whatHappened = victimName + " committed suicide";
-            data.noun = "suicide";
-            data.popupDesc = "suicides";
-            if (lastDamage == damageType.fire) {
-                data.whatHappened = victimName + " self-immolated";
+            } else {
+                data.noun = "death";
+                data.popupDesc = "deaths";
+                if (lastDamage == damageType.fire) {
+                    data.whatHappened = victimName + " burned to death";
+                    GameManager.Instance.IncrementStat(StatType.immolations, 1);
+                } else if (lastDamage == damageType.asphyxiation) {
+                    data.whatHappened = victimName + " asphyxiated";
+                } else if (lastDamage == damageType.cosmic) {
+                    data.whatHappened = victimName + " was annihilated by cosmic energy";
+                } else if (lastDamage == damageType.cutting || lastDamage == damageType.piercing) {
+                    data.whatHappened = victimName + " was stabbed to death";
+                }
             }
         }
         return data;

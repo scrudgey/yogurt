@@ -65,8 +65,9 @@ public class Blender : Container, ISaveable {
             //blend contained item
             if (items.Count > 0) {
                 MessageDamage message = new MessageDamage();
+                message.suppressGibs = true;
                 message.amount = Time.deltaTime * 10;
-                message.force = Vector2.zero;
+                message.force = Vector2.up;
                 message.type = damageType.physical;
                 message.suppressImpactSound = true;
 
@@ -133,13 +134,13 @@ public class Blender : Container, ISaveable {
         if (edible && edible.blendable) {
             liquidContainer.FillWithLiquid(edible.Liquify());
         }
-        Gibs[] gibses = obj.GetComponents<Gibs>();
-        foreach (Gibs gibs in gibses) {
-            if (gibs.notPhysical)
-                continue;
-            EmitParticle(gibs.particle);
-            Destroy(gibs);
-        }
+        // Gibs[] gibses = obj.GetComponents<Gibs>();
+        // foreach (Gibs gibs in gibses) {
+        //     if (gibs.notPhysical)
+        //         continue;
+        //     // EmitParticle(gibs.particle);
+        //     Destroy(gibs);
+        // }
     }
     public void EmitParticle(GameObject particle) {
         GameObject bit = Instantiate(particle, transform.position, Quaternion.identity) as GameObject;

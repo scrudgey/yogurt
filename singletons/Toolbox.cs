@@ -24,7 +24,7 @@ public static class ExtensionMethods {
     }
 }
 
-public class Toolbox : Singleton<Toolbox> {
+public partial class Toolbox : Singleton<Toolbox> {
     protected Toolbox() { } // guarantee this will be always a singleton only - can't use the constructor!
     private CameraControl cameraControl;
     private GameObject tom;

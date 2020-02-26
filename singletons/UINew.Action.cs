@@ -183,7 +183,6 @@ public partial class UINew : Singleton<UINew> {
         // punch button
         if (Controller.Instance.focus.fightMode) {
             ShowPunchButton();
-            return;
         } else {
             HidePunchButton();
             if (Controller.Instance.focus.defaultInteraction != null && Controller.Instance.focus.defaultInteraction.IsValid()) {

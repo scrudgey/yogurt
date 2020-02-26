@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 
 namespace AI {
-    [System.Serializable]
     public class Priority {
         public string priorityName = "priority";
         public const float urgencyMinor = 1f;

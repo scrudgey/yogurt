@@ -1,16 +1,15 @@
 ﻿using UnityEngine;
-
-public class Gibs : MonoBehaviour {
-    [System.Serializable]
-    public class LoHi {
-        public float low;
-        public float high;
-        public LoHi() : this(0.025f, 0.075f) { }
-        public LoHi(float low, float high) {
-            this.low = low;
-            this.high = high;
-        }
+[System.Serializable]
+public class LoHi {
+    public float low;
+    public float high;
+    public LoHi() : this(0.025f, 0.075f) { }
+    public LoHi(float low, float high) {
+        this.low = low;
+        this.high = high;
     }
+}
+public class Gibs : MonoBehaviour {
     public bool applyAnimationSkinColor;
     public damageType damageCondition;
     public int number;
@@ -35,9 +34,10 @@ public class Gibs : MonoBehaviour {
         initAngleFromHorizontal.high = other.initAngleFromHorizontal.high;
     }
     public void Emit(MessageDamage message, Intrinsics intrinsics = null) {
+        if (message.suppressGibs)
+            return;
         if (!DamageTypeMatch(damageCondition, message.type))
             return;
-
         for (int i = 0; i < number; i++) {
             GameObject bit = Instantiate(particle, transform.position, Quaternion.identity) as GameObject;
             if (intrinsics != null && intrinsics.buffs.Count > 0) {

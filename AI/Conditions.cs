@@ -256,7 +256,6 @@ namespace AI {
             inv = g.GetComponent<Inventory>();
         }
         public override status Evaluate() {
-            // TODO: check if i am holding a melee weapon
             if (inv != null) {
                 if (inv.holding) {
                     MeleeWeapon weapon = inv.holding.GetComponent<MeleeWeapon>();

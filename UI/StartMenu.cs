@@ -272,49 +272,15 @@ public class StartMenu : MonoBehaviour {
         SkinCallback(randomSkin.ToString());
 
         input.ActivateInputField();
-        input.text = SuggestAName();
+        input.text = Toolbox.SuggestWeirdName();
     }
     public void RandomizeName() {
         InputField input = newGameMenu.transform.Find("InputField").GetComponent<InputField>();
 
         input.ActivateInputField();
-        input.text = SuggestAName();
+        input.text = Toolbox.SuggestWeirdName();
     }
-    public static string SuggestAName() {
-        List<string> names = new List<string>(){
-        "Shemp",
-        "Frog",
-        "Crogus",
-        "Smitty",
-        "Scrummy Bingus",
-        "Fang",
-        "Ziplock McBaggins",
-        "Questor",
-        "Bigfoot",
-        "Quangle Cringleberry",
-        "Wicks Cherrycoke",
-        "Sauncho Smilax",
-        "Moe",
-        "Tyrone Slothrop",
-        "Voorwerp",
-        "Scrauncho",
-        "Bengis",
-        "Pingy",
-        "Scrints",
-        "Chungus",
-        "Beppo",
-        "Bippy",
-        "Smits",
-        "Oprah Noodlemantra",
-        "Hash Burnslide",
-        "Bandit Slumbody",
-        "Regina Phalange",
-        "Horngus",
-        "Scrungle",
-        "Nutte"
-    };
-        return names[UnityEngine.Random.Range(0, names.Count)];
-    }
+
     public void GenderCallback(string gender) {
         switch (gender) {
             case "female":
