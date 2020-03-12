@@ -88,7 +88,8 @@ public class DancingGod : MonoBehaviour {
         numberOfJumps = 3;
         state = State.jump;
         interval = jumpInterval;
-        audioSource.PlayOneShot(jumpSound);
+        if (jumpSound != null)
+            audioSource.PlayOneShot(jumpSound);
     }
     void nextFrame() {
         frameIndex += 1;

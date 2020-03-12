@@ -25,7 +25,7 @@ public class Buff {
         this.time = otherBuff.time;
     }
     public bool active() {
-        return boolValue || (time < lifetime);
+        return boolValue || (time < lifetime) || floatValue > 0;
     }
     public bool Update() {
         bool changed = false;
@@ -38,6 +38,26 @@ public class Buff {
             boolValue = true;
         }
         return changed;
+    }
+    public static Buff operator +(Buff a, Buff b) {
+        Buff result = new Buff(a);
+
+        result.boolValue |= b.boolValue;
+        result.floatValue += b.floatValue;
+
+        // adjust times.
+        if (a.lifetime == 0 && b.lifetime > 0) {
+            result.lifetime = b.lifetime;
+            result.time = b.time;
+        } else if (b.lifetime == 0 && a.lifetime > 0) {
+            result.lifetime = a.lifetime;
+            result.time = a.time;
+        } else if (b.lifetime > 0 && a.lifetime > 0) {
+            result.lifetime = Mathf.Max(a.lifetime, b.lifetime);
+            result.time = Mathf.Min(a.time, b.time);
+        }
+
+        return result;
     }
 }
 public enum BuffType {

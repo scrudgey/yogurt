@@ -354,13 +354,15 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         }
         Qualities qualities = other.GetComponent<Qualities>();
         if (qualities) {
-            EventData data = qualities.ToEvent();
-            ReactToEvent(data, new HashSet<GameObject>());
+            foreach (EventData data in qualities.ToDescribable().GetChildren()) {
+                ReactToEvent(data, new HashSet<GameObject>());
 
-            OccurrenceData oD = new OccurrenceGeneric();
-            oD.events.Add(data);
-            MessageOccurrence message = new MessageOccurrence(oD);
-            Toolbox.Instance.SendMessage(gameObject, this, message);
+                OccurrenceData oD = new OccurrenceGeneric();
+                oD.AddChild(data);
+                // oD.children.Add(data);
+                MessageOccurrence message = new MessageOccurrence(oD);
+                Toolbox.Instance.SendMessage(gameObject, this, message);
+            }
         }
         if (other.name == "CameraRegion") {
             MessageOnCamera message = new MessageOnCamera(true);
@@ -372,7 +374,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         Toolbox.Instance.SendMessage(gameObject, this, new MessageOccurrence(od));
         if (od is OccurrenceViolence)
             WitnessViolence((OccurrenceViolence)od);
-        foreach (EventData e in od.events) {
+        foreach (EventData e in od.GetChildren()) {
             ReactToEvent(e, od.involvedParties());
         }
     }
@@ -397,9 +399,9 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         Rating[] ratings = (Rating[])Rating.GetValues(typeof(Rating));
         Toolbox.ShuffleArray<Rating>(ratings);
         foreach (Rating rating in ratings) {
-            float threshhold = Toolbox.Gompertz(dat.ratings[rating], 1.26f, -6.9f, 1);
+            float threshhold = Toolbox.Gompertz(dat.quality[rating], 1.26f, -6.9f, 1);
             threshhold *= 1 - (float)seenCount / 5.0f;
-            if (UnityEngine.Random.Range(0f, 1f) < threshhold && dat.ratings[rating] > 0) {
+            if (UnityEngine.Random.Range(0f, 1f) < threshhold && dat.quality[rating] > 0) {
                 MessageSpeech message = new MessageSpeech(reactions[rating]);
                 message.nimrod = true;
                 message.involvedParties.Add(gameObject);

@@ -30,11 +30,11 @@ public class CommercialDescription {
         allEvents = inputEvents;
         HashSet<EventData> events = new HashSet<EventData>(inputEvents);
         // initialize dataset
-        maxDisturbing = events.OrderBy(o => o.ratings[Rating.disturbing]).ToList();
-        maxDisgusting = events.OrderBy(o => o.ratings[Rating.disgusting]).ToList();
-        maxChaos = events.OrderBy(o => o.ratings[Rating.chaos]).ToList();
-        maxOffense = events.OrderBy(o => o.ratings[Rating.offensive]).ToList();
-        maxPositive = events.OrderBy(o => o.ratings[Rating.positive]).ToList();
+        maxDisturbing = events.OrderBy(o => o.quality[Rating.disturbing]).ToList();
+        maxDisgusting = events.OrderBy(o => o.quality[Rating.disgusting]).ToList();
+        maxChaos = events.OrderBy(o => o.quality[Rating.chaos]).ToList();
+        maxOffense = events.OrderBy(o => o.quality[Rating.offensive]).ToList();
+        maxPositive = events.OrderBy(o => o.quality[Rating.positive]).ToList();
 
         Dictionary<EventData, int> occurrencesInTop3 = new Dictionary<EventData, int>();
         foreach (EventData e in events) {
@@ -73,7 +73,7 @@ public class CommercialDescription {
             Dictionary<EventData, float> deltas = new Dictionary<EventData, float>();
             // calc deltas
             for (int i = 0; i < list.Count - 1; i++) {
-                deltas[list[i + 1]] = list[i].ratings[key] - list[i + 1].ratings[key];
+                deltas[list[i + 1]] = list[i].quality[key] - list[i + 1].quality[key];
             }
             // populate list of event, highest delta
             foreach (EventData eventData in deltas.Keys) {

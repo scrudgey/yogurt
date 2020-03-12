@@ -50,13 +50,11 @@ public class CommercialReportMenu : MonoBehaviour {
         SetRefs();
         descriptionText.text = commercial.SentenceReview();
 
-        EventData total = commercial.Total();
-
-        positiveScore.text = total.ratings[Rating.positive].ToString();
-        chaosScore.text = total.ratings[Rating.chaos].ToString();
-        disgustingScore.text = total.ratings[Rating.disgusting].ToString();
-        disturbingScore.text = total.ratings[Rating.disturbing].ToString();
-        offensiveScore.text = total.ratings[Rating.offensive].ToString();
+        positiveScore.text = commercial.quality[Rating.positive].ToString();
+        chaosScore.text = commercial.quality[Rating.chaos].ToString();
+        disgustingScore.text = commercial.quality[Rating.disgusting].ToString();
+        disturbingScore.text = commercial.quality[Rating.disturbing].ToString();
+        offensiveScore.text = commercial.quality[Rating.offensive].ToString();
 
         transcript.text = "";
         foreach (string line in commercial.transcript) {

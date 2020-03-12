@@ -255,9 +255,9 @@ public partial class GameManager : Singleton<GameManager> {
             }
         }
         UINew.Instance.ClearStatusIcons();
-        foreach (Buff buff in intrinsics.AllBuffs()) {
-            if (buff.boolValue == true || buff.floatValue > 0) {
-                UINew.Instance.AddStatusIcon(buff);
+        foreach (KeyValuePair<BuffType, Buff> buff in intrinsics.NetBuffs()) {
+            if (buff.Value.active()) {
+                UINew.Instance.AddStatusIcon(buff.Value);
             }
         }
     }

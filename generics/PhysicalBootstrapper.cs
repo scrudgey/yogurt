@@ -296,7 +296,7 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
     void OnDestroy() {
         if (isQuitting)
             return;
-        if (physical && physical.gameObject) {
+        if (physical != null && physical.gameObject != null) {
             ClaimsManager.Instance.WasDestroyed(physical.gameObject);
             Destroy(physical.gameObject);
         }

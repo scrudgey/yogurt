@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Runtime.Serialization.Formatters.Binary;
+using analysis;
 
 [System.Serializable]
 public enum CommercialComparison {
@@ -14,7 +15,7 @@ public enum CommercialComparison {
 
 [System.Serializable]
 [XmlRoot("Commercial")]
-public class Commercial {
+public class Commercial : Describable {
     public string name = "default";
     public string description = "default";
     public string cutscene = "default";
@@ -22,7 +23,9 @@ public class Commercial {
     public List<string> unlockUponCompletion;
     public string unlockItem = "";
     public string email = "";
-    public List<EventData> eventData = new List<EventData>();
+    // public List<EventData> eventData = new List<EventData>();
+    public List<DescribableOccurrenceData> occurrences = new List<DescribableOccurrenceData>();
+    // public List<DescribableOccurrenceData> children;
     public HashSet<string> yogurtEaterOutfits = new HashSet<string>();
     public HashSet<string> yogurtEaterNames = new HashSet<string>();
     public HashSet<string> visitedLocations = new HashSet<string>();
@@ -101,30 +104,19 @@ public class Commercial {
                 yogurtEaterNames.Add(eatOccurrence.eaterName);
             }
         }
-        foreach (EventData data in occurrence.events) {
+        foreach (EventData data in occurrence.GetChildren()) {
             IncrementValue(data);
-        }
-        eventData.AddRange(occurrence.events);
-        foreach (EventData data in occurrence.events) {
             if (data.transcriptLine != null) {
                 transcript.Add(data.transcriptLine);
             }
         }
+        AddChild(occurrence.ToDescribable());
         UINew.Instance.UpdateObjectives();
     }
     public Commercial() {
         unlockUponCompletion = new List<string>();
     }
     public List<string> transcript = new List<string>();
-    public EventData Total() {
-        EventData total = new EventData();
-        foreach (EventData data in eventData) {
-            foreach (Rating key in data.ratings.Keys) {
-                total.ratings[key] += data.ratings[key];
-            }
-        }
-        return total;
-    }
     public void IncrementValue(EventData data) {
         if (data.val == 0)
             return;
@@ -147,18 +139,20 @@ public class Commercial {
         // string outName = "commercial_history_" + guid.ToString() + ".xml";
         string filename = Path.Combine(Application.persistentDataPath, "commercial_history_" + guid.ToString() + ".txt");
         StreamWriter writer = new StreamWriter(filename, false);
-        foreach (EventData data in eventData) {
+        foreach (DescribableOccurrenceData data in GetChildren()) {
             writer.WriteLine(data.whatHappened);
         }
         writer.Close();
         filename = Path.Combine(Application.persistentDataPath, "commercial_events_" + guid.ToString() + ".txt");
         writer = new StreamWriter(filename, false);
-        foreach (EventData data in eventData) {
-            string line = data.id + ";" + data.noun + ";" + data.ratings[Rating.disturbing].ToString() + ";" + data.ratings[Rating.disgusting].ToString() + ";" + data.ratings[Rating.chaos].ToString() + ";" + data.ratings[Rating.offensive].ToString() + ";" + data.ratings[Rating.positive].ToString() + ";" + data.whatHappened;
-            writer.WriteLine(line);
+        foreach (DescribableOccurrenceData data in occurrences) {
+            foreach (EventData child in data.GetChildren()) {
+                string line = child.id + ";" + child.noun + ";" + child.quality[Rating.disturbing].ToString() + ";" + child.quality[Rating.disgusting].ToString() + ";" + child.quality[Rating.chaos].ToString() + ";" + child.quality[Rating.offensive].ToString() + ";" + child.quality[Rating.positive].ToString() + ";" + child.whatHappened;
+                writer.WriteLine(line);
+            }
         }
         writer.Close();
-        analysis = new CommercialDescription(eventData);
+        // analysis = new CommercialDescription(eventData);
     }
     public bool Evaluate() {
         bool requirementsMet = true;
@@ -168,52 +162,55 @@ public class Commercial {
         return requirementsMet;
     }
     public string SentenceReview() {
-        // TODO: adjectives to describe the commercial based on key properties of prominent events
-        List<string> adjectives = new List<string>();
-        foreach (EventData eventd in analysis.outlierEvents) {
-            string adj = eventd.Adjective();
-            if (adj != "none")
-                adjectives.Add(adj);
-        }
-        StringBuilder builder = new StringBuilder();
-        builder.Append("A");
-        switch (Mathf.Min(adjectives.Count, 3)) {
-            case 3:
-            case 2:
-                builder.Append(" ");
-                builder.Append(adjectives[0] + " and " + adjectives[1]);
-                break;
-            case 1:
-                builder.Append(" ");
-                builder.Append(adjectives[0]);
-                break;
-            case 0:
-            default:
-                break;
-        }
-        builder.Append(" commercial that prominently features ");
-        List<string> nouns = new List<string>();
-        foreach (EventData eventd in analysis.outlierEvents) {
-            if (!nouns.Contains(eventd.noun))
-                nouns.Add(eventd.noun);
-        }
-        builder.Append(nouns[0]);
-        switch (nouns.Count) {
-            case 3:
-                builder.Append(", ");
-                builder.Append(nouns[1] + ", and " + nouns[2]);
-                break;
-            case 2:
-                builder.Append(" and ");
-                builder.Append(nouns[1]);
-                break;
-            case 1:
-            default:
-                break;
-        }
-        builder.Append(".");
-        return builder.ToString();
+        return "WOW OK";
     }
+    // public string SentenceReview() {
+    //     // TODO: adjectives to describe the commercial based on key properties of prominent events
+    //     List<string> adjectives = new List<string>();
+    //     foreach (EventData eventd in analysis.outlierEvents) {
+    //         string adj = eventd.Adjective();
+    //         if (adj != "none")
+    //             adjectives.Add(adj);
+    //     }
+    //     StringBuilder builder = new StringBuilder();
+    //     builder.Append("A");
+    //     switch (Mathf.Min(adjectives.Count, 3)) {
+    //         case 3:
+    //         case 2:
+    //             builder.Append(" ");
+    //             builder.Append(adjectives[0] + " and " + adjectives[1]);
+    //             break;
+    //         case 1:
+    //             builder.Append(" ");
+    //             builder.Append(adjectives[0]);
+    //             break;
+    //         case 0:
+    //         default:
+    //             break;
+    //     }
+    //     builder.Append(" commercial that prominently features ");
+    //     List<string> nouns = new List<string>();
+    //     foreach (EventData eventd in analysis.outlierEvents) {
+    //         if (!nouns.Contains(eventd.noun))
+    //             nouns.Add(eventd.noun);
+    //     }
+    //     builder.Append(nouns[0]);
+    //     switch (nouns.Count) {
+    //         case 3:
+    //             builder.Append(", ");
+    //             builder.Append(nouns[1] + ", and " + nouns[2]);
+    //             break;
+    //         case 2:
+    //             builder.Append(" and ");
+    //             builder.Append(nouns[1]);
+    //             break;
+    //         case 1:
+    //         default:
+    //             break;
+    //     }
+    //     builder.Append(".");
+    //     return builder.ToString();
+    // }
 
 
 }

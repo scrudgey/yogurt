@@ -10,6 +10,7 @@ using UnityEngine.Audio;
 public enum TrackName {
     none,
     mainTitle,
+    apartment,
     creepyAmbient,
     lithophone,
     jingle,
@@ -28,9 +29,11 @@ public class Track {
     public TrackName trackName;
     public float playTime;
     public bool loop;
-    public Track(TrackName trackName, bool loop = true) {
+    public float volume = 1;
+    public Track(TrackName trackName, bool loop = true, float vol = 1) {
         this.trackName = trackName;
         this.loop = loop;
+        this.volume = vol;
     }
 }
 [System.Serializable]
@@ -44,6 +47,11 @@ public class Music {
 public class MusicTitle : Music {
     public MusicTitle() {
         tracks = new Stack<Track>(new List<Track> { new Track(TrackName.mainTitle) });
+    }
+}
+public class MusicApartment : Music {
+    public MusicApartment() {
+        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.apartment, vol: 0.5f) });
     }
 }
 public class MusicNone : Music {
@@ -80,8 +88,8 @@ public class MusicBeat : Music {
 public class MusicVamp : Music {
     public MusicVamp() {
         tracks = new Stack<Track>(new List<Track> {
-            new Track(TrackName.dracLoop),
-            new Track(TrackName.dracIntro, loop: false),
+            new Track(TrackName.dracLoop, vol:0.5f),
+            new Track(TrackName.dracIntro, loop: false, vol:0.5f),
             });
     }
 }
@@ -108,7 +116,8 @@ public class MusicCongrats : Music {
 public class MusicController : Singleton<MusicController> {
 
     static Dictionary<TrackName, string> trackFiles = new Dictionary<TrackName, string>(){
-        {TrackName.mainTitle, "Main Vamp w keys YC3"},
+        {TrackName.mainTitle, "Title Screen Theme YC3 MUSIC 2020"},
+        {TrackName.apartment, "Main Vamp w keys YC3"},
         {TrackName.creepyAmbient, "ForestMoon Alternate Loop YC3"},
         {TrackName.lithophone, "Lithophone LOOP REMIX YC3"},
         {TrackName.jingle, "jingle1"},
@@ -141,10 +150,11 @@ public class MusicController : Singleton<MusicController> {
         {"potion", () => new MusicCreepy()},
         {"vampire_house", () => new MusicVamp()},
         {"dungeon", () => new MusicVamp()},
-        {"house", () => new MusicNone()},
-        {"apartment", () => new MusicNone()},
-        {"neighborhood", () => new MusicNone()},
+        {"house", () => new MusicApartment()},
+        {"apartment", () => new MusicApartment()},
+        {"neighborhood", () => new MusicApartment()},
     };
+    // TODO: add studio
     public static Dictionary<TrackName, AudioClip> tracks = new Dictionary<TrackName, AudioClip>();
     public Camera cam; // TOOD: make obsolete
     public AudioSource audioSource;
@@ -220,6 +230,7 @@ public class MusicController : Singleton<MusicController> {
             return;
 
         audioSource.clip = tracks[track.trackName];
+        audioSource.volume = track.volume;
         audioSource.Play();
         nowPlayingTrack = track;
         audioSource.time = track.playTime;

@@ -67,7 +67,7 @@ public class Eater : Interactive, ISaveable {
         netIntrinsics = message.netBuffs;
     }
     public void HandleOccurrence(MessageOccurrence message) {
-        foreach (EventData data in message.data.events)
+        foreach (EventData data in message.data.GetChildren())
             ReactToOccurrence(data);
     }
     void Update() {
@@ -287,9 +287,9 @@ public class Eater : Interactive, ISaveable {
         // foreach (KeyValuePair<Rating, float> kvp in od.ratings) {
         //     Debug.Log(kvp.Key.ToString() + ": " + kvp.Value.ToString());
         // }
-        if (od.ratings[Rating.disgusting] > 1)
+        if (od.quality[Rating.disgusting] > 1)
             nausea += 10f;
-        if (od.ratings[Rating.disgusting] > 2)
+        if (od.quality[Rating.disgusting] > 2)
             nausea += 10f;
     }
     public void SaveData(PersistentComponent data) {

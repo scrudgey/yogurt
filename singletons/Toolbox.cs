@@ -135,7 +135,7 @@ public partial class Toolbox : Singleton<Toolbox> {
         EventData eventData = new EventData(chaos: chaos, disgusting: disgusting, disturbing: disturbing, offensive: offensive, positive: positive);
 
         occurrence.data = data;
-        data.events.Add(eventData);
+        data.AddChild(eventData);
         occurrence.data.CalculateDescriptions();
 
         return eventData;

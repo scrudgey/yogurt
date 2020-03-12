@@ -93,12 +93,15 @@ public class VideoCamera : Interactive {
         Qualities qualities = col.GetComponent<Qualities>();
         if (qualities != null) {
             // TODO: no messageoccurrence??
-            EventData data = qualities.ToEvent();
-            GameManager.Instance.data.activeCommercial.eventData.Add(data);
+            // EventData data = qualities.ToEvent();
+            GameManager.Instance.data.activeCommercial.AddChild(qualities.ToDescribable());
         }
         Occurrence occurrence = col.gameObject.GetComponent<Occurrence>();
-        if (occurrence != null)
+        if (occurrence != null) {
+
             GameManager.Instance.data.activeCommercial.ProcessOccurrence(occurrence);
+            GameManager.Instance.data.activeCommercial.AddChild(occurrence.data.ToDescribable());
+        }
     }
 
     public void UpdateStatus() {

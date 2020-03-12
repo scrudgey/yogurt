@@ -6,10 +6,7 @@ using System.Linq;
 [System.Serializable]
 public enum Rating { disturbing, disgusting, chaos, offensive, positive };
 public class Occurrence : MonoBehaviour {
-    // An occurrence is a little bit of code that lives on a temporarily persistent flag in the world
-    // that knows how to describe an event in terms of EventData. 
-    // occurrences can also be noticed by perceptive components which use the flag properties to compose 
-    // a stimulus.
+    // we use a separate class here so that the data is serializable although the involvedparties is not.
     public OccurrenceData data;
     public HashSet<GameObject> involvedParties() {
         if (data == null) {

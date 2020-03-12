@@ -2,20 +2,22 @@
 using System.Collections.Generic;
 
 public class Intrinsics : MonoBehaviour, ISaveable {
+    public Intrinsics parent;
     public List<Buff> buffs = new List<Buff>();
     public List<Buff> liveBuffs = new List<Buff>();
-    // TODO: if we ever need to, we can extend "childBuffs" to be keyed on strings; 
-    // think of it as accessible slots
-    public Dictionary<Component, List<Buff>> childBuffs = new Dictionary<Component, List<Buff>>();
+    public Dictionary<Component, Intrinsics> children = new Dictionary<Component, Intrinsics>();
     public Dictionary<BuffType, GameObject> intrinsicFX;
-    public bool blessed;
     public void AddChild(Component owner, Intrinsics donor) {
-        childBuffs[owner] = donor.buffs;
+        children[owner] = donor;
+        donor.parent = this;
         IntrinsicsChanged();
     }
     public void RemoveChild(Component owner) {
-        childBuffs.Remove(owner);
-        IntrinsicsChanged();
+        if (children.ContainsKey(owner)) {
+            children[owner].parent = null;
+            children.Remove(owner);
+            IntrinsicsChanged();
+        }
     }
     public void CreateLiveBuffs(List<Buff> newBuffs) {
         foreach (Buff b in newBuffs) {
@@ -56,7 +58,12 @@ public class Intrinsics : MonoBehaviour, ISaveable {
         }
         liveBuffs.Add(newBuff);
     }
-    void Update() {
+    public void Update() {
+        if (parent == null) {
+            DoUpdate();
+        }
+    }
+    public void DoUpdate() {
         bool changed = false;
         Stack<Buff> removeBuffs = new Stack<Buff>();
         foreach (Buff buff in liveBuffs) {
@@ -71,7 +78,11 @@ public class Intrinsics : MonoBehaviour, ISaveable {
         if (changed) {
             IntrinsicsChanged();
         }
+        foreach (KeyValuePair<Component, Intrinsics> kvp in children) {
+            kvp.Value.DoUpdate();
+        }
     }
+
     public void Awake() {
         intrinsicFX = new Dictionary<BuffType, GameObject>();
         foreach (BuffType type in System.Enum.GetValues(typeof(BuffType))) {
@@ -104,7 +115,7 @@ public class Intrinsics : MonoBehaviour, ISaveable {
                     }
                     break;
                 case BuffType.invulnerable:
-                    if (kvp.Value.boolValue || kvp.Value.floatValue > 0) {
+                    if (kvp.Value.active()) {
                         Transform head = transform.Find("head");
                         GameObject halo = GameObject.Instantiate(Resources.Load("particles/halo")) as GameObject;
                         if (head) {
@@ -166,12 +177,8 @@ public class Intrinsics : MonoBehaviour, ISaveable {
         List<Buff> returnBuffs = new List<Buff>();
         returnBuffs.AddRange(buffs);
         returnBuffs.AddRange(liveBuffs);
-        foreach (KeyValuePair<Component, List<Buff>> kvp in childBuffs) {
-            returnBuffs.AddRange(kvp.Value);
-            if (kvp.Value.Count > 0) {
-                Buff b = kvp.Value[0];
-                // Debug.Log(gameObject.name + "> " + kvp.Key.ToString()+" : "+b.floatValue.ToString());
-            }
+        foreach (KeyValuePair<Component, Intrinsics> kvp in children) {
+            returnBuffs.AddRange(kvp.Value.NetBuffs().Values);
         }
         return returnBuffs;
     }
@@ -185,8 +192,9 @@ public class Intrinsics : MonoBehaviour, ISaveable {
             //
             //	THE BUFF ALGEBRA
             //
-            netBuffs[buff.type].boolValue |= buff.boolValue;
-            netBuffs[buff.type].floatValue += buff.floatValue;
+            // netBuffs[buff.type].boolValue |= buff.boolValue;
+            // netBuffs[buff.type].floatValue += buff.floatValue;
+            netBuffs[buff.type] = netBuffs[buff.type] + buff;
         }
         return netBuffs;
     }
@@ -198,26 +206,22 @@ public class Intrinsics : MonoBehaviour, ISaveable {
             GameManager.Instance.FocusIntrinsicsChanged(this);
         }
         SetBuffFX();
+        if (parent != null) {
+            parent.IntrinsicsChanged();
+        }
     }
     public void SaveData(PersistentComponent data) {
         data.buffs = new List<Buff>();
         foreach (Buff b in liveBuffs) {
             data.buffs.Add(new Buff(b));
         }
-        data.bools["blessed"] = blessed;
     }
     public void LoadData(PersistentComponent data) {
         liveBuffs = new List<Buff>();
         foreach (Buff b in data.buffs) {
             liveBuffs.Add(new Buff(b));
         }
-        if (data.bools.ContainsKey("blessed"))
-            blessed = data.bools["blessed"];
-        if (blessed) {
-            Buff blessing = new Buff(BuffType.invulnerable, true, 0, 3);
-            buffs.Add(blessing);
-        }
-        if (data.buffs.Count > 0 || blessed)
+        if (data.buffs.Count > 0)// || blessed)
             IntrinsicsChanged();
     }
 }

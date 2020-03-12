@@ -35,8 +35,8 @@ namespace AI {
                 }
             if (incoming is MessageOccurrence) {
                 MessageOccurrence message = (MessageOccurrence)incoming;
-                foreach (EventData data in message.data.events) {
-                    urgency += data.ratings[Rating.disturbing] / 2f;
+                foreach (EventData data in message.data.GetChildren()) {
+                    urgency += data.quality[Rating.disturbing] / 2f;
                 }
             }
         }

@@ -59,6 +59,11 @@ public partial class UINew : Singleton<UINew> {
             ConfigureUIElements();
             init = true;
         }
+        // Sprite[] sprites = Resources.LoadAll<Sprite>("UI/Cursor2_128");
+
+        // cursorDefault = sprites[0].texture;
+        // cursorHighlight = sprites[1].texture;
+
         cursorDefault = (Texture2D)Resources.Load("UI/cursor3_64_2");
         cursorHighlight = (Texture2D)Resources.Load("UI/cursor3_64_1");
         cursorTarget = (Texture2D)Resources.Load("UI/cursor3_target3");

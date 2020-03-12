@@ -85,7 +85,7 @@ public class Destructible : Damageable, ISaveable {
                 message.type = damageType.physical;
                 message.force = col.relativeVelocity;
                 TakeDamage(message);
-                Debug.Log("Collision damage on " + gameObject.name + " to the tune of " + damage.ToString());
+                // Debug.Log("Collision damage on " + gameObject.name + " to the tune of " + damage.ToString());
             } else {
                 Rigidbody2D rigidbody = GetComponent<Rigidbody2D>();
                 float damage = rigidbody.mass * vel / 5.0f;
@@ -94,7 +94,7 @@ public class Destructible : Damageable, ISaveable {
                 message.type = damageType.physical;
                 message.force = col.relativeVelocity;
                 TakeDamage(message);
-                Debug.Log("Collision damage on " + gameObject.name + " to the tune of " + damage.ToString());
+                // Debug.Log("Collision damage on " + gameObject.name + " to the tune of " + damage.ToString());
             }
         }
 

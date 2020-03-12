@@ -196,7 +196,14 @@ public class DialogueMenu : MonoBehaviour {
             return;
         }
         if (target.hitState <= Controllable.HitState.stun) {
-            if (target.defaultMonologue != "") {
+            //     if (message.value && cameraMonologue != "") {
+            //     defaultMonologue = cameraMonologue;
+            // } else {
+
+            // }
+            if (target.onCamera && target.cameraMonologue != "") {
+                LoadDialogueTree(target.cameraMonologue);
+            } else if (target.defaultMonologue != "") {
                 LoadDialogueTree(target.defaultMonologue);
             }
         } else {

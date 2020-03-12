@@ -22,9 +22,16 @@ public class UIButtonCallbacks : MonoBehaviour {
         GameManager.Instance.SetFocus(MySaver.LoadScene());
     }
     public void TestButtonClick() {
-        string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
-        DirectoryInfo dataDir = new DirectoryInfo(path);
-        dataDir.Delete(true);
+        GameObject target = GameObject.Find("blue_shirt");
+        if (target != null) {
+            PhysicalBootstrapper pb = target.GetComponent<PhysicalBootstrapper>();
+            Godhead.BlessItem(pb);
+        }
+
+        // string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
+        // DirectoryInfo dataDir = new DirectoryInfo(path);
+        // dataDir.Delete(true);
+
         // Debug.Log("test");
         // Grammar g = new Grammar();
         // g.Load("insult");

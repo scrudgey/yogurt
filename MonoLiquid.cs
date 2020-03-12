@@ -57,16 +57,16 @@ public class MonoLiquid : MonoBehaviour, ISaveable {
                     EventData data = Toolbox.Instance.DataFlag(coll.gameObject, chaos: 1, disgusting: 1);
                     data.whatHappened = liquid.name + " stained " + Toolbox.Instance.GetName(coll.gameObject);
                     if (liquid.immoral > 0) {
-                        data.ratings[Rating.chaos] += 1;
-                        data.ratings[Rating.disturbing] += 1;
+                        data.quality[Rating.chaos] += 1;
+                        data.quality[Rating.disturbing] += 1;
                     }
                     if (liquid.vomit) {
-                        data.ratings[Rating.chaos] += 1;
-                        data.ratings[Rating.disgusting] += 1;
+                        data.quality[Rating.chaos] += 1;
+                        data.quality[Rating.disgusting] += 1;
                     }
                     if (liquid.offal > 0) {
-                        data.ratings[Rating.chaos] += 1;
-                        data.ratings[Rating.disgusting] += 1;
+                        data.quality[Rating.chaos] += 1;
+                        data.quality[Rating.disgusting] += 1;
                     }
                     data.noun = "staining";
                 }

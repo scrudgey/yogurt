@@ -6,6 +6,8 @@ public class Outfit : Interactive, ISaveable {
     public string readableUniformName;
     public string pluralUniformType;
     public GameObject initUniform;
+    public GameObject uniform;
+
     public Controllable.HitState hitState;
     public Intrinsics uniformIntrinsics;
     void Awake() {
@@ -26,7 +28,7 @@ public class Outfit : Interactive, ISaveable {
         if (initUniform != null) {
             // Debug.Log("donning init uniform");
             GameObject uniObject = initUniform;
-            if (!initUniform.activeInHierarchy) {
+            if (initUniform.scene.name == null) {
                 uniObject = Instantiate(initUniform);
             }
             Uniform uniform = uniObject.GetComponent<Uniform>();
@@ -36,13 +38,14 @@ public class Outfit : Interactive, ISaveable {
         }
     }
     public void StealUniform(Outfit otherOutfit) {
-        // TODO: add naked outfit
         GameObject uniObject = RemoveUniform();
-        Uniform uniform = uniObject.GetComponent<Uniform>();
-        otherOutfit.DonUniform(uniform);
+        Uniform myUniform = uniObject.GetComponent<Uniform>();
+        otherOutfit.DonUniform(myUniform);
         GoNude();
     }
     public void GoNude() {
+        initUniform = null;
+        uniform = null;
         MessageAnimation anim = new MessageAnimation();
         if (gender == Gender.male) {
             anim.outfitName = "nude";
@@ -70,21 +73,25 @@ public class Outfit : Interactive, ISaveable {
     public void DonUniformWrapper(Uniform uniform) {
         DonUniform(uniform);
     }
-    public GameObject DonUniform(Uniform uniform, bool cleanStains = true) {
+    public GameObject DonUniform(Uniform newUniform, bool cleanStains = true) {
         GameObject removedUniform = RemoveUniform();
-        PhysicalBootstrapper phys = uniform.GetComponent<PhysicalBootstrapper>();
+        PhysicalBootstrapper phys = newUniform.GetComponent<PhysicalBootstrapper>();
         if (phys)
             phys.DestroyPhysical();
         MessageAnimation anim = new MessageAnimation();
-        anim.outfitName = uniform.baseName;
+        anim.outfitName = newUniform.baseName;
         Toolbox.Instance.SendMessage(gameObject, this, anim);
-        Toolbox.Instance.AddChildIntrinsics(gameObject, this, uniform.gameObject);
-        wornUniformName = Toolbox.Instance.CloneRemover(uniform.gameObject.name);
-        readableUniformName = uniform.readableName;
-        pluralUniformType = uniform.pluralName;
-        GameManager.Instance.CheckItemCollection(uniform.gameObject, gameObject);
-        ClaimsManager.Instance.WasDestroyed(uniform.gameObject);
-        Destroy(uniform.gameObject);
+
+
+        wornUniformName = Toolbox.Instance.CloneRemover(newUniform.gameObject.name);
+        readableUniformName = newUniform.readableName;
+        pluralUniformType = newUniform.pluralName;
+        GameManager.Instance.CheckItemCollection(newUniform.gameObject, gameObject);
+        // ClaimsManager.Instance.WasDestroyed(uniform.gameObject);
+        // Destroy(uniform.gameObject);
+        this.uniform = newUniform.gameObject;
+        Toolbox.Instance.AddChildIntrinsics(gameObject, this, newUniform.gameObject);
+        newUniform.gameObject.SetActive(false);
         if (cleanStains) {
             foreach (Stain stain in GetComponentsInChildren<Stain>()) {
                 Destroy(stain.gameObject);
@@ -99,15 +106,29 @@ public class Outfit : Interactive, ISaveable {
     public GameObject RemoveUniform() {
         if (wornUniformName == "nude")
             return null;
-        string prefabName = wornUniformName;
-        GameObject uniform = Instantiate(Resources.Load("prefabs/" + prefabName)) as GameObject;
+        // TODO: change?
+        GameObject removed = null;
+        if (uniform != null) {
+            removed = uniform;
+        } else {
+            string prefabName = wornUniformName;
+            removed = Instantiate(Resources.Load("prefabs/" + prefabName)) as GameObject;
+        }
+
         Toolbox.Instance.RemoveChildIntrinsics(gameObject, this);
-        uniform.transform.position = transform.position;
-        SpriteRenderer sprite = uniform.GetComponent<SpriteRenderer>();
-        sprite.sortingLayerName = "ground";
-        return uniform;
+        removed.transform.position = transform.position;
+        // SpriteRenderer sprite = uniform.GetComponent<SpriteRenderer>();
+        // sprite.sortingLayerName = "ground";
+        removed.SetActive(true);
+        return removed;
     }
     public void SaveData(PersistentComponent data) {
+
+        if (uniform != null) {
+            MySaver.AddToReferenceTree(gameObject, uniform.gameObject);
+            MySaver.UpdateGameObjectReference(uniform.gameObject, data, "uniform");
+        }
+
         data.strings["worn"] = wornUniformName;
         data.ints["hitstate"] = (int)hitState;
         data.ints["gender"] = (int)gender;
@@ -115,11 +136,22 @@ public class Outfit : Interactive, ISaveable {
     public void LoadData(PersistentComponent data) {
         wornUniformName = data.strings["worn"];
         string wornuniform = data.strings["worn"];
-        if (wornuniform != "nude") {
-            initUniform = Resources.Load("prefabs/" + data.strings["worn"]) as GameObject;
-        } else {
+
+        if (data.GUIDs.ContainsKey("uniform")) {
+            GameObject go = MySaver.IDToGameObject(data.GUIDs["uniform"]);
+            if (go != null) {
+                // initUniform = go;
+                GameObject removedUniform = DonUniform(go.GetComponent<Uniform>(), cleanStains: false);
+                if (removedUniform)
+                    Destroy(removedUniform);
+            }
+            initUniform = null;
+        }
+
+        if (wornuniform == "nude") {
             GoNude();
         }
+
         hitState = (Controllable.HitState)data.ints["hitstate"];
         gender = (Gender)data.ints["gender"];
     }

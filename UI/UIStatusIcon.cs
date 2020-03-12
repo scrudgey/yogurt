@@ -21,6 +21,7 @@ public class UIStatusIcon : MonoBehaviour {
     public void Update() {
         if (buff == null)
             Destroy(gameObject);
+        buff.time += Time.deltaTime;
         if (buff.lifetime > 0) {
             float width = (1 - (buff.time / buff.lifetime)) * lifebarDefaultSize.x;
             lifeBar.sizeDelta = new Vector2(width, lifebarDefaultSize.y);

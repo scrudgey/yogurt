@@ -96,6 +96,8 @@ public class Speech : Interactive, ISaveable {
     public Controllable.HitState hitState;
     public Sprite[] portrait;
     public string defaultMonologue;
+    public string cameraMonologue;
+    public bool onCamera;
     public bool disableSpeakWith;
     public bool glibSpeakWith;
     public bool inDialogue;
@@ -174,13 +176,14 @@ public class Speech : Interactive, ISaveable {
         if (glibSpeakWith) {
             Interaction speakWith = new Interaction(this, "Talk", "SayRandom");
             speakWith.unlimitedRange = true;
+            speakWith.selfOnOtherConsent = false;
+            speakWith.selfOnSelfConsent = false;
             string myname = Toolbox.Instance.GetName(gameObject);
             interactions.Add(speakWith);
         }
     }
     void HandleOnCamera(MessageOnCamera message) {
-        // TODO
-        // change default monologue
+        onCamera = message.value;
     }
     void HandleSpeech(MessageSpeech message) {
         if (message.swearTarget != null) {
@@ -248,6 +251,15 @@ public class Speech : Interactive, ISaveable {
     public bool SpeakWith_Validation() {
         if (disableInteractions)
             return false;
+        Speech controlSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
+        if (Controller.Instance.state == Controller.ControlState.commandSelect) {
+            controlSpeech = Controller.Instance.commandTarget.GetComponent<Speech>();
+        }
+        if (controlSpeech == null)
+            return false;
+        if (controlSpeech.glibSpeakWith) {
+            return false;
+        }
         if (Controller.Instance.state == Controller.ControlState.commandSelect) {
             return Controller.Instance.commandTarget != gameObject;
         } else {
@@ -377,15 +389,15 @@ public class Speech : Interactive, ISaveable {
         speechData.speaker = gameObject;
         if (message.eventData == null)
             message.eventData = new EventData();
-        speechData.events.Add(message.eventData);
+        speechData.AddChild(message.eventData);
 
         List<bool> swearList = new List<bool>();
         string censoredPhrase = ProcessDialogue(message.phrase, ref swearList);
         speechData.profanity = Toolbox.LevenshteinDistance(message.phrase, censoredPhrase);
         swearMask = swearList.ToArray();
 
-        message.eventData.ratings[Rating.chaos] += speechData.profanity * 2f;
-        message.eventData.ratings[Rating.offensive] += speechData.profanity * 5f;
+        message.eventData.quality[Rating.chaos] += speechData.profanity * 2f;
+        message.eventData.quality[Rating.offensive] += speechData.profanity * 5f;
 
         speechData.line = censoredPhrase;
         if (inDialogue)
