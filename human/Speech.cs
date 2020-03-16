@@ -251,6 +251,8 @@ public class Speech : Interactive, ISaveable {
     public bool SpeakWith_Validation() {
         if (disableInteractions)
             return false;
+        if (GameManager.Instance.playerObject == null)
+            return false;
         Speech controlSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
         if (Controller.Instance.state == Controller.ControlState.commandSelect) {
             controlSpeech = Controller.Instance.commandTarget.GetComponent<Speech>();

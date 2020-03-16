@@ -64,9 +64,13 @@ public class Destructible : Damageable, ISaveable {
             Toolbox.Instance.SpawnDroplet(transform.position, container.liquid);
             Toolbox.Instance.SpawnDroplet(transform.position, container.liquid);
         }
-        EventData data = Toolbox.Instance.DataFlag(gameObject, chaos: Random.Range(1, 2));
-        data.noun = "destruction";
-        data.whatHappened = Toolbox.Instance.CloneRemover(gameObject.name) + " was destroyed";
+        EventData data = Toolbox.Instance.DataFlag(
+            gameObject,
+            "destruction",
+            Toolbox.Instance.CloneRemover(gameObject.name) + " was destroyed",
+            chaos: Random.Range(1, 2));
+        // data.noun = "destruction";
+        // data.whatHappened = Toolbox.Instance.CloneRemover(gameObject.name) + " was destroyed";
         if (lastMessage.type == damageType.fire) {
             if (Toolbox.Instance.CloneRemover(name) == "dollar") {
                 GameManager.Instance.IncrementStat(StatType.dollarsBurned, 1);

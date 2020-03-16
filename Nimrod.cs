@@ -15,7 +15,7 @@ namespace Nimrod {
             foreach (string line in textData.text.Split('\n')) {
                 if (line.Length == 0)
                     continue;
-                if (line[0] == '%'){
+                if (line[0] == '%') {
                     continue;
                 }
                 Match match = def_hook.Match(line);
@@ -84,7 +84,7 @@ namespace Nimrod {
             symbols[key].Add(val);
         }
 
-        public static Grammar ObjectToGrammar(GameObject target){
+        public static Grammar ObjectToGrammar(GameObject target) {
             Grammar g = new Grammar();
 
             g.AddSymbol("target-item", "none");
@@ -97,6 +97,7 @@ namespace Nimrod {
                 if (targetDM.possession != null) {
                     string possessionName = targetDM.possession.name;
                     g.SetSymbol("target-item", possessionName);
+                    g.Load("insult_item");
                 }
             }
 
@@ -105,6 +106,7 @@ namespace Nimrod {
             if (targetOutfit != null) {
                 g.SetSymbol("target-clothes", targetOutfit.readableUniformName);
                 g.SetSymbol("target-clothes-plural", targetOutfit.pluralUniformType);
+                g.Load("insult_clothes");
             }
 
             // insult hat
@@ -113,6 +115,7 @@ namespace Nimrod {
                 if (targetHead.hat != null) {
                     string hatName = targetHead.hat.name;
                     g.SetSymbol("target-hat", hatName);
+                    g.Load("insult_hat");
                 }
             }
 

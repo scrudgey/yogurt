@@ -26,23 +26,9 @@ public class Insults {
         return "";
     }
 
-    public static Grammar InsultGrammar(GameObject target){
+    public static Grammar InsultGrammar(GameObject target) {
         Grammar g = Grammar.ObjectToGrammar(target);
         g.Load("insult");
-
-        if (g.Parse("{target-item}") != "none"){
-            g.Load("insult_item");
-            // flavor
-        }
-        if (g.Parse("{target-clothes}") != "none"){
-            g.Load("insult_clothes");
-            // flavor
-        }
-        if (g.Parse("{target-hat}") != "none"){
-            g.Load("insult_hat");
-            // flavor
-        }
-
         return g;
     }
 }

@@ -67,7 +67,7 @@ public class Eater : Interactive, ISaveable {
         netIntrinsics = message.netBuffs;
     }
     public void HandleOccurrence(MessageOccurrence message) {
-        foreach (EventData data in message.data.GetChildren())
+        foreach (EventData data in message.data.describable.GetChildren())
             ReactToOccurrence(data);
     }
     void Update() {

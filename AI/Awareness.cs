@@ -357,8 +357,9 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             foreach (EventData data in qualities.ToDescribable().GetChildren()) {
                 ReactToEvent(data, new HashSet<GameObject>());
 
-                OccurrenceData oD = new OccurrenceGeneric();
+                OccurrenceGeneric oD = new OccurrenceGeneric();
                 oD.AddChild(data);
+                oD.eventData.Add(data);
                 // oD.children.Add(data);
                 MessageOccurrence message = new MessageOccurrence(oD);
                 Toolbox.Instance.SendMessage(gameObject, this, message);
@@ -374,7 +375,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         Toolbox.Instance.SendMessage(gameObject, this, new MessageOccurrence(od));
         if (od is OccurrenceViolence)
             WitnessViolence((OccurrenceViolence)od);
-        foreach (EventData e in od.GetChildren()) {
+        foreach (EventData e in od.describable.GetChildren()) {
             ReactToEvent(e, od.involvedParties());
         }
     }

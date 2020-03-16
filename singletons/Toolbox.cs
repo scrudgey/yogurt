@@ -128,13 +128,16 @@ public partial class Toolbox : Singleton<Toolbox> {
         noiseOccurrence.data = data;
         data.CalculateDescriptions();
     }
-    public EventData DataFlag(GameObject spawner, float chaos = 0, float disgusting = 0, float disturbing = 0, float offensive = 0, float positive = 0) {
+    public EventData DataFlag(GameObject spawner, string noun, string whatHappened, float chaos = 0, float disgusting = 0, float disturbing = 0, float offensive = 0, float positive = 0) {
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
-        OccurrenceData data = new OccurrenceGeneric();
+        OccurrenceGeneric data = new OccurrenceGeneric();
         EventData eventData = new EventData(chaos: chaos, disgusting: disgusting, disturbing: disturbing, offensive: offensive, positive: positive);
 
+        eventData.noun = noun;
+        eventData.whatHappened = whatHappened;
         occurrence.data = data;
+        data.eventData.Add(eventData);
         data.AddChild(eventData);
         occurrence.data.CalculateDescriptions();
 

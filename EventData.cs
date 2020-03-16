@@ -12,18 +12,34 @@ public class EventData : Describable {
     public string transcriptLine;
     public string noun;
     public EventData() {
+        quality = new SerializableDictionary<Rating, float>(){
+            {Rating.disgusting, 0f},
+            {Rating.disturbing, 0f},
+            {Rating.chaos, 0f},
+            {Rating.offensive, 0f},
+            {Rating.positive, 0f}
+        };
     }
     public EventData(EventData other) {
+        this.quality = new SerializableDictionary<Rating, float>(){
+            {Rating.disgusting, 0f},
+            {Rating.disturbing, 0f},
+            {Rating.chaos, 0f},
+            {Rating.offensive, 0f},
+            {Rating.positive, 0f}
+        };
         this.key = other.key;
         this.val = other.val;
         this.popupDesc = other.popupDesc;
         this.whatHappened = other.whatHappened;
         this.transcriptLine = other.transcriptLine;
         this.noun = other.noun;
-        this.quality = new SerializableDictionary<Rating, float>();
         foreach (KeyValuePair<Rating, float> kvp in other.quality) {
             this.quality[kvp.Key] = kvp.Value;
         }
+    }
+    override public string ToString() {
+        return noun + " " + key + " " + val.ToString() + " " + popupDesc + " " + whatHappened + " " + transcriptLine + " ";
     }
     public EventData(float disturbing = 0, float disgusting = 0, float chaos = 0, float offensive = 0, float positive = 0) {
         quality[Rating.disturbing] = disturbing;
@@ -40,23 +56,6 @@ public class EventData : Describable {
             match &= quality[key] == other.quality[key];
         }
         return match;
-    }
-    public Rating Quality() {
-        Dictionary<Rating, float> absRates = new Dictionary<Rating, float>();
-        foreach (Rating key in quality.Keys) {
-            absRates[key] = Mathf.Abs(quality[key]);
-        }
-        return absRates.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
-    }
-    public string Adjective() {
-        Grammar grammar = new Grammar();
-        grammar.Load("ratings");
-        Rating rate = Quality();
-        if (quality[rate] == 0)
-            return "none";
-        float severity = Mathf.Min(quality[rate], 3);
-        string key = rate.ToString() + "_" + severity.ToString();
-        return grammar.Parse("{" + key + "}");
     }
     public static EventData Yogurt(GameObject eater) {
         EventData data = new EventData(positive: 1);

@@ -3,9 +3,6 @@ using System.Xml.Serialization;
 using UnityEngine.SceneManagement;
 using UnityEngine;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Runtime.Serialization.Formatters.Binary;
 using analysis;
 
 [System.Serializable]
@@ -15,7 +12,7 @@ public enum CommercialComparison {
 
 [System.Serializable]
 [XmlRoot("Commercial")]
-public class Commercial : Describable {
+public class Commercial : MetaDescribable<DescribableOccurrenceData> {
     public string name = "default";
     public string description = "default";
     public string cutscene = "default";
@@ -23,16 +20,14 @@ public class Commercial : Describable {
     public List<string> unlockUponCompletion;
     public string unlockItem = "";
     public string email = "";
-    // public List<EventData> eventData = new List<EventData>();
-    public List<DescribableOccurrenceData> occurrences = new List<DescribableOccurrenceData>();
-    // public List<DescribableOccurrenceData> children;
+    // public List<DescribableOccurrenceData> occurrences = new List<DescribableOccurrenceData>();
     public HashSet<string> yogurtEaterOutfits = new HashSet<string>();
     public HashSet<string> yogurtEaterNames = new HashSet<string>();
     public HashSet<string> visitedLocations = new HashSet<string>();
     public HashSet<string> outfits = new HashSet<string>();
     public bool gravy;
     [XmlIgnore]
-    public CommercialDescription analysis;
+    // public CommercialAnalysis analysis;
     // [XmlIgnore]
     public List<Objective> objectives = new List<Objective>();
     public Commercial(Commercial other) {
@@ -104,13 +99,13 @@ public class Commercial : Describable {
                 yogurtEaterNames.Add(eatOccurrence.eaterName);
             }
         }
-        foreach (EventData data in occurrence.GetChildren()) {
+        foreach (EventData data in occurrence.describable.GetChildren()) {
             IncrementValue(data);
             if (data.transcriptLine != null) {
                 transcript.Add(data.transcriptLine);
             }
         }
-        AddChild(occurrence.ToDescribable());
+        AddChild(occurrence.describable);
         UINew.Instance.UpdateObjectives();
     }
     public Commercial() {
@@ -145,14 +140,13 @@ public class Commercial : Describable {
         writer.Close();
         filename = Path.Combine(Application.persistentDataPath, "commercial_events_" + guid.ToString() + ".txt");
         writer = new StreamWriter(filename, false);
-        foreach (DescribableOccurrenceData data in occurrences) {
+        foreach (DescribableOccurrenceData data in GetChildren()) {
             foreach (EventData child in data.GetChildren()) {
-                string line = child.id + ";" + child.noun + ";" + child.quality[Rating.disturbing].ToString() + ";" + child.quality[Rating.disgusting].ToString() + ";" + child.quality[Rating.chaos].ToString() + ";" + child.quality[Rating.offensive].ToString() + ";" + child.quality[Rating.positive].ToString() + ";" + child.whatHappened;
+                string line = data.id + ";" + child.noun + ";" + child.quality[Rating.disturbing].ToString() + ";" + child.quality[Rating.disgusting].ToString() + ";" + child.quality[Rating.chaos].ToString() + ";" + child.quality[Rating.offensive].ToString() + ";" + child.quality[Rating.positive].ToString() + ";" + child.whatHappened;
                 writer.WriteLine(line);
             }
         }
         writer.Close();
-        // analysis = new CommercialDescription(eventData);
     }
     public bool Evaluate() {
         bool requirementsMet = true;
@@ -161,9 +155,9 @@ public class Commercial : Describable {
         }
         return requirementsMet;
     }
-    public string SentenceReview() {
-        return "WOW OK";
-    }
+    // public string SentenceReview() {
+    //     return "WOW OK";
+    // }
     // public string SentenceReview() {
     //     // TODO: adjectives to describe the commercial based on key properties of prominent events
     //     List<string> adjectives = new List<string>();
@@ -211,8 +205,6 @@ public class Commercial : Describable {
     //     builder.Append(".");
     //     return builder.ToString();
     // }
-
-
 }
 [System.Serializable]
 public class CommercialProperty {

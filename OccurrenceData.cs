@@ -6,39 +6,60 @@ using analysis;
 
 
 [System.Serializable]
-public class DescribableOccurrenceData : Describable {
-    public List<EventData> children;
-    public DescribableOccurrenceData() { } // needed for serialization
-    public DescribableOccurrenceData(List<Describable> desc) {
+public class DescribableOccurrenceData : MetaDescribable<EventData> {
+    public HashSet<string> nouns = new HashSet<string>();
+    public DescribableOccurrenceData() {
         whatHappened = "";
-        foreach (Describable child in desc) {
-            AddChild(child);
-            whatHappened += child.whatHappened + "\n";
-        }
+    } // needed for serialization
+    override public void AddChild(EventData eventData) {
+        eventData.id = this.id;
+        if (eventData.noun != "")
+            nouns.Add(eventData.noun);
+        base.AddChild(eventData);
     }
-    new public List<EventData> GetChildren() {
-        return children;
+    override public void UpdateChildren() {
+        this.whatHappened = "";
+        foreach (EventData child in GetChildren()) {
+            if (child.whatHappened != null)
+                whatHappened += child.whatHappened + "\n";
+        }
+        base.UpdateChildren();
+    }
+    public DescribableOccurrenceData(List<EventData> desc) {
+        whatHappened = "";
+        foreach (EventData child in desc) {
+            AddChild(child);
+        }
     }
 }
 
 [System.Serializable]
-public abstract class OccurrenceData : Describable {
+public abstract class OccurrenceData {
     public abstract HashSet<GameObject> involvedParties();
+    public DescribableOccurrenceData describable = new DescribableOccurrenceData();
     public void CalculateDescriptions() {
-        // children = new List<Describable>();
-        ResetChildren();
+        describable.ResetChildren();
         Descriptions();
     }
     public abstract void Descriptions();
-    public DescribableOccurrenceData ToDescribable() {
-        return new DescribableOccurrenceData(GetChildren());
+    public virtual void AddChild(EventData child) {
+        describable.AddChild(child);
     }
 }
 public class OccurrenceGeneric : OccurrenceData {
     public override HashSet<GameObject> involvedParties() {
         return new HashSet<GameObject> { };
     }
-    override public void Descriptions() { }
+    public List<EventData> eventData = new List<EventData>();
+    override public void Descriptions() {
+        foreach (EventData e in eventData) {
+            AddChild(e);
+        }
+    }
+    // override public void AddChild(EventData child) {
+    //     eventData.Add(child);
+    //     base.AddChild(child);
+    // }
 }
 public class OccurrenceFire : OccurrenceData {
     public GameObject flamingObject;

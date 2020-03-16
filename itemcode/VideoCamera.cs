@@ -98,9 +98,7 @@ public class VideoCamera : Interactive {
         }
         Occurrence occurrence = col.gameObject.GetComponent<Occurrence>();
         if (occurrence != null) {
-
-            GameManager.Instance.data.activeCommercial.ProcessOccurrence(occurrence);
-            GameManager.Instance.data.activeCommercial.AddChild(occurrence.data.ToDescribable());
+            GameManager.Instance.data.activeCommercial.ProcessOccurrence(occurrence); // adds child
         }
     }
 
@@ -123,7 +121,6 @@ public class VideoCamera : Interactive {
         }
     }
     public void Enable() {
-        Debug.Log("start camera");
         UINew.Instance.ShowMenu(UINew.MenuType.scriptSelect);
     }
     public bool Enable_Validation() {

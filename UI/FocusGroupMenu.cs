@@ -2,25 +2,18 @@
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Text;
+using analysis;
 
 public class FocusGroupMenu : MonoBehaviour {
-    public enum PreferenceType { hates, likes };
-    [System.Serializable]
-    public struct Preference {
-        public Rating type;
-        public PreferenceType pref;
-        public Preference(Rating type, PreferenceType pref) {
-            this.type = type;
-            this.pref = pref;
-        }
-    }
+
     [System.Serializable]
     public class FocusGroupPersonality {
-        public enum ReviewType { none, outlier, notable, topDisturbing, topDisgusting, topChaos, topOffensive, topPositive };
-        public List<ReviewType> reviewTypes;
+        // public enum ReviewType { none, outlier, notable, topDisturbing, topDisgusting, topChaos, topOffensive, topPositive };
+        // public List<ReviewType> reviewTypes;
         public Sprite head_norm;
         public Sprite head_talking;
         public Sprite body;
+        // we do it this way so it's serializable in the unity editor
         public List<Preference> preferences = new List<Preference>(){
             new Preference(Rating.chaos, PreferenceType.hates),
             new Preference(Rating.disturbing, PreferenceType.hates),
@@ -28,46 +21,46 @@ public class FocusGroupMenu : MonoBehaviour {
             new Preference(Rating.offensive, PreferenceType.hates),
             new Preference(Rating.positive, PreferenceType.likes)
         };
-        public EventData SelectEvent(Commercial commercial, int n) {
-            if (reviewTypes.Count == 0)
-                return commercial.analysis.outlierEvents[n];
-            switch (reviewTypes[Random.Range(0, reviewTypes.Count)]) {
-                case ReviewType.outlier:
-                    return commercial.analysis.outlierEvents[n];
-                case ReviewType.notable:
-                    return commercial.analysis.notableEvents[n];
-                case ReviewType.topDisturbing:
-                    return commercial.analysis.maxDisturbing[n];
-                case ReviewType.topDisgusting:
-                    return commercial.analysis.maxDisgusting[n];
-                case ReviewType.topChaos:
-                    return commercial.analysis.maxChaos[n];
-                case ReviewType.topOffensive:
-                    return commercial.analysis.maxOffense[n];
-                case ReviewType.topPositive:
-                    return commercial.analysis.maxPositive[n];
-                default:
-                    return commercial.analysis.outlierEvents[n];
-            }
+        public Describable SelectEvent(Commercial commercial) {
+            CommercialAnalysis analysis = new CommercialAnalysis(commercial);
+            // if (reviewTypes.Count == 0)
+            return analysis.Climax(0);
+            // return commercial.analysis.outlierEvents[n];
+            // switch (reviewTypes[Random.Range(0, reviewTypes.Count)]) {
+            //     case ReviewType.outlier:
+            //         return commercial.analysis.outlierEvents[n];
+            //     case ReviewType.notable:
+            //         return commercial.analysis.notableEvents[n];
+            //     case ReviewType.topDisturbing:
+            //         return commercial.analysis.maxDisturbing[n];
+            //     case ReviewType.topDisgusting:
+            //         return commercial.analysis.maxDisgusting[n];
+            //     case ReviewType.topChaos:
+            //         return commercial.analysis.maxChaos[n];
+            //     case ReviewType.topOffensive:
+            //         return commercial.analysis.maxOffense[n];
+            //     case ReviewType.topPositive:
+            //         return commercial.analysis.maxPositive[n];
+            //     default:
+            //         return commercial.analysis.outlierEvents[n];
+            // }
         }
-        public string ReactToEvent(EventData data) {
-            Rating quality = data.Quality();
-            PreferenceType opinion = PreferenceType.likes;
-            foreach (Preference pref in preferences) {
-                if (pref.type == quality)
-                    opinion = pref.pref;
-            }
-            if (opinion == PreferenceType.hates) {
-                return "\"I did not like when ";
-            }
-            return "\"I liked when ";
-        }
-        public string DescribeEvent(Commercial commercial, int n) {
-            StringBuilder builder = new StringBuilder();
-            EventData eventd = SelectEvent(commercial, n);
 
-            builder.Append(ReactToEvent(eventd));
-            builder.Append(eventd.whatHappened);
+        public string ReviewCommercial(Commercial commercial) {
+
+            // react to the commercial's primary traits
+            // the events are frequently chaotic: do i like or dislike?
+
+            // react to the commercial's notable events: 
+            // the vomit is notable for its offensiveness: do i like or dislike?
+
+            StringBuilder builder = new StringBuilder();
+            Describable eventd = SelectEvent(commercial);
+
+            // TODO: FIX!
+            // builder.Append(ReactToEvent(eventd));
+            builder.Append(Interpretation.NotableNouns(commercial));
+            // builder.Append(eventd.whatHappened.Trim());
             builder.Append(".\"");
             return Toolbox.RemoveExtraPunctuation(builder.ToString());
         }
@@ -128,7 +121,7 @@ public class FocusGroupMenu : MonoBehaviour {
         bubbles[p].SetActive(true);
         mouths[p] = true;
         timer = 1f;
-        reviewText.text = p.DescribeEvent(commercial, index);
+        reviewText.text = p.ReviewCommercial(commercial);
     }
     public void DoneButtonCallback() {
         Destroy(gameObject);

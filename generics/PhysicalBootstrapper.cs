@@ -219,9 +219,13 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
                     GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
                 }
             if (coll.gameObject != horizon) {
-                EventData data = Toolbox.Instance.DataFlag(gameObject, chaos: 1);
-                data.noun = "collision";
-                data.whatHappened = Toolbox.Instance.CloneRemover(coll.gameObject.name) + " collided with " + Toolbox.Instance.CloneRemover(gameObject.name);
+                EventData data = Toolbox.Instance.DataFlag(
+                    gameObject,
+                    "collision",
+                    Toolbox.Instance.CloneRemover(coll.gameObject.name) + " collided with " + Toolbox.Instance.CloneRemover(gameObject.name),
+                    chaos: 1);
+                // data.noun = "collision";
+                // data.whatHappened = Toolbox.Instance.CloneRemover(coll.gameObject.name) + " collided with " + Toolbox.Instance.CloneRemover(gameObject.name);
             }
         }
 

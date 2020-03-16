@@ -1,14 +1,12 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-
+using analysis;
 public class CommercialReportMenu : MonoBehaviour {
-    // TODO: unique events so that the top 3 aren't all different cases of cannibalism
     Text descriptionText;
     Text positiveScore, chaosScore, disgustingScore, disturbingScore, offensiveScore;
     Text transcript;
     Text eventText;
     public Commercial commercial;
-    public CommercialDescription eventSet;
     private Canvas canvas;
     public void Start() {
         canvas = GetComponent<Canvas>();
@@ -48,7 +46,7 @@ public class CommercialReportMenu : MonoBehaviour {
     public void Report(Commercial activeCommercial) {
         commercial.WriteReport();
         SetRefs();
-        descriptionText.text = commercial.SentenceReview();
+        descriptionText.text = Interpretation.PrimaryNouns(commercial);
 
         positiveScore.text = commercial.quality[Rating.positive].ToString();
         chaosScore.text = commercial.quality[Rating.chaos].ToString();

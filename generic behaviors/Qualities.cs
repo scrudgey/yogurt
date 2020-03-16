@@ -19,6 +19,6 @@ public class Qualities : MonoBehaviour {
         );
         data.whatHappened = "I saw " + Toolbox.Instance.GetName(gameObject);
         data.noun = "observation";
-        return new DescribableOccurrenceData(new List<Describable> { data });
+        return new DescribableOccurrenceData(new List<EventData> { data });
     }
 }
