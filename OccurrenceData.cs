@@ -18,11 +18,7 @@ public class DescribableOccurrenceData : MetaDescribable<EventData> {
         base.AddChild(eventData);
     }
     override public void UpdateChildren() {
-        this.whatHappened = "";
-        foreach (EventData child in GetChildren()) {
-            if (child.whatHappened != null)
-                whatHappened += child.whatHappened + "\n";
-        }
+        this.whatHappened = NotableChild().whatHappened;
         base.UpdateChildren();
     }
     public DescribableOccurrenceData(List<EventData> desc) {

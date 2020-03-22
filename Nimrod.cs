@@ -6,7 +6,8 @@ using UnityEngine;
 namespace Nimrod {
     public class Grammar {
         private Regex symbol_hook = new Regex(@"(\{(.+?)\})", RegexOptions.Multiline);
-        private Regex prob_hook = new Regex(@"(<([\.\d]+)\|(.+?)>)", RegexOptions.Multiline);
+        private Regex prob_hook = new Regex(@"(<([\.\d]+)\|(.+?)>)", RegexOptions.Multiline); // also matches either_hook
+        private Regex either_hook = new Regex(@"(<([\.\d]*)\|([^\|>]*)\|([^\|>]*)>)", RegexOptions.Multiline);
         private Regex def_hook = new Regex(@"^#(.+)");
         private Dictionary<string, List<string>> symbols = new Dictionary<string, List<string>>();
         public void Load(string filename) {
@@ -47,6 +48,22 @@ namespace Nimrod {
                         parseText = builder.ToString();
                     }
                 }
+
+                // replace either/or syntax
+                matches = either_hook.Matches(parseText);
+                if (matches.Count > 0) {
+                    foreach (Match match in matches) {
+                        if (Random.Range(0.0f, 1.0f) < float.Parse(match.Groups[2].Value)) {
+                            StringBuilder builder = new StringBuilder(parseText);
+                            builder.Replace(match.Groups[1].Value, Interpret(match.Groups[3].Value));
+                            parseText = builder.ToString();
+                        } else {
+                            StringBuilder builder = new StringBuilder(parseText);
+                            builder.Replace(match.Groups[1].Value, Interpret(match.Groups[4].Value));
+                            parseText = builder.ToString();
+                        }
+                    }
+                }
                 // replace with probability
                 matches = prob_hook.Matches(parseText);
                 if (matches.Count > 0) {
@@ -82,44 +99,6 @@ namespace Nimrod {
         public void SetSymbol(string key, string val) {
             symbols[key] = new List<string>();
             symbols[key].Add(val);
-        }
-
-        public static Grammar ObjectToGrammar(GameObject target) {
-            Grammar g = new Grammar();
-
-            g.AddSymbol("target-item", "none");
-            g.AddSymbol("target-clothes", "none");
-            g.AddSymbol("target-hat", "none");
-
-            // insult possessions
-            DecisionMaker targetDM = target.GetComponent<DecisionMaker>();
-            if (targetDM != null) {
-                if (targetDM.possession != null) {
-                    string possessionName = targetDM.possession.name;
-                    g.SetSymbol("target-item", possessionName);
-                    g.Load("insult_item");
-                }
-            }
-
-            // insult outfit
-            Outfit targetOutfit = target.GetComponent<Outfit>();
-            if (targetOutfit != null) {
-                g.SetSymbol("target-clothes", targetOutfit.readableUniformName);
-                g.SetSymbol("target-clothes-plural", targetOutfit.pluralUniformType);
-                g.Load("insult_clothes");
-            }
-
-            // insult hat
-            Head targetHead = target.GetComponentInChildren<Head>();
-            if (targetHead != null) {
-                if (targetHead.hat != null) {
-                    string hatName = targetHead.hat.name;
-                    g.SetSymbol("target-hat", hatName);
-                    g.Load("insult_hat");
-                }
-            }
-
-            return g;
         }
     }
 }

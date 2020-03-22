@@ -23,26 +23,25 @@ namespace analysis {
         public static List<Rating> GOOD_RATINGS = new List<Rating>{
             Rating.positive
         };
-        public static string PrimaryNouns(Commercial commercial) {
-            /**
-            "the commercial is characterized by {adjective} {noun}"
-                high intensity
-                    negative rating
-                        The commercial spits in the audience's face with its insistence on {adjective} {noun}
-                        Flirting dangerously with insanity, the commercial features repeated imagery of {adjective} {noun}
-                        A low point of the commercial features heinous yogurt vomiting.
 
-                    positive rating
-                        It's a crowd pleaser, with a focus on {adjective} {noun}
-                low intensity
-                    negative rating
-                        Mildly unpleasant, featuring {adjective} {noun}
-                    positive rating
-                        Measured, thoughtful, mildly {adjective} {noun} 
+        public static List<string> Review(Commercial commercial, FocusGroupPersonality personality = null) {
+            HashSet<string> sentences = new HashSet<string>();
 
-            the commercial is primarily characterized by eating, vomiting yogurt, and yogurt eating.
-            **/
+            foreach (Func<Commercial, FocusGroupPersonality, string> func in new List<Func<Commercial, FocusGroupPersonality, string>>(){
+                PrimaryNouns,
+                NotableNouns,
+                FrequentQualities,
+                Climax,
+                Memorable}) {
+                string review = func(commercial, personality);
+                if (review != "") {
+                    sentences.Add(review);
+                }
+            }
+            return Toolbox.Shuffle(sentences.ToList()).Take(UnityEngine.Random.Range(1, 3)).ToList();
+        }
 
+        public static string PrimaryNouns(Commercial commercial, FocusGroupPersonality personality = null) {
             Grammar g = new Grammar();
             CommercialAnalysis analysis = new CommercialAnalysis(commercial);
 
@@ -85,18 +84,25 @@ namespace analysis {
             g.SetSymbol("adjective2", adjective2);
 
             g.Load("ratings");
-            g.Load("interpretation_sentencereview");
+            if (personality == null) {
+                g.Load("interpretation_sentencereview");
+            } else {
+                g.Load("interpretation_sentencereview_personal");
+            }
 
             return g.Parse("{review}");
         }
 
-        // what to do when there are no notable nouns?
-        public static string NotableNouns(Commercial commercial) {
+        public static string NotableNouns(Commercial commercial, FocusGroupPersonality personality = null) {
             Grammar g = new Grammar();
             CommercialAnalysis analysis = new CommercialAnalysis(commercial);
 
             // get notable nouns
             List<NounNotability> notables = analysis.NotableNouns();
+
+            if (notables.Count == 0)
+                return "";
+
             string noun1 = notables[0].labelDescription.label;
 
             // get noun qualities
@@ -112,6 +118,8 @@ namespace analysis {
                 qualities1 = "{13-quality}";
             }
 
+            g.SetSymbol("adjective1", AdjectiveKey(reasons1[0], UnityEngine.Random.Range(0, 3)));
+
             string main1 = "";
             Rating rating1 = reasons1[UnityEngine.Random.Range(0, reasons1.Count)];
             if (BAD_RATINGS.Contains(rating1)) {
@@ -125,32 +133,117 @@ namespace analysis {
             g.SetSymbol("quality1", qualities1);
 
             g.Load("ratings");
-            g.Load("interpretation_notablenoun");
+            if (personality == null) {
+                g.Load("interpretation_notablenoun");
+            } else {
+                g.Load("interpretation_notablenoun_personal");
+            }
+
             return g.Parse("{review}");
         }
-        public static string FrequentQualities(Commercial commercial) {
+        public static string FrequentQualities(Commercial commercial, FocusGroupPersonality personality = null) {
             Grammar g = new Grammar();
-            // the events of this commercial are frequently disgusting and chaotic
             CommercialAnalysis analysis = new CommercialAnalysis(commercial);
             List<Rating> frequents = analysis.FrequentQualities();
-            return "";
+
+            Rating rating1 = frequents[0];
+            Rating rating2 = frequents[1];
+
+            float amount1 = commercial.Mode(rating1);
+            float amount2 = commercial.Mode(rating2);
+
+            string adjectiveKey1 = AdjectiveKey(rating1, Mathf.Min(amount1, 3));
+            string adjectiveKey2 = AdjectiveKey(rating2, Mathf.Min(amount1, 3));
+
+            g.SetSymbol("adjective1", adjectiveKey1);
+
+            if (amount2 >= 1) {
+                g.SetSymbol("adjective2", adjectiveKey2);
+                g.SetSymbol("main", "{main-2}");
+            } else {
+                g.SetSymbol("main", "{main-1}");
+            }
+
+            g.Load("ratings");
+            if (personality == null) {
+                g.Load("interpretation_frequent");
+            } else {
+                g.Load("interpretation_frequent_personal");
+            }
+            return g.Parse("{review}");
         }
-        public static string Climax(Commercial commercial) {
+        public static string Climax(Commercial commercial, FocusGroupPersonality personality = null) {
             Grammar g = new Grammar();
-            // the climax of the commercial was when test vomited up vomited-up puddle of yogurt
             CommercialAnalysis analysis = new CommercialAnalysis(commercial);
             DescribableOccurrenceData occurrence = analysis.Climax(0);
-            return "";
+
+            Tuple<Rating, float> quality1 = occurrence.QualityMax();
+            string adjective1 = AdjectiveKey(quality1.Item1, quality1.Item2);
+
+            string introKey = "";
+            if (BAD_RATINGS.Contains(quality1.Item1)) {
+                if (quality1.Item2 < 2) {
+                    introKey = "{bad_low}";
+                } else {
+                    introKey = "{bad_high}";
+                }
+            } else if (GOOD_RATINGS.Contains(quality1.Item1)) {
+                if (quality1.Item2 < 2) {
+                    introKey = "{good_low}";
+                } else {
+                    introKey = "{good_high}";
+                }
+            }
+
+            g.SetSymbol("main", introKey);
+            g.SetSymbol("what-happened", occurrence.whatHappened.Trim());
+            g.SetSymbol("adjective1", adjective1);
+
+            g.Load("ratings");
+            if (personality == null) {
+                g.Load("interpretation_climax");
+            } else {
+                g.Load("interpretation_climax_personal");
+            }
+            return g.Parse("{review}");
         }
-        public static string Memorable(Commercial commercial) {
+        public static string Memorable(Commercial commercial, FocusGroupPersonality personality = null) {
             Grammar g = new Grammar();
-            // it was memorable when test said Yuck
             CommercialAnalysis analysis = new CommercialAnalysis(commercial);
             DescribableOccurrenceData occurrence = analysis.Memorable();
-            return "";
+
+            Tuple<Rating, float> quality1 = occurrence.QualityMax();
+            string adjective1 = AdjectiveKey(quality1.Item1, quality1.Item2);
+
+            string introKey = "";
+            if (BAD_RATINGS.Contains(quality1.Item1)) {
+                if (quality1.Item2 < 2) {
+                    introKey = "{bad_low}";
+                } else {
+                    introKey = "{bad_high}";
+                }
+            } else if (GOOD_RATINGS.Contains(quality1.Item1)) {
+                if (quality1.Item2 < 2) {
+                    introKey = "{good_low}";
+                } else {
+                    introKey = "{good_high}";
+                }
+            }
+
+            g.SetSymbol("main", introKey);
+            g.SetSymbol("what-happened", occurrence.whatHappened.Trim());
+            g.SetSymbol("adjective1", adjective1);
+
+            g.Load("ratings");
+            if (personality == null) {
+                g.Load("interpretation_memorable");
+            } else {
+                g.Load("interpretation_memorable_personal");
+            }
+            return g.Parse("{review}");
         }
 
-        public string ReactToEvent(Describable data, FocusGroupMenu.FocusGroupPersonality personality) {
+        public string ReactToEvent(Describable data, FocusGroupPersonality personality = null) {
             Tuple<Rating, float> quality = data.Quality();
             PreferenceType opinion = PreferenceType.likes;
 
@@ -165,7 +258,6 @@ namespace analysis {
             }
             return "\"I liked when ";
         }
-
 
         public static string Adjective(Describable describable, Rating rating) {
             Grammar grammar = new Grammar();

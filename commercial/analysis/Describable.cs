@@ -34,5 +34,13 @@ namespace analysis {
             float amount = quality[rating];
             return new Tuple<Rating, float>(rating, amount);
         }
+
+        public float Norm() {
+            float norm = 0;
+            foreach (Rating key in quality.Keys) {
+                norm += Mathf.Abs(quality[key]);
+            }
+            return norm;
+        }
     }
 }

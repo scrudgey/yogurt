@@ -46,7 +46,8 @@ public class CommercialReportMenu : MonoBehaviour {
     public void Report(Commercial activeCommercial) {
         commercial.WriteReport();
         SetRefs();
-        descriptionText.text = Interpretation.PrimaryNouns(commercial);
+
+        descriptionText.text = string.Join(" ", Interpretation.Review(commercial)).Trim();
 
         positiveScore.text = commercial.quality[Rating.positive].ToString();
         chaosScore.text = commercial.quality[Rating.chaos].ToString();

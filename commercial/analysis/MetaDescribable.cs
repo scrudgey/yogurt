@@ -62,6 +62,13 @@ namespace analysis {
                 return ranking;
             }
         }
+        public int GetNotability(T child) {
+            if (notables.ContainsKey(child.id)) {
+                return notables[child.id];
+            } else {
+                return -1;
+            }
+        }
 
         public MetaDescribable() {
             children = new List<T>();
@@ -129,7 +136,11 @@ namespace analysis {
                     totalRank[child.id] += val;
                 }
                 foreach (Rating rating in Enum.GetValues(typeof(Rating))) {
-                    GetFraction(child)[rating] = child.quality[rating] / quality[rating];
+                    if (quality[rating] != 0) {
+                        GetFraction(child)[rating] = child.quality[rating] / quality[rating];
+                    } else {
+                        GetFraction(child)[rating] = -1;
+                    }
                 }
             }
 
@@ -144,6 +155,17 @@ namespace analysis {
         }
         public float Mean(Rating rating) {
             return Sum(rating) / (float)Qualities(rating).Count;
+        }
+        public float Mode(Rating rating) {
+            var x = from q in Qualities(rating) where q > 0 select q;
+            if (x.Count() == 0) {
+                return 0;
+            }
+            return x
+            .GroupBy(v => v)
+            .OrderByDescending(g => g.Count())
+            .First()
+            .Key;
         }
         public float Sum(Rating rating) {
             float total = 0;
@@ -165,6 +187,19 @@ namespace analysis {
             float amount = Mathf.Min(3, Max(rating));
 
             return new Tuple<Rating, float>(rating, amount);
+        }
+
+        public T NotableChild() {
+            T notable = null;
+            float maxVal = float.MinValue;
+            foreach (T child in children) {
+                float norm = child.Norm();
+                if (norm > maxVal) {
+                    notable = child;
+                    maxVal = norm;
+                }
+            }
+            return notable;
         }
     }
 }

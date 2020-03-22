@@ -516,7 +516,7 @@ public class Speech : Interactive, ISaveable {
     public Monologue InsultMonologue(GameObject target) {
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
-        string content = Insults.ComposeInsult(target);
+        string content = global::Insult.ComposeInsult(target);
         MessageInsult messageInsult = new MessageInsult();
         Toolbox.Instance.SendMessage(target, this, messageInsult);
 

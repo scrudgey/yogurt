@@ -37,11 +37,6 @@ namespace analysis {
             // labels
             labels = new HashSet<string>();
             foreach (DescribableOccurrenceData oc in occurrences) {
-                if (oc.nouns.Count == 0) {
-                    foreach (EventData child in oc.GetChildren()) {
-                        Debug.Log(child.ToString());
-                    }
-                }
                 labels.UnionWith(oc.nouns);
             }
             labelCollection = new MetaDescribable<LabelDescription>();
@@ -63,7 +58,11 @@ namespace analysis {
         public List<NounNotability> NotableNouns() {
             List<NounNotability> nouns = new List<NounNotability>();
             foreach (LabelDescription ld in labelCollection.GetChildren()) {
-                IEnumerable<Rating> reasons = from item in labelCollection.GetFraction(ld) where item.Value > 0.5 select item.Key;
+                // var dict = labelCollection.GetFraction(ld);
+                // foreach (Rating r in Enum.GetValues(typeof(Rating))) {
+                //     Debug.Log(ld.whatHappened + " " + r.ToString() + " " + dict[r].ToString());
+                // }
+                IEnumerable<Rating> reasons = from item in labelCollection.GetFraction(ld) where item.Value >= 0.5 select item.Key;
                 if (reasons.Count() > 0) {
                     nouns.Add(new NounNotability(ld, reasons.ToList()));
                 }
@@ -89,7 +88,7 @@ namespace analysis {
         }
 
         public DescribableOccurrenceData Memorable() {
-            return commercial.GetChildren().OrderByDescending(o => commercial.notables[o.id]).First();
+            return commercial.GetChildren().OrderByDescending(o => commercial.GetNotability(o)).First();
         }
     }
 }
