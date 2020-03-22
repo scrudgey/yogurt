@@ -3,15 +3,6 @@ using System;
 using System.Collections.Generic;
 
 namespace AI {
-    [System.Serializable]
-    public class Ref<T> {
-        public T val;
-        public Ref(T t) {
-            val = t;
-        }
-    }
-
-    [System.Serializable]
     public class Goal {
         public List<Routine> routines = new List<Routine>();
         public int index = 0;
@@ -22,14 +13,15 @@ namespace AI {
         public float slewTime;
         private bool fulfillingRequirements = true;
         public string goalThought = "I'm just doing my thing.";
+        public bool ignoreRequirementsIfConditionMet;
         public Goal(GameObject g, Controllable c) {
             gameObject = g;
             control = c;
             slewTime = UnityEngine.Random.Range(0.1f, 0.5f);
         }
         public status Evaluate() {
-            // if (successCondition.Evaluate() == status.success)
-            //     return status.success;
+            if (ignoreRequirementsIfConditionMet && successCondition.Evaluate() == status.success)
+                return status.success;
             foreach (Goal requirement in requirements) {
                 if (requirement.Evaluate() != status.success) {
                     return status.failure;
@@ -38,14 +30,18 @@ namespace AI {
             return successCondition.Evaluate();
         }
         public virtual void Update() {
+
             // if i have any unmet requirements, my update goes to the first unmet one.
-            foreach (Goal requirement in requirements) {
-                if (requirement.Evaluate() != status.success) {
-                    fulfillingRequirements = true;
-                    requirement.Update();
-                    return;
+            if (!(ignoreRequirementsIfConditionMet && successCondition.Evaluate() == status.success)) {
+                foreach (Goal requirement in requirements) {
+                    if (requirement.Evaluate() != status.success) {
+                        fulfillingRequirements = true;
+                        requirement.Update();
+                        return;
+                    }
                 }
             }
+
             if (fulfillingRequirements) {
                 // Debug.Log(control.gameObject.name + " " + this.ToString() + " requirements met"); ;
                 control.ResetInput();
@@ -75,8 +71,9 @@ namespace AI {
                     }
                 }
                 catch (Exception e) {
-                    Debug.Log(this.ToString() + " fail: " + e.Message);
-                    Debug.Log(e.TargetSite);
+                    Debug.LogError(this.ToString() + " fail: " + e.Message);
+                    Debug.LogError(e.StackTrace);
+                    // Debug.Log(e.TargetSite);
                 }
             }
         }
@@ -110,6 +107,38 @@ namespace AI {
             routines.Add(talkRoutine);
         }
     }
+    public class GoalSayLine : Goal {
+        public ConditionBoolSwitch boolSwitch;
+        public GoalSayLine(GameObject g, Controllable c, MessageSpeech message) : base(g, c) {
+            boolSwitch = new ConditionBoolSwitch(g);
+            RoutineSayLine routine = new RoutineSayLine(g, c, message, boolSwitch);
+            successCondition = boolSwitch;
+            routines.Add(routine);
+        }
+    }
+    public class GoalDeliverPizza : Goal {
+        public Ref<GameObject> target;
+        public ConditionBoolSwitch boolSwitch;
+        public GoalDeliverPizza(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c) {
+            this.target = target;
+            successCondition = new ConditionBoolSwitch(g);
+            boolSwitch = new ConditionBoolSwitch(g);
+            successCondition = boolSwitch;
+            RoutineSpeechWithPerson talkRoutine = new RoutineSpeechWithPerson(g, c, target, (ConditionBoolSwitch)successCondition);
+            routines.Add(talkRoutine);
+        }
+    }
+    public class GoalUseItem : Goal {
+        public Inventory inventory;
+        public ConditionBoolSwitch boolSwitch;
+        public GoalUseItem(GameObject g, Controllable c) : base(g, c) {
+            inventory = g.GetComponent<Inventory>();
+            boolSwitch = new ConditionBoolSwitch(g);
+            successCondition = boolSwitch;
+            RoutinePressF routinePressF = new RoutinePressF(g, c, boolSwitch, count: 2, interval: 5f);
+            routines.Add(routinePressF);
+        }
+    }
     public class GoalGetItem : Goal {
         public bool findingFail;
         public GoalGetItem(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c) {
@@ -117,7 +146,6 @@ namespace AI {
             successCondition = new ConditionHoldingSpecificObject(g, target);
             routines.Add(new RoutineRetrieveRefFromInv(g, c, target));
             routines.Add(new RoutineGetRefFromEnvironment(g, c, target));
-
         }
         public GoalGetItem(GameObject g, Controllable c, string target) : base(g, c) {
             goalThought = "I need a " + target + ".";
@@ -145,11 +173,11 @@ namespace AI {
         public new string goalThought {
             get { return "I'm going to check out that " + target.val.name + "."; }
         }
-        public GoalWalkToObject(GameObject g, Controllable c, Ref<GameObject> t, float range = 0.2f, bool invert = false) : base(g, c) {
+        public GoalWalkToObject(GameObject g, Controllable c, Ref<GameObject> t, float range = 0.2f, bool invert = false, Vector2 localOffset = new Vector2()) : base(g, c) {
             target = t;
             // TODO: if invert, change success condition
-            successCondition = new ConditionCloseToObject(g, target, range);
-            routines.Add(new RoutineWalkToGameobject(g, c, target, invert: invert));
+            successCondition = new ConditionCloseToObject(g, target, range, localOffset: localOffset);
+            routines.Add(new RoutineWalkToGameobject(g, c, target, invert: invert, localOffset: localOffset));
         }
         public GoalWalkToObject(GameObject g, Controllable c, Type objType, float range = 0.2f) : base(g, c) {
             // GameObject targetObject = GameObject.FindObjectOfType<typeof(objType)>();
@@ -167,14 +195,22 @@ namespace AI {
 
     public class GoalWalkToPoint : Goal {
         public Ref<Vector2> target;
-        public GoalWalkToPoint(GameObject g, Controllable c, Ref<Vector2> target, float minDistance = 0.2f, bool invert = false) : base(g, c) {
+        public GoalWalkToPoint(GameObject g, Controllable c, Ref<Vector2> target, float minDistance = 0.2f, bool invert = false, bool jitter = false) : base(g, c) {
             goalThought = "I want to be over there.";
             this.target = target;
             ConditionLocation condition = new ConditionLocation(g, target);
             condition.minDistance = minDistance;
             successCondition = condition;
 
-            routines.Add(new RoutineWalkToPoint(g, c, target, minDistance, invert: invert));
+            RoutineWalkToPoint routineWalk = new RoutineWalkToPoint(g, c, target, minDistance, invert: invert);
+            routines.Add(routineWalk);
+            if (jitter) {
+                RoutineWander wanderRoutine = new RoutineWander(g, c);
+                routineWalk.timeLimit = 0.5f;
+                wanderRoutine.timeLimit = 0.5f;
+
+                routines.Add(wanderRoutine);
+            }
         }
         public GoalWalkToPoint(GameObject g, Controllable c, Ref<Vector2> target) : this(g, c, target, minDistance: 0.2f, invert: false) { }
     }
@@ -232,6 +268,35 @@ namespace AI {
             hoseRoutine.timeLimit = 1;
             wanderRoutine.timeLimit = 1;
             routines.Add(hoseRoutine);
+            routines.Add(wanderRoutine);
+        }
+    }
+    public class GoalPunch : Goal {
+        public Ref<GameObject> target;
+        public new string goalThought {
+            get { return "I've got to do something about that " + target.val.name + "."; }
+        }
+        public GoalPunch(GameObject g, Controllable c, Ref<GameObject> r, Personality.CombatProfficiency profficiency) : base(g, c) {
+            Goal punchGoal = new Goal(gameObject, control);
+            Routine routinePunch = new RoutinePunchAt(gameObject, control, r, profficiency);
+            Routine wanderRoutine = new RoutineWander(g, c);
+            switch (profficiency) {
+                case Personality.CombatProfficiency.expert:
+                    routinePunch.timeLimit = 1.2f;
+                    wanderRoutine.timeLimit = 0.5f;
+                    break;
+                default:
+                case Personality.CombatProfficiency.normal:
+                    routinePunch.timeLimit = 1.0f;
+                    wanderRoutine.timeLimit = 1f;
+                    break;
+                case Personality.CombatProfficiency.poor:
+                    routinePunch.timeLimit = 1f;
+                    wanderRoutine.timeLimit = 1.2f;
+                    break;
+            }
+
+            routines.Add(routinePunch);
             routines.Add(wanderRoutine);
         }
     }

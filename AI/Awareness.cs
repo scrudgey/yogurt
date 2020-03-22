@@ -119,6 +119,16 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         Toolbox.RegisterMessageCallback<MessageInventoryChanged>(this, ProcessInventoryChanged);
         Toolbox.RegisterMessageCallback<MessageSpeech>(this, HandleSpeech);
         Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsics);
+        Toolbox.RegisterMessageCallback<MessageOnCamera>(this, HandleOnCamera);
+        GameManager.onRecordingChange += OnRecordingChange;
+    }
+    void OnRecordingChange(bool value) {
+        if (this == null)
+            return;
+        if (!value) {
+            MessageOnCamera message = new MessageOnCamera(value);
+            Toolbox.Instance.SendMessage(gameObject, this, message);
+        }
     }
     void HandleNetIntrinsics(MessageNetIntrinsic message) {
         netBuffs = message.netBuffs;
@@ -130,6 +140,9 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                     kvp.Value.status = PersonalAssessment.friendStatus.enemy;
             }
         }
+    }
+    void HandleOnCamera(MessageOnCamera message) {
+
     }
 
     void HandleSpeech(MessageSpeech message) {
@@ -299,6 +312,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                 if (otherHead.hat != null)
                     fieldOfView.Add(otherHead.hat.gameObject);
         }
+
     }
     public string RecallMemory() {
         if (shortTermMemory.Count() == 0) {
@@ -340,12 +354,19 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         }
         Qualities qualities = other.GetComponent<Qualities>();
         if (qualities) {
-            EventData data = qualities.ToEvent();
-            ReactToEvent(data, new HashSet<GameObject>());
+            foreach (EventData data in qualities.ToDescribable().GetChildren()) {
+                ReactToEvent(data, new HashSet<GameObject>());
 
-            OccurrenceData oD = new OccurrenceGeneric();
-            oD.events.Add(data);
-            MessageOccurrence message = new MessageOccurrence(oD);
+                OccurrenceGeneric oD = new OccurrenceGeneric();
+                oD.AddChild(data);
+                oD.eventData.Add(data);
+                // oD.children.Add(data);
+                MessageOccurrence message = new MessageOccurrence(oD);
+                Toolbox.Instance.SendMessage(gameObject, this, message);
+            }
+        }
+        if (other.name == "CameraRegion") {
+            MessageOnCamera message = new MessageOnCamera(true);
             Toolbox.Instance.SendMessage(gameObject, this, message);
         }
         seenFlags.Add(other.gameObject);
@@ -354,7 +375,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         Toolbox.Instance.SendMessage(gameObject, this, new MessageOccurrence(od));
         if (od is OccurrenceViolence)
             WitnessViolence((OccurrenceViolence)od);
-        foreach (EventData e in od.events) {
+        foreach (EventData e in od.describable.GetChildren()) {
             ReactToEvent(e, od.involvedParties());
         }
     }
@@ -379,9 +400,9 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         Rating[] ratings = (Rating[])Rating.GetValues(typeof(Rating));
         Toolbox.ShuffleArray<Rating>(ratings);
         foreach (Rating rating in ratings) {
-            float threshhold = Toolbox.Gompertz(dat.ratings[rating], 1.26f, -6.9f, 1);
+            float threshhold = Toolbox.Gompertz(dat.quality[rating], 1.26f, -6.9f, 1);
             threshhold *= 1 - (float)seenCount / 5.0f;
-            if (UnityEngine.Random.Range(0f, 1f) < threshhold && dat.ratings[rating] > 0) {
+            if (UnityEngine.Random.Range(0f, 1f) < threshhold && dat.quality[rating] > 0) {
                 MessageSpeech message = new MessageSpeech(reactions[rating]);
                 message.nimrod = true;
                 message.involvedParties.Add(gameObject);

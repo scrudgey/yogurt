@@ -15,7 +15,7 @@ public class LiquidContainer : Interactive, ISaveable {
     }
     public float fillCapacity;
     private float spillTimeout = 0.075f;
-    protected bool empty;
+    // protected bool empty;
     public bool lid;
     private bool doSpill = false;
     private float spillSeverity;
@@ -23,6 +23,7 @@ public class LiquidContainer : Interactive, ISaveable {
     public string descriptionName;
     public AudioClip[] drinkSounds;
     public bool configured = false;
+    public AudioClip fillSound;
     void Update() {
         if (spillTimeout > 0) {
             spillTimeout -= Time.deltaTime;
@@ -38,12 +39,14 @@ public class LiquidContainer : Interactive, ISaveable {
             Interaction fillContainer = new Interaction(this, "Fill", "FillFromContainer");
             Interaction drinker = new Interaction(this, "Drink", "Drink");
             drinker.validationFunction = true;
-            drinker.playerOnOtherConsent = false;
+            // drinker.playerOnOtherConsent = true;
+            drinker.selfOnOtherConsent = false;
+            drinker.defaultPriority = 5;
+            // drinker.debug = true;
             fillContainer.validationFunction = true;
             interactions.Add(drinker);
             interactions.Add(fillContainer);
             interactions.Add(fillReservoir);
-            empty = true;
             if (liquidSprite)
                 liquidSprite.enabled = false;
             if (initLiquid != "") {
@@ -78,6 +81,9 @@ public class LiquidContainer : Interactive, ISaveable {
         FillWithLiquid(l.liquid);
         if (l.fillSound != null) {
             Toolbox.Instance.AudioSpeaker(l.fillSound, transform.position);
+        }
+        if (fillSound != null) {
+            Toolbox.Instance.AudioSpeaker(fillSound, transform.position);
         }
     }
     public string FillFromReservoir_desc(LiquidResevoir l) {
@@ -145,12 +151,6 @@ public class LiquidContainer : Interactive, ISaveable {
             if (liquidSprite)
                 liquidSprite.enabled = false;
         }
-        if (empty && amount > 0) {
-            empty = false;
-        }
-        if (!empty && amount <= 0) {
-            empty = true;
-        }
     }
     public void Spill() {
         Spill(0.02f);
@@ -188,6 +188,7 @@ public class LiquidContainer : Interactive, ISaveable {
         }
     }
     public bool Drink_Validation(Eater eater) {
+        // Debug.Log(amount.ToString());
         return amount > 0;
     }
     public string Drink_desc(Eater eater) {
@@ -204,21 +205,17 @@ public class LiquidContainer : Interactive, ISaveable {
         data.floats["amount"] = amount;
         data.bools["lid"] = lid;
         if (liquid != null) {
-            data.strings["liquid"] = liquid.filename;
-        } else {
-            data.strings["liquid"] = "";
+            data.liquids["liquid"] = liquid;
         }
     }
-    // TODO: if i had some nicer methods to handle loading an amount of liquid 
-    // i think this would be a little better.
     public void LoadData(PersistentComponent data) {
-        if (data.strings["liquid"] != "") {
-            FillByLoad(data.strings["liquid"]);
-        } else {
-            FillByLoad("water");
-        }
+        liquid = null;
+        amount = 0;
         fillCapacity = data.floats["fillCapacity"];
-        amount = data.floats["amount"];
         lid = data.bools["lid"];
+        if (data.liquids.ContainsKey("liquid")) {
+            FillWithLiquid(data.liquids["liquid"]);
+        }
+        amount = data.floats["amount"];
     }
 }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 public class Physical : MonoBehaviour {
     public enum mode { none, fly, ground, zip }
-    // public AudioClip[] impactSounds = new AudioClip[0];
     public AudioClip[] landSounds = new AudioClip[0];
     public PhysicalBootstrapper bootstrapper;
     private GameObject trueObject;
@@ -177,9 +176,11 @@ public class Physical : MonoBehaviour {
                 Physics2D.IgnoreCollision(horizonCollider, phys.objectCollider, true);
             }
         }
-        if (landSounds != null)
-            if (landSounds.Length > 0 && !suppressLandSound)
-                audioSource.PlayOneShot(landSounds[Random.Range(0, landSounds.Length)]);
+        if (landSounds != null && landSounds.Length > 0 && !suppressLandSound) {
+            AudioClip clip = landSounds[Random.Range(0, landSounds.Length)];
+            if (clip != null)
+                audioSource.PlayOneShot(clip);
+        }
         suppressLandSound = false;
         SetSliderLimit(1f * objectCollider.Distance(horizonCollider).distance);
         if (noCollisions) {
@@ -243,9 +244,9 @@ public class Physical : MonoBehaviour {
     void OnTriggerEnter2D(Collider2D coll) {
         if (coll.tag == "table" && coll.gameObject != gameObject) {
             // START TABLE
-            // Debug.Log(name + " table collision detected, dostarttable true");
             table = coll.GetComponentInParent<Table>();
             doStartTable = true;
+            // Debug.Log(name + " table collision detected, dostarttable true");
             // Debug.Break();
         }
     }
@@ -254,6 +255,8 @@ public class Physical : MonoBehaviour {
             // STOP TABLE
             table = coll.GetComponentInParent<Table>();
             doStopTable = true;
+            // Debug.Log(name + " table exit detected, doStopTable true");
+            // Debug.Break();
         }
     }
     void StartTable() {
@@ -284,7 +287,7 @@ public class Physical : MonoBehaviour {
         transform.SetParent(null);
         if (spriteRenderer)
             spriteRenderer.enabled = true;
-        // FlyMode();
+        FlyMode();
     }
     void OnCollisionEnter2D(Collision2D collision) {
         bootstrapper.Collision(collision);

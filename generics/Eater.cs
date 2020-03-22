@@ -22,7 +22,7 @@ public class Eater : Interactive, ISaveable {
         }
     }
     private bool poisonNausea;
-    private Queue<GameObject> eatenQueue;
+    public Queue<GameObject> eatenQueue;
     public float vomitCountDown;
     public Dictionary<BuffType, Buff> netIntrinsics;
     private void CheckNausea() {
@@ -41,9 +41,10 @@ public class Eater : Interactive, ISaveable {
     void Awake() {
         eatenQueue = new Queue<GameObject>();
         Interaction eatAction = new Interaction(this, "Eat", "Eat");
-        eatAction.defaultPriority = 1;
+        // eatAction.defaultPriority = 1;
         eatAction.dontWipeInterface = false;
-        eatAction.otherOnPlayerConsent = false;
+        eatAction.otherOnSelfConsent = false;
+        eatAction.holdingOnOtherConsent = false;
         eatAction.validationFunction = true;
         interactions.Add(eatAction);
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
@@ -66,7 +67,7 @@ public class Eater : Interactive, ISaveable {
         netIntrinsics = message.netBuffs;
     }
     public void HandleOccurrence(MessageOccurrence message) {
-        foreach (EventData data in message.data.events)
+        foreach (EventData data in message.data.describable.GetChildren())
             ReactToOccurrence(data);
     }
     void Update() {
@@ -164,6 +165,9 @@ public class Eater : Interactive, ISaveable {
         if (mliquid) {
             eatData.liquid = mliquid.liquid;
             if (mliquid.liquid != null) {
+                if (mliquid.liquid.name == "yogurt") {
+                    GameManager.Instance.IncrementStat(StatType.yogurtEaten, 1);
+                }
                 if (mliquid.liquid.name == "yogurt") {
                     GameManager.Instance.IncrementStat(StatType.yogurtEaten, 1);
                 }
@@ -283,9 +287,9 @@ public class Eater : Interactive, ISaveable {
         // foreach (KeyValuePair<Rating, float> kvp in od.ratings) {
         //     Debug.Log(kvp.Key.ToString() + ": " + kvp.Value.ToString());
         // }
-        if (od.ratings[Rating.disgusting] > 1)
+        if (od.quality[Rating.disgusting] > 1)
             nausea += 10f;
-        if (od.ratings[Rating.disgusting] > 2)
+        if (od.quality[Rating.disgusting] > 2)
             nausea += 10f;
     }
     public void SaveData(PersistentComponent data) {

@@ -4,7 +4,7 @@ using System;
 
 namespace AI {
     public enum status { neutral, success, failure }
-    [System.Serializable]
+
     public class Routine {
         public string routineThought = "I have no idea what I'm doing!";
         protected GameObject gameObject;
@@ -34,6 +34,7 @@ namespace AI {
         // this bit first checks for a timeout, then calls a routine
         // that is specific to the child class.
         public status Update() {
+            // Debug.Log("")
             runTime += Time.deltaTime;
             if (timeLimit > 0 && runTime > timeLimit) {
                 runTime = 0;
@@ -121,6 +122,51 @@ namespace AI {
             }
         }
     }
+    public class RoutineSpeechWithPerson : Routine {
+        public Ref<GameObject> target;
+        private ConditionBoolSwitch condition;
+        private Speech speech;
+        public RoutineSpeechWithPerson(GameObject g, Controllable c, Ref<GameObject> target, ConditionBoolSwitch condition) : base(g, c) {
+            this.target = target;
+            this.condition = condition;
+            this.speech = g.GetComponent<Speech>();
+        }
+        protected override status DoUpdate() {
+            if (target.val == null)
+                return status.neutral;
+            if (!condition.conditionMet) {
+                condition.conditionMet = true;
+                speech.SpeakWith();
+                Inventory myInv = gameObject.GetComponent<Inventory>();
+                Inventory theirInv = target.val.GetComponent<Inventory>();
+                if (myInv.holding != null) {
+                    theirInv.GetItem(myInv.holding);
+                }
+                return status.success;
+            } else {
+                return status.failure;
+            }
+        }
+    }
+    public class RoutineSayLine : Routine {
+        public MessageSpeech message;
+        private ConditionBoolSwitch condition;
+        public RoutineSayLine(GameObject g, Controllable c, MessageSpeech message, ConditionBoolSwitch condition) : base(g, c) {
+            this.message = message;
+            this.condition = condition;
+        }
+        protected override status DoUpdate() {
+            if (message == null)
+                return status.neutral;
+            if (!condition.conditionMet) {
+                Toolbox.Instance.SendMessage(gameObject, control, message);
+                condition.conditionMet = true;
+                return status.success;
+            } else {
+                return status.failure;
+            }
+        }
+    }
     public class RoutineGetNamedFromEnvironment : Routine {
         private Inventory inv;
         private Awareness awareness;
@@ -162,21 +208,16 @@ namespace AI {
     }
     public class RoutineGetRefFromEnvironment : Routine {
         private Inventory inv;
-        // private Awareness awareness;
-        private Ref<GameObject> target;
+        private Ref<GameObject> target = new Ref<GameObject>(null);
         private RoutineWalkToGameobject walkToRoutine;
         public RoutineGetRefFromEnvironment(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c) {
             // routineThought = "I'm going to pick up that " + t + ".";
             this.target = target;
             inv = gameObject.GetComponent<Inventory>();
-            // awareness = gameObject.GetComponent<Awareness>();
             Configure();
         }
         public override void Configure() {
-            // List<GameObject> objs = new List<GameObject>();
-            if (target.val && target.val.activeInHierarchy) {
-                walkToRoutine = new RoutineWalkToGameobject(gameObject, control, target);
-            }
+            walkToRoutine = new RoutineWalkToGameobject(gameObject, control, target);
         }
         protected override status DoUpdate() {
             if (target.val && target.val.activeInHierarchy) {
@@ -335,6 +376,34 @@ namespace AI {
             return status.neutral;
         }
     }
+    public class RoutinePressF : Routine {
+        public ConditionBoolSwitch boolSwitch;
+        public int count;
+        public float interval;
+        public float timer;
+        public int numberTimesPressed;
+        public RoutinePressF(GameObject g, Controllable c, ConditionBoolSwitch boolSwitch, int count = 1, float interval = 1f) : base(g, c) {
+            this.boolSwitch = boolSwitch;
+            this.count = count;
+            this.interval = interval;
+            this.timer = interval;
+        }
+        protected override status DoUpdate() {
+            timer += Time.deltaTime;
+            if (timer > interval) {
+                timer = 0;
+                if (numberTimesPressed < count) {
+                    numberTimesPressed += 1;
+                    control.ShootPressed();
+                    return status.neutral;
+                } else {
+                    boolSwitch.conditionMet = true;
+                    return status.success;
+                }
+            }
+            return status.neutral;
+        }
+    }
     public class RoutineWanderAndPressF : RoutineWander {
         public float timeSinceF;
         public RoutineWanderAndPressF(GameObject g, Controllable c) : base(g, c) {
@@ -436,6 +505,7 @@ namespace AI {
         private Transform cachedTransform;
         private GameObject cachedGameObject;
         public float minDistance = 0.2f;
+        public Vector2 localOffset;
         public Transform targetTransform {
             get {
                 if (cachedGameObject == target.val) {
@@ -452,14 +522,18 @@ namespace AI {
                 }
             }
         }
-        public RoutineWalkToGameobject(GameObject g, Controllable c, Ref<GameObject> targetObject, bool invert = false) : base(g, c) {
+        public RoutineWalkToGameobject(GameObject g, Controllable c, Ref<GameObject> targetObject, bool invert = false, Vector2 localOffset = new Vector2()) : base(g, c) {
             routineThought = "I'm walking over to the " + g.name + ".";
-            target = targetObject;
+            this.target = targetObject;
             this.invert = invert;
+            this.localOffset = localOffset;
         }
         protected override status DoUpdate() {
-            if (target.val) {
-                float distToTarget = Vector2.Distance(transform.position, targetTransform.position);
+            if (target.val != null) {
+                Vector2 localizedOffset = new Vector2(targetTransform.lossyScale.x * localOffset.x, targetTransform.lossyScale.y * localOffset.y);
+
+                Vector2 targetPosition = (Vector2)targetTransform.position + localizedOffset;
+                float distToTarget = Vector2.Distance(transform.position, targetPosition);
                 control.leftFlag = control.rightFlag = control.upFlag = control.downFlag = false;
                 if (distToTarget <= minDistance) {
                     return status.success;
@@ -467,11 +541,10 @@ namespace AI {
                     Vector2 comparator = Vector2.zero;
 
                     if (invert) {
-                        comparator = targetTransform.position - transform.position;
+                        comparator = targetPosition - (Vector2)transform.position;
                     } else {
-                        comparator = transform.position - targetTransform.position;
+                        comparator = (Vector2)transform.position - targetPosition;
                     }
-
                     if (comparator.x > 0) {
                         control.leftFlag = true;
                     } else if (comparator.x < 0) {
@@ -487,6 +560,7 @@ namespace AI {
                     return status.neutral;
                 }
             } else {
+                // Debug.Log("target val is null");
                 return status.failure;
             }
         }
@@ -531,11 +605,11 @@ namespace AI {
                 control.SetDirection(Vector2.ClampMagnitude(target.val.transform.position - gameObject.transform.position, 1f));
                 if (timer < 0) {
                     if (proficiency == Personality.CombatProfficiency.normal) {
-                        timer = 0.65f + UnityEngine.Random.Range(0, 0.25f);
+                        timer = 0.75f + UnityEngine.Random.Range(0, 0.25f);
                     } else if (proficiency == Personality.CombatProfficiency.expert) {
                         timer = 0.5f + UnityEngine.Random.Range(0, 0.2f);
                     } else if (proficiency == Personality.CombatProfficiency.poor) {
-                        timer = 0.8f + UnityEngine.Random.Range(0, 0.25f);
+                        timer = 0.9f + UnityEngine.Random.Range(0, 0.25f);
                     }
                     control.ShootPressed();
                 } else {

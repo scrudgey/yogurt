@@ -12,8 +12,8 @@ public class ObjectiveIndicator : MonoBehaviour {
     public string location;
     public Objective objective;
 
-    public void UpdateCheck(Commercial localCommercial) {
-        SetCheck(objective.RequirementsMet(localCommercial));
+    public void UpdateCheck() {
+        SetCheck(objective.RequirementsMet(GameManager.Instance.data.activeCommercial));
     }
     public void SetCheck(bool value) {
         if (value) {

@@ -54,7 +54,7 @@ public class Controller : Singleton<Controller> {
     }
     public GameObject commandTarget;
     public bool doCommand;
-    public Interaction commandAct = null;
+    public InteractionParam commandAct = null;
     public ActionButtonScript.buttonType commandButtonType = ActionButtonScript.buttonType.none;
     void ChangeState(ControlState previousState) {
         // TODO: code for transitioning between states
@@ -313,7 +313,6 @@ public class Controller : Singleton<Controller> {
     public void Clicked(GameObject clicked, GameObject clickSite) {
         // Debug.Log("clicked "+clicked.name + " last: "+lastLeftClicked);
         if (lastLeftClicked == clicked) {
-            // TODO: fix this conditional!
             UINew.Instance.ClearWorldButtons();
             lastLeftClicked = null;
         } else {
@@ -322,17 +321,9 @@ public class Controller : Singleton<Controller> {
             if (commandTarget != null)
                 actor = commandTarget;
             if (clicked.transform.IsChildOf(actor.transform) || clicked == actor) {
-                Inventory inventory = actor.GetComponent<Inventory>();
-                if (inventory) {
-                    if (inventory.holding) {
-                        UINew.Instance.DisplayHandActions(inventory);
-                    } else {
-                        UINew.Instance.ClearWorldButtons();
-                        lastLeftClicked = null;
-                    }
-                }
+                UINew.Instance.ShowActionsForPlayerClick(actor);
             } else {
-                UINew.Instance.SetClickedActions(lastLeftClicked, clickSite);
+                UINew.Instance.ShowActionsForWorldClick(lastLeftClicked, clickSite);
             }
         }
     }
@@ -378,31 +369,13 @@ public class Controller : Singleton<Controller> {
     }
     public void DoCommand() {
         // Hand action
-        if (commandButtonType != ActionButtonScript.buttonType.none) {
+        if (commandButtonType == ActionButtonScript.buttonType.none) {
+            commandAct.DoAction();
+        } else if (commandButtonType == ActionButtonScript.buttonType.Punch) {
+            focus.ShootPressed();
+        } else {
             Inventory inventory = commandTarget.GetComponent<Inventory>();
             Controllable controllable = commandTarget.GetComponent<Controllable>();
-            switch (commandButtonType) {
-                case ActionButtonScript.buttonType.Drop:
-                    inventory.DropItem();
-                    UINew.Instance.ClearWorldButtons();
-                    break;
-                case ActionButtonScript.buttonType.Throw:
-                    inventory.ThrowItem();
-                    UINew.Instance.ClearWorldButtons();
-                    break;
-                case ActionButtonScript.buttonType.Stash:
-                    inventory.StashItem(inventory.holding.gameObject);
-                    UINew.Instance.ClearWorldButtons();
-                    UINew.Instance.UpdateInventoryButton(inventory);
-                    break;
-                case ActionButtonScript.buttonType.Punch:
-                    controllable.ShootPressed();
-                    break;
-                default:
-                    break;
-            }
-        } else { // normal action
-            commandAct.DoAction();
         }
         ResetCommandState();
         commandAct = null;
@@ -412,7 +385,7 @@ public class Controller : Singleton<Controller> {
         if (state != ControlState.commandSelect) {
             if (button.bType == ActionButtonScript.buttonType.Action) {
                 if (InteractionIsWithinRange(button.action) || button.manualAction) {
-                    button.action.DoAction();
+                    button.action.DoAction(button.parameters);
                     if (!button.action.dontWipeInterface) {
                         UINew.Instance.RefreshUI(active: true);
                         ResetLastLeftClicked();
@@ -429,8 +402,8 @@ public class Controller : Singleton<Controller> {
         // handle commands clicked
         if (button.bType == ActionButtonScript.buttonType.Action) {
             if (InteractionIsWithinRange(button.action) || button.manualAction) {
-                commandAct = button.action;
-                DialogueCommand().CommandCallback(button.action);
+                commandAct = new InteractionParam(button.action, button.parameters);
+                DialogueCommand().CommandCallback(commandAct);
             }
         } else {
             commandButtonType = button.bType;

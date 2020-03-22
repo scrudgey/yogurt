@@ -39,7 +39,8 @@ public class Doorway : Interactive {
                 }
             }
         }
-        GameManager.Instance.publicAudio.PlayOneShot(leaveSound);
+        if (leaveSound != null)
+            GameManager.Instance.publicAudio.PlayOneShot(leaveSound);
         GameManager.Instance.LeaveScene(destination, destinationEntry);
     }
     public void PlayEnterSound() {

@@ -20,7 +20,7 @@ public class PeterPicklebottom : MonoBehaviour {
         controllable = GetComponent<Controllable>();
         target = new Ref<Duplicatable>(null);
         objRef = new Ref<GameObject>(null);
-        if (SceneManager.GetActiveScene().name == "house") {
+        if (SceneManager.GetActiveScene().name == "apartment") {
             foreach (Doorway doorway in GameObject.FindObjectsOfType<Doorway>()) {
                 if (doorway.entryID == 0 && !doorway.spawnPoint) {
                     door = doorway;

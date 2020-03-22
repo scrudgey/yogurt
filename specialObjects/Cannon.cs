@@ -16,6 +16,7 @@ public class Cannon : Interactive, ISaveable {
 
         shootPlayerAction = new Interaction(this, "Enter", "StartShootPlayer");
         shootPlayerAction.descString = "Climb into cannon";
+        shootPlayerAction.AddDesireFunction(DesireToShootPlayer);
         interactions.Add(shootPlayerAction);
 
         shootItemAction = new Interaction(this, "Shoot", "StartShootItem");
@@ -24,8 +25,8 @@ public class Cannon : Interactive, ISaveable {
 
         chargeAction = new Interaction(this, "Fill", "ChargeCannon");
         chargeAction.descString = "Fill cannon with gunpowder";
-        chargeAction.inertOnPlayerConsent = true;
-        chargeAction.otherOnPlayerConsent = true;
+        // chargeAction.inertOnPlayerConsent = true;
+        // chargeAction.otherOnPlayerConsent = true;
         interactions.Add(chargeAction);
 
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
@@ -33,6 +34,9 @@ public class Cannon : Interactive, ISaveable {
     public void ShootPlayer() {
         shootEffect.Play();
         audioSource.PlayOneShot(shootSound);
+    }
+    public desire DesireToShootPlayer(Personality myPersonality, GameObject requester) {
+        return desire.decline;
     }
     public void StartShootPlayer() {
         if (charged) {

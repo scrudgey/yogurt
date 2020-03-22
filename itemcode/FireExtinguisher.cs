@@ -12,18 +12,21 @@ public class FireExtinguisher : Interactive, IDirectable {
     private Vector2 direction = Vector2.right;
     private bool doSpray;
     void Awake() {
-        Interaction spray = new Interaction(this, "Spray", "Spray", false, true);
+        Interaction spray = new Interaction(this, "Spray", "Spray");
         spray.defaultPriority = 2;
         spray.continuous = true;
         spray.dontWipeInterface = true;
-        spray.otherOnPlayerConsent = false;
-        spray.playerOnOtherConsent = false;
+        spray.otherOnSelfConsent = false;
+        spray.selfOnOtherConsent = false;
         interactions.Add(spray);
 
-        Interaction spray2 = new Interaction(this, "Spray", "SprayObject", true, false);
+        Interaction spray2 = new Interaction(this, "Spray", "SprayObject");
         spray2.continuous = true;
         // spray2.inertOnPlayerConsent = false;
         // spray2.otherOnPlayerConsent = true;
+        spray2.selfOnSelfConsent = false;
+        spray2.otherOnSelfConsent = false;
+
         spray2.unlimitedRange = true;
         spray2.dontWipeInterface = true;
         spray2.validationFunction = true;

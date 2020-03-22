@@ -54,21 +54,26 @@ public class MonoLiquid : MonoBehaviour, ISaveable {
                     stainRenderer.color = liquid.color;
                     Liquid.MonoLiquidify(stain, liquid);
 
-                    EventData data = Toolbox.Instance.DataFlag(coll.gameObject, chaos: 1, disgusting: 1);
-                    data.whatHappened = liquid.name + " stained " + Toolbox.Instance.GetName(coll.gameObject);
+                    EventData data = Toolbox.Instance.DataFlag(
+                        coll.gameObject,
+                        "staining",
+                        liquid.name + " stained " + Toolbox.Instance.GetName(coll.gameObject),
+                        chaos: 1,
+                        disgusting: 1);
+                    // data.noun = "staining";
+                    // data.whatHappened = liquid.name + " stained " + Toolbox.Instance.GetName(coll.gameObject);
                     if (liquid.immoral > 0) {
-                        data.ratings[Rating.chaos] += 1;
-                        data.ratings[Rating.disturbing] += 1;
+                        data.quality[Rating.chaos] += 1;
+                        data.quality[Rating.disturbing] += 1;
                     }
                     if (liquid.vomit) {
-                        data.ratings[Rating.chaos] += 1;
-                        data.ratings[Rating.disgusting] += 1;
+                        data.quality[Rating.chaos] += 1;
+                        data.quality[Rating.disgusting] += 1;
                     }
                     if (liquid.offal > 0) {
-                        data.ratings[Rating.chaos] += 1;
-                        data.ratings[Rating.disgusting] += 1;
+                        data.quality[Rating.chaos] += 1;
+                        data.quality[Rating.disgusting] += 1;
                     }
-                    data.noun = "staining";
                 }
                 ClaimsManager.Instance.WasDestroyed(gameObject);
             }
@@ -78,11 +83,16 @@ public class MonoLiquid : MonoBehaviour, ISaveable {
         liquid = Liquid.LoadLiquid(type);
     }
     void OnGroundImpact(Physical phys) {
-        EventData data = Toolbox.Instance.DataFlag(gameObject, chaos: 1, disgusting: 1);
-        data.whatHappened = liquid.name + " was spilled";
-        data.noun = "spilling";
+        EventData data = Toolbox.Instance.DataFlag(
+            gameObject,
+            "spilling",
+            liquid.name + " was spilled",
+            chaos: 1,
+            disgusting: 1);
+        // data.whatHappened = liquid.name + " was spilled";
+        // data.noun = "spilling";
         GameObject puddle = Instantiate(Resources.Load("prefabs/Puddle"), transform.position, Quaternion.identity) as GameObject;
-        puddle.layer = 9;
+        // puddle.layer = 4;
         PhysicalBootstrapper pb = GetComponent<PhysicalBootstrapper>();
         pb.DestroyPhysical();
         Liquid.MonoLiquidify(puddle, liquid);

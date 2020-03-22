@@ -14,7 +14,7 @@ public class LiquidResevoir : Interactive {
         }
         if (drinkable) {
             Interaction drinker = new Interaction(this, "Drink", "Drink");
-            drinker.playerOnOtherConsent = true;
+            drinker.selfOnOtherConsent = true;
             interactions.Add(drinker);
         }
     }

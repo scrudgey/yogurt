@@ -2,76 +2,9 @@
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Text;
+using analysis;
 
 public class FocusGroupMenu : MonoBehaviour {
-    public enum PreferenceType { hates, likes };
-    [System.Serializable]
-    public struct Preference {
-        public Rating type;
-        public PreferenceType pref;
-        public Preference(Rating type, PreferenceType pref) {
-            this.type = type;
-            this.pref = pref;
-        }
-    }
-    [System.Serializable]
-    public class FocusGroupPersonality {
-        public enum ReviewType { none, outlier, notable, topDisturbing, topDisgusting, topChaos, topOffensive, topPositive };
-        public List<ReviewType> reviewTypes;
-        public Sprite head_norm;
-        public Sprite head_talking;
-        public Sprite body;
-        public List<Preference> preferences = new List<Preference>(){
-            new Preference(Rating.chaos, PreferenceType.hates),
-            new Preference(Rating.disturbing, PreferenceType.hates),
-            new Preference(Rating.disgusting, PreferenceType.hates),
-            new Preference(Rating.offensive, PreferenceType.hates),
-            new Preference(Rating.positive, PreferenceType.likes)
-        };
-        public EventData SelectEvent(Commercial commercial, int n) {
-            if (reviewTypes.Count == 0)
-                return commercial.analysis.outlierEvents[n];
-            switch (reviewTypes[Random.Range(0, reviewTypes.Count)]) {
-                case ReviewType.outlier:
-                    return commercial.analysis.outlierEvents[n];
-                case ReviewType.notable:
-                    return commercial.analysis.notableEvents[n];
-                case ReviewType.topDisturbing:
-                    return commercial.analysis.maxDisturbing[n];
-                case ReviewType.topDisgusting:
-                    return commercial.analysis.maxDisgusting[n];
-                case ReviewType.topChaos:
-                    return commercial.analysis.maxChaos[n];
-                case ReviewType.topOffensive:
-                    return commercial.analysis.maxOffense[n];
-                case ReviewType.topPositive:
-                    return commercial.analysis.maxPositive[n];
-                default:
-                    return commercial.analysis.outlierEvents[n];
-            }
-        }
-        public string ReactToEvent(EventData data) {
-            Rating quality = data.Quality();
-            PreferenceType opinion = PreferenceType.likes;
-            foreach (Preference pref in preferences) {
-                if (pref.type == quality)
-                    opinion = pref.pref;
-            }
-            if (opinion == PreferenceType.hates) {
-                return "I did not like when ";
-            }
-            return "I liked when ";
-        }
-        public string DescribeEvent(Commercial commercial, int n) {
-            StringBuilder builder = new StringBuilder();
-            EventData eventd = SelectEvent(commercial, n);
-
-            builder.Append(ReactToEvent(eventd));
-            builder.Append(eventd.whatHappened);
-            builder.Append(".");
-            return Toolbox.RemoveExtraPunctuation(builder.ToString());
-        }
-    }
     public Commercial commercial;
     public Text reviewText;
     private int _index;
@@ -89,8 +22,14 @@ public class FocusGroupMenu : MonoBehaviour {
     public Dictionary<FocusGroupPersonality, Image> bodies = new Dictionary<FocusGroupPersonality, Image>();
     public Dictionary<FocusGroupPersonality, bool> mouths = new Dictionary<FocusGroupPersonality, bool>();
     public List<FocusGroupPersonality> personalities = new List<FocusGroupPersonality>();
+
+    public Dictionary<FocusGroupPersonality, string> reviews = new Dictionary<FocusGroupPersonality, string>();
     public float timer;
     public void Start() {
+        foreach (FocusGroupPersonality personality in personalities) {
+            reviews[personality] = personality.ReviewCommercial(commercial);
+        }
+
         Canvas canvas = GetComponent<Canvas>();
         canvas.worldCamera = GameManager.Instance.cam;
         reviewText = transform.Find("panel/textbox/Text").GetComponent<Text>();
@@ -128,12 +67,42 @@ public class FocusGroupMenu : MonoBehaviour {
         bubbles[p].SetActive(true);
         mouths[p] = true;
         timer = 1f;
-        reviewText.text = p.DescribeEvent(commercial, index);
+        reviewText.text = reviews[p];
     }
     public void DoneButtonCallback() {
         Destroy(gameObject);
     }
     public void NextButtonCallback() {
         index += 1;
+    }
+}
+
+[System.Serializable]
+public class FocusGroupPersonality {
+    public Sprite head_norm;
+    public Sprite head_talking;
+    public Sprite body;
+    // we do it this way so it's serializable in the unity editor
+    public List<Preference> preferences = new List<Preference>(){
+            new Preference(Rating.chaos, PreferenceType.hates),
+            new Preference(Rating.disturbing, PreferenceType.hates),
+            new Preference(Rating.disgusting, PreferenceType.hates),
+            new Preference(Rating.offensive, PreferenceType.hates),
+            new Preference(Rating.positive, PreferenceType.likes)
+        };
+    public Describable SelectEvent(Commercial commercial) {
+        CommercialAnalysis analysis = new CommercialAnalysis(commercial);
+        return analysis.Climax(0);
+    }
+
+    public string ReviewCommercial(Commercial commercial) {
+        StringBuilder builder = new StringBuilder();
+        Describable eventd = SelectEvent(commercial);
+
+        // TODO: expand on this
+        builder.Append("\"");
+        builder.Append(string.Join(" ", Interpretation.Review(commercial, this)).Trim());
+        builder.Append("\"");
+        return Toolbox.RemoveExtraPunctuation(builder.ToString());
     }
 }

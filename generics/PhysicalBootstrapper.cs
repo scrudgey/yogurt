@@ -47,7 +47,7 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         Toolbox.RegisterMessageCallback<MessageDamage>(this, HandleDamage);
     }
     public void HandleDamage(MessageDamage dam) {
-        if (dam.type == damageType.fire || dam.type == damageType.cosmic || dam.type == damageType.asphyxiation)
+        if (dam.type == damageType.fire || dam.type == damageType.asphyxiation)
             return;
         if (dam.messenger != this)
             Impact(dam);
@@ -114,6 +114,9 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         foreach (Table table in Object.FindObjectsOfType<Table>()) {
             Collider2D tableCollider = table.transform.parent.GetComponent<Collider2D>();
             Physics2D.IgnoreCollision(groundCollider, tableCollider, true);
+        }
+        foreach (Collider2D myCollider in GetComponents<Collider2D>()) {
+            Physics2D.IgnoreCollision(groundCollider, myCollider, true);
         }
 
         horizon = new GameObject("horizon");
@@ -189,20 +192,7 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         }
     }
     void OnCollisionEnter2D(Collision2D coll) {
-        if (coll.relativeVelocity.magnitude > 0.1) {
-            if (impactSounds != null)
-                if (impactSounds.Length > 0) {
-                    GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
-                }
-            if (coll.gameObject != horizon) {
-                EventData data = Toolbox.Instance.DataFlag(gameObject, chaos: 1);
-                data.noun = "collision";
-                data.whatHappened = Toolbox.Instance.CloneRemover(coll.gameObject.name) + " collided with " + Toolbox.Instance.CloneRemover(gameObject.name);
-            }
-        }
-        if (coll.gameObject == groundObject) {
-
-        } else if (coll.gameObject == horizon) {
+        if (coll.gameObject == horizon) {
             if (coll.relativeVelocity.magnitude > 0.1) {
                 Bounce();
             } else {
@@ -213,9 +203,32 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
             if (physical == null)
                 return;
             if (physical.currentMode == Physical.mode.zip) {
+                if (coll.otherCollider.transform.root == transform.root) {
+                    return;
+                }
                 Collision(coll);
             }
         }
+
+        if (coll.gameObject.transform.root == transform.root)
+            return;
+
+        if (coll.relativeVelocity.magnitude > 0.1) {
+            if (impactSounds != null && !silentImpact)
+                if (impactSounds.Length > 0) {
+                    GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
+                }
+            if (coll.gameObject != horizon) {
+                EventData data = Toolbox.Instance.DataFlag(
+                    gameObject,
+                    "collision",
+                    Toolbox.Instance.CloneRemover(coll.gameObject.name) + " collided with " + Toolbox.Instance.CloneRemover(gameObject.name),
+                    chaos: 1);
+                // data.noun = "collision";
+                // data.whatHappened = Toolbox.Instance.CloneRemover(coll.gameObject.name) + " collided with " + Toolbox.Instance.CloneRemover(gameObject.name);
+            }
+        }
+
     }
     public void Set3Motion(Vector3 velocity) {
         setV = velocity;
@@ -287,13 +300,17 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
     void OnDestroy() {
         if (isQuitting)
             return;
-        if (physical && physical.gameObject) {
+        if (physical != null && physical.gameObject != null) {
             ClaimsManager.Instance.WasDestroyed(physical.gameObject);
             Destroy(physical.gameObject);
         }
     }
     public void Collision(Collision2D collision) {
-        // Debug.Log("physical collision: "+gameObject.name+" + "+collision.gameObject.name);
+        if (collision.otherCollider.transform.root == collision.collider.transform.root) {
+            return;
+        }
+
+        // Debug.Log("physical collision: " + gameObject.name + " + " + collision.gameObject.name);
         // Debug.Log(collision.relativeVelocity.magnitude);
         MessageDamage message = new MessageDamage();
         if (thrownBy != null) {
@@ -308,7 +325,7 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         message.amount = collision.relativeVelocity.magnitude;
         if (physical)
             if (physical.currentMode == Physical.mode.zip)
-                message.amount = 15f;
+                message.amount = 25f;
 
         message.type = damageType.physical;
         if (collision.relativeVelocity.magnitude > 1) {
@@ -340,7 +357,7 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         if (physical.currentMode == Physical.mode.zip) {
             Rebound();
         } else {
-            Vector2 force = message.force / 2f;
+            Vector2 force = message.force;// / 2f;
             if (message.strength) {
                 thrownBy = gameObject;
                 // sprite.sortingLayerName = "main";

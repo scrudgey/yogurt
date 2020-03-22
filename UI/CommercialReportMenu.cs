@@ -1,14 +1,12 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-
+using analysis;
 public class CommercialReportMenu : MonoBehaviour {
-    // TODO: unique events so that the top 3 aren't all different cases of cannibalism
     Text descriptionText;
     Text positiveScore, chaosScore, disgustingScore, disturbingScore, offensiveScore;
     Text transcript;
     Text eventText;
     public Commercial commercial;
-    public CommercialDescription eventSet;
     private Canvas canvas;
     public void Start() {
         canvas = GetComponent<Canvas>();
@@ -19,8 +17,10 @@ public class CommercialReportMenu : MonoBehaviour {
         UINew.Instance.CloseActiveMenu();
         MySaver.Save();
         // MySaver.SaveObjectDatabase();
-        if (GameManager.Instance.activeCommercial.cutscene != "none") {
-            GameManager.Instance.BoardRoomCutscene();
+        if (GameManager.Instance.data.activeCommercial.cutscene != "none") {
+            if (GameManager.Instance.data.activeCommercial.gravy) {
+                GameManager.Instance.AntiMayorCutscene();
+            } else GameManager.Instance.BoardRoomCutscene();
         } else {
             GameManager.Instance.NewDayCutscene();
         }
@@ -46,15 +46,14 @@ public class CommercialReportMenu : MonoBehaviour {
     public void Report(Commercial activeCommercial) {
         commercial.WriteReport();
         SetRefs();
-        descriptionText.text = commercial.SentenceReview();
 
-        EventData total = commercial.Total();
+        descriptionText.text = string.Join(" ", Interpretation.Review(commercial)).Trim();
 
-        positiveScore.text = total.ratings[Rating.positive].ToString();
-        chaosScore.text = total.ratings[Rating.chaos].ToString();
-        disgustingScore.text = total.ratings[Rating.disgusting].ToString();
-        disturbingScore.text = total.ratings[Rating.disturbing].ToString();
-        offensiveScore.text = total.ratings[Rating.offensive].ToString();
+        positiveScore.text = commercial.quality[Rating.positive].ToString();
+        chaosScore.text = commercial.quality[Rating.chaos].ToString();
+        disgustingScore.text = commercial.quality[Rating.disgusting].ToString();
+        disturbingScore.text = commercial.quality[Rating.disturbing].ToString();
+        offensiveScore.text = commercial.quality[Rating.offensive].ToString();
 
         transcript.text = "";
         foreach (string line in commercial.transcript) {

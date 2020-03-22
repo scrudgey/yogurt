@@ -7,7 +7,7 @@ public class Grabbable : Item {
     public bool fire;
     // Use this for initialization
     virtual public void Start() {
-        Interaction getAction = new Interaction(this, "Get", "Get", true, false);
+        Interaction getAction = new Interaction(this, "Get", "Get");
         interactions.Add(getAction);
         Pickup pickup = itemPrefab.GetComponent<Pickup>();
         itemName = pickup.itemName;

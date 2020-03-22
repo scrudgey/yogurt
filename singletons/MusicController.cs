@@ -4,11 +4,13 @@ using System.Collections;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using System;
+using UnityEngine.Audio;
 
 [System.Serializable]
 public enum TrackName {
     none,
     mainTitle,
+    apartment,
     creepyAmbient,
     lithophone,
     jingle,
@@ -21,15 +23,19 @@ public enum TrackName {
     chela,
     itemAcquired,
     congrats,
+    mayor,
+    mayor_attic
 }
 [System.Serializable]
 public class Track {
     public TrackName trackName;
     public float playTime;
     public bool loop;
-    public Track(TrackName trackName, bool loop = true) {
+    public float volume = 1;
+    public Track(TrackName trackName, bool loop = true, float vol = 1) {
         this.trackName = trackName;
         this.loop = loop;
+        this.volume = vol;
     }
 }
 [System.Serializable]
@@ -43,6 +49,11 @@ public class Music {
 public class MusicTitle : Music {
     public MusicTitle() {
         tracks = new Stack<Track>(new List<Track> { new Track(TrackName.mainTitle) });
+    }
+}
+public class MusicApartment : Music {
+    public MusicApartment() {
+        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.apartment, vol: 0.5f) });
     }
 }
 public class MusicNone : Music {
@@ -76,11 +87,21 @@ public class MusicBeat : Music {
         tracks = new Stack<Track>(new List<Track> { new Track(TrackName.fillerBeat) });
     }
 }
+public class MusicMayor : Music {
+    public MusicMayor() {
+        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.mayor) });
+    }
+}
+public class MusicMayorAttic : Music {
+    public MusicMayorAttic() {
+        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.mayor_attic) });
+    }
+}
 public class MusicVamp : Music {
     public MusicVamp() {
         tracks = new Stack<Track>(new List<Track> {
-            new Track(TrackName.dracLoop),
-            new Track(TrackName.dracIntro, loop: false),
+            new Track(TrackName.dracLoop, vol:0.5f),
+            new Track(TrackName.dracIntro, loop: false, vol:0.5f),
             });
     }
 }
@@ -107,7 +128,8 @@ public class MusicCongrats : Music {
 public class MusicController : Singleton<MusicController> {
 
     static Dictionary<TrackName, string> trackFiles = new Dictionary<TrackName, string>(){
-        {TrackName.mainTitle, "Main Vamp w keys YC3"},
+        {TrackName.mainTitle, "Title Screen Theme YC3 MUSIC 2020"},
+        {TrackName.apartment, "Main Vamp w keys YC3"},
         {TrackName.creepyAmbient, "ForestMoon Alternate Loop YC3"},
         {TrackName.lithophone, "Lithophone LOOP REMIX YC3"},
         {TrackName.jingle, "jingle1"},
@@ -120,12 +142,13 @@ public class MusicController : Singleton<MusicController> {
         {TrackName.dracLoop, "Dracula Mansion LOOP YC3"},
         {TrackName.itemAcquired, "Item Acquisition YC3"},
         {TrackName.congrats, "Short CONGRATS YC3"},
+        {TrackName.mayor, "Mayor's House #2 improved YC3 2020"},
+        {TrackName.mayor_attic, "Mayor's ATTIC #1 YC3"}
     };
 
     static Dictionary<string, Func<Music>> sceneMusic = new Dictionary<string, Func<Music>>() {
         {"title", () => new MusicTitle()},
         {"chamber", () => new MusicChamber()},
-        {"mayors_attic",() => new MusicCreepy()},
         {"space", () => new MusicSpace()},
         {"moon1", () => new MusicMoon()},
         {"moon_pool", () => new MusicMoon()},
@@ -140,8 +163,17 @@ public class MusicController : Singleton<MusicController> {
         {"potion", () => new MusicCreepy()},
         {"vampire_house", () => new MusicVamp()},
         {"dungeon", () => new MusicVamp()},
-        {"house", () => new MusicNone()},
+        {"house", () => new MusicApartment()},
+        {"apartment", () => new MusicApartment()},
+        {"neighborhood", () => new MusicApartment()},
+        {"mayors_house", () => new MusicMayor()},
+        {"mayors_attic", () => new MusicMayorAttic()},
+        {"cave1", () => new MusicMayorAttic()},
+        {"cave2", () => new MusicMayorAttic()},
+        {"cave3", () => new MusicMayorAttic()},
+        {"cave4", () => new MusicMayorAttic()},
     };
+    // TODO: add studio
     public static Dictionary<TrackName, AudioClip> tracks = new Dictionary<TrackName, AudioClip>();
     public Camera cam; // TOOD: make obsolete
     public AudioSource audioSource;
@@ -151,7 +183,9 @@ public class MusicController : Singleton<MusicController> {
     public Coroutine endCoroutine;
     public void Awake() {
         SetCamera();
-        audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
+        audioSource = Toolbox.GetOrCreateComponent<AudioSource>(gameObject);
+        AudioMixer mixer = Resources.Load("mixers/MusicMixer") as AudioMixer;
+        audioSource.outputAudioMixerGroup = mixer.FindMatchingGroups("Master")[0];
         // load tracks
         foreach (KeyValuePair<TrackName, string> kvp in trackFiles) {
             // Debug.Log("loading music/" + kvp.Value + " ...");
@@ -215,6 +249,7 @@ public class MusicController : Singleton<MusicController> {
             return;
 
         audioSource.clip = tracks[track.trackName];
+        audioSource.volume = track.volume;
         audioSource.Play();
         nowPlayingTrack = track;
         audioSource.time = track.playTime;

@@ -42,7 +42,7 @@ public class MySaver {
                 continue;
             if (file.FullName == GameManager.Instance.data.lastSavedPlayerPath)
                 continue;
-            if (file.Name != "house_state.xml")
+            if (file.Name != "apartment_state.xml")
                 File.Delete(file.FullName);
         }
         // GARBAGE COLLECTION
@@ -60,7 +60,7 @@ public class MySaver {
             // playerStream.Close();
             if (objectDataBase != null) {
                 foreach (KeyValuePair<Guid, PersistentObject> kvp in objectDataBase) {
-                    if (kvp.Value.sceneName != "house") {
+                    if (kvp.Value.sceneName != "apartment") {
                         if (!playerIDs.Contains(kvp.Key))
                             removeEntries.Push(kvp.Key);
                     }
@@ -69,7 +69,7 @@ public class MySaver {
         } else {
             if (objectDataBase != null) {
                 foreach (KeyValuePair<Guid, PersistentObject> kvp in objectDataBase) {
-                    if (kvp.Value.sceneName != "house") {
+                    if (kvp.Value.sceneName != "apartment") {
                         removeEntries.Push(kvp.Key);
                     }
                 }
@@ -312,6 +312,7 @@ public class MySaver {
                 if (marker) {
                     marker.id = persistent.id;
                 }
+                Toolbox.GetOrCreateComponent<Intrinsics>(go);
             } else {
                 Debug.LogError("object " + idn.ToString() + " not found in database");
             }

@@ -27,6 +27,9 @@ public class TeleportSwitch : Interactive {
         audioSource.PlayOneShot(teleportSound);
         doTeleport = true;
     }
+    public string Teleport_desc() {
+        return "Throw switch";
+    }
     void FixedUpdate() {
         if (doTeleport) {
             doTeleport = false;

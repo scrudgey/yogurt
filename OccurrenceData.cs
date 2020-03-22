@@ -2,26 +2,60 @@ using Nimrod;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using analysis;
+
+
+[System.Serializable]
+public class DescribableOccurrenceData : MetaDescribable<EventData> {
+    public HashSet<string> nouns = new HashSet<string>();
+    public DescribableOccurrenceData() {
+        whatHappened = "";
+    } // needed for serialization
+    override public void AddChild(EventData eventData) {
+        eventData.id = this.id;
+        if (eventData.noun != "")
+            nouns.Add(eventData.noun);
+        base.AddChild(eventData);
+    }
+    override public void UpdateChildren() {
+        this.whatHappened = NotableChild().whatHappened;
+        base.UpdateChildren();
+    }
+    public DescribableOccurrenceData(List<EventData> desc) {
+        whatHappened = "";
+        foreach (EventData child in desc) {
+            AddChild(child);
+        }
+    }
+}
 
 [System.Serializable]
 public abstract class OccurrenceData {
-    public System.Guid id = System.Guid.NewGuid();
-    public List<EventData> events = new List<EventData>();
     public abstract HashSet<GameObject> involvedParties();
+    public DescribableOccurrenceData describable = new DescribableOccurrenceData();
     public void CalculateDescriptions() {
-        events = new List<EventData>();
+        describable.ResetChildren();
         Descriptions();
-        foreach (EventData eDat in events) {
-            eDat.id = this.id.ToString();
-        }
     }
     public abstract void Descriptions();
+    public virtual void AddChild(EventData child) {
+        describable.AddChild(child);
+    }
 }
 public class OccurrenceGeneric : OccurrenceData {
     public override HashSet<GameObject> involvedParties() {
         return new HashSet<GameObject> { };
     }
-    override public void Descriptions() { }
+    public List<EventData> eventData = new List<EventData>();
+    override public void Descriptions() {
+        foreach (EventData e in eventData) {
+            AddChild(e);
+        }
+    }
+    // override public void AddChild(EventData child) {
+    //     eventData.Add(child);
+    //     base.AddChild(child);
+    // }
 }
 public class OccurrenceFire : OccurrenceData {
     public GameObject flamingObject;
@@ -34,10 +68,11 @@ public class OccurrenceFire : OccurrenceData {
         string objectName = Toolbox.Instance.GetName(flamingObject);
         data.noun = "fire";
         data.whatHappened = "the " + objectName + " burned";
-        events.Add(data);
+        AddChild(data);
         if (objectName == "table") {
             if (extinguished == false) {
-                events.Add(EventData.TableFire());
+                AddChild(EventData.TableFire());
+                // children.Add(EventData.TableFire());
             }
         }
     }
@@ -47,7 +82,9 @@ public class OccurrenceEat : OccurrenceData {
     public Edible edible;
     public GameObject eater;
     public string eaterOutfitName;
+    public string eaterName;
     public bool yogurt;
+    public bool gravy;
     public override HashSet<GameObject> involvedParties() {
         return new HashSet<GameObject> { eater, edible.gameObject };
     }
@@ -63,40 +100,42 @@ public class OccurrenceEat : OccurrenceData {
         if (otherOutfit != null) {
             eaterOutfitName = otherOutfit.wornUniformName;
         }
+        eaterName = eater.name;
         data.noun = "eating";
         if (edible.offal) {
-            data.ratings[Rating.disgusting] = 2;
-            data.ratings[Rating.chaos] = 2;
+            data.quality[Rating.disgusting] = 2;
+            data.quality[Rating.chaos] = 2;
         }
         if (edible.immoral) {
-            data.ratings[Rating.disturbing] = 3;
-            data.ratings[Rating.offensive] = 3;
-            data.ratings[Rating.chaos] = 3;
+            data.quality[Rating.disturbing] = 3;
+            data.quality[Rating.offensive] = 3;
+            data.quality[Rating.chaos] = 3;
         }
-        events.Add(data);
+        AddChild(data);
+        // children.Add(data);
         if (edible.vomit) {
-            events.Add(EventData.VomitEat(eater));
+            AddChild(EventData.VomitEat(eater));
         }
         string edibleName = Toolbox.Instance.GetName(edible.gameObject);
-        if (
-            (liquid != null && (liquid.name == "yogurt" || liquid.ingredients.Contains("yogurt")))
-             || edibleName == "yogurt"
-             ) {
+        if ((liquid != null && (liquid.name == "yogurt" || liquid.ingredients.Contains("yogurt"))) || edibleName == "yogurt") {
             yogurt = true;
-            // adjust
-            events.Add(EventData.Yogurt(eater));
+            AddChild(EventData.Yogurt(eater));
             if (liquid.vomit) {
-                events.Add(EventData.YogurtVomitEat(eater));
+                AddChild(EventData.YogurtVomitEat(eater));
             }
             if (edible.gameObject.name == "Puddle(Clone)") {
-                events.Add(EventData.YogurtFloor(eater));
+                AddChild(EventData.YogurtFloor(eater));
             }
         }
+        if ((liquid != null && (liquid.name == "gravy" || liquid.ingredients.Contains("gravy"))) || edibleName == "gravy") {
+            gravy = true;
+            AddChild(EventData.Gravy(eater));
+        }
         if (edibleName == "eggplant") {
-            events.Add(EventData.Eggplant(eater));
+            AddChild(EventData.Eggplant(eater));
         }
         if (edible.human) {
-            events.Add(EventData.Cannibalism(eater));
+            AddChild(EventData.Cannibalism(eater));
         }
     }
 }
@@ -125,7 +164,7 @@ public class OccurrenceDeath : OccurrenceData {
             if (lastAttacker.GetComponent<Inventory>() != null)
                 assailant = true;
         }
-        events.Add(EventData.Death(dead, lastAttacker, lastDamage, monster, suicide, assailant));
+        AddChild(EventData.Death(dead, lastAttacker, lastDamage, monster, suicide, assailant));
     }
 }
 public class OccurrenceVomit : OccurrenceData {
@@ -138,14 +177,14 @@ public class OccurrenceVomit : OccurrenceData {
         if (vomit == null & vomiter == null)
             return;
         EventData data = EventData.Vomit(vomiter, vomit);
-        events.Add(data);
+        AddChild(data);
         if (vomit != null) {
             MonoLiquid mliquid = vomit.GetComponent<MonoLiquid>();
             if (mliquid == null)
                 return;
             if (mliquid.liquid != null) {
                 if (mliquid.liquid.name == "yogurt")
-                    events.Add(EventData.VomitYogurt(vomiter));
+                    AddChild(EventData.VomitYogurt(vomiter));
             }
         }
     }
@@ -156,7 +195,7 @@ public class OccurrenceNecronomicon : OccurrenceData {
     }
     public override void Descriptions() {
         EventData data = EventData.EldritchHorror();
-        events.Add(data);
+        AddChild(data);
     }
 }
 public class OccurrenceSpeech : OccurrenceData {
@@ -175,12 +214,12 @@ public class OccurrenceSpeech : OccurrenceData {
         string targetName = "";
         if (target != null)
             targetName = Toolbox.Instance.GetName(target);
-        EventData data = null;
-        if (events.Count > 0) {
-            data = events[0];
-        } else {
-            data = new EventData();
-        }
+        // EventData data = null;
+        // if (GetChildren().Count > 0) {
+        //     data = (EventData)GetChildren()[0];
+        // } else {
+        EventData data = new EventData();
+        // }
         data.whatHappened = speakerName + " said " + line;
         data.noun = "dialogue";
         data.transcriptLine = speakerName + ": " + line;
@@ -188,22 +227,23 @@ public class OccurrenceSpeech : OccurrenceData {
         if (threat) {
             data.whatHappened = speakerName + " threatened " + targetName;
             data.noun = "threats";
-            data.ratings[Rating.chaos] = 1;
-            data.ratings[Rating.offensive] = Random.Range(2, 3);
-            data.ratings[Rating.disturbing] = 2;
+            data.quality[Rating.chaos] = 1;
+            data.quality[Rating.offensive] = Random.Range(2, 3);
+            data.quality[Rating.disturbing] = 2;
         }
         if (insult) {
             data.whatHappened = speakerName + " insulted " + targetName;
             data.noun = "insults";
-            data.ratings[Rating.chaos] = 1;
-            data.ratings[Rating.offensive] = Random.Range(2, 3);
-            data.ratings[Rating.disturbing] = 2;
+            data.quality[Rating.chaos] = 1;
+            data.quality[Rating.offensive] = Random.Range(2, 3);
+            data.quality[Rating.disturbing] = 2;
         }
         if (profanity > 0 && data.noun == "dialogue")
             data.noun = "profanity";
-        if (events.Count == 0) {
-            events.Add(data);
-        }
+        // if (children.Count == 0) {
+        //     children.Add(data);
+        // }
+        AddChild(data);
     }
 }
 public class OccurrenceViolence : OccurrenceData {
@@ -227,6 +267,6 @@ public class OccurrenceViolence : OccurrenceData {
         } else if (type == damageType.piercing) {
             data.whatHappened = attackerName + " stabbed " + victimName;
         }
-        events.Add(data);
+        AddChild(data);
     }
 }

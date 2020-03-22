@@ -14,10 +14,6 @@ public class Interaction {
     public string action;
     public GameObject lastTarget;
     public GameObject defaultTarget;
-    public List<object> parameters;
-    public List<Component> defaultParameters;
-    public bool hideInManualActions;
-    public bool hideInRightClickMenu;
     public int defaultPriority;
     public float range = Mathf.Pow(0.35f, 2f);
     public bool unlimitedRange = false;
@@ -37,18 +33,19 @@ public class Interaction {
     private System.Reflection.MethodInfo validationMethodInfo;
     private System.Reflection.MethodInfo descMethodInfo;
     private DesireFunction desireFunction;
-    public bool playerOnOtherConsent = true;
-    public bool otherOnPlayerConsent = true;
-    public bool inertOnPlayerConsent = true;
+    public bool selfOnOtherConsent = true;
+    public bool selfOnSelfConsent = true;
+    public bool otherOnSelfConsent = true;
+    public bool holdingOnOtherConsent = true;
+    // public bool inertOnPlayerConsent = true;
     public string descString = null;
-    public Interaction(Interactive o, string name, string functionName) : this(o, name, functionName, false, false) { }
-    public Interaction(Interactive o, string name, string functionName, bool manualHide, bool rightHide) {
+    public Interaction(Interactive o, string name, string functionName) {
         this.parameterTypes = new List<System.Type>();
         this.action = functionName;
         this.actionName = name;
         this.parent = o;
-        this.hideInManualActions = manualHide;
-        this.hideInRightClickMenu = rightHide;
+        // this.hideInTopMenu = manualHide;
+        // this.hideInClickMenu = rightHide;
         methodInfo = parent.GetType().GetMethod(functionName);
         if (methodInfo != null) {
             System.Reflection.ParameterInfo[] pars = methodInfo.GetParameters();
@@ -78,8 +75,8 @@ public class Interaction {
                 Debug.Log("interaction validation function was not located.");
         }
     }
-    public bool CheckDependency(List<object> targetComponents) {
-        parameters = new List<object>();
+    public List<object> CheckDependency(List<object> targetComponents) {
+        List<object> parameters = new List<object>();
         bool enabled = true;
         int parameterMatches = 0;
         int parameterMisses = 0;
@@ -111,8 +108,7 @@ public class Interaction {
             }
         }
         if (parameterMatches == parameterTypes.Count) {
-            if (debug)
-                Debug.Log("enabled");
+
             enabled = true;
             // if a validation function is specified, we have to also check to see whether it 
             // is okay with being enabled.
@@ -123,14 +119,18 @@ public class Interaction {
                 if (!validation)
                     enabled = false;
             }
+            if (debug)
+                Debug.Log("enabled: " + enabled.ToString());
         } else {
             if (debug)
                 Debug.Log("disabled");
             enabled = false;
         }
-        return enabled;
+        if (enabled) {
+            return parameters;
+        } else return null;
     }
-    public bool IsValid() {
+    public bool IsValid(List<object> parameters) {
         bool validation = true;
         if (validationFunction) {
             if (validationMethodInfo == null)
@@ -143,7 +143,7 @@ public class Interaction {
         }
         return validation;
     }
-    public string Description() {
+    public string Description(List<object> parameters) {
         if (descString != null) {
             return descString;
         }
@@ -158,10 +158,7 @@ public class Interaction {
         }
     }
     // this can be sped up if I store it in a delegate instead of calling Invoke
-    public void DoAction(List<object> customParameters = null) {
-        if (customParameters == null) {
-            customParameters = parameters;
-        }
+    public void DoAction(List<object> parameters) {
         if (actionDelegate == null) {
             if (parameters != null) {
                 methodInfo.Invoke(parent, parameters.ToArray());

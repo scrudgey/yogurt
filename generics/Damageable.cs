@@ -125,7 +125,7 @@ public abstract class Damageable : MonoBehaviour {
             damage = CalculateDamage(message);
             if (message.strength) {
                 result = ImpactResult.strong;
-                damage *= 2f;
+                damage *= 10f;
             } else {
                 if (damage > 0) {
                     result = ImpactResult.normal;
@@ -134,7 +134,7 @@ public abstract class Damageable : MonoBehaviour {
                 }
             }
             // play impact sounds
-            if ((message.impactSounds.Length > 0) || (message.type != damageType.fire && message.type != damageType.asphyxiation && message.type != damageType.cosmic))
+            if ((message.impactSounds.Length > 0) || (message.type != damageType.fire && message.type != damageType.asphyxiation))
                 PlayImpactSound(result, message);
             if (message.messenger != null)
                 message.messenger.SendMessage("ImpactReceived", result, SendMessageOptions.DontRequireReceiver);
@@ -146,7 +146,7 @@ public abstract class Damageable : MonoBehaviour {
         if (gameObject == GameManager.Instance.playerObject) {
             UINew.Instance.Hit();
         }
-        if (message.type == damageType.fire || message.type == damageType.cosmic || message.type == damageType.asphyxiation)
+        if (message.type == damageType.fire || message.type == damageType.asphyxiation)
             return;
         if (controllable) {
             controllable.direction = -1f * message.force;
@@ -157,10 +157,12 @@ public abstract class Damageable : MonoBehaviour {
         if (gameObject.name == "ghost" && SceneManager.GetActiveScene().name == "mayors_attic") {
             GameManager.Instance.data.ghostsKilled += 1;
         }
-        if (lastMessage == null)
+        if (lastMessage == null) {
             lastMessage = new MessageDamage(0.5f, damageType.physical);
+        }
+        Intrinsics myIntrinsics = GetComponent<Intrinsics>();
         foreach (Gibs gib in GetComponents<Gibs>())
-            gib.Emit(lastMessage);
+            gib.Emit(lastMessage, intrinsics: myIntrinsics);
         PhysicalBootstrapper phys = GetComponent<PhysicalBootstrapper>();
         if (phys) {
             phys.DestroyPhysical();

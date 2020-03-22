@@ -69,6 +69,7 @@ public class MessageDamage : Message {
     public GameObject responsibleParty;
     public bool strength;
     public float angleAboveHorizontal;
+    public bool suppressGibs;
     public MessageDamage() { }
     public MessageDamage(float amount, damageType type) {
         this.amount = amount;
@@ -118,5 +119,11 @@ public class MessageNoise : Message {
     public Vector2 location;
     public MessageNoise(GameObject gameObject) {
         this.location = gameObject.transform.position;
+    }
+}
+public class MessageOnCamera : Message {
+    public bool value;
+    public MessageOnCamera(bool value) {
+        this.value = value;
     }
 }

@@ -5,8 +5,7 @@ using System;
 public class Controllable : MonoBehaviour {
     public enum HitState { none, stun, unconscious, dead };
     public enum ControlType { none, AI, player }
-    public Interaction defaultInteraction;
-    public List<object> defaultParameters;
+    public InteractionParam defaultInteraction;
     public static List<Type> AIComponents = new List<Type>(){
         typeof(DecisionMaker),
         typeof(PeterPicklebottom)
@@ -103,21 +102,25 @@ public class Controllable : MonoBehaviour {
         UpdateDefaultInteraction();
     }
     public void HandleNoise(MessageNoise message) {
-        if (hitState >= HitState.stun)
+        if (hitState >= HitState.stun || fightMode)
             return;
 
         LookAtPoint(message.location);
     }
     public void HandleInventoryMessage(MessageInventoryChanged message) {
+        // Debug.Log(gameObject.name + " updating default actions on inv change");
         UpdateDefaultInteraction();
     }
-    public HashSet<Interaction> UpdateDefaultInteraction() {
+    public InteractionParam UpdateDefaultInteraction() {
         defaultInteraction = null;
-        HashSet<Interaction> manualActions = new HashSet<Interaction>(Interactor.GetInteractions(gameObject, gameObject, manualActions: true));
-        defaultInteraction = Interactor.GetDefaultAction(manualActions);
-        if (defaultInteraction != null)
-            defaultParameters = defaultInteraction.parameters;
-        return manualActions;
+
+        HashSet<InteractionParam> manualActions = Interactor.SelfOnSelfInteractions(gameObject);
+
+        InteractionParam defaultButton = Interactor.GetDefaultAction(manualActions);
+        if (defaultButton != null) {
+            defaultInteraction = defaultButton;
+        }
+        return defaultInteraction;
     }
     void HandleHitStun(MessageHitstun message) {
         hitState = message.hitState;
@@ -185,18 +188,17 @@ public class Controllable : MonoBehaviour {
             Toolbox.Instance.SendMessage(gameObject, this, new MessagePunch());
         } else {
             if (defaultInteraction != null) {
-                defaultInteraction.DoAction(customParameters: defaultParameters);
+                defaultInteraction.DoAction();
             }
-            UINew.Instance.UpdateButtons();
+            UINew.Instance.UpdateTopActionButtons();
         }
     }
     public void ShootHeld() {
-        if (defaultInteraction != null && defaultInteraction.continuous) {
+        if (defaultInteraction != null && defaultInteraction.interaction.continuous) {
             defaultInteraction.DoAction();
         }
     }
     public virtual void ToggleFightMode() {
         fightMode = !fightMode;
     }
-
 }

@@ -6,7 +6,8 @@ public class Necronomicon : Interactive {
     public ParticleSystem rayFx;
     public ParticleSystem smokeFx;
     public void Awake() {
-        Interaction read = new Interaction(this, "Read", "Read", false, true);
+        Interaction read = new Interaction(this, "Read", "Read");
+        read.otherOnSelfConsent = false;
         read.defaultPriority = 6;
         read.descString = "Read the necronomicon";
         interactions.Add(read);

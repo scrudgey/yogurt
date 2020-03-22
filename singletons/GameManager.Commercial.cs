@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Xml.Serialization;
+using System.Collections;
 
 public partial class GameManager : Singleton<GameManager> {
 
@@ -34,39 +35,58 @@ public partial class GameManager : Singleton<GameManager> {
         data.unlockedCommercials.Add(unlocked);
         data.newUnlockedCommercials.Add(unlocked);
     }
-    public void EvaluateCommercial(Commercial commercial) {
+    public void EvaluateCommercial() {
         bool success = false;
-        if (activeCommercial != null) {
-            success = commercial.Evaluate(activeCommercial);
+        if (GameManager.Instance.data.activeCommercial != null) {
+            success = GameManager.Instance.data.activeCommercial.Evaluate();
         }
         if (success) {
             //process reward
-            CommercialCompleted(commercial);
+            CommercialCompleted();
         } else {
             // do something to display why the commercial is not done yet
             Debug.Log("commercial did not pass.");
             Debug.Log("loaded commercial:");
-            Debug.Log(activeCommercial);
+            Debug.Log(GameManager.Instance.data.activeCommercial);
         }
     }
-    public void CommercialCompleted(Commercial commercial) {
-        commercial.name = activeCommercial.name;
+    public void CommercialCompleted() {
+        Commercial commercial = GameManager.Instance.data.activeCommercial;
         data.completeCommercials.Add(commercial);
-        foreach (string unlock in activeCommercial.unlockUponCompletion) {
+        foreach (string unlock in commercial.unlockUponCompletion) {
             UnlockCommercial(unlock);
         }
         GameObject report = UINew.Instance.ShowMenu(UINew.MenuType.commercialReport);
         CommercialReportMenu menu = report.GetComponent<CommercialReportMenu>();
         menu.commercial = commercial;
-        report.GetComponent<CommercialReportMenu>().Report(activeCommercial);
-        if (activeCommercial.unlockItem != "") {
-            ReceivePackage(activeCommercial.unlockItem);
+        report.GetComponent<CommercialReportMenu>().Report(commercial);
+        if (commercial.unlockItem != "") {
+            ReceivePackage(commercial.unlockItem);
         }
-        if (activeCommercial.email != "") {
-            ReceiveEmail(activeCommercial.email);
+        if (commercial.email != "") {
+            ReceiveEmail(commercial.email);
         }
         UINew.Instance.ClearObjectives();
         UINew.Instance.RefreshUI(active: false);
+    }
+    public void StartCommercial(Commercial commercial) {
+        GameManager.Instance.data.activeCommercial = commercial;
+        // GameManager.Instance.data.recordingCommercial = true;
+        SetRecordingStatus(true);
+        foreach (VideoCamera vid in GameObject.FindObjectsOfType<VideoCamera>()) {
+            vid.UpdateStatus();
+        }
+        if (commercial.name == "1950s Greaser Beatdown") {
+            CutsceneManager.Instance.InitializeCutscene<CutsceneScorpion>();
+        }
+        foreach (Objective objective in GameManager.Instance.data.activeCommercial.objectives) {
+            UINew.Instance.AddObjective(objective);
+        }
+    }
+    public void SetRecordingStatus(bool value) {
+        data.recordingCommercial = value;
+        if (GameManager.onRecordingChange != null)
+            GameManager.onRecordingChange(value);
     }
 }
 

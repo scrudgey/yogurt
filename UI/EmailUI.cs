@@ -59,6 +59,7 @@ public class EmailUI : MonoBehaviour {
     public void EmailEntryCallback(Email email) {
         // populate the text entries with the information from the email
         emailText.text = name_hook.Replace(email.content, GameManager.Instance.saveGameName);
+        emailText.text = Speech.ParseGender(emailText.text);
         toText.text = "To: " + name_hook.Replace(email.toString, GameManager.Instance.saveGameName);
         fromText.text = "From: " + email.fromString;
         subjectText.text = "Subject: " + name_hook.Replace(email.subject, GameManager.Instance.saveGameName);

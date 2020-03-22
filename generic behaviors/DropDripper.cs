@@ -49,14 +49,17 @@ public class DropDripper : MonoBehaviour, ISaveable {
         Vector3 initPosition = transform.position;
         initPosition.z = height;
         GameObject droplet = Toolbox.Instance.SpawnDroplet(initPosition, liquid, Vector3.zero);
-        if (pickup != null) {
-            if (pickup.holder != null) {
-                foreach (Collider2D holderCollider in pickup.holder.GetComponentsInChildren<Collider2D>()) {
-                    Collider2D dropCollider = droplet.GetComponent<Collider2D>();
-                    Physics2D.IgnoreCollision(holderCollider, dropCollider, true);
-                }
+        Collider2D dropCollider = droplet.GetComponent<Collider2D>();
+        if (pickup != null && pickup.holder != null) {
+            foreach (Collider2D holderCollider in pickup.holder.GetComponentsInChildren<Collider2D>()) {
+                Physics2D.IgnoreCollision(holderCollider, dropCollider, true);
+            }
+        } else {
+            foreach (Collider2D holderCollider in GetComponentsInChildren<Collider2D>()) {
+                Physics2D.IgnoreCollision(holderCollider, dropCollider, true);
             }
         }
+        // Debug.Break();
     }
     public void SaveData(PersistentComponent data) {
         data.ints["amount"] = amount;

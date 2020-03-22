@@ -4,6 +4,10 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class Poptext : MonoBehaviour {
+    static private Stack<AchievementPopup.CollectedInfo> collectedStack = new Stack<AchievementPopup.CollectedInfo>();
+    static private Stack<Achievement> achievementStack = new Stack<Achievement>();
+    static public bool achievementPopupInProgress;
+
     public List<string> description = new List<string>();
     private HueShiftText hueShifter;
     public List<float> initValueList = new List<float>();
@@ -75,7 +79,7 @@ public class Poptext : MonoBehaviour {
             }
             if (commercial != null) {
                 // UI check if commercial is complete      
-                UINew.Instance.UpdateRecordButtons(commercial);
+                UINew.Instance.UpdateObjectives();
             }
 
             yield return new WaitForSeconds(hangtime);
@@ -108,4 +112,65 @@ public class Poptext : MonoBehaviour {
             return -c / 2 * (t * (t - 2) - 1) + b;
         }
     }
+
+    static public void PopupCounter(string text, float initValue, float finalValue, Commercial commercial) {
+        GameObject existingPop = GameObject.Find("Poptext(Clone)");
+        if (existingPop == null) {
+            GameObject pop = Instantiate(Resources.Load("UI/Poptext")) as GameObject;
+            Canvas popCanvas = pop.GetComponent<Canvas>();
+            popCanvas.worldCamera = GameManager.Instance.cam;
+
+            Poptext poptext = pop.GetComponent<Poptext>();
+            poptext.description.Add(text);
+            poptext.initValueList.Add(initValue);
+            poptext.finalValueList.Add(finalValue);
+            poptext.commercial = commercial;
+        } else {
+            Poptext poptext = existingPop.GetComponent<Poptext>();
+            poptext.description.Add(text);
+            poptext.initValueList.Add(initValue);
+            poptext.finalValueList.Add(finalValue);
+        }
+
+    }
+    static public void PopupCollected(GameObject obj) {
+        PopupCollected(new AchievementPopup.CollectedInfo(obj));
+    }
+    static public void PopupCollected(AchievementPopup.CollectedInfo info) {
+        GameObject existingPop = GameObject.Find("AchievementPopup(Clone)");
+        if (existingPop == null) {
+            GameObject pop = Instantiate(Resources.Load("UI/AchievementPopup")) as GameObject;
+            Canvas popCanvas = pop.GetComponent<Canvas>();
+            popCanvas.worldCamera = GameManager.Instance.cam;
+            AchievementPopup achievement = pop.GetComponent<AchievementPopup>();
+
+            achievement.CollectionPopup(info);
+            achievementPopupInProgress = true;
+        } else {
+            collectedStack.Push(info);
+        }
+    }
+    static public void PopupAchievement(Achievement achieve) {
+        GameObject existingPop = GameObject.Find("AchievementPopup(Clone)");
+        if (existingPop == null) {
+            GameObject pop = Instantiate(Resources.Load("UI/AchievementPopup")) as GameObject;
+            Canvas popCanvas = pop.GetComponent<Canvas>();
+            popCanvas.worldCamera = GameManager.Instance.cam;
+            AchievementPopup achievement = pop.GetComponent<AchievementPopup>();
+
+            achievement.Achievement(achieve);
+            achievementPopupInProgress = true;
+        } else {
+            achievementStack.Push(achieve);
+        }
+    }
+    static public void LateUpdate() {
+        if (!achievementPopupInProgress && collectedStack.Count > 0) {
+            PopupCollected(collectedStack.Pop());
+        }
+        if (!achievementPopupInProgress && achievementStack.Count > 0) {
+            PopupAchievement(achievementStack.Pop());
+        }
+    }
+
 }

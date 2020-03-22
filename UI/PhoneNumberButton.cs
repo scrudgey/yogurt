@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 public class PhoneNumberButton : MonoBehaviour {
     public PhoneMenu menu;
-    public enum phoneNumber { fire, police, clown }
+    public enum phoneNumber { fire, police, clown, pizza }
     public phoneNumber number;
     public Image image;
     public void Clicked() {
@@ -25,6 +25,9 @@ public class PhoneNumberButton : MonoBehaviour {
                 break;
             case phoneNumber.clown:
                 display.text = "clown";
+                break;
+            case phoneNumber.pizza:
+                display.text = "pizza";
                 break;
             default:
                 break;

@@ -23,7 +23,7 @@ public class SpeechMenu : MonoBehaviour {
         // message.randomSpeech = true;
         // Toolbox.Instance.SendMessage(GameManager.Instance.playerObject, this, message);
         Awareness awareness = Controller.Instance.focus.GetComponent<Awareness>();
-        if (awareness){
+        if (awareness) {
             message.phrase = awareness.RecallMemory();
         } else {
             message.randomSpeech = true;

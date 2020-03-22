@@ -44,7 +44,6 @@ public class Library : MonoBehaviour {
         new Book("Physiology of Sneezing", "", "Quite a fascinating little thing, the uvula."),
         new Book("Beyond Fly Fishing", "Ceril B. Hayes", "Say what you will, but Ceril Hayes really did take fly fishing to a new level."),
         new Book("The Heptameron", "This book contains various instructions for summoning angels."),
-        new Book("Dune", "Neat book."),
         new Book("How to Tiptoe the Tippy-Toe Way", "Now I know!"),
         new Book("A pamphlet on puppet craft", "It has instructions for various different kinds of puppets."),
         new Book("Poetry of the Isle of Man", "Who am I to judge? But it's not really my thing."),
@@ -55,7 +54,7 @@ public class Library : MonoBehaviour {
         new Book("Moby Dick: Part II", "I didn't think the first one needed a soft reboot by a young adult author in 2019."),
         new Book("The Book of the Law", "I won't discuss its contents."),
         // Various illustrated guides to castles, pirate ships, caves, other planets, the deep sea, and things like that.
-        new Book("Physics of Stellar Interiors", "Stars are apparently made of a bunch of hot gas."),
+        new Book("Physics of Stellar Interiors", "Stars are apparently just a bunch of hot gas."),
         new Book("Shock and Awe: How I Made Millions Buying and Selling Pogs", "Shack Ripkin", "", "This guy is so cool!"),
         new Book("The Book of Lies", "It seems a rather unsavory book."),
         new Book("The Origin of Clowns in Hyperdimensional Visition", "", "From Madame Tahuti Press", "This is pretty far-out stuff!"),
@@ -78,7 +77,7 @@ public class Library : MonoBehaviour {
         new Book("Faust", "Goethe", "If this Faust guy is so smart, why does he keep making all these dumb decisions?"),
         new Book("A biography of Beethoven", "Five chapters, quite illuminating."),
         new Book("The Long and Bloody Trail West", "Atlas McTavish", "Wow, how nihilistic and violent! This must be a Very Important Book!"),
-        new Book("I Fought Bigfoot at Yosemite Falls", "", "15 pages, illustrated", "What rubbish!"),
+        new Book("I Fought Bigfoot at Yosemite Falls", "Anon", "15 pages, illustrated", "What rubbish!"),
         new Book("The Briefcase: A History", "I never realized I had so many questions about briefcases!"),
         new Book("A travel guide to Nova Scotia", "Well, it looks pretty nice."),
         new Book("Paying the Ultimate Price: Fast Lives and Loose Change in the Vending Machine Underworld", "Written with unusual clarity and insight. Self-published."),
@@ -86,13 +85,13 @@ public class Library : MonoBehaviour {
         new Book("Coolidge", "P. Hoffman", @"Ah, yes. The ""Oatmeal and Toast"" President."),
         new Book("Encyclopedia of Sci-Fi Robots", @"""Number 104: K9, the robotic dog."""),
         new Book("UFOs and The Military Industrial Establishment", "Roger Saltpepper", "", "Very thick and thoroughly documented."),
-        new Book("I Loved Bigfoot in Acadia National Park", "", "15 pages, illustrated", "I find this book troubling."),
-        new Book("UFOs and The Military Industrial Establishment", "Roger Saltpepper", "", "Very thick and thoroughly documented."),
+        new Book("I Loved Bigfoot in Acadia National Park", "Anon", "20 pages, illustrated", "I find this book troubling."),
+        new Book("The Dummy's Guide to Amassing Wealth", "Matt Lictor", "Second edition", "The actual financial advice here, such as it is, is flimsy at best."),
     };
     public static Stack<Book> bookBag = new Stack<Book>();
 
     void LateUpdate() {
-        if (GameManager.Instance.data.mayorLibraryShuffled)
+        if (GameManager.Instance.data != null && GameManager.Instance.data.mayorLibraryShuffled)
             return;
         GameManager.Instance.data.mayorLibraryShuffled = true;
         List<GrabbableBook> grabbables = new List<GrabbableBook>(GameObject.FindObjectsOfType<GrabbableBook>());

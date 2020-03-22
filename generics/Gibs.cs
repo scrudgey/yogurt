@@ -1,16 +1,15 @@
 ﻿using UnityEngine;
-
-public class Gibs : MonoBehaviour {
-    [System.Serializable]
-    public class LoHi {
-        public float low;
-        public float high;
-        public LoHi() : this(0.025f, 0.075f) { }
-        public LoHi(float low, float high) {
-            this.low = low;
-            this.high = high;
-        }
+[System.Serializable]
+public class LoHi {
+    public float low;
+    public float high;
+    public LoHi() : this(0.025f, 0.075f) { }
+    public LoHi(float low, float high) {
+        this.low = low;
+        this.high = high;
     }
+}
+public class Gibs : MonoBehaviour {
     public bool applyAnimationSkinColor;
     public damageType damageCondition;
     public int number;
@@ -20,11 +19,31 @@ public class Gibs : MonoBehaviour {
     public LoHi initHeight = new LoHi(0.025f, 0.075f);
     public LoHi initVelocity = new LoHi(0.5f, 0.5f);
     public LoHi initAngleFromHorizontal = new LoHi(0.1f, 0.9f);
-    public void Emit(MessageDamage message) {
+    public void CopyFrom(Gibs other) {
+        applyAnimationSkinColor = other.applyAnimationSkinColor;
+        damageCondition = other.damageCondition;
+        number = other.number;
+        particle = other.particle;
+        color = other.color;
+        notPhysical = other.notPhysical;
+        initHeight.low = other.initHeight.low;
+        initHeight.high = other.initHeight.high;
+        initVelocity.low = other.initVelocity.low;
+        initVelocity.high = other.initVelocity.high;
+        initAngleFromHorizontal.low = other.initAngleFromHorizontal.low;
+        initAngleFromHorizontal.high = other.initAngleFromHorizontal.high;
+    }
+    public void Emit(MessageDamage message, Intrinsics intrinsics = null) {
+        if (message.suppressGibs)
+            return;
         if (!DamageTypeMatch(damageCondition, message.type))
             return;
         for (int i = 0; i < number; i++) {
             GameObject bit = Instantiate(particle, transform.position, Quaternion.identity) as GameObject;
+            if (intrinsics != null && intrinsics.buffs.Count > 0) {
+                Intrinsics bitIntrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(bit);
+                bitIntrinsics.liveBuffs = intrinsics.buffs;
+            }
             SpriteRenderer sprite = bit.GetComponent<SpriteRenderer>();
             sprite.color = color;
             if (applyAnimationSkinColor) {
@@ -71,7 +90,7 @@ public class Gibs : MonoBehaviour {
             // Debug.Log(message.force);
             Vector3 force = message.force * Random.Range(initVelocity.low, initVelocity.high) / 12f;
             if (message.strength)
-                force *= 2f;
+                force *= 4f;
             if (message.angleAboveHorizontal != 0) {
                 initAngleFromHorizontal.low = message.angleAboveHorizontal;
                 initAngleFromHorizontal.high = message.angleAboveHorizontal;
@@ -98,18 +117,5 @@ public class Gibs : MonoBehaviour {
             return true;
         return false;
     }
-    public void CopyFrom(Gibs other) {
-        applyAnimationSkinColor = other.applyAnimationSkinColor;
-        damageCondition = other.damageCondition;
-        number = other.number;
-        particle = other.particle;
-        color = other.color;
-        notPhysical = other.notPhysical;
-        initHeight.low = other.initHeight.low;
-        initHeight.high = other.initHeight.high;
-        initVelocity.low = other.initVelocity.low;
-        initVelocity.high = other.initVelocity.high;
-        initAngleFromHorizontal.low = other.initAngleFromHorizontal.low;
-        initAngleFromHorizontal.high = other.initAngleFromHorizontal.high;
-    }
+
 }

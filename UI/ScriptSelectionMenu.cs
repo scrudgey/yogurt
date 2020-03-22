@@ -2,6 +2,8 @@
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
+
 public class ScriptSelectionMenu : MonoBehaviour {
     Text descriptionText;
     GameObject scrollContent;
@@ -14,37 +16,47 @@ public class ScriptSelectionMenu : MonoBehaviour {
 
         descriptionText = transform.Find("Panel/Body/sidebar/DescriptionPanel/DescriptionBox/Description").GetComponent<Text>();
         scrollContent = transform.Find("Panel/Body/Left/ScriptList/Viewport/Content").gameObject;
-        GameObject firstEntry = null;
+
         effects.buttons = new List<Button>(builtInButtons);
-        foreach (Commercial script in GameManager.Instance.data.unlockedCommercials) {
-            bool complete = false;
-            foreach (Commercial completed in GameManager.Instance.data.completeCommercials) {
-                if (completed.name == script.name)
-                    complete = true;
+        Scene scene = SceneManager.GetActiveScene();
+        if (scene.name == "gravy_studio") {
+            LoadCommercials(gravy: true);
+        } else LoadCommercials();
+
+        effects.Configure();
+    }
+    public void LoadCommercials(bool gravy = false) {
+        GameObject firstEntry = null;
+        HashSet<Commercial> unlockedCommercials = new HashSet<Commercial>();
+
+        foreach (Commercial commercial in GameManager.Instance.data.unlockedCommercials) {
+            if (gravy == commercial.gravy) {
+                unlockedCommercials.Add(commercial);
             }
-            if (complete)
-                continue;
+        }
+
+        HashSet<Commercial> completeCommercials = new HashSet<Commercial>(unlockedCommercials);
+        completeCommercials.IntersectWith(GameManager.Instance.data.completeCommercials);
+
+        HashSet<Commercial> incompleteCommercials = new HashSet<Commercial>(unlockedCommercials);
+        incompleteCommercials.ExceptWith(GameManager.Instance.data.completeCommercials);
+
+
+        foreach (Commercial script in incompleteCommercials) {
             GameObject newEntry = CreateScriptButton(script);
             if (firstEntry == null) {
                 firstEntry = newEntry;
             }
         }
-        foreach (Commercial script in GameManager.Instance.data.unlockedCommercials) {
-            bool complete = false;
-            foreach (Commercial completed in GameManager.Instance.data.completeCommercials) {
-                if (completed.name == script.name)
-                    complete = true;
-            }
-            if (!complete)
-                continue;
+        foreach (Commercial script in completeCommercials) {
             GameObject newEntry = CreateScriptButton(script);
             if (firstEntry == null) {
                 firstEntry = newEntry;
             }
         }
+
         EventSystem.current.SetSelectedGameObject(firstEntry);
         ClickedScript(firstEntry.GetComponent<ScriptListEntry>());
-        effects.Configure();
     }
     GameObject CreateScriptButton(Commercial script) {
         GameObject newEntry = Instantiate(Resources.Load("UI/ScriptListEntry")) as GameObject;
@@ -56,9 +68,7 @@ public class ScriptSelectionMenu : MonoBehaviour {
     }
     public void ClickedOkay() {
         if (lastClicked) {
-            GameManager.Instance.activeCommercial = lastClicked.commercial;
-            VideoCamera director = GameObject.FindObjectOfType<VideoCamera>();
-            director.Enable();
+            GameManager.Instance.StartCommercial(new Commercial(lastClicked.commercial));
         }
         UINew.Instance.CloseActiveMenu();
     }

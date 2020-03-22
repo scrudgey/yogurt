@@ -1,6 +1,37 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-
+using System.Collections.Generic;
+public struct ActionButton {
+    public GameObject gameobject;
+    public ActionButtonScript buttonScript;
+    public Text buttonText;
+}
+public class InteractionParam {
+    public Interaction interaction;
+    public List<object> parameters;
+    public InteractionParam(Interaction interaction, List<object> parameters) {
+        this.interaction = interaction;
+        this.parameters = parameters;
+    }
+    public bool IsValid() {
+        return interaction.IsValid(parameters);
+    }
+    public void DoAction() {
+        interaction.DoAction(parameters);
+    }
+    public string Description() {
+        return interaction.Description(parameters);
+    }
+    public override bool Equals(object obj) {
+        return this.Equals(obj as InteractionParam);
+    }
+    public bool Equals(InteractionParam other) {
+        return this.interaction == other.interaction;
+    }
+    public override int GetHashCode() {
+        return this.interaction.GetHashCode();
+    }
+}
 public class ActionButtonScript : MonoBehaviour {
     public enum buttonType {
         none,
@@ -19,13 +50,17 @@ public class ActionButtonScript : MonoBehaviour {
     private bool mouseHeld;
     public Inventory inventory;
     public Button button;
+    public List<object> parameters;
     public void clicked() {
         Controller.Instance.ButtonClicked(this);
+    }
+    public void DoAction() {
+        action.DoAction(parameters);
     }
     void Update() {
         if (mouseHeld && bType == buttonType.Action) {
             if (action.continuous && (Controller.Instance.InteractionIsWithinRange(action) || manualAction)) {
-                action.DoAction();
+                DoAction();
             }
         } else {
             if (button == null)
@@ -50,9 +85,9 @@ public class ActionButtonScript : MonoBehaviour {
         if (bType == buttonType.Action) {
             if (Controller.Instance.commandTarget != null) {
                 string targetName = Toolbox.Instance.GetName(Controller.Instance.commandTarget);
-                UINew.Instance.actionButtonText = "Command " + targetName + " to " + action.Description();
+                UINew.Instance.actionButtonText = "Command " + targetName + " to " + action.Description(parameters);
             } else {
-                UINew.Instance.actionButtonText = action.Description();
+                UINew.Instance.actionButtonText = action.Description(parameters);
             }
         } else {
             if (Controller.Instance.commandTarget != null) {
@@ -78,7 +113,7 @@ public class ActionButtonScript : MonoBehaviour {
             case buttonType.Stash:
                 inventory.StashItem(inventory.holding.gameObject);
                 UINew.Instance.ClearWorldButtons();
-                UINew.Instance.UpdateInventoryButton(inventory);
+                UINew.Instance.UpdateTopActionButtons();
                 break;
 
             case buttonType.Punch:

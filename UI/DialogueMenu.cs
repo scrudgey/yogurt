@@ -21,6 +21,9 @@ public class Monologue {
     public static string replaceHooks(string inString) {
         string line = name_hook.Replace(inString, GameManager.Instance.saveGameName);
         line = cosmic_name_hook.Replace(line, GameManager.Instance.data.cosmicName);
+        List<bool> swearList = new List<bool>();
+        line = Speech.ProcessDialogue(line, ref swearList);
+        //  swearMask = swearList.ToArray();
         return line;
     }
     public Monologue(Speech speaker, string[] texts) {
@@ -30,6 +33,7 @@ public class Monologue {
             // string line = name_hook.Replace(texts[i], GameManager.Instance.saveGameName);
             // line = cosmic_name_hook.Replace(texts[i], GameManager.Instance.data.cosmicName);
             string line = replaceHooks(texts[i]);
+            line = speaker.grammar.Parse(line);
             text.Push(line);
         }
     }
@@ -192,7 +196,14 @@ public class DialogueMenu : MonoBehaviour {
             return;
         }
         if (target.hitState <= Controllable.HitState.stun) {
-            if (target.defaultMonologue != "") {
+            //     if (message.value && cameraMonologue != "") {
+            //     defaultMonologue = cameraMonologue;
+            // } else {
+
+            // }
+            if (target.onCamera && target.cameraMonologue != "") {
+                LoadDialogueTree(target.cameraMonologue);
+            } else if (target.defaultMonologue != "") {
                 LoadDialogueTree(target.defaultMonologue);
             }
         } else {
@@ -335,13 +346,13 @@ public class DialogueMenu : MonoBehaviour {
         Controller.Instance.state = Controller.ControlState.commandSelect;
         UINew.Instance.CloseActiveMenu();
     }
-    public void CommandCallback(Interaction action) {
+    public void CommandCallback(InteractionParam ip) {
         Speech playerSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
         Speech targetSpeech = Controller.Instance.commandTarget.GetComponent<Speech>();
         Configure(playerSpeech, targetSpeech, interruptDefault: true);
-        desire desireToAct = action.GetDesire(Controller.Instance.commandTarget, GameManager.Instance.playerObject);
+        desire desireToAct = ip.interaction.GetDesire(Controller.Instance.commandTarget, GameManager.Instance.playerObject);
 
-        PromptCommand(action.Description());
+        PromptCommand(ip.Description());
         if (desireToAct == desire.decline) {
             DeclineCommand();
             Controller.Instance.ResetCommandState();
@@ -561,8 +572,10 @@ public class DialogueMenu : MonoBehaviour {
 
         // while (nextLine) {
         bool nextLine = false;
-        if (text == "END")
-            UINew.Instance.CloseActiveMenu();
+        if (text == "END") {
+            if (UINew.Instance.activeMenuType == UINew.MenuType.dialogue)
+                UINew.Instance.CloseActiveMenu();
+        }
         if (text == "POLESTARCALLBACK") {
             PoleStarCallback();
             nextLine = true;

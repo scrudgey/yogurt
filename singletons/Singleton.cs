@@ -26,7 +26,7 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour {
             }
         }
     }
-    public static void InitializeInstance(){
+    public static void InitializeInstance() {
         if (_instance != null)
             return;
         _instance = (T)FindObjectOfType(typeof(T));
@@ -37,7 +37,7 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour {
             return;
         }
         if (_instance == null) {
-            GameObject singleton = new GameObject();
+            GameObject singleton = GameObject.Instantiate(Resources.Load("required/singletonTemplate")) as GameObject;
             _instance = singleton.AddComponent<T>();
             singleton.name = "(singleton) " + typeof(T).ToString();
             DontDestroyOnLoad(singleton);

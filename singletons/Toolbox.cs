@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using UnityEngine.Audio;
 public enum SkinColor {
     light,
     dark,
@@ -23,7 +24,7 @@ public static class ExtensionMethods {
     }
 }
 
-public class Toolbox : Singleton<Toolbox> {
+public partial class Toolbox : Singleton<Toolbox> {
     protected Toolbox() { } // guarantee this will be always a singleton only - can't use the constructor!
     private CameraControl cameraControl;
     private GameObject tom;
@@ -31,6 +32,10 @@ public class Toolbox : Singleton<Toolbox> {
     static Regex doublePunctuationRegex = new Regex(@"[/./?!][/./?!]");
     static Regex cloneFinder = new Regex(@"(.+)\(Clone\)$", RegexOptions.Multiline);
     static Regex underScoreFinder = new Regex(@"_", RegexOptions.Multiline);
+    AudioMixer sfxMixer;
+    void Start() {
+        sfxMixer = Resources.Load("mixers/SoundEffectMixer") as AudioMixer;
+    }
     static public T GetOrCreateComponent<T>(GameObject g) where T : Component {
         T component = g.GetComponent<T>();
         if (component) {
@@ -60,6 +65,9 @@ public class Toolbox : Singleton<Toolbox> {
             }
         }
         return d[n, m];
+    }
+    public static float RGBDistance(Color x, Color y) {
+        return Math.Abs(x.r - y.r) + Math.Abs(x.g - y.g) + Math.Abs(x.b - y.b);
     }
     public static float Gompertz(float x, float a = 1, float b = 1, float c = 1) {
         return (float)(a * Math.Exp(b * Math.Exp(-c * x)));
@@ -120,14 +128,17 @@ public class Toolbox : Singleton<Toolbox> {
         noiseOccurrence.data = data;
         data.CalculateDescriptions();
     }
-    public EventData DataFlag(GameObject spawner, float chaos = 0, float disgusting = 0, float disturbing = 0, float offensive = 0, float positive = 0) {
+    public EventData DataFlag(GameObject spawner, string noun, string whatHappened, float chaos = 0, float disgusting = 0, float disturbing = 0, float offensive = 0, float positive = 0) {
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
-        OccurrenceData data = new OccurrenceGeneric();
+        OccurrenceGeneric data = new OccurrenceGeneric();
         EventData eventData = new EventData(chaos: chaos, disgusting: disgusting, disturbing: disturbing, offensive: offensive, positive: positive);
 
+        eventData.noun = noun;
+        eventData.whatHappened = whatHappened;
         occurrence.data = data;
-        data.events.Add(eventData);
+        data.eventData.Add(eventData);
+        data.AddChild(eventData);
         occurrence.data.CalculateDescriptions();
 
         return eventData;
@@ -137,11 +148,16 @@ public class Toolbox : Singleton<Toolbox> {
         if (!source) {
             source = g.AddComponent<AudioSource>();
         }
+        if (sfxMixer == null) {
+            sfxMixer = Resources.Load("mixers/SoundEffectMixer") as AudioMixer;
+        }
         source.rolloffMode = AudioRolloffMode.Logarithmic;
         // source.minDistance = 0.4f;
         source.minDistance = 1f;
         source.maxDistance = 5.42f;
         source.spatialBlend = 1;
+
+        source.outputAudioMixerGroup = sfxMixer.FindMatchingGroups("Master")[0];
         return source;
     }
     public void AudioSpeaker(string clipName, Vector3 position) {
@@ -156,6 +172,7 @@ public class Toolbox : Singleton<Toolbox> {
         GameObject speaker = Instantiate(Resources.Load("Speaker"), position, Quaternion.identity) as GameObject;
         AudioSource speakerSource = speaker.GetComponent<AudioSource>();
         speakerSource.clip = clip;
+        speakerSource.pitch = UnityEngine.Random.Range(0.95f, 1.05f);
         speakerSource.Play();
         DestroyOnceQuiet doq = speaker.GetComponent<DestroyOnceQuiet>();
         doq.instantiatedByToolbox = true;

@@ -18,6 +18,45 @@ public class Speech : Interactive, ISaveable {
         @"\bdick\b",
         @"\bass\b"};
 
+    public static string ParseGender(string instring) {
+        //Use named capturing groups to make life easier
+        // var pattern = "(?<label>\"formatter\"): ([\"])(?<tag>.*)([\"])";
+        string genderHook = @"\[\[(?<male>.+)\|(?<female>.+)\]\]";
+
+        //Create a substitution pattern for the Replace method
+        string replacePattern = "";
+        if (GameManager.Instance.playerGender == Gender.male) {
+            replacePattern = "${male}";
+        } else if (GameManager.Instance.playerGender == Gender.female) {
+            replacePattern = "${female}";
+        }
+
+        return Regex.Replace(instring, genderHook, replacePattern, RegexOptions.IgnoreCase);
+    }
+
+    public static string ProcessDialogue(string phrase, ref List<bool> swearList) {
+        string finalPhrase = ParseGender(phrase);
+        string uncensoredPhrase = finalPhrase;
+
+        foreach (string swear in swearWords) {
+            StringBuilder builder = new StringBuilder();
+            foreach (char c in swear.Substring(2, swear.Length - 4)) {
+                builder.Append("∎");
+            }
+            string mask = builder.ToString();
+            finalPhrase = Regex.Replace(finalPhrase, swear, mask);
+        }
+
+        for (int i = 0; i < finalPhrase.Length; i++) {
+            if (finalPhrase[i] != uncensoredPhrase[i]) {
+                swearList.Add(true);
+            } else {
+                swearList.Add(false);
+            }
+        }
+        return finalPhrase;
+    }
+
     struct BuffMessage {
         public string On;
         public string Off;
@@ -32,6 +71,7 @@ public class Speech : Interactive, ISaveable {
             {BuffType.fireproof, new BuffMessage("I feel fireproof!", "I no longer feel fireproof!")},
             {BuffType.undead, new BuffMessage("I feel kinda weird!", "I feel blessed!")},
             {BuffType.poison, new BuffMessage("I don't feel so good!", "I feel much better!")},
+            {BuffType.invulnerable, new BuffMessage("I am invincible!", "I feel exposed!")},
         };
     private string words;
     public bool speaking = false;
@@ -46,7 +86,7 @@ public class Speech : Interactive, ISaveable {
     private float speakSpeed;
     private bool[] swearMask;
     public bool vomiting;
-    public string voice = "none";
+    public string voice;
     public AudioClip[] speakSounds;
     public Vector2 pitchRange = new Vector2(0, 1);
     public Vector2 spacingRange = new Vector2(0.1f, 0.15f);
@@ -56,27 +96,30 @@ public class Speech : Interactive, ISaveable {
     public Controllable.HitState hitState;
     public Sprite[] portrait;
     public string defaultMonologue;
+    public string cameraMonologue;
+    public bool onCamera;
     public bool disableSpeakWith;
+    public bool glibSpeakWith;
     public bool inDialogue;
     private Dictionary<BuffType, Buff> currentNetIntrinsic;
     public Dictionary<BuffType, Buff> previousNetInstrinsic;
     public bool doCompareIntrinsic;
     public bool configured = false;
-    void Awake() {
-        Interaction speak = new Interaction(this, "Look", "Describe");
-        speak.hideInManualActions = true;
-        speak.unlimitedRange = true;
-        speak.otherOnPlayerConsent = false;
-        speak.playerOnOtherConsent = false;
-        speak.inertOnPlayerConsent = false;
-        speak.dontWipeInterface = false;
-        interactions.Add(speak);
-        if (!disableSpeakWith) {
-            Interaction speakWith = new Interaction(this, "Talk...", "SpeakWith");
-            speakWith.unlimitedRange = true;
-            speakWith.validationFunction = true;
-            interactions.Add(speakWith);
+    public Grammar grammar = new Grammar();
+    public List<string> otherNimrodDefs;
+    public void LoadGrammar() {
+        grammar = new Grammar();
+        grammar.Load("structure");
+        // grammar.Load("flavor_test");
+        grammar.Load("flavor_" + flavor);
+        foreach (string otherFile in otherNimrodDefs) {
+            grammar.Load(otherFile);
         }
+    }
+    void Awake() {
+        LoadGrammar();
+
+
         GameObject speechFramework = Instantiate(Resources.Load("UI/SpeechChild"), transform.position, Quaternion.identity) as GameObject;
         speechFramework.name = "SpeechChild";
         speechFramework.transform.SetParent(transform, false);
@@ -97,11 +140,12 @@ public class Speech : Interactive, ISaveable {
                 bubbleCanvas.worldCamera = Camera.main;
             }
         }
-        if (voice != "none") {
+        if (voice != null) {
             AudioClip[] voiceSounds = Resources.LoadAll<AudioClip>("sounds/speechSets/" + voice);
             speakSounds = speakSounds.Concat(voiceSounds).ToArray();
         }
-        gibberizer = gameObject.AddComponent<SoundGibberizer>();
+        // gibberizer = gameObject.AddComponent<SoundGibberizer>();
+        gibberizer = Toolbox.GetOrCreateComponent<SoundGibberizer>(gameObject);
         gibberizer.bleepSound = bleepSound;
         gibberizer.sounds = speakSounds;
         gibberizer.pitchRange = pitchRange;
@@ -112,6 +156,34 @@ public class Speech : Interactive, ISaveable {
         Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
         Toolbox.RegisterMessageCallback<MessageAnimation>(this, HandleAnimation);
         Toolbox.RegisterMessageCallback<MessageHead>(this, HandleHead);
+        Toolbox.RegisterMessageCallback<MessageOnCamera>(this, HandleOnCamera);
+    }
+    void Start() {
+        Interaction speak = new Interaction(this, "Look", "Describe");
+        speak.unlimitedRange = true;
+        speak.otherOnSelfConsent = false;
+        speak.selfOnSelfConsent = false;
+        speak.holdingOnOtherConsent = false;
+        speak.dontWipeInterface = false;
+        interactions.Add(speak);
+        if (!disableSpeakWith && !glibSpeakWith) {
+            Interaction speakWith = new Interaction(this, "Talk...", "SpeakWith");
+            speakWith.unlimitedRange = true;
+            speakWith.validationFunction = true;
+            speakWith.AddDesireFunction(DesireToSpeakWith);
+            interactions.Add(speakWith);
+        }
+        if (glibSpeakWith) {
+            Interaction speakWith = new Interaction(this, "Talk", "SayRandom");
+            speakWith.unlimitedRange = true;
+            speakWith.selfOnOtherConsent = false;
+            speakWith.selfOnSelfConsent = false;
+            string myname = Toolbox.Instance.GetName(gameObject);
+            interactions.Add(speakWith);
+        }
+    }
+    void HandleOnCamera(MessageOnCamera message) {
+        onCamera = message.value;
     }
     void HandleSpeech(MessageSpeech message) {
         if (message.swearTarget != null) {
@@ -169,6 +241,9 @@ public class Speech : Interactive, ISaveable {
         }
         return menu;
     }
+    public desire DesireToSpeakWith(Personality myPersonality, GameObject requester) {
+        return desire.decline;
+    }
     public string SpeakWith_desc() {
         string otherName = Toolbox.Instance.GetName(gameObject);
         return "Speak with " + otherName;
@@ -176,6 +251,17 @@ public class Speech : Interactive, ISaveable {
     public bool SpeakWith_Validation() {
         if (disableInteractions)
             return false;
+        if (GameManager.Instance.playerObject == null)
+            return false;
+        Speech controlSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
+        if (Controller.Instance.state == Controller.ControlState.commandSelect) {
+            controlSpeech = Controller.Instance.commandTarget.GetComponent<Speech>();
+        }
+        if (controlSpeech == null)
+            return false;
+        if (controlSpeech.glibSpeakWith) {
+            return false;
+        }
         if (Controller.Instance.state == Controller.ControlState.commandSelect) {
             return Controller.Instance.commandTarget != gameObject;
         } else {
@@ -228,9 +314,11 @@ public class Speech : Interactive, ISaveable {
             bubbleText.text = words;
             float charIndex = (speakTimeTotal - speakTime) * speakSpeed;
 
+            // Debug.Log(charIndex);
+            // Debug.Log(swearMask.Length);
             if (charIndex < swearMask.Length) {
                 gibberizer.bleep = swearMask[(int)charIndex];
-                if (!gibberizer.play && !vomiting) {
+                if (!gibberizer.play && !vomiting && !inDialogue) {
                     gibberizer.StartPlay();
                 }
             }
@@ -279,6 +367,10 @@ public class Speech : Interactive, ISaveable {
             Toolbox.Instance.SendMessage(gameObject, this, message);
         }
     }
+    public string SayRandom_desc() {
+        string otherName = Toolbox.Instance.GetName(gameObject);
+        return "Speak with " + otherName;
+    }
     public OccurrenceSpeech Say(MessageSpeech message) {
         if (message.phrase == "")
             return null;
@@ -291,10 +383,6 @@ public class Speech : Interactive, ISaveable {
             return null;
         }
         if (message.nimrod) {
-            Grammar grammar = new Grammar();
-            grammar.Load("structure");
-            grammar.Load("flavor_test");
-            grammar.Load("flavor_" + flavor);
             message.phrase = grammar.Parse(message.phrase);
             if (message.phrase == "")
                 return null;
@@ -303,16 +391,15 @@ public class Speech : Interactive, ISaveable {
         speechData.speaker = gameObject;
         if (message.eventData == null)
             message.eventData = new EventData();
-        speechData.events.Add(message.eventData);
-        string censoredPhrase = CensorSwears(message.phrase);
-        speechData.profanity = Toolbox.LevenshteinDistance(message.phrase, censoredPhrase);
-        swearMask = new bool[message.phrase.Length];
-        for (int i = 0; i < message.phrase.Length; i++) {
-            swearMask[i] = message.phrase[i] != censoredPhrase[i];
-        }
+        speechData.AddChild(message.eventData);
 
-        message.eventData.ratings[Rating.chaos] += speechData.profanity * 2f;
-        message.eventData.ratings[Rating.offensive] += speechData.profanity * 5f;
+        List<bool> swearList = new List<bool>();
+        string censoredPhrase = ProcessDialogue(message.phrase, ref swearList);
+        speechData.profanity = Toolbox.LevenshteinDistance(message.phrase, censoredPhrase);
+        swearMask = swearList.ToArray();
+
+        message.eventData.quality[Rating.chaos] += speechData.profanity * 2f;
+        message.eventData.quality[Rating.offensive] += speechData.profanity * 5f;
 
         speechData.line = censoredPhrase;
         if (inDialogue)
@@ -332,18 +419,7 @@ public class Speech : Interactive, ISaveable {
         Toolbox.Instance.OccurenceFlag(gameObject, speechData);
         return speechData;
     }
-    public string CensorSwears(string phrase) {
-        string censoredPhrase = phrase;
-        foreach (string swear in swearWords) {
-            StringBuilder builder = new StringBuilder();
-            foreach (char c in swear.Substring(2, swear.Length - 4)) {
-                builder.Append("∎");
-            }
-            string mask = builder.ToString();
-            censoredPhrase = Regex.Replace(censoredPhrase, swear, mask);
-        }
-        return censoredPhrase;
-    }
+
     public void Insult(string phrase, GameObject target, EventData data = null) {
         MessageSpeech message = new MessageSpeech(phrase);
         message.eventData = new EventData();
@@ -440,13 +516,15 @@ public class Speech : Interactive, ISaveable {
     public Monologue InsultMonologue(GameObject target) {
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
-        string content = Insults.ComposeInsult(target);
+        string content = global::Insult.ComposeInsult(target);
         MessageInsult messageInsult = new MessageInsult();
         Toolbox.Instance.SendMessage(target, this, messageInsult);
 
         EventData data = new EventData(chaos: 2, disturbing: 1, positive: -2, offensive: Random.Range(2, 3));
         Insult(content, target, data: data);
-        string censoredContent = CensorSwears(content);
+        List<bool> swearList = new List<bool>();
+        string censoredContent = ProcessDialogue(content, ref swearList);
+        swearMask = swearList.ToArray();
         List<string> strings = new List<string>() { censoredContent };
         Monologue mono = new Monologue(this, strings.ToArray());
 
@@ -458,14 +536,13 @@ public class Speech : Interactive, ISaveable {
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
 
-        Grammar grammar = new Grammar();
-        grammar.Load("structure");
-        grammar.Load("flavor_" + flavor);
         string content = grammar.Parse("{threat}");
 
         EventData data = new EventData(chaos: 2, disturbing: 1, positive: -2, offensive: Random.Range(2, 3));
         Threaten(content, target, data: data);
-        string censoredContent = CensorSwears(content);
+        List<bool> swearList = new List<bool>();
+        string censoredContent = ProcessDialogue(content, ref swearList);
+        swearMask = swearList.ToArray();
         List<string> strings = new List<string>() { censoredContent };
         Monologue mono = new Monologue(this, strings.ToArray());
 
@@ -506,9 +583,24 @@ public class Speech : Interactive, ISaveable {
 
     public void SaveData(PersistentComponent data) {
         data.ints["hitstate"] = (int)hitState;
+        data.strings["name"] = speechName;
+        data.floats["pitchLow"] = pitchRange.x;
+        data.floats["pitchHigh"] = pitchRange.y;
+        data.floats["spacingLow"] = spacingRange.x;
+        data.floats["spacingHigh"] = spacingRange.y;
+        data.strings["speechSet"] = voice;
+        data.bools["glibSpeakWith"] = glibSpeakWith;
     }
     public void LoadData(PersistentComponent data) {
         hitState = (Controllable.HitState)data.ints["hitstate"];
+        speechName = data.strings["name"];
+
+        pitchRange.x = data.floats["pitchLow"];
+        pitchRange.y = data.floats["pitchHigh"];
+        spacingRange.x = data.floats["spacingLow"];
+        spacingRange.y = data.floats["spacingHigh"];
+        voice = data.strings["speechSet"];
+        glibSpeakWith = data.bools["glibSpeakWith"];
     }
 }
 

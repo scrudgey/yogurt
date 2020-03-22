@@ -46,6 +46,7 @@ public class PhoneMenu : MonoBehaviour {
         effects.buttons = new List<Button>(builtInButtons);
         AddNumber(PhoneNumberButton.phoneNumber.fire);
         AddNumber(PhoneNumberButton.phoneNumber.clown);
+        AddNumber(PhoneNumberButton.phoneNumber.pizza);
         effects.Configure();
     }
     public void PhoneButtonCallback(PhoneNumberButton button) {

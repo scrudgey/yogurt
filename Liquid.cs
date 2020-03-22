@@ -38,7 +38,10 @@ public class Liquid {
         returnLiquid.colorR = (l1.colorR + l2.colorR) / 2.0f;
         returnLiquid.colorG = (l1.colorG + l2.colorG) / 2.0f;
         returnLiquid.colorB = (l1.colorB + l2.colorB) / 2.0f;
-        returnLiquid.color = new Color(returnLiquid.colorR / 255.0F, returnLiquid.colorG / 255.0F, returnLiquid.colorB / 255.0F);
+
+        returnLiquid.color = AddColors(l1.color, l2.color);
+
+        // returnLiquid.color = new Color(returnLiquid.colorR / 255.0F, returnLiquid.colorG / 255.0F, returnLiquid.colorB / 255.0F);
 
         if (l2.ingredients.Count > 0) {
             l1.ingredients.AddRange(l2.ingredients);
@@ -52,6 +55,10 @@ public class Liquid {
 
         l1.name = GetName(l1);
         return returnLiquid;
+    }
+    public static Color AddColors(Color x, Color y) {
+        List<Color32> c = Colors.colors.Values.ToList();
+        return c[Mathf.Abs(x.GetHashCode() + y.GetHashCode()) % c.Count];
     }
     public static Buff MixPotion(Liquid liq) {
         List<PotionData> potions = PotionComponent.LoadAllPotions();

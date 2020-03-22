@@ -20,11 +20,14 @@ public enum StatType {
     deathByCombat,
     deathByMisadventure,
     deathByAsphyxiation,
+    deathByExplosion,
     mayorsSassed,
     actsOfCannibalism,
     heartsEaten,
     nullifications,
     othersSetOnFire,
+    monstersKilled,
+    murders,
 }
 
 [System.Serializable]

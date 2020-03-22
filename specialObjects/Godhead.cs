@@ -118,7 +118,9 @@ public class Godhead : MonoBehaviour {
     }
     void UpdateBless() {
         if (!item.gameObject.activeInHierarchy) {
-            BlessItem();
+            handPointRenderer.enabled = false;
+            item.transform.position = handPoint.position;
+            BlessItem(item);
         }
         if (timer > 1f) {
             godSpeech.defaultMonologue = "dancing_god_bless";
@@ -127,10 +129,8 @@ public class Godhead : MonoBehaviour {
             state = State.dialogue;
         }
     }
-    void BlessItem() {
-        handPointRenderer.enabled = false;
+    public static void BlessItem(PhysicalBootstrapper item) {
         item.gameObject.SetActive(true);
-        item.transform.position = handPoint.position;
         item.InitPhysical(0.05f, Vector3.zero);
         item.physical.StartGroundMode();
 
@@ -140,21 +140,14 @@ public class Godhead : MonoBehaviour {
         if (uniform != null || hat != null) {
             Buff bless = new Buff(BuffType.invulnerable, true, 0, 30f);
             itemIntrinsics.liveBuffs.Add(bless);
-            itemIntrinsics.blessed = true;
         } else {
             Buff bless = new Buff(BuffType.invulnerable, true, 0, 3);
             itemIntrinsics.buffs.Add(bless);
-            itemIntrinsics.blessed = true;
         }
         itemIntrinsics.IntrinsicsChanged();
     }
     void UpdateDestroy() {
         if (item != null) {
-            // handPointRenderer.enabled = false;
-            // item.gameObject.SetActive(true);
-            // item.transform.position = handPoint.position;
-            // item.InitPhysical(0.05f, Vector3.zero);
-            // item.physical.StartGroundMode();
             Destroy(item);
         }
         if (timer > 1f) {

@@ -127,7 +127,9 @@ public class PerkMenu : MonoBehaviour {
         GameManager.Instance.data.perks[selectedPerk.perk.name] = true;
         selectedPerk.GetComponent<Button>().interactable = false;
         UINew.Instance.RefreshUI(active: true);
-        UINew.Instance.PlayUISound("sounds/8-bit/BOUNCE3");
+        // UINew.Instance.PlayUISound("sounds/8-bit/BOUNCE3");
+        GameManager.Instance.PlayPublicSound(Resources.Load("sounds/8-bit/BOUNCE3") as AudioClip);
+
         numberCollected += 1;
         levelText.text = "Level: " + numberCollected.ToString();
     }
