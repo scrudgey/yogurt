@@ -1,6 +1,13 @@
 ﻿using UnityEngine;
 using System.IO;
 using UnityEngine.UI;
+using UnityEngine;
+using System.Collections.Generic;
+using System.IO;
+using System.Xml.Serialization;
+using UnityEngine.SceneManagement;
+using System.Linq;
+using System;
 public class UIButtonCallbacks : MonoBehaviour {
     public void FightButtonClick() {
         if (Controller.Instance.state == Controller.ControlState.inMenu)
@@ -22,11 +29,14 @@ public class UIButtonCallbacks : MonoBehaviour {
         GameManager.Instance.SetFocus(MySaver.LoadScene());
     }
     public void TestButtonClick() {
-        GameObject target = GameObject.Find("blue_shirt");
-        if (target != null) {
-            PhysicalBootstrapper pb = target.GetComponent<PhysicalBootstrapper>();
-            Godhead.BlessItem(pb);
-        }
+
+        EnumerateCollectibles();
+
+        // GameObject target = GameObject.Find("blue_shirt");
+        // if (target != null) {
+        //     PhysicalBootstrapper pb = target.GetComponent<PhysicalBootstrapper>();
+        //     Godhead.BlessItem(pb);
+        // }
 
         // string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
         // DirectoryInfo dataDir = new DirectoryInfo(path);
@@ -60,5 +70,40 @@ public class UIButtonCallbacks : MonoBehaviour {
 
     public void MusicToggleChanged(bool selected) {
         GameManager.settings.musicOn = selected;
+    }
+
+
+    public void EnumerateCollectibles() {
+        GameObject[] prefabs = Resources.LoadAll("prefabs/", typeof(GameObject))
+            .Cast<GameObject>()
+            .ToArray();
+        HashSet<string> items = new HashSet<string>();
+        HashSet<string> food = new HashSet<string>();
+        HashSet<string> clothes = new HashSet<string>();
+        foreach (GameObject prefab in prefabs) {
+            Edible objectEdible = prefab.GetComponent<Edible>();
+            if (objectEdible != null) {
+                food.Add(prefab.name);
+            }
+            if (prefab.GetComponent<Uniform>() || prefab.GetComponent<Hat>()) {
+                clothes.Add(prefab.name);
+            }
+            if (prefab.GetComponent<Pickup>()) {
+                items.Add(prefab.name);
+            }
+        }
+        Debug.Log("number of items: " + items.Count().ToString());
+        Debug.Log("number of food: " + food.Count().ToString());
+        Debug.Log("number of clothes: " + food.Count().ToString());
+        // commercials
+        TextAsset[] commercials = Resources.LoadAll("data/commercials/", typeof(TextAsset))
+            .Cast<TextAsset>()
+            .ToArray();
+        Debug.Log("number of commercials: " + commercials.Count().ToString());
+        // achievements
+        GameObject[] achievementPrefabs = Resources.LoadAll("achievements/", typeof(GameObject))
+            .Cast<GameObject>()
+            .ToArray();
+        Debug.Log("number of achievements: " + achievementPrefabs.Count().ToString());
     }
 }

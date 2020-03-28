@@ -104,9 +104,8 @@ public class Outfit : Interactive, ISaveable {
         return "Wear " + uniformName;
     }
     public GameObject RemoveUniform() {
-        if (wornUniformName == "nude")
+        if (wornUniformName == "nude" || wornUniformName == "nude_female")
             return null;
-        // TODO: change?
         GameObject removed = null;
         if (uniform != null) {
             removed = uniform;

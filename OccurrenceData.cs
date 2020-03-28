@@ -12,6 +12,8 @@ public class DescribableOccurrenceData : MetaDescribable<EventData> {
         whatHappened = "";
     } // needed for serialization
     override public void AddChild(EventData eventData) {
+        if (eventData == null)
+            return;
         eventData.id = this.id;
         if (eventData.noun != "")
             nouns.Add(eventData.noun);
@@ -31,31 +33,29 @@ public class DescribableOccurrenceData : MetaDescribable<EventData> {
 
 [System.Serializable]
 public abstract class OccurrenceData {
-    public abstract HashSet<GameObject> involvedParties();
     public DescribableOccurrenceData describable = new DescribableOccurrenceData();
+    public abstract HashSet<GameObject> involvedParties();
     public void CalculateDescriptions() {
         describable.ResetChildren();
         Descriptions();
     }
     public abstract void Descriptions();
-    public virtual void AddChild(EventData child) {
+    protected virtual void AddChild(EventData child) {
         describable.AddChild(child);
     }
 }
-public class OccurrenceGeneric : OccurrenceData {
+public class OccurrenceEvent : OccurrenceData {
+    protected EventData eventData;
+    public OccurrenceEvent(EventData eventData) {
+        this.eventData = eventData;
+        describable.AddChild(eventData);
+    }
     public override HashSet<GameObject> involvedParties() {
         return new HashSet<GameObject> { };
     }
-    public List<EventData> eventData = new List<EventData>();
     override public void Descriptions() {
-        foreach (EventData e in eventData) {
-            AddChild(e);
-        }
+        describable.AddChild(eventData);
     }
-    // override public void AddChild(EventData child) {
-    //     eventData.Add(child);
-    //     base.AddChild(child);
-    // }
 }
 public class OccurrenceFire : OccurrenceData {
     public GameObject flamingObject;
@@ -89,19 +89,20 @@ public class OccurrenceEat : OccurrenceData {
         return new HashSet<GameObject> { eater, edible.gameObject };
     }
     public override void Descriptions() {
-        EventData data = new EventData();
         MonoLiquid monoLiquid = edible.GetComponent<MonoLiquid>();
+        string whatHappened = "";
         if (monoLiquid) {
-            data.whatHappened = Toolbox.Instance.GetName(eater) + " drank " + monoLiquid.liquid.name;
+            whatHappened = Toolbox.Instance.GetName(eater) + " drank " + monoLiquid.liquid.name;
         } else {
-            data.whatHappened = Toolbox.Instance.GetName(eater) + " ate " + edible.name;
+            whatHappened = Toolbox.Instance.GetName(eater) + " ate " + edible.name;
         }
+        EventData data = new EventData("eating", whatHappened);
+
         Outfit otherOutfit = eater.GetComponent<Outfit>();
         if (otherOutfit != null) {
             eaterOutfitName = otherOutfit.wornUniformName;
         }
         eaterName = eater.name;
-        data.noun = "eating";
         if (edible.offal) {
             data.quality[Rating.disgusting] = 2;
             data.quality[Rating.chaos] = 2;
@@ -198,14 +199,15 @@ public class OccurrenceNecronomicon : OccurrenceData {
         AddChild(data);
     }
 }
-public class OccurrenceSpeech : OccurrenceData {
-    // TODO: include disturbingness for swearing;
+public class OccurrenceSpeech : OccurrenceEvent {
     public GameObject speaker;
     public GameObject target;
     public string line;
     public bool threat;
     public bool insult;
     public int profanity;
+    public List<bool> swearList = new List<bool>();
+    public OccurrenceSpeech(EventData eventData) : base(eventData) { }
     public override HashSet<GameObject> involvedParties() {
         return new HashSet<GameObject> { speaker, target };
     }
@@ -214,35 +216,25 @@ public class OccurrenceSpeech : OccurrenceData {
         string targetName = "";
         if (target != null)
             targetName = Toolbox.Instance.GetName(target);
-        // EventData data = null;
-        // if (GetChildren().Count > 0) {
-        //     data = (EventData)GetChildren()[0];
-        // } else {
-        EventData data = new EventData();
-        // }
-        data.whatHappened = speakerName + " said " + line;
-        data.noun = "dialogue";
+        EventData data = new EventData("dialogue", speakerName + " said " + line);
         data.transcriptLine = speakerName + ": " + line;
         // insert bits here for script desc, transcript line
         if (threat) {
             data.whatHappened = speakerName + " threatened " + targetName;
             data.noun = "threats";
-            data.quality[Rating.chaos] = 1;
-            data.quality[Rating.offensive] = Random.Range(2, 3);
-            data.quality[Rating.disturbing] = 2;
         }
         if (insult) {
             data.whatHappened = speakerName + " insulted " + targetName;
             data.noun = "insults";
-            data.quality[Rating.chaos] = 1;
-            data.quality[Rating.offensive] = Random.Range(2, 3);
-            data.quality[Rating.disturbing] = 2;
         }
+        if (eventData != null)
+            data.quality = eventData.quality;
+
+        data.quality[Rating.chaos] += (int)(profanity / 10);
+        data.quality[Rating.offensive] += (int)(profanity / 2);
         if (profanity > 0 && data.noun == "dialogue")
             data.noun = "profanity";
-        // if (children.Count == 0) {
-        //     children.Add(data);
-        // }
+
         AddChild(data);
     }
 }

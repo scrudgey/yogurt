@@ -12,6 +12,7 @@ public class Speech : Interactive, ISaveable {
         @"\bshit\b",
         @"\bfucked\b",
         @"\bfuck\b",
+        @"\bfucking\b",
         @"\bshazbotting\b",
         @"\bshazbot\b",
         @"\bpiss\b",
@@ -194,10 +195,6 @@ public class Speech : Interactive, ISaveable {
             Swear();
             return;
         }
-        if (message.randomSpeech) {
-            SayRandom();
-            return;
-        }
         Say(message);
     }
     void HandleHitStun(MessageHitstun message) {
@@ -274,20 +271,21 @@ public class Speech : Interactive, ISaveable {
         LiquidContainer container = obj.GetComponent<LiquidContainer>();
         MonoLiquid mono = obj.GetComponent<MonoLiquid>();
         BookPickup book = obj.GetComponent<BookPickup>();
-        MessageSpeech message = new MessageSpeech();
+        string phrase = "";
         if (container) {
             if (container.amount > 0 && container.descriptionName != "") {
-                message.phrase = "It's a " + container.descriptionName + " full of " + container.liquid.name + ".";
+                phrase = "It's a " + container.descriptionName + " full of " + container.liquid.name + ".";
             } else {
-                message.phrase = obj.description;
+                phrase = obj.description;
             }
         } else if (mono) {
-            message.phrase = "It's " + mono.liquid.name + ".";
+            phrase = "It's " + mono.liquid.name + ".";
         } else if (book) {
-            message.phrase = book.book.Describe();
+            phrase = book.book.Describe();
         } else {
-            message.phrase = Monologue.replaceHooks(obj.description);
+            phrase = Monologue.replaceHooks(obj.description);
         }
+        MessageSpeech message = new MessageSpeech(phrase);
         Say(message);
     }
     public string Describe_desc(Item obj) {
@@ -382,62 +380,35 @@ public class Speech : Interactive, ISaveable {
             queue.Add(message);
             return null;
         }
-        if (message.nimrod) {
-            message.phrase = grammar.Parse(message.phrase);
-            if (message.phrase == "")
-                return null;
-        }
-        OccurrenceSpeech speechData = new OccurrenceSpeech();
+
+        OccurrenceSpeech speechData = message.ToOccurrenceSpeech(grammar);
         speechData.speaker = gameObject;
-        if (message.eventData == null)
-            message.eventData = new EventData();
-        speechData.AddChild(message.eventData);
 
-        List<bool> swearList = new List<bool>();
-        string censoredPhrase = ProcessDialogue(message.phrase, ref swearList);
-        speechData.profanity = Toolbox.LevenshteinDistance(message.phrase, censoredPhrase);
-        swearMask = swearList.ToArray();
+        if (speechData != null)
+            Toolbox.Instance.OccurenceFlag(gameObject, speechData);
 
-        message.eventData.quality[Rating.chaos] += speechData.profanity * 2f;
-        message.eventData.quality[Rating.offensive] += speechData.profanity * 5f;
-
-        speechData.line = censoredPhrase;
         if (inDialogue)
             return null;
-        words = censoredPhrase;
+
         speakTime = DoubleSeat(message.phrase.Length, 2f, 50f, 5f, 2f);
         speakTimeTotal = speakTime;
         speakSpeed = message.phrase.Length / speakTime;
-        if (message.insultTarget != null) {
-            speechData.insult = true;
-            speechData.target = message.insultTarget;
-        }
-        if (message.threatTarget != null) {
-            speechData.threat = true;
-            speechData.target = message.threatTarget;
-        }
-        Toolbox.Instance.OccurenceFlag(gameObject, speechData);
+        swearMask = speechData.swearList.ToArray();
+        words = speechData.line;
         return speechData;
     }
 
-    public void Insult(string phrase, GameObject target, EventData data = null) {
-        MessageSpeech message = new MessageSpeech(phrase);
-        message.eventData = new EventData();
-        if (data != null) {
-            message.eventData = data;
-        }
-        message.eventData.noun = "insults";
+    public void Insult(string phrase, GameObject target) {
+        MessageSpeech message = new MessageSpeech(phrase, data: new EventData(chaos: 2, disturbing: 1, positive: -2, offensive: Random.Range(2, 3)));
+        message.insultTarget = target;
+
         Say(message);
         MessageNoise noise = new MessageNoise(gameObject);
         Toolbox.Instance.SendMessage(target, this, noise);
     }
-    public void Threaten(string phrase, GameObject target, EventData data = null) {
-        MessageSpeech message = new MessageSpeech(phrase);
-        message.eventData = new EventData();
-        if (data != null) {
-            message.eventData = data;
-        }
-        message.eventData.noun = "threats";
+    public void Threaten(string phrase, GameObject target) {
+        MessageSpeech message = new MessageSpeech(phrase, data: new EventData(chaos: 2, disturbing: 1, positive: -2, offensive: Random.Range(2, 3)));
+        message.threatTarget = target;
         Say(message);
         MessageNoise noise = new MessageNoise(gameObject);
         Toolbox.Instance.SendMessage(target, this, noise);
@@ -483,20 +454,22 @@ public class Speech : Interactive, ISaveable {
         }
         return result;
     }
-    // TODO: this function will change to incorporate Nimrod and flavor
     public void Swear(GameObject target = null) {
         if (!target) {
             MessageSpeech message = new MessageSpeech("shazbot!");
             Say(message);
             return;
         }
+
         GameObject mainTarget = Controller.Instance.GetBaseInteractive(target.transform);
         string targetname = Toolbox.Instance.GetName(mainTarget);
         Insult("that shazbotting " + targetname + "!", target);
 
-        // TODO: actually convey insult, etc.
         MessageNoise noise = new MessageNoise(gameObject);
         Toolbox.Instance.SendMessage(target, this, noise);
+
+        MessageInsult messageInsult = new MessageInsult();
+        Toolbox.Instance.SendMessage(target, this, messageInsult);
 
         Controllable control = GetComponent<Controllable>();
         control.LookAtPoint(target.transform.position);
@@ -520,12 +493,13 @@ public class Speech : Interactive, ISaveable {
         MessageInsult messageInsult = new MessageInsult();
         Toolbox.Instance.SendMessage(target, this, messageInsult);
 
-        EventData data = new EventData(chaos: 2, disturbing: 1, positive: -2, offensive: Random.Range(2, 3));
-        Insult(content, target, data: data);
+        Insult(content, target);
+
         List<bool> swearList = new List<bool>();
         string censoredContent = ProcessDialogue(content, ref swearList);
         swearMask = swearList.ToArray();
         List<string> strings = new List<string>() { censoredContent };
+
         Monologue mono = new Monologue(this, strings.ToArray());
 
         Controllable control = GetComponent<Controllable>();
@@ -538,8 +512,7 @@ public class Speech : Interactive, ISaveable {
 
         string content = grammar.Parse("{threat}");
 
-        EventData data = new EventData(chaos: 2, disturbing: 1, positive: -2, offensive: Random.Range(2, 3));
-        Threaten(content, target, data: data);
+        Threaten(content, target);
         List<bool> swearList = new List<bool>();
         string censoredContent = ProcessDialogue(content, ref swearList);
         swearMask = swearList.ToArray();
@@ -558,13 +531,9 @@ public class Speech : Interactive, ISaveable {
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
         Monologue mono = new Monologue(this, new string[] { "How dare you!" });
-        EventData data = new EventData(chaos: 1, disturbing: 0, positive: -1, offensive: 0);
         if (say) {
-            MessageSpeech message = new MessageSpeech("how dare you!");
-            message.eventData = data;
+            MessageSpeech message = new MessageSpeech("How dare you!", data: new EventData(chaos: 1, disturbing: 0, positive: -1, offensive: 0));
             Say(message);
-            // MessageNoise noise = new MessageNoise(gameObject);
-            // Toolbox.Instance.SendMessage(target, this, noise);
         }
         return mono;
     }
@@ -572,10 +541,8 @@ public class Speech : Interactive, ISaveable {
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
         Monologue mono = new Monologue(this, new string[] { "Mercy!" });
-        EventData data = new EventData(chaos: 1, disturbing: 0, positive: -1, offensive: 0);
         if (say) {
-            MessageSpeech message = new MessageSpeech("Mercy!");
-            message.eventData = data;
+            MessageSpeech message = new MessageSpeech("Mercy!", data: new EventData(chaos: 1, disturbing: 0, positive: -1, offensive: 0));
             Say(message);
         }
         return mono;

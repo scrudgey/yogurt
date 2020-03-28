@@ -43,19 +43,44 @@ public class MessageHead : Message {
 public class MessageSpeech : Message {
     public string phrase;
     public bool randomSwear;
-    public bool randomSpeech;
+    // public bool randomSpeech;
     public bool sayLine;
     public GameObject swearTarget;
     public GameObject insultTarget;
     public GameObject threatTarget;
     public bool nimrod;
-    public EventData eventData;
+    private EventData eventData;
     public bool interrupt;
     public HashSet<GameObject> involvedParties = new HashSet<GameObject>();
     public MessageSpeech() { }
-    public MessageSpeech(string phrase, EventData eventData = null) {
+    public MessageSpeech(string phrase) {
         this.phrase = phrase;
-        this.eventData = eventData;
+    }
+    public MessageSpeech(string phrase, EventData data = null) {
+        this.phrase = phrase;
+        this.eventData = data;
+    }
+    public OccurrenceSpeech ToOccurrenceSpeech(Nimrod.Grammar grammar) {
+        OccurrenceSpeech speechData = new OccurrenceSpeech(eventData);
+        if (grammar != null && nimrod) {
+            phrase = grammar.Parse(phrase);
+            if (phrase == "")
+                return null;
+        }
+        // sswearList = new List<bool>();
+        string censoredPhrase = Speech.ProcessDialogue(phrase, ref speechData.swearList);
+
+        speechData.profanity = Toolbox.LevenshteinDistance(phrase, censoredPhrase);
+        speechData.line = censoredPhrase;
+        if (insultTarget != null) {
+            speechData.insult = true;
+            speechData.target = insultTarget;
+        }
+        if (threatTarget != null) {
+            speechData.threat = true;
+            speechData.target = threatTarget;
+        }
+        return speechData;
     }
 }
 public class MessageDamage : Message {

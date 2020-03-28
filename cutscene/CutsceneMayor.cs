@@ -26,6 +26,7 @@ public class CutsceneMayor : Cutscene {
         Controllable playerController = GameManager.Instance.playerObject.GetComponent<Controllable>();
         playerController.SetDirection(Vector2.down);
         UINew.Instance.RefreshUI();
+        MusicController.Instance.EnqueueMusic(new MusicMayor());
     }
     public override void Update() {
         if (!inPosition) {
@@ -51,6 +52,7 @@ public class CutsceneMayor : Cutscene {
         foreach (KeyValuePair<Controllable, Controllable.ControlType> kvp in initialState) {
             kvp.Key.control = kvp.Value;
         }
+        MusicController.Instance.End();
     }
     public void MenuWasClosed() {
         walkingAway = true;

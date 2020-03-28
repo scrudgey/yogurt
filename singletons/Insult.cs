@@ -3,12 +3,49 @@ using UnityEngine;
 
 public class Insult {
     public static Grammar ObjectToGrammar(GameObject target) {
+        // determine animate vs. inanimate
+        Controllable targetControllable = target.GetComponent<Controllable>();
+        if (targetControllable == null) {
+            return InanimateInsultGrammar(target);
+        } else {
+            return AnimateInsultGrammar(target);
+        }
+
+    }
+    public static Grammar InanimateInsultGrammar(GameObject target) {
+        Grammar g = new Grammar();
+        g.Load("insult_inanimate");
+
+        Item item = target.GetComponent<Item>();
+
+        g.AddSymbol("object", item.itemName);
+
+        // load specific symbols
+        // food
+
+        return g;
+    }
+    public static Grammar AnimateInsultGrammar(GameObject target) {
         Grammar g = new Grammar();
         g.Load("insult");
 
         g.AddSymbol("target-item", "none");
         g.AddSymbol("target-clothes", "none");
         g.AddSymbol("target-hat", "none");
+        g.AddSymbol("mister", "none");
+
+        // mr. vs mrs.
+        Gender targetGender = Toolbox.GetGender(target);
+        switch (targetGender) {
+            default:
+            case (Gender.male):
+                g.SetSymbol("mister", "mister");
+                break;
+            case (Gender.female):
+                g.SetSymbol("mister", "missus");
+                break;
+        }
+
 
         // insult possessions
         DecisionMaker targetDM = target.GetComponent<DecisionMaker>();

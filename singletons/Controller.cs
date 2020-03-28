@@ -4,7 +4,14 @@ using System.Collections.Generic;
 using UnityEngine.EventSystems;
 public class Controller : Singleton<Controller> {
     public enum ControlState {
-        normal, inMenu, waitForMenu, commandSelect, swearSelect, insultSelect, cutscene, hypnosisSelect
+        normal,
+        inMenu,
+        waitForMenu,
+        commandSelect,
+        swearSelect,
+        insultSelect,
+        cutscene,
+        hypnosisSelect
     }
     private Controllable _focus;
     public Controllable focus {
@@ -251,7 +258,7 @@ public class Controller : Singleton<Controller> {
                 foreach (RaycastHit2D hit in hits) {
                     if (hit.collider != null && !forbiddenTags.Contains(hit.collider.tag)) {
                         state = ControlState.normal;
-                        MessageSpeech message = new MessageSpeech();
+                        MessageSpeech message = new MessageSpeech("");
                         message.swearTarget = hit.collider.gameObject;
                         Toolbox.Instance.SendMessage(focus.gameObject, this, message);
                         UINew.Instance.SetActionText("");

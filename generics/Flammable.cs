@@ -142,9 +142,8 @@ public class Flammable : MonoBehaviour, ISaveable {
             message.responsibleParty = gameObject;
             Toolbox.Instance.SendMessage(gameObject, this, message, sendUpwards: false);
             if (Random.Range(0, 100f) < 1) {
-                MessageSpeech speechMessage = new MessageSpeech();
                 string name = Toolbox.Instance.GetName(gameObject);
-                speechMessage.phrase = "this " + name + " is hot!";
+                MessageSpeech speechMessage = new MessageSpeech("this " + name + " is hot!");
                 Toolbox.Instance.SendMessage(gameObject, this, speechMessage, sendUpwards: true);
             }
         } else {

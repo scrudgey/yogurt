@@ -50,8 +50,8 @@ public class SaveInspector : MonoBehaviour {
                 completeAchievements += 1;
         }
         float completion = 0;
-        completion += 0.33f * data.collectedObjects.Count / 100f;
-        completion += 0.33f * data.completeCommercials.Count / 5f;
+        completion += 0.33f * data.collectedObjects.Count / 95;
+        completion += 0.33f * data.completeCommercials.Count / 17f;
         completion += 0.33f * completeAchievements / data.achievements.Count;
         return completion * 100f;
     }

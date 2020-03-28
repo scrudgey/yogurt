@@ -91,7 +91,6 @@ namespace analysis {
             {Rating.positive, 0f}
         };
         }
-
         public void ResetChildren() {
             children = new List<T>();
         }

@@ -172,6 +172,8 @@ public class MusicController : Singleton<MusicController> {
         {"cave2", () => new MusicMayorAttic()},
         {"cave3", () => new MusicMayorAttic()},
         {"cave4", () => new MusicMayorAttic()},
+        {"anti_mayor_cutscene", () => new MusicMayorAttic()},
+        {"gravy_studio", () => new MusicMoon()}
     };
     // TODO: add studio
     public static Dictionary<TrackName, AudioClip> tracks = new Dictionary<TrackName, AudioClip>();

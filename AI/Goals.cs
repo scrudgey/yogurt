@@ -337,7 +337,7 @@ namespace AI {
                 EventData ed = new EventData(positive: 1);
                 utteranceTimer = UnityEngine.Random.Range(10f, 20f);
                 string phrase = phrases[UnityEngine.Random.Range(0, phrases.Count)];
-                MessageSpeech message = new MessageSpeech(phrase, eventData: ed);
+                MessageSpeech message = new MessageSpeech(phrase, data: ed);
                 Toolbox.Instance.SendMessage(gameObject, gameObject.transform, message);
             }
         }

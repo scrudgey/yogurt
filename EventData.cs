@@ -11,7 +11,10 @@ public class EventData : Describable {
     public string popupDesc;
     public string transcriptLine;
     public string noun;
-    public EventData() {
+    public EventData() { } // needed for serialization, should not be used
+    public EventData(string noun, string whatHappened) {
+        this.noun = noun;
+        this.whatHappened = whatHappened;
         quality = new SerializableDictionary<Rating, float>(){
             {Rating.disgusting, 0f},
             {Rating.disturbing, 0f},

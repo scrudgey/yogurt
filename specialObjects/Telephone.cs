@@ -26,37 +26,31 @@ public class Telephone : Item {
     }
     public void FireButtonCallback() {
         if (fireTime <= 0) {
-            MessageSpeech message = new MessageSpeech();
-            message.phrase = "We'll send someone over right away!";
+            MessageSpeech message = new MessageSpeech("We'll send someone over right away!");
             Toolbox.Instance.SendMessage(gameObject, this, message);
             fireTime = 10f;
         } else {
-            MessageSpeech message = new MessageSpeech();
-            message.phrase = "Just sit tight, the team is on their way!";
+            MessageSpeech message = new MessageSpeech("Just sit tight, the team is on their way!");
             Toolbox.Instance.SendMessage(gameObject, this, message);
         }
     }
     public void ClownCallback() {
         if (fireTime <= 0) {
-            MessageSpeech message = new MessageSpeech();
-            message.phrase = "Ho ho! Sit tight! We have dispatched a clown to your location!";
+            MessageSpeech message = new MessageSpeech("Ho ho! Sit tight! We have dispatched a clown to your location!");
             Toolbox.Instance.SendMessage(gameObject, this, message);
             clownTime = 10f;
         } else {
-            MessageSpeech message = new MessageSpeech();
-            message.phrase = "Brother clown is with you this day!";
+            MessageSpeech message = new MessageSpeech("Brother clown is with you this day!");
             Toolbox.Instance.SendMessage(gameObject, this, message);
         }
     }
     public void PizzaCallback() {
         if (pizzaTime <= 0) {
-            MessageSpeech message = new MessageSpeech();
-            message.phrase = "One large pizza, coming up!";
+            MessageSpeech message = new MessageSpeech("One large pizza, coming up!");
             Toolbox.Instance.SendMessage(gameObject, this, message);
             pizzaTime = 10f;
         } else {
-            MessageSpeech message = new MessageSpeech();
-            message.phrase = "Chill out buddy, the pizza's on its way! Chill!";
+            MessageSpeech message = new MessageSpeech("Chill out buddy, the pizza's on its way! Chill!");
             Toolbox.Instance.SendMessage(gameObject, this, message);
         }
     }

@@ -5,7 +5,7 @@ public class SpeechMenu : MonoBehaviour {
         GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
     }
     public void SwearButton() {
-        MessageSpeech message = new MessageSpeech();
+        MessageSpeech message = new MessageSpeech("");
         message.randomSwear = true;
         Toolbox.Instance.SendMessage(GameManager.Instance.playerObject, this, message);
         UINew.Instance.CloseActiveMenu();
@@ -18,19 +18,19 @@ public class SpeechMenu : MonoBehaviour {
         UINew.Instance.CloseActiveMenu();
         Controller.Instance.state = Controller.ControlState.insultSelect;
     }
-    public void RandomButton() {
-        MessageSpeech message = new MessageSpeech();
-        // message.randomSpeech = true;
-        // Toolbox.Instance.SendMessage(GameManager.Instance.playerObject, this, message);
-        Awareness awareness = Controller.Instance.focus.GetComponent<Awareness>();
-        if (awareness) {
-            message.phrase = awareness.RecallMemory();
-        } else {
-            message.randomSpeech = true;
-        }
-        Toolbox.Instance.SendMessage(GameManager.Instance.playerObject, this, message);
-        UINew.Instance.CloseActiveMenu();
-    }
+    // public void RandomButton() {
+    //     MessageSpeech message = new MessageSpeech();
+    //     // message.randomSpeech = true;
+    //     // Toolbox.Instance.SendMessage(GameManager.Instance.playerObject, this, message);
+    //     Awareness awareness = Controller.Instance.focus.GetComponent<Awareness>();
+    //     if (awareness) {
+    //         message.phrase = awareness.RecallMemory();
+    //     } else {
+    //         message.randomSpeech = true;
+    //     }
+    //     Toolbox.Instance.SendMessage(GameManager.Instance.playerObject, this, message);
+    //     UINew.Instance.CloseActiveMenu();
+    // }
     public void CancelButton() {
         UINew.Instance.CloseActiveMenu();
     }
