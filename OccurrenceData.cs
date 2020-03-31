@@ -35,7 +35,7 @@ public class DescribableOccurrenceData : MetaDescribable<EventData> {
 public abstract class OccurrenceData {
     public DescribableOccurrenceData describable = new DescribableOccurrenceData();
     public abstract HashSet<GameObject> involvedParties();
-    public void CalculateDescriptions() {
+    public virtual void CalculateDescriptions() {
         describable.ResetChildren();
         Descriptions();
     }
@@ -46,16 +46,17 @@ public abstract class OccurrenceData {
 }
 public class OccurrenceEvent : OccurrenceData {
     protected EventData eventData;
+    public override HashSet<GameObject> involvedParties() {
+        return new HashSet<GameObject> { };
+    }
     public OccurrenceEvent(EventData eventData) {
         this.eventData = eventData;
         describable.AddChild(eventData);
     }
-    public override HashSet<GameObject> involvedParties() {
-        return new HashSet<GameObject> { };
+    public override void CalculateDescriptions() {
+        Descriptions();
     }
-    override public void Descriptions() {
-        describable.AddChild(eventData);
-    }
+    override public void Descriptions() { }
 }
 public class OccurrenceFire : OccurrenceData {
     public GameObject flamingObject;
@@ -132,7 +133,7 @@ public class OccurrenceEat : OccurrenceData {
             gravy = true;
             AddChild(EventData.Gravy(eater));
         }
-        if (edibleName == "eggplant") {
+        if (edibleName.Contains("eggplant")) {
             AddChild(EventData.Eggplant(eater));
         }
         if (edible.human) {
@@ -211,7 +212,11 @@ public class OccurrenceSpeech : OccurrenceEvent {
     public override HashSet<GameObject> involvedParties() {
         return new HashSet<GameObject> { speaker, target };
     }
+    public override void CalculateDescriptions() {
+        Descriptions();
+    }
     public override void Descriptions() {
+        describable.ResetChildren();
         string speakerName = Toolbox.Instance.GetName(speaker);
         string targetName = "";
         if (target != null)

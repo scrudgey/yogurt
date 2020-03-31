@@ -11,27 +11,29 @@ public class Computer : Item {
         CheckBubble();
     }
     public void CheckBubble() {
+        Debug.Log(Controller.Instance.state);
+        Debug.Log("checking bubble");
+        bool activeBubble = false;
+        if (GameManager.Instance.data == null)
+            return;
+        foreach (Email email in GameManager.Instance.data.emails) {
+            Debug.Log("email read: " + email.read.ToString());
+            if (email.read == false)
+                activeBubble = true;
+        }
+        if (activeBubble) {
+            newBubble.EnableFrames();
+        } else {
+            newBubble.DisableFrames();
+        }
+    }
+    public void OpenEmail() {
         if (Controller.Instance.state != Controller.ControlState.cutscene &&
             Controller.Instance.state != Controller.ControlState.inMenu &&
             Controller.Instance.state != Controller.ControlState.waitForMenu
             ) {
-            bool activeBubble = false;
-            if (GameManager.Instance.data == null)
-                return;
-            foreach (Email email in GameManager.Instance.data.emails) {
-                if (email.read == false)
-                    activeBubble = true;
-            }
-            if (activeBubble) {
-                newBubble.EnableFrames();
-            } else {
-                newBubble.DisableFrames();
-            }
+            GameObject menu = UINew.Instance.ShowMenu(UINew.MenuType.email);
+            menu.GetComponent<EmailUI>().computer = this;
         }
-
-    }
-    public void OpenEmail() {
-        GameObject menu = UINew.Instance.ShowMenu(UINew.MenuType.email);
-        menu.GetComponent<EmailUI>().computer = this;
     }
 }

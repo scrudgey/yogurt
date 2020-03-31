@@ -104,7 +104,12 @@ public class Liquid {
         if (liq.buffs.Count == 0) {
             return "water";
         } else if (liq.buffs.Count == 1) {
-            return "potion of " + buffMap[liq.buffs[0].type].name;
+            // permanent / not permanent
+            if (liq.buffs[0].lifetime == 0) {
+                return "potion of permanent " + buffMap[liq.buffs[0].type].name;
+            } else {
+                return "potion of " + buffMap[liq.buffs[0].type].name;
+            }
         } else if (liq.buffs.Count == 2) {
             string buff1 = buffMap[liq.buffs[0].type].name;
             string buff2 = buffMap[liq.buffs[1].type].name;
@@ -196,6 +201,7 @@ public class Liquid {
         monoLiquid.edible.offal = liquid.offal > 0;
         monoLiquid.edible.pureeColor = liquid.color;
         monoLiquid.edible.vomit = liquid.vomit;
+        monoLiquid.edible.eatSound = Resources.Load("sounds/eating/slurp") as AudioClip;
         if (liquid.flammable) {
             Flammable existingFlammable = target.transform.root.GetComponentInChildren<Flammable>();
             if (existingFlammable == null) {

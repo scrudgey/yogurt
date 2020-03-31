@@ -9,6 +9,7 @@ public class CosmicNullifier : Pickup {
         nullify = new Interaction(this, "Nullify", "Nullify");
         nullify.unlimitedRange = true;
         nullify.validationFunction = true;
+        nullify.otherOnSelfConsent = false;
         // nullify.inertOnPlayerConsent = false;
         // nullify.otherOnPlayerConsent = false;
         interactions.Add(nullify);

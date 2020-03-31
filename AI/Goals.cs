@@ -72,7 +72,7 @@ namespace AI {
                 }
                 catch (Exception e) {
                     Debug.LogError(this.ToString() + " fail: " + e.Message);
-                    Debug.LogError(e.StackTrace);
+                    Debug.LogErrorFormat(e.StackTrace);
                     // Debug.Log(e.TargetSite);
                 }
             }

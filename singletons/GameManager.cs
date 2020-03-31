@@ -129,6 +129,8 @@ public partial class GameManager : Singleton<GameManager> {
         {"cave4", "tomb"},
         {"apartment", "apartment"},
         {"boardroom", "yogurt HQ"},
+        {"hell1", "hell"},
+        {"venus1", "venus"},
     };
     public GameData data;
     public static GlobalSettings settings = new GlobalSettings();
@@ -254,12 +256,7 @@ public partial class GameManager : Singleton<GameManager> {
                 Debug.Log("Weird telepathy culling mask issue");
             }
         }
-        UINew.Instance.ClearStatusIcons();
-        foreach (KeyValuePair<BuffType, Buff> buff in intrinsics.NetBuffs()) {
-            if (buff.Value.active()) {
-                UINew.Instance.AddStatusIcon(buff.Value);
-            }
-        }
+        UINew.Instance.UpdateStatusIcons(intrinsics);
     }
     public void SetFocus(GameObject target) {
         if (playerObject != null) {
@@ -424,6 +421,13 @@ public partial class GameManager : Singleton<GameManager> {
             }
             data.firstTimeLeavingHouse = false;
         }
+        // if (sceneName == "apartment") {
+        //     Debug.Log("checking scene");
+        //     Computer computer = GameObject.FindObjectOfType<Computer>();
+        //     if (computer != null) {
+        //         computer.CheckBubble();
+        //     }
+        // }
         if (sceneName == "studio" && !data.visitedStudio) {
             data.visitedStudio = true;
             VideoCamera videoCamera = GameObject.FindObjectOfType<VideoCamera>();
@@ -522,6 +526,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
     }
     void WakeUpInBed() {
+        Debug.Log("wake up in bed");
         Hurtable playerHurtable = playerObject.GetComponent<Hurtable>();
         if (playerHurtable.hitState == Controllable.HitState.dead) {
             Destroy(playerObject);
@@ -596,6 +601,7 @@ public partial class GameManager : Singleton<GameManager> {
 
             bed.SleepCutscene();
         }
+        Debug.Log("checking scene");
         Computer computer = GameObject.FindObjectOfType<Computer>();
         if (computer != null) {
             computer.CheckBubble();

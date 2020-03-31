@@ -113,6 +113,8 @@ public class Speech : Interactive, ISaveable {
         grammar.Load("structure");
         // grammar.Load("flavor_test");
         grammar.Load("flavor_" + flavor);
+        grammar.Load("threat");
+        grammar.Load("random_phrase");
         foreach (string otherFile in otherNimrodDefs) {
             grammar.Load(otherFile);
         }
@@ -360,7 +362,8 @@ public class Speech : Interactive, ISaveable {
     }
     public void SayRandom() {
         if (randomPhrases.Length > 0) {
-            string toSay = randomPhrases[Random.Range(0, randomPhrases.Length)];
+            // string toSay = randomPhrases[Random.Range(0, randomPhrases.Length)];
+            string toSay = grammar.Parse("{random}");
             MessageSpeech message = new MessageSpeech(toSay);
             Toolbox.Instance.SendMessage(gameObject, this, message);
         }
@@ -369,33 +372,34 @@ public class Speech : Interactive, ISaveable {
         string otherName = Toolbox.Instance.GetName(gameObject);
         return "Speak with " + otherName;
     }
-    public OccurrenceSpeech Say(MessageSpeech message) {
+    public void Say(MessageSpeech message) {
         if (message.phrase == "")
-            return null;
+            return;
         if (hitState >= Controllable.HitState.unconscious)
-            return null;
+            return;
         if (speaking && message.phrase != words && !message.interrupt) {
             if (queue.Count >= 1)
-                return null;
+                return;
             queue.Add(message);
-            return null;
+            return;
         }
 
         OccurrenceSpeech speechData = message.ToOccurrenceSpeech(grammar);
+        if (speechData == null)
+            return;
         speechData.speaker = gameObject;
 
         if (speechData != null)
             Toolbox.Instance.OccurenceFlag(gameObject, speechData);
 
         if (inDialogue)
-            return null;
+            return;
 
         speakTime = DoubleSeat(message.phrase.Length, 2f, 50f, 5f, 2f);
         speakTimeTotal = speakTime;
         speakSpeed = message.phrase.Length / speakTime;
         swearMask = speechData.swearList.ToArray();
         words = speechData.line;
-        return speechData;
     }
 
     public void Insult(string phrase, GameObject target) {
@@ -510,6 +514,13 @@ public class Speech : Interactive, ISaveable {
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
 
+        // the key 
+        Gender targetGender = Toolbox.GetGender(target);
+        if (targetGender == Gender.male) {
+            grammar.SetSymbol("gender", "man");
+        } else {
+            grammar.SetSymbol("gender", "lady");
+        }
         string content = grammar.Parse("{threat}");
 
         Threaten(content, target);

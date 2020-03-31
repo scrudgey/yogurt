@@ -34,7 +34,7 @@ public abstract class Damageable : MonoBehaviour {
     public MessageDamage cacheFiredMessage;
     private float cachedTime;
     public List<ImpactGibs> impactGibs = new List<ImpactGibs>();
-    public static bool Damages(Damageable damageable, damageType type, Dictionary<BuffType, Buff> netBuffs) {
+    public static bool Damages(damageType type, Dictionary<BuffType, Buff> netBuffs) {
         // no buffs means no immunities
         if (netBuffs == null)
             return true;
@@ -110,7 +110,7 @@ public abstract class Damageable : MonoBehaviour {
         }
         lastMessage = message;
         // lastDamage = message.type;
-        bool vulnerable = Damages(this, message.type, netBuffs);
+        bool vulnerable = Damages(message.type, netBuffs);
         ImpactResult result = ImpactResult.normal;
         float damage = 0f;
         if (vulnerable) {

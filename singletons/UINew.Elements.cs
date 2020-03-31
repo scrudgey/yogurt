@@ -96,22 +96,14 @@ public partial class UINew : Singleton<UINew> {
             Destroy(element);
         activeWorldButtons = new List<GameObject>();
     }
+
+    /*
+    *   Objectives
+    */
     public void ClearObjectives() {
         foreach (Transform child in objectivesContainer) {
             Destroy(child.gameObject);
         }
-    }
-    public void ClearStatusIcons() {
-        foreach (Transform child in UICanvas.transform.Find("iconDock")) {
-            Destroy(child.gameObject);
-        }
-    }
-
-    public void AddStatusIcon(Buff buff) {
-        GameObject icon = Instantiate(Resources.Load("UI/StatusIcon")) as GameObject;
-        UIStatusIcon statusIcon = icon.GetComponent<UIStatusIcon>();
-        statusIcon.Initialize(buff.type, buff);
-        statusIcon.transform.SetParent(UICanvas.transform.Find("iconDock"), false);
     }
     public ObjectiveIndicator AddObjective(Objective objective) {
         GameObject objectiveObject = GameManager.Instantiate(Resources.Load("UI/objective")) as GameObject;
@@ -120,5 +112,44 @@ public partial class UINew : Singleton<UINew> {
         script.objective = objective;
         script.description.text = objective.desc;
         return script;
+    }
+
+    /*
+    *   Status icons
+    */
+    public void UpdateStatusIcons(Intrinsics intrinsics) {
+        HashSet<BuffType> existingBuffs = ClearStatusIcons();
+        foreach (KeyValuePair<BuffType, Buff> buff in intrinsics.NetBuffs()) {
+            if (buff.Value.active()) {
+
+                GameObject icon = UINew.Instance.AddStatusIcon(buff.Value);
+                ParticleSystem particles = icon.GetComponentInChildren<ParticleSystem>();
+                if (!existingBuffs.Contains(buff.Value.type)) {
+                    particles.Play();
+                } else {
+                    particles.Stop();
+                    Outline outline = icon.GetComponent<Outline>();
+                    OutlineFader fader = icon.GetComponent<OutlineFader>();
+                    Destroy(outline);
+                    Destroy(fader);
+                }
+            }
+        }
+    }
+    public HashSet<BuffType> ClearStatusIcons() {
+        HashSet<BuffType> existingBuffs = new HashSet<BuffType>();
+        foreach (Transform child in iconDock) {
+            UIStatusIcon statusIcon = child.GetComponent<UIStatusIcon>();
+            existingBuffs.Add(statusIcon.buff.type);
+            Destroy(child.gameObject);
+        }
+        return existingBuffs;
+    }
+    public GameObject AddStatusIcon(Buff buff) {
+        GameObject icon = Instantiate(Resources.Load("UI/StatusIcon")) as GameObject;
+        UIStatusIcon statusIcon = icon.GetComponent<UIStatusIcon>();
+        statusIcon.Initialize(buff.type, buff);
+        statusIcon.transform.SetParent(iconDock, false);
+        return icon;
     }
 }

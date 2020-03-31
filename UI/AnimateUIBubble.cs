@@ -36,6 +36,7 @@ public class AnimateUIBubble : MonoBehaviour {
         }
     }
     public void EnableFrames() {
+        Debug.Log("enable frames");
         animationTimer = 0;
     }
     public void DisableFrames() {

@@ -34,7 +34,7 @@ public class SaveInspector : MonoBehaviour {
         Sprite[] sprites = Resources.LoadAll<Sprite>("spritesheets/" + data.headSpriteSheet);
         headShot.sprite = sprites[0];
 
-        itemCountText.text = data.collectedObjects.Count.ToString() + "/100";
+        itemCountText.text = data.collectedObjects.Count.ToString() + "/95";
         int completeAchievements = 0;
         foreach (Achievement achievement in save.data.achievements) {
             if (achievement.complete)

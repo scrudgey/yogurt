@@ -68,6 +68,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         Interaction swingAction = new Interaction(this, "Swing", "SwingItem");
         swingAction.selfOnOtherConsent = false;
         swingAction.otherOnSelfConsent = false;
+        swingAction.holdingOnOtherConsent = false;
 
         swingAction.defaultPriority = 5;
         interactions.Add(swingAction);

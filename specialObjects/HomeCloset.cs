@@ -29,6 +29,7 @@ public class HomeCloset : Interactive {
             CheckBubble();
         }
     }
+
     public string OpenCloset_desc() {
         switch (type) {
             case ClosetType.all:

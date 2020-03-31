@@ -1,9 +1,7 @@
 ﻿using UnityEngine;
 using System.IO;
 using UnityEngine.UI;
-using UnityEngine;
 using System.Collections.Generic;
-using System.IO;
 using System.Xml.Serialization;
 using UnityEngine.SceneManagement;
 using System.Linq;

@@ -61,7 +61,7 @@ public class Outfit : Interactive, ISaveable {
     public bool StealUniform_Validation(Outfit otherOutfit) {
         if (otherOutfit == this)
             return false;
-        if (wornUniformName == "nude")
+        if (wornUniformName == "nude" || wornUniformName == "nude_female")
             return false;
         if (hitState >= Controllable.HitState.unconscious)
             return true;
@@ -92,6 +92,7 @@ public class Outfit : Interactive, ISaveable {
         this.uniform = newUniform.gameObject;
         Toolbox.Instance.AddChildIntrinsics(gameObject, this, newUniform.gameObject);
         newUniform.gameObject.SetActive(false);
+        ClaimsManager.Instance.WasDestroyed(newUniform.gameObject);
         if (cleanStains) {
             foreach (Stain stain in GetComponentsInChildren<Stain>()) {
                 Destroy(stain.gameObject);
@@ -147,7 +148,7 @@ public class Outfit : Interactive, ISaveable {
             initUniform = null;
         }
 
-        if (wornuniform == "nude") {
+        if (wornuniform == "nude" || wornUniformName == "nude_female") {
             GoNude();
         }
 

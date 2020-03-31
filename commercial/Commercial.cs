@@ -20,15 +20,11 @@ public class Commercial : MetaDescribable<DescribableOccurrenceData> {
     public List<string> unlockUponCompletion;
     public string unlockItem = "";
     public string email = "";
-    // public List<DescribableOccurrenceData> occurrences = new List<DescribableOccurrenceData>();
     public HashSet<string> yogurtEaterOutfits = new HashSet<string>();
     public HashSet<string> yogurtEaterNames = new HashSet<string>();
     public HashSet<string> visitedLocations = new HashSet<string>();
     public HashSet<string> outfits = new HashSet<string>();
     public bool gravy;
-    [XmlIgnore]
-    // public CommercialAnalysis analysis;
-    // [XmlIgnore]
     public List<Objective> objectives = new List<Objective>();
     public Commercial(Commercial other) {
         this.name = other.name;

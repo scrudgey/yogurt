@@ -29,8 +29,11 @@ public class DamageThreshhold {
 public class Explosive : MonoBehaviour {
     public bool exploding = false;
     public List<DamageThreshhold> threshHolds = new List<DamageThreshhold>();
+    public Dictionary<BuffType, Buff> netBuffs = new Dictionary<BuffType, Buff>();
+    public Intrinsics intrinsics;
     void Start() {
         Toolbox.RegisterMessageCallback<MessageDamage>(this, HandleMessageDamage);
+        intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject);
     }
     void Update() {
         foreach (DamageThreshhold threshHold in threshHolds) {
@@ -38,11 +41,23 @@ public class Explosive : MonoBehaviour {
         }
     }
     void HandleMessageDamage(MessageDamage message) {
-        foreach (DamageThreshhold threshHold in threshHolds) {
-            threshHold.TakeDamage(message);
-            if (threshHold.Explode())
-                Explode();
+        if (intrinsics == null)
+            intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject);
+        netBuffs = intrinsics.NetBuffs();
+        if (Damageable.Damages(message.type, netBuffs)) {
+            Debug.Log(message.type);
+            Debug.Log(netBuffs);
+            foreach (DamageThreshhold threshHold in threshHolds) {
+                threshHold.TakeDamage(message);
+                if (threshHold.Explode())
+                    Explode();
+            }
         }
+
+    }
+    public virtual void HandleNetIntrinsic(MessageNetIntrinsic message) {
+        Debug.Log("netbuffs changed");
+        netBuffs = message.netBuffs;
     }
     public void Explode() {
         if (exploding)
