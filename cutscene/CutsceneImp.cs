@@ -57,9 +57,13 @@ public class CutsceneImp : Cutscene {
         } else if (GetPotion()) {
             cutsceneState = CutsceneState.describeIngredient;
             StartIngredientAnalysis();
+        } else if (analyzand.name.ToLower().Contains("necronomicon")) {
+            cutsceneState = CutsceneState.describeIngredient;
+            StartNecronomiconAnalysis();
         } else {
             RefuseAnalysis();
         }
+        timer = 0;
         // TODO: else if special
     }
     void SetDialogue(DialogueNode newNode) {
@@ -70,19 +74,27 @@ public class CutsceneImp : Cutscene {
         menu.monologue = new Monologue();
         menu.dialogue = new Stack<Monologue>();
         menu.cutsceneDialogue = true;
+        menu.disableCommand = true;
 
         menu.dialogueTree.Add(newNode);
         menu.ParseNode(newNode);
     }
     void StartIngredientAnalysis() {
-
-        // message.phrase = grammar.Parse(message.phrase);
-
         DialogueNode newNode = new DialogueNode();
         newNode.text.Add("Gra ha ha ha... Yes, show me your trinket....");
         newNode.text.Add(ingredient);
         newNode.text.Add(grammar.Parse("{ingredientDesc}"));
         newNode.text.Add("It can be used in potion of " + potionData.name + "!");
+        newNode.text.Add("IMPCALLBACK3");
+        SetDialogue(newNode);
+    }
+    void StartNecronomiconAnalysis() {
+        DialogueNode newNode = new DialogueNode();
+        newNode.text.Add("Gra ha ha ha... Yes, show me your trinket....");
+        newNode.text.Add("How have you come to possess the necronomicon?");
+        newNode.text.Add("It is a book of great evil, and great power!");
+        newNode.text.Add("It can be used to open ancient sealed portals to other places and dimensions.");
+        newNode.text.Add("Get it out of here! Do not use it under any circumstances!!!");
         newNode.text.Add("IMPCALLBACK3");
         SetDialogue(newNode);
     }

@@ -131,13 +131,15 @@ public class TVMenu : MonoBehaviour {
         showText.text = "";
         hideText.gameObject.SetActive(false);
         image.color = new Color(19, 19, 19, 255);
-        if (myTrack != null)
+        if (myTrack != null) {
+            myTrack = null;
             MusicController.Instance.End();
+        }
     }
-    // void OnDestroy() {
-    //     // if (myTrack != null) {
-
-    //     //     MusicController.Instance.End();
-    //     // }
-    // }
+    void OnDestroy() {
+        if (myTrack != null) {
+            myTrack = null;
+            MusicController.Instance.End();
+        }
+    }
 }

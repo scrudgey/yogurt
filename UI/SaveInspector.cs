@@ -32,7 +32,7 @@ public class SaveInspector : MonoBehaviour {
                                     t.Seconds).ToString();
 
         Sprite[] sprites = Resources.LoadAll<Sprite>("spritesheets/" + data.headSpriteSheet);
-        headShot.sprite = sprites[0];
+        headShot.sprite = Toolbox.ApplySkinToneToSprite(sprites[0], data.headSkinColor);
 
         itemCountText.text = data.collectedObjects.Count.ToString() + "/95";
         int completeAchievements = 0;

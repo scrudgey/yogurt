@@ -17,7 +17,24 @@ public class Speech : Interactive, ISaveable {
         @"\bshazbot\b",
         @"\bpiss\b",
         @"\bdick\b",
-        @"\bass\b"};
+        @"\bass\b",
+        @"\bcock\b",
+        @"\bnutsack\b",
+        @"\bbootyhole\b",
+        @"\bbitchmade\b",
+        @"\bmotherfucker\b",
+        @"\basshole"};
+
+    // asshole
+    // fix whitespace matching
+    static string[] swearWhiteList = new string[]{
+        @"-ass",
+        @"hole",
+        @"sack",
+        @"made",
+        @"mother",
+    };
+    static Regex spaceMatcher = new Regex(@"\b");
 
     public static string ParseGender(string instring) {
         //Use named capturing groups to make life easier
@@ -34,28 +51,35 @@ public class Speech : Interactive, ISaveable {
 
         return Regex.Replace(instring, genderHook, replacePattern, RegexOptions.IgnoreCase);
     }
-
     public static string ProcessDialogue(string phrase, ref List<bool> swearList) {
-        string finalPhrase = ParseGender(phrase);
-        string uncensoredPhrase = finalPhrase;
-
+        StringBuilder sb = new StringBuilder(ParseGender(phrase));
+        char censorChar = "∎".ToCharArray()[0];
         foreach (string swear in swearWords) {
-            StringBuilder builder = new StringBuilder();
-            foreach (char c in swear.Substring(2, swear.Length - 4)) {
-                builder.Append("∎");
+            Regex matcher = new Regex(swear);
+            foreach (Match match in matcher.Matches(phrase)) {
+                for (int i = 0; i < match.Length; i++) {
+                    char c = swear.Substring(i, 1).ToCharArray()[0];
+                    sb[match.Index + i] = censorChar;
+                }
             }
-            string mask = builder.ToString();
-            finalPhrase = Regex.Replace(finalPhrase, swear, mask);
         }
-
-        for (int i = 0; i < finalPhrase.Length; i++) {
-            if (finalPhrase[i] != uncensoredPhrase[i]) {
+        foreach (string white in swearWhiteList) {
+            Regex matcher = new Regex(white);
+            foreach (Match match in matcher.Matches(phrase)) {
+                string mask = phrase.Substring(match.Index, match.Length);
+                for (int i = 0; i < match.Length; i++) {
+                    sb[match.Index + i] = white.Substring(i, 1).ToCharArray()[0];
+                }
+            }
+        }
+        for (int i = 0; i < sb.Length; i++) {
+            if (sb[i] != phrase[i]) {
                 swearList.Add(true);
             } else {
                 swearList.Add(false);
             }
         }
-        return finalPhrase;
+        return sb.ToString();
     }
 
     struct BuffMessage {

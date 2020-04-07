@@ -32,12 +32,13 @@ public partial class UINew : Singleton<UINew> {
         if (inventory && inventory.holding) {
 
             activeWorldButtons = new List<GameObject>();
-            List<ActionButton> buttons = null;
-            if (Controller.Instance.commandTarget != null) {
-                buttons = CreateButtonsFromActions(Interactor.SelfOnSelfInteractions(Controller.Instance.commandTarget));
-            } else {
-                buttons = CreateButtonsFromActions(Interactor.SelfOnSelfInteractions(GameManager.Instance.playerObject));
-            }
+            List<ActionButton> buttons = CreateButtonsFromActions(Interactor.SelfOnSelfInteractions(actor));
+            // List<ActionButton> buttons = null;
+            // if (Controller.Instance.commandTarget != null) {
+            //     buttons = CreateButtonsFromActions(Interactor.SelfOnSelfInteractions(Controller.Instance.commandTarget));
+            // } else {
+            //     buttons = CreateButtonsFromActions(Interactor.SelfOnSelfInteractions(GameManager.Instance.playerObject));
+            // }
 
             foreach (ActionButton button in buttons) {
                 activeWorldButtons.Add(button.gameobject);

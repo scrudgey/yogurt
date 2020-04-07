@@ -8,12 +8,9 @@ public class Head : Interactive, IExcludable, ISaveable {
         hatPoint = transform.Find("hatPoint").gameObject;
         spriteRenderer = GetComponent<SpriteRenderer>();
         Interaction wearAct = new Interaction(this, "Wear", "DonHat");
-        // wearAct.debug = true;
+        wearAct.holdingOnOtherConsent = false;
         wearAct.dontWipeInterface = false;
         wearAct.validationFunction = true;
-        // wearAct.selfOnOtherConsent = true;
-        // wearAct.selfOnSelfConsent = false;
-        // wearAct.self
         interactions.Add(wearAct);
     }
     public void Start() {

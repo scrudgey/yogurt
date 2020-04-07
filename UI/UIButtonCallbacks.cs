@@ -28,7 +28,11 @@ public class UIButtonCallbacks : MonoBehaviour {
     }
     public void TestButtonClick() {
 
-        EnumerateCollectibles();
+        Speech speech = GameObject.FindObjectOfType<Speech>();
+        MessageSpeech message = new MessageSpeech("what is this janky-ass bullshit? an ass? assholes!");
+        speech.Say(message);
+
+        // EnumerateCollectibles();
 
         // GameObject target = GameObject.Find("blue_shirt");
         // if (target != null) {

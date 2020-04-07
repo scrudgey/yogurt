@@ -139,7 +139,6 @@ public class Hurtable : Damageable, ISaveable {
         if (health <= -0.75 * maxHealth && message.type == damageType.cutting) {
             Destruct();
             if (!monster) {
-                Debug.Log("corpse desecration");
                 EventData data = Toolbox.Instance.DataFlag(
                     gameObject,
                     "corpse desecration",

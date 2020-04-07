@@ -31,6 +31,7 @@ public class Explosive : MonoBehaviour {
     public List<DamageThreshhold> threshHolds = new List<DamageThreshhold>();
     public Dictionary<BuffType, Buff> netBuffs = new Dictionary<BuffType, Buff>();
     public Intrinsics intrinsics;
+    public bool ignoreDamage;
     void Start() {
         Toolbox.RegisterMessageCallback<MessageDamage>(this, HandleMessageDamage);
         intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject);
@@ -41,6 +42,8 @@ public class Explosive : MonoBehaviour {
         }
     }
     void HandleMessageDamage(MessageDamage message) {
+        if (ignoreDamage)
+            return;
         if (intrinsics == null)
             intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject);
         netBuffs = intrinsics.NetBuffs();

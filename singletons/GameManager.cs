@@ -526,7 +526,6 @@ public partial class GameManager : Singleton<GameManager> {
         }
     }
     void WakeUpInBed() {
-        Debug.Log("wake up in bed");
         Hurtable playerHurtable = playerObject.GetComponent<Hurtable>();
         if (playerHurtable.hitState == Controllable.HitState.dead) {
             Destroy(playerObject);
@@ -601,7 +600,6 @@ public partial class GameManager : Singleton<GameManager> {
 
             bed.SleepCutscene();
         }
-        Debug.Log("checking scene");
         Computer computer = GameObject.FindObjectOfType<Computer>();
         if (computer != null) {
             computer.CheckBubble();

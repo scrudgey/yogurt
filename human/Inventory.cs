@@ -225,6 +225,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         holding.GetComponent<Rigidbody2D>().isKinematic = false;
         holding.GetComponent<Collider2D>().isTrigger = false;
         holding = null;
+        UINew.Instance.ClearWorldButtons();
     }
     public void DropItem() {
         if (holding == null)
@@ -247,6 +248,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         SpriteRenderer sprite = holding.GetComponent<SpriteRenderer>();
         sprite.sortingLayerName = "main";
         holding = null;
+        UINew.Instance.ClearWorldButtons();
     }
     public void RetrieveItem(string itemName) {
         for (int i = 0; i < items.Count; i++) {

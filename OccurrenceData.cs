@@ -114,22 +114,34 @@ public class OccurrenceEat : OccurrenceData {
             data.quality[Rating.chaos] = 3;
         }
         AddChild(data);
-        // children.Add(data);
         if (edible.vomit) {
             AddChild(EventData.VomitEat(eater));
         }
         string edibleName = Toolbox.Instance.GetName(edible.gameObject);
-        if ((liquid != null && (liquid.name == "yogurt" || liquid.ingredients.Contains("yogurt"))) || edibleName == "yogurt") {
+        if (edibleName == "yogurt cup") {
             yogurt = true;
             AddChild(EventData.Yogurt(eater));
-            if (liquid.vomit) {
-                AddChild(EventData.YogurtVomitEat(eater));
+        }
+        if (liquid != null) {
+            if (liquid.name == "yogurt" || liquid.ingredients.Contains("yogurt")) {
+                yogurt = true;
+                if (liquid.vomit) {
+                    AddChild(EventData.YogurtVomitEat(eater));
+                }
+                if (edible.gameObject.name == "Puddle(Clone)") {
+                    AddChild(EventData.YogurtFloor(eater));
+                }
+                AddChild(EventData.Yogurt(eater));
             }
-            if (edible.gameObject.name == "Puddle(Clone)") {
-                AddChild(EventData.YogurtFloor(eater));
+            if (liquid.name == "gravy" || liquid.ingredients.Contains("gravy")) {
+                gravy = true;
+                AddChild(EventData.Gravy(eater));
+            }
+            if (liquid.ingredients.Contains("eggplant")) {
+                AddChild(EventData.Eggplant(eater));
             }
         }
-        if ((liquid != null && (liquid.name == "gravy" || liquid.ingredients.Contains("gravy"))) || edibleName == "gravy") {
+        if (edibleName.Contains("gravy")) {
             gravy = true;
             AddChild(EventData.Gravy(eater));
         }

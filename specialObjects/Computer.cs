@@ -11,13 +11,10 @@ public class Computer : Item {
         CheckBubble();
     }
     public void CheckBubble() {
-        Debug.Log(Controller.Instance.state);
-        Debug.Log("checking bubble");
         bool activeBubble = false;
         if (GameManager.Instance.data == null)
             return;
         foreach (Email email in GameManager.Instance.data.emails) {
-            Debug.Log("email read: " + email.read.ToString());
             if (email.read == false)
                 activeBubble = true;
         }

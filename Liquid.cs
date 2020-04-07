@@ -63,9 +63,9 @@ public class Liquid {
     public static Buff MixPotion(Liquid liq) {
         List<PotionData> potions = PotionComponent.LoadAllPotions();
         foreach (PotionData potion in potions) {
-            if (potion.Satisfied(liq.ingredients)) {
-                liq.ingredients.Remove(potion.ingredient1.prefabName);
-                liq.ingredients.Remove(potion.ingredient2.prefabName);
+            if (potion.Satisfied(liq.ingredients) && !liq.buffs.Contains(potion.buff)) {
+                // liq.ingredients.Remove(potion.ingredient1.prefabName);
+                // liq.ingredients.Remove(potion.ingredient2.prefabName);
                 Buff newBuff = potion.buff;
                 if (GameManager.Instance.data.perks["potion"]) {
                     newBuff.lifetime = 0;

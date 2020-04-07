@@ -67,7 +67,6 @@ public class Bed : Doorway {
                 collectible++;
         }
         if (collectible > 1 && GameManager.Instance.data.days > 1 && !GameManager.Instance.data.loadedDay) {
-            Debug.Log("picklebottom");
             CutsceneManager.Instance.InitializeCutscene<CutscenePickleBottom>();
         }
         Update();
