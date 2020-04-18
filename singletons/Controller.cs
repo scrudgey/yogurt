@@ -4,7 +4,14 @@ using System.Collections.Generic;
 using UnityEngine.EventSystems;
 public class Controller : Singleton<Controller> {
     public enum ControlState {
-        normal, inMenu, waitForMenu, commandSelect, swearSelect, insultSelect, cutscene, hypnosisSelect
+        normal,
+        inMenu,
+        waitForMenu,
+        commandSelect,
+        swearSelect,
+        insultSelect,
+        cutscene,
+        hypnosisSelect
     }
     private Controllable _focus;
     public Controllable focus {
@@ -41,7 +48,8 @@ public class Controller : Singleton<Controller> {
         };
     public static List<ControlState> selectionStates = new List<ControlState>(){Controller.ControlState.swearSelect,
                                                                                 Controller.ControlState.insultSelect,
-                                                                                Controller.ControlState.hypnosisSelect};
+                                                                                Controller.ControlState.hypnosisSelect,
+                                                                                Controller.ControlState.commandSelect};
     private ControlState _state;
     public ControlState state {
         get { return _state; }
@@ -107,11 +115,15 @@ public class Controller : Singleton<Controller> {
         if (Input.GetButtonDown("Cancel")) {
             // TODO: exit command states
             if (state != ControlState.cutscene) {
-                if (selectionStates.Contains(state) || state == ControlState.commandSelect) {
+                if (selectionStates.Contains(state)) {
                     state = ControlState.normal;
                     UINew.Instance.RefreshUI(active: true);
                 } else {
-                    UINew.Instance.ShowMenu(UINew.MenuType.escape);
+                    if (UINew.Instance.activeMenu != null) {
+                        UINew.Instance.CloseActiveMenu();
+                    } else {
+                        UINew.Instance.ShowMenu(UINew.MenuType.escape);
+                    }
                 }
             } else {
                 CutsceneManager.Instance.EscapePressed();
@@ -251,7 +263,7 @@ public class Controller : Singleton<Controller> {
                 foreach (RaycastHit2D hit in hits) {
                     if (hit.collider != null && !forbiddenTags.Contains(hit.collider.tag)) {
                         state = ControlState.normal;
-                        MessageSpeech message = new MessageSpeech();
+                        MessageSpeech message = new MessageSpeech("");
                         message.swearTarget = hit.collider.gameObject;
                         Toolbox.Instance.SendMessage(focus.gameObject, this, message);
                         UINew.Instance.SetActionText("");
@@ -376,6 +388,7 @@ public class Controller : Singleton<Controller> {
         } else {
             Inventory inventory = commandTarget.GetComponent<Inventory>();
             Controllable controllable = commandTarget.GetComponent<Controllable>();
+            inventory.ButtonCallback(commandButtonType);
         }
         ResetCommandState();
         commandAct = null;

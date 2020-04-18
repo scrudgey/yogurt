@@ -357,9 +357,9 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             foreach (EventData data in qualities.ToDescribable().GetChildren()) {
                 ReactToEvent(data, new HashSet<GameObject>());
 
-                OccurrenceGeneric oD = new OccurrenceGeneric();
-                oD.AddChild(data);
-                oD.eventData.Add(data);
+                OccurrenceEvent oD = new OccurrenceEvent(data);
+                // oD.AddChild(data);
+                // oD.additionEventData.Add(data);
                 // oD.children.Add(data);
                 MessageOccurrence message = new MessageOccurrence(oD);
                 Toolbox.Instance.SendMessage(gameObject, this, message);
@@ -425,20 +425,21 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         foreach (Ref<GameObject> np in removeThese) {
             newPeopleList.Remove(np);
         }
-        MessageSpeech message = new MessageSpeech();
+        string phrase = "";
         switch (assessment.status) {
             case PersonalAssessment.friendStatus.enemy:
-                message.phrase = "{greet-enemy}";
+                phrase = "{greet-enemy}";
 
                 break;
             case PersonalAssessment.friendStatus.friend:
-                message.phrase = "{greet-friend}";
+                phrase = "{greet-friend}";
                 break;
             default:
             case PersonalAssessment.friendStatus.neutral:
-                message.phrase = "{greet-neutral}";
+                phrase = "{greet-neutral}";
                 break;
         }
+        MessageSpeech message = new MessageSpeech(phrase);
         message.nimrod = true;
         message.involvedParties.Add(target);
         message.involvedParties.Add(gameObject);
@@ -528,12 +529,13 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                         GameManager.Instance.sceneTime - assessment.timeWarned > 7f &&
                         assessment.status != PersonalAssessment.friendStatus.enemy) {
                         assessment.timeWarned = GameManager.Instance.sceneTime;
-                        MessageSpeech message = new MessageSpeech();
+                        string phrase = "";
                         if (!assessment.warned) {
-                            message.phrase = "Halt! Come no closer!";
+                            phrase = "Halt! Come no closer!";
                         } else {
-                            message.phrase = "I am sworn to protect this bridge";
+                            phrase = "I am sworn to protect this bridge";
                         }
+                        MessageSpeech message = new MessageSpeech(phrase);
                         Toolbox.Instance.SendMessage(gameObject, this, message);
                         assessment.warned = true;
                     }

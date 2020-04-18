@@ -29,7 +29,7 @@ public class Duplicatable : Interactive, ISaveable {
                 }
             }
         }
-        return true;
+        return nullifiable;
     }
     public bool PickleReady() {
         return Nullifiable() && gameObject.GetComponent<Pickup>();

@@ -2,15 +2,15 @@
 using UnityEngine.Rendering;
 
 public class OrderByY : MonoBehaviour {
-    [System.Serializable]
-    public struct Follower {
-        public SpriteRenderer renderer;
-        public int offset;
-        public Follower(SpriteRenderer renderer, int offset = 1) {
-            this.renderer = renderer;
-            this.offset = offset;
-        }
-    }
+    // [System.Serializable]
+    // public struct Follower {
+    //     public SpriteRenderer renderer;
+    //     public int offset;
+    //     public Follower(SpriteRenderer renderer, int offset = 1) {
+    //         this.renderer = renderer;
+    //         this.offset = offset;
+    //     }
+    // }
     SpriteRenderer spriteRenderer;
     SortingGroup sortGroup;
     PhysicalBootstrapper bootstrapper;

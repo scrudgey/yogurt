@@ -32,9 +32,9 @@ public class SaveInspector : MonoBehaviour {
                                     t.Seconds).ToString();
 
         Sprite[] sprites = Resources.LoadAll<Sprite>("spritesheets/" + data.headSpriteSheet);
-        headShot.sprite = sprites[0];
+        headShot.sprite = Toolbox.ApplySkinToneToSprite(sprites[0], data.headSkinColor);
 
-        itemCountText.text = data.collectedObjects.Count.ToString() + "/100";
+        itemCountText.text = data.collectedObjects.Count.ToString() + "/95";
         int completeAchievements = 0;
         foreach (Achievement achievement in save.data.achievements) {
             if (achievement.complete)
@@ -50,8 +50,8 @@ public class SaveInspector : MonoBehaviour {
                 completeAchievements += 1;
         }
         float completion = 0;
-        completion += 0.33f * data.collectedObjects.Count / 100f;
-        completion += 0.33f * data.completeCommercials.Count / 5f;
+        completion += 0.33f * data.collectedObjects.Count / 95;
+        completion += 0.33f * data.completeCommercials.Count / 17f;
         completion += 0.33f * completeAchievements / data.achievements.Count;
         return completion * 100f;
     }

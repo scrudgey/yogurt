@@ -48,7 +48,7 @@ public class Flammable : MonoBehaviour, ISaveable {
         fire.flammable = this;
         fireRadius = fireChild.AddComponent<CircleCollider2D>();
         fireRadius.isTrigger = true;
-        fireRadius.radius = 0.2f;
+        fireRadius.radius = 0.1f;
         fireRadius.name = "fire";
         fire.gameObject.layer = 13;
         //ensure that there is a speaker
@@ -142,9 +142,8 @@ public class Flammable : MonoBehaviour, ISaveable {
             message.responsibleParty = gameObject;
             Toolbox.Instance.SendMessage(gameObject, this, message, sendUpwards: false);
             if (Random.Range(0, 100f) < 1) {
-                MessageSpeech speechMessage = new MessageSpeech();
                 string name = Toolbox.Instance.GetName(gameObject);
-                speechMessage.phrase = "this " + name + " is hot!";
+                MessageSpeech speechMessage = new MessageSpeech("this " + name + " is hot!");
                 Toolbox.Instance.SendMessage(gameObject, this, speechMessage, sendUpwards: true);
             }
         } else {

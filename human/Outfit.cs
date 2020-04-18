@@ -13,6 +13,7 @@ public class Outfit : Interactive, ISaveable {
     void Awake() {
         Interaction wearInteraction = new Interaction(this, "Wear", "DonUniformWrapper");
         wearInteraction.dontWipeInterface = false;
+        wearInteraction.holdingOnOtherConsent = false;
         interactions.Add(wearInteraction);
 
         Interaction stealInteraction = new Interaction(this, "Take Outfit", "StealUniform");
@@ -61,7 +62,7 @@ public class Outfit : Interactive, ISaveable {
     public bool StealUniform_Validation(Outfit otherOutfit) {
         if (otherOutfit == this)
             return false;
-        if (wornUniformName == "nude")
+        if (wornUniformName == "nude" || wornUniformName == "nude_female")
             return false;
         if (hitState >= Controllable.HitState.unconscious)
             return true;
@@ -92,6 +93,7 @@ public class Outfit : Interactive, ISaveable {
         this.uniform = newUniform.gameObject;
         Toolbox.Instance.AddChildIntrinsics(gameObject, this, newUniform.gameObject);
         newUniform.gameObject.SetActive(false);
+        ClaimsManager.Instance.WasDestroyed(newUniform.gameObject);
         if (cleanStains) {
             foreach (Stain stain in GetComponentsInChildren<Stain>()) {
                 Destroy(stain.gameObject);
@@ -104,9 +106,8 @@ public class Outfit : Interactive, ISaveable {
         return "Wear " + uniformName;
     }
     public GameObject RemoveUniform() {
-        if (wornUniformName == "nude")
+        if (wornUniformName == "nude" || wornUniformName == "nude_female")
             return null;
-        // TODO: change?
         GameObject removed = null;
         if (uniform != null) {
             removed = uniform;
@@ -133,6 +134,11 @@ public class Outfit : Interactive, ISaveable {
         data.ints["hitstate"] = (int)hitState;
         data.ints["gender"] = (int)gender;
     }
+    void OnDestroy() {
+        if (uniform != null) {
+            Destroy(uniform);
+        }
+    }
     public void LoadData(PersistentComponent data) {
         wornUniformName = data.strings["worn"];
         string wornuniform = data.strings["worn"];
@@ -148,7 +154,7 @@ public class Outfit : Interactive, ISaveable {
             initUniform = null;
         }
 
-        if (wornuniform == "nude") {
+        if (wornuniform == "nude" || wornUniformName == "nude_female") {
             GoNude();
         }
 

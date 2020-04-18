@@ -30,7 +30,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             }
             Toolbox.Instance.SendMessage(gameObject, this, invMessage);
             Toolbox.Instance.SendMessage(gameObject, this, directableMessage);
-            if (value != null && !value.heavyObject)
+            if (value != null)
                 GameManager.Instance.CheckItemCollection(value.gameObject, gameObject);
             // Controllable controllable = GetComponent<Controllable>();
             // if (controllable != null)
@@ -68,6 +68,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         Interaction swingAction = new Interaction(this, "Swing", "SwingItem");
         swingAction.selfOnOtherConsent = false;
         swingAction.otherOnSelfConsent = false;
+        swingAction.holdingOnOtherConsent = false;
 
         swingAction.defaultPriority = 5;
         interactions.Add(swingAction);
@@ -224,6 +225,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         holding.GetComponent<Rigidbody2D>().isKinematic = false;
         holding.GetComponent<Collider2D>().isTrigger = false;
         holding = null;
+        UINew.Instance.ClearWorldButtons();
     }
     public void DropItem() {
         if (holding == null)
@@ -246,6 +248,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         SpriteRenderer sprite = holding.GetComponent<SpriteRenderer>();
         sprite.sortingLayerName = "main";
         holding = null;
+        UINew.Instance.ClearWorldButtons();
     }
     public void RetrieveItem(string itemName) {
         for (int i = 0; i < items.Count; i++) {
@@ -333,9 +336,27 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     void Update() {
         if (holding) {
             if (directionAngle > 45 && directionAngle < 135) {
-                holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
+                holdSortGroup.sortingLayerName = "main";
+                holdSortGroup.sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
+                // if (holdingSortGroup != null) {
+                //     holdingSortGroup.sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
+                //     holdingSortGroup.sortingLayerName = "main";
+                // } else if (holdingSpriteRenderer != null) {
+                //     holdingSpriteRenderer.sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
+                //     holdingSortGroup.sortingLayerName = "main";
+                // }
+                // holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
             } else {
-                holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder + 2;
+                holdSortGroup.sortingLayerName = "air";
+                holdSortGroup.sortingOrder = GetComponent<Renderer>().sortingOrder + 2;
+                // if (holdingSortGroup != null) {
+                //     holdingSortGroup.sortingOrder = GetComponent<Renderer>().sortingOrder + 2;
+                //     holdingSortGroup.sortingLayerName = "air";
+                // } else if (holdingSpriteRenderer != null) {
+                //     holdingSpriteRenderer.sortingOrder = GetComponent<Renderer>().sortingOrder + 2;
+                //     holdingSortGroup.sortingLayerName = "air";
+                // }
+                // holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder + 2;
             }
             holding.transform.position = holdpoint.transform.position;
             if (holdpoint_angle != 0 && currentAnimation == MessageAnimation.AnimType.none) {
@@ -430,9 +451,9 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         startPoint.y += direction.normalized.y / 7f + 0.01f;
         GameObject slash = Instantiate(Resources.Load("PhysicalImpact"), startPoint, holdpoint.rotation) as GameObject;
         PhysicalImpact impact = slash.GetComponent<PhysicalImpact>();
-        MessageDamage message = new MessageDamage(20f, damageType.physical);
-        message.force = 20f * direction;
-        message.amount = 20f;
+        MessageDamage message = new MessageDamage(40f, damageType.physical);
+        message.force = 40f * direction;
+        message.amount = 40f;
         message.responsibleParty = gameObject;
         message.strength = netBuffs[BuffType.strength].boolValue;
         message.type = damageType.physical;

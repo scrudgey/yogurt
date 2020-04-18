@@ -3,18 +3,25 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Nimrod;
+using System.Xml.Serialization;
 
 namespace analysis {
     [System.Serializable]
     public class MetaDescribable<T> : Describable where T : Describable, new() {
+        [XmlIgnore]
         private List<T> children = new List<T>();
         public bool debug;
+        [XmlIgnore]
         public SerializableDictionary<Rating, List<float>> qualities = new SerializableDictionary<Rating, List<float>>();
-
+        [XmlIgnore]
         public SerializableDictionary<System.Guid, SerializableDictionary<Rating, float>> rank = new SerializableDictionary<System.Guid, SerializableDictionary<Rating, float>>();
+        [XmlIgnore]
         public SerializableDictionary<System.Guid, SerializableDictionary<Rating, bool>> notable = new SerializableDictionary<System.Guid, SerializableDictionary<Rating, bool>>(); //top
+        [XmlIgnore]
         public SerializableDictionary<System.Guid, int> notables = new SerializableDictionary<Guid, int>(); // tops
+        [XmlIgnore]
         public SerializableDictionary<System.Guid, int> totalRank = new SerializableDictionary<System.Guid, int>(); // total_rank
+        [XmlIgnore]
         public SerializableDictionary<System.Guid, SerializableDictionary<Rating, float>> fraction = new SerializableDictionary<System.Guid, SerializableDictionary<Rating, float>>();
 
         public SerializableDictionary<Rating, float> GetRank(T child) {
@@ -91,7 +98,6 @@ namespace analysis {
             {Rating.positive, 0f}
         };
         }
-
         public void ResetChildren() {
             children = new List<T>();
         }

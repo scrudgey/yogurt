@@ -8,7 +8,6 @@ public partial class UINew : Singleton<UINew> {
 
     private enum EasingDirection { none, up, down }
 
-
     public GameObject UICanvas;
     private List<GameObject> activeWorldButtons = new List<GameObject>();
     private List<GameObject> activeTopButtons = new List<GameObject>();
@@ -49,6 +48,7 @@ public partial class UINew : Singleton<UINew> {
     public string actionButtonText;
     public UIHitIndicator hitIndicator;
     public Transform objectivesContainer;
+    public Transform iconDock;
     public GameObject buttonAnchor;
     public List<string> previousTopButtons = new List<string>();
     public void Start() {
@@ -60,10 +60,8 @@ public partial class UINew : Singleton<UINew> {
             init = true;
         }
         // Sprite[] sprites = Resources.LoadAll<Sprite>("UI/Cursor2_128");
-
         // cursorDefault = sprites[0].texture;
         // cursorHighlight = sprites[1].texture;
-
         cursorDefault = (Texture2D)Resources.Load("UI/cursor3_64_2");
         cursorHighlight = (Texture2D)Resources.Load("UI/cursor3_64_1");
         cursorTarget = (Texture2D)Resources.Load("UI/cursor3_target3");
@@ -99,6 +97,7 @@ public partial class UINew : Singleton<UINew> {
         topRightBar = UICanvas.transform.Find("topright").gameObject;
         hitIndicator = UICanvas.transform.Find("hitIndicator").GetComponent<UIHitIndicator>();
         objectivesContainer = UICanvas.transform.Find("objectives");
+        iconDock = UICanvas.transform.Find("iconDock");
         topRightRectTransform = topRightBar.GetComponent<RectTransform>();
         if (lifebarDefaultSize == Vector2.zero)
             lifebarDefaultSize = new Vector2(lifebar.rect.width, lifebar.rect.height);
@@ -125,14 +124,17 @@ public partial class UINew : Singleton<UINew> {
         }
     }
 
-
     public void RefreshUI(bool active = false) {
         List<GameObject> buttons = new List<GameObject>() { inventoryButton, fightButton, punchButton, speakButton, hypnosisButton, vomitButton, teleportButton };
         foreach (GameObject button in buttons) {
             if (button)
                 button.SetActive(false);
         }
+
+        // health / oxygen bars
         topRightBar.SetActive(false);
+
+        // action buttons
         ClearWorldButtons();
         ClearTopButtons();
 
@@ -140,7 +142,7 @@ public partial class UINew : Singleton<UINew> {
         UpdateObjectives();
 
         // buff effects
-        foreach (Transform child in UICanvas.transform.Find("iconDock")) {
+        foreach (Transform child in iconDock) {
             child.gameObject.SetActive(active);
         }
 
@@ -155,14 +157,4 @@ public partial class UINew : Singleton<UINew> {
         }
 
     }
-
-
-    // public void BounceText(string text, GameObject target) {
-    //     GameObject bounce = Instantiate(Resources.Load("UI/BounceText")) as GameObject;
-    //     BounceText bounceScript = bounce.GetComponent<BounceText>();
-    //     if (target) {
-    //         bounceScript.target = target;
-    //     }
-    //     bounceScript.text = text;
-    // }
 }

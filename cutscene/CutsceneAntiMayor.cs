@@ -15,11 +15,7 @@ public class CutsceneAntiMayor : Cutscene {
     private float startDialogue = 4.5f;
     private bool inDialogue;
     Text settingText;
-    // Text escPrompt;
-    // GameObject longShot;
     Speech am;
-    // Speech larry;
-    // Speech curly;
     HeadAnimation amControl;
     Humanoid amHum;
     GameObject amObj;
@@ -28,7 +24,6 @@ public class CutsceneAntiMayor : Cutscene {
     float scriptTimeSpace = 1f;
     public override void Configure() {
         configured = true;
-        // longShot = GameObject.Find("long_shot");
         GameObject canvas = GameObject.Find("Canvas");
         settingText = canvas.transform.Find("text").GetComponent<Text>();
         Color blank = new Color(255, 255, 255, 0);
@@ -39,6 +34,10 @@ public class CutsceneAntiMayor : Cutscene {
         amHum.SetDirection(Vector2.right);
         amControl.DirectionChange(Vector2.right);
         am = amObj.GetComponent<Speech>();
+
+        AudioSource amAudio = amObj.GetComponent<AudioSource>();
+        amAudio.minDistance = 100f;
+        amAudio.maxDistance = 200f;
     }
     public override void Update() {
         timer += Time.deltaTime;

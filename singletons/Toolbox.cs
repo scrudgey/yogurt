@@ -131,15 +131,14 @@ public partial class Toolbox : Singleton<Toolbox> {
     public EventData DataFlag(GameObject spawner, string noun, string whatHappened, float chaos = 0, float disgusting = 0, float disturbing = 0, float offensive = 0, float positive = 0) {
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
         Occurrence occurrence = flag.GetComponent<Occurrence>();
-        OccurrenceGeneric data = new OccurrenceGeneric();
-        EventData eventData = new EventData(chaos: chaos, disgusting: disgusting, disturbing: disturbing, offensive: offensive, positive: positive);
 
+        EventData eventData = new EventData(chaos: chaos, disgusting: disgusting, disturbing: disturbing, offensive: offensive, positive: positive);
         eventData.noun = noun;
         eventData.whatHappened = whatHappened;
+        OccurrenceEvent data = new OccurrenceEvent(eventData);
+        data.CalculateDescriptions();
+
         occurrence.data = data;
-        data.eventData.Add(eventData);
-        data.AddChild(eventData);
-        occurrence.data.CalculateDescriptions();
 
         return eventData;
     }
@@ -539,7 +538,7 @@ public partial class Toolbox : Singleton<Toolbox> {
         }
     }
     public static void SetGender(GameObject target, Gender gender) {
-        Speech speech = target.GetComponent<Speech>();
+        // Speech speech = target.GetComponent<Speech>();
         HeadAnimation headAnimation = target.GetComponentInChildren<HeadAnimation>();
         Outfit outfit = target.GetComponent<Outfit>();
 
@@ -555,7 +554,15 @@ public partial class Toolbox : Singleton<Toolbox> {
             default:
                 break;
         }
-        outfit.gender = gender;
+        if (outfit != null) {
+            outfit.gender = gender;
+        }
+    }
+    public static Gender GetGender(GameObject target) {
+        Outfit outfit = target.GetComponent<Outfit>();
+        if (outfit != null) {
+            return outfit.gender;
+        } else return Gender.male;
     }
 
     public void deactivateEventually(GameObject target) {

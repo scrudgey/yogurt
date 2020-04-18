@@ -13,6 +13,7 @@ public class BalloonMaker : Interactive {
         // balloon.hideInClickMenu = true;
         balloon.otherOnSelfConsent = false;
         balloon.selfOnOtherConsent = false;
+        balloon.holdingOnOtherConsent = false;
         // balloon.inertOnPlayerConsent = false;
         interactions.Add(balloon);
     }

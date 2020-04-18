@@ -140,9 +140,11 @@ public class Godhead : MonoBehaviour {
         if (uniform != null || hat != null) {
             Buff bless = new Buff(BuffType.invulnerable, true, 0, 30f);
             itemIntrinsics.liveBuffs.Add(bless);
+            itemIntrinsics.IntrinsicsChanged();
         } else {
             Buff bless = new Buff(BuffType.invulnerable, true, 0, 3);
             itemIntrinsics.buffs.Add(bless);
+            itemIntrinsics.IntrinsicsChanged();
         }
         itemIntrinsics.IntrinsicsChanged();
     }

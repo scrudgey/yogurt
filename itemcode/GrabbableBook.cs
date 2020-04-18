@@ -19,6 +19,8 @@ public class GrabbableBook : Grabbable, ISaveable {
     }
     override public void Start() {
         if (book == null) {
+            if (GameManager.Instance.data != null && GameManager.Instance.data.mayorLibraryShuffled)
+                Destroy(gameObject);
             book = new Book("Book", "Joe Book");
         }
         itemPrefab = Resources.Load("prefabs/book") as GameObject;

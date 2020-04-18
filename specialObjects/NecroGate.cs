@@ -10,6 +10,9 @@ public class NecroGate : Doorway {
     public ParticleSystem[] particles;
     public override void Awake() {
         Interaction leaveaction = new Interaction(this, actionDesc, "Portal");
+        leaveaction.otherOnSelfConsent = true;
+        leaveaction.selfOnOtherConsent = true;
+        leaveaction.selfOnSelfConsent = true;
         interactions.Add(leaveaction);
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 

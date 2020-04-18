@@ -11,7 +11,10 @@ public class EventData : Describable {
     public string popupDesc;
     public string transcriptLine;
     public string noun;
-    public EventData() {
+    public EventData() { } // needed for serialization, should not be used
+    public EventData(string noun, string whatHappened) {
+        this.noun = noun;
+        this.whatHappened = whatHappened;
         quality = new SerializableDictionary<Rating, float>(){
             {Rating.disgusting, 0f},
             {Rating.disturbing, 0f},
@@ -157,6 +160,7 @@ public class EventData : Describable {
             data.whatHappened = Toolbox.Instance.GetName(dead) + " was killed";
             GameManager.Instance.IncrementStat(StatType.monstersKilled, 1);
         } else if (suicide) {
+            data = new EventData(offensive: 3, disgusting: 3, disturbing: 3, chaos: 2, positive: -3);
             data.whatHappened = victimName + " committed suicide";
             data.noun = "suicide";
             data.popupDesc = "suicides";
@@ -166,7 +170,6 @@ public class EventData : Describable {
                 GameManager.Instance.IncrementStat(StatType.selfImmolations, 1);
             }
         } else {
-
             data = new EventData(offensive: 4, disgusting: 3, disturbing: 4, chaos: 4, positive: -3);
             data.key = "death";
             data.val = 1f;

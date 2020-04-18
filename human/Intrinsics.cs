@@ -94,6 +94,11 @@ public class Intrinsics : MonoBehaviour, ISaveable {
         IntrinsicsChanged();
     }
     public void SetBuffFX() {
+        Transform headTransform = transform.Find("head");
+        Head head = null;
+        if (headTransform != null) {
+            head = headTransform.GetComponent<Head>();
+        }
         foreach (KeyValuePair<BuffType, Buff> kvp in NetBuffs()) {
             switch (kvp.Key) {
                 case BuffType.undead:
@@ -105,7 +110,7 @@ public class Intrinsics : MonoBehaviour, ISaveable {
                 case BuffType.ethereal:
                     if (kvp.Value.boolValue || kvp.Value.floatValue > 0) {
                         FadeAlpha fader = Toolbox.GetOrCreateComponent<FadeAlpha>(gameObject);
-                        Transform head = transform.Find("head");
+
                         if (head) {
                             fader.spriteRenderers.Add(head.GetComponent<SpriteRenderer>());
                         }
@@ -116,23 +121,37 @@ public class Intrinsics : MonoBehaviour, ISaveable {
                     break;
                 case BuffType.invulnerable:
                     if (kvp.Value.active()) {
-                        Transform head = transform.Find("head");
-                        GameObject halo = GameObject.Instantiate(Resources.Load("particles/halo")) as GameObject;
-                        if (head) {
-                            halo.transform.SetParent(head, false);
-                            halo.transform.localPosition = Vector3.zero;
-                        } else {
-                            halo.transform.SetParent(transform, false);
-                            halo.transform.localPosition = Vector3.zero;
+
+                        // only create halo if invuln. is not the hat
+                        // add to head if head exists, else add to me
+                        if (!(head != null && children.ContainsKey(head) && children[head].NetBuffs()[BuffType.invulnerable].active())) {
+                            Transform haloTransform = transform.Find("halo");
+                            if (haloTransform == null) {
+                                GameObject halo = GameObject.Instantiate(Resources.Load("particles/halo")) as GameObject;
+                                halo.name = "halo";
+                                if (head != null) {
+                                    halo.transform.SetParent(head.transform, false);
+                                } else {
+                                    halo.transform.SetParent(transform, false);
+                                }
+                                halo.transform.localPosition = Vector3.zero;
+                            }
                         }
                     } else {
-                        Transform head = transform.Find("head");
-                        Transform halo = transform.Find("halo(Clone)");
-                        if (head) {
-                            halo = head.Find("halo(Clone)");
+
+                        // only delete halo if invuln. is not the hat
+                        // delete from head if head exists, otherwise delete from me
+                        if (!(head != null && children.ContainsKey(head) && children[head].NetBuffs()[BuffType.invulnerable].active())) {
+                            Transform haloTransform = null;
+                            if (head != null) {
+                                haloTransform = head.transform.Find("halo");
+                            } else {
+                                haloTransform = transform.Find("halo");
+                            }
+                            if (haloTransform != null) {
+                                Destroy(haloTransform.gameObject);
+                            }
                         }
-                        if (halo != null)
-                            Destroy(halo.gameObject);
                     }
                     break;
                 default:

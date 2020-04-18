@@ -249,8 +249,9 @@ public class DialogueMenu : MonoBehaviour {
             cutsceneDialogue = true;
             EnableButtons();
         }
-        if (filename == "imp") {
+        if (filename == "imp2") {
             disableCommand = true;
+            // cutsceneDialogue = true;
             EnableButtons();
         }
 

@@ -32,7 +32,6 @@ public class AnimateUIBubble : MonoBehaviour {
                 frame1.SetActive(false);
                 frame2.SetActive(true);
             }
-            // spriteRenderer.sprite = frames[frameIndex];
         }
     }
     public void EnableFrames() {

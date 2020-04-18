@@ -13,7 +13,7 @@ public class PotionSeller : Interactive {
     public GameObject rightPoint;
     void Start() {
         speech = GetComponent<Speech>();
-        Interaction giveAct = new Interaction(this, "analyze", "Analyze");
+        Interaction giveAct = new Interaction(this, "Analyze", "Analyze");
         interactions.Add(giveAct);
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
     }

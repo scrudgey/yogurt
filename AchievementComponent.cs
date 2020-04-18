@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System;
-// using UnityEditor;
 public class AchievementComponent : MonoBehaviour {
     public Achievement achivement;
 }
