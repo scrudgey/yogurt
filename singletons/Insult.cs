@@ -17,8 +17,11 @@ public class Insult {
         g.Load("insult_inanimate");
 
         Item item = target.GetComponent<Item>();
-
-        g.AddSymbol("object", item.itemName);
+        if (item != null) {
+            g.AddSymbol("object", item.itemName);
+        } else {
+            g.AddSymbol("object", "thing");
+        }
 
         // load specific symbols
         // food

@@ -13,6 +13,7 @@ public class Outfit : Interactive, ISaveable {
     void Awake() {
         Interaction wearInteraction = new Interaction(this, "Wear", "DonUniformWrapper");
         wearInteraction.dontWipeInterface = false;
+        wearInteraction.holdingOnOtherConsent = false;
         interactions.Add(wearInteraction);
 
         Interaction stealInteraction = new Interaction(this, "Take Outfit", "StealUniform");
@@ -132,6 +133,11 @@ public class Outfit : Interactive, ISaveable {
         data.strings["worn"] = wornUniformName;
         data.ints["hitstate"] = (int)hitState;
         data.ints["gender"] = (int)gender;
+    }
+    void OnDestroy() {
+        if (uniform != null) {
+            Destroy(uniform);
+        }
     }
     public void LoadData(PersistentComponent data) {
         wornUniformName = data.strings["worn"];

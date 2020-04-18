@@ -394,7 +394,6 @@ public class Controller : Singleton<Controller> {
         commandAct = null;
     }
     public void ButtonClicked(ActionButtonScript button) {
-        Debug.Log(state);
         // normal click
         if (state != ControlState.commandSelect) {
             if (button.bType == ActionButtonScript.buttonType.Action) {

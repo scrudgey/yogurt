@@ -48,7 +48,7 @@ public class Flammable : MonoBehaviour, ISaveable {
         fire.flammable = this;
         fireRadius = fireChild.AddComponent<CircleCollider2D>();
         fireRadius.isTrigger = true;
-        fireRadius.radius = 0.2f;
+        fireRadius.radius = 0.1f;
         fireRadius.name = "fire";
         fire.gameObject.layer = 13;
         //ensure that there is a speaker

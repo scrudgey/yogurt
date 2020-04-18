@@ -11,6 +11,7 @@ public class PersistentObject {
     public string prefabPath;
     public bool noPrefab;
     public bool childObject;
+    public bool apartmentObject;
     public System.Guid id;
     public Vector3 transformPosition;
     public Vector3 transformScale;
@@ -54,6 +55,8 @@ public class PersistentObject {
         Update(gameObject);
         MyMarker marker = gameObject.GetComponent<MyMarker>();
         if (marker != null) {
+            // id = marker.id;
+            apartmentObject = marker.apartmentObject;
             foreach (GameObject childObject in marker.persistentChildren) {
                 PersistentObject persistentChildObject = new PersistentObject(childObject);
                 persistentChildObject.parentObject = childObject.name;

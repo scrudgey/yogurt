@@ -116,18 +116,7 @@ namespace AI {
             routines.Add(routine);
         }
     }
-    public class GoalDeliverPizza : Goal {
-        public Ref<GameObject> target;
-        public ConditionBoolSwitch boolSwitch;
-        public GoalDeliverPizza(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c) {
-            this.target = target;
-            successCondition = new ConditionBoolSwitch(g);
-            boolSwitch = new ConditionBoolSwitch(g);
-            successCondition = boolSwitch;
-            RoutineSpeechWithPerson talkRoutine = new RoutineSpeechWithPerson(g, c, target, (ConditionBoolSwitch)successCondition);
-            routines.Add(talkRoutine);
-        }
-    }
+
     public class GoalUseItem : Goal {
         public Inventory inventory;
         public ConditionBoolSwitch boolSwitch;
@@ -231,14 +220,28 @@ namespace AI {
             successCondition = new ConditionLookingAtObject(g, c, target);
         }
     }
+    public class GoalDeliverPizza : Goal {
+        public Ref<GameObject> target;
+        public ConditionBoolSwitch boolSwitch;
+        public GoalDeliverPizza(GameObject g, Controllable c, Ref<GameObject> target) : base(g, c) {
+            this.target = target;
+            successCondition = new ConditionBoolSwitch(g);
+            boolSwitch = new ConditionBoolSwitch(g);
+            successCondition = boolSwitch;
+            RoutineSpeechWithPerson talkRoutine = new RoutineSpeechWithPerson(g, c, target, (ConditionBoolSwitch)successCondition);
+            routines.Add(talkRoutine);
+        }
+    }
     public class GoalTriggerTrapdoor : Goal {
-        ConditionBoolSwitch successSwitch;
+        public ConditionBoolSwitch successSwitch;
         public GoalTriggerTrapdoor(GameObject g, Controllable c) : base(g, c) {
             goalThought = "I'm sprining my trap.";
             Speech speech = g.GetComponent<Speech>();
 
             successSwitch = new ConditionBoolSwitch(g);
             routines.Add(new RoutineTrapdoor(g, c, speech, successSwitch));
+
+            // routines.Add(new Routine)
 
             // successSwitch.conditionMet = true;
             successCondition = successSwitch;
@@ -282,13 +285,13 @@ namespace AI {
             Routine wanderRoutine = new RoutineWander(g, c);
             switch (profficiency) {
                 case Personality.CombatProfficiency.expert:
-                    routinePunch.timeLimit = 1.2f;
-                    wanderRoutine.timeLimit = 0.5f;
+                    routinePunch.timeLimit = 4f;
+                    wanderRoutine.timeLimit = 0.25f;
                     break;
                 default:
                 case Personality.CombatProfficiency.normal:
-                    routinePunch.timeLimit = 1.0f;
-                    wanderRoutine.timeLimit = 1f;
+                    routinePunch.timeLimit = 2f;
+                    wanderRoutine.timeLimit = 0.5f;
                     break;
                 case Personality.CombatProfficiency.poor:
                     routinePunch.timeLimit = 1f;

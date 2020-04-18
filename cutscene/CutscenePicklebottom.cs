@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
-
+using System.Linq;
 
 public class CutscenePickleBottom : Cutscene {
     CameraControl camControl;
@@ -28,10 +28,13 @@ public class CutscenePickleBottom : Cutscene {
         // TODO
         // random 2 / 3 items?
         peterAI.targets = new Stack<Duplicatable>();
+        int maxNumber = Random.Range(5, 10);
         foreach (Duplicatable dup in GameObject.FindObjectsOfType<Duplicatable>()) {
             if (dup.PickleReady()) {
                 peterAI.targets.Push(dup);
             }
+            if (peterAI.targets.Count >= maxNumber)
+                break;
         }
         UINew.Instance.SetActionText("You have been visited by Peter Picklebottom");
         Toolbox.Instance.SwitchAudioListener(GameObject.Find("Main Camera"));

@@ -190,8 +190,6 @@ public class MySaver {
         }
 
         // close the XML serialization stream
-        // sceneStream.Close();
-        // playerStream.Close();
         GameManager.Instance.SaveGameData();
         if (!File.Exists(objectsPath)) {
             SaveObjectDatabase();
@@ -203,14 +201,11 @@ public class MySaver {
         var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<Guid, PersistentObject>));
         string objectsPath = GameManager.Instance.ObjectsSavePath();
 
-        // Debug.Log("saving "+objectsPath+" ...");
-        // Debug.Log(objectDataBase.Count);
         using (FileStream objectStream = File.Create(objectsPath)) {
             persistentSerializer.Serialize(objectStream, objectDataBase);
         }
-        // objectStream.Close();
     }
-    public static GameObject LoadScene() {
+    public static GameObject LoadScene(bool newDayLoad = false) {
         UINew.Instance.ClearWorldButtons();
         GameObject playerObject = null;
         loadedObjects = new Dictionary<Guid, GameObject>();
@@ -231,6 +226,7 @@ public class MySaver {
             Debug.Log("WEIRD: no existing object database on Load!");
             objectDataBase = new SerializableDictionary<Guid, PersistentObject>();
         }
+
         // destroy any currently existing permanent object
         // this should only be done if there exists a savestate for the level.
         // otherwise the default unity editor scene should be loaded as is.
@@ -239,8 +235,14 @@ public class MySaver {
             Stack<GameObject> gameObjectsToDestroy = new Stack<GameObject>();
             for (int i = 0; i < marks.Count; i++) {
                 if (marks[i] != null) {
+                    // do not destroy static objects
                     if (marks[i].staticObject)
                         continue;
+
+                    // do not destroy apartmentobject on newday
+                    if (newDayLoad && marks[i].apartmentObject)
+                        continue;
+
                     gameObjectsToDestroy.Push(marks[i].gameObject);
                 }
             }
@@ -259,7 +261,7 @@ public class MySaver {
             using (var sceneStream = new FileStream(scenePath, FileMode.Open)) {
                 sceneIDs = listSerializer.Deserialize(sceneStream) as List<Guid>;
             }
-            LoadObjects(sceneIDs);
+            LoadObjects(sceneIDs, newDayLoad: newDayLoad);
         }
         if (File.Exists(playerPath)) {
             using (var playerStream = new FileStream(playerPath, FileMode.Open)) {
@@ -269,27 +271,46 @@ public class MySaver {
         } else {
             playerObject = GameManager.Instance.InstantiatePlayerPrefab();
         }
-        HandleLoadedPersistents(sceneIDs);
-        HandleLoadedPersistents(playerIDs);
+        HandleLoadedPersistents(sceneIDs, newDayLoad: newDayLoad);
+        HandleLoadedPersistents(playerIDs, newDayLoad: newDayLoad);
+
+        // if this is the start of a new day in the apartment, we delete apartment objects from the database
+        // because instead of loading them, we will use the scene's default
+        if (newDayLoad) {
+            List<Guid> apartmentKeys = new List<Guid>();
+            foreach (KeyValuePair<Guid, PersistentObject> kvp in objectDataBase) {
+                if (kvp.Value.apartmentObject) {
+                    // objectDataBase.Remove(kvp.Key);
+                    apartmentKeys.Add(kvp.Key);
+                }
+            }
+            foreach (Guid apartmentKey in apartmentKeys) {
+                objectDataBase.Remove(apartmentKey);
+            }
+        }
 
         return playerObject;
     }
-    public static void HandleLoadedPersistents(List<Guid> ids) {
+    public static void HandleLoadedPersistents(List<Guid> ids, bool newDayLoad = false) {
         // TODO: smarter check?
         foreach (Guid idn in ids) {
             PersistentObject persistent = null;
             if (objectDataBase.TryGetValue(idn, out persistent)) {
+                if (newDayLoad && persistent.apartmentObject)
+                    continue;
                 // TODO: handle update instead of replacement
                 // TODO: alert on load if instantiation fails
                 persistent.HandleLoad(loadedObjects[idn]);
             }
         }
     }
-    public static GameObject LoadObjects(List<Guid> ids) {
+    public static GameObject LoadObjects(List<Guid> ids, bool newDayLoad = false) {
         GameObject rootObject = null;
         foreach (Guid idn in ids) {
             PersistentObject persistent = null;
             if (objectDataBase.TryGetValue(idn, out persistent)) {
+                if (newDayLoad && persistent.apartmentObject)
+                    continue;
                 // TODO: do something smarter to find the child object
                 GameObject go = null;
                 if (persistent.noPrefab) {

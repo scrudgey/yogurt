@@ -11,22 +11,35 @@ public class Lighter : Interactive {
     void Start() {
         pickup = GetComponent<Pickup>();
         Interaction f = new Interaction(this, "Fire", "Fire");
+        f.holdingOnOtherConsent = false;
         f.otherOnSelfConsent = false;
         f.descString = "Use lighter";
         f.defaultPriority = 2;
         interactions.Add(f);
         flameRadius = transform.Find("flameRadius").GetComponent<Collider2D>();
         flameRadius.enabled = false;
+        Toolbox.RegisterMessageCallback<MessageDamage>(this, HandleMessageDamage);
+    }
+    public void HandleMessageDamage(MessageDamage message) {
+        if (message.type == damageType.asphyxiation && flameon) {
+            StopFire();
+        }
     }
     public void Fire() {
         flameon = !flameon;
         if (flameon) {
-            fire.Play();
-            flameRadius.enabled = true;
+            StartFire();
         } else {
-            fire.Stop();
-            flameRadius.enabled = false;
+            StopFire();
         }
+    }
+    private void StartFire() {
+        fire.Play();
+        flameRadius.enabled = true;
+    }
+    private void StopFire() {
+        fire.Stop();
+        flameRadius.enabled = false;
     }
     void OnTriggerEnter2D(Collider2D coll) {
 

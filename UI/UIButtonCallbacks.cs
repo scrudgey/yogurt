@@ -28,9 +28,9 @@ public class UIButtonCallbacks : MonoBehaviour {
     }
     public void TestButtonClick() {
 
-        Speech speech = GameObject.FindObjectOfType<Speech>();
-        MessageSpeech message = new MessageSpeech("what is this janky-ass bullshit? an ass? assholes!");
-        speech.Say(message);
+        // Speech speech = GameObject.FindObjectOfType<Speech>();
+        // MessageSpeech message = new MessageSpeech("what is this janky-ass bullshit? an ass? assholes!");
+        // speech.Say(message);
 
         // EnumerateCollectibles();
 
@@ -40,9 +40,9 @@ public class UIButtonCallbacks : MonoBehaviour {
         //     Godhead.BlessItem(pb);
         // }
 
-        // string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
-        // DirectoryInfo dataDir = new DirectoryInfo(path);
-        // dataDir.Delete(true);
+        string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
+        DirectoryInfo dataDir = new DirectoryInfo(path);
+        dataDir.Delete(true);
 
         // Debug.Log("test");
         // Grammar g = new Grammar();

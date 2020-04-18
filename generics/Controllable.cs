@@ -190,7 +190,8 @@ public class Controllable : MonoBehaviour {
             if (defaultInteraction != null) {
                 defaultInteraction.DoAction();
             }
-            UINew.Instance.UpdateTopActionButtons();
+            if (Controller.Instance.focus == this)
+                UINew.Instance.UpdateTopActionButtons();
         }
     }
     public void ShootHeld() {

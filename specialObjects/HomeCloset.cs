@@ -4,7 +4,10 @@ public class HomeCloset : Interactive {
     public ClosetType type;
     AnimateUIBubble newBubbleAnimation;
     public void Start() {
-        interactions.Add(new Interaction(this, "Open", "OpenCloset"));
+        Interaction act = new Interaction(this, "Open", "OpenCloset");
+        act.holdingOnOtherConsent = false;
+        // act.otherOnSelfConsent = false;
+        interactions.Add(act);
         newBubbleAnimation = GetComponent<AnimateUIBubble>();
         CheckBubble();
     }

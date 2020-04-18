@@ -382,9 +382,17 @@ public partial class GameManager : Singleton<GameManager> {
             Toolbox.GetOrCreateComponent<CameraControl>(cam.gameObject);
         }
 
+        // check here if it's a new day load
         UINew.Instance.ConfigureUIElements();
         if (loadLevel) {
-            playerObject = MySaver.LoadScene();
+            playerObject = MySaver.LoadScene(newDayLoad: data.entryID == -99);
+            if (data.entryID == -99) {
+                foreach (Controllable controllable in GameObject.FindObjectsOfType<Controllable>()) {
+                    if (controllable.gameObject != playerObject) {
+                        Destroy(controllable.gameObject);
+                    }
+                }
+            }
         } else {
             if (data == null)
                 data = InitializedGameData();
@@ -421,13 +429,6 @@ public partial class GameManager : Singleton<GameManager> {
             }
             data.firstTimeLeavingHouse = false;
         }
-        // if (sceneName == "apartment") {
-        //     Debug.Log("checking scene");
-        //     Computer computer = GameObject.FindObjectOfType<Computer>();
-        //     if (computer != null) {
-        //         computer.CheckBubble();
-        //     }
-        // }
         if (sceneName == "studio" && !data.visitedStudio) {
             data.visitedStudio = true;
             VideoCamera videoCamera = GameObject.FindObjectOfType<VideoCamera>();
@@ -521,6 +522,7 @@ public partial class GameManager : Singleton<GameManager> {
                     PlayPublicSound(teleportEnter);
                     GameObject.Instantiate(Resources.Load("prefabs/fx/teleportEntryEffect"), playerObject.transform.position, Quaternion.identity);
                     Toolbox.Instance.AudioSpeaker(teleportEnter, playerObject.transform.position);
+
                 }
             }
         }
@@ -532,6 +534,30 @@ public partial class GameManager : Singleton<GameManager> {
             playerObject = InstantiatePlayerPrefab();
             SetFocus(playerObject);
         }
+
+        // apartment normally does not reset. here, we want to reset certain items every morning.
+        // if the item no longer exists, create it.
+        // however, the item state will persist intra-day.
+
+        // normally, a scene state persists by deleting persistent objects upon scene load and then creating them based on save information.
+        // in our case, we want to:
+        //      when it's not a new day, delete all persistent objects in apartment, and load state like normal.
+        //      when it is a new day, don't delete select items (keep around their default state)
+        //          do not load corresponding persistent state (this is a tricky part)
+        //              add a new flag to persistent objects and markers.
+
+        // detect new day on load
+
+        // toilet
+        // piggybank
+        // fridge
+
+        // people
+        // https://github.com/scrudgey/yogurt/issues/123
+
+
+
+
         foreach (Puddle puddle in GameObject.FindObjectsOfType<Puddle>()) {
             Destroy(puddle.gameObject);
         }
@@ -900,9 +926,6 @@ public partial class GameManager : Singleton<GameManager> {
             return;
         UnityEngine.Object testPrefab = Resources.Load("prefabs/" + filename);
         if (testPrefab != null) {
-            data.collectedObjects.Add(filename);
-            data.itemCheckedOut[filename] = true;
-            Poptext.PopupCollected(obj);
             Edible objectEdible = obj.GetComponent<Edible>();
             if (objectEdible != null) {
                 if (!objectEdible.inedible) {
@@ -916,10 +939,17 @@ public partial class GameManager : Singleton<GameManager> {
                 data.newCollectedClothes.Add(filename);
                 data.clothesCollectedToday += 1;
             }
-            if (obj.GetComponent<Pickup>()) {
+            Pickup pickup = obj.GetComponent<Pickup>();
+            if (pickup != null && !pickup.heavyObject) {
                 data.collectedItems.Add(filename);
                 data.newCollectedItems.Add(filename);
                 data.itemsCollectedToday += 1;
+            }
+
+            if (pickup == null || !pickup.heavyObject) {
+                data.collectedObjects.Add(filename);
+                data.itemCheckedOut[filename] = true;
+                Poptext.PopupCollected(obj);
             }
         }
     }

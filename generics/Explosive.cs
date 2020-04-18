@@ -48,8 +48,6 @@ public class Explosive : MonoBehaviour {
             intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject);
         netBuffs = intrinsics.NetBuffs();
         if (Damageable.Damages(message.type, netBuffs)) {
-            Debug.Log(message.type);
-            Debug.Log(netBuffs);
             foreach (DamageThreshhold threshHold in threshHolds) {
                 threshHold.TakeDamage(message);
                 if (threshHold.Explode())

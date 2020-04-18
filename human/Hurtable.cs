@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.SceneManagement;
 
 public class Hurtable : Damageable, ISaveable {
@@ -31,10 +32,12 @@ public class Hurtable : Damageable, ISaveable {
     private float ouchFrequency = 0.1f;
     public GameObject dizzyEffect;
     public GameObject lastAttacker;
+    public bool impersonalAttacker;
     public float timeSinceLastCough;
     bool vibrate;
     public bool bleeds = true; // if true, bleed on cutting / piercing damage
     public bool monster = false; // if true, death of this hurtable is not shocking or disturbing
+    public Dictionary<damageType, float> totalDamage = new Dictionary<damageType, float>();
     public void Reset() {
         health = maxHealth;
         oxygen = maxOxygen;
@@ -77,6 +80,8 @@ public class Hurtable : Damageable, ISaveable {
         if (message.responsibleParty != null) {
             lastAttacker = message.responsibleParty;
         }
+        impersonalAttacker = message.impersonal;
+
         if (message.type == damageType.asphyxiation) {
             oxygen -= message.amount;
             if (oxygen <= 0) {
@@ -98,7 +103,6 @@ public class Hurtable : Damageable, ISaveable {
             default:
             case damageType.physical:
                 damage = Mathf.Max(message.amount - armor, 0);
-                health -= damage;
                 if (message.strength) {
                     impulse += damage * 2;
                 } else {
@@ -114,16 +118,22 @@ public class Hurtable : Damageable, ISaveable {
         }
         health -= damage;
 
+        if (!totalDamage.ContainsKey(message.type)) {
+            totalDamage[message.type] = 0;
+        }
+        totalDamage[message.type] += damage;
+
         // if the damage is fire or cutting, we die at health 0
         if (health <= 0 && (message.type == damageType.fire || message.type == damageType.cutting)) {
             Die(message.type);
         }
         // otherwise, we die at health -50%
-        if (health <= -0.5 * maxHealth) {
-            Die(message.type);
+        if (health <= -0.4 * maxHealth) {
+            damageType maxDamageType = totalDamage.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
+            Die(maxDamageType);
         }
         // the corpse can still be destroyed after that
-        if (health <= -0.75 * maxHealth && message.type == damageType.cosmic) {
+        if (health <= -0.6 * maxHealth && message.type == damageType.cosmic) {
             // TODO: cosmic vaporization effect
             Destruct();
             EventData data = Toolbox.Instance.DataFlag(
@@ -136,7 +146,7 @@ public class Hurtable : Damageable, ISaveable {
                 positive: -2,
                 offensive: -2);
         }
-        if (health <= -0.75 * maxHealth && message.type == damageType.cutting) {
+        if (health <= -0.6 * maxHealth && message.type == damageType.cutting) {
             Destruct();
             if (!monster) {
                 EventData data = Toolbox.Instance.DataFlag(
@@ -192,6 +202,7 @@ public class Hurtable : Damageable, ISaveable {
         } else {
             KnockDown();
         }
+
         LogTypeOfDeath(type);
         if (dizzyEffect != null) {
             ClaimsManager.Instance.WasDestroyed(dizzyEffect);
@@ -219,9 +230,9 @@ public class Hurtable : Damageable, ISaveable {
         }
     }
     public void LogTypeOfDeath(damageType type) {
-        bool suicide = false;
-        bool damageZone = false;
-        bool assailant = false;
+        bool suicide = lastAttacker == gameObject;
+        bool assailant = (lastAttacker != null) && (lastAttacker != gameObject) && !impersonalAttacker;
+        // bool assailant = false;
 
         // TODO: could this logic belong to eventdata / occurrence ?
         if (GameManager.Instance.playerObject == gameObject) {
@@ -237,7 +248,7 @@ public class Hurtable : Damageable, ISaveable {
             if (type == damageType.explosion) {
                 GameManager.Instance.IncrementStat(StatType.deathByExplosion, 1);
             }
-            if (damageZone) {
+            if (impersonalAttacker) {
                 GameManager.Instance.IncrementStat(StatType.deathByMisadventure, 1);
             }
             if (assailant) {
@@ -249,7 +260,7 @@ public class Hurtable : Damageable, ISaveable {
         OccurrenceDeath occurrenceData = new OccurrenceDeath(monster);
         occurrenceData.dead = gameObject;
         occurrenceData.suicide = suicide;
-        occurrenceData.damageZone = damageZone;
+        occurrenceData.damageZone = impersonalAttacker;
         occurrenceData.assailant = assailant;
         occurrenceData.lastAttacker = lastAttacker;
         occurrenceData.lastDamage = type;
@@ -299,13 +310,13 @@ public class Hurtable : Damageable, ISaveable {
         if (health <= 0 && hitState < Controllable.HitState.unconscious) {
             KnockDown();
         }
-        if (impulse > 50f && hitState < Controllable.HitState.unconscious) {
+        if (impulse > 120f && hitState < Controllable.HitState.unconscious) {
             KnockDown();
         }
         if (downedTimer <= 0 && hitState == Controllable.HitState.unconscious) { //&& health > 0) {
             GetUp();
         }
-        if (impulse > 35f && !doubledOver && hitState < Controllable.HitState.unconscious) {
+        if (impulse > 75f && !doubledOver && hitState < Controllable.HitState.unconscious) {
             DoubleOver(true);
         }
         if (impulse <= 0f && doubledOver && hitState < Controllable.HitState.unconscious) {
@@ -330,7 +341,7 @@ public class Hurtable : Damageable, ISaveable {
         hitState = Controllable.AddHitState(hitState, Controllable.HitState.unconscious);
         doubledOver = false;
         if (gameObject == GameManager.Instance.playerObject) {
-            downedTimer = 4f;
+            downedTimer = 5f;
         } else {
             downedTimer = 10f;
         }
@@ -352,9 +363,9 @@ public class Hurtable : Damageable, ISaveable {
         // Debug.Log(health);
         if (health < 0.25f * maxHealth)
             if (gameObject == GameManager.Instance.playerObject) {
-                health = 0.66f * maxHealth;
+                health += 0.3f * maxHealth;
             } else {
-                health = 0.25f * maxHealth;
+                health += 0.25f * maxHealth;
             }
         hitState = Controllable.RemoveHitState(hitState, Controllable.HitState.unconscious);
         doubledOver = false;

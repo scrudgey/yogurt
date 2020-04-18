@@ -12,17 +12,30 @@ public class Stain : MonoBehaviour, ISaveable {
     public void ConfigureParentObject(GameObject parent) {
         this.parent = parent;
         transform.position = parent.transform.position;
-        parentMask = Toolbox.GetOrCreateComponent<SpriteMask>(parent);
+
         parentRenderer = parent.GetComponent<SpriteRenderer>();
         SpriteRenderer stainRenderer = GetComponent<SpriteRenderer>();
         stainRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+
+        parentMask = parent.GetComponent<SpriteMask>();
+        if (parentMask == null) {
+            int sortingId = Random.Range(500, 32760);
+            parentMask = Toolbox.GetOrCreateComponent<SpriteMask>(parent);
+            parentMask.isCustomRangeActive = true;
+            parentMask.frontSortingLayerID = SortingLayer.NameToID("main");
+            parentMask.backSortingLayerID = SortingLayer.NameToID("main");
+            parentMask.frontSortingOrder = sortingId + 1;
+            parentMask.backSortingOrder = sortingId;
+
+            stainRenderer.sortingOrder = sortingId;
+        } else {
+            stainRenderer.sortingOrder = parentMask.backSortingOrder;
+        }
+
+
         transform.SetParent(parent.transform, true);
 
-        parentMask.isCustomRangeActive = true;
-        parentMask.frontSortingLayerID = SortingLayer.NameToID("air");
-        parentMask.backSortingLayerID = SortingLayer.NameToID("air");
-        parentMask.frontSortingOrder = 100;
-        parentMask.backSortingOrder = 0;
+
     }
     public void RemoveStain() {
         Destroy(gameObject);

@@ -84,6 +84,13 @@ public class CutsceneScorpion : Cutscene {
                 inv.GetItem(pickup);
                 numSwitchblades += 1;
             }
+
+            Awareness awareness = greaser.GetComponent<Awareness>();
+            foreach (GameObject otherGreaser in greasers) {
+                PersonalAssessment assessment = awareness.FormPersonalAssessment(otherGreaser);
+                if (assessment != null)
+                    assessment.status = PersonalAssessment.friendStatus.friend;
+            }
         }
         UINew.Instance.RefreshUI(active: true);
         complete = true;

@@ -6,7 +6,7 @@ using AI;
 public class PeterPicklebottom : MonoBehaviour {
     public enum AIState { none, walkToTarget, slewAtTarget, leave, passive }
     public AIState state;
-    public Controllable controllable;
+    public SimpleControl controllable;
     public Ref<Duplicatable> target;
     public Ref<GameObject> objRef;
     public float timer;
@@ -16,8 +16,9 @@ public class PeterPicklebottom : MonoBehaviour {
     public AudioClip theme;
     public AudioClip[] takeSound;
     private AudioSource audioSource;
+    public float slewTime = 1f;
     public void Start() {
-        controllable = GetComponent<Controllable>();
+        controllable = GetComponent<SimpleControl>();
         target = new Ref<Duplicatable>(null);
         objRef = new Ref<GameObject>(null);
         if (SceneManager.GetActiveScene().name == "apartment") {
@@ -70,20 +71,24 @@ public class PeterPicklebottom : MonoBehaviour {
                 }
                 break;
             case AIState.slewAtTarget:
-                if (timer > 1f && target.val != null) {
+                if (timer > slewTime && target.val != null) {
                     target.val.nullifyFX = null;
                     target.val.Nullify();
                     ClaimsManager.Instance.WasDestroyed(target.val.gameObject);
                     audioSource.PlayOneShot(takeSound[Random.Range(0, takeSound.Length)]);
+                    controllable.maxSpeed += 0.15f;
                 }
-                if (timer > 2f) {
+                if (timer > 2f * slewTime) {
                     state = AIState.walkToTarget;
                     target.val = targets.Pop();
                     objRef.val = target.val.gameObject;
                     timer = 0f;
+                    slewTime -= 0.2f;
+                    slewTime = Mathf.Max(0.3f, slewTime);
                 }
                 break;
             case AIState.leave:
+                controllable.maxSpeed = 0.4f;
                 objRef.val = door.gameObject;
                 float doorDistance = Vector2.Distance(transform.position, objRef.val.transform.position);
                 if (doorDistance > 0.1f) {

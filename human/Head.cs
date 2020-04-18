@@ -81,7 +81,7 @@ public class Head : Interactive, IExcludable, ISaveable {
         PhysicalBootstrapper phys = hat.GetComponent<PhysicalBootstrapper>();
         if (phys) {
             phys.gameObject.SetActive(true);
-            phys.InitPhysical(0.2f, Vector2.zero);
+            phys.InitPhysical(0.02f, Vector2.zero);
         } else {
             hat.transform.parent = null;
         }

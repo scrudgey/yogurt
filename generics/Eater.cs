@@ -287,6 +287,7 @@ public class Eater : Interactive, ISaveable {
         // foreach (KeyValuePair<Rating, float> kvp in od.ratings) {
         //     Debug.Log(kvp.Key.ToString() + ": " + kvp.Value.ToString());
         // }
+
         if (od.quality[Rating.disgusting] > 1)
             nausea += 10f;
         if (od.quality[Rating.disgusting] > 2)

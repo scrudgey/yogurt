@@ -19,6 +19,8 @@ public class BookPickup : Pickup, ISaveable {
     public int sprite;
     public void Awake() {
         Interaction read = new Interaction(this, "Read", "Read");
+        read.otherOnSelfConsent = false;
+        read.holdingOnOtherConsent = false;
         interactions.Add(read);
 
         sprite = Random.Range(0, bookSprites.Length);
