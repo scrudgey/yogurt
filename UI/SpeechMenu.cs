@@ -12,11 +12,11 @@ public class SpeechMenu : MonoBehaviour {
     }
     public void SwearAtButton() {
         UINew.Instance.CloseActiveMenu();
-        Controller.Instance.state = Controller.ControlState.swearSelect;
+        InputController.Instance.state = InputController.ControlState.swearSelect;
     }
     public void InsultButton() {
         UINew.Instance.CloseActiveMenu();
-        Controller.Instance.state = Controller.ControlState.insultSelect;
+        InputController.Instance.state = InputController.ControlState.insultSelect;
     }
     // public void RandomButton() {
     //     MessageSpeech message = new MessageSpeech();

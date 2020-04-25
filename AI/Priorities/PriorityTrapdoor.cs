@@ -7,7 +7,7 @@ namespace AI {
         public bool trapTriggered = false;
         public ConditionBoolSwitch boolSwitch;
         public TrapDoor trapdoor;
-        public PriorityTrapdoor(GameObject g, Controllable c, Vector3 guardPoint) : base(g, c) {
+        public PriorityTrapdoor(GameObject g, Controller c, Vector3 guardPoint) : base(g, c) {
             trapdoor = GameObject.Find("trapdoor").GetComponent<TrapDoor>();
 
             priorityName = "trapdoor";

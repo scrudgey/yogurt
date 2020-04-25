@@ -160,19 +160,19 @@ public class Godhead : MonoBehaviour {
         }
     }
     public void FinalSpeechCallback() {
-        Controller.Instance.state = Controller.ControlState.cutscene;
+        InputController.Instance.state = InputController.ControlState.cutscene;
         timer = 0f;
         state = State.retract;
         handParticles.Stop();
         handPointRenderer.enabled = false;
     }
     public void Bless() {
-        Controller.Instance.state = Controller.ControlState.cutscene;
+        InputController.Instance.state = InputController.ControlState.cutscene;
         state = State.bless;
         timer = 0f;
     }
     public void Destroy() {
-        Controller.Instance.state = Controller.ControlState.cutscene;
+        InputController.Instance.state = InputController.ControlState.cutscene;
         state = State.destroy;
         timer = 0f;
     }

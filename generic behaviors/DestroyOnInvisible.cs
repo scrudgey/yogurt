@@ -12,7 +12,7 @@ public class DestroyOnInvisible : MonoBehaviour {
         if (initPosition.x < 0 || initPosition.y < 0 || initPosition.x > renderingCamera.pixelWidth || initPosition.y > renderingCamera.pixelHeight) {
             Destroy(gameObject);
             UINew.Instance.ClearWorldButtons();
-            Controller.Instance.ResetLastLeftClicked();
+            InputController.Instance.ResetLastLeftClicked();
         }
     }
 }

@@ -38,9 +38,18 @@ public class CutsceneBoardroom : Cutscene {
         moeObj = GameObject.Find("moe");
         GameObject larryObj = GameObject.Find("larry");
         GameObject curlyObj = GameObject.Find("curly");
-        moeObj.GetComponent<Humanoid>().SetDirection(Vector2.down);
-        larryObj.GetComponent<Humanoid>().SetDirection(Vector2.right);
-        curlyObj.GetComponent<Humanoid>().SetDirection(Vector2.left);
+        using (Controller controller = new Controller(moeObj)) {
+            controller.SetDirection(Vector2.down);
+        }
+        using (Controller controller = new Controller(larryObj)) {
+            controller.SetDirection(Vector2.right);
+        }
+        using (Controller controller = new Controller(curlyObj)) {
+            controller.SetDirection(Vector2.left);
+        }
+        // moeObj.GetComponent<Humanoid>().SetDirection(Vector2.down);
+        // larryObj.GetComponent<Humanoid>().SetDirection(Vector2.right);
+        // curlyObj.GetComponent<Humanoid>().SetDirection(Vector2.left);
         moeControl = moeObj.GetComponentInChildren<HeadAnimation>();
         moeControl.DirectionChange(Vector2.down);
         moe = moeObj.GetComponent<Speech>();

@@ -16,8 +16,9 @@ public class CutsceneAntiMayor : Cutscene {
     private bool inDialogue;
     Text settingText;
     Speech am;
-    HeadAnimation amControl;
-    Humanoid amHum;
+    HeadAnimation amHeadAnim;
+    // Humanoid amHum;
+    Controller amController;
     GameObject amObj;
     List<string> lines = new List<string>();
     int index = 0;
@@ -29,10 +30,11 @@ public class CutsceneAntiMayor : Cutscene {
         Color blank = new Color(255, 255, 255, 0);
         settingText.color = blank;
         amObj = GameObject.Find("AntiMayor");
-        amHum = amObj.GetComponent<Humanoid>();
-        amControl = amObj.GetComponentInChildren<HeadAnimation>();
-        amHum.SetDirection(Vector2.right);
-        amControl.DirectionChange(Vector2.right);
+        // amHum = amObj.GetComponent<Humanoid>();
+        amController = new Controller(amObj);
+        amHeadAnim = amObj.GetComponentInChildren<HeadAnimation>();
+        amController.SetDirection(Vector2.right);
+        amHeadAnim.DirectionChange(Vector2.right);
         am = amObj.GetComponent<Speech>();
 
         AudioSource amAudio = amObj.GetComponent<AudioSource>();
@@ -90,23 +92,23 @@ public class CutsceneAntiMayor : Cutscene {
         if (line == "<LEFT>") {
             Vector3 scale = new Vector3(-1, 1, 1);
             amObj.transform.localScale = scale;
-            amControl.DirectionChange(Vector2.left);
-            amHum.SetDirection(Vector2.left);
+            amHeadAnim.DirectionChange(Vector2.left);
+            amController.SetDirection(Vector2.left);
         } else if (line == "<RIGHT>") {
             Vector3 scale = new Vector3(1, 1, 1);
             amObj.transform.localScale = scale;
-            amControl.DirectionChange(Vector2.right);
-            amHum.SetDirection(Vector2.right);
+            amHeadAnim.DirectionChange(Vector2.right);
+            amController.SetDirection(Vector2.right);
         } else if (line == "<DOWN>") {
             Vector3 scale = new Vector3(1, 1, 1);
             amObj.transform.localScale = scale;
-            amControl.DirectionChange(Vector2.down);
-            amHum.SetDirection(Vector2.down);
+            amHeadAnim.DirectionChange(Vector2.down);
+            amController.SetDirection(Vector2.down);
         } else if (line == "<UP>") {
             Vector3 scale = new Vector3(1, 1, 1);
             amObj.transform.localScale = scale;
-            amControl.DirectionChange(Vector2.up);
-            amHum.SetDirection(Vector2.up);
+            amHeadAnim.DirectionChange(Vector2.up);
+            amController.SetDirection(Vector2.up);
         }
         if (endHook.IsMatch(line)) {
             complete = true;

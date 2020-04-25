@@ -19,12 +19,11 @@ public class DamageZone : MonoBehaviour {
     void OnTriggerStay2D(Collider2D other) {
         if (enabled == false)
             return;
-        float timerVal = 0;
-        if (Controller.forbiddenTags.Contains(other.tag))
+        if (InputController.forbiddenTags.Contains(other.tag))
             return;
 
         if (!roots.ContainsKey(other)) {
-            roots[other] = Controller.Instance.GetBaseInteractive(other.transform);
+            roots[other] = InputController.Instance.GetBaseInteractive(other.transform);
         }
 
         GameObject root = roots[other];

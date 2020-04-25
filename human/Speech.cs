@@ -257,10 +257,10 @@ public class Speech : Interactive, ISaveable {
         // TODO: fix commanding someone to speak with player
         UINew.Instance.RefreshUI();
         DialogueMenu menu = UINew.Instance.ShowMenu(UINew.MenuType.dialogue).GetComponent<DialogueMenu>();
-        if (Controller.Instance.commandTarget == null) {
+        if (InputController.Instance.commandTarget == null) {
             menu.Configure(GameManager.Instance.playerObject.GetComponent<Speech>(), this);
         } else {
-            menu.Configure(Controller.Instance.commandTarget.GetComponent<Speech>(), this);
+            menu.Configure(InputController.Instance.commandTarget.GetComponent<Speech>(), this);
         }
         return menu;
     }
@@ -277,16 +277,16 @@ public class Speech : Interactive, ISaveable {
         if (GameManager.Instance.playerObject == null)
             return false;
         Speech controlSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
-        if (Controller.Instance.state == Controller.ControlState.commandSelect) {
-            controlSpeech = Controller.Instance.commandTarget.GetComponent<Speech>();
+        if (InputController.Instance.state == InputController.ControlState.commandSelect) {
+            controlSpeech = InputController.Instance.commandTarget.GetComponent<Speech>();
         }
         if (controlSpeech == null)
             return false;
         if (controlSpeech.glibSpeakWith) {
             return false;
         }
-        if (Controller.Instance.state == Controller.ControlState.commandSelect) {
-            return Controller.Instance.commandTarget != gameObject;
+        if (InputController.Instance.state == InputController.ControlState.commandSelect) {
+            return InputController.Instance.commandTarget != gameObject;
         } else {
             return GameManager.Instance.playerObject != gameObject;
         }
@@ -489,7 +489,7 @@ public class Speech : Interactive, ISaveable {
             return;
         }
 
-        GameObject mainTarget = Controller.Instance.GetBaseInteractive(target.transform);
+        GameObject mainTarget = InputController.Instance.GetBaseInteractive(target.transform);
         string targetname = Toolbox.Instance.GetName(mainTarget);
         Insult("that shazbotting " + targetname + "!", target);
 
@@ -499,8 +499,10 @@ public class Speech : Interactive, ISaveable {
         MessageInsult messageInsult = new MessageInsult();
         Toolbox.Instance.SendMessage(target, this, messageInsult);
 
-        Controllable control = GetComponent<Controllable>();
-        control.LookAtPoint(target.transform.position);
+        // Controllable control = GetComponent<Controllable>();
+        using (Controller control = new Controller(gameObject)) {
+            control.LookAtPoint(target.transform.position);
+        }
 
         if (GameManager.Instance.data.perks["burn"]) {
             MessageDamage burnNotice = new MessageDamage(10f, damageType.fire);
@@ -530,8 +532,11 @@ public class Speech : Interactive, ISaveable {
 
         Monologue mono = new Monologue(this, strings.ToArray());
 
-        Controllable control = GetComponent<Controllable>();
-        control.LookAtPoint(target.transform.position);
+        // Controllable control = GetComponent<Controllable>();
+        // control.LookAtPoint(target.transform.position);
+        using (Controller control = new Controller(gameObject)) {
+            control.LookAtPoint(target.transform.position);
+        }
         return mono;
     }
     public Monologue ThreatMonologue(GameObject target) {
@@ -554,8 +559,11 @@ public class Speech : Interactive, ISaveable {
         List<string> strings = new List<string>() { censoredContent };
         Monologue mono = new Monologue(this, strings.ToArray());
 
-        Controllable control = GetComponent<Controllable>();
-        control.LookAtPoint(target.transform.position);
+        // Controllable control = GetComponent<Controllable>();
+        // control.LookAtPoint(target.transform.position);
+        using (Controller control = new Controller(gameObject)) {
+            control.LookAtPoint(target.transform.position);
+        }
         return mono;
     }
 

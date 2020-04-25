@@ -37,14 +37,14 @@ public class TeleportSwitch : Interactive {
             HashSet<GameObject> pad2Objects = new HashSet<GameObject>();
             foreach (Transform obj in GameObject.FindObjectsOfType<Transform>()) {
 
-                if (Controller.forbiddenTags.Contains(obj.tag))
+                if (InputController.forbiddenTags.Contains(obj.tag))
                     continue;
 
                 if (pad1.bounds.Contains(obj.position)) {
-                    pad1Objects.Add(Controller.Instance.GetBaseInteractive(obj));
+                    pad1Objects.Add(InputController.Instance.GetBaseInteractive(obj));
                 }
                 if (pad2.bounds.Contains(obj.position)) {
-                    pad2Objects.Add(Controller.Instance.GetBaseInteractive(obj));
+                    pad2Objects.Add(InputController.Instance.GetBaseInteractive(obj));
                 }
             }
 

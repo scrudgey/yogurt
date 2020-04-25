@@ -27,7 +27,7 @@ public class Teleporter : Interactive {
             timer -= Time.deltaTime;
             if (timer <= 0) {
                 startEffect.Stop();
-                Controller.Instance.suspendInput = false;
+                InputController.Instance.suspendInput = false;
                 GameManager.Instance.LeaveScene(destination, 420);
             }
         }

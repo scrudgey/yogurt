@@ -39,7 +39,7 @@ public class CutsceneNeconomicon : Cutscene {
         player = GameManager.Instance.playerObject;
         footPoint = player.transform.Find("footPoint");
         footpointInitPosition = footPoint.position;
-        Controller.Instance.suspendInput = true;
+        InputController.Instance.suspendInput = true;
         playerAnimation = player.GetComponent<AdvancedAnimation>();
         playerCollider = player.GetComponent<Collider2D>();
         playerControl = player.GetComponent<Humanoid>();
@@ -144,7 +144,7 @@ public class CutsceneNeconomicon : Cutscene {
         footPoint.position = footpointInitPosition;
     }
     void End() {
-        Controller.Instance.suspendInput = false;
+        InputController.Instance.suspendInput = false;
         UINew.Instance.RefreshUI(active: true);
         if (playerAnimation)
             playerAnimation.enabled = true;

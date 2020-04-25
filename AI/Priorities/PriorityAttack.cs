@@ -5,7 +5,7 @@ namespace AI {
         private Inventory inventory;
         private float updateInterval;
         private Dictionary<BuffType, Buff> netBuffs = new Dictionary<BuffType, Buff>();
-        public PriorityAttack(GameObject g, Controllable c) : base(g, c) {
+        public PriorityAttack(GameObject g, Controller c) : base(g, c) {
             priorityName = "attack";
             inventory = gameObject.GetComponent<Inventory>();
 

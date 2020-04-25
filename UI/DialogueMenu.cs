@@ -180,10 +180,15 @@ public class DialogueMenu : MonoBehaviour {
         portrait2.sprite = target.portrait[0];
         portrait1.sprite = instigator.portrait[0];
         targetControl = target.GetComponent<Controllable>();
+        using (Controller controller = new Controller(targetControl)) {
+            controller.SetDirection(instigator.transform.position - target.transform.position);
+        }
+        using (Controller controller = new Controller(targetControl)) {
+            controller.SetDirection(target.transform.position - instigator.transform.position);
+        }
+
         instigatorControl = instigator.GetComponent<Controllable>();
-        instigatorControl.SetDirection(target.transform.position - instigator.transform.position);
         if (targetControl) {
-            targetControl.SetDirection(instigator.transform.position - target.transform.position);
             targetControl.disabled = true;
         }
         if (instigatorControl)
@@ -343,20 +348,20 @@ public class DialogueMenu : MonoBehaviour {
         }
     }
     public void Command() {
-        Controller.Instance.commandTarget = target.gameObject;
-        Controller.Instance.state = Controller.ControlState.commandSelect;
+        InputController.Instance.commandTarget = target.gameObject;
+        InputController.Instance.state = InputController.ControlState.commandSelect;
         UINew.Instance.CloseActiveMenu();
     }
     public void CommandCallback(InteractionParam ip) {
         Speech playerSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
-        Speech targetSpeech = Controller.Instance.commandTarget.GetComponent<Speech>();
+        Speech targetSpeech = InputController.Instance.commandTarget.GetComponent<Speech>();
         Configure(playerSpeech, targetSpeech, interruptDefault: true);
-        desire desireToAct = ip.interaction.GetDesire(Controller.Instance.commandTarget, GameManager.Instance.playerObject);
+        desire desireToAct = ip.interaction.GetDesire(InputController.Instance.commandTarget, GameManager.Instance.playerObject);
 
         PromptCommand(ip.Description());
         if (desireToAct == desire.decline) {
             DeclineCommand();
-            Controller.Instance.ResetCommandState();
+            InputController.Instance.ResetCommandState();
         } else {
             AcceptCommand();
         }
@@ -403,7 +408,7 @@ public class DialogueMenu : MonoBehaviour {
                 break;
         }
         Speech playerSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
-        Speech targetSpeech = Controller.Instance.commandTarget.GetComponent<Speech>();
+        Speech targetSpeech = InputController.Instance.commandTarget.GetComponent<Speech>();
         Configure(playerSpeech, targetSpeech, interruptDefault: true);
 
         List<string> request = new List<string>();
@@ -642,26 +647,24 @@ public class DialogueMenu : MonoBehaviour {
         }
     }
     IEnumerator AwardRoutine(Controllable controllable, Inventory inv) {
-        yield return new WaitForSeconds(0.1f);
-        controllable.ResetInput();
-        controllable.LookAtPoint(GameManager.Instance.playerObject.transform.position);
-        controllable.disabled = true;
-        yield return new WaitForSeconds(1.0f);
-        controllable.LookAtPoint(GameManager.Instance.playerObject.transform.position);
-        // AudioClip congratsClip = Resources.Load("music/Short CONGRATS YC3") as AudioClip;
-        MusicController.Instance.EnqueueMusic(new MusicCongrats());
-        GameObject confetti = Resources.Load("particles/confetti explosion") as GameObject;
-        // Toolbox.Instance.AudioSpeaker(congratsClip, controllable.transform.position);
-        GameObject.Instantiate(confetti, controllable.transform.position, Quaternion.identity);
-        yield return new WaitForSeconds(3f);
-        controllable.LookAtPoint(GameManager.Instance.playerObject.transform.position);
-        inv.DropItem();
-        yield return new WaitForSeconds(0.5f);
-        if (controllable == Controller.Instance.focus) {
-            controllable.control = Controllable.ControlType.player;
-        } else {
-            controllable.control = Controllable.ControlType.AI;
+        using (Controller control = new Controller(controllable)) {
+            control.LookAtPoint(target.transform.position);
+
+            yield return new WaitForSeconds(0.1f);
+            control.ResetInput();
+            control.LookAtPoint(GameManager.Instance.playerObject.transform.position);
+            controllable.disabled = true;
+            yield return new WaitForSeconds(1.0f);
+            control.LookAtPoint(GameManager.Instance.playerObject.transform.position);
+            // AudioClip congratsClip = Resources.Load("music/Short CONGRATS YC3") as AudioClip;
+            MusicController.Instance.EnqueueMusic(new MusicCongrats());
+            GameObject confetti = Resources.Load("particles/confetti explosion") as GameObject;
+            // Toolbox.Instance.AudioSpeaker(congratsClip, controllable.transform.position);
+            GameObject.Instantiate(confetti, controllable.transform.position, Quaternion.identity);
+            yield return new WaitForSeconds(3f);
+            control.LookAtPoint(GameManager.Instance.playerObject.transform.position);
+            inv.DropItem();
+            yield return new WaitForSeconds(0.5f);
         }
-        controllable.disabled = false;
     }
 }

@@ -27,7 +27,7 @@ public class CutsceneManager : Singleton<CutsceneManager> {
         SceneManager.sceneLoaded += LevelWasLoaded;
     }
     public void InitializeCutscene<T>() where T : Cutscene, new() {
-        Controller.Instance.state = Controller.ControlState.cutscene;
+        InputController.Instance.state = InputController.ControlState.cutscene;
         cutscene = new T();
         if (!lateConfigure.Contains(typeof(T)))
             cutscene.Configure();
@@ -56,7 +56,7 @@ public class CutsceneManager : Singleton<CutsceneManager> {
         if (cutscene.complete) {
             cutscene.CleanUp();
             cutscene = null;
-            Controller.Instance.state = Controller.ControlState.normal;
+            InputController.Instance.state = InputController.ControlState.normal;
         } else {
             if (cutscene.configured) {
                 cutscene.Update();

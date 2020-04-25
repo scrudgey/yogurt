@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace AI {
     public class PriorityInvestigateNoise : Priority {
         public Ref<Vector2> lastHeardNoise = new Ref<Vector2>(Vector2.zero);
-        public PriorityInvestigateNoise(GameObject g, Controllable c) : base(g, c) {
+        public PriorityInvestigateNoise(GameObject g, Controller c) : base(g, c) {
             priorityName = "investigate noise";
 
             GoalWalkToPoint walkTo = new GoalWalkToPoint(g, c, lastHeardNoise, 0.3f, jitter: true);

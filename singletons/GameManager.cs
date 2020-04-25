@@ -259,15 +259,15 @@ public partial class GameManager : Singleton<GameManager> {
         UINew.Instance.UpdateStatusIcons(intrinsics);
     }
     public void SetFocus(GameObject target) {
-        if (playerObject != null) {
-            Controllable oldControl = playerObject.GetComponent<Controllable>();
-            oldControl.control = Controllable.ControlType.AI;
-        }
+        // if (playerObject != null) {
+        // Controllable oldControl = playerObject.GetComponent<Controllable>();
+        // oldControl.control = Controllable.ControlType.AI;
+        // }
         Toolbox.Instance.SwitchAudioListener(target);
         playerObject = target;
-        Controllable targetControl = playerObject.GetComponent<Controllable>();
-        Controller.Instance.focus = target.GetComponent<Controllable>();
-        targetControl.control = Controllable.ControlType.player;
+        // Controllable targetControl = playerObject.GetComponent<Controllable>();
+        InputController.Instance.focus = target.GetComponent<Controllable>();
+        // targetControl.control = Controllable.ControlType.player;
         cameraControl = FindObjectOfType<CameraControl>();
         if (cameraControl)
             cameraControl.focus = target;
@@ -408,7 +408,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
 
         SetFocus(playerObject);
-        Controller.Instance.state = Controller.ControlState.normal;
+        InputController.Instance.state = InputController.ControlState.normal;
         UINew.Instance.RefreshUI(active: true);
 
         if (sceneName == "neighborhood") {
@@ -491,7 +491,7 @@ public partial class GameManager : Singleton<GameManager> {
     }
     public void InitializeNonPlayableLevel() {
         string sceneName = SceneManager.GetActiveScene().name;
-        Controller.Instance.state = Controller.ControlState.cutscene;
+        InputController.Instance.state = InputController.ControlState.cutscene;
         UINew.Instance.RefreshUI();
         Toolbox.Instance.SwitchAudioListener(GameObject.Find("Main Camera"));
         if (sceneName == "morning_cutscene") {

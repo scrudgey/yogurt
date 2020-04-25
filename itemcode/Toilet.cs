@@ -38,7 +38,7 @@ public class Toilet : Container {
             GameObject droplet = Toolbox.Instance.SpawnDroplet(Liquid.LoadLiquid("toilet_water"), 0.5f, gameObject, 0.2f);
             if (i < 2) {
                 Collider2D dropletCollider = droplet.GetComponent<Collider2D>();
-                foreach (Collider2D playerCollider in Controller.Instance.focus.GetComponentsInChildren<Collider2D>()) {
+                foreach (Collider2D playerCollider in InputController.Instance.focus.GetComponentsInChildren<Collider2D>()) {
                     Physics2D.IgnoreCollision(dropletCollider, playerCollider, true);
                 }
             }

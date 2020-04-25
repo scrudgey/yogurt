@@ -1,12 +1,13 @@
 using UnityEngine;
 using System.Collections.Generic;
+using AI;
 namespace AI {
     public class PriorityDeliverPizza : Priority {
         public Ref<GameObject> target = new Ref<GameObject>(null);
         public Ref<GameObject> playerTarget = new Ref<GameObject>(null);
         public ConditionBoolSwitch boolSwitch;
         public bool pizzaDelivered = false;
-        public PriorityDeliverPizza(GameObject g, Controllable c) : base(g, c) {
+        public PriorityDeliverPizza(GameObject g, Controller c) : base(g, c) {
             priorityName = "deliver pizza";
             Config();
         }

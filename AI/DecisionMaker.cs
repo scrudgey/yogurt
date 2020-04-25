@@ -61,7 +61,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
     };
     public string activePriorityName;
     public PriorityType defaultPriorityType;
-    public Controllable control;
+    public Controller control;
     public GameObject thought;
     public Text thoughtText;
     public List<Priority> priorities;
@@ -88,7 +88,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         awareness = Toolbox.GetOrCreateComponent<Awareness>(gameObject);
         awareness.decisionMaker = this;
         awareness.enabled = this.enabled;
-        control = GetComponent<Controllable>();
+        control = new Controller(GetComponent<Controllable>());
 
         // start awareness with knowledge of possessions
         if (possession != null) {

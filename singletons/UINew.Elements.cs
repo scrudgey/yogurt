@@ -9,9 +9,9 @@ public partial class UINew : Singleton<UINew> {
         hitIndicator.Hit();
     }
     public void HealthBarOn() {
-        if (Controller.Instance.focusHurtable == null)
+        if (InputController.Instance.focusHurtable == null)
             return;
-        if (Controller.Instance.focusHurtable.oxygen >= Controller.Instance.focusHurtable.maxOxygen) {
+        if (InputController.Instance.focusHurtable.oxygen >= InputController.Instance.focusHurtable.maxOxygen) {
             if (healthBarEasingDirection == EasingDirection.none) {
                 if (topRightRectTransform.anchoredPosition.y > 10f) {
                     healthBarEasingTimer = 0f;
@@ -21,9 +21,9 @@ public partial class UINew : Singleton<UINew> {
         }
     }
     public void HealthBarOff() {
-        if (Controller.Instance.focusHurtable == null)
+        if (InputController.Instance.focusHurtable == null)
             return;
-        if (Controller.Instance.focusHurtable.oxygen >= Controller.Instance.focusHurtable.maxOxygen) {
+        if (InputController.Instance.focusHurtable.oxygen >= InputController.Instance.focusHurtable.maxOxygen) {
             if (healthBarEasingDirection == EasingDirection.none) {
                 if (topRightRectTransform.anchoredPosition.y < 40f) {
                     healthBarEasingTimer = 0f;
@@ -41,9 +41,9 @@ public partial class UINew : Singleton<UINew> {
         }
     }
     public void OxygenBarOff() {
-        if (Controller.Instance.focusHurtable == null)
+        if (InputController.Instance.focusHurtable == null)
             return;
-        if (Controller.Instance.focusHurtable.health >= Controller.Instance.focusHurtable.maxHealth) {
+        if (InputController.Instance.focusHurtable.health >= InputController.Instance.focusHurtable.maxHealth) {
             if (oxygenBarEasingDirection == EasingDirection.none) {
                 if (topRightRectTransform.anchoredPosition.y < 40f) {
                     oxygenBarEasingTimer = 0f;

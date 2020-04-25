@@ -19,40 +19,40 @@ public partial class UINew : Singleton<UINew> {
                     SetActionText(lastTarget);
                 }
             } else {
-                List<Controller.ControlState> selectStates = new List<Controller.ControlState>{
-                    Controller.ControlState.swearSelect,
-                    Controller.ControlState.insultSelect,
-                    Controller.ControlState.hypnosisSelect};
-                if (Controller.Instance.state == Controller.ControlState.commandSelect) {
-                    string commandName = Toolbox.Instance.GetName(Controller.Instance.commandTarget);
+                List<InputController.ControlState> selectStates = new List<InputController.ControlState>{
+                    InputController.ControlState.swearSelect,
+                    InputController.ControlState.insultSelect,
+                    InputController.ControlState.hypnosisSelect};
+                if (InputController.Instance.state == InputController.ControlState.commandSelect) {
+                    string commandName = Toolbox.Instance.GetName(InputController.Instance.commandTarget);
                     if (target != null) {
                         SetActionText("Command " + commandName + " to...");
                     } else {
                         SetActionText("Command " + commandName + "...");
                     }
-                } else if (selectStates.Contains(Controller.Instance.state)) {
+                } else if (selectStates.Contains(InputController.Instance.state)) {
                     if (target != null) {
                         lastTarget = Toolbox.Instance.GetName(target);
-                        switch (Controller.Instance.state) {
-                            case Controller.ControlState.swearSelect:
+                        switch (InputController.Instance.state) {
+                            case InputController.ControlState.swearSelect:
                                 SetActionText("Swear at " + lastTarget);
                                 break;
-                            case Controller.ControlState.insultSelect:
+                            case InputController.ControlState.insultSelect:
                                 SetActionText("Insult " + lastTarget);
                                 break;
-                            case Controller.ControlState.hypnosisSelect:
+                            case InputController.ControlState.hypnosisSelect:
                                 SetActionText("Hypnotize " + lastTarget);
                                 break;
                         }
                     } else {
-                        switch (Controller.Instance.state) {
-                            case Controller.ControlState.swearSelect:
+                        switch (InputController.Instance.state) {
+                            case InputController.ControlState.swearSelect:
                                 SetActionText("Swear at ...");
                                 break;
-                            case Controller.ControlState.insultSelect:
+                            case InputController.ControlState.insultSelect:
                                 SetActionText("Insult ...");
                                 break;
-                            case Controller.ControlState.hypnosisSelect:
+                            case InputController.ControlState.hypnosisSelect:
                                 SetActionText("Hypnotize ...");
                                 break;
 
@@ -89,8 +89,8 @@ public partial class UINew : Singleton<UINew> {
         }
     }
     public void UpdateCursor(bool highlight) {
-        switch (Controller.Instance.state) {
-            case Controller.ControlState.normal:
+        switch (InputController.Instance.state) {
+            case InputController.ControlState.normal:
                 if (cursorText.activeInHierarchy)
                     cursorText.SetActive(false);
                 if (highlight) {
@@ -99,22 +99,22 @@ public partial class UINew : Singleton<UINew> {
                     Cursor.SetCursor(cursorDefault, new Vector2(28, 16), CursorMode.Auto);
                 }
                 break;
-            case Controller.ControlState.inMenu:
-            case Controller.ControlState.waitForMenu:
+            case InputController.ControlState.inMenu:
+            case InputController.ControlState.waitForMenu:
                 if (cursorText.activeInHierarchy)
                     cursorText.SetActive(false);
                 Cursor.SetCursor(cursorHighlight, new Vector2(28, 16), CursorMode.Auto);
                 break;
-            case Controller.ControlState.commandSelect:
+            case InputController.ControlState.commandSelect:
                 SetCursorText("COMMAND");
                 break;
-            case Controller.ControlState.hypnosisSelect:
+            case InputController.ControlState.hypnosisSelect:
                 SetCursorText("HYPNOTIZE");
                 break;
-            case Controller.ControlState.insultSelect:
+            case InputController.ControlState.insultSelect:
                 SetCursorText("INSULT");
                 break;
-            case Controller.ControlState.swearSelect:
+            case InputController.ControlState.swearSelect:
                 SetCursorText("SWEAR\nAT");
                 break;
             default:
@@ -131,17 +131,17 @@ public partial class UINew : Singleton<UINew> {
 
         Poptext.LateUpdate();
 
-        if (Controller.Instance.focusHurtable != null && !GameManager.Instance.playerIsDead) {
-            float width = (Controller.Instance.focusHurtable.health / Controller.Instance.focusHurtable.maxHealth) * lifebarDefaultSize.x;
+        if (InputController.Instance.focusHurtable != null && !GameManager.Instance.playerIsDead) {
+            float width = (InputController.Instance.focusHurtable.health / InputController.Instance.focusHurtable.maxHealth) * lifebarDefaultSize.x;
             lifebar.sizeDelta = new Vector2(width, lifebarDefaultSize.y);
-            width = (Controller.Instance.focusHurtable.oxygen / Controller.Instance.focusHurtable.maxOxygen) * oxygenbarDefaultSize.x;
+            width = (InputController.Instance.focusHurtable.oxygen / InputController.Instance.focusHurtable.maxOxygen) * oxygenbarDefaultSize.x;
             oxygenbar.sizeDelta = new Vector2(width, oxygenbarDefaultSize.y);
-            if (Controller.Instance.focusHurtable.health < Controller.Instance.focusHurtable.maxHealth) {
+            if (InputController.Instance.focusHurtable.health < InputController.Instance.focusHurtable.maxHealth) {
                 HealthBarOn();
             } else {
                 HealthBarOff();
             }
-            if (Controller.Instance.focusHurtable.oxygen < Controller.Instance.focusHurtable.maxOxygen) {
+            if (InputController.Instance.focusHurtable.oxygen < InputController.Instance.focusHurtable.maxOxygen) {
                 OxygenBarOn();
             } else {
                 OxygenBarOff();
@@ -186,14 +186,14 @@ public partial class UINew : Singleton<UINew> {
         bool highlight = false;
         RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
         foreach (RaycastHit2D hit in hits) {
-            if (hit.collider != null && !Controller.forbiddenTags.Contains(hit.collider.tag)) {
+            if (hit.collider != null && !InputController.forbiddenTags.Contains(hit.collider.tag)) {
                 highlight = true;
             }
         }
         GameObject target = null;
         if (highlight) {
-            GameObject top = Controller.Instance.GetFrontObject(hits);
-            target = Controller.Instance.GetBaseInteractive(top.transform);
+            GameObject top = InputController.Instance.GetFrontObject(hits);
+            target = InputController.Instance.GetBaseInteractive(top.transform);
         }
         bool cursorOverButton = EventSystem.current.IsPointerOverGameObject();
 

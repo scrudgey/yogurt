@@ -8,9 +8,9 @@ using System.Linq;
 using System;
 public class UIButtonCallbacks : MonoBehaviour {
     public void FightButtonClick() {
-        if (Controller.Instance.state == Controller.ControlState.inMenu)
+        if (InputController.Instance.state == InputController.ControlState.inMenu)
             return;
-        Controller.Instance.focus.ToggleFightMode();
+        InputController.Instance.controller.ToggleFightMode();
         UINew.Instance.UpdateTopActionButtons();
     }
     public void SpeakButtonClick() {
@@ -50,16 +50,16 @@ public class UIButtonCallbacks : MonoBehaviour {
         // Debug.Log(g.Parse("{main}"));
     }
     public void HypnosisButtonClick() {
-        if (Controller.Instance.state == Controller.ControlState.inMenu)
+        if (InputController.Instance.state == InputController.ControlState.inMenu)
             return;
-        if (Controller.Instance.state != Controller.ControlState.hypnosisSelect) {
-            Controller.Instance.state = Controller.ControlState.hypnosisSelect;
+        if (InputController.Instance.state != InputController.ControlState.hypnosisSelect) {
+            InputController.Instance.state = InputController.ControlState.hypnosisSelect;
         } else {
-            Controller.Instance.state = Controller.ControlState.normal;
+            InputController.Instance.state = InputController.ControlState.normal;
         }
     }
     public void VomitButtonClick() {
-        if (Controller.Instance.state == Controller.ControlState.inMenu)
+        if (InputController.Instance.state == InputController.ControlState.inMenu)
             return;
         Eater eater = GameManager.Instance.playerObject.GetComponent<Eater>();
         eater.Vomit();

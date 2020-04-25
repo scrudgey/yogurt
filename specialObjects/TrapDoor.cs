@@ -39,7 +39,7 @@ public class TrapDoor : MonoBehaviour {
         if (!active)
             return;
         if (collider.gameObject == GameManager.Instance.playerObject) {
-            Controller.Instance.state = Controller.ControlState.cutscene;
+            InputController.Instance.state = InputController.ControlState.cutscene;
             UINew.Instance.RefreshUI(active: false);
             timer = 0.1f;
             collider.gameObject.SetActive(false);
