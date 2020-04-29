@@ -28,7 +28,7 @@ public class CutsceneDancingGod : Cutscene {
         item.gameObject.SetActive(false);
 
         pankrator = GameObject.Find("Pankrator");
-        pankratorController = new Controller(pankrator.GetComponent<Controllable>());
+        pankratorController = new Controller(pankrator);
         playerController = new Controller(InputController.Instance.focus);
     }
     public override void Update() {
@@ -109,6 +109,8 @@ public class CutsceneDancingGod : Cutscene {
         cam.offset = new Vector3(0, 0.2f, 0);
         dancingGod.transform.localPosition = Vector3.Lerp(dancingGod.transform.localPosition, dancingGod.initPosition, 0.1f);
         if (Vector2.Distance(dancingGod.transform.localPosition, dancingGod.initPosition) < 0.01f) {
+            pankratorController.Deregister();
+            playerController.Deregister();
             complete = true;
             dancingGod.numberOfJumps = 0;
             dancingGod.FinishJump();
@@ -121,7 +123,6 @@ public class CutsceneDancingGod : Cutscene {
             UINew.Instance.RefreshUI(active: true);
             cam.maxSize = 0.65f;
             cam.offset = new Vector3(0, 0.2f, 0);
-            // pankrator.GetComponent<Controllable>().control = Controllable.ControlType.AI;
         }
     }
 }

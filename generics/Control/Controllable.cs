@@ -4,6 +4,23 @@ using System;
 
 public class Controllable : MonoBehaviour {
 
+    public static List<Type> ControlPriority = new List<Type>{
+        typeof(Intrinsics),
+        typeof(Outfit),
+        typeof(Inventory)
+    };
+
+    public static int CompareComponent(Component x, Component y) {
+        if (ControlPriority.Contains(x.GetType()) && ControlPriority.Contains(y.GetType())) {
+            return ControlPriority.IndexOf(x.GetType()) - ControlPriority.IndexOf(y.GetType());
+        } else if (ControlPriority.Contains(x.GetType())) {
+            return 1;
+        } else if (ControlPriority.Contains(y.GetType())) {
+            return -1;
+        } else {
+            return 0;
+        }
+    }
 
     public enum HitState { none, stun, unconscious, dead };
     // public enum ControlType { none, AI, player }
@@ -53,11 +70,12 @@ public class Controllable : MonoBehaviour {
                 controlStack.Peek().LostControl(this);
             }
             ResetInput();
-            // Debug.Log(name + " registering controller ");
             controlStack.Push(controller);
         }
     }
+
     public void Deregister(Controller controller) {
+        // Debug.Log(this + " deregistering controller");
         if (controlStack.Peek() == controller) {
             controlStack.Pop();
             if (controlStack.Count > 0) {

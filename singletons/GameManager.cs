@@ -459,6 +459,12 @@ public partial class GameManager : Singleton<GameManager> {
                     mayorSpeech.defaultMonologue = "mayor_award";
             }
         }
+        // change polestar dialogues
+        // TODO:
+        if (data.teleporterUnlocked) {
+            // Speech mySpeech = GetComponent<Speech>();
+            // mySpeech.defaultMonologue = "polestar";
+        }
         if (sceneName == "cave3" && data.toiletItems.Count > 0) {
             Collider2D toiletZone = GameObject.Find("toiletZone").GetComponent<Collider2D>();
             Bounds bounds = toiletZone.bounds;

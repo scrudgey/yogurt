@@ -42,5 +42,6 @@ namespace AI {
             } else
                 return DoUpdate();
         }
+        public virtual void ExitPriority() { }
     }
 }

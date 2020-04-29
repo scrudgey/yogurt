@@ -63,7 +63,7 @@ public class DialogueMenu : MonoBehaviour {
     public Trader targetTrade;
     private Controllable instigatorControl;
     private Controllable targetControl;
-    private AnchoriteDance targetAnchoriteDance;
+    // private AnchoriteDance targetAnchoriteDance;
     public Image portrait1;
     public Image portrait2;
     public GameObject portraitContainer1;
@@ -171,9 +171,9 @@ public class DialogueMenu : MonoBehaviour {
         targetInv = target.GetComponent<Inventory>();
         targetAwareness = target.GetComponent<Awareness>();
         targetTrade = target.GetComponent<Trader>();
-        targetAnchoriteDance = target.GetComponent<AnchoriteDance>();
-        if (targetAnchoriteDance)
-            targetAnchoriteDance.StopDance();
+        // targetAnchoriteDance = target.GetComponent<AnchoriteDance>();
+        // if (targetAnchoriteDance)
+        //     targetAnchoriteDance.StopDance();
         if (instigatorInv == null || targetInv == null) {
             giveButton.interactable = false;
         }
@@ -228,8 +228,8 @@ public class DialogueMenu : MonoBehaviour {
             targetControl.disabled = false;
         if (instigatorControl)
             instigatorControl.disabled = false;
-        if (targetAnchoriteDance)
-            targetAnchoriteDance.StartDance();
+        // if (targetAnchoriteDance)
+        //     targetAnchoriteDance.StartDance();
         if (menuClosed != null)
             menuClosed();
     }

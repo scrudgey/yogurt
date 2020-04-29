@@ -35,7 +35,9 @@ namespace AI {
         public virtual void ReceiveMessage(Message m) { }
         // public virtual void ObserveOccurrence(OccurrenceData data){}
         public virtual void EnterPriority() { }
-        public virtual void ExitPriority() { }
+        public virtual void ExitPriority() {
+            goal.ExitPriority();
+        }
 
     }
 }

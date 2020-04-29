@@ -8,9 +8,7 @@ public class GhostController : MonoBehaviour {
     private float wanderTime = 0;
     public Controller control;
 
-    void Start() {
-        // control = GetComponent<Controllable>();
-
+    void Awake() {
         wanderTime = UnityEngine.Random.Range(0, 2);
         dir = (DirectionEnum)(UnityEngine.Random.Range(0, 4));
         control = new Controller(gameObject);

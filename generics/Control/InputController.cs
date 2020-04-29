@@ -17,7 +17,7 @@ public class InputController : Singleton<InputController> {
         hypnosisSelect
     }
     private Controllable _focus;
-    public Controllable focus { // change to IControllable
+    public Controllable focus {
         get {
             return _focus;
         }
@@ -68,6 +68,8 @@ public class InputController : Singleton<InputController> {
         }
     }
     public GameObject commandTarget;
+    public Controller commandController;
+    public Controller commandPlayerController;
     public bool doCommand;
     public InteractionParam commandAct = null;
     public ActionButtonScript.buttonType commandButtonType = ActionButtonScript.buttonType.none;
@@ -86,21 +88,24 @@ public class InputController : Singleton<InputController> {
         if (previousState == ControlState.commandSelect) {
             // if we've aborted command state without success
             // reset command character and target control
-            // Controllable commandTargetControl = commandTarget.GetComponent<Controllable>();
-            // commandTargetControl.control = Controllable.ControlType.AI;
-            // commandTargetControl.ResetInput();
             if (!doCommand)
                 ResetCommandState();
         }
         if (state == ControlState.commandSelect) {
-            // Controllable commandTargetControl = commandTarget.GetComponent<Controllable>();
-            // commandTargetControl.control = Controllable.ControlType.none;
+            commandController = new Controller(commandTarget);
+            commandPlayerController = new Controller(InputController.Instance.focus);
         }
     }
     public void ResetCommandState() {
         if (commandTarget != null) {
             // Controllable targetControl = commandTarget.GetComponent<Controllable>();
             // targetControl.control = Controllable.ControlType.AI;
+        }
+        if (commandController != null) {
+            commandController.Deregister();
+        }
+        if (commandPlayerController != null) {
+            commandPlayerController.Deregister();
         }
         commandTarget = null;
         // reset command state

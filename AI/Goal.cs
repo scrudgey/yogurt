@@ -36,6 +36,9 @@ namespace AI {
             if (!(ignoreRequirementsIfConditionMet && successCondition.Evaluate() == status.success)) {
                 foreach (Goal requirement in requirements) {
                     if (requirement.Evaluate() != status.success) {
+                        if (!fulfillingRequirements) {
+                            ExitPriority();
+                        }
                         fulfillingRequirements = true;
                         requirement.Update();
                         return;
@@ -59,6 +62,7 @@ namespace AI {
                     // Debug.Log(routineStatus);
                     if (routineStatus == status.failure) {
                         control.ResetInput();
+                        routines[index].ExitPriority();
                         index++;
                         // get next routine, or fail.
                         if (index < routines.Count) {
@@ -77,6 +81,17 @@ namespace AI {
                     // Debug.Log(e.TargetSite);
                 }
             }
+        }
+        public void ExitPriority() {
+            foreach (Goal req in requirements) {
+                req.ExitPriority();
+            }
+            foreach (Routine routine in routines) {
+                routine.ExitPriority();
+            }
+        }
+        public void EnterPriority() {
+
         }
     }
 }

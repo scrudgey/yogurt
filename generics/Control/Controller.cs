@@ -4,10 +4,9 @@ using System;
 public enum DirectionEnum { left, right, up, down, none }
 
 public class Controller : IDisposable {
-    public void Dispose() {
-        Deregister();
-        // GC.SuppressFinalize(this);
-    }
+    // class to use to interface with ControllableProxy
+    // must use this instead of using Controllable directly.
+    // ensures that we interfce with the controllable proxy
     public Controller() { }
     public Controller(GameObject g) {
         if (g != null)
@@ -17,24 +16,27 @@ public class Controller : IDisposable {
         if (controllable != null)
             Register(controllable);
     }
-    // class to use to interface with ControllableProxy
-    // must use this instead of using Controllable directly.
-    // ensures that we interfce with the controllable proxy
+    ~Controller() {
+        Deregister();
+    }
+    public void Dispose() {
+        Deregister();
+        // GC.SuppressFinalize(this);
+    }
 
-    // anything that Controls needs to subclass Controller,
-    // or instantiate a Controller.
-    // then call controller.register(Controllable) instead of GetComponent<Controllable>()
 
-    // leftflag, rightflag, etc.
-    // register(IControllable) <- use this instead of GetComponent<Controllable>()
-    // calls setDirection() on Controllable
+    public delegate void ControlDelegate();
+    // public delegate void OnGainedControlDelegate();
+    public ControlDelegate lostControlDelegate;
+    public ControlDelegate gainedControlDelegate;
 
-    // Controllable
-    // setDirection(direction, IController)
-    //      checks vs. controller stack to see if we accept the input
-    //      sets the flags of controllable, which are private.
-    // stack of controllers
-    //
+    public bool Authenticate() {
+        if (controllable != null) {
+            return controllable.Authenticate(this);
+        } else {
+            return false;
+        }
+    }
 
     public Controllable controllable;
     public void Register(Controllable c) {
@@ -44,11 +46,14 @@ public class Controller : IDisposable {
         Deregister();
         c.Register(this);
         this.controllable = c;
+        GainedControl(c);
+        Debug.Log("controllable registering with " + c);
     }
     public void Deregister() {
         if (controllable != null) {
             controllable.Deregister(this);
         }
+        LostControl(controllable);
         controllable = null;
     }
 
@@ -97,10 +102,14 @@ public class Controller : IDisposable {
     }
 
     public virtual void GainedControl(Controllable controllable) {
-
+        // Debug.Log("controller gained control of " + controllable);
+        if (gainedControlDelegate != null)
+            gainedControlDelegate();
     }
     public virtual void LostControl(Controllable controllable) {
-
+        Debug.Log("controller lost control of " + controllable);
+        if (lostControlDelegate != null)
+            lostControlDelegate();
     }
     public void ShootPressed() {
         if (controllable != null) {
