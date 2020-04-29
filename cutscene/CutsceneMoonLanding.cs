@@ -103,7 +103,6 @@ public class CutsceneMoonLanding : Cutscene {
         GameObject.Destroy(landingString);
 
         if (playerInv != null && initHolding != null) {
-            // initHolding = playerInv.holding;
             playerInv.GetItem(initHolding);
         }
 

@@ -60,7 +60,6 @@ public class CutsceneFall : Cutscene {
             }
             UINew.Instance.RefreshUI(active: true);
             if (playerInv != null && initHolding != null) {
-                // initHolding = playerInv.holding;
                 playerInv.GetItem(initHolding);
             }
             complete = true;
