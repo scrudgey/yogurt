@@ -6,7 +6,7 @@ namespace AI {
         public Ref<Vector2> lastDamageArea = new Ref<Vector2>(Vector2.zero);
         private GoalWalkToObject goalRunFromObject;
         // private GoalWalkToPoint goalRunFromPoint;
-        public PriorityRunAway(GameObject g, Controllable c) : base(g, c) {
+        public PriorityRunAway(GameObject g, Controller c) : base(g, c) {
             priorityName = "run away";
             goalRunFromObject = new GoalWalkToObject(gameObject, control, lastAttacker, invert: true);
             // goalRunFromPoint = new GoalWalkToPoint(gameObject, control, lastDamageArea, invert: true);

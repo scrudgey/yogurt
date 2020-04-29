@@ -450,8 +450,8 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
     void WitnessViolence(OccurrenceViolence dat) {
         if (dat.victim == null || dat.attacker == null)
             return;
-        GameObject victimObject = Controller.Instance.GetBaseInteractive(dat.victim.transform);
-        GameObject attackerObject = Controller.Instance.GetBaseInteractive(dat.attacker.transform);
+        GameObject victimObject = InputController.Instance.GetBaseInteractive(dat.victim.transform);
+        GameObject attackerObject = InputController.Instance.GetBaseInteractive(dat.attacker.transform);
         PersonalAssessment attacker = FormPersonalAssessment(attackerObject);
         PersonalAssessment victim = FormPersonalAssessment(victimObject);
         if (possession != null && possession == victimObject) {

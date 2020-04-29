@@ -58,18 +58,19 @@ public class CutsceneScorpion : Cutscene {
         if (speech == null) {
             speech = greaser.GetComponent<Speech>();
         }
-        Controllable control = greaser.GetComponent<Controllable>();
-        Ref<Vector2> walkRef = new Ref<Vector2>(target);
-
-        walkRoutine = new RoutineWalkToPoint(greaser, control, walkRef, 0.1f);
-        float walkTime = 0f;
-        float targTime = Random.Range(0.4f, 0.6f);
-        while (walkTime < targTime) {
-            walkRoutine.Update();
-            walkTime += Time.deltaTime;
-            yield return null;
+        // Controllable control = greaser.GetComponent<Controllable>();
+        using (Controller control = new Controller(greaser)) {
+            Ref<Vector2> walkRef = new Ref<Vector2>(target);
+            walkRoutine = new RoutineWalkToPoint(greaser, control, walkRef, 0.1f);
+            float walkTime = 0f;
+            float targTime = Random.Range(0.4f, 0.6f);
+            while (walkTime < targTime) {
+                walkRoutine.Update();
+                walkTime += Time.deltaTime;
+                yield return null;
+            }
+            control.ResetInput();
         }
-        control.ResetInput();
     }
 
     public void MenuWasClosed() {

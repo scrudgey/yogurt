@@ -161,7 +161,7 @@ public class CutsceneImp : Cutscene {
         state = PotionState.first;
         timer = 0;
         impRenderer.sprite = impSeller.leftWave[0];
-        Controller.Instance.state = Controller.ControlState.cutscene;
+        InputController.Instance.state = InputController.ControlState.cutscene;
     }
     public void DescribeFirstIngredient() {
         state = PotionState.describeFirst;
@@ -172,13 +172,13 @@ public class CutsceneImp : Cutscene {
         newNode.text.Add("The second ingredient is...");
         newNode.text.Add("IMPCALLBACK2");
         SetDialogue(newNode);
-        Controller.Instance.state = Controller.ControlState.cutscene;
+        InputController.Instance.state = InputController.ControlState.cutscene;
     }
     public void SecondIngredient() {
         state = PotionState.second;
         timer = 0;
         impRenderer.sprite = impSeller.rightWave[0];
-        Controller.Instance.state = Controller.ControlState.cutscene;
+        InputController.Instance.state = InputController.ControlState.cutscene;
     }
     public void DescribeSecondIngredient() {
         state = PotionState.describeFirst;
@@ -189,7 +189,7 @@ public class CutsceneImp : Cutscene {
         newNode.text.Add("Together they make potion of " + potionData.name + "!");
         newNode.text.Add("IMPCALLBACK3");
         SetDialogue(newNode);
-        Controller.Instance.state = Controller.ControlState.cutscene;
+        InputController.Instance.state = InputController.ControlState.cutscene;
     }
     public void Finish() {
         complete = true;

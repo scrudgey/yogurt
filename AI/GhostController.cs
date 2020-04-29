@@ -3,38 +3,37 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class GhostController : MonoBehaviour {
-    enum direction { left, right, up, down, none }
-    private direction dir;
-    private float wanderTime = 0;
-    public Controllable control;
 
-    void Start() {
-        control = GetComponent<Controllable>();
+    private DirectionEnum dir;
+    private float wanderTime = 0;
+    public Controller control;
+
+    void Awake() {
         wanderTime = UnityEngine.Random.Range(0, 2);
-        dir = (direction)(UnityEngine.Random.Range(0, 4));
-        // control.
+        dir = (DirectionEnum)(UnityEngine.Random.Range(0, 4));
+        control = new Controller(gameObject);
     }
     public void Update() {
         control.ResetInput();
         if (wanderTime > 0) {
             switch (dir) {
-                case direction.down:
+                case DirectionEnum.down:
                     control.downFlag = true;
                     break;
-                case direction.left:
+                case DirectionEnum.left:
                     control.leftFlag = true;
                     break;
-                case direction.right:
+                case DirectionEnum.right:
                     control.rightFlag = true;
                     break;
-                case direction.up:
+                case DirectionEnum.up:
                     control.upFlag = true;
                     break;
             }
         }
         if (wanderTime < -1f) {
             wanderTime = UnityEngine.Random.Range(0, 2);
-            dir = (direction)(UnityEngine.Random.Range(0, 4));
+            dir = (DirectionEnum)(UnityEngine.Random.Range(0, 4));
         } else {
             wanderTime -= Time.deltaTime;
         }

@@ -22,7 +22,7 @@ public class NecroGate : Doorway {
 
     public void Portal() {
         if (locked) {
-            Toolbox.Instance.SendMessage(Controller.Instance.focus.gameObject, this, message);
+            Toolbox.Instance.SendMessage(InputController.Instance.focus.gameObject, this, message);
         } else {
             Leave();
         }

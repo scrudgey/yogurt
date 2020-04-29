@@ -12,8 +12,8 @@ public partial class UINew : Singleton<UINew> {
         ClearWorldButtons();
         activeWorldButtons = new List<GameObject>();
         List<ActionButton> actionButtons = null;
-        if (Controller.Instance.commandTarget != null) {
-            actionButtons = CreateButtonsFromActions(Interactor.SelfOnOtherInteractions(Controller.Instance.commandTarget, clickedOn));
+        if (InputController.Instance.commandTarget != null) {
+            actionButtons = CreateButtonsFromActions(Interactor.SelfOnOtherInteractions(InputController.Instance.commandTarget, clickedOn));
         } else {
             actionButtons = CreateButtonsFromActions(Interactor.SelfOnOtherInteractions(GameManager.Instance.playerObject, clickedOn));
         }
@@ -59,7 +59,7 @@ public partial class UINew : Singleton<UINew> {
             }
             activeWorldButtons.Add(CircularizeButtons(buttons, GameManager.Instance.playerObject));
         } else {
-            Controller.Instance.ResetLastLeftClicked();
+            InputController.Instance.ResetLastLeftClicked();
         }
     }
 
@@ -175,20 +175,20 @@ public partial class UINew : Singleton<UINew> {
 
         ClearTopButtons();
 
-        InteractionParam defaultAction = Controller.Instance.focus.UpdateDefaultInteraction();
+        InteractionParam defaultAction = InputController.Instance.focus.UpdateDefaultInteraction();
         List<ActionButton> actionButtons = new List<ActionButton>();
         if (defaultAction != null) {
             actionButtons = CreateActionButtons(new HashSet<InteractionParam> { defaultAction });
         }
 
         // punch button
-        if (Controller.Instance.focus.fightMode) {
+        if (InputController.Instance.focus.fightMode) {
             ShowPunchButton();
         } else {
             HidePunchButton();
-            if (Controller.Instance.focus.defaultInteraction != null && Controller.Instance.focus.defaultInteraction.IsValid()) {
+            if (InputController.Instance.focus.defaultInteraction != null && InputController.Instance.focus.defaultInteraction.IsValid()) {
                 foreach (ActionButton button in actionButtons) {
-                    if (button.buttonScript.action == Controller.Instance.focus.defaultInteraction.interaction) {
+                    if (button.buttonScript.action == InputController.Instance.focus.defaultInteraction.interaction) {
                         GameObject indicator = Instantiate(Resources.Load("UI/defaultButtonIndicator")) as GameObject;
                         indicator.transform.SetParent(button.gameobject.transform, false);
                         indicator.transform.SetAsLastSibling();

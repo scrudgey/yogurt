@@ -387,7 +387,9 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
                 Add3Motion(impulse);
             }
             if (impactSounds != null && impactSounds.Length > 0) {
-                audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
+                AudioClip ac = impactSounds[Random.Range(0, impactSounds.Length)];
+                if (ac != null)
+                    audioSource.PlayOneShot(ac);
             }
         }
     }

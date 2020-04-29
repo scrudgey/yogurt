@@ -52,24 +52,24 @@ public class ActionButtonScript : MonoBehaviour {
     public Button button;
     public List<object> parameters;
     public void clicked() {
-        Controller.Instance.ButtonClicked(this);
+        InputController.Instance.ButtonClicked(this);
     }
     public void DoAction() {
         action.DoAction(parameters);
     }
     void Update() {
         if (mouseHeld && bType == buttonType.Action) {
-            if (action.continuous && (Controller.Instance.InteractionIsWithinRange(action) || manualAction)) {
+            if (action.continuous && (InputController.Instance.InteractionIsWithinRange(action) || manualAction)) {
                 DoAction();
             }
         } else {
             if (button == null)
                 return;
             if (!manualAction && action != null) {
-                if (Controller.Instance.InteractionIsWithinRange(action)) {
+                if (InputController.Instance.InteractionIsWithinRange(action)) {
                     button.interactable = true;
                 }
-                if (!Controller.Instance.InteractionIsWithinRange(action)) {
+                if (!InputController.Instance.InteractionIsWithinRange(action)) {
                     button.interactable = false;
                 }
             }
@@ -83,15 +83,15 @@ public class ActionButtonScript : MonoBehaviour {
     }
     public void MouseOver() {
         if (bType == buttonType.Action) {
-            if (Controller.Instance.commandTarget != null) {
-                string targetName = Toolbox.Instance.GetName(Controller.Instance.commandTarget);
+            if (InputController.Instance.commandTarget != null) {
+                string targetName = Toolbox.Instance.GetName(InputController.Instance.commandTarget);
                 UINew.Instance.actionButtonText = "Command " + targetName + " to " + action.Description(parameters);
             } else {
                 UINew.Instance.actionButtonText = action.Description(parameters);
             }
         } else {
-            if (Controller.Instance.commandTarget != null) {
-                string targetName = Toolbox.Instance.GetName(Controller.Instance.commandTarget);
+            if (InputController.Instance.commandTarget != null) {
+                string targetName = Toolbox.Instance.GetName(InputController.Instance.commandTarget);
                 UINew.Instance.actionButtonText = "Command " + targetName + " to " + HandActionDescription();
             } else {
                 UINew.Instance.actionButtonText = HandActionDescription();
@@ -117,7 +117,7 @@ public class ActionButtonScript : MonoBehaviour {
                 break;
 
             case buttonType.Punch:
-                Controller.Instance.focus.ShootPressed();
+                InputController.Instance.controller.ShootPressed();
                 break;
 
             default:

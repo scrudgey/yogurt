@@ -41,7 +41,7 @@ public partial class UINew : Singleton<UINew> {
             CloseActiveMenu();
             return null;
         }
-        if (Controller.Instance.state == Controller.ControlState.waitForMenu)
+        if (InputController.Instance.state == InputController.ControlState.waitForMenu)
             return null;
         CloseActiveMenu();
         activeMenu = GameObject.Instantiate(Resources.Load(menuPrefabs[typeMenu])) as GameObject;
@@ -49,9 +49,9 @@ public partial class UINew : Singleton<UINew> {
         canvas.worldCamera = GameManager.Instance.cam;
         activeMenuType = typeMenu;
         if (actionRequired.Contains(typeMenu)) {
-            Controller.Instance.state = Controller.ControlState.waitForMenu;
+            InputController.Instance.state = InputController.ControlState.waitForMenu;
         } else {
-            Controller.Instance.state = Controller.ControlState.inMenu;
+            InputController.Instance.state = InputController.ControlState.inMenu;
         }
         Time.timeScale = 0f;
         return activeMenu;
@@ -63,7 +63,7 @@ public partial class UINew : Singleton<UINew> {
             activeMenu.SendMessage("OnDestroy", options: SendMessageOptions.DontRequireReceiver);
             Time.timeScale = 1f;
             activeMenu = null;
-            Controller.Instance.MenuClosedCallback();
+            InputController.Instance.MenuClosedCallback();
         }
     }
 

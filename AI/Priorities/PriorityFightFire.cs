@@ -7,7 +7,7 @@ namespace AI {
         GoalUsePhone callFD;
         Goal useFireExtinguisher;
         private Dictionary<BuffType, Buff> netBuffs = new Dictionary<BuffType, Buff>();
-        public PriorityFightFire(GameObject g, Controllable c) : base(g, c) {
+        public PriorityFightFire(GameObject g, Controller c) : base(g, c) {
             priorityName = "fight fire";
             getExt = new GoalGetItem(gameObject, control, "fire_extinguisher");
 

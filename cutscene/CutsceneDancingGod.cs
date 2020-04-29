@@ -10,6 +10,8 @@ public class CutsceneDancingGod : Cutscene {
     float timer;
     PhysicalBootstrapper item;
     GameObject pankrator;
+    Controller pankratorController;
+    Controller playerController;
     public void Configure(PhysicalBootstrapper item) {
         this.item = item;
         configured = true;
@@ -26,7 +28,8 @@ public class CutsceneDancingGod : Cutscene {
         item.gameObject.SetActive(false);
 
         pankrator = GameObject.Find("Pankrator");
-        pankrator.GetComponent<Controllable>().control = Controllable.ControlType.none;
+        pankratorController = new Controller(pankrator);
+        playerController = new Controller(InputController.Instance.focus);
     }
     public override void Update() {
         timer += Time.deltaTime;
@@ -53,26 +56,26 @@ public class CutsceneDancingGod : Cutscene {
         UINew.Instance.RefreshUI(active: true);
     }
     void UpdateWalkTo() {
-        if (Mathf.Abs(Controller.Instance.focus.transform.position.x - standPoint.position.x) < 0.1) {
+        if (Mathf.Abs(InputController.Instance.focus.transform.position.x - standPoint.position.x) < 0.1) {
             EnterJumpState();
         } else {
             doWalk();
         }
     }
     void doWalk() {
-        if (Mathf.Abs(Controller.Instance.focus.transform.position.x - standPoint.position.x) > 0.1) {
-            if (Controller.Instance.focus.transform.position.x > standPoint.position.x) {
-                Controller.Instance.focus.leftFlag = true;
-                Controller.Instance.focus.rightFlag = false;
-            } else if (Controller.Instance.focus.transform.position.x < standPoint.position.x) {
-                Controller.Instance.focus.rightFlag = true;
-                Controller.Instance.focus.leftFlag = false;
+        if (Mathf.Abs(InputController.Instance.focus.transform.position.x - standPoint.position.x) > 0.1) {
+            if (InputController.Instance.focus.transform.position.x > standPoint.position.x) {
+                playerController.leftFlag = true;
+                playerController.rightFlag = false;
+            } else if (InputController.Instance.focus.transform.position.x < standPoint.position.x) {
+                playerController.rightFlag = true;
+                playerController.leftFlag = false;
             }
         }
     }
     void EnterJumpState() {
-        Controller.Instance.focus.ResetInput();
-        Controller.Instance.state = Controller.ControlState.cutscene;
+        playerController.ResetInput();
+        InputController.Instance.state = InputController.ControlState.cutscene;
         state = State.jump;
         timer = 0f;
         cam.maxSize = 0.85f;
@@ -83,12 +86,12 @@ public class CutsceneDancingGod : Cutscene {
         if (timer < 1.5f) {
             doWalk();
         } else if (timer > 1.5f) {
-            Controller.Instance.focus.ResetInput();
+            playerController.ResetInput();
             dancingGod.transform.localPosition = Vector3.Lerp(dancingGod.transform.localPosition, dancingGod.jumpUpPosition, 0.02f);
         }
         if (timer > 4f) {
-            Controller.Instance.focus.ResetInput();
-            Controller.Instance.state = Controller.ControlState.cutscene;
+            playerController.ResetInput();
+            InputController.Instance.state = InputController.ControlState.cutscene;
             state = State.god;
             timer = 0f;
             godhead.gameObject.SetActive(true);
@@ -96,7 +99,7 @@ public class CutsceneDancingGod : Cutscene {
         }
     }
     void GodHeadCallback() {
-        Controller.Instance.state = Controller.ControlState.normal;
+        InputController.Instance.state = InputController.ControlState.normal;
         dancingGod.enabled = true;
         timer = 0f;
         state = State.replace;
@@ -106,17 +109,20 @@ public class CutsceneDancingGod : Cutscene {
         cam.offset = new Vector3(0, 0.2f, 0);
         dancingGod.transform.localPosition = Vector3.Lerp(dancingGod.transform.localPosition, dancingGod.initPosition, 0.1f);
         if (Vector2.Distance(dancingGod.transform.localPosition, dancingGod.initPosition) < 0.01f) {
+            pankratorController.Deregister();
+            playerController.Deregister();
             complete = true;
             dancingGod.numberOfJumps = 0;
             dancingGod.FinishJump();
             UINew.Instance.RefreshUI(active: true);
         }
         if (timer > 2f) {
+            pankratorController.Deregister();
+            playerController.Deregister();
             complete = true;
             UINew.Instance.RefreshUI(active: true);
             cam.maxSize = 0.65f;
             cam.offset = new Vector3(0, 0.2f, 0);
-            pankrator.GetComponent<Controllable>().control = Controllable.ControlType.AI;
         }
     }
 }

@@ -19,7 +19,7 @@ namespace AI {
         });
         public Personality.CameraPreference camPref;
         public bool onCamera;
-        public PriorityReactToCamera(GameObject g, Controllable c, Personality.CameraPreference camPref) : base(g, c) {
+        public PriorityReactToCamera(GameObject g, Controller c, Personality.CameraPreference camPref) : base(g, c) {
             priorityName = "reactToCamera";
             this.camPref = camPref;
 

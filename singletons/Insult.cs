@@ -81,7 +81,7 @@ public class Insult {
         return g;
     }
     public static string ComposeInsult(GameObject insultTarget) {
-        GameObject target = Controller.Instance.GetBaseInteractive(insultTarget.transform);
+        GameObject target = InputController.Instance.GetBaseInteractive(insultTarget.transform);
         Grammar grammar = InsultGrammar(target);
         return grammar.Parse("{main}");
     }

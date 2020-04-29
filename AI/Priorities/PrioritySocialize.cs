@@ -4,7 +4,7 @@ namespace AI {
     public class PrioritySocialize : Priority {
         public Ref<GameObject> target = new Ref<GameObject>(null);
         public Ref<GameObject> peopleTarget = new Ref<GameObject>(null);
-        public PrioritySocialize(GameObject g, Controllable c) : base(g, c) {
+        public PrioritySocialize(GameObject g, Controller c) : base(g, c) {
             priorityName = "socialize";
             Config();
         }

@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 namespace AI {
     public class PriorityPanic : Priority {
-        public PriorityPanic(GameObject g, Controllable c) : base(g, c) {
+        public PriorityPanic(GameObject g, Controller c) : base(g, c) {
             priorityName = "panic";
             goal = new GoalPanic(g, c);
         }

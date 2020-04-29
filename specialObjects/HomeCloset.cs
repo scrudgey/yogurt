@@ -21,9 +21,9 @@ public class HomeCloset : Interactive {
             newBubbleAnimation.DisableFrames();
     }
     public void OpenCloset() {
-        if (Controller.Instance.state != Controller.ControlState.cutscene &&
-            Controller.Instance.state != Controller.ControlState.inMenu &&
-            Controller.Instance.state != Controller.ControlState.waitForMenu
+        if (InputController.Instance.state != InputController.ControlState.cutscene &&
+            InputController.Instance.state != InputController.ControlState.inMenu &&
+            InputController.Instance.state != InputController.ControlState.waitForMenu
             ) {
             GameObject menuObject = UINew.Instance.ShowMenu(UINew.MenuType.closet);
             ClosetButtonHandler menu = menuObject.GetComponent<ClosetButtonHandler>();

@@ -87,9 +87,9 @@ public class Bed : Doorway {
                 }
             }
             if (Input.anyKey &&
-            (Controller.Instance.state != Controller.ControlState.cutscene &&
-            Controller.Instance.state != Controller.ControlState.inMenu &&
-            Controller.Instance.state != Controller.ControlState.waitForMenu
+            (InputController.Instance.state != InputController.ControlState.cutscene &&
+            InputController.Instance.state != InputController.ControlState.inMenu &&
+            InputController.Instance.state != InputController.ControlState.waitForMenu
             )
             ) {
                 sleeping = false;
@@ -120,6 +120,6 @@ public class Bed : Doorway {
             GameManager.Instance.ShowDiaryEntry("death1");
             return;
         }
-        Controller.Instance.state = Controller.ControlState.normal;
+        InputController.Instance.state = InputController.ControlState.normal;
     }
 }

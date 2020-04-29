@@ -51,7 +51,7 @@ public class HeadAnimation : MonoBehaviour, IDirectable, ISaveable {
         Animation animationComponent = GetComponent<Animation>();
         animationComponent.Play(sequence);
     }
-    void Awake() {
+    public void Awake() {
         spriteRenderer = GetComponent<SpriteRenderer>();
         MessageDirectable directableMessage = new MessageDirectable();
         directableMessage.addDirectable.Add(this);

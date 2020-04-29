@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 
 namespace AI {
+
     [System.Serializable]
     public class Ref<T> {
         public virtual T val {

@@ -35,7 +35,7 @@ public class Fire : MonoBehaviour {
     }
     void OnTriggerEnter2D(Collider2D coll) {
         if (!flammables.ContainsKey(coll.gameObject)) {
-            GameObject baseInteractive = Controller.Instance.GetBaseInteractive(coll.gameObject.transform);
+            GameObject baseInteractive = InputController.Instance.GetBaseInteractive(coll.gameObject.transform);
             Flammable flam = baseInteractive.GetComponentInChildren<Flammable>();
             Fire otherFire = baseInteractive.GetComponentInChildren<Fire>();
             if (flam != null && flam != flammable) {

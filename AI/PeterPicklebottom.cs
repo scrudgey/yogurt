@@ -6,6 +6,7 @@ using AI;
 public class PeterPicklebottom : MonoBehaviour {
     public enum AIState { none, walkToTarget, slewAtTarget, leave, passive }
     public AIState state;
+    public Controller controller;
     public SimpleControl controllable;
     public Ref<Duplicatable> target;
     public Ref<GameObject> objRef;
@@ -19,6 +20,8 @@ public class PeterPicklebottom : MonoBehaviour {
     public float slewTime = 1f;
     public void Start() {
         controllable = GetComponent<SimpleControl>();
+        controller = new Controller(controllable);
+
         target = new Ref<Duplicatable>(null);
         objRef = new Ref<GameObject>(null);
         if (SceneManager.GetActiveScene().name == "apartment") {
@@ -39,7 +42,7 @@ public class PeterPicklebottom : MonoBehaviour {
                 objRef.val = target.val.gameObject;
             }
             state = AIState.walkToTarget;
-            routine = new RoutineWalkToGameobject(gameObject, controllable, objRef);
+            routine = new RoutineWalkToGameobject(gameObject, controller, objRef);
             routine.minDistance = 0.1f;
             timer = -2f;
             audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
@@ -67,7 +70,7 @@ public class PeterPicklebottom : MonoBehaviour {
                 if (routineStatus == status.success) {
                     timer = 0;
                     state = AIState.slewAtTarget;
-                    controllable.ResetInput();
+                    controller.ResetInput();
                 }
                 break;
             case AIState.slewAtTarget:

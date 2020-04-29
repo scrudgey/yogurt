@@ -14,6 +14,7 @@ public class Personality {
     public enum CombatProfficiency { normal, poor, expert };
     public enum CameraPreference { none, actor, avoidant, ambivalent, excited, eater, gravy };
     public enum PizzaDeliverer { no, yes };
+    public enum Dancer { no, follower, leader };
     public Bravery bravery;
     public Stoicism stoicism;
     public BattleStyle battleStyle;
@@ -22,7 +23,8 @@ public class Personality {
     public CombatProfficiency combatProficiency;
     public CameraPreference camPref;
     public PizzaDeliverer pizzaDeliverer;
-    public Personality(Bravery bravery, CameraPreference camPref, Stoicism stoicism, BattleStyle battleStyle, Suggestible suggestible, Social social, CombatProfficiency combatProficiency, PizzaDeliverer pizzaDeliverer) {
+    public Dancer dancer;
+    public Personality(Bravery bravery, CameraPreference camPref, Stoicism stoicism, BattleStyle battleStyle, Suggestible suggestible, Social social, CombatProfficiency combatProficiency, PizzaDeliverer pizzaDeliverer, Dancer dancer) {
         this.bravery = bravery;
         this.camPref = camPref;
         this.stoicism = stoicism;
@@ -31,6 +33,7 @@ public class Personality {
         this.social = social;
         this.combatProficiency = combatProficiency;
         this.pizzaDeliverer = pizzaDeliverer;
+        this.dancer = dancer;
     }
 }
 
@@ -39,7 +42,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         Attack, FightFire, ProtectPossessions,
         ReadScript, RunAway, Wander, ProtectZone,
         MakeBalloonAnimals, InvestigateNoise, PrioritySocialize,
-        Panic, Sentry, Trapdoor, DeliverPizza
+        Panic, Sentry, Trapdoor, DeliverPizza, Dance
     }
     // the ONLY reason we need this redundant structure is so that I can expose
     // a selectable default priority type in unity editor.
@@ -58,10 +61,11 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         {typeof(PrioritySentry), PriorityType.Sentry},
         {typeof(PriorityTrapdoor), PriorityType.Trapdoor},
         {typeof(PriorityDeliverPizza), PriorityType.DeliverPizza},
+        {typeof(PriorityDance), PriorityType.Dance},
     };
     public string activePriorityName;
     public PriorityType defaultPriorityType;
-    public Controllable control;
+    public Controller control;
     public GameObject thought;
     public Text thoughtText;
     public List<Priority> priorities;
@@ -80,15 +84,15 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         if (!initialized)
             Initialize();
     }
-    public void Initialize() {
 
+    public void Initialize() {
         // Debug.Log("decision maker initialize");
         initialized = true;
         // make sure there's Awareness
         awareness = Toolbox.GetOrCreateComponent<Awareness>(gameObject);
         awareness.decisionMaker = this;
         awareness.enabled = this.enabled;
-        control = GetComponent<Controllable>();
+        control = new Controller(GetComponent<Controllable>());
 
         // start awareness with knowledge of possessions
         if (possession != null) {
@@ -135,6 +139,9 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         }
         if (personality.pizzaDeliverer == Personality.PizzaDeliverer.yes) {
             InitializePriority(new PriorityDeliverPizza(gameObject, control), typeof(PriorityDeliverPizza));
+        }
+        if (personality.dancer == Personality.Dancer.follower || personality.dancer == Personality.Dancer.leader) {
+            InitializePriority(new PriorityDance(gameObject, control), typeof(PriorityDance));
         }
 
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);

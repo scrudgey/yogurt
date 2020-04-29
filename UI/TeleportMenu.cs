@@ -52,7 +52,7 @@ public class TeleportMenu : MonoBehaviour {
         if (selectedButton != null) {
             GameManager.Instance.data.teleportedToday = true;
             UINew.Instance.CloseActiveMenu();
-            Controller.Instance.suspendInput = true;
+            InputController.Instance.suspendInput = true;
             if (teleporter != null) {
                 teleporter.DoTeleport(selectedButton.scene_name);
             } else {
