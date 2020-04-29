@@ -8,6 +8,8 @@ public class CutsceneMoonLanding : Cutscene {
     AdvancedAnimation playerAnimation;
     HeadAnimation playerHeadAnimation;
     Collider2D playerCollider;
+    Inventory playerInv;
+    Pickup initHolding;
     Speech playerSpeech;
     GameObject landingString;
     public override void Configure() {
@@ -23,6 +25,11 @@ public class CutsceneMoonLanding : Cutscene {
         playerHeadAnimation = GameManager.Instance.playerObject.GetComponent<HeadAnimation>();
         playerSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
         playerCollider = GameManager.Instance.playerObject.GetComponent<Collider2D>();
+
+        playerInv = GameManager.Instance.playerObject.GetComponent<Inventory>();
+        if (playerInv != null) {
+            initHolding = playerInv.holding;
+        }
         if (playerControllable != null) {
             playerControllable.enabled = false;
         }
@@ -94,6 +101,12 @@ public class CutsceneMoonLanding : Cutscene {
             playerHurable.KnockDown();
         }
         GameObject.Destroy(landingString);
+
+        if (playerInv != null && initHolding != null) {
+            // initHolding = playerInv.holding;
+            playerInv.GetItem(initHolding);
+        }
+
         if (!GameManager.Instance.data.visitedMoon) {
             GameManager.Instance.data.visitedMoon = true;
             GameManager.Instance.ShowDiaryEntry("moon");

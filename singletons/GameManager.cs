@@ -439,7 +439,7 @@ public partial class GameManager : Singleton<GameManager> {
             }
             ShowDiaryEntry("diaryStudio");
         }
-        if (sceneName == "cave1" || sceneName == "cave2" || (sceneName == "cave3" && data.entryID == 3) || sceneName == "cave4") {
+        if (sceneName == "cave1" || sceneName == "cave2" || (sceneName == "cave3" && data.entryID == 3) || (sceneName == "cave4" && data.entryID == 0)) {
             CutsceneManager.Instance.InitializeCutscene<CutsceneFall>();
         }
         if (sceneName == "dungeon" && data.entryID != 2) {

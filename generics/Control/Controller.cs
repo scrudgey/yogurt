@@ -47,7 +47,7 @@ public class Controller : IDisposable {
         c.Register(this);
         this.controllable = c;
         GainedControl(c);
-        Debug.Log("controllable registering with " + c);
+        // Debug.Log("controllable registering with " + c);
     }
     public void Deregister() {
         if (controllable != null) {
@@ -107,7 +107,7 @@ public class Controller : IDisposable {
             gainedControlDelegate();
     }
     public virtual void LostControl(Controllable controllable) {
-        Debug.Log("controller lost control of " + controllable);
+        // Debug.Log("controller lost control of " + controllable);
         if (lostControlDelegate != null)
             lostControlDelegate();
     }

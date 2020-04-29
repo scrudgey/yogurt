@@ -73,13 +73,15 @@ public partial class UINew : Singleton<UINew> {
         return newbutton;
     }
 
-    static public List<ActionButton> CreateButtonsFromActions(HashSet<InteractionParam> interactions, bool removeColliders = false) {
+    static public List<ActionButton> CreateButtonsFromActions(HashSet<InteractionParam> interactions, bool fixColliders = false) {
         List<ActionButton> returnList = new List<ActionButton>();
         foreach (InteractionParam ip in interactions) {
             ActionButton newButton = SpawnButton(ip);
-            if (removeColliders) {
-                Destroy(newButton.gameobject.GetComponent<CircleCollider2D>());
-                Destroy(newButton.gameobject.GetComponent<Rigidbody2D>());
+            if (fixColliders) {
+                Rigidbody2D buttonBody = newButton.gameobject.GetComponent<Rigidbody2D>();
+                if (buttonBody) {
+                    buttonBody.bodyType = RigidbodyType2D.Kinematic;
+                }
             }
             returnList.Add(newButton);
         }
@@ -117,7 +119,7 @@ public partial class UINew : Singleton<UINew> {
             Vector2 initPosition = renderingCamera.WorldToScreenPoint(initLocation);
             n++;
             button.gameobject.transform.SetParent(UICanvas.transform, false);
-            button.gameobject.transform.SetSiblingIndex(0);
+            // button.gameobject.transform.SetSiblingIndex(0);
             initPosition = (initPosition - centerPosition) / (renderingCamera.pixelWidth / 800f);
             if (initPosition.y > canvasRect.rect.height / 2f) {
                 initPosition.y = canvasRect.rect.height / 2f - 50f;

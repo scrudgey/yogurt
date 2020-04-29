@@ -134,7 +134,7 @@ public class MusicTVR2 : Music {
 }
 public class MusicMountain : Music {
     public MusicMountain() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.mountain, vol: 2f) });
+        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.mountain, vol: 4f) });
     }
 }
 public class MusicController : Singleton<MusicController> {

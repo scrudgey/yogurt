@@ -8,6 +8,8 @@ public class CutsceneFall : Cutscene {
     protected Rigidbody2D playerBody;
     Controllable playerControl;
     Hurtable playerHurtable;
+    Inventory playerInv;
+    Pickup initHolding;
     protected float initDrag;
     protected virtual float fallDist() { return -0.3f; }
     public override void Configure() {
@@ -17,6 +19,10 @@ public class CutsceneFall : Cutscene {
         playerBody = player.GetComponent<Rigidbody2D>();
         playerControl = player.GetComponent<Humanoid>();
         playerHurtable = player.GetComponent<Hurtable>();
+        playerInv = GameManager.Instance.playerObject.GetComponent<Inventory>();
+        if (playerInv != null) {
+            initHolding = playerInv.holding;
+        }
         if (playerAnimation) {
             playerAnimation.enabled = false;
             playerAnimation.LateUpdate();
@@ -53,6 +59,10 @@ public class CutsceneFall : Cutscene {
                 playerHurtable.downedTimer = 3f;
             }
             UINew.Instance.RefreshUI(active: true);
+            if (playerInv != null && initHolding != null) {
+                // initHolding = playerInv.holding;
+                playerInv.GetItem(initHolding);
+            }
             complete = true;
         }
     }

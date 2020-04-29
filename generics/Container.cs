@@ -35,8 +35,6 @@ public class Container : MayorLock, IExcludable, ISaveable {
 
         Interaction stasher = new Interaction(this, "Put", "Store");
         stasher.validationFunction = true;
-        // stasher.holdingOnOtherConsent = false;
-        // stasher.otherOnSelfConsent = false;
         interactions.Add(stasher);
 
         retrieveActions = new Dictionary<Pickup, Interaction>();
@@ -52,7 +50,7 @@ public class Container : MayorLock, IExcludable, ISaveable {
             newInteraction.parameterTypes.Add(typeof(Inventory));
             newInteraction.descString = "Retrieve " + Toolbox.Instance.GetName(closurePickup.gameObject);
             newInteraction.holdingOnOtherConsent = false;
-            newInteraction.otherOnSelfConsent = false;
+            // newInteraction.otherOnSelfConsent = false;
             interactions.Add(newInteraction);
             PhysicalBootstrapper bs = pickup.gameObject.GetComponent<PhysicalBootstrapper>();
             if (bs) {
