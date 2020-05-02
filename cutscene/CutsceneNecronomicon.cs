@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
-
+using Nimrod;
 
 public class CutsceneNeconomicon : Cutscene {
     private enum State { start, rising, hovering, falling, end };
@@ -23,6 +23,7 @@ public class CutsceneNeconomicon : Cutscene {
     Collider2D zombieZonezone;
     float zombieTimer;
     float occurrenceTimer;
+    Grammar grammar = new Grammar();
     public List<Collider2D> colliders = new List<Collider2D>();
     public override void Configure() {
         cameraControl = GameObject.FindObjectOfType<CameraControl>();
@@ -78,6 +79,9 @@ public class CutsceneNeconomicon : Cutscene {
         state = State.rising;
         configured = true;
         Toolbox.Instance.AudioSpeaker("ominous", player.transform.position);
+
+
+        grammar.Load("horror");
     }
     public override void Update() {
         timer += Time.deltaTime;
@@ -114,6 +118,10 @@ public class CutsceneNeconomicon : Cutscene {
                 if (zombieTimer <= 0f) {
                     zombieTimer = UnityEngine.Random.Range(0.45f, 1.0f);
                     SpawnZombie(player);
+                    if (Random.Range(0, 1f) < 0.25f) {
+                        MessageSpeech message = new MessageSpeech(grammar.Parse("{reading}"));
+                        Toolbox.Instance.SendMessage(player, CutsceneManager.Instance, message);
+                    }
                 }
                 if (occurrenceTimer <= 0f) {
                     occurrenceTimer = UnityEngine.Random.Range(0.25f, 1.0f);

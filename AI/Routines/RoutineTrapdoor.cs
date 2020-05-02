@@ -11,6 +11,8 @@ namespace AI {
             this.sw = sw;
         }
         protected override status DoUpdate() {
+            if (!control.Authenticate())
+                return status.neutral;
             if (!sw.conditionMet) {
                 vampireSpeech.SpeakWith();
                 sw.conditionMet = true;

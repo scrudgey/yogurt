@@ -57,7 +57,7 @@ public class Explosive : MonoBehaviour {
 
     }
     public virtual void HandleNetIntrinsic(MessageNetIntrinsic message) {
-        Debug.Log("netbuffs changed");
+        // Debug.Log("netbuffs changed");
         netBuffs = message.netBuffs;
     }
     public void Explode() {
@@ -84,7 +84,7 @@ public class Explosive : MonoBehaviour {
         // Debug.Log(amount);
         cam.Shake(amount);
 
-
+        Toolbox.Instance.OccurenceFlag(gameObject, EventData.Explosion(gameObject));
 
         // Debug.Break();
         MessageDamage selfDestruct = new MessageDamage(200f, damageType.explosion);

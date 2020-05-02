@@ -27,6 +27,8 @@ public enum StatType {
     othersSetOnFire,
     monstersKilled,
     murders,
+    bedsMade,
+    booksBurned
 }
 
 [System.Serializable]

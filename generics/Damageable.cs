@@ -27,6 +27,8 @@ public abstract class Damageable : MonoBehaviour {
     public AudioClip[] strongImpactSounds;
     // public damageType lastDamage;
     public MessageDamage lastMessage;
+    public GameObject lastAttacker;
+    public bool impersonalAttacker;
     public GameObject gibsContainerPrefab;
     public Dictionary<BuffType, Buff> netBuffs;
     new public Rigidbody2D rigidbody2D;
@@ -82,7 +84,7 @@ public abstract class Damageable : MonoBehaviour {
         netBuffs = message.netBuffs;
         NetIntrinsicsChanged(message);
     }
-    public abstract void NetIntrinsicsChanged(MessageNetIntrinsic message);
+    public virtual void NetIntrinsicsChanged(MessageNetIntrinsic message) { }
     private void HandleMessageDamage(MessageDamage message) {
         if (message.type == damageType.fire) {
             cacheFiredMessage = message;
@@ -120,8 +122,11 @@ public abstract class Damageable : MonoBehaviour {
                 return;
             if (message.type == damageType.cosmic && netBuffs != null && netBuffs[BuffType.ethereal].boolValue) {
                 message.type = damageType.cutting;
-                // lastDamage = damageType.cutting;
             }
+            if (message.responsibleParty != null) {
+                lastAttacker = message.responsibleParty;
+            }
+            impersonalAttacker = message.impersonal;
             damage = CalculateDamage(message);
             if (message.strength) {
                 result = ImpactResult.strong;

@@ -26,6 +26,8 @@ public class StatsBrowser : MonoBehaviour {
         {StatType.monstersKilled, "monsters killed"},
         {StatType.murders, "murders"},
         {StatType.deathByExplosion, "death by explosion"},
+        {StatType.bedsMade, "beds made"},
+        {StatType.booksBurned, "books burned"},
     };
     public Text title;
     public Text content;

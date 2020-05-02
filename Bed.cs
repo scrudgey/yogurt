@@ -35,6 +35,7 @@ public class Bed : Doorway {
             spriteRenderer.sprite = bedSprites[0];
             audioSource.PlayOneShot(beddingSound);
         }
+        GameManager.Instance.IncrementStat(StatType.bedsMade, 1);
     }
     public bool MakeBed_Validation() {
         return unmade;

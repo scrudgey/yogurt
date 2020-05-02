@@ -18,7 +18,7 @@ public class Qualities : MonoBehaviour {
             positive: positive
         );
         data.whatHappened = "I saw " + Toolbox.Instance.GetName(gameObject);
-        data.noun = "observation";
+        data.noun = "imagery";
         return new DescribableOccurrenceData(new List<EventData> { data });
     }
 }

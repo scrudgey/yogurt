@@ -5,6 +5,21 @@ using System.Linq;
 using analysis;
 
 
+// Occurrence: monobehavior
+// occurrencedata: non-serializable runtime fields for passing detailed information between components on sight
+//                      contains eventdata
+// eventdata: serializable, standard fields.
+
+// to simplify: turn occurrencedata into eventdata if nothing consumes its nonserializable fields
+//          * occurrencefire
+//          * occurrencenecronomicon
+//
+// calcdescriptions is employed to ensure that initializing code can set things nicely in code.
+// remove this and use constructor code, and or initialization block.
+// allow a toolbox method that just takes an eventdata
+
+// eventdata -> occurrencedata -> occurrence
+
 [System.Serializable]
 public class DescribableOccurrenceData : MetaDescribable<EventData> {
     public HashSet<string> nouns = new HashSet<string>();

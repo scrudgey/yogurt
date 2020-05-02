@@ -166,8 +166,6 @@ public class EventData : Describable {
             data.popupDesc = "suicides";
             if (lastDamage == damageType.fire) {
                 data.whatHappened = victimName + " self-immolated";
-                GameManager.Instance.IncrementStat(StatType.immolations, 1);
-                GameManager.Instance.IncrementStat(StatType.selfImmolations, 1);
             }
         } else {
             data = new EventData(offensive: 4, disgusting: 3, disturbing: 4, chaos: 4, positive: -3);
@@ -185,6 +183,8 @@ public class EventData : Describable {
                     data.whatHappened = attackerName + " strangled " + victimName + " to death";
                 } else if (lastDamage == damageType.cosmic) {
                     data.whatHappened = attackerName + " annihilated " + victimName + " with cosmic energy";
+                } else if (lastDamage == damageType.explosion) {
+                    data.whatHappened = attackerName + " vaporized " + victimName + " in an explosion";
                 }
             } else {
                 data.noun = "death";
@@ -198,7 +198,57 @@ public class EventData : Describable {
                     data.whatHappened = victimName + " was annihilated by cosmic energy";
                 } else if (lastDamage == damageType.cutting || lastDamage == damageType.piercing) {
                     data.whatHappened = victimName + " was stabbed to death";
+                } else if (lastDamage == damageType.explosion) {
+                    data.whatHappened = victimName + " exploded into bloody chunks";
                 }
+            }
+        }
+        return data;
+    }
+    public static EventData Destruction(
+        GameObject destroyed,
+        GameObject lastAttacker,
+        MessageDamage lastMessage) {
+        string victimName = Toolbox.Instance.GetName(destroyed);
+        EventData data = new EventData(offensive: 1, disgusting: 1, disturbing: 1, chaos: 2, positive: -1);
+        data.key = "destruction";
+        data.val = 1f;
+        data.noun = "destruction";
+        data.popupDesc = "objects destroyed";
+
+        if (Toolbox.Instance.CloneRemover(destroyed.name) == "book" && lastMessage.type == damageType.fire) {
+            data = new EventData(offensive: 2, disgusting: 0, disturbing: 1, chaos: 2, positive: -2);
+            data.noun = "book burning";
+            data.key = "book burning";
+            data.val = 1f;
+            data.popupDesc = "book burnings";
+        }
+
+        data.whatHappened = "the " + victimName + " was destroyed";
+
+        if (lastMessage.type == damageType.fire) {
+            data.whatHappened = "the " + victimName + " was incinerated";
+        } else if (lastMessage.type == damageType.asphyxiation) {
+            data.whatHappened = "the " + victimName + " broke due to lack of oxygen";
+        } else if (lastMessage.type == damageType.cosmic) {
+            data.whatHappened = "the " + victimName + " was annihilated by cosmic energy";
+        } else if (lastMessage.type == damageType.cutting || lastMessage.type == damageType.piercing) {
+            data.whatHappened = "the " + victimName + " was chopped into pieces";
+        } else if (lastMessage.type == damageType.explosion) {
+            data.whatHappened = "the " + victimName + " was destroyed in an explosion";
+        }
+
+        if (!lastMessage.impersonal && lastAttacker != null) {
+            string attackerName = Toolbox.Instance.GetName(lastAttacker);
+            data.whatHappened = attackerName + " destroyed the " + victimName;
+            if (lastMessage.type == damageType.fire) {
+                data.whatHappened = attackerName + " incinerated the " + victimName;
+            } else if (lastMessage.type == damageType.cosmic) {
+                data.whatHappened = attackerName + " annihilated the " + victimName + " with cosmic energy";
+            } else if (lastMessage.type == damageType.cutting || lastMessage.type == damageType.piercing) {
+                data.whatHappened = attackerName + " chopped the " + victimName + " into little pieces";
+            } else if (lastMessage.type == damageType.explosion) {
+                data.whatHappened = attackerName + " exploded the " + victimName;
             }
         }
         return data;
@@ -224,4 +274,14 @@ public class EventData : Describable {
         data.whatHappened = grammar.Parse("{main}");
         return data;
     }
+    public static EventData Explosion(GameObject explosive) {
+        EventData data = new EventData(disturbing: 0, disgusting: 0, chaos: 3, offensive: 0, positive: 1);
+        data.key = "explosions";
+        data.val = 1f;
+        data.popupDesc = "explosions";
+        data.noun = "explosion";
+        data.whatHappened = "the " + Toolbox.Instance.GetName(explosive) + " exploded";
+        return data;
+    }
+
 }

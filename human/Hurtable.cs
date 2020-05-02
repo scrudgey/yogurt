@@ -31,8 +31,6 @@ public class Hurtable : Damageable, ISaveable {
     public float downedTimer;
     private float ouchFrequency = 0.1f;
     public GameObject dizzyEffect;
-    public GameObject lastAttacker;
-    public bool impersonalAttacker;
     public float timeSinceLastCough;
     bool vibrate;
     public bool bleeds = true; // if true, bleed on cutting / piercing damage
@@ -77,11 +75,6 @@ public class Hurtable : Damageable, ISaveable {
         }
     }
     public override float CalculateDamage(MessageDamage message) {
-        if (message.responsibleParty != null) {
-            lastAttacker = message.responsibleParty;
-        }
-        impersonalAttacker = message.impersonal;
-
         if (message.type == damageType.asphyxiation) {
             oxygen -= message.amount;
             if (oxygen <= 0) {
@@ -158,6 +151,9 @@ public class Hurtable : Damageable, ISaveable {
                     disgusting: 4,
                     positive: -2,
                     offensive: -2);
+                data.key = "corpse desecration";
+                data.val = 1;
+                data.popupDesc = "corpses desecrated";
             }
         }
         if (message.type != damageType.fire && message.type != damageType.asphyxiation) {

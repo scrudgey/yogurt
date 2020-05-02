@@ -34,7 +34,8 @@ namespace AI {
         // this bit first checks for a timeout, then calls a routine
         // that is specific to the child class.
         public status Update() {
-            // Debug.Log("")
+            if (!control.Authenticate())
+                return status.neutral;
             runTime += Time.deltaTime;
             if (timeLimit > 0 && runTime > timeLimit) {
                 runTime = 0;

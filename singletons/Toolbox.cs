@@ -119,6 +119,16 @@ public partial class Toolbox : Singleton<Toolbox> {
         }
         return s;
     }
+    public void OccurenceFlag(GameObject spawner, EventData data) {
+        GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
+        GameObject noise = GameObject.Instantiate(Resources.Load("NoiseFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
+        Occurrence occurrence = flag.GetComponent<Occurrence>();
+        Occurrence noiseOccurrence = noise.GetComponent<Occurrence>();
+        OccurrenceData occurrenceData = new OccurrenceEvent(data);
+        occurrence.data = occurrenceData;
+        noiseOccurrence.data = occurrenceData;
+        occurrenceData.CalculateDescriptions();
+    }
     public void OccurenceFlag(GameObject spawner, OccurrenceData data) {
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
         GameObject noise = GameObject.Instantiate(Resources.Load("NoiseFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
