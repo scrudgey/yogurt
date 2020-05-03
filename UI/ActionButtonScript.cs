@@ -31,6 +31,9 @@ public class InteractionParam {
     public override int GetHashCode() {
         return this.interaction.GetHashCode();
     }
+    public desire GetDesire(GameObject commandTarget, GameObject requester) {
+        return interaction.GetDesire(commandTarget, requester, parameters);
+    }
 }
 public class ActionButtonScript : MonoBehaviour {
     public enum buttonType {

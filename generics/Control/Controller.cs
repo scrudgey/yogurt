@@ -98,7 +98,8 @@ public class Controller : IDisposable {
         }
     }
     public void ResetInput() {
-        SetDirection(DirectionEnum.none, false);
+        if (controllable != null)
+            SetDirection(DirectionEnum.none, false);
     }
 
     public virtual void GainedControl(Controllable controllable) {

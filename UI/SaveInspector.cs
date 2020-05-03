@@ -50,9 +50,10 @@ public class SaveInspector : MonoBehaviour {
                 completeAchievements += 1;
         }
         float completion = 0;
-        completion += 0.33f * data.collectedObjects.Count / 95;
-        completion += 0.33f * data.completeCommercials.Count / 17f;
-        completion += 0.33f * completeAchievements / data.achievements.Count;
+        completion += 0.25f * data.collectedObjects.Count / 95;
+        completion += 0.25f * data.completeCommercials.Count / 17f;
+        completion += 0.25f * completeAchievements / data.achievements.Count;
+        completion += 0.25f * data.unlockedScenes.Count / GameManager.sceneNames.Count;
         return completion * 100f;
     }
     public void ItemCollectionCallback() {

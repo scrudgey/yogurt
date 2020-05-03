@@ -197,7 +197,7 @@ public class Speech : Interactive, ISaveable {
             Interaction speakWith = new Interaction(this, "Talk...", "SpeakWith");
             speakWith.unlimitedRange = true;
             speakWith.validationFunction = true;
-            speakWith.AddDesireFunction(DesireToSpeakWith);
+            // speakWith.AddDesireFunction(DesireToSpeakWith);
             interactions.Add(speakWith);
         }
         if (glibSpeakWith) {
@@ -264,7 +264,7 @@ public class Speech : Interactive, ISaveable {
         }
         return menu;
     }
-    public desire DesireToSpeakWith(Personality myPersonality, GameObject requester) {
+    public desire SpeakWith_desire() {
         return desire.decline;
     }
     public string SpeakWith_desc() {
@@ -532,8 +532,6 @@ public class Speech : Interactive, ISaveable {
 
         Monologue mono = new Monologue(this, strings.ToArray());
 
-        // Controllable control = GetComponent<Controllable>();
-        // control.LookAtPoint(target.transform.position);
         using (Controller control = new Controller(gameObject)) {
             control.LookAtPoint(target.transform.position);
         }

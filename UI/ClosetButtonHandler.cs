@@ -9,6 +9,7 @@ public class ClosetButtonHandler : MonoBehaviour {
     public Text descriptionText;
     public Text nameText;
     public Transform listContent;
+    public Transform buffs;
     public UIButtonEffects effects;
     public Button closeButton;
     public HomeCloset.ClosetType closetType;
@@ -21,6 +22,29 @@ public class ClosetButtonHandler : MonoBehaviour {
         GameObject newObject = Instantiate(Resources.Load("UI/ItemEntry")) as GameObject;
         return newObject.GetComponent<ItemEntryScript>();
     }
+    public void InstantiateBuff(Buff buff) {
+        GameObject icon = Instantiate(Resources.Load("UI/StatusIcon")) as GameObject;
+        UIStatusIcon statusIcon = icon.GetComponent<UIStatusIcon>();
+
+        Outline outline = icon.GetComponent<Outline>();
+        OutlineFader fader = icon.GetComponent<OutlineFader>();
+        ParticleSystem fx = icon.GetComponentInChildren<ParticleSystem>();
+
+        if (outline != null)
+            Destroy(outline);
+        if (fader != null)
+            Destroy(fader);
+        if (fx != null)
+            Destroy(fx);
+
+        statusIcon.Initialize(buff.type, buff);
+        statusIcon.transform.SetParent(buffs, false);
+    }
+    public void ClearBuffs() {
+        foreach (Transform childObject in buffs) {
+            Destroy(childObject.gameObject);
+        }
+    }
     public void PopulateItemList(HomeCloset.ClosetType type) {
         closetType = type;
         effects = GetComponent<UIButtonEffects>();
@@ -28,6 +52,7 @@ public class ClosetButtonHandler : MonoBehaviour {
         foreach (Transform childObject in listContent) {
             Destroy(childObject.gameObject);
         }
+        ClearBuffs();
         List<string> itemList = GameManager.Instance.data.collectedObjects;
 
         if (type == HomeCloset.ClosetType.clothing) {
@@ -74,9 +99,13 @@ public class ClosetButtonHandler : MonoBehaviour {
         UINew.Instance.CloseActiveMenu();
     }
     public void ItemMouseover(ItemEntryScript itemScript) {
+        ClearBuffs();
         nameText.text = itemScript.itemName;
         descriptionText.text = itemScript.description;
         icon.sprite = itemScript.sprite;
         icon.color = new Color(1f, 1f, 1f, 1f);
+        foreach (Buff buff in itemScript.buffs) {
+            InstantiateBuff(buff);
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
 public class ItemEntryScript : MonoBehaviour, IPointerEnterHandler {
     public string itemName;
@@ -16,6 +17,7 @@ public class ItemEntryScript : MonoBehaviour, IPointerEnterHandler {
         }
     }
     public Sprite sprite;
+    public List<Buff> buffs = new List<Buff>();
     public string description;
     public void Clicked() {
         ClosetButtonHandler handler = GetComponentInParent<ClosetButtonHandler>();
@@ -77,6 +79,18 @@ public class ItemEntryScript : MonoBehaviour, IPointerEnterHandler {
             itemName = name;
             description = "";
         }
+
+
+        Intrinsics intrinsics = tempObject.GetComponent<Intrinsics>();
+        if (intrinsics != null) {
+            foreach (KeyValuePair<BuffType, Buff> kvp in intrinsics.NetBuffs()) {
+                if (kvp.Value.active()) {
+                    kvp.Value.lifetime = 0;
+                    buffs.Add(kvp.Value);
+                }
+            }
+        }
+
         prefabName = name;
         entryText.text = itemName;
         Destroy(tempObject);

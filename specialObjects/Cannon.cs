@@ -16,17 +16,13 @@ public class Cannon : Interactive, ISaveable {
 
         shootPlayerAction = new Interaction(this, "Enter", "StartShootPlayer");
         shootPlayerAction.descString = "Climb into cannon";
-        shootPlayerAction.AddDesireFunction(DesireToShootPlayer);
         interactions.Add(shootPlayerAction);
 
         shootItemAction = new Interaction(this, "Shoot", "StartShootItem");
-        // shootItemAction.descString = "Shoot cannon";
         interactions.Add(shootItemAction);
 
         chargeAction = new Interaction(this, "Fill", "ChargeCannon");
         chargeAction.descString = "Fill cannon with gunpowder";
-        // chargeAction.inertOnPlayerConsent = true;
-        // chargeAction.otherOnPlayerConsent = true;
         interactions.Add(chargeAction);
 
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
@@ -35,7 +31,7 @@ public class Cannon : Interactive, ISaveable {
         shootEffect.Play();
         audioSource.PlayOneShot(shootSound);
     }
-    public desire DesireToShootPlayer(Personality myPersonality, GameObject requester) {
+    public desire ShootPlayer_desire() {
         return desire.decline;
     }
     public void StartShootPlayer() {
@@ -77,7 +73,6 @@ public class Cannon : Interactive, ISaveable {
         charged = data.bools["charged"];
     }
     IEnumerator ShootItemRoutine(PhysicalBootstrapper pb) {
-
         pb.transform.position = ejectionPoint.position;
         pb.transform.rotation = ejectionPoint.rotation;
 
@@ -89,7 +84,6 @@ public class Cannon : Interactive, ISaveable {
 
         pb.transform.position = ejectionPoint.position;
         pb.transform.rotation = ejectionPoint.rotation;
-        // pb.initHeight = 0.15f;
         pb.InitPhysical(0.15f, ejectionPoint.up * 5f);
 
         // disable 

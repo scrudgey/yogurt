@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 
 public class DoorwayZone : Doorway {
-    // public Transform enterPoint;
     public override void Enter(GameObject player) {
         enterPoint = transform.Find("enterPoint");
         player.transform.position = enterPoint.position;
@@ -16,7 +15,9 @@ public class DoorwayZone : Doorway {
     void Exit(Collider2D collider) {
         if (disableInteractions)
             return;
-        if (collider.gameObject == GameManager.Instance.playerObject) {
+        if (InputController.forbiddenTags.Contains(collider.tag))
+            return;
+        if (collider.transform == GameManager.Instance.playerObject.transform || collider.transform.IsChildOf(GameManager.Instance.playerObject.transform)) {
             Leave();
         }
     }

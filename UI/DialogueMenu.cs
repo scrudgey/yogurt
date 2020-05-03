@@ -356,7 +356,7 @@ public class DialogueMenu : MonoBehaviour {
         Speech playerSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
         Speech targetSpeech = InputController.Instance.commandTarget.GetComponent<Speech>();
         Configure(playerSpeech, targetSpeech, interruptDefault: true);
-        desire desireToAct = ip.interaction.GetDesire(InputController.Instance.commandTarget, GameManager.Instance.playerObject);
+        desire desireToAct = ip.GetDesire(InputController.Instance.commandTarget, GameManager.Instance.playerObject);
 
         PromptCommand(ip.Description());
         if (desireToAct == desire.decline) {

@@ -4,7 +4,6 @@ using System.Linq;
 using System;
 
 public enum desire { none, accept, decline }
-public delegate desire DesireFunction(Personality myPersonality, GameObject requester);
 
 [System.Serializable]
 public class Interaction {
@@ -32,7 +31,8 @@ public class Interaction {
     private System.Reflection.MethodInfo methodInfo;
     private System.Reflection.MethodInfo validationMethodInfo;
     private System.Reflection.MethodInfo descMethodInfo;
-    private DesireFunction desireFunction;
+    private System.Reflection.MethodInfo desireMethodInfo;
+    // private DesireFunction desireFunction;
     public bool selfOnOtherConsent = true;
     public bool selfOnSelfConsent = true;
     public bool otherOnSelfConsent = true;
@@ -57,7 +57,8 @@ public class Interaction {
             Debug.Log("interaction has failed to find its parent's method");
         }
         descMethodInfo = parent.GetType().GetMethod(functionName + "_desc");
-        desireFunction += defaultDesireFunction;
+        desireMethodInfo = parent.GetType().GetMethod(functionName + "_desire");
+        // desireFunction += defaultDesireFunction;
     }
     public Interaction(Interactive o, string name, Action<Component> initAction) {
         this.parameterTypes = new List<System.Type>();
@@ -169,19 +170,20 @@ public class Interaction {
             actionDelegate(parameters[0] as Component);
         }
     }
-    public desire defaultDesireFunction(Personality myPersonality, GameObject requester) {
-        if (myPersonality.suggestible == Personality.Suggestible.stubborn) {
+    public desire GetDesire(GameObject commandTarget, GameObject requester, List<object> parameters) {
+        DecisionMaker dm = commandTarget.GetComponent<DecisionMaker>();
+        if (dm.personality.suggestible == Personality.Suggestible.stubborn) {
             return desire.decline;
         }
-        return desire.accept;
-    }
-    public void AddDesireFunction(DesireFunction df) {
-        desireFunction -= defaultDesireFunction;
-        desireFunction += df;
-    }
-    public desire GetDesire(GameObject commandTarget, GameObject requester) {
-        DecisionMaker dm = commandTarget.GetComponent<DecisionMaker>();
-        return desireFunction(dm.personality, requester);
+        if (desireMethodInfo != null) {
+            if (parameters != null) {
+                return (desire)desireMethodInfo.Invoke(parent, parameters.ToArray());
+            } else {
+                return (desire)desireMethodInfo.Invoke(parent, null);
+            }
+        } else {
+            return desire.accept;
+        }
     }
 }
 public class Interactive : MonoBehaviour {

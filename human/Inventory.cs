@@ -193,6 +193,16 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         string itemname = Toolbox.Instance.GetName(pickup.gameObject);
         return "Pick up " + itemname;
     }
+    public desire GetItem_desire(Pickup pickup) {
+        Qualities qualities = pickup.GetComponent<Qualities>();
+        if (qualities) {
+            DescribableOccurrenceData data = qualities.ToDescribable();
+            if (data.quality[Rating.disgusting] > 0 || data.quality[Rating.disturbing] > 0 || data.quality[Rating.offensive] > 0) {
+                return desire.decline;
+            }
+        }
+        return desire.accept;
+    }
     public void StashItem(GameObject item) {
         items.Add(item);
         if (holding != null && item == holding.gameObject)
