@@ -81,12 +81,13 @@ public class Library : MonoBehaviour {
         new Book("The Briefcase: A History", "I never realized I had so many questions about briefcases!"),
         new Book("A travel guide to Nova Scotia", "Well, it looks pretty nice."),
         new Book("Paying the Ultimate Price: Fast Lives and Loose Change in the Vending Machine Underworld", "Written with unusual clarity and insight. Self-published."),
-        new Book("The Autocrat of the Breakfast Nook", "Judge Henry Adams Shipman Jr.", "What a pompous windbag!"),
+        new Book("The Autocrat of the Breakfast Nook", "Judge Henry Adams Jr.", "What a pompous windbag!"),
         new Book("Coolidge", "P. Hoffman", @"Ah, yes. The ""Oatmeal and Toast"" President."),
         new Book("Encyclopedia of Sci-Fi Robots", @"""Number 104: K9, the robotic dog."""),
         new Book("UFOs and The Military Industrial Establishment", "Roger Saltpepper", "", "Very thick and thoroughly documented."),
         new Book("I Loved Bigfoot in Acadia National Park", "Anon", "20 pages, illustrated", "I find this book troubling."),
         new Book("The Dummy's Guide to Amassing Wealth", "Matt Lictor", "Second edition", "The actual financial advice here, such as it is, is flimsy at best."),
+        new Book("101 Photographs of Snails!", "Bob", "", "If I had to pick a favorite, it'd be #30."),
     };
     public static Stack<Book> bookBag = new Stack<Book>();
 

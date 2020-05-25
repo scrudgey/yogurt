@@ -15,7 +15,7 @@ public class Parallax : MonoBehaviour {
     public List<ParallaxLayer> layers = new List<ParallaxLayer>();
     public bool applyOffsets;
     public Vector2 layerNeutralAtPosition;
-    void Start() {
+    void Awake() {
         Transform cameraTransform = GameObject.FindObjectOfType<Camera>().transform;
         originalPosition = cameraTransform.position;
         for (int i = 0; i < layers.Count; i++) {

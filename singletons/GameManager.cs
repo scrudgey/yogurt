@@ -63,6 +63,7 @@ public class GameData {
     public bool recordingCommercial;
 
     public List<System.Guid> toiletItems = new List<System.Guid>();
+    public bool loadedSewerItemsToday = false;
     public GameData() {
         days = 0;
         saveDate = System.DateTime.Now.ToString();
@@ -131,6 +132,7 @@ public partial class GameManager : Singleton<GameManager> {
         {"boardroom", "yogurt HQ"},
         {"hell1", "hell"},
         {"venus1", "venus"},
+        {"fountain", "ruinsw"},
     };
     public GameData data;
     public static GlobalSettings settings = new GlobalSettings();
@@ -305,12 +307,12 @@ public partial class GameManager : Singleton<GameManager> {
         UINew.Instance.RefreshUI(active: true);
     }
     public void LeaveScene(string toSceneName, int toEntryNumber) {
-        MySaver.Save();
-        data.entryID = toEntryNumber;
-        SceneManager.LoadScene(toSceneName);
+        Time.timeScale = 0f;
+
+        UINew.Instance.FadeOut(() => DoLeaveScene(toSceneName, toEntryNumber));
     }
-    void SceneWasLoaded(Scene scene, LoadSceneMode mode) {
-        // Debug.Log("on level was loaded");
+    public void SceneWasLoaded(Scene scene, LoadSceneMode mode) {
+        UINew.Instance.FadeIn(() => DoSceneWasLoaded(scene, mode));
         Toolbox.Instance.numberOfLiveSpeakers = 0;
         publicAudio.Stop();
         sceneTime = 0f;
@@ -333,8 +335,18 @@ public partial class GameManager : Singleton<GameManager> {
                 return;
             }
         }
-
         MusicController.Instance.SceneChange(scene.name);
+        Time.timeScale = 0f;
+    }
+    public void DoLeaveScene(string toSceneName, int toEntryNumber) {
+        Time.timeScale = 1f;
+
+        MySaver.Save();
+        data.entryID = toEntryNumber;
+        SceneManager.LoadScene(toSceneName);
+    }
+    public void DoSceneWasLoaded(Scene scene, LoadSceneMode mode) {
+        Time.timeScale = 1f;
     }
     void ResetGameState() {
         try {
@@ -408,6 +420,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
 
         SetFocus(playerObject);
+        // cam.transform.position = playerObject.transform.position;
         InputController.Instance.state = InputController.ControlState.normal;
         UINew.Instance.RefreshUI(active: true);
 
@@ -468,7 +481,8 @@ public partial class GameManager : Singleton<GameManager> {
             }
         }
 
-        if (sceneName == "cave3" && data.toiletItems.Count > 0) {
+        if (sceneName == "cave3" && !data.loadedSewerItemsToday) {
+            data.loadedSewerItemsToday = true;
             Collider2D toiletZone = GameObject.Find("toiletZone").GetComponent<Collider2D>();
             Bounds bounds = toiletZone.bounds;
             MySaver.LoadObjects(data.toiletItems);
@@ -481,7 +495,7 @@ public partial class GameManager : Singleton<GameManager> {
                     );
                 }
             }
-            data.toiletItems = new List<System.Guid>();
+            // data.toiletItems = new List<System.Guid>();
         }
         PlayerEnter();
         if (playerIsDead) {
@@ -565,8 +579,6 @@ public partial class GameManager : Singleton<GameManager> {
         // https://github.com/scrudgey/yogurt/issues/123
 
 
-
-
         foreach (Puddle puddle in GameObject.FindObjectsOfType<Puddle>()) {
             Destroy(puddle.gameObject);
         }
@@ -620,6 +632,7 @@ public partial class GameManager : Singleton<GameManager> {
                         advAnim.LoadSprites();
                     }
                 }
+                FocusIntrinsicsChanged(playerIntrinsics);
             }
 
             data.teleportedToday = false;
@@ -673,6 +686,7 @@ public partial class GameManager : Singleton<GameManager> {
         data.mayorLibraryShuffled = false;
         data.gangMembersDefeated = 0;
         data.activeCommercial = null;
+        data.loadedSewerItemsToday = false;
         // data.recordingCommercial = false;
         SetRecordingStatus(false);
     }

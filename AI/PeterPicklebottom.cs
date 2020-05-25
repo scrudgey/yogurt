@@ -63,8 +63,16 @@ public class PeterPicklebottom : MonoBehaviour {
         if (target.val == null && targets.Count == 0 && state != AIState.leave) {
             state = AIState.leave;
         }
+
         switch (state) {
             case AIState.walkToTarget:
+                if (target.val == null && targets.Count > 0) {
+                    target.val = targets.Pop();
+                    objRef.val = target.val.gameObject;
+                }
+                if (target.val == null && targets.Count == 0) {
+                    state = AIState.leave;
+                }
                 float distanceToTarget = Vector2.Distance(transform.position, target.val.transform.position);
                 status routineStatus = routine.Update();
                 if (routineStatus == status.success) {

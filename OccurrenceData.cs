@@ -61,8 +61,9 @@ public abstract class OccurrenceData {
 }
 public class OccurrenceEvent : OccurrenceData {
     protected EventData eventData;
+    public HashSet<GameObject> involved = new HashSet<GameObject>();
     public override HashSet<GameObject> involvedParties() {
-        return new HashSet<GameObject> { };
+        return involved;
     }
     public OccurrenceEvent(EventData eventData) {
         this.eventData = eventData;

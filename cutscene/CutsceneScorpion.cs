@@ -22,6 +22,7 @@ public class CutsceneScorpion : Cutscene {
             }
         }
         greaserPrefab = Resources.Load("prefabs/greaser") as GameObject;
+        MusicController.Instance.EnqueueMusic(new MusicGreaser());
     }
     public override void Update() {
         timer += Time.deltaTime;

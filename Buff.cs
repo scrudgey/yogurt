@@ -59,6 +59,25 @@ public class Buff {
 
         return result;
     }
+
+    public static Dictionary<BuffType, string> buffNames = new Dictionary<BuffType, string>{
+        {BuffType.armor, "armor"},
+        {BuffType.bonusHealth, "bonus health"},
+        {BuffType.clearHeaded, "mindfulness"},
+        {BuffType.coughing, "coughing"},
+        {BuffType.death, "death"},
+        {BuffType.enraged, "rage"},
+        {BuffType.ethereal, "ethereal"},
+        {BuffType.fireproof, "fireproof"},
+        {BuffType.invulnerable, "blessed"},
+        {BuffType.noPhysicalDamage, "nonphysical"},
+        {BuffType.poison, "poison"},
+        {BuffType.speed, "speed"},
+        {BuffType.strength, "strength"},
+        {BuffType.telepathy, "telepathy"},
+        {BuffType.undead, "undead"},
+    };
+
 }
 public enum BuffType {
     telepathy,

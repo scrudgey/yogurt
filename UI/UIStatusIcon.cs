@@ -11,7 +11,7 @@ public class UIStatusIcon : MonoBehaviour {
         text = transform.Find("Text").GetComponent<Text>();
         lifeBar = transform.Find("lifebar/mask/fill").GetComponent<RectTransform>();
 
-        text.text = type.ToString();
+        text.text = Buff.buffNames[type];
         if (lifebarDefaultSize == Vector2.zero)
             lifebarDefaultSize = new Vector2(lifeBar.rect.width, lifeBar.rect.height);
         if (buff.lifetime == 0) {

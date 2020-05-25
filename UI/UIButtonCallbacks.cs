@@ -26,6 +26,7 @@ public class UIButtonCallbacks : MonoBehaviour {
     public void LoadButtonClick() {
         GameManager.Instance.SetFocus(MySaver.LoadScene());
     }
+    public Boolean faded;
     public void TestButtonClick() {
 
         // Speech speech = GameObject.FindObjectOfType<Speech>();
@@ -40,14 +41,20 @@ public class UIButtonCallbacks : MonoBehaviour {
         //     Godhead.BlessItem(pb);
         // }
 
-        string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
-        DirectoryInfo dataDir = new DirectoryInfo(path);
-        dataDir.Delete(true);
+        // string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
+        // DirectoryInfo dataDir = new DirectoryInfo(path);
+        // dataDir.Delete(true);
 
         // Debug.Log("test");
         // Grammar g = new Grammar();
         // g.Load("insult");
         // Debug.Log(g.Parse("{main}"));
+        if (faded) {
+            UINew.Instance.FadeIn(() => { Debug.Log("done faded"); });
+        } else {
+            UINew.Instance.FadeOut(() => { Debug.Log("done faded"); });
+        }
+        faded = !faded;
     }
     public void HypnosisButtonClick() {
         if (InputController.Instance.state == InputController.ControlState.inMenu)

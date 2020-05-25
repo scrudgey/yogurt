@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using Easings;
 using UnityEngine.EventSystems;
+using System;
 
 public partial class UINew : Singleton<UINew> {
     public void Hit() {
@@ -151,5 +152,11 @@ public partial class UINew : Singleton<UINew> {
         statusIcon.Initialize(buff.type, buff);
         statusIcon.transform.SetParent(iconDock, false);
         return icon;
+    }
+    public void FadeOut(Action callback) {
+        fader.FadeOut(callback);
+    }
+    public void FadeIn(Action callback) {
+        fader.FadeIn(callback);
     }
 }

@@ -151,56 +151,6 @@ public class Commercial : MetaDescribable<DescribableOccurrenceData> {
         }
         return requirementsMet;
     }
-    // public string SentenceReview() {
-    //     return "WOW OK";
-    // }
-    // public string SentenceReview() {
-    //     // TODO: adjectives to describe the commercial based on key properties of prominent events
-    //     List<string> adjectives = new List<string>();
-    //     foreach (EventData eventd in analysis.outlierEvents) {
-    //         string adj = eventd.Adjective();
-    //         if (adj != "none")
-    //             adjectives.Add(adj);
-    //     }
-    //     StringBuilder builder = new StringBuilder();
-    //     builder.Append("A");
-    //     switch (Mathf.Min(adjectives.Count, 3)) {
-    //         case 3:
-    //         case 2:
-    //             builder.Append(" ");
-    //             builder.Append(adjectives[0] + " and " + adjectives[1]);
-    //             break;
-    //         case 1:
-    //             builder.Append(" ");
-    //             builder.Append(adjectives[0]);
-    //             break;
-    //         case 0:
-    //         default:
-    //             break;
-    //     }
-    //     builder.Append(" commercial that prominently features ");
-    //     List<string> nouns = new List<string>();
-    //     foreach (EventData eventd in analysis.outlierEvents) {
-    //         if (!nouns.Contains(eventd.noun))
-    //             nouns.Add(eventd.noun);
-    //     }
-    //     builder.Append(nouns[0]);
-    //     switch (nouns.Count) {
-    //         case 3:
-    //             builder.Append(", ");
-    //             builder.Append(nouns[1] + ", and " + nouns[2]);
-    //             break;
-    //         case 2:
-    //             builder.Append(" and ");
-    //             builder.Append(nouns[1]);
-    //             break;
-    //         case 1:
-    //         default:
-    //             break;
-    //     }
-    //     builder.Append(".");
-    //     return builder.ToString();
-    // }
 }
 [System.Serializable]
 public class CommercialProperty {

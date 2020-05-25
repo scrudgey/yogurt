@@ -45,6 +45,7 @@ public class Stat {
 
 [System.Serializable]
 public class Achievement {
+    public string steamId;
     public string icon;
     public bool complete;
     public System.DateTime completedTime;

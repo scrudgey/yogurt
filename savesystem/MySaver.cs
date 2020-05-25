@@ -60,7 +60,7 @@ public class MySaver {
             // playerStream.Close();
             if (objectDataBase != null) {
                 foreach (KeyValuePair<Guid, PersistentObject> kvp in objectDataBase) {
-                    if (kvp.Value.sceneName != "apartment") {
+                    if (kvp.Value.sceneName != "apartment" && !GameManager.Instance.data.toiletItems.Contains(kvp.Key)) {
                         if (!playerIDs.Contains(kvp.Key))
                             removeEntries.Push(kvp.Key);
                     }

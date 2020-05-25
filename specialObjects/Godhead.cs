@@ -31,6 +31,10 @@ public class Godhead : MonoBehaviour {
     public void Start() {
         cam = GameObject.FindObjectOfType<CameraControl>();
 
+        if (GameManager.Instance.data.cosmicName != "") {
+            godSpeech.defaultMonologue = "dancing_god_cosmic";
+        }
+
         source = Toolbox.Instance.SetUpAudioSource(gameObject);
         state = State.moveHead;
         hand.gameObject.SetActive(false);

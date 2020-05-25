@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
 public class CutsceneDungeonFall : CutsceneFall {
-    override protected float fallDist() { return -3.236f; }
+    override protected float fallDist() { return -2.91f; }
     private float catchPoint = 0.317f;
     private bool caught;
     private bool dumping;

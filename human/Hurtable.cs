@@ -36,6 +36,8 @@ public class Hurtable : Damageable, ISaveable {
     public bool bleeds = true; // if true, bleed on cutting / piercing damage
     public bool monster = false; // if true, death of this hurtable is not shocking or disturbing
     public Dictionary<damageType, float> totalDamage = new Dictionary<damageType, float>();
+    public Collider2D myCollider;
+    public bool unknockdownable;
     public void Reset() {
         health = maxHealth;
         oxygen = maxOxygen;
@@ -49,6 +51,7 @@ public class Hurtable : Damageable, ISaveable {
         oxygen = maxOxygen;
         Toolbox.RegisterMessageCallback<MessageHead>(this, HandleHead);
         Toolbox.RegisterMessageCallback<MessageStun>(this, HandleStun);
+        myCollider = GetComponent<Collider2D>();
     }
     void HandleHead(MessageHead head) {
         if (head.type == MessageHead.HeadType.vomiting) {
@@ -332,6 +335,8 @@ public class Hurtable : Damageable, ISaveable {
         }
     }
     public void KnockDown() {
+        if (unknockdownable)
+            return;
         if (hitState >= Controllable.HitState.unconscious)
             return;
         hitState = Controllable.AddHitState(hitState, Controllable.HitState.unconscious);
@@ -340,6 +345,9 @@ public class Hurtable : Damageable, ISaveable {
             downedTimer = 5f;
         } else {
             downedTimer = 10f;
+        }
+        if (myCollider != null) {
+            myCollider.enabled = false;
         }
         Vector3 pivot = transform.position;
         pivot.y -= 0.15f;
@@ -363,6 +371,9 @@ public class Hurtable : Damageable, ISaveable {
             } else {
                 health += 0.25f * maxHealth;
             }
+        if (myCollider != null) {
+            myCollider.enabled = true;
+        }
         hitState = Controllable.RemoveHitState(hitState, Controllable.HitState.unconscious);
         doubledOver = false;
         Vector3 pivot = transform.position;

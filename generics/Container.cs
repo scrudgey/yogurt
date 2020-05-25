@@ -66,6 +66,8 @@ public class Container : MayorLock, IExcludable, ISaveable {
         interactions.Add(stasher);
     }
     protected void RemoveRetrieveAction(Pickup pickup) {
+        if (retrieveActions.ContainsKey(pickup))
+            return;
         interactions.Remove(retrieveActions[pickup]);
     }
     public bool Store_Validation(Inventory inv) {

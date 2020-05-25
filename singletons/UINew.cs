@@ -50,6 +50,7 @@ public partial class UINew : Singleton<UINew> {
     public Transform objectivesContainer;
     public Transform iconDock;
     public GameObject buttonAnchor;
+    public FadeInOut fader;
     public List<string> previousTopButtons = new List<string>();
     public void Start() {
         Awake();
@@ -97,6 +98,7 @@ public partial class UINew : Singleton<UINew> {
         topRightBar = UICanvas.transform.Find("topright").gameObject;
         hitIndicator = UICanvas.transform.Find("hitIndicator").GetComponent<UIHitIndicator>();
         objectivesContainer = UICanvas.transform.Find("objectives");
+        fader = UICanvas.transform.Find("fader").GetComponent<FadeInOut>();
         iconDock = UICanvas.transform.Find("iconDock");
         topRightRectTransform = topRightBar.GetComponent<RectTransform>();
         if (lifebarDefaultSize == Vector2.zero)

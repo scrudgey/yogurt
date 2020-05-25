@@ -26,7 +26,9 @@ public enum TrackName {
     mayor,
     mayor_attic,
     tv_r2d2,
-    mountain
+    mountain,
+    greaser,
+    imp
 }
 [System.Serializable]
 public class Track {
@@ -137,6 +139,16 @@ public class MusicMountain : Music {
         tracks = new Stack<Track>(new List<Track> { new Track(TrackName.mountain, vol: 4f) });
     }
 }
+public class MusicImp : Music {
+    public MusicImp() {
+        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.imp, vol: 0.5f) });
+    }
+}
+public class MusicGreaser : Music {
+    public MusicGreaser() {
+        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.greaser) });
+    }
+}
 public class MusicController : Singleton<MusicController> {
 
     static Dictionary<TrackName, string> trackFiles = new Dictionary<TrackName, string>(){
@@ -157,7 +169,9 @@ public class MusicController : Singleton<MusicController> {
         {TrackName.mayor, "Mayor's House #2 improved YC3 2020"},
         {TrackName.mayor_attic, "Mayor's ATTIC #1 YC3"},
         {TrackName.tv_r2d2, "TV-r2d2"},
-        {TrackName.mountain, "Mountain Ambience #2 YC3 2020"}
+        {TrackName.mountain, "Mountain Ambience #2 YC3 2020"},
+        {TrackName.greaser, "Greaser Theme #5 ALL IN -- YC3 2020"},
+        {TrackName.imp, "IMP's Theme Draft #11 CABBAGEPATCH ADAMS _ YC3 2020"},
     };
 
     static Dictionary<string, Func<Music>> sceneMusic = new Dictionary<string, Func<Music>>() {
@@ -174,7 +188,7 @@ public class MusicController : Singleton<MusicController> {
         // {"morning_cutscene", musicBeat},
         {"forest", () => new MusicCreepy()},
         {"woods", () => new MusicCreepy()},
-        {"potion", () => new MusicCreepy()},
+        {"potion", () => new MusicImp()},
         {"vampire_house", () => new MusicVamp()},
         {"dungeon", () => new MusicVamp()},
         {"house", () => new MusicApartment()},
@@ -189,7 +203,7 @@ public class MusicController : Singleton<MusicController> {
         {"anti_mayor_cutscene", () => new MusicMayorAttic()},
         {"gravy_studio", () => new MusicMoon()},
         {"mountain", () => new MusicMountain()},
-        {"volcano", () => new MusicMountain()}
+        {"volcano", () => new MusicMountain()},
     };
     // TODO: add studio
     public static Dictionary<TrackName, AudioClip> tracks = new Dictionary<TrackName, AudioClip>();

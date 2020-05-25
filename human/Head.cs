@@ -4,6 +4,7 @@ public class Head : Interactive, IExcludable, ISaveable {
     public Hat hat;
     public Hat initHat;
     private SpriteRenderer spriteRenderer;
+    public Controllable.HitState hitState;
     void Awake() {
         hatPoint = transform.Find("hatPoint").gameObject;
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -12,6 +13,14 @@ public class Head : Interactive, IExcludable, ISaveable {
         wearAct.dontWipeInterface = false;
         wearAct.validationFunction = true;
         interactions.Add(wearAct);
+
+        Interaction stealInteraction = new Interaction(this, "Take Hat", "StealUniform");
+        stealInteraction.validationFunction = true;
+        interactions.Add(stealInteraction);
+        Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
+    }
+    void HandleHitStun(MessageHitstun message) {
+        hitState = message.hitState;
     }
     public void Start() {
         if (initHat) {
@@ -63,7 +72,25 @@ public class Head : Interactive, IExcludable, ISaveable {
     public bool DonHat_Validation(Hat h) {
         return h.head == null;
     }
-    void RemoveHat() {
+    public void StealUniform(Head otherHead) {
+        Hat removedHat = RemoveHat();
+        // Uniform myUniform = uniObject.GetComponent<Uniform>();
+        otherHead.DonHat(removedHat);
+        // GoNude();
+    }
+    public bool StealUniform_Validation(Head otherHead) {
+        if (otherHead == this)
+            return false;
+        if (hat == null)
+            return false;
+        if (hitState >= Controllable.HitState.unconscious)
+            return true;
+        return false;
+    }
+    public string StealUniform_desc(Head otherHead) {
+        return "Take hat";
+    }
+    public Hat RemoveHat() {
         if (hat.helmet) {
             spriteRenderer.enabled = true;
         }
@@ -91,7 +118,9 @@ public class Head : Interactive, IExcludable, ISaveable {
         }
         MessageDirectable directable = new MessageDirectable();
         directable.removeDirectable.AddRange(hat.GetComponentsInParent<IDirectable>());
+        Hat returnHat = hat;
         hat = null;
+        return returnHat;
     }
     public void DropMessage(GameObject obj) {
         RemoveHat();

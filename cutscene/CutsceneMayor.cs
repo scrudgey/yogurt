@@ -54,6 +54,8 @@ public class CutsceneMayor : Cutscene {
         }
     }
     public override void CleanUp() {
+        mayorController.Deregister();
+        playerController.Deregister();
         UINew.Instance.RefreshUI(active: true);
         foreach (Controllable controllable in GameObject.FindObjectsOfType<Controllable>()) {
             controllable.enabled = true;

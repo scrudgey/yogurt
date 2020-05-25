@@ -86,6 +86,7 @@ public abstract class Damageable : MonoBehaviour {
     }
     public virtual void NetIntrinsicsChanged(MessageNetIntrinsic message) { }
     private void HandleMessageDamage(MessageDamage message) {
+        Debug.Log(gameObject.name + " handling message " + message.type.ToString());
         if (message.type == damageType.fire) {
             cacheFiredMessage = message;
             return;
@@ -104,6 +105,8 @@ public abstract class Damageable : MonoBehaviour {
         }
     }
     public virtual void TakeDamage(MessageDamage message) {
+        if (!enabled)
+            return;
         if (message.amount == 0)
             return;
         foreach (ImpactGibs impactGib in impactGibs) {
@@ -166,8 +169,9 @@ public abstract class Damageable : MonoBehaviour {
             lastMessage = new MessageDamage(0.5f, damageType.physical);
         }
         Intrinsics myIntrinsics = GetComponent<Intrinsics>();
+        // TODO: does this ruin undead gibs?
         foreach (Gibs gib in GetComponents<Gibs>())
-            gib.Emit(lastMessage, intrinsics: myIntrinsics);
+            gib.Emit(lastMessage);//, intrinsics: myIntrinsics);
         PhysicalBootstrapper phys = GetComponent<PhysicalBootstrapper>();
         if (phys) {
             phys.DestroyPhysical();

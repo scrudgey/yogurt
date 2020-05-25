@@ -11,7 +11,9 @@ namespace AI {
         public TrapDoor trapdoor;
         public bool atMansion;
         public PriorityTrapdoor(GameObject g, Controller c, Vector3 guardPoint) : base(g, c) {
-            trapdoor = GameObject.Find("trapdoor").GetComponent<TrapDoor>();
+            GameObject trapdoorObj = GameObject.Find("trapdoor");
+            if (trapdoorObj != null)
+                trapdoor = trapdoorObj.GetComponent<TrapDoor>();
 
             priorityName = "trapdoor";
             player = new Ref<GameObject>(GameManager.Instance.playerObject);
@@ -32,8 +34,8 @@ namespace AI {
             if (!atMansion)
                 return -1f;
             player.val = GameManager.Instance.playerObject;
-            if (!trapdoor.active) {
-                return Priority.urgencySmall; ;
+            if (trapdoor != null && !trapdoor.active) {
+                return Priority.urgencySmall;
             } else {
                 return -1f;
             }

@@ -8,10 +8,10 @@ public class LiquidResevoir : Interactive {
     public AudioClip[] drinkSounds;
     void Awake() {
         liquid = Liquid.LoadLiquid(initLiquid);
-        if (liquid.buffs.Count > 0) {
-            Intrinsics intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject);
-            intrinsics.buffs.AddRange(liquid.buffs);
-        }
+        // if (liquid.buffs.Count > 0) {
+        //     Intrinsics intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject);
+        //     intrinsics.buffs.AddRange(liquid.buffs);
+        // }
         if (drinkable) {
             Interaction drinker = new Interaction(this, "Drink", "Drink");
             drinker.selfOnOtherConsent = true;
