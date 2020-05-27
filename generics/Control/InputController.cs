@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 
-// public class 
 public class InputController : Singleton<InputController> {
     public enum ControlState {
         normal,

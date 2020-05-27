@@ -5,19 +5,31 @@ using UnityEngine.UI;
 using UnityEngine.Audio;
 
 public class SettingsMenu : MonoBehaviour {
-    AudioMixer sfxMixer;
-    AudioMixer musicMixer;
-    void Start() {
-        sfxMixer = Resources.Load("mixers/SoundEffectMixer") as AudioMixer;
-        musicMixer = Resources.Load("mixers/MusicMixer") as AudioMixer;
+    public Canvas controlsCanvas;
+    public Canvas mainCanvas;
+    public Slider musicVolumeSlider;
+    public Slider sfxVolumeSlider;
+    public Toggle musicToggle;
+    public void Start() {
+        float musicVolume = GameManager.Instance.GetMusicVolume();
+        float sfxVolume = GameManager.Instance.GetSFXVolume();
+        bool musicState = GameManager.Instance.GetMusicState();
+
+        musicVolumeSlider.SetValueWithoutNotify(musicVolume);
+        sfxVolumeSlider.SetValueWithoutNotify(sfxVolume);
+        musicToggle.SetIsOnWithoutNotify(musicState);
     }
     public void MusicToggleChanged(Toggle change) {
-        GameManager.settings.musicOn = change.isOn;
+        GameManager.Instance.SetMusicOn(change.isOn);
     }
     public void MusicVolumeControl(float vol) {
-        musicMixer.SetFloat("Volume", Mathf.Log10(vol) * 20);
+        GameManager.Instance.SetMusicVolume(vol);
     }
     public void SFXVolumeControl(float vol) {
-        sfxMixer.SetFloat("Volume", Mathf.Log10(vol) * 20);
+        GameManager.Instance.SetSFXVolume(vol);
+    }
+    public void GraphicButtonCallback() {
+        controlsCanvas.enabled = true;
+        mainCanvas.enabled = false;
     }
 }

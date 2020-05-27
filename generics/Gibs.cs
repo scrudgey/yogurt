@@ -33,17 +33,13 @@ public class Gibs : MonoBehaviour {
         initAngleFromHorizontal.low = other.initAngleFromHorizontal.low;
         initAngleFromHorizontal.high = other.initAngleFromHorizontal.high;
     }
-    public void Emit(MessageDamage message, Intrinsics intrinsics = null) {
+    public void Emit(MessageDamage message) {
         if (message.suppressGibs)
             return;
         if (!DamageTypeMatch(damageCondition, message.type))
             return;
         for (int i = 0; i < number; i++) {
             GameObject bit = Instantiate(particle, transform.position, Quaternion.identity) as GameObject;
-            if (intrinsics != null && intrinsics.buffs.Count > 0) {
-                Intrinsics bitIntrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(bit);
-                bitIntrinsics.liveBuffs = intrinsics.buffs;
-            }
             SpriteRenderer sprite = bit.GetComponent<SpriteRenderer>();
             sprite.color = color;
             if (applyAnimationSkinColor) {

@@ -84,22 +84,6 @@ public class GameData {
         return completeAchievements;
     }
 }
-public class GlobalSettings {
-    private bool _musicOn = true;
-    public bool musicOn {
-        get { return _musicOn; }
-        set {
-            _musicOn = value;
-            if (value) {
-                MusicController.Instance.SetMusic(MusicController.Instance.nowPlayingMusic);
-            } else {
-                MusicController.Instance.StopTrack();
-            }
-        }
-    }
-    public float sfxVolume;
-    public float musicVolume;
-}
 public partial class GameManager : Singleton<GameManager> {
     protected GameManager() { }
     static public Dictionary<string, string> sceneNames = new Dictionary<string, string>(){
@@ -135,7 +119,6 @@ public partial class GameManager : Singleton<GameManager> {
         {"fountain", "ruinsw"},
     };
     public GameData data;
-    public static GlobalSettings settings = new GlobalSettings();
     public string saveGameName = "test";
     private CameraControl cameraControl;
     public Camera cam;
@@ -168,6 +151,7 @@ public partial class GameManager : Singleton<GameManager> {
         publicAudio.PlayOneShot(clip);
     }
     public void Start() {
+        InitSettings();
         if (data == null) {
             data = InitializedGameData();
             // ReceiveEmail("duplicator");
@@ -243,7 +227,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
     }
     public bool InCutsceneLevel() {
-        return SceneManager.GetActiveScene().buildIndex <= 3;
+        return SceneManager.GetActiveScene().buildIndex <= 4;
     }
     public void FocusIntrinsicsChanged(Intrinsics intrinsics) {
         Dictionary<BuffType, Buff> netBuffs = intrinsics.NetBuffs();

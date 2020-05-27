@@ -88,6 +88,7 @@ public class Library : MonoBehaviour {
         new Book("I Loved Bigfoot in Acadia National Park", "Anon", "20 pages, illustrated", "I find this book troubling."),
         new Book("The Dummy's Guide to Amassing Wealth", "Matt Lictor", "Second edition", "The actual financial advice here, such as it is, is flimsy at best."),
         new Book("101 Photographs of Snails!", "Bob", "", "If I had to pick a favorite, it'd be #30."),
+        new Book("I Hate Fish!", "Susan Wraithewhite", "", "She makes a strong argument."),
     };
     public static Stack<Book> bookBag = new Stack<Book>();
 

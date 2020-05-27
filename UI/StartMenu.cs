@@ -48,7 +48,6 @@ public class StartMenu : MonoBehaviour {
         logo.SetActive(true);
         state = menuState.anykey;
     }
-
     void Update() {
         if (Input.anyKey && state == menuState.anykey) {
             state = menuState.main;
@@ -348,4 +347,11 @@ public class StartMenu : MonoBehaviour {
 
         previewPrefab.sprite = Toolbox.ApplySkinToneToSprite(newSprite, selectedSkinColor);
     }
+
+    // void RemapButtonClicked(InputAction actionToRebind) {
+    //     var rebindOperation = actionToRebind.PerformInteractiveRebinding()
+    //                 .WithControlsExcluding("Mouse") // To avoid accidental input from mouse motion
+    //                 .OnMatchWaitForAnother(0.1f)
+    //                 .Start();
+    // }
 }

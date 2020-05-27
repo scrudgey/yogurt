@@ -273,7 +273,7 @@ public class MusicController : Singleton<MusicController> {
             PlayTrack(stack.Peek());
     }
     public void PlayTrack(Track track) {
-        if (!GameManager.settings.musicOn) {
+        if (!GameManager.Instance.GetMusicState()) {
             StopTrack();
             return;
         }

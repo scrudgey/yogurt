@@ -78,7 +78,7 @@ public class UIButtonCallbacks : MonoBehaviour {
     }
 
     public void MusicToggleChanged(bool selected) {
-        GameManager.settings.musicOn = selected;
+        GameManager.Instance.SetMusicOn(selected);
     }
 
 
