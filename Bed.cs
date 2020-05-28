@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-
+using UnityEngine.InputSystem;
 public class Bed : Doorway {
     bool unmade = true;
     public Sprite[] bedSprites;
@@ -87,7 +87,7 @@ public class Bed : Doorway {
                     audioSource.PlayOneShot(snoreSound);
                 }
             }
-            if (Input.anyKey &&
+            if (Keyboard.current.anyKey.isPressed &&
             (InputController.Instance.state != InputController.ControlState.cutscene &&
             InputController.Instance.state != InputController.ControlState.inMenu &&
             InputController.Instance.state != InputController.ControlState.waitForMenu

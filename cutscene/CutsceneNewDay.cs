@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using Easings;
+using UnityEngine.InputSystem;
 
 public class CutsceneNewDay : Cutscene {
     private float timer;
@@ -37,7 +38,7 @@ public class CutsceneNewDay : Cutscene {
             col.a = (float)PennerDoubleAnimation.ExpoEaseIn(timer - startDayFade, 0, 1, stopDayFade - startDayFade);
             dayText.color = col;
         }
-        if (timer >= stopTime || Input.anyKey) {
+        if (timer >= stopTime || Keyboard.current.anyKey.isPressed) {
             complete = true;
             GameManager.Instance.NewDay();
         }

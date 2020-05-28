@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.IO;
 using System;
 using System.Collections.Generic;
+using UnityEngine.InputSystem;
 
 public class StartMenu : MonoBehaviour {
     public GameObject logo;
@@ -49,7 +50,7 @@ public class StartMenu : MonoBehaviour {
         state = menuState.anykey;
     }
     void Update() {
-        if (Input.anyKey && state == menuState.anykey) {
+        if (Keyboard.current.anyKey.isPressed && state == menuState.anykey) {
             state = menuState.main;
             mainMenu.SetActive(true);
             prompt.SetActive(false);
