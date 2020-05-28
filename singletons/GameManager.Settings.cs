@@ -14,8 +14,8 @@ public partial class GameManager : Singleton<GameManager> {
         sfxMixer = Resources.Load("mixers/SoundEffectMixer") as AudioMixer;
         musicMixer = Resources.Load("mixers/MusicMixer") as AudioMixer;
 
-        float musicVolume = PlayerPrefs.GetFloat(prefsKey_MusicVolume, 1f);
-        float sfxVolume = PlayerPrefs.GetFloat(prefsKey_SFXVolume, 1f);
+        float musicVolume = PlayerPrefs.GetFloat(prefsKey_MusicVolume, 0.8f);
+        float sfxVolume = PlayerPrefs.GetFloat(prefsKey_SFXVolume, 0.8f);
         SetMusicVolume(musicVolume);
         SetSFXVolume(sfxVolume);
     }

@@ -17,6 +17,13 @@ public class UIButtonEffects : MonoBehaviour, IPointerDownHandler, IPointerEnter
     void Start() {
         Configure();
     }
+    // void Awake() {
+    //     Play(startSound);
+    // }
+    void OnEnable() {
+        Play(startSound);
+
+    }
 
     public void Configure() {
         if (prefabSet != null)

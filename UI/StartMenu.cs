@@ -91,6 +91,11 @@ public class StartMenu : MonoBehaviour {
                 mainMenu.SetActive(true);
                 state = menuState.main;
             }
+            if (settingsMenu.gameObject.activeInHierarchy) {
+                settingsMenu.SetActive(false);
+                mainMenu.SetActive(true);
+                state = menuState.main;
+            }
         }
         keypressedThisFrame = false;
     }
