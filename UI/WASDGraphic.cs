@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Easings;
+using UnityEngine.InputSystem;
+
+// TODO: change this
 
 public class WASDGraphic : MonoBehaviour {
     public List<Text> letters;
@@ -30,7 +33,7 @@ public class WASDGraphic : MonoBehaviour {
             outline.effectColor = outlineColor;
         }
 
-        if (Input.anyKey) {
+        if (Keyboard.current.anyKey.isPressed) {
             // stop
             Destroy(gameObject);
         }

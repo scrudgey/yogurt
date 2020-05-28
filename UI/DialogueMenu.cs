@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 public class DialogueNode {
     public List<string> text = new List<string>();
@@ -109,6 +110,17 @@ public class DialogueMenu : MonoBehaviour {
     public bool disableCommand;
     private bool doTrapDoor;
     private bool doVampireAttack;
+
+    public MyControls controls;
+    bool keypressedThisFrame;
+    void Awake() {
+        controls = new MyControls();
+
+        controls.Player.Primary.Enable();
+
+        controls.Player.Primary.performed += _ => keypressedThisFrame = true;
+    }
+
     public void Start() {
         if (configured)
             return;
@@ -499,13 +511,14 @@ public class DialogueMenu : MonoBehaviour {
         choicePanel.SetActive(false);
     }
     public void Update() {
-        if (Input.GetKeyDown("a")) {
+        if (keypressedThisFrame) {
             if (waitForKeyPress) {
                 waitForKeyPress = false;
                 advancedKeyPressed = true;
                 NextLine();
             }
         }
+        keypressedThisFrame = false;
 
         advancedKeyPressed = false;
         if (monologue.text.Count == 0) {

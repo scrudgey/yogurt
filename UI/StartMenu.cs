@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.IO;
 using System;
 using System.Collections.Generic;
+using UnityEngine.InputSystem;
 
 public class StartMenu : MonoBehaviour {
     public GameObject logo;
@@ -32,6 +33,16 @@ public class StartMenu : MonoBehaviour {
     public Image previewPrefab;
     public Image previewPortrait;
 
+    public MyControls controls;
+    bool keypressedThisFrame;
+    void Awake() {
+        controls = new MyControls();
+
+        controls.Player.Escape.Enable();
+
+        controls.Player.Escape.performed += _ => keypressedThisFrame = true;
+    }
+
 
     void Start() {
         AudioSource source = GetComponent<AudioSource>();
@@ -49,12 +60,12 @@ public class StartMenu : MonoBehaviour {
         state = menuState.anykey;
     }
     void Update() {
-        if (Input.anyKey && state == menuState.anykey) {
+        if (Keyboard.current.anyKey.isPressed && state == menuState.anykey) {
             state = menuState.main;
             mainMenu.SetActive(true);
             prompt.SetActive(false);
         }
-        if (Input.GetKeyDown(KeyCode.Escape)) {
+        if (keypressedThisFrame) {
             if (saveInspector.gameObject.activeInHierarchy) {
                 saveInspector.gameObject.SetActive(false);
                 loadGameMenu.gameObject.SetActive(true);
@@ -81,6 +92,7 @@ public class StartMenu : MonoBehaviour {
                 state = menuState.main;
             }
         }
+        keypressedThisFrame = false;
     }
     private void SwitchMenu(menuState switchTo) {
         newGameMenu.SetActive(false);

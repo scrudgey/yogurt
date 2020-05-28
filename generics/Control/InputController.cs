@@ -6,6 +6,7 @@ using UnityEngine.InputSystem;
 
 
 public class InputController : Singleton<InputController> {
+    MyControls controls;
     public enum ControlState {
         normal,
         inMenu,
@@ -73,6 +74,49 @@ public class InputController : Singleton<InputController> {
     public bool doCommand;
     public InteractionParam commandAct = null;
     public ActionButtonScript.buttonType commandButtonType = ActionButtonScript.buttonType.none;
+    public Vector2 inputVector;
+    public bool firePressedHeld;
+    public bool firePressedThisFrame;
+
+    // public bool escapeHeld;
+    public bool escaprePressedThisFrame;
+    public bool leftClickHeld;
+    public bool leftClickedThisFrame;
+    void Awake() {
+        controls = new MyControls();
+
+        // enable controls
+        controls.Player.Move.Enable();
+        controls.Player.Fire.Enable();
+        controls.Player.InteractWith.Enable();
+        controls.Player.Escape.Enable();
+        controls.Player.Primary.Enable();
+
+        // Move
+        controls.Player.Move.performed += ctx => inputVector = ctx.ReadValue<Vector2>();
+
+        // Fire
+        controls.Player.Fire.performed += ctx => {
+            firePressedThisFrame = ctx.ReadValueAsButton();
+            firePressedHeld = ctx.ReadValueAsButton();
+        };
+
+        // Left click
+        controls.Player.InteractWith.performed += ctx => {
+            leftClickedThisFrame = ctx.ReadValueAsButton();
+            leftClickHeld = ctx.ReadValueAsButton();
+        };
+
+        // Escape
+        controls.Player.Escape.performed += ctx => {
+            escaprePressedThisFrame = ctx.ReadValueAsButton();
+        };
+
+        // Button up
+        controls.Player.Fire.canceled += _ => firePressedHeld = false;
+        controls.Player.InteractWith.canceled += _ => leftClickHeld = false;
+        controls.Player.Move.canceled += _ => inputVector = Vector2.zero;
+    }
     void ChangeState(ControlState previousState) {
         // TODO: code for transitioning between states
         // if (focus) {
@@ -125,7 +169,7 @@ public class InputController : Singleton<InputController> {
         }
     }
     void Update() {
-        if (Input.GetButtonDown("Cancel")) {
+        if (escaprePressedThisFrame) {
             // TODO: exit command states
             if (state != ControlState.cutscene) {
                 if (selectionStates.Contains(state)) {
@@ -142,45 +186,35 @@ public class InputController : Singleton<InputController> {
                 CutsceneManager.Instance.EscapePressed();
             }
         }
+        escaprePressedThisFrame = false;
+
         if (state != ControlState.normal & state != ControlState.commandSelect & state != ControlState.hypnosisSelect & state != ControlState.insultSelect & state != ControlState.swearSelect)
             return;
         if (focus != null & !suspendInput) {
             controller.ResetInput();
-            // if (focus.control == Controllable.ControlType.none)
-            //     return;
-            if (Input.GetAxis("Vertical") > 0)
+            if (inputVector.y > 0)
                 controller.upFlag = true;
-            if (Input.GetAxis("Vertical") < 0)
+            if (inputVector.y < 0)
                 controller.downFlag = true;
-            if (Input.GetAxis("Horizontal") < 0)
+            if (inputVector.x < 0)
                 controller.leftFlag = true;
-            if (Input.GetAxis("Horizontal") > 0)
+            if (inputVector.x > 0)
                 controller.rightFlag = true;
             //Fire key 
-            if (Input.GetButtonDown("Fire1")) {
+            if (firePressedThisFrame) {
                 controller.ShootPressed();
             }
-            if (Input.GetButton("Fire1")) {
+            if (firePressedHeld) {
                 controller.ShootHeld();
             }
         }
-        // right click
-        if (Input.GetMouseButtonDown(1)) {
-            RightClick();
-        }
+
         // left click
-        if (Input.GetMouseButtonDown(0)) {
+        if (leftClickedThisFrame) {
             LeftClick();
         }
-    }
-    void RightClick() {
-        //detect if we clicked anything
-        RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-        foreach (RaycastHit2D hit in hits) {
-            if (hit.collider != null && !forbiddenTags.Contains(hit.collider.tag)) {
-                focus.lastRightClicked = hit.collider.gameObject;
-            }
-        }
+        firePressedThisFrame = false;
+        leftClickedThisFrame = false;
     }
     SpriteRenderer WhichIsFirst(SpriteRenderer one, SpriteRenderer two) {
         if (one == null && two == null) {
@@ -269,7 +303,7 @@ public class InputController : Singleton<InputController> {
         if (focus.hitState >= Controllable.HitState.stun)
             return;
 
-        RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero).OrderBy(h => h.collider.gameObject.name).ToArray();
+        RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue()), Vector2.zero).OrderBy(h => h.collider.gameObject.name).ToArray();
 
         switch (state) {
             case ControlState.swearSelect:
