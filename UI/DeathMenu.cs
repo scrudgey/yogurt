@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using UnityEngine.InputSystem;
 
 public class DeathMenu : MonoBehaviour {
     public bool buttonVisible;
@@ -8,6 +9,15 @@ public class DeathMenu : MonoBehaviour {
     public List<Rigidbody2D> letters;
     public bool lettersInactive;
     private float timer;
+    public MyControls controls;
+    bool keypressedThisFrame;
+    void Awake() {
+        controls = new MyControls();
+
+        controls.Player.Primary.Enable();
+
+        controls.Player.Primary.performed += _ => keypressedThisFrame = true;
+    }
     void Start() {
         Canvas canvas = GetComponent<Canvas>();
         canvas.worldCamera = GameManager.Instance.cam;
@@ -44,7 +54,7 @@ public class DeathMenu : MonoBehaviour {
     }
     void Update() {
         timer += Time.deltaTime;
-        if (Input.anyKeyDown && timer > 1) {
+        if (keypressedThisFrame && timer > 1) {
             if (!buttonVisible) {
                 buttonVisible = true;
                 button.SetActive(true);
@@ -68,5 +78,7 @@ public class DeathMenu : MonoBehaviour {
             buttonVisible = true;
             button.SetActive(true);
         }
+
+        keypressedThisFrame = false;
     }
 }

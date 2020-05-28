@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using Easings;
 using UnityEngine.EventSystems;
 using System;
+using UnityEngine.InputSystem;
 
 public partial class UINew : Singleton<UINew> {
     public void Hit() {
@@ -70,7 +71,7 @@ public partial class UINew : Singleton<UINew> {
     public void SetCursorText(string text) {
         if (!cursorText.activeInHierarchy)
             cursorText.SetActive(true);
-        Vector3 mousePos = Input.mousePosition;
+        Vector3 mousePos = Mouse.current.position.ReadValue();
         mousePos.y -= 30;
         Vector2 pos;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(UICanvas.transform as RectTransform, mousePos, GameManager.Instance.cam, out pos);

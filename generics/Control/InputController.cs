@@ -90,6 +90,7 @@ public class InputController : Singleton<InputController> {
         controls.Player.Fire.Enable();
         controls.Player.InteractWith.Enable();
         controls.Player.Escape.Enable();
+        controls.Player.Primary.Enable();
 
         // Move
         controls.Player.Move.performed += ctx => inputVector = ctx.ReadValue<Vector2>();

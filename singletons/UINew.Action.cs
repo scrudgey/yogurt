@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using Easings;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 public partial class UINew : Singleton<UINew> {
 
@@ -161,7 +162,8 @@ public partial class UINew : Singleton<UINew> {
             priorBody = button.gameobject.GetComponent<Rigidbody2D>();
             angle += incrementAngle;
         }
-        buttonAnchor.transform.position = renderingCamera.ScreenToWorldPoint(Input.mousePosition);
+
+        buttonAnchor.transform.position = renderingCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
         buttonAnchor.transform.SetParent(target.transform);
         return buttonAnchor;
     }
