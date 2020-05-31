@@ -33,14 +33,14 @@ public class StartMenu : MonoBehaviour {
     public Image previewPrefab;
     public Image previewPortrait;
 
-    public MyControls controls;
+    // public MyControls controls;
     bool keypressedThisFrame;
     void Awake() {
-        controls = new MyControls();
+        // controls = new MyControls();
 
-        controls.Player.Escape.Enable();
+        // controls.Player.Escape.Enable();
 
-        controls.Player.Escape.performed += _ => keypressedThisFrame = true;
+        InputController.controls.Player.Escape.performed += _ => keypressedThisFrame = true;
     }
 
 
