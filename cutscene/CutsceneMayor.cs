@@ -11,17 +11,14 @@ public class CutsceneMayor : Cutscene {
     private bool walkingAway;
     Controller playerController;
     Controller mayorController;
-    // private Dictionary<Controllable, Controllable.ControlType> initialState = new Dictionary<Controllable, Controllable.ControlType>();
     public override void Configure() {
         configured = true;
         spawnPoint = GameObject.Find("mayorSpawnpoint");
         foreach (Controllable controllable in GameObject.FindObjectsOfType<Controllable>()) {
-            // initialState[controllable] = controllable.control;
-            // controllable.control = Controllable.ControlType.none;
             controllable.enabled = false;
         }
         mayor = GameObject.Instantiate(Resources.Load("prefabs/Mayor"), spawnPoint.transform.position, Quaternion.identity) as GameObject;
-        mayorController = new Controller(mayor);// mayor.GetComponent<Humanoid>();
+        mayorController = new Controller(mayor);
 
         mayorAI = mayor.GetComponent<DecisionMaker>();
         mayorSpeech = mayor.GetComponent<Speech>();

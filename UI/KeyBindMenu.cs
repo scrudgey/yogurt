@@ -5,14 +5,20 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class KeyBindMenu : MonoBehaviour {
+    public List<RebindActionUI> buttons;
     public void CloseButtonCallback() {
         gameObject.SetActive(false);
     }
     public void OnEnable() {
-        InputController.DisableControls();
+        InputController.Instance.DisableControls();
+        // trigger button update
+        foreach (RebindActionUI button in buttons) {
+            if (button != null)
+                button.UpdateBindingDisplay();
+        }
     }
 
     public void OnDisable() {
-        InputController.EnableControls();
+        InputController.Instance.EnableControls();
     }
 }

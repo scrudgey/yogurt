@@ -69,20 +69,7 @@ public class GameData {
         saveDate = System.DateTime.Now.ToString();
         saveDateTime = System.DateTime.Now;
     }
-    public List<Achievement> CheckAchievements() {
-        List<Achievement> completeAchievements = new List<Achievement>();
-        foreach (Achievement achieve in achievements) {
-            if (!achieve.complete) {
-                bool pass = achieve.Evaluate(stats);
-                if (pass) {
-                    achieve.complete = true;
-                    achieve.completedTime = System.DateTime.Now;
-                    completeAchievements.Add(achieve);
-                }
-            }
-        }
-        return completeAchievements;
-    }
+
 }
 public partial class GameManager : Singleton<GameManager> {
     protected GameManager() { }
@@ -131,7 +118,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = true;
+    public bool debug = false;
     public bool failedLevelLoad = false;
     public Gender playerGender;
 
@@ -227,7 +214,8 @@ public partial class GameManager : Singleton<GameManager> {
         }
     }
     public bool InCutsceneLevel() {
-        return SceneManager.GetActiveScene().buildIndex <= 4;
+        return SceneManager.GetActiveScene().buildIndex <= 3;
+        // return SceneManager.GetActiveScene().buildIndex <= 4;
     }
     public void FocusIntrinsicsChanged(Intrinsics intrinsics) {
         Dictionary<BuffType, Buff> netBuffs = intrinsics.NetBuffs();
@@ -802,20 +790,21 @@ public partial class GameManager : Singleton<GameManager> {
         data.recordingCommercial = false;
         data.completeCommercials = new HashSet<Commercial>();
         // initialize achievements
-        data.achievements = new List<Achievement>();
+        data.achievements = AchievementManager.LoadAchievements();
+        // data.achievements = new List<Achievement>();
         data.stats = new SerializableDictionary<StatType, Stat>();
-        GameObject[] achievementPrefabs = Resources.LoadAll("achievements/", typeof(GameObject))
-            .Cast<GameObject>()
-            .ToArray();
-        foreach (GameObject prefab in achievementPrefabs) {
-            if (debug && prefab.name == "StartGame")
-                continue;
-            AchievementComponent component = prefab.GetComponent<AchievementComponent>();
-            if (component) {
-                Achievement cloneAchievement = new Achievement(component.achivement);
-                data.achievements.Add(cloneAchievement);
-            }
-        }
+        // GameObject[] achievementPrefabs = Resources.LoadAll("achievements/", typeof(GameObject))
+        //     .Cast<GameObject>()
+        //     .ToArray();
+        // foreach (GameObject prefab in achievementPrefabs) {
+        //     if (debug && prefab.name == "StartGame")
+        //         continue;
+        //     AchievementComponent component = prefab.GetComponent<AchievementComponent>();
+        //     if (component) {
+        //         Achievement cloneAchievement = new Achievement(component.achivement);
+        //         data.achievements.Add(cloneAchievement);
+        //     }
+        // }
         return data;
     }
 
@@ -1014,7 +1003,7 @@ public partial class GameManager : Singleton<GameManager> {
         // check achievements
         if (InCutsceneLevel())
             return;
-        List<Achievement> completeAchievements = data.CheckAchievements();
+        List<Achievement> completeAchievements = AchievementManager.Instance.CheckAchievements(data);
         foreach (Achievement achievement in completeAchievements) {
             Poptext.PopupAchievement(achievement);
         }

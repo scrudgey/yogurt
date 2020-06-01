@@ -7,5 +7,6 @@ public class SingletonInitializer : MonoBehaviour {
         ClaimsManager.InitializeInstance();
         UINew.InitializeInstance();
         CutsceneManager.InitializeInstance();
+        AchievementManager.InitializeInstance();
     }
 }

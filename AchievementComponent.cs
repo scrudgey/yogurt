@@ -46,6 +46,7 @@ public class Stat {
 [System.Serializable]
 public class Achievement {
     public string steamId;
+    public bool steamAchieved;
     public string icon;
     public bool complete;
     public System.DateTime completedTime;
@@ -102,5 +103,7 @@ public class Achievement {
         statList = source.statList;
         statDict = source.statDict;
         directive = source.directive;
+        steamId = source.steamId;
+
     }
 }

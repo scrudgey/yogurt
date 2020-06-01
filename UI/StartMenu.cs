@@ -40,7 +40,7 @@ public class StartMenu : MonoBehaviour {
 
         // controls.Player.Escape.Enable();
 
-        InputController.controls.Player.Escape.performed += _ => keypressedThisFrame = true;
+        InputController.Instance.EscapeAction.action.performed += _ => keypressedThisFrame = true;
     }
 
 

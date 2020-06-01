@@ -16,7 +16,7 @@ public class DeathMenu : MonoBehaviour {
 
         // controls.Player.Primary.Enable();
 
-        InputController.controls.Player.Primary.performed += _ => keypressedThisFrame = true;
+        InputController.Instance.PrimaryAction.action.performed += _ => keypressedThisFrame = true;
     }
     void Start() {
         Canvas canvas = GetComponent<Canvas>();

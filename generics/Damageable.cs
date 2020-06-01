@@ -86,7 +86,7 @@ public abstract class Damageable : MonoBehaviour {
     }
     public virtual void NetIntrinsicsChanged(MessageNetIntrinsic message) { }
     private void HandleMessageDamage(MessageDamage message) {
-        Debug.Log(gameObject.name + " handling message " + message.type.ToString());
+        // Debug.Log(gameObject.name + " handling message " + message.type.ToString());
         if (message.type == damageType.fire) {
             cacheFiredMessage = message;
             return;

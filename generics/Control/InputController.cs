@@ -9,21 +9,7 @@ using System;
 
 
 public class InputController : Singleton<InputController> {
-    private static MyControls _controls;
-    public static MyControls controls {
-        get {
-            if (_controls != null) {
-                return _controls;
-
-            } else {
-                _controls = new MyControls();
-                return _controls;
-            }
-
-        }
-    }
-
-    public MyControls x;
+    // public MyControls x;
     public enum ControlState {
         normal,
         inMenu,
@@ -42,6 +28,7 @@ public class InputController : Singleton<InputController> {
         set {
             _focus = value;
             if (_focus != null) {
+                EnableControls();
                 focusHurtable = _focus.GetComponent<Hurtable>();
                 controller.Register(_focus);
             }
@@ -102,43 +89,45 @@ public class InputController : Singleton<InputController> {
     public InputActionReference FireAction;
     public InputActionReference InteractWithAction;
     public InputActionReference EscapeAction;
-    public static readonly string bindingFileName = "keybindings";
+    public InputActionReference PrimaryAction;
+    public static readonly string bindingFileName = "keybindings.xml";
     public List<InputActionMap> actionMaps() {
         return new List<InputActionMap>{
         MoveAction.action.actionMap,
         FireAction.action.actionMap,
         InteractWithAction.action.actionMap,
-        EscapeAction.action.actionMap
+        EscapeAction.action.actionMap,
+        PrimaryAction.action.actionMap
         };
     }
     public static string BindingSavePath() {
         return Path.Combine(Application.persistentDataPath, bindingFileName);
     }
-    // public readonly string prefsKey_Move;
-    // public readonly string prefsKey_Fire;
-    // public readonly string prefsKey_Interact;
-    // public readonly string prefsKey_Escape;
 
-    public static void EnableControls() {
+    public void EnableControls() {
         // enable controls
-        controls.Player.Move.Enable();
-        controls.Player.Fire.Enable();
-        controls.Player.InteractWith.Enable();
-        controls.Player.Escape.Enable();
-        controls.Player.Primary.Enable();
+        MoveAction.action.Enable();
+        FireAction.action.Enable();
+        InteractWithAction.action.Enable();
+        EscapeAction.action.Enable();
+        PrimaryAction.action.Enable();
     }
-    public static void DisableControls() {
+    public void DisableControls() {
+        Debug.Log("disable input");
         // disable controls
-        controls.Player.Move.Disable();
-        controls.Player.Fire.Disable();
-        controls.Player.InteractWith.Disable();
-        controls.Player.Escape.Disable();
-        controls.Player.Primary.Disable();
+        MoveAction.action.Disable();
+        FireAction.action.Disable();
+        InteractWithAction.action.Disable();
+        EscapeAction.action.Disable();
+        PrimaryAction.action.Disable();
     }
     public void LoadCustomBindings() {
         string path = BindingSavePath();
-        if (!System.IO.Directory.Exists(path))
+
+        if (!System.IO.File.Exists(path))
             return;
+
+        // Debug.Log("found bindings file " + path);
 
         var dictSerializer = new XmlSerializer(typeof(SerializableDictionary<Guid, string>));
         SerializableDictionary<Guid, string> overrides = new SerializableDictionary<Guid, string>();
@@ -147,32 +136,28 @@ public class InputController : Singleton<InputController> {
                 overrides = dictSerializer.Deserialize(bindingsStream) as SerializableDictionary<Guid, string>;
             }
         }
-        // var overrides = new Dictionary<Guid, string>();
-
 
         foreach (var map in actionMaps()) {
             var bindings = map.bindings;
             for (var i = 0; i < bindings.Count; ++i) {
-                if (overrides.TryGetValue(bindings[i].id, out var overridePath))
+                if (overrides.TryGetValue(bindings[i].id, out var overridePath)) {
+                    // Debug.Log("applying override " + bindings[i].id.ToString() + " " + overridePath);
                     map.ApplyBindingOverride(i, new InputBinding { overridePath = overridePath });
+                }
             }
         }
     }
 
     public void SaveCustomBindings() {
-
-        var overrides = new Dictionary<Guid, string>();
+        var overrides = new SerializableDictionary<Guid, string>();
         foreach (var map in actionMaps())
             foreach (var binding in map.bindings) {
                 if (!string.IsNullOrEmpty(binding.overridePath))
                     overrides[binding.id] = binding.overridePath;
             }
-
         if (overrides.Count == 0)
             return;
-        var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<Guid, PersistentObject>));
-        // string objectsPath = GameManager.Instance.ObjectsSavePath();
-
+        var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<Guid, string>));
         string path = BindingSavePath();
         using (FileStream objectStream = File.Create(path)) {
             persistentSerializer.Serialize(objectStream, overrides);
@@ -214,9 +199,6 @@ public class InputController : Singleton<InputController> {
     }
     void ChangeState(ControlState previousState) {
         // TODO: code for transitioning between states
-        // if (focus) {
-        // focus.ResetInput();
-        // }
         controller.ResetInput();
         UINew.Instance.ClearWorldButtons();
         UINew.Instance.SetActionText("");
@@ -236,10 +218,6 @@ public class InputController : Singleton<InputController> {
         }
     }
     public void ResetCommandState() {
-        if (commandTarget != null) {
-            // Controllable targetControl = commandTarget.GetComponent<Controllable>();
-            // targetControl.control = Controllable.ControlType.AI;
-        }
         if (commandController != null) {
             commandController.Deregister();
         }
