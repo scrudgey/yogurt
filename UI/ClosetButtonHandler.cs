@@ -47,6 +47,7 @@ public class ClosetButtonHandler : MonoBehaviour {
     }
     public void PopulateItemList(HomeCloset.ClosetType type) {
         closetType = type;
+
         effects = GetComponent<UIButtonEffects>();
         effects.buttons = new List<Button>() { closeButton };
         foreach (Transform childObject in listContent) {
@@ -93,6 +94,12 @@ public class ClosetButtonHandler : MonoBehaviour {
     }
     public void CloseButtonClick() {
         UINew.Instance.CloseActiveMenu();
+    }
+    public void AdvancedButtonClick() {
+        GameObject menuObject = UINew.Instance.ShowMenu(UINew.MenuType.loadoutEditor);
+        LoadoutEditor menu = menuObject.GetComponent<LoadoutEditor>();
+        menu.Configure(closetType);
+        GameManager.Instance.DetermineClosetNews();
     }
     public void ItemClick(ItemEntryScript itemScript) {
         GameManager.Instance.RetrieveCollectedItem(itemScript.prefabName, closetType);
