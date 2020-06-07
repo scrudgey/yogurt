@@ -955,37 +955,6 @@ public partial class GameManager : Singleton<GameManager> {
         string filename = Toolbox.Instance.CloneRemover(obj.name);
         return data.collectedObjects.Contains(filename);
     }
-    public void RetrieveCollectedItem(string name, HomeCloset.ClosetType closetType) {
-        if (data.itemCheckedOut[name])
-            return;
-        GameObject item = Instantiate(Resources.Load("prefabs/" + name), playerObject.transform.position, Quaternion.identity) as GameObject;
-        Instantiate(Resources.Load("particles/poof"), playerObject.transform.position, Quaternion.identity);
-        publicAudio.PlayOneShot(Resources.Load("sounds/pop", typeof(AudioClip)) as AudioClip);
-        data.itemCheckedOut[name] = true;
-        if (closetType == HomeCloset.ClosetType.clothing) {
-            Outfit playerOutfit = playerObject.GetComponent<Outfit>();
-            Uniform itemUniform = item.GetComponent<Uniform>();
-            if (playerOutfit != null && itemUniform != null) {
-                // playerInventory.GetItem(itemPickup);
-                playerOutfit.DonUniform(itemUniform);
-                return;
-            }
-
-            Head playerHead = playerObject.GetComponentInChildren<Head>();
-            Hat itemHat = item.GetComponent<Hat>();
-            if (playerHead != null && itemHat != null) {
-                playerHead.DonHat(itemHat);
-                return;
-            }
-
-        } else {
-            Inventory playerInventory = playerObject.GetComponent<Inventory>();
-            Pickup itemPickup = item.GetComponent<Pickup>();
-            if (playerInventory != null && itemPickup != null) {
-                playerInventory.GetItem(itemPickup);
-            }
-        }
-    }
     public void IncrementStat(StatType statType, float value) {
         // change stat
         if (!data.stats.ContainsKey(statType))

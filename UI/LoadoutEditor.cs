@@ -1,16 +1,20 @@
 ﻿using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
-
+using System.IO;
+using System.Xml.Serialization;
 public class LoadoutEditor : MonoBehaviour {
     public Transform itemCollection;
     public Transform loadoutCollection;
     public Transform buffs;
 
     public Text clothesText;
+    public GameObject clothesEvictButton;
     public Text hatText;
+    public GameObject hatEvictButton;
 
     public Button inventoryButton;
     public Button clothesButton;
@@ -20,22 +24,30 @@ public class LoadoutEditor : MonoBehaviour {
     public Image icon;
     public Text nameText;
     public Text descriptionText;
-    public HomeCloset.ClosetType closetType;
 
     private ItemEntryScript lastClicked;
-    public List<ItemEntryScript> loadoutItems;
+    public HashSet<ItemEntryScript> loadoutItems = new HashSet<ItemEntryScript>();
     public ItemEntryScript loadoutClothes;
     public ItemEntryScript loadoutHat;
 
     private Dictionary<ItemEntryScript, GameObject> itemScripts = new Dictionary<ItemEntryScript, GameObject>();
     private Dictionary<LoadoutEntryScript, GameObject> loadoutScripts = new Dictionary<LoadoutEntryScript, GameObject>();
 
+    public static readonly string loadoutFileName = "loadout.xml";
+    public static readonly string keyItems = "items";
+    public static readonly string keyHat = "hat";
+    public static readonly string keyClothes = "clothes";
+    public HomeCloset closet;
+    public static string LoadoutSavePath() {
+        return Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName, loadoutFileName);
+    }
     private ItemEntryScript spawnEntry(string name) {
         GameObject newObject = Instantiate(Resources.Load("UI/ItemEntry")) as GameObject;
         ItemEntryScript script = newObject.GetComponent<ItemEntryScript>();
         script.Configure(name, HomeCloset.ClosetType.all);
         script.transform.SetParent(itemCollection, false);
         itemScripts[script] = newObject;
+        script.enableItem = !GameManager.Instance.data.itemCheckedOut[name];
         return script;
     }
     private LoadoutEntryScript spawnLoadoutScript(ItemEntryScript itemScript) {
@@ -45,12 +57,14 @@ public class LoadoutEditor : MonoBehaviour {
         script.transform.SetParent(loadoutCollection, false);
         script.loadoutEditor = this;
         loadoutScripts[script] = newObject;
+        loadoutItems.Add(itemScript);
+        // itemScript.enableItem = false;
+        script.enableItem = !GameManager.Instance.data.itemCheckedOut[itemScript.prefabName];
         return script;
     }
 
-    public void Configure(HomeCloset.ClosetType type) {
-        closetType = type;
-
+    public void Configure(HomeCloset closet) {
+        this.closet = closet;
         effects = GetComponent<UIButtonEffects>();
 
         foreach (Transform child in itemCollection) {
@@ -62,6 +76,11 @@ public class LoadoutEditor : MonoBehaviour {
         inventoryButton.interactable = false;
         clothesButton.interactable = false;
         hatButton.interactable = false;
+
+        clothesText.text = "";
+        clothesEvictButton.SetActive(false);
+        hatText.text = "";
+        hatEvictButton.SetActive(false);
 
         ClearBuffs();
 
@@ -89,6 +108,7 @@ public class LoadoutEditor : MonoBehaviour {
             }
         }
         effects.Configure();
+        LoadLoadout();
     }
     public void InstantiateBuff(Buff buff) {
         GameObject icon = Instantiate(Resources.Load("UI/StatusIcon")) as GameObject;
@@ -148,21 +168,19 @@ public class LoadoutEditor : MonoBehaviour {
     }
 
 
-    public void LoadButtonCallback() {
-        // load the loadout
-        Debug.Log("load the loadout");
-    }
     public void CloseButtonCallback() {
         UINew.Instance.CloseActiveMenu();
     }
     public void SimpleButtonCallback() {
+        PlayerPrefs.SetString(HomeCloset.prefsKey_ClosetMenuType, "simple");
+
         GameObject menuObject = UINew.Instance.ShowMenu(UINew.MenuType.closet);
         ClosetButtonHandler menu = menuObject.GetComponent<ClosetButtonHandler>();
-        menu.PopulateItemList(closetType);
+        menu.PopulateItemList(HomeCloset.ClosetType.all, closet);
         GameManager.Instance.DetermineClosetNews();
     }
-    enum LoadoutButtonType { none, inventory, clothes, hat }
-    void SetButtons(LoadoutButtonType buttonType) {
+    public enum LoadoutButtonType { none, inventory, clothes, hat }
+    public void SetButtons(LoadoutButtonType buttonType) {
         switch (buttonType) {
             case LoadoutButtonType.none:
                 inventoryButton.interactable = false;
@@ -195,6 +213,7 @@ public class LoadoutEditor : MonoBehaviour {
         lastClicked.enableItem = false;
 
         SetButtons(LoadoutButtonType.none);
+        SaveLoadout();
     }
     public void ClothesButtonCallback() {
         // evict existing clothes
@@ -203,47 +222,169 @@ public class LoadoutEditor : MonoBehaviour {
         // set new clothes
         SetClothes(lastClicked);
         SetButtons(LoadoutButtonType.none);
+        SaveLoadout();
     }
     public void HatButtonCallback() {
-        Debug.Log("hat arrow");
-
         // evict existing hat
         EvictHat();
 
         // set new hat
         SetHat(lastClicked);
         SetButtons(LoadoutButtonType.none);
+        SaveLoadout();
+    }
+    public void ClothesFieldCallback() {
+        if (loadoutClothes != null) {
+            SetDetailView(loadoutClothes);
+            SetButtons(LoadoutButtonType.none);
+        }
+    }
+    public void HatFieldCallback() {
+        if (loadoutHat != null) {
+            SetDetailView(loadoutHat);
+            SetButtons(LoadoutButtonType.none);
+        }
     }
     void SetHat(ItemEntryScript script) {
         script.enableItem = false;
         loadoutHat = script;
         hatText.text = script.itemName;
+        hatEvictButton.SetActive(true);
     }
     void SetClothes(ItemEntryScript script) {
         script.enableItem = false;
         loadoutClothes = script;
         clothesText.text = script.itemName;
+        clothesEvictButton.SetActive(true);
     }
 
-    void EvictHat() {
+    public void EvictHat() {
         // add hat back to the item list
         if (loadoutHat != null) {
-            loadoutHat.enableItem = true;
+            loadoutHat.enableItem = !GameManager.Instance.data.itemCheckedOut[loadoutHat.prefabName];
         }
+        loadoutHat = null;
+        hatText.text = "";
+        hatEvictButton.SetActive(false);
     }
-    void EvictClothes() {
+    public void EvictClothes() {
         // add clothes back to the item list
         if (loadoutClothes != null) {
-            loadoutClothes.enableItem = true;
+            loadoutClothes.enableItem = !GameManager.Instance.data.itemCheckedOut[loadoutClothes.prefabName];
         }
+        loadoutClothes = null;
+        clothesText.text = "";
+        clothesEvictButton.SetActive(false);
     }
     public void EvictItem(LoadoutEntryScript script) {
-        // add item back to the item list
+
+        loadoutItems.Remove(script.itemEntryScript);
+        // reenable item script
+        script.itemEntryScript.enableItem = !GameManager.Instance.data.itemCheckedOut[script.prefabName];
 
         // delete button
         Destroy(script.gameObject);
+        SaveLoadout();
+    }
+    public void LoadButtonCallback() {
+        // load the loadout
+        GameObject playerObject = GameManager.Instance.playerObject;
+        Inventory playerInventory = playerObject.GetComponent<Inventory>();
+        Outfit playerOutfit = playerObject.GetComponent<Outfit>();
 
-        // reenable item script
-        script.itemEntryScript.enableItem = true;
+        foreach (ItemEntryScript script in loadoutItems) {
+            if (GameManager.Instance.data.itemCheckedOut[script.prefabName])
+                continue;
+            GameObject item = Instantiate(Resources.Load("prefabs/" + script.prefabName), playerObject.transform.position, Quaternion.identity) as GameObject;
+            GameManager.Instance.data.itemCheckedOut[script.prefabName] = true;
+            Pickup itemPickup = item.GetComponent<Pickup>();
+            if (playerInventory != null && itemPickup != null) {
+                // playerInventory.GetItem(itemPickup);
+                playerInventory.StashItem(item);
+
+                // TODO: straight to inventory
+            }
+        }
+        if (loadoutClothes != null) {
+            GameObject item = Instantiate(Resources.Load("prefabs/" + loadoutClothes.prefabName), playerObject.transform.position, Quaternion.identity) as GameObject;
+            Uniform itemUniform = item.GetComponent<Uniform>();
+            if (playerOutfit != null && itemUniform != null) {
+                // playerOutfit.DonUniform(itemUniform);
+                GameManager.Instance.data.itemCheckedOut[loadoutClothes.prefabName] = true;
+                GameObject removedUniform = playerOutfit.DonUniform(itemUniform);
+                if (removedUniform != null) {
+                    closet.StashObject(removedUniform.GetComponent<Pickup>());
+                }
+            }
+
+        }
+        if (loadoutHat != null) {
+            GameObject item = Instantiate(Resources.Load("prefabs/" + loadoutHat.prefabName), playerObject.transform.position, Quaternion.identity) as GameObject;
+            Head playerHead = playerObject.GetComponentInChildren<Head>();
+            Hat itemHat = item.GetComponent<Hat>();
+            if (playerHead != null && itemHat != null) {
+                // playerHead.DonHat(itemHat);
+                GameManager.Instance.data.itemCheckedOut[loadoutHat.prefabName] = true;
+                GameObject removedHat = playerHead.DonHat(itemHat);
+                if (removedHat != null) {
+                    closet.StashObject(removedHat.GetComponent<Pickup>());
+                }
+            }
+        }
+        GameManager.Instance.publicAudio.PlayOneShot(Resources.Load("sounds/pop", typeof(AudioClip)) as AudioClip);
+        Instantiate(Resources.Load("particles/poof"), playerObject.transform.position, Quaternion.identity);
+        UINew.Instance.CloseActiveMenu();
+    }
+
+    public void LoadLoadout() {
+        string path = LoadoutSavePath();
+
+        if (!System.IO.File.Exists(path))
+            return;
+
+        Debug.Log("found loadout file " + path);
+
+        var dictSerializer = new XmlSerializer(typeof(SerializableDictionary<string, string>));
+        SerializableDictionary<string, string> loadout = new SerializableDictionary<string, string>();
+
+        if (File.Exists(path)) {
+            using (var loadoutStream = new FileStream(path, FileMode.Open)) {
+                loadout = dictSerializer.Deserialize(loadoutStream) as SerializableDictionary<string, string>;
+            }
+        }
+        List<ItemEntryScript> itemScriptList = itemScripts.Keys.ToList();
+        if (loadout.ContainsKey(keyItems)) {
+            foreach (string prefabName in loadout[keyItems].Split(';')) {
+                ItemEntryScript itemScript = itemScriptList.Find(x => x.prefabName == prefabName);
+                spawnLoadoutScript(itemScript);
+                itemScript.enableItem = false;
+            }
+        }
+        if (loadout.ContainsKey(keyHat)) {
+            SetHat(itemScriptList.Find(x => x.prefabName == loadout[keyHat]));
+        }
+        if (loadout.ContainsKey(keyClothes)) {
+            SetClothes(itemScriptList.Find(x => x.prefabName == loadout[keyClothes]));
+        }
+    }
+
+    public void SaveLoadout() {
+        var loadout = new SerializableDictionary<string, string>();
+
+        if (loadoutItems.Count > 0) {
+            loadout[keyItems] = String.Join(";", loadoutItems.Select(x => x.prefabName));
+        }
+        if (loadoutHat != null) {
+            loadout[keyHat] = loadoutHat.prefabName;
+        }
+        if (loadoutClothes != null) {
+            loadout[keyClothes] = loadoutClothes.prefabName;
+        }
+
+        var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<string, string>));
+        string path = LoadoutSavePath();
+        using (FileStream objectStream = File.Create(path)) {
+            persistentSerializer.Serialize(objectStream, loadout);
+        }
     }
 }

@@ -33,9 +33,10 @@ public class Head : Interactive, IExcludable, ISaveable {
             }
         }
     }
-    public void DonHat(Hat h) {
+    public GameObject DonHat(Hat h) {
+        GameObject returnVal = null;
         if (hat)
-            RemoveHat();
+            returnVal = RemoveHat().gameObject;
         h.head = this;
         ClaimsManager.Instance.ClaimObject(h.gameObject, this);
         hat = h;
@@ -65,6 +66,7 @@ public class Head : Interactive, IExcludable, ISaveable {
         }
         Toolbox.Instance.AddChildIntrinsics(transform.parent.gameObject, this, h.gameObject);
         GameManager.Instance.CheckItemCollection(h.gameObject, transform.root.gameObject);
+        return returnVal;
     }
     public string DonHat_desc(Hat h) {
         return "Wear " + Toolbox.Instance.GetName(h.gameObject);

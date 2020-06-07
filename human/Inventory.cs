@@ -332,8 +332,6 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             "throwing",
             Toolbox.Instance.GetName(gameObject) + " threw a " + Toolbox.Instance.GetName(throwObject),
             chaos: 1);
-        // data.noun = "throwing";
-        // data.whatHappened = Toolbox.Instance.GetName(gameObject) + " threw a " + Toolbox.Instance.GetName(throwObject);
         throwObject = null;
         // Debug.Break();
     }
@@ -348,25 +346,9 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             if (directionAngle > 45 && directionAngle < 135) {
                 holdSortGroup.sortingLayerName = "main";
                 holdSortGroup.sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
-                // if (holdingSortGroup != null) {
-                //     holdingSortGroup.sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
-                //     holdingSortGroup.sortingLayerName = "main";
-                // } else if (holdingSpriteRenderer != null) {
-                //     holdingSpriteRenderer.sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
-                //     holdingSortGroup.sortingLayerName = "main";
-                // }
-                // holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
             } else {
                 holdSortGroup.sortingLayerName = "air";
                 holdSortGroup.sortingOrder = GetComponent<Renderer>().sortingOrder + 2;
-                // if (holdingSortGroup != null) {
-                //     holdingSortGroup.sortingOrder = GetComponent<Renderer>().sortingOrder + 2;
-                //     holdingSortGroup.sortingLayerName = "air";
-                // } else if (holdingSpriteRenderer != null) {
-                //     holdingSpriteRenderer.sortingOrder = GetComponent<Renderer>().sortingOrder + 2;
-                //     holdingSortGroup.sortingLayerName = "air";
-                // }
-                // holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder + 2;
             }
             holding.transform.position = holdpoint.transform.position;
             if (holdpoint_angle != 0 && currentAnimation == MessageAnimation.AnimType.none) {

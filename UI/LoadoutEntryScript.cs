@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 public class LoadoutEntryScript : MonoBehaviour {
-    public string itemName;
+    // public string itemName;
     public string prefabName;
     private bool _enableItem;
     public bool enableItem {
@@ -23,6 +23,10 @@ public class LoadoutEntryScript : MonoBehaviour {
         // call back to loadout editor
         loadoutEditor.EvictItem(this);
     }
+    public void ClickedCallback() {
+        loadoutEditor.SetDetailView(itemEntryScript);
+        loadoutEditor.SetButtons(LoadoutEditor.LoadoutButtonType.none);
+    }
     private void CheckGrey() {
         Text myText = transform.Find("item").GetComponent<Text>();
         if (enableItem) {
@@ -35,6 +39,6 @@ public class LoadoutEntryScript : MonoBehaviour {
         this.itemEntryScript = script;
         Text entryText = transform.Find("item").GetComponent<Text>();
         prefabName = script.prefabName;
-        entryText.text = itemName;
+        entryText.text = script.itemName;
     }
 }

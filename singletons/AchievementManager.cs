@@ -54,7 +54,7 @@ public class AchievementManager : Singleton<AchievementManager> {
             // Cache the GameID for use in the Callbacks
             m_GameID = new CGameID(SteamUtils.GetAppID());
             m_UserAchievementStored = Callback<UserAchievementStored_t>.Create(OnAchievementStored);
-            PrintAchievements();
+            // PrintAchievements();
         } else {
             Debug.LogWarning("SteamManager NOT initialized!");
         }
@@ -62,8 +62,6 @@ public class AchievementManager : Singleton<AchievementManager> {
 
     private void PrintAchievements() {
         foreach (Achievement achievement in LoadAchievements()) {
-            // Debug.Log(achievement.steamId);
-            // Debug.Log(achievement.steamAchieved);
             bool ret = SteamUserStats.GetAchievement(achievement.steamId, out achievement.steamAchieved);
             if (ret) {
                 string Name = SteamUserStats.GetAchievementDisplayAttribute(achievement.steamId, "name");
