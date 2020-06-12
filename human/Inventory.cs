@@ -366,14 +366,33 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         Toolbox.Instance.SendMessage(gameObject, this, anim);
 
         if (weapon.swingSounds.Length > 0) {
-            GetComponent<AudioSource>().PlayOneShot(weapon.swingSounds[Random.Range(0, weapon.swingSounds.Length)]);
+            // GetComponent<AudioSource>().PlayOneShot(weapon.swingSounds[Random.Range(0, weapon.swingSounds.Length)]);
+            Toolbox.Instance.AudioSpeaker(weapon.swingSounds[Random.Range(0, weapon.swingSounds.Length)], transform.position);
         }
+
         slashFlag = "right";
         if (directionAngle > 45 && directionAngle < 135) {
             slashFlag = "up";
         }
-        if (directionAngle > 225 && directionAngle < 315) {
+        if (directionAngle >= 225 && directionAngle < 315) {
             slashFlag = "down";
+        }
+        if (weapon.damageType == damageType.cosmic) {
+            GameObject fx = GameObject.Instantiate(Resources.Load("particles/CosmicDamageEffect"), transform.position, Quaternion.identity) as GameObject;
+            CosmicDamageEffect cosmicDamageEffect = fx.GetComponent<CosmicDamageEffect>();
+            switch (slashFlag) {
+                case "right":
+                    if (directionAngle >= 135 && directionAngle < 225) {
+                        cosmicDamageEffect.Emit(Vector2.left);
+                    } else cosmicDamageEffect.Emit(Vector2.right);
+                    break;
+                case "up":
+                    cosmicDamageEffect.Emit(Vector2.up);
+                    break;
+                case "down":
+                    cosmicDamageEffect.Emit(Vector2.down);
+                    break;
+            }
         }
     }
     public string SwingItem_desc(MeleeWeapon weapon) {

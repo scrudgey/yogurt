@@ -45,7 +45,7 @@ public class DamageZone : MonoBehaviour {
     void OnTriggerExit2D() {
     }
     public void ImpactReceived(ImpactResult result) {
-        if (result == ImpactResult.normal) {
+        if (Damageable.DamageResults.Contains(result)) {
             if (!audioSource.isPlaying && audioSource.clip != null) {
                 audioSource.Play();
             }

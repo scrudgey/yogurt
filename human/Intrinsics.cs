@@ -202,17 +202,8 @@ public class Intrinsics : MonoBehaviour, ISaveable {
         return returnBuffs;
     }
     public Dictionary<BuffType, Buff> NetBuffs() {
-        Dictionary<BuffType, Buff> netBuffs = new Dictionary<BuffType, Buff>();
-        foreach (BuffType type in System.Enum.GetValues(typeof(BuffType))) {
-            netBuffs[type] = new Buff();
-            netBuffs[type].type = type;
-        }
+        Dictionary<BuffType, Buff> netBuffs = emptyBuffMap();
         foreach (Buff buff in AllBuffs()) {
-            //
-            //	THE BUFF ALGEBRA
-            //
-            // netBuffs[buff.type].boolValue |= buff.boolValue;
-            // netBuffs[buff.type].floatValue += buff.floatValue;
             netBuffs[buff.type] = netBuffs[buff.type] + buff;
         }
         return netBuffs;
@@ -242,5 +233,13 @@ public class Intrinsics : MonoBehaviour, ISaveable {
         }
         if (data.buffs.Count > 0)// || blessed)
             IntrinsicsChanged();
+    }
+    public static Dictionary<BuffType, Buff> emptyBuffMap() {
+        Dictionary<BuffType, Buff> dict = new Dictionary<BuffType, Buff>();
+        foreach (BuffType type in System.Enum.GetValues(typeof(BuffType))) {
+            dict[type] = new Buff();
+            dict[type].type = type;
+        }
+        return dict;
     }
 }

@@ -416,7 +416,7 @@ public class InputController : Singleton<InputController> {
                         return;
                     }
                     Controllable controllable = target.GetComponent<Controllable>();
-                    GameObject hypnosisEffect = Instantiate(Resources.Load("prefabs/fx/hypnosisEffect"), GameManager.Instance.playerObject.transform.position, Quaternion.identity) as GameObject;
+                    GameObject hypnosisEffect = Instantiate(Resources.Load("particles/hypnosisEffect"), GameManager.Instance.playerObject.transform.position, Quaternion.identity) as GameObject;
                     HypnosisEffect fx = hypnosisEffect.GetComponent<HypnosisEffect>();
                     fx.target = target;
 

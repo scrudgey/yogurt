@@ -105,6 +105,7 @@ public class CutsceneImp : Cutscene {
         newNode.text.Add("Gra ha ha ha... Yes, show me your trinket....");
         newNode.text.Add("What a lovely " + Toolbox.Instance.GetName(analyzand) + ".");
         newNode.text.Add("Within it, I sense much " + dat.name + ".");
+        newNode.text.Add(dat.buffDescription);
         newNode.text.Add("The first ingredient is...");
         newNode.text.Add("IMPCALLBACK1");
         SetDialogue(newNode);

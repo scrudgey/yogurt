@@ -3,7 +3,7 @@
 public class Destructible : Damageable, ISaveable {
     public float maxHealth;
     public float health;
-    public float bonusHealth;
+    // public float bonusHealth;
     public AudioClip[] hitSound;
     public AudioClip[] destroySound;
     public float physicalMultiplier = 1f;
@@ -14,10 +14,10 @@ public class Destructible : Damageable, ISaveable {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
     }
     public override void NetIntrinsicsChanged(MessageNetIntrinsic intrins) {
-        if (intrins.netBuffs[BuffType.bonusHealth].floatValue > bonusHealth) {
+        if (intrins.netBuffs[BuffType.bonusHealth].floatValue > netBuffs[BuffType.bonusHealth].floatValue) {
             health += intrins.netBuffs[BuffType.bonusHealth].floatValue;
         }
-        bonusHealth = intrins.netBuffs[BuffType.bonusHealth].floatValue;
+        base.NetIntrinsicsChanged(intrins);
     }
 
     override protected void Update() {
@@ -25,12 +25,12 @@ public class Destructible : Damageable, ISaveable {
         if (health < 0) {
             Die();
         }
-        if (health > maxHealth + bonusHealth) {
-            health = maxHealth + bonusHealth;
+        if (health > maxHealth + netBuffs[BuffType.bonusHealth].floatValue) {
+            health = maxHealth + netBuffs[BuffType.bonusHealth].floatValue;
         }
     }
-    public override float CalculateDamage(MessageDamage message) {
-        float damage = 0f;
+    public override void CalculateDamage(MessageDamage message) {
+        float damage = message.amount;
         switch (message.type) {
             case damageType.piercing:
             case damageType.cutting:
@@ -40,17 +40,14 @@ public class Destructible : Damageable, ISaveable {
             case damageType.fire:
                 damage = message.amount * fireMultiplier;
                 break;
-            case damageType.explosion:
-            case damageType.cosmic:
-                damage = message.amount;
-                break;
             case damageType.asphyxiation:
+                damage = 0;
+                break;
             default:
                 break;
         }
         // Debug.Log(gameObject.name+ "> " + health.ToString()+ " taking damage: "+damage.ToString());
         health -= damage;
-        return damage;
     }
     //TODO: make destruction chaos somehow proportional to object
     public void Die() {

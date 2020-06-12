@@ -103,7 +103,7 @@ public partial class GameManager : Singleton<GameManager> {
         {"boardroom", "yogurt HQ"},
         {"hell1", "hell"},
         {"venus1", "venus"},
-        {"fountain", "ruinsw"},
+        {"fountain", "ruins"},
     };
     public GameData data;
     public string saveGameName = "test";
@@ -118,7 +118,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = false;
+    public bool debug = true;
     public bool failedLevelLoad = false;
     public Gender playerGender;
 
@@ -210,7 +210,7 @@ public partial class GameManager : Singleton<GameManager> {
 
             Destroy(head.gameObject);
             Hurtable hurtable = playerObject.GetComponent<Hurtable>();
-            hurtable.Die(damageType.physical);
+            hurtable.Die(message, damageType.physical);
         }
     }
     public bool InCutsceneLevel() {
@@ -322,21 +322,21 @@ public partial class GameManager : Singleton<GameManager> {
     }
     void ResetGameState() {
         try {
-            FileInfo playerFile = new FileInfo(GameManager.Instance.data.lastSavedPlayerPath);
-            if (playerFile.Exists) {
-                playerFile.Delete();
-            }
+            // FileInfo playerFile = new FileInfo(GameManager.Instance.data.lastSavedPlayerPath);
+            // if (playerFile.Exists) {
+            //     playerFile.Delete();
+            // }
+            MySaver.BackupFailedSave();
             MySaver.CleanupSaves();
 
-            string housePath = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
-            housePath = Path.Combine(housePath, "apartment_state.xml");
+            string housePath = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName, "apartment_state.xml");
             string[] paths = new string[] { housePath, GameManager.Instance.data.lastSavedPlayerPath };
 
             foreach (string path in paths) {
-                if (!System.IO.File.Exists(path))
-                    return;
                 FileInfo info = new FileInfo(path);
-                File.Delete(info.FullName);
+                if (!info.Exists)
+                    continue;
+                info.Delete();
             }
             NewGame();
         }
@@ -371,6 +371,7 @@ public partial class GameManager : Singleton<GameManager> {
         if (loadLevel) {
             playerObject = MySaver.LoadScene(newDayLoad: data.entryID == -99);
             if (data.entryID == -99) {
+                // reset apartment by deleting all controllables
                 foreach (Controllable controllable in GameObject.FindObjectsOfType<Controllable>()) {
                     if (controllable.gameObject != playerObject) {
                         Destroy(controllable.gameObject);
@@ -445,12 +446,9 @@ public partial class GameManager : Singleton<GameManager> {
             }
         }
         if (sceneName == "chamber" && data.teleporterUnlocked) {
-            // change polestar dialogues
-            // TODO:
-            if (data.teleporterUnlocked) {
-                // Speech mySpeech = GetComponent<Speech>();
-                // mySpeech.defaultMonologue = "polestar";
-            }
+            // TODO:change polestar dialogues
+            // Speech mySpeech = GetComponent<Speech>();
+            // mySpeech.defaultMonologue = "polestar";
         }
 
         if (sceneName == "cave3" && !data.loadedSewerItemsToday) {
@@ -515,7 +513,7 @@ public partial class GameManager : Singleton<GameManager> {
                     // teleport entry
                     AudioClip teleportEnter = Resources.Load("sounds/clown/clown4") as AudioClip;
                     PlayPublicSound(teleportEnter);
-                    GameObject.Instantiate(Resources.Load("prefabs/fx/teleportEntryEffect"), playerObject.transform.position, Quaternion.identity);
+                    GameObject.Instantiate(Resources.Load("particles/teleportEntryEffect"), playerObject.transform.position, Quaternion.identity);
                     Toolbox.Instance.AudioSpeaker(teleportEnter, playerObject.transform.position);
 
                 }

@@ -58,7 +58,6 @@ public class LoadoutEditor : MonoBehaviour {
         script.loadoutEditor = this;
         loadoutScripts[script] = newObject;
         loadoutItems.Add(itemScript);
-        // itemScript.enableItem = false;
         script.enableItem = !GameManager.Instance.data.itemCheckedOut[itemScript.prefabName];
         return script;
     }
@@ -286,6 +285,14 @@ public class LoadoutEditor : MonoBehaviour {
         Destroy(script.gameObject);
         SaveLoadout();
     }
+    public GameObject SpawnPrefab(string prefabName) {
+        GameObject item = Instantiate(Resources.Load("prefabs/" + prefabName), GameManager.Instance.playerObject.transform.position, Quaternion.identity) as GameObject;
+        GameManager.Instance.data.itemCheckedOut[prefabName] = true;
+        PhysicalBootstrapper phys = item.GetComponent<PhysicalBootstrapper>();
+        if (phys)
+            phys.DestroyPhysical();
+        return item;
+    }
     public void LoadButtonCallback() {
         // load the loadout
         GameObject playerObject = GameManager.Instance.playerObject;
@@ -295,22 +302,16 @@ public class LoadoutEditor : MonoBehaviour {
         foreach (ItemEntryScript script in loadoutItems) {
             if (GameManager.Instance.data.itemCheckedOut[script.prefabName])
                 continue;
-            GameObject item = Instantiate(Resources.Load("prefabs/" + script.prefabName), playerObject.transform.position, Quaternion.identity) as GameObject;
-            GameManager.Instance.data.itemCheckedOut[script.prefabName] = true;
+            GameObject item = SpawnPrefab(script.prefabName);
             Pickup itemPickup = item.GetComponent<Pickup>();
             if (playerInventory != null && itemPickup != null) {
-                // playerInventory.GetItem(itemPickup);
                 playerInventory.StashItem(item);
-
-                // TODO: straight to inventory
             }
         }
         if (loadoutClothes != null) {
-            GameObject item = Instantiate(Resources.Load("prefabs/" + loadoutClothes.prefabName), playerObject.transform.position, Quaternion.identity) as GameObject;
+            GameObject item = SpawnPrefab(loadoutClothes.prefabName);
             Uniform itemUniform = item.GetComponent<Uniform>();
             if (playerOutfit != null && itemUniform != null) {
-                // playerOutfit.DonUniform(itemUniform);
-                GameManager.Instance.data.itemCheckedOut[loadoutClothes.prefabName] = true;
                 GameObject removedUniform = playerOutfit.DonUniform(itemUniform);
                 if (removedUniform != null) {
                     closet.StashObject(removedUniform.GetComponent<Pickup>());
@@ -319,12 +320,10 @@ public class LoadoutEditor : MonoBehaviour {
 
         }
         if (loadoutHat != null) {
-            GameObject item = Instantiate(Resources.Load("prefabs/" + loadoutHat.prefabName), playerObject.transform.position, Quaternion.identity) as GameObject;
+            GameObject item = SpawnPrefab(loadoutClothes.prefabName);
             Head playerHead = playerObject.GetComponentInChildren<Head>();
             Hat itemHat = item.GetComponent<Hat>();
             if (playerHead != null && itemHat != null) {
-                // playerHead.DonHat(itemHat);
-                GameManager.Instance.data.itemCheckedOut[loadoutHat.prefabName] = true;
                 GameObject removedHat = playerHead.DonHat(itemHat);
                 if (removedHat != null) {
                     closet.StashObject(removedHat.GetComponent<Pickup>());
@@ -342,7 +341,6 @@ public class LoadoutEditor : MonoBehaviour {
         if (!System.IO.File.Exists(path))
             return;
 
-        Debug.Log("found loadout file " + path);
 
         var dictSerializer = new XmlSerializer(typeof(SerializableDictionary<string, string>));
         SerializableDictionary<string, string> loadout = new SerializableDictionary<string, string>();

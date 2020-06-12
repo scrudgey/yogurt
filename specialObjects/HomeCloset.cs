@@ -35,7 +35,7 @@ public class HomeCloset : Interactive {
             ) {
 
             var menuType = PlayerPrefs.GetString(prefsKey_ClosetMenuType, "simple");
-            if (menuType == "simple") {
+            if (menuType == "simple" || type == HomeCloset.ClosetType.clothing || type == HomeCloset.ClosetType.food) {
                 GameObject menuObject = UINew.Instance.ShowMenu(UINew.MenuType.closet);
                 ClosetButtonHandler menu = menuObject.GetComponent<ClosetButtonHandler>();
                 menu.PopulateItemList(type, this);

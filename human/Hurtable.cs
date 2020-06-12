@@ -21,9 +21,9 @@ public class Hurtable : Damageable, ISaveable {
     public float maxHealth;
     public float oxygen;
     public float maxOxygen = 100f;
-    public float bonusHealth;
-    public float armor;
-    public bool coughing;
+    // public float bonusHealth;
+    // public float armor;
+    // public bool coughing;
     public bool ethereal;
     private float hitStunCounter;
     private bool doubledOver;
@@ -66,39 +66,31 @@ public class Hurtable : Damageable, ISaveable {
         hitStunCounter = message.timeout;
     }
     public override void NetIntrinsicsChanged(MessageNetIntrinsic intrins) {
-        if (intrins.netBuffs[BuffType.bonusHealth].floatValue > bonusHealth) {
+        if (intrins.netBuffs[BuffType.bonusHealth].floatValue > netBuffs[BuffType.bonusHealth].floatValue) {
             health += intrins.netBuffs[BuffType.bonusHealth].floatValue;
         }
-        bonusHealth = intrins.netBuffs[BuffType.bonusHealth].floatValue;
-        armor = intrins.netBuffs[BuffType.armor].floatValue;
-        coughing = intrins.netBuffs[BuffType.coughing].boolValue;
         if (intrins.netBuffs[BuffType.death].active()) {
             health = float.MinValue;
-            Die(damageType.physical);
+            Die(lastMessage, damageType.physical);
         }
+        base.NetIntrinsicsChanged(intrins);
     }
-    public override float CalculateDamage(MessageDamage message) {
-        if (message.type == damageType.asphyxiation) {
-            oxygen -= message.amount;
-            if (oxygen <= 0) {
-                Die(damageType.asphyxiation);
-            }
-            return 0;
-        }
-        float damage = 0;
-        float armor = this.armor;
-        if (message.strength || hitState == Controllable.HitState.dead)
-            armor = 0;
+    public override void CalculateDamage(MessageDamage message) {
+        float damage = message.amount;
+
+        // if armor subtracted from the damage and i am dead, add it back
+        if (!message.strength && netBuffs[BuffType.armor].floatValue > 0 && hitState == Controllable.HitState.dead)
+            message.amount += netBuffs[BuffType.armor].floatValue;
+
         switch (message.type) {
             case damageType.piercing:
             case damageType.cutting:
-                if (Mathf.Max(message.amount - armor, 0) > 0) {
+                if (message.amount > 0) {
                     Bleed(transform.position, message.force.normalized);
                 }
                 goto case damageType.physical;
             default:
             case damageType.physical:
-                damage = Mathf.Max(message.amount - armor, 0);
                 if (message.strength) {
                     impulse += damage * 2;
                 } else {
@@ -111,7 +103,43 @@ public class Hurtable : Damageable, ISaveable {
             case damageType.cosmic:
                 damage = message.amount;
                 break;
+            case damageType.asphyxiation:
+                oxygen -= message.amount;
+                if (oxygen <= 0) {
+                    Die(message, damageType.asphyxiation);
+                }
+                damage = 0;
+                break;
         }
+
+        // side effect
+        if (message.type != damageType.fire && message.type != damageType.asphyxiation) {
+            hitState = Controllable.AddHitState(hitState, Controllable.HitState.stun);
+            hitStunCounter = Random.Range(0.2f, 0.25f);
+        }
+
+        // special effect
+        if (damage > 0 && Random.Range(0.0f, 1.0f) < ouchFrequency) {
+            MessageSpeech speechMessage = new MessageSpeech();
+            speechMessage.nimrod = true;
+            speechMessage.interrupt = true;
+            switch (message.type) {
+                case damageType.physical:
+                    speechMessage.phrase = "{pain-physical}";
+                    break;
+                case damageType.fire:
+                    speechMessage.phrase = "{pain-fire}";
+                    break;
+                default:
+                    speechMessage.phrase = "{pain-physical}";
+                    break;
+            }
+            Toolbox.Instance.SendMessage(gameObject, this, speechMessage);
+        }
+
+        /**
+        **  health adjustment
+        **/
         health -= damage;
 
         if (!totalDamage.ContainsKey(message.type)) {
@@ -121,12 +149,12 @@ public class Hurtable : Damageable, ISaveable {
 
         // if the damage is fire or cutting, we die at health 0
         if (health <= 0 && (message.type == damageType.fire || message.type == damageType.cutting)) {
-            Die(message.type);
+            Die(message, message.type);
         }
         // otherwise, we die at health -50%
         if (health <= -0.4 * maxHealth) {
             damageType maxDamageType = totalDamage.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
-            Die(maxDamageType);
+            Die(message, maxDamageType);
         }
         // the corpse can still be destroyed after that
         if (health <= -0.6 * maxHealth && message.type == damageType.cosmic) {
@@ -159,31 +187,9 @@ public class Hurtable : Damageable, ISaveable {
                 data.popupDesc = "corpses desecrated";
             }
         }
-        if (message.type != damageType.fire && message.type != damageType.asphyxiation) {
-            hitState = Controllable.AddHitState(hitState, Controllable.HitState.stun);
-            hitStunCounter = Random.Range(0.2f, 0.25f);
-        }
-        if (damage > 0 && Random.Range(0.0f, 1.0f) < ouchFrequency) {
-            MessageSpeech speechMessage = new MessageSpeech();
-            speechMessage.nimrod = true;
-            speechMessage.interrupt = true;
-            switch (message.type) {
-                case damageType.physical:
-                    speechMessage.phrase = "{pain-physical}";
-                    break;
-                case damageType.fire:
-                    speechMessage.phrase = "{pain-fire}";
-                    break;
-                default:
-                    speechMessage.phrase = "{pain-physical}";
-                    break;
-            }
-            Toolbox.Instance.SendMessage(gameObject, this, speechMessage);
-        }
-        return damage;
     }
 
-    public void Die(damageType type) {
+    public void Die(MessageDamage message, damageType type /* the overall type of damage TODO: rename */) {
         if (hitState == Controllable.HitState.dead)
             return;
 
@@ -202,7 +208,7 @@ public class Hurtable : Damageable, ISaveable {
             KnockDown();
         }
 
-        LogTypeOfDeath(type);
+        LogTypeOfDeath(message);
         if (dizzyEffect != null) {
             ClaimsManager.Instance.WasDestroyed(dizzyEffect);
             Destroy(dizzyEffect);
@@ -228,23 +234,23 @@ public class Hurtable : Damageable, ISaveable {
             speech.disableSpeakWith = true;
         }
     }
-    public void LogTypeOfDeath(damageType type) {
+    public void LogTypeOfDeath(MessageDamage message) {
         bool suicide = lastAttacker == gameObject;
         bool assailant = (lastAttacker != null) && (lastAttacker != gameObject) && !impersonalAttacker;
         // bool assailant = false;
 
         // TODO: could this logic belong to eventdata / occurrence ?
         if (GameManager.Instance.playerObject == gameObject) {
-            if (type == damageType.fire) {
+            if (message.type == damageType.fire) {
                 if (suicide) {
                     GameManager.Instance.IncrementStat(StatType.selfImmolations, 1);
                 }
                 GameManager.Instance.IncrementStat(StatType.immolations, 1);
             }
-            if (type == damageType.asphyxiation) {
+            if (message.type == damageType.asphyxiation) {
                 GameManager.Instance.IncrementStat(StatType.deathByAsphyxiation, 1);
             }
-            if (type == damageType.explosion) {
+            if (message.type == damageType.explosion) {
                 GameManager.Instance.IncrementStat(StatType.deathByExplosion, 1);
             }
             if (impersonalAttacker) {
@@ -262,7 +268,7 @@ public class Hurtable : Damageable, ISaveable {
         occurrenceData.damageZone = impersonalAttacker;
         occurrenceData.assailant = assailant;
         occurrenceData.lastAttacker = lastAttacker;
-        occurrenceData.lastDamage = type;
+        occurrenceData.lastDamage = message.type;
         Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData);
 
         if (gameObject.name.StartsWith("greaser")) {
@@ -321,7 +327,7 @@ public class Hurtable : Damageable, ISaveable {
         if (impulse <= 0f && doubledOver && hitState < Controllable.HitState.unconscious) {
             DoubleOver(false);
         }
-        if (coughing) {
+        if (netBuffs[BuffType.coughing].active()) {
             timeSinceLastCough -= Time.deltaTime;
             if (timeSinceLastCough <= 0) {
                 MessageSpeech speech = new MessageSpeech("{cough}");
@@ -358,7 +364,7 @@ public class Hurtable : Damageable, ISaveable {
         message.hitState = hitState;
         Toolbox.Instance.SendMessage(gameObject, this, message);
 
-        dizzyEffect = Instantiate(Resources.Load("prefabs/fx/dizzy"), transform.position + new Vector3(0.1f, 0.1f, 0), Quaternion.identity) as GameObject;
+        dizzyEffect = Instantiate(Resources.Load("particles/dizzy"), transform.position + new Vector3(0.1f, 0.1f, 0), Quaternion.identity) as GameObject;
         FollowGameObject dizzyFollower = dizzyEffect.GetComponent<FollowGameObject>();
         dizzyFollower.target = gameObject;
         dizzyFollower.Init();
@@ -406,19 +412,18 @@ public class Hurtable : Damageable, ISaveable {
         }
     }
     public void Bleed(Vector3 position, Vector3 direction) {
-        if (!bleeds)
-            return;
-
-        Liquid blood = Liquid.LoadLiquid("blood");
-        float initHeight = (position.y - transform.position.y) + 0.15f;
-        GameObject drop = Toolbox.Instance.SpawnDroplet(blood, 0.3f, gameObject, initHeight, direction.normalized);
-        Edible edible = drop.GetComponent<Edible>();
-        edible.human = true;
+        if (bleeds) {
+            Liquid blood = Liquid.LoadLiquid("blood");
+            float initHeight = (position.y - transform.position.y) + 0.15f;
+            GameObject drop = Toolbox.Instance.SpawnDroplet(blood, 0.3f, gameObject, initHeight, direction.normalized);
+            Edible edible = drop.GetComponent<Edible>();
+            edible.human = true;
+        }
     }
     public void SaveData(PersistentComponent data) {
         data.floats["health"] = health;
         data.floats["maxHealth"] = maxHealth;
-        data.floats["bonusHealth"] = bonusHealth;
+        // data.floats["bonusHealth"] = bonusHealth;
         data.floats["impulse"] = impulse;
         data.floats["downed_timer"] = downedTimer;
         data.ints["hitstate"] = (int)hitState;
@@ -428,7 +433,7 @@ public class Hurtable : Damageable, ISaveable {
     public void LoadData(PersistentComponent data) {
         health = data.floats["health"];
         maxHealth = data.floats["maxHealth"];
-        bonusHealth = data.floats["bonusHealth"];
+        // bonusHealth = data.floats["bonusHealth"];
         impulse = data.floats["impulse"];
         downedTimer = data.floats["downed_timer"];
         hitState = (Controllable.HitState)data.ints["hitstate"];

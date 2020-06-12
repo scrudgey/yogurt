@@ -14,6 +14,7 @@ public class ClosetButtonHandler : MonoBehaviour {
     public Button closeButton;
     public HomeCloset.ClosetType closetType;
     public HomeCloset closet;
+    public GameObject advancedButton;
     void Awake() {
         GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
         icon.sprite = null;
@@ -49,6 +50,9 @@ public class ClosetButtonHandler : MonoBehaviour {
     public void PopulateItemList(HomeCloset.ClosetType type, HomeCloset closet) {
         this.closet = closet;
         closetType = type;
+
+        if (type != HomeCloset.ClosetType.all && type != HomeCloset.ClosetType.items)
+            advancedButton.SetActive(false);
 
         effects = GetComponent<UIButtonEffects>();
         effects.buttons = new List<Button>() { closeButton };
