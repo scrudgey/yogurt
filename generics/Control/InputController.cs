@@ -3,10 +3,13 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using System.Xml.Serialization;
+using System.IO;
+using System;
 
 
 public class InputController : Singleton<InputController> {
-    MyControls controls;
+    // public MyControls x;
     public enum ControlState {
         normal,
         inMenu,
@@ -25,6 +28,7 @@ public class InputController : Singleton<InputController> {
         set {
             _focus = value;
             if (_focus != null) {
+                EnableControls();
                 focusHurtable = _focus.GetComponent<Hurtable>();
                 controller.Register(_focus);
             }
@@ -77,51 +81,124 @@ public class InputController : Singleton<InputController> {
     public Vector2 inputVector;
     public bool firePressedHeld;
     public bool firePressedThisFrame;
-
     // public bool escapeHeld;
     public bool escaprePressedThisFrame;
     public bool leftClickHeld;
     public bool leftClickedThisFrame;
-    void Awake() {
-        controls = new MyControls();
+    public InputActionReference MoveAction;
+    public InputActionReference FireAction;
+    public InputActionReference InteractWithAction;
+    public InputActionReference EscapeAction;
+    public InputActionReference PrimaryAction;
+    public static readonly string bindingFileName = "keybindings.xml";
+    public List<InputActionMap> actionMaps() {
+        return new List<InputActionMap>{
+        MoveAction.action.actionMap,
+        FireAction.action.actionMap,
+        InteractWithAction.action.actionMap,
+        EscapeAction.action.actionMap,
+        PrimaryAction.action.actionMap
+        };
+    }
+    public static string BindingSavePath() {
+        return Path.Combine(Application.persistentDataPath, bindingFileName);
+    }
 
+    public void EnableControls() {
         // enable controls
-        controls.Player.Move.Enable();
-        controls.Player.Fire.Enable();
-        controls.Player.InteractWith.Enable();
-        controls.Player.Escape.Enable();
-        controls.Player.Primary.Enable();
+        MoveAction.action.Enable();
+        FireAction.action.Enable();
+        InteractWithAction.action.Enable();
+        EscapeAction.action.Enable();
+        PrimaryAction.action.Enable();
+    }
+    public void DisableControls() {
+        Debug.Log("disable input");
+        // disable controls
+        MoveAction.action.Disable();
+        FireAction.action.Disable();
+        InteractWithAction.action.Disable();
+        EscapeAction.action.Disable();
+        PrimaryAction.action.Disable();
+    }
+    public void LoadCustomBindings() {
+        string path = BindingSavePath();
+
+        if (!System.IO.File.Exists(path))
+            return;
+
+        // Debug.Log("found bindings file " + path);
+
+        var dictSerializer = new XmlSerializer(typeof(SerializableDictionary<Guid, string>));
+        SerializableDictionary<Guid, string> overrides = new SerializableDictionary<Guid, string>();
+        if (File.Exists(path)) {
+            using (var bindingsStream = new FileStream(path, FileMode.Open)) {
+                overrides = dictSerializer.Deserialize(bindingsStream) as SerializableDictionary<Guid, string>;
+            }
+        }
+
+        foreach (var map in actionMaps()) {
+            var bindings = map.bindings;
+            for (var i = 0; i < bindings.Count; ++i) {
+                if (overrides.TryGetValue(bindings[i].id, out var overridePath)) {
+                    // Debug.Log("applying override " + bindings[i].id.ToString() + " " + overridePath);
+                    map.ApplyBindingOverride(i, new InputBinding { overridePath = overridePath });
+                }
+            }
+        }
+    }
+
+    public void SaveCustomBindings() {
+        var overrides = new SerializableDictionary<Guid, string>();
+        foreach (var map in actionMaps())
+            foreach (var binding in map.bindings) {
+                if (!string.IsNullOrEmpty(binding.overridePath))
+                    overrides[binding.id] = binding.overridePath;
+            }
+        if (overrides.Count == 0)
+            return;
+        var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<Guid, string>));
+        string path = BindingSavePath();
+        using (FileStream objectStream = File.Create(path)) {
+            persistentSerializer.Serialize(objectStream, overrides);
+        }
+    }
+    void Awake() {
+        // Restrict the controls to certain devices.
+        // controls.devices = new InputDevice[] { Keyboard.current, Mouse.current };
+
+        // // Restrict the controls to one control scheme.
+        // controls.bindingGroup = InputBinding.MaskByGroup(controls.controlSchemes.First(x => x.name == "Keyboard&Mouse").bindingGroup);
+        LoadCustomBindings();
+        EnableControls();
 
         // Move
-        controls.Player.Move.performed += ctx => inputVector = ctx.ReadValue<Vector2>();
+        MoveAction.action.performed += ctx => inputVector = ctx.ReadValue<Vector2>();
 
         // Fire
-        controls.Player.Fire.performed += ctx => {
+        FireAction.action.performed += ctx => {
             firePressedThisFrame = ctx.ReadValueAsButton();
             firePressedHeld = ctx.ReadValueAsButton();
         };
 
         // Left click
-        controls.Player.InteractWith.performed += ctx => {
+        InteractWithAction.action.performed += ctx => {
             leftClickedThisFrame = ctx.ReadValueAsButton();
             leftClickHeld = ctx.ReadValueAsButton();
         };
 
         // Escape
-        controls.Player.Escape.performed += ctx => {
+        EscapeAction.action.performed += ctx => {
             escaprePressedThisFrame = ctx.ReadValueAsButton();
         };
 
         // Button up
-        controls.Player.Fire.canceled += _ => firePressedHeld = false;
-        controls.Player.InteractWith.canceled += _ => leftClickHeld = false;
-        controls.Player.Move.canceled += _ => inputVector = Vector2.zero;
+        FireAction.action.canceled += _ => firePressedHeld = false;
+        InteractWithAction.action.canceled += _ => leftClickHeld = false;
+        MoveAction.action.canceled += _ => inputVector = Vector2.zero;
     }
     void ChangeState(ControlState previousState) {
         // TODO: code for transitioning between states
-        // if (focus) {
-        // focus.ResetInput();
-        // }
         controller.ResetInput();
         UINew.Instance.ClearWorldButtons();
         UINew.Instance.SetActionText("");
@@ -141,10 +218,6 @@ public class InputController : Singleton<InputController> {
         }
     }
     public void ResetCommandState() {
-        if (commandTarget != null) {
-            // Controllable targetControl = commandTarget.GetComponent<Controllable>();
-            // targetControl.control = Controllable.ControlType.AI;
-        }
         if (commandController != null) {
             commandController.Deregister();
         }
@@ -343,7 +416,7 @@ public class InputController : Singleton<InputController> {
                         return;
                     }
                     Controllable controllable = target.GetComponent<Controllable>();
-                    GameObject hypnosisEffect = Instantiate(Resources.Load("prefabs/fx/hypnosisEffect"), GameManager.Instance.playerObject.transform.position, Quaternion.identity) as GameObject;
+                    GameObject hypnosisEffect = Instantiate(Resources.Load("particles/hypnosisEffect"), GameManager.Instance.playerObject.transform.position, Quaternion.identity) as GameObject;
                     HypnosisEffect fx = hypnosisEffect.GetComponent<HypnosisEffect>();
                     fx.target = target;
 

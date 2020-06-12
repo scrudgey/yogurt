@@ -13,6 +13,8 @@ public class ClosetButtonHandler : MonoBehaviour {
     public UIButtonEffects effects;
     public Button closeButton;
     public HomeCloset.ClosetType closetType;
+    public HomeCloset closet;
+    public GameObject advancedButton;
     void Awake() {
         GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
         icon.sprite = null;
@@ -45,8 +47,13 @@ public class ClosetButtonHandler : MonoBehaviour {
             Destroy(childObject.gameObject);
         }
     }
-    public void PopulateItemList(HomeCloset.ClosetType type) {
+    public void PopulateItemList(HomeCloset.ClosetType type, HomeCloset closet) {
+        this.closet = closet;
         closetType = type;
+
+        if (type != HomeCloset.ClosetType.all && type != HomeCloset.ClosetType.items)
+            advancedButton.SetActive(false);
+
         effects = GetComponent<UIButtonEffects>();
         effects.buttons = new List<Button>() { closeButton };
         foreach (Transform childObject in listContent) {
@@ -94,8 +101,49 @@ public class ClosetButtonHandler : MonoBehaviour {
     public void CloseButtonClick() {
         UINew.Instance.CloseActiveMenu();
     }
+    public void AdvancedButtonClick() {
+        PlayerPrefs.SetString(HomeCloset.prefsKey_ClosetMenuType, "advanced");
+        GameObject menuObject = UINew.Instance.ShowMenu(UINew.MenuType.loadoutEditor);
+        LoadoutEditor menu = menuObject.GetComponent<LoadoutEditor>();
+        menu.Configure(closet);
+        GameManager.Instance.DetermineClosetNews();
+    }
     public void ItemClick(ItemEntryScript itemScript) {
-        GameManager.Instance.RetrieveCollectedItem(itemScript.prefabName, closetType);
+        GameObject playerObject = GameManager.Instance.playerObject;
+
+        if (GameManager.Instance.data.itemCheckedOut[itemScript.prefabName])
+            return;
+        GameObject item = Instantiate(Resources.Load("prefabs/" + itemScript.prefabName), playerObject.transform.position, Quaternion.identity) as GameObject;
+        Instantiate(Resources.Load("particles/poof"), playerObject.transform.position, Quaternion.identity);
+        GameManager.Instance.publicAudio.PlayOneShot(Resources.Load("sounds/pop", typeof(AudioClip)) as AudioClip);
+        GameManager.Instance.data.itemCheckedOut[itemScript.prefabName] = true;
+        if (closetType == HomeCloset.ClosetType.clothing) {
+            Outfit playerOutfit = playerObject.GetComponent<Outfit>();
+            Uniform itemUniform = item.GetComponent<Uniform>();
+            Head playerHead = playerObject.GetComponentInChildren<Head>();
+            Hat itemHat = item.GetComponent<Hat>();
+
+            if (playerOutfit != null && itemUniform != null) {
+                GameObject removedUniform = playerOutfit.DonUniform(itemUniform);
+                if (removedUniform != null) {
+                    closet.StashObject(removedUniform.GetComponent<Pickup>());
+                }
+            }
+            if (playerHead != null && itemHat != null) {
+                GameObject removedHat = playerHead.DonHat(itemHat);
+                if (removedHat != null) {
+                    closet.StashObject(removedHat.GetComponent<Pickup>());
+                }
+            }
+        } else {
+            Inventory playerInventory = playerObject.GetComponent<Inventory>();
+            Pickup itemPickup = item.GetComponent<Pickup>();
+            if (playerInventory != null && itemPickup != null) {
+                playerInventory.GetItem(itemPickup);
+            }
+        }
+
+
         UINew.Instance.CloseActiveMenu();
     }
     public void ItemMouseover(ItemEntryScript itemScript) {

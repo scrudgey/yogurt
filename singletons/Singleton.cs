@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Linq;
 
 /// <summary>
 /// Be aware this will not prevent a non singleton constructor
@@ -8,6 +9,7 @@
 /// As a note, this is made as MonoBehaviour because we need Coroutines.
 /// </summary>
 public class Singleton<T> : MonoBehaviour where T : MonoBehaviour {
+    // protected string prefabPath = "required/singletonTemplate";
     private static T _instance;
     private static object _lock = new object();
     public static T Instance {
@@ -37,8 +39,25 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour {
             return;
         }
         if (_instance == null) {
-            GameObject singleton = GameObject.Instantiate(Resources.Load("required/singletonTemplate")) as GameObject;
-            _instance = singleton.AddComponent<T>();
+            GameObject[] singletonPrefabs = Resources.LoadAll("required/singletons/", typeof(GameObject))
+                .Cast<GameObject>()
+                .ToArray();
+
+            string prefabPath = "required/singletons/singletonTemplate";
+
+            foreach (GameObject prefab in singletonPrefabs) {
+                if (prefab.GetComponent<T>() != null) {
+                    prefabPath = "required/singletons/" + prefab.name;
+                }
+            }
+
+            // Debug.Log("instantiating " + prefabPath + " ...");
+
+            GameObject singleton = GameObject.Instantiate(Resources.Load(prefabPath)) as GameObject;
+
+            _instance = singleton.GetComponent<T>();
+            if (_instance == null)
+                _instance = singleton.AddComponent<T>();
             singleton.name = "(singleton) " + typeof(T).ToString();
             DontDestroyOnLoad(singleton);
             // Debug.Log("[Singleton] An instance of " + typeof(T) + 

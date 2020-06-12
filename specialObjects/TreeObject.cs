@@ -32,9 +32,9 @@ public class TreeObject : Damageable {
             }
         }
     }
-    public override float CalculateDamage(MessageDamage message) {
+    public override void CalculateDamage(MessageDamage message) {
         if (immunities.Contains(message.type))
-            return 0;
+            return;
         hinge.useMotor = true;
         timer = 0;
         doShake = true;
@@ -44,6 +44,5 @@ public class TreeObject : Damageable {
             FallingLeaf newLeafScript = newLeaf.GetComponent<FallingLeaf>();
             newLeafScript.height = Random.Range(0.9f, 1f);
         }
-        return 1f;
     }
 }

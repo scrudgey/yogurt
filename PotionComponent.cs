@@ -34,6 +34,7 @@ public struct PotionData {
     public BuffData ingredient1;
     public BuffData ingredient2;
     public Buff buff;
+    public string buffDescription;
     public HashSet<string> RequiredItems() {
         return new HashSet<string>() { ingredient1.prefabName, ingredient2.prefabName };
     }

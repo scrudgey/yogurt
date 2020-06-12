@@ -9,14 +9,14 @@ public class DeathMenu : MonoBehaviour {
     public List<Rigidbody2D> letters;
     public bool lettersInactive;
     private float timer;
-    public MyControls controls;
+    // public MyControls controls;
     bool keypressedThisFrame;
     void Awake() {
-        controls = new MyControls();
+        // controls = new MyControls();
 
-        controls.Player.Primary.Enable();
+        // controls.Player.Primary.Enable();
 
-        controls.Player.Primary.performed += _ => keypressedThisFrame = true;
+        InputController.Instance.PrimaryAction.action.performed += _ => keypressedThisFrame = true;
     }
     void Start() {
         Canvas canvas = GetComponent<Canvas>();

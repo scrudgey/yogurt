@@ -110,15 +110,13 @@ public class DialogueMenu : MonoBehaviour {
     public bool disableCommand;
     private bool doTrapDoor;
     private bool doVampireAttack;
-
-    public MyControls controls;
-    bool keypressedThisFrame;
+    // public MyControls controls;
+    public bool keypressedThisFrame;
     void Awake() {
-        controls = new MyControls();
-
-        controls.Player.Primary.Enable();
-
-        controls.Player.Primary.performed += _ => keypressedThisFrame = true;
+        InputController.Instance.PrimaryAction.action.Enable();
+        InputController.Instance.PrimaryAction.action.performed += _ => {
+            keypressedThisFrame = true;
+        };
     }
 
     public void Start() {

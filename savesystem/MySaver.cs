@@ -28,6 +28,11 @@ public class MySaver {
             return 0;
         }
     }
+    public static void BackupFailedSave() {
+        string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
+        string destPath = Path.Combine(Application.persistentDataPath, "crashdump");
+        DirectoryCopy(path, destPath, true);
+    }
     public static void CleanupSaves() {
         string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
         if (!System.IO.Directory.Exists(path))
@@ -42,6 +47,8 @@ public class MySaver {
                 continue;
             if (file.FullName == GameManager.Instance.data.lastSavedPlayerPath)
                 continue;
+            if (file.Name == LoadoutEditor.loadoutFileName)
+                continue;
             if (file.Name != "apartment_state.xml")
                 File.Delete(file.FullName);
         }
@@ -55,9 +62,6 @@ public class MySaver {
             using (var playerStream = new FileStream(playerPath, FileMode.Open)) {
                 playerIDs = listSerializer.Deserialize(playerStream) as List<Guid>;
             }
-            // var playerStream = new FileStream(playerPath, FileMode.Open);
-            // playerIDs = listSerializer.Deserialize(playerStream) as List<int>;
-            // playerStream.Close();
             if (objectDataBase != null) {
                 foreach (KeyValuePair<Guid, PersistentObject> kvp in objectDataBase) {
                     if (kvp.Value.sceneName != "apartment" && !GameManager.Instance.data.toiletItems.Contains(kvp.Key)) {
@@ -434,4 +438,35 @@ public class MySaver {
     //     }
     //     return objectDataBase.Count + 1;
     // }
+    private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs) {
+        // Get the subdirectories for the specified directory.
+        DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+
+        if (!dir.Exists) {
+            throw new DirectoryNotFoundException(
+                "Source directory does not exist or could not be found: "
+                + sourceDirName);
+        }
+
+        DirectoryInfo[] dirs = dir.GetDirectories();
+        // If the destination directory doesn't exist, create it.
+        if (!Directory.Exists(destDirName)) {
+            Directory.CreateDirectory(destDirName);
+        }
+
+        // Get the files in the directory and copy them to the new location.
+        FileInfo[] files = dir.GetFiles();
+        foreach (FileInfo file in files) {
+            string temppath = Path.Combine(destDirName, file.Name);
+            file.CopyTo(temppath, false);
+        }
+
+        // If copying subdirectories, copy them and their contents to new location.
+        if (copySubDirs) {
+            foreach (DirectoryInfo subdir in dirs) {
+                string temppath = Path.Combine(destDirName, subdir.Name);
+                DirectoryCopy(subdir.FullName, temppath, copySubDirs);
+            }
+        }
+    }
 }

@@ -11,7 +11,8 @@ public class PlaySoundOnStart : MonoBehaviour {
         source = Toolbox.Instance.SetUpAudioSource(gameObject);
         if (disableSpatialBlending)
             source.spatialBlend = 0;
-        if (sound != null)
-            source.PlayOneShot(sound);
+        if (sound != null) {
+            Toolbox.Instance.AudioSpeaker(sound, transform.position);
+        }
     }
 }

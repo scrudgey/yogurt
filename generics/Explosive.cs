@@ -47,13 +47,13 @@ public class Explosive : MonoBehaviour {
         if (intrinsics == null)
             intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject);
         netBuffs = intrinsics.NetBuffs();
-        if (Damageable.Damages(message.type, netBuffs)) {
-            foreach (DamageThreshhold threshHold in threshHolds) {
-                threshHold.TakeDamage(message);
-                if (threshHold.Explode())
-                    Explode();
-            }
-        }
+        // if (Damageable.Damages(message.type, netBuffs)) {
+        //     foreach (DamageThreshhold threshHold in threshHolds) {
+        //         threshHold.TakeDamage(message);
+        //         if (threshHold.Explode())
+        //             Explode();
+        //     }
+        // }
 
     }
     public virtual void HandleNetIntrinsic(MessageNetIntrinsic message) {

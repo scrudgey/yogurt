@@ -8,7 +8,8 @@ public partial class UINew : Singleton<UINew> {
     public enum MenuType {
         none, escape, inventory, speech, closet,
         scriptSelect, commercialReport, newDayReport, email,
-        diary, dialogue, phone, perk, teleport, tv, perkBrowser
+        diary, dialogue, phone, perk, teleport, tv, perkBrowser,
+        loadoutEditor
     }
     private Dictionary<MenuType, string> menuPrefabs = new Dictionary<MenuType, string>{
         {MenuType.escape,                   "UI/PauseMenu"},
@@ -25,7 +26,8 @@ public partial class UINew : Singleton<UINew> {
         {MenuType.perk,                     "UI/PerkMenu"},
         {MenuType.teleport,                 "UI/TeleportMenu"},
         {MenuType.tv,                       "UI/TVMenu"},
-        {MenuType.perkBrowser,              "UI/PerkBrowser"}
+        {MenuType.perkBrowser,              "UI/PerkBrowser"},
+        {MenuType.loadoutEditor,            "UI/AdvancedClosetMenu"}
     };
 
     private static List<MenuType> actionRequired = new List<MenuType> { MenuType.commercialReport, MenuType.diary, MenuType.perk, MenuType.dialogue };

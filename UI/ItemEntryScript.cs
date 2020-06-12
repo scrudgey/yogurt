@@ -21,11 +21,27 @@ public class ItemEntryScript : MonoBehaviour, IPointerEnterHandler {
     public string description;
     public void Clicked() {
         ClosetButtonHandler handler = GetComponentInParent<ClosetButtonHandler>();
-        handler.ItemClick(this);
+        if (handler != null) {
+            handler.ItemClick(this);
+            return;
+        }
+        LoadoutEditor editor = GetComponentInParent<LoadoutEditor>();
+        if (editor != null) {
+            editor.ItemButtonCallback(this);
+            return;
+        }
     }
     public void OnPointerEnter(PointerEventData eventData) {
         ClosetButtonHandler handler = GetComponentInParent<ClosetButtonHandler>();
-        handler.ItemMouseover(this);
+        if (handler != null) {
+            handler.ItemMouseover(this);
+            return;
+        }
+        // LoadoutEditor editor = GetComponentInParent<LoadoutEditor>();
+        // if (editor != null) {
+        //     editor.ItemMouseover(this);
+        //     return;
+        // }
     }
     private void CheckGrey() {
         Text myText = transform.Find("item").GetComponent<Text>();

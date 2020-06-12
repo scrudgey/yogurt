@@ -6,6 +6,7 @@ using UnityEngine.Audio;
 
 public class SettingsMenu : MonoBehaviour {
     public Canvas controlsCanvas;
+    public KeyBindMenu keybindingMenu;
     public Canvas mainCanvas;
     public Slider musicVolumeSlider;
     public Slider sfxVolumeSlider;
@@ -31,5 +32,9 @@ public class SettingsMenu : MonoBehaviour {
     public void GraphicButtonCallback() {
         controlsCanvas.enabled = true;
         mainCanvas.enabled = false;
+    }
+    public void ControlButtonCallback() {
+        keybindingMenu.gameObject.SetActive(true);
+        // keybindingMenu.Configure();
     }
 }
