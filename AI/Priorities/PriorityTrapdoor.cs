@@ -17,7 +17,6 @@ namespace AI {
 
             priorityName = "trapdoor";
             player = new Ref<GameObject>(GameManager.Instance.playerObject);
-            Debug.Log(player.val);
             Goal getToZone = new GoalWalkToPoint(gameObject, control, new Ref<Vector2>((Vector2)guardPoint));
             Goal lookGoal = new GoalLookInDirection(gameObject, control, Vector2.down);
             Goal observe = new GoalObserveObject(gameObject, control, player);

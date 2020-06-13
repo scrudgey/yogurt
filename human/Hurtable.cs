@@ -21,9 +21,6 @@ public class Hurtable : Damageable, ISaveable {
     public float maxHealth;
     public float oxygen;
     public float maxOxygen = 100f;
-    // public float bonusHealth;
-    // public float armor;
-    // public bool coughing;
     public bool ethereal;
     private float hitStunCounter;
     private bool doubledOver;
@@ -35,6 +32,7 @@ public class Hurtable : Damageable, ISaveable {
     bool vibrate;
     public bool bleeds = true; // if true, bleed on cutting / piercing damage
     public bool monster = false; // if true, death of this hurtable is not shocking or disturbing
+    public bool ghostly = false; // if true, does not leave a skeleton behind when vaporized
     public Dictionary<damageType, float> totalDamage = new Dictionary<damageType, float>();
     public Collider2D myCollider;
     public bool unknockdownable;
@@ -198,8 +196,10 @@ public class Hurtable : Damageable, ISaveable {
             inv.DropItem();
         }
         if (type == damageType.cosmic || type == damageType.fire) {
-            Instantiate(Resources.Load("prefabs/skeleton"), transform.position, transform.rotation);
-            Toolbox.Instance.AudioSpeaker("Flash Fire Ignite 01", transform.position);
+            if (!ghostly) {
+                Instantiate(Resources.Load("prefabs/skeleton"), transform.position, transform.rotation);
+                Toolbox.Instance.AudioSpeaker("Flash Fire Ignite 01", transform.position);
+            }
             ClaimsManager.Instance.WasDestroyed(gameObject);
             Destroy(gameObject);
         } else if (type == damageType.explosion) {

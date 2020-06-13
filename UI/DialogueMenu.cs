@@ -113,10 +113,13 @@ public class DialogueMenu : MonoBehaviour {
     // public MyControls controls;
     public bool keypressedThisFrame;
     void Awake() {
+        keypressedThisFrame = false;
         InputController.Instance.PrimaryAction.action.Enable();
-        InputController.Instance.PrimaryAction.action.performed += _ => {
-            keypressedThisFrame = true;
+        InputController.Instance.PrimaryAction.action.performed += ctx => {
+            keypressedThisFrame = ctx.ReadValueAsButton();
+            // keypressedThisFrame = true;
         };
+
     }
 
     public void Start() {
@@ -158,7 +161,9 @@ public class DialogueMenu : MonoBehaviour {
     }
     public void SetText(string newText = "DEFAULT") {
         if (newText == "DEFAULT") {
-            speechText.text = monologue.GetString();
+            List<bool> swearList = new List<bool>();
+            string text = Speech.ProcessDialogue(monologue.GetString(), ref swearList);
+            speechText.text = text;
             largeText.text = monologue.text.Peek();
         } else {
             speechText.text = newText;
