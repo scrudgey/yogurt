@@ -253,6 +253,25 @@ public class EventData : Describable {
         }
         return data;
     }
+    public static EventData Nullification(GameObject nullified) {
+        string victimName = Toolbox.Instance.GetName(nullified);
+        EventData data = new EventData(offensive: 1, disgusting: 0, disturbing: 2, chaos: 0, positive: 0);
+        data.key = "nullification";
+        data.val = 1f;
+        data.noun = "nullification";
+        data.popupDesc = "objects nullified";
+
+        data.whatHappened = $"the {victimName} was vaporized";
+        if (victimName.ToLower().Contains("effigy")) {
+            data = new EventData(offensive: 1, disgusting: 0, disturbing: 2, chaos: 0, positive: 0);
+            data.noun = "effigy nullification";
+            data.key = "nullify_hatred";
+            data.val = 1f;
+            data.popupDesc = "effigy nullifications";
+            data.whatHappened = $"an offensive effigy was vaporized";
+        }
+        return data;
+    }
     public static EventData Eggplant(GameObject eater) {
         EventData data = new EventData(positive: 1);
         data.key = "eggplant";

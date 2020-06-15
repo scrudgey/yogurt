@@ -34,7 +34,7 @@ public class TVMenu : MonoBehaviour {
         slewTime = 0;
         animationTimer = 0;
 
-        StartShow(TelevisionShow.LoadByFilename("tv1"));
+        StartShow(TelevisionShow.LoadByFilename("vampire1"));
     }
     public void StartShow(TelevisionShow show) {
         this.show = show;
@@ -52,7 +52,6 @@ public class TVMenu : MonoBehaviour {
             return;
         timer += Time.unscaledDeltaTime;
         if (timer > slewTime) {
-            timer = 0;
             NextElement();
         }
 
@@ -80,8 +79,7 @@ public class TVMenu : MonoBehaviour {
             Music track = TelevisionShow.musicTracks[groups["track"].Value]();
             MusicController.Instance.EnqueueMusic(track);
             myTrack = track;
-        }
-        if (spriteMatcher.IsMatch(line)) {
+        } else if (spriteMatcher.IsMatch(line)) {
             Match spriteMatch = spriteMatcher.Match(line);
             GroupCollection groups = spriteMatch.Groups;
             int index = int.Parse(groups["index"].Value);
@@ -108,7 +106,8 @@ public class TVMenu : MonoBehaviour {
             Match slewMatch = slewMatcher.Match(line);
             GroupCollection groups = slewMatch.Groups;
             slewTime = float.Parse(groups["time"].Value);
-            // Debug.Log("slewmatch " + slewTime.ToString());
+            // timer = slewTime;
+            timer = 0;
         } else if (endMatcher.IsMatch(line)) {
             // Debug.Log("end");
             EndShow();

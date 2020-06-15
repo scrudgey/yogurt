@@ -10,8 +10,6 @@ public class CosmicNullifier : Pickup {
         nullify.unlimitedRange = true;
         nullify.validationFunction = true;
         nullify.otherOnSelfConsent = false;
-        // nullify.inertOnPlayerConsent = false;
-        // nullify.otherOnPlayerConsent = false;
         interactions.Add(nullify);
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
     }

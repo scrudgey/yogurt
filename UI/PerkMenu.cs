@@ -20,6 +20,8 @@ public class PerkMenu : MonoBehaviour {
     public List<Button> builtInButtons;
     public UIButtonEffects effects;
     public AspectRatioFitter aspectRatioFitter;
+    public delegate void MyDelegate();
+    public MyDelegate menuClosed;
     void Start() {
         effects = GetComponent<UIButtonEffects>();
         GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
@@ -136,6 +138,10 @@ public class PerkMenu : MonoBehaviour {
     public void DoneButtonClick() {
         UINew.Instance.CloseActiveMenu();
         MusicController.Instance.End();
+    }
+    void OnDestroy() {
+        if (menuClosed != null)
+            menuClosed();
     }
 
 }

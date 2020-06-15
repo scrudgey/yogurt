@@ -201,7 +201,7 @@ public class Hurtable : Damageable, ISaveable {
                 Toolbox.Instance.AudioSpeaker("Flash Fire Ignite 01", transform.position);
             }
             ClaimsManager.Instance.WasDestroyed(gameObject);
-            Destroy(gameObject);
+            Destruct();
         } else if (type == damageType.explosion) {
             Destruct();
         } else {

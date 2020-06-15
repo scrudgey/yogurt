@@ -169,10 +169,16 @@ namespace AI {
         }
 
         void Pose() {
+            int spriteIndex = 0;
+            int headIndex = 0;
             // hash time to get the index.
-
-            int spriteIndex = UnityEngine.Random.Range(0, spritesheet.Length);
-            int headIndex = UnityEngine.Random.Range(0, headSprites.Length);
+            if (personality.dancer == Personality.Dancer.leader) {
+                spriteIndex = ((int)UnityEngine.Time.realtimeSinceStartup + 1) % spritesheet.Length;
+                headIndex = ((int)UnityEngine.Time.realtimeSinceStartup + 1) % headSprites.Length;
+            } else {
+                spriteIndex = (int)UnityEngine.Time.realtimeSinceStartup % spritesheet.Length;
+                headIndex = (int)UnityEngine.Time.realtimeSinceStartup % headSprites.Length;
+            }
 
             spriteRenderer.sprite = spritesheet[spriteIndex];
             headRenderer.sprite = headSprites[headIndex];

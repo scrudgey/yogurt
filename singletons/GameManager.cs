@@ -42,6 +42,7 @@ public class GameData {
     public int entryID;
     public List<Achievement> achievements;
     public SerializableDictionary<StatType, Stat> stats = new SerializableDictionary<StatType, Stat>();
+    public List<string> commercialsInitializedToday;
     public List<Email> emails;
     public List<string> packages;
     public bool firstTimeLeavingHouse;
@@ -445,12 +446,6 @@ public partial class GameManager : Singleton<GameManager> {
                     mayorSpeech.defaultMonologue = "mayor_award";
             }
         }
-        if (sceneName == "chamber" && data.teleporterUnlocked) {
-            // TODO:change polestar dialogues
-            // Speech mySpeech = GetComponent<Speech>();
-            // mySpeech.defaultMonologue = "polestar";
-        }
-
         if (sceneName == "cave3" && !data.loadedSewerItemsToday) {
             data.loadedSewerItemsToday = true;
             Collider2D toiletZone = GameObject.Find("toiletZone").GetComponent<Collider2D>();
@@ -465,9 +460,11 @@ public partial class GameManager : Singleton<GameManager> {
                     );
                 }
             }
-            // data.toiletItems = new List<System.Guid>();
         }
         PlayerEnter();
+        if (data.activeCommercial != null) {
+            CheckCommercialInitialization(data.activeCommercial, sceneName);
+        }
         if (playerIsDead) {
             UINew.Instance.RefreshUI(active: false);
             Instantiate(Resources.Load("UI/deathMenu"));
@@ -657,7 +654,7 @@ public partial class GameManager : Singleton<GameManager> {
         data.gangMembersDefeated = 0;
         data.activeCommercial = null;
         data.loadedSewerItemsToday = false;
-        // data.recordingCommercial = false;
+        data.commercialsInitializedToday = new List<string>();
         SetRecordingStatus(false);
     }
     public void DetermineClosetNews() {
@@ -716,6 +713,8 @@ public partial class GameManager : Singleton<GameManager> {
         data.newCollectedFood = new List<string>();
         data.collectedClothes = new List<string>();
         data.newCollectedClothes = new List<string>();
+        data.commercialsInitializedToday = new List<string>();
+
         data.packages = new List<string>();
         data.emails = new List<Email>();
         data.itemCheckedOut = new SerializableDictionary<string, bool>();
@@ -761,6 +760,7 @@ public partial class GameManager : Singleton<GameManager> {
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("moon"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("vampire"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("boardroom"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("nullify1"));
             data.perks["hypnosis"] = true;
             data.perks["vomit"] = true;
             data.perks["eat_all"] = true;
@@ -789,20 +789,7 @@ public partial class GameManager : Singleton<GameManager> {
         data.completeCommercials = new HashSet<Commercial>();
         // initialize achievements
         data.achievements = AchievementManager.LoadAchievements();
-        // data.achievements = new List<Achievement>();
         data.stats = new SerializableDictionary<StatType, Stat>();
-        // GameObject[] achievementPrefabs = Resources.LoadAll("achievements/", typeof(GameObject))
-        //     .Cast<GameObject>()
-        //     .ToArray();
-        // foreach (GameObject prefab in achievementPrefabs) {
-        //     if (debug && prefab.name == "StartGame")
-        //         continue;
-        //     AchievementComponent component = prefab.GetComponent<AchievementComponent>();
-        //     if (component) {
-        //         Achievement cloneAchievement = new Achievement(component.achivement);
-        //         data.achievements.Add(cloneAchievement);
-        //     }
-        // }
         return data;
     }
 
@@ -915,7 +902,10 @@ public partial class GameManager : Singleton<GameManager> {
         string filename = Toolbox.Instance.CloneRemover(obj.name);
         if (filename.ToLower() == "droplet" || filename.ToLower() == "puddle")
             return;
-        // filename = Toolbox.Instance.ReplaceUnderscore(filename);
+        if (filename.ToLower() == "cosmic_nullifier") {
+            ReceiveEmail("nullify1");
+            UnlockCommercial("nullify1");
+        }
         if (data.collectedObjects.Contains(filename))
             return;
         UnityEngine.Object testPrefab = Resources.Load("prefabs/" + filename);
@@ -1030,7 +1020,7 @@ public partial class GameManager : Singleton<GameManager> {
             "Ignotum P. Ignotius",
             "Magna Morti",
             "Quadriceps Potentia",
-            "Pontifex Prime"
+            "Pontifex Prime",
         };
         return names[UnityEngine.Random.Range(0, names.Count)];
     }

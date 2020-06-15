@@ -117,7 +117,6 @@ public class DialogueMenu : MonoBehaviour {
         InputController.Instance.PrimaryAction.action.Enable();
         InputController.Instance.PrimaryAction.action.performed += ctx => {
             keypressedThisFrame = ctx.ReadValueAsButton();
-            // keypressedThisFrame = true;
         };
 
     }

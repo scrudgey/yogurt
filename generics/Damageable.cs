@@ -118,7 +118,7 @@ public abstract class Damageable : MonoBehaviour {
             CalculateDamage(message);
 
             // UI hit effect if i am the player
-            if (gameObject == GameManager.Instance.playerObject) {
+            if (gameObject == GameManager.Instance.playerObject && message.type != damageType.asphyxiation) {
                 UINew.Instance.Hit();
             }
             // look in the direction 
