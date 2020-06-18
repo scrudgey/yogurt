@@ -130,8 +130,8 @@ public class Eater : Interactive, ISaveable {
 
         GameObject eaten = food.gameObject;
         eaten.name = Toolbox.Instance.CloneRemover(eaten.name);
-        eatenQueue.Enqueue(eaten);
         eaten.SetActive(false);
+        eatenQueue.Enqueue(eaten);
         if (eatenQueue.Count > 2) {
             GameObject oldEaten = eatenQueue.Dequeue();
             ClaimsManager.Instance.WasDestroyed(oldEaten);
@@ -213,6 +213,10 @@ public class Eater : Interactive, ISaveable {
         }
         GameManager.Instance.CheckItemCollection(food.gameObject, gameObject);
         food.BeEaten();
+
+        eaten.transform.position = transform.position;
+        eaten.transform.SetParent(transform, false);
+        eaten.transform.localPosition = Random.insideUnitCircle * (3f / 100);
     }
     public bool Eat_Validation(Edible food) {
         if (GameManager.Instance.data == null)
@@ -314,6 +318,14 @@ public class Eater : Interactive, ISaveable {
             if (eaten != null) {
                 eatenQueue.Enqueue(eaten);
                 eaten.SetActive(false);
+                eaten.transform.position = transform.position;
+                eaten.transform.SetParent(transform, false);
+                eaten.transform.localPosition = Random.insideUnitCircle * (3f / 100);
+                Bones itemBones = eaten.GetComponent<Bones>();
+                if (itemBones != null) {
+                    if (itemBones.follower == null)
+                        itemBones.Start();
+                }
             } else {
                 // Debug.Log("eaten1 is null");
             }
@@ -323,6 +335,14 @@ public class Eater : Interactive, ISaveable {
             if (eaten != null) {
                 eatenQueue.Enqueue(eaten);
                 eaten.SetActive(false);
+                eaten.transform.position = transform.position;
+                eaten.transform.SetParent(transform, false);
+                eaten.transform.localPosition = Random.insideUnitCircle * (3f / 100);
+                Bones itemBones = eaten.GetComponent<Bones>();
+                if (itemBones != null) {
+                    if (itemBones.follower == null)
+                        itemBones.Start();
+                }
             } else {
                 // Debug.Log("eaten0 is null");
             }

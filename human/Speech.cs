@@ -95,6 +95,7 @@ public class Speech : Interactive, ISaveable {
             {BuffType.telepathy, new BuffMessage("I can hear thoughts!", "I can no longer hear thoughts!")},
             {BuffType.fireproof, new BuffMessage("I feel fireproof!", "I no longer feel fireproof!")},
             {BuffType.undead, new BuffMessage("I feel kinda weird!", "I feel blessed!")},
+            {BuffType.ethereal, new BuffMessage("I feel intangible!", "I feel solid!")},
             {BuffType.poison, new BuffMessage("I don't feel so good!", "I feel much better!")},
             {BuffType.invulnerable, new BuffMessage("I am invincible!", "I feel exposed!")},
         };
@@ -282,9 +283,6 @@ public class Speech : Interactive, ISaveable {
         }
         if (controlSpeech == null)
             return false;
-        if (controlSpeech.glibSpeakWith) {
-            return false;
-        }
         if (InputController.Instance.state == InputController.ControlState.commandSelect) {
             return InputController.Instance.commandTarget != gameObject;
         } else {

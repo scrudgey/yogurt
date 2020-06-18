@@ -207,6 +207,10 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         items.Add(item);
         if (holding != null && item == holding.gameObject)
             SoftDropItem();
+        Bones itemBones = item.GetComponent<Bones>();
+        if (itemBones != null) {
+            itemBones.follower.gameObject.SetActive(false);
+        }
         item.SetActive(false);
     }
     public bool PlaceItem(Vector2 place) {
@@ -276,6 +280,11 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
                 holding = items[i].GetComponent<Pickup>();
                 items.RemoveAt(i);
 
+                Bones itemBones = holding.GetComponent<Bones>();
+                if (itemBones != null) {
+                    if (itemBones.follower != null)
+                        itemBones.follower.gameObject.SetActive(true);
+                }
                 break;
             }
         }
@@ -510,8 +519,6 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
                 Debug.Log("tried to get loadedobject " + data.ints["holdingID"].ToString() + " but was not found!");
             }
         }
-        // note: trying to reference a key in data.ints that didn't exist here caused a hard crash at runtime
-        // so PROTECT YA NECK!!!
         if (data.ints["itemCount"] > 0) {
             for (int i = 0; i < data.ints["itemCount"]; i++) {
                 GameObject theItem = MySaver.IDToGameObject(data.GUIDs["item" + i.ToString()]);

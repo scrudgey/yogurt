@@ -64,11 +64,9 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
             Portrait portrait = null;
             switch (gender) {
                 case Gender.male:
-                    // head.baseName = maleHeads[UnityEngine.Random.Range(0, maleHeads.Count)];
                     portrait = maleHeads[UnityEngine.Random.Range(0, maleHeads.Count)].portrait;
                     break;
                 case Gender.female:
-                    // head.baseName = femaleHeads[UnityEngine.Random.Range(0, femaleHeads.Count)];
                     portrait = femaleHeads[UnityEngine.Random.Range(0, femaleHeads.Count)].portrait;
                     break;
             }
@@ -77,12 +75,6 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
             speech.portrait = portrait.sprites.ToArray();
             Toolbox.SetSkinColor(gameObject, portrait.skinColor);
             head.LoadSprites();
-
-            // if (portrait.overrideGenderFemale) {
-            //     Toolbox.SetGender(gameObject, Gender.female);
-            // } else if (portrait.overrideGenderMale) {
-            //     Toolbox.SetGender(gameObject, Gender.male);
-            // }
         } else {
             if (randomizeSkinColor) {
                 SkinColor skinColor = (SkinColor)UnityEngine.Random.Range(0, 3);

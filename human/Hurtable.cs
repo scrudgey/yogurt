@@ -190,7 +190,6 @@ public class Hurtable : Damageable, ISaveable {
     public void Die(MessageDamage message, damageType type /* the overall type of damage TODO: rename */) {
         if (hitState == Controllable.HitState.dead)
             return;
-
         Inventory inv = GetComponent<Inventory>();
         if (inv) {
             inv.DropItem();
@@ -241,17 +240,19 @@ public class Hurtable : Damageable, ISaveable {
 
         // TODO: could this logic belong to eventdata / occurrence ?
         if (GameManager.Instance.playerObject == gameObject) {
-            if (message.type == damageType.fire) {
-                if (suicide) {
-                    GameManager.Instance.IncrementStat(StatType.selfImmolations, 1);
+            if (message != null) {
+                if (message.type == damageType.fire) {
+                    if (suicide) {
+                        GameManager.Instance.IncrementStat(StatType.selfImmolations, 1);
+                    }
+                    GameManager.Instance.IncrementStat(StatType.immolations, 1);
                 }
-                GameManager.Instance.IncrementStat(StatType.immolations, 1);
-            }
-            if (message.type == damageType.asphyxiation) {
-                GameManager.Instance.IncrementStat(StatType.deathByAsphyxiation, 1);
-            }
-            if (message.type == damageType.explosion) {
-                GameManager.Instance.IncrementStat(StatType.deathByExplosion, 1);
+                if (message.type == damageType.asphyxiation) {
+                    GameManager.Instance.IncrementStat(StatType.deathByAsphyxiation, 1);
+                }
+                if (message.type == damageType.explosion) {
+                    GameManager.Instance.IncrementStat(StatType.deathByExplosion, 1);
+                }
             }
             if (impersonalAttacker) {
                 GameManager.Instance.IncrementStat(StatType.deathByMisadventure, 1);
@@ -268,7 +269,11 @@ public class Hurtable : Damageable, ISaveable {
         occurrenceData.damageZone = impersonalAttacker;
         occurrenceData.assailant = assailant;
         occurrenceData.lastAttacker = lastAttacker;
-        occurrenceData.lastDamage = message.type;
+        if (message != null) {
+            occurrenceData.lastDamage = message.type;
+        } else {
+            occurrenceData.lastDamage = damageType.any;
+        }
         Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData);
 
         if (gameObject.name.StartsWith("greaser")) {
