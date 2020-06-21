@@ -10,7 +10,7 @@ public class ChemicalSpray : MonoBehaviour {
             if (flam.onFire) {
                 flam.onFire = false;
                 flam.heat = -10f;
-                flam.burnTimer = 0;
+                flam.SetBurnTimer();
                 OccurrenceFire fireData = new OccurrenceFire();
                 fireData.flamingObject = coll.gameObject;
                 fireData.extinguished = true;

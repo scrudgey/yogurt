@@ -159,7 +159,10 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
             gibberizer.spacingRange = speech.spacingRange;
             gibberizer.sounds = speech.speakSounds;
         }
-
+        Awareness awareness = GetComponent<Awareness>();
+        if (awareness) {
+            awareness.socializationTimer = -1f * UnityEngine.Random.Range(0f, 10f);
+        }
         configured = true;
     }
 

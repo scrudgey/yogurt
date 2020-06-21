@@ -5,6 +5,7 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
     public AudioClip[] impactSounds;
     public AudioClip[] landSounds;
     public AudioClip[] scrapeSounds;
+    public AudioClip[] bounceSounds;
     private GameObject hingeObject;
     private Rigidbody2D hingeBody;
     private HingeJoint2D hingeJoint2D;
@@ -67,6 +68,11 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         doInit = false;
     }
     public void InitPhysical(float height, Vector3 initialVelocity) {
+        // Debug.LogWarning("initphysical");
+        // Debug.Log(initialVelocity.x);
+        // Debug.Log(initialVelocity.y);
+        // Debug.Log(initialVelocity.z);
+        // Debug.Log(height);
         doInit = false;
         Vector2 initPos = transform.position;
         Vector2 groundPos = transform.position;
@@ -90,11 +96,14 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         // Set up ground object
         groundObject = new GameObject(name + " Ground");
         groundObject.tag = "footprint";
-        if (noCollisions) {
-            groundObject.layer = 15;
-        } else {
-            groundObject.layer = 16;
-        }
+        // if (noCollisions) {
+        //     // groundObject.layer = 15;
+        //     foreach (Collider2D collider in groundObject.GetComponents<Collider2D>()) {
+        //         collider.enabled = false;
+        //     }
+        // }
+        groundObject.layer = 16;
+
         groundObject.transform.position = initPos;
         Toolbox.Instance.SetUpAudioSource(groundObject);
         //rigidbody 2D
@@ -107,6 +116,7 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         groundBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         groundBody.interpolation = RigidbodyInterpolation2D.Interpolate;
         //box collider
+        // if (!noCollisions) {
         groundCollider = groundObject.AddComponent<CapsuleCollider2D>();
         groundCollider.direction = CapsuleDirection2D.Horizontal;
         groundCollider.sharedMaterial = Resources.Load<PhysicsMaterial2D>("ground");
@@ -118,6 +128,8 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         foreach (Collider2D myCollider in GetComponents<Collider2D>()) {
             Physics2D.IgnoreCollision(groundCollider, myCollider, true);
         }
+        // }
+
 
         horizon = new GameObject("horizon");
         horizon.layer = 9;
@@ -216,7 +228,7 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         if (coll.relativeVelocity.magnitude > 0.1) {
             if (impactSounds != null && !silentImpact)
                 if (impactSounds.Length > 0) {
-                    GetComponent<AudioSource>().PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
+                    audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
                 }
             if (coll.gameObject != horizon) {
                 EventData data = Toolbox.Instance.DataFlag(
@@ -409,6 +421,9 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         physical.FlyMode();
         // Debug.Log("angular vel:" + physical.objectBody.angularVelocity.ToString());
         // Debug.Log("y vel:" + objectVelocity.y.ToString());
+        if (bounceSounds != null && bounceSounds.Length > 0) {
+            audioSource.PlayOneShot(bounceSounds[Random.Range(0, bounceSounds.Length)]);
+        }
     }
     public void Bounce() {
         // Debug.Log(name + " bounced");
@@ -420,6 +435,10 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         body.velocity = vel;
         groundBody.velocity = groundVelocity;
         physical.BroadcastMessage("OnGroundImpact", physical, SendMessageOptions.DontRequireReceiver);
+
+        if (bounceSounds != null && bounceSounds.Length > 0) {
+            audioSource.PlayOneShot(bounceSounds[Random.Range(0, bounceSounds.Length)]);
+        }
     }
 
     public void SaveData(PersistentComponent data) {

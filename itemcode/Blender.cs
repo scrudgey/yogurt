@@ -70,7 +70,6 @@ public class Blender : Container, ISaveable {
                 message.force = Vector2.up;
                 message.type = damageType.physical;
                 message.suppressImpactSound = true;
-
                 Toolbox.Instance.SendMessage(items[0].gameObject, this, message, false);
             }
             if (liquidContainer.amount > 0 && !liquidContainer.lid) {

@@ -34,6 +34,7 @@ public class TVMenu : MonoBehaviour {
         slewTime = 0;
         animationTimer = 0;
 
+        // StartShow(TelevisionShow.LoadByFilename("tv1"));
         StartShow(TelevisionShow.LoadByFilename("vampire1"));
     }
     public void StartShow(TelevisionShow show) {
@@ -129,7 +130,9 @@ public class TVMenu : MonoBehaviour {
         hideText.text = "";
         showText.text = "";
         hideText.gameObject.SetActive(false);
+        // image.sprite = null;
         image.color = new Color(19, 19, 19, 255);
+        image.enabled = false;
         if (myTrack != null) {
             myTrack = null;
             MusicController.Instance.End();

@@ -9,14 +9,14 @@ public class Bones : MonoBehaviour {
     public BonesFollower follower;
     public void Start() {
 
-        if (!xraySought) {
-            xraySought = true;
-            xrayFound = GameObject.Find("xray screen") != null;
-        }
-        if (!xrayFound) {
-            Destroy(this);
-            return;
-        }
+        // if (!xraySought) {
+        //     xraySought = true;
+        //     xrayFound = GameObject.Find("xray screen") != null;
+        // }
+        // if (!xrayFound) {
+        //     Destroy(this);
+        //     return;
+        // }
 
         GameObject bone = GameObject.Instantiate(Resources.Load("bonesFollower")) as GameObject;
         SpriteRenderer boneSpriteRenderer = bone.GetComponent<SpriteRenderer>();

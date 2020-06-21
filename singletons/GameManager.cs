@@ -577,7 +577,7 @@ public partial class GameManager : Singleton<GameManager> {
             if (playerFlammable) {
                 playerFlammable.onFire = false;
                 playerFlammable.heat = 0;
-                playerFlammable.burnTimer = 0f;
+                playerFlammable.SetBurnTimer();
             }
             Intrinsics playerIntrinsics = playerObject.GetComponent<Intrinsics>();
             if (playerIntrinsics) {
@@ -905,6 +905,9 @@ public partial class GameManager : Singleton<GameManager> {
         if (filename.ToLower() == "cosmic_nullifier") {
             ReceiveEmail("nullify1");
             UnlockCommercial("nullify1");
+        }
+        if (filename.ToLower() == "strength_potion") {
+            ReceiveEmail("strength");
         }
         if (data.collectedObjects.Contains(filename))
             return;

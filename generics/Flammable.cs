@@ -19,7 +19,10 @@ public class Flammable : MonoBehaviour, ISaveable {
     public bool fireproof;
     public bool silent; // if true, flammable will not generate occurrence flags
     // public bool coldFire;
-    public float burnTimer;
+    private float burnTimer;
+    public void SetBurnTimer() {
+        burnTimer = 0.1f;
+    }
     void Start() {
         pickup = GetComponent<Pickup>();
 

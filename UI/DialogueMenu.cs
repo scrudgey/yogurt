@@ -23,8 +23,7 @@ public class Monologue {
         string line = name_hook.Replace(inString, GameManager.Instance.saveGameName);
         line = cosmic_name_hook.Replace(line, GameManager.Instance.data.cosmicName);
         List<bool> swearList = new List<bool>();
-        line = Speech.ProcessDialogue(line, ref swearList);
-        //  swearMask = swearList.ToArray();
+        line = Speech.ProcessDialogue(line, ref swearList).phrase;
         return line;
     }
     public Monologue(Speech speaker, string[] texts) {
@@ -161,8 +160,8 @@ public class DialogueMenu : MonoBehaviour {
     public void SetText(string newText = "DEFAULT") {
         if (newText == "DEFAULT") {
             List<bool> swearList = new List<bool>();
-            string text = Speech.ProcessDialogue(monologue.GetString(), ref swearList);
-            speechText.text = text;
+            MessagePhrase text = Speech.ProcessDialogue(monologue.GetString(), ref swearList);
+            speechText.text = text.phrase;
             largeText.text = monologue.text.Peek();
         } else {
             speechText.text = newText;
@@ -527,9 +526,9 @@ public class DialogueMenu : MonoBehaviour {
             if (dialogue.Count > 0 && !waitForKeyPress) {
                 waitForKeyPress = true;
                 if (dialogue.Peek().text.Peek() == "END") {
-                    promptText.text = "[PRESS A TO END]";
+                    promptText.text = "[PRESS ANY KEY TO END]";
                 } else {
-                    promptText.text = "[PRESS A]";
+                    promptText.text = "[PRESS ANY KEY]";
                 }
             }
             return;
@@ -544,7 +543,7 @@ public class DialogueMenu : MonoBehaviour {
             monologue.speaker.gibberizer.StopPlay();
             if (monologue.text.Count > 1) {
                 waitForKeyPress = true;
-                promptText.text = "[PRESS A]";
+                promptText.text = "[PRESS ANY KEY]";
             } else {
                 monologue.text.Pop();
                 if (dialogue.Count == 0)

@@ -15,8 +15,6 @@ public class Duplicator : Interactive, IDirectable {
         Interaction dup = new Interaction(this, "Duplicate", "Duplicate");
         dup.unlimitedRange = true;
         dup.validationFunction = true;
-        // dup.inertOnPlayerConsent = false;
-        // dup.otherOnPlayerConsent = false;
         interactions.Add(dup);
     }
     public void Duplicate(Duplicatable duplicatable) {
@@ -26,15 +24,12 @@ public class Duplicator : Interactive, IDirectable {
         audioSource.PlayOneShot(dupSound);
         Instantiate(Resources.Load("particles/poof"), dupObj.transform.position, Quaternion.identity);
         if (duplicatable.duplicationPrefab.name == "dollar") {
-            // GameManager.Instance.data.achievementStats.dollarsDuplicated += 1;
-            // GameManager.Instance.CheckAchievements();
             GameManager.Instance.IncrementStat(StatType.dollarsDuplicated, 1);
         }
         if (duplicatable.gameObject == GameManager.Instance.playerObject) {
             Duplicatable newDuplicatabale = dupObj.GetComponent<Duplicatable>();
             if (newDuplicatabale) {
                 newDuplicatabale.adoptedName = GameManager.Instance.saveGameName;
-                // dupObj.name
             }
         }
         if (particles != null) {

@@ -43,10 +43,13 @@ public class Destructible : Damageable, ISaveable {
             case damageType.asphyxiation:
                 damage = 0;
                 break;
+            case damageType.explosion:
+                damage = message.amount * 2f;
+                break;
             default:
                 break;
         }
-        // Debug.Log(gameObject.name+ "> " + health.ToString()+ " taking damage: "+damage.ToString());
+        // Debug.Log($"{gameObject.name} > {health} taking damage: {damage} {message.type}");
         health -= damage;
     }
     //TODO: make destruction chaos somehow proportional to object

@@ -317,10 +317,9 @@ public class LoadoutEditor : MonoBehaviour {
                     closet.StashObject(removedUniform.GetComponent<Pickup>());
                 }
             }
-
         }
         if (loadoutHat != null) {
-            GameObject item = SpawnPrefab(loadoutClothes.prefabName);
+            GameObject item = SpawnPrefab(loadoutHat.prefabName);
             Head playerHead = playerObject.GetComponentInChildren<Head>();
             Hat itemHat = item.GetComponent<Hat>();
             if (playerHead != null && itemHat != null) {

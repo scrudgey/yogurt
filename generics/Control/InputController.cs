@@ -232,10 +232,19 @@ public class InputController : Singleton<InputController> {
         commandButtonType = ActionButtonScript.buttonType.none;
         doCommand = false;
     }
+    public void ResetInput() {
+        leftClickHeld = false;
+        leftClickedThisFrame = false;
+        inputVector = Vector2.zero;
+        firePressedHeld = false;
+        firePressedThisFrame = false;
+        escaprePressedThisFrame = false;
+    }
     public void MenuClosedCallback() {
         if (state == ControlState.inMenu || state == ControlState.waitForMenu) {
             state = ControlState.normal;
         }
+        ResetInput();
         // if a command action is specified, we should process it after the dialogue menu is closed.
         if (doCommand) {
             DoCommand();

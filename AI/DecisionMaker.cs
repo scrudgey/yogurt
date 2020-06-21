@@ -84,6 +84,8 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
     public Collider2D warnZone = null;
     public Vector3 guardPoint;
     public bool initialized = false;
+    public bool debug;
+
     void Awake() {
         if (!initialized)
             Initialize();
@@ -187,6 +189,9 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
             priority.urgency = Mathf.Min(priority.urgency, Priority.urgencyMaximum);
             // if (priority.Urgency(personality) <= Priority.urgencyMinor)
             //     continue;
+            if (debug) {
+                Debug.Log($"{priority.priorityName}: {priority.urgency}");
+            }
             if (priority.Urgency(personality) > activePriority.Urgency(personality))
                 activePriority = priority;
         }

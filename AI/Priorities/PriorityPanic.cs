@@ -8,7 +8,7 @@ namespace AI {
         }
         public override void Update() {
             if (urgency > 0) {
-                urgency -= Time.deltaTime;
+                urgency -= Time.deltaTime / 2f;
             }
         }
         public override float Urgency(Personality personality) {
@@ -38,6 +38,11 @@ namespace AI {
                 foreach (EventData data in message.data.describable.GetChildren()) {
                     urgency += data.quality[Rating.disturbing] / 2f;
                 }
+            }
+            if (incoming is MessageDamage) {
+                MessageDamage message = (MessageDamage)incoming;
+                // if (!message.impersonal)
+                urgency -= Priority.urgencyMinor;
             }
         }
     }

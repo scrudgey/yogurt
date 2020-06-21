@@ -39,7 +39,9 @@ public class Physical : MonoBehaviour {
         foreach (Physical phys in GameObject.FindObjectsOfType<Physical>()) {
             if (phys == this)
                 continue;
-            Physics2D.IgnoreCollision(horizonCollider, phys.GetComponent<Collider2D>(), true);
+            Collider2D collider = phys.GetComponent<Collider2D>();
+            if (collider)
+                Physics2D.IgnoreCollision(horizonCollider, collider, true);
             foreach (Collider2D col in phys.GetComponentsInChildren<Collider2D>()) {
                 if (col.tag == "fire")
                     continue;
@@ -183,11 +185,11 @@ public class Physical : MonoBehaviour {
         }
         suppressLandSound = false;
         SetSliderLimit(1f * objectCollider.Distance(horizonCollider).distance);
-        if (noCollisions) {
-            gameObject.layer = 15;
-        } else {
-            gameObject.layer = 16;
-        }
+        // if (noCollisions) {
+        //     gameObject.layer = 15;
+        // } else {
+        gameObject.layer = 16;
+        // }
         if (spriteRenderer)
             spriteRenderer.enabled = false;
         if (objectRenderer)
@@ -227,7 +229,8 @@ public class Physical : MonoBehaviour {
                 Physics2D.IgnoreCollision(objectCollider, phys.horizonCollider, true);
             }
         }
-        gameObject.layer = 15;
+        gameObject.layer = 16;
+        // gameObject.layer = 15;
         if (spriteRenderer)
             spriteRenderer.enabled = true;
         if (objectRenderer)

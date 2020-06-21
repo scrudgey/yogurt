@@ -141,7 +141,7 @@ public class MusicMountain : Music {
 }
 public class MusicImp : Music {
     public MusicImp() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.imp, vol: 0.5f) });
+        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.imp, vol: 0.75f) });
     }
 }
 public class MusicGreaser : Music {

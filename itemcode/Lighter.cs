@@ -42,7 +42,6 @@ public class Lighter : Interactive {
         flameRadius.enabled = false;
     }
     void OnTriggerEnter2D(Collider2D coll) {
-
         if (!flammables.ContainsKey(coll.gameObject)) {
             Flammable flammable = coll.GetComponent<Flammable>();
             if (flammable != null) {
@@ -57,7 +56,7 @@ public class Lighter : Interactive {
             return;
         if (flammables.ContainsKey(coll.gameObject) && flameRadius.enabled) {
             // flammables[coll.gameObject].heat += Time.deltaTime * 2f;
-            flammables[coll.gameObject].burnTimer = 1f;
+            flammables[coll.gameObject].SetBurnTimer();
             if (pickup != null) {
                 if (pickup.holder != null) {
                     flammables[coll.gameObject].responsibleParty = pickup.holder.gameObject;

@@ -1,12 +1,10 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using Poisson;
 
 [System.Serializable]
-public class ImpactGibs {
-    public float probability;
-    public Gibs gibs;
-}
+
 public enum ImpactResult { none, damageNormal, damageStrong, damageCosmic, damageOther, repelNormal, repelEthereal, repelInvulnerable, repelOther }
 
 public enum damageType { physical, fire, any, cutting, piercing, cosmic, asphyxiation, explosion }
@@ -37,7 +35,7 @@ public abstract class Damageable : MonoBehaviour {
     public Controllable controllable;
     public MessageDamage cacheFiredMessage;
     private float cachedTime;
-    public List<ImpactGibs> impactGibs = new List<ImpactGibs>();
+    private List<Gibs> impactGibs = new List<Gibs>();
     public virtual void Awake() {
         if (gibsContainerPrefab != null) {
             GameObject gibsContainer = Instantiate(gibsContainerPrefab) as GameObject;
@@ -60,7 +58,11 @@ public abstract class Damageable : MonoBehaviour {
             etherealRepelSounds = Resources.LoadAll<AudioClip>("sounds/repel_ethereal/");
         if (invulnerableRepelSounds != null && invulnerableRepelSounds.Length == 0)
             invulnerableRepelSounds = Resources.LoadAll<AudioClip>("sounds/repel_invulnerable/");
-
+        impactGibs = new List<Gibs>();
+        foreach (Gibs gib in GetComponents<Gibs>()) {
+            if (gib.impactEmitExpectedPer100 > 0)
+                impactGibs.Add(gib);
+        }
         rigidbody2D = Toolbox.GetOrCreateComponent<Rigidbody2D>(gameObject);
         rigidbody2D.gravityScale = 0;
         controllable = GetComponent<Controllable>();
@@ -111,9 +113,13 @@ public abstract class Damageable : MonoBehaviour {
                 lastAttacker = message.responsibleParty;
             }
             impersonalAttacker = message.impersonal;
-            foreach (ImpactGibs impactGib in impactGibs) {
-                if (Random.Range(0, 1f) <= impactGib.probability)
-                    impactGib.gibs.Emit(message);
+            foreach (Gibs gib in impactGibs) {
+                // expected number of gibs to emit:
+                // damage * ( ratePer100Damage /100)
+                double lambda = (message.amount / 100f) * gib.impactEmitExpectedPer100;
+                int number = Poisson.Poisson.GetPoisson(lambda);
+                if (number > 0)
+                    gib.Emit(number, message);
             }
             CalculateDamage(message);
 
@@ -157,11 +163,17 @@ public abstract class Damageable : MonoBehaviour {
         ImpactResult.repelNormal, ImpactResult.repelEthereal, ImpactResult.repelInvulnerable, ImpactResult.repelOther
     };
     public ImpactResult Damages(MessageDamage message, Dictionary<BuffType, Buff> netBuffs) {
-
-        // TODO: account for fire
-
-        if (!message.strength)
-            message.amount = Mathf.Max(message.amount - netBuffs[BuffType.armor].floatValue, 0);
+        if (!message.strength) {
+            switch (message.type) {
+                case damageType.physical:
+                case damageType.cutting:
+                case damageType.piercing:
+                    message.amount = Mathf.Max(message.amount - netBuffs[BuffType.armor].floatValue, 0);
+                    break;
+                default:
+                    break;
+            }
+        }
 
         ImpactResult result = ImpactResult.none;
         AudioClip[] sounds = new AudioClip[0];
@@ -199,6 +211,12 @@ public abstract class Damageable : MonoBehaviour {
                     break;
                 case damageType.fire:
                     if (fireproof) result = ImpactResult.repelOther;
+                    if (ethereal) {
+                        result = ImpactResult.repelEthereal;
+                    }
+                    if (invulnerable) {
+                        result = ImpactResult.repelInvulnerable;
+                    }
                     break;
                 case damageType.asphyxiation:
                     if (undead) result = ImpactResult.repelOther;
@@ -206,9 +224,8 @@ public abstract class Damageable : MonoBehaviour {
                 default:
                     break;
             }
-
         }
-        if (!RepelResults.Contains(result) && !message.suppressImpactSound) {
+        if (!RepelResults.Contains(result)) {
             switch (message.type) {
                 case damageType.physical:
                 case damageType.cutting:
@@ -238,7 +255,7 @@ public abstract class Damageable : MonoBehaviour {
         }
 
         // play sound
-        if (sounds.Length > 0) {
+        if (sounds.Length > 0 && !message.suppressImpactSound) {
             Toolbox.Instance.AudioSpeaker(sounds[Random.Range(0, sounds.Length)], transform.position);
         }
         if (message.messenger != null)

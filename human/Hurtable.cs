@@ -99,6 +99,7 @@ public class Hurtable : Damageable, ISaveable {
                 damage = message.amount * 10;
                 break;
             case damageType.cosmic:
+                impulse += damage;
                 damage = message.amount;
                 break;
             case damageType.asphyxiation:

@@ -84,7 +84,13 @@ public class EventData : Describable {
         data.val = 1f;
         data.popupDesc = "vomit events";
         data.noun = "vomiting";
-        data.whatHappened = Toolbox.Instance.GetName(vomiter) + " vomited up " + Toolbox.Instance.GetName(vomited);
+        string vomitedName = Toolbox.Instance.GetName(vomited);
+        string vomiterName = Toolbox.Instance.GetName(vomiter);
+        if (vomitedName != "") {
+            data.whatHappened = $"{vomiterName} vomited up {vomitedName}";
+        } else {
+            data.whatHappened = $"{vomiterName} vomited!";
+        }
         return data;
     }
     public static EventData VomitYogurt(GameObject vomiter) {
@@ -115,7 +121,7 @@ public class EventData : Describable {
         return data;
     }
     public static EventData YogurtFloor(GameObject eater) {
-        EventData data = new EventData(disgusting: 1, chaos: 1);
+        EventData data = new EventData(disgusting: 2, chaos: 2);
         data.key = "yogurt_floor";
         data.val = 1f;
         data.popupDesc = "yogurt eaten off the floor";

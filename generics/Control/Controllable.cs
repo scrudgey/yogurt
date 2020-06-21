@@ -236,8 +236,9 @@ public class Controllable : MonoBehaviour {
                 if (defaultInteraction != null) {
                     defaultInteraction.DoAction();
                 }
-                if (InputController.Instance.focus == this)
+                if (InputController.Instance.focus == this) {
                     UINew.Instance.UpdateTopActionButtons();
+                }
             }
         }
 

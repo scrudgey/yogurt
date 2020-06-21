@@ -208,7 +208,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         if (holding != null && item == holding.gameObject)
             SoftDropItem();
         Bones itemBones = item.GetComponent<Bones>();
-        if (itemBones != null) {
+        if (itemBones != null && itemBones.follower != null) {
             itemBones.follower.gameObject.SetActive(false);
         }
         item.SetActive(false);
@@ -262,7 +262,8 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         SpriteRenderer sprite = holding.GetComponent<SpriteRenderer>();
         sprite.sortingLayerName = "main";
         holding = null;
-        UINew.Instance.ClearWorldButtons();
+        if (gameObject == GameManager.Instance.playerObject)
+            UINew.Instance.ClearWorldButtons();
     }
     public void RetrieveItem(string itemName) {
         for (int i = 0; i < items.Count; i++) {
@@ -328,7 +329,8 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
                 if (!collider.isTrigger) {
                     Physics2D.IgnoreCollision(collider, phys.physical.objectCollider);
                     Physics2D.IgnoreCollision(collider, phys.physical.horizonCollider);
-                    Physics2D.IgnoreCollision(collider, phys.physical.groundCollider);
+                    if (phys.physical.groundCollider != null)
+                        Physics2D.IgnoreCollision(collider, phys.physical.groundCollider);
                     phys.physical.temporaryDisabledColliders.Add(collider);
                 }
             }

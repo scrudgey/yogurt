@@ -404,6 +404,34 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             threshhold *= 1 - (float)seenCount / 5.0f;
             if (UnityEngine.Random.Range(0f, 1f) < threshhold && dat.quality[rating] > 0) {
                 MessageSpeech message = new MessageSpeech(reactions[rating]);
+
+                // embellish the reaction
+                if (UnityEngine.Random.Range(0f, 1f) < threshhold) {
+                    string whatHappened = "";
+                    if (UnityEngine.Random.Range(0f, 1f) < 0.5f) {
+                        whatHappened = dat.whatHappened;
+                    } else {
+                        whatHappened = dat.noun;
+                    }
+                    // if whathappened starts with "I saw"
+                    if (whatHappened.Length > 5 && whatHappened.Substring(0, 5) == "I saw") {
+                        whatHappened = whatHappened.Replace("I saw", "A");
+                    }
+                    if (whatHappened == "imagery") {
+                        whatHappened = "Oh!";
+                    }
+                    if (UnityEngine.Random.Range(0f, 1f) < 0.5f) {
+                        if (UnityEngine.Random.Range(0f, 1f) < 0.5f)
+                            message.phrase = $"{whatHappened}! {reactions[rating]}";
+                        else
+                            message.phrase = $"{reactions[rating]} {whatHappened}! ";
+                    } else {
+                        message.phrase = $"{whatHappened}!";
+                    }
+                    // message.phrase = $"{dat.whatHappened}! {reactions[rating]}";
+                } else {
+                    message.phrase = reactions[rating];
+                }
                 message.nimrod = true;
                 message.involvedParties.Add(gameObject);
                 message.involvedParties.UnionWith(involvedParties);

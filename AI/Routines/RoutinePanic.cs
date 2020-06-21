@@ -4,6 +4,7 @@ using System;
 
 namespace AI {
     public class RoutinePanic : Routine {
+        public static List<string> panicPhrases = new List<string>() { "Yipe!", "Egad!", "Panic!", "Yikes!", "Yikers!" };
         private float wanderTime = 0;
         // private float switchTime = 0;
         private DirectionEnum dir;
@@ -15,13 +16,7 @@ namespace AI {
             dir = (DirectionEnum)(UnityEngine.Random.Range(0, 4));
         }
         protected override status DoUpdate() {
-            // switchTime += Time.deltaTime;
-            // if (switchTime > 0.5f) {
-            //     switchTime = 0;
-            //     control.ResetInput();
-            //     dir = (DirectionEnum)(UnityEngine.Random.Range(0, 4));
-            // }
-            if (wanderTime > 0) {
+            if (wanderTime >= 0) {
                 wanderTime -= Time.deltaTime;
                 switch (dir) {
                     case DirectionEnum.down:
@@ -39,8 +34,13 @@ namespace AI {
                 }
             } else {
                 if (wanderTime < 0f) {
-                    wanderTime = UnityEngine.Random.Range(0, 0.75f);
+                    wanderTime = UnityEngine.Random.Range(0, 0.25f);
                     dir = (DirectionEnum)(UnityEngine.Random.Range(0, 4));
+                    control.ResetInput();
+                    if (UnityEngine.Random.Range(0, 1f) < 0.1f) {
+                        MessageSpeech message = new MessageSpeech(panicPhrases[UnityEngine.Random.Range(0, panicPhrases.Count)]);
+                        Toolbox.Instance.SendMessage(gameObject, Toolbox.Instance, message);
+                    }
                 }
             }
 

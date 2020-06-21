@@ -12,7 +12,7 @@ namespace AI {
         protected override status DoUpdate() {
             timeSinceF -= Time.deltaTime;
             if (timeSinceF <= 0) {
-                timeSinceF = UnityEngine.Random.Range(1.5f, 10.5f);
+                timeSinceF = UnityEngine.Random.Range(1.5f, 20.5f);
                 control.ShootPressed();
             }
             return base.DoUpdate();

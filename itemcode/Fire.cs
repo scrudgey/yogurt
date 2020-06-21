@@ -59,7 +59,7 @@ public class Fire : MonoBehaviour {
         damageQueue.Add(coll.gameObject);
         if (flammables.TryGetValue(coll.gameObject, out flam)) {
             // flam.heat += Time.deltaTime;
-            flam.burnTimer = 1f;
+            flam.SetBurnTimer();
             if (flammable.responsibleParty != null) {
                 flam.responsibleParty = flammable.responsibleParty;
             }

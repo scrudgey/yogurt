@@ -7,7 +7,10 @@ public class FlipSpriteRandom : MonoBehaviour {
     public bool flipY = true;
     public float dutyCycle = 0;
     public float timer;
+    public bool scaleWithVelocity;
+    public Rigidbody2D body;
     public void Start() {
+        body = GetComponent<Rigidbody2D>();
         Flip();
     }
     public void Flip() {
@@ -27,7 +30,11 @@ public class FlipSpriteRandom : MonoBehaviour {
     public void Update() {
         if (dutyCycle <= 0)
             return;
-        timer += Time.deltaTime;
+        if (scaleWithVelocity) {
+            timer += Time.deltaTime * (1 + body.velocity.magnitude);
+        } else {
+            timer += Time.deltaTime;
+        }
         if (timer > dutyCycle) {
             timer = 0;
             Flip();
