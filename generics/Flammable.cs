@@ -21,7 +21,7 @@ public class Flammable : MonoBehaviour, ISaveable {
     // public bool coldFire;
     private float burnTimer;
     public void SetBurnTimer() {
-        burnTimer = 0.1f;
+        burnTimer = 0.2f;
     }
     void Start() {
         pickup = GetComponent<Pickup>();
@@ -72,10 +72,8 @@ public class Flammable : MonoBehaviour, ISaveable {
         }
     }
     public void HandleDamageMessage(MessageDamage message) {
-        // TODO: rate limit this step
         if (message.type == damageType.fire) {
-            // heat += message.amount;
-            burnTimer = 1f;
+            SetBurnTimer();
             responsibleParty = message.responsibleParty;
         }
         if (message.type == damageType.asphyxiation) {

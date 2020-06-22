@@ -331,9 +331,19 @@ public partial class Toolbox : Singleton<Toolbox> {
         return output;
     }
     public string UnderscoreRemover(string input) {
-
         return underScoreFinder.Replace(input, " ");
     }
+    // public string GetReferent(GameObject obj) {
+    //     Item item = obj.GetComponent<Item>();
+    //     if (item && item.referent != "") {
+    //         return item.referent;
+    //     }
+    //     Speech speech = obj.GetComponent<Speech>();
+    //     if (speech && speech.referent != "") {
+    //         return speech.referent;
+    //     }
+    //     return "A " + GetName(obj);
+    // }
     public string GetName(GameObject obj) {
         // possibly also use intrinsics
         string nameOut = "";
@@ -350,6 +360,9 @@ public partial class Toolbox : Singleton<Toolbox> {
         Item item = obj.GetComponent<Item>();
         if (item) {
             nameOut = item.itemName;
+            // if (item.referent != "") {
+            //     nameOut = item.referent;
+            // } else nameOut = item.itemName;
         } else {
             nameOut = obj.name;
         }
@@ -366,6 +379,10 @@ public partial class Toolbox : Singleton<Toolbox> {
         if (speech) {
             if (speech.speechName != "")
                 nameOut = speech.speechName;
+            // if (speech.referent != "") {
+            //     nameOut = speech.referent;
+            // } else if (speech.speechName != "")
+            //     nameOut = speech.speechName;
         }
         nameOut = CloneRemover(nameOut);
         nameOut = UnderscoreRemover(nameOut);

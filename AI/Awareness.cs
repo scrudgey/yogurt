@@ -391,6 +391,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         if (involvedParties.Contains(gameObject))
             return;
 
+        // TODO: this could be a lot nicer maybe?
         int seenCount = 0;
         foreach (string noun in lastNEvents) {
             if (noun == dat.noun)
@@ -411,14 +412,20 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                     if (UnityEngine.Random.Range(0f, 1f) < 0.5f) {
                         whatHappened = dat.whatHappened;
                     } else {
-                        whatHappened = dat.noun;
+                        whatHappened = Toolbox.UppercaseFirst(dat.noun);
                     }
+                    if (whatHappened == "Imagery") {
+                        whatHappened = dat.whatHappened;
+                    }
+
                     // if whathappened starts with "I saw"
                     if (whatHappened.Length > 5 && whatHappened.Substring(0, 5) == "I saw") {
+                        // TODO: use different article here depending
                         whatHappened = whatHappened.Replace("I saw", "A");
                     }
-                    if (whatHappened == "imagery") {
-                        whatHappened = "Oh!";
+                    string myName = Toolbox.Instance.GetName(gameObject);
+                    if (whatHappened.Contains(myName)) {
+                        whatHappened = whatHappened.Replace(myName, "I");
                     }
                     if (UnityEngine.Random.Range(0f, 1f) < 0.5f) {
                         if (UnityEngine.Random.Range(0f, 1f) < 0.5f)

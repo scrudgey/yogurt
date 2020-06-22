@@ -50,6 +50,8 @@ public class Commercial : MetaDescribable<DescribableOccurrenceData> {
         while (lines.Count > 0) {
             CommercialProperty prop = new CommercialProperty();
             string line = lines.Pop();
+            if (line == "")
+                continue;
             string[] bits = line.Split(',');
             string key = bits[0];
             if (key == "unlock") {
@@ -68,7 +70,9 @@ public class Commercial : MetaDescribable<DescribableOccurrenceData> {
                 c.objectives.Add(new ObjectiveScorpion());
             } else if (key == "gravyCommercial") {
                 c.gravy = true;
-            } else c.objectives.Add(new ObjectiveProperty(bits));
+            } else {
+                c.objectives.Add(new ObjectiveProperty(bits));
+            }
         }
         return c;
     }

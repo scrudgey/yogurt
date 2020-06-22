@@ -14,6 +14,7 @@ public struct MessagePhrase {
     public int profanity;
 }
 public class Speech : Interactive, ISaveable {
+    public string referent;
     public string speechName;
     static string[] swearWords = new string[]{
         @"\bshit\b",
@@ -200,7 +201,7 @@ public class Speech : Interactive, ISaveable {
     void Start() {
         Interaction speak = new Interaction(this, "Look", "Describe");
         speak.unlimitedRange = true;
-        speak.otherOnSelfConsent = false;
+        // speak.otherOnSelfConsent = false;
         speak.selfOnSelfConsent = false;
         speak.holdingOnOtherConsent = false;
         speak.dontWipeInterface = false;

@@ -239,7 +239,8 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         holding.GetComponent<Rigidbody2D>().isKinematic = false;
         holding.GetComponent<Collider2D>().isTrigger = false;
         holding = null;
-        UINew.Instance.ClearWorldButtons();
+        if (gameObject == GameManager.Instance.playerObject)
+            UINew.Instance.ClearWorldButtons();
     }
     public void DropItem() {
         if (holding == null)

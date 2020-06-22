@@ -25,7 +25,6 @@ public partial class Toolbox : Singleton<Toolbox> {
         "Bengis",
         "Pingy",
         "Scrints",
-        "Chungus",
         "Beppo",
         "Bippy",
         "Smits",
