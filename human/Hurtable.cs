@@ -419,8 +419,12 @@ public class Hurtable : Damageable, ISaveable {
     }
     public void Bleed(Vector3 position, Vector3 direction) {
         if (bleeds) {
+
             Liquid blood = Liquid.LoadLiquid("blood");
-            float initHeight = (position.y - transform.position.y) + 0.15f;
+            float initHeight = 0;
+            if (hitState < Controllable.HitState.unconscious) {
+                initHeight = (position.y - transform.position.y) + 0.15f;
+            }
             GameObject drop = Toolbox.Instance.SpawnDroplet(blood, 0.3f, gameObject, initHeight, direction.normalized);
             Edible edible = drop.GetComponent<Edible>();
             edible.human = true;

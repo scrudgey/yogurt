@@ -12,8 +12,8 @@ public class Duplicatable : Interactive, ISaveable {
     void Start() {
         if (nullifyFX == null)
             nullifyFX = Resources.Load("particles/nullify") as GameObject;
-        if (duplicationPrefab == null)
-            duplicationPrefab = Resources.Load("prefabs/" + Toolbox.Instance.CloneRemover(gameObject.name)) as GameObject;
+        // if (duplicationPrefab == null)
+        duplicationPrefab = Resources.Load("prefabs/" + Toolbox.Instance.CloneRemover(gameObject.name)) as GameObject;
         if (nullifySounds.Count == 0) {
             nullifySounds = new List<AudioClip>();
             nullifySounds.Add(Resources.Load("sounds/absorbed") as AudioClip);

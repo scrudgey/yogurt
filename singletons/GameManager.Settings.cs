@@ -30,7 +30,7 @@ public partial class GameManager : Singleton<GameManager> {
     public void SetMusicOn(bool value) {
         PlayerPrefs.SetInt(prefsKey_MusicOn, value ? 1 : 0);
         if (value) {
-            MusicController.Instance.SetMusic(MusicController.Instance.nowPlayingMusic);
+            MusicController.Instance.RestartMusic();
         } else {
             MusicController.Instance.StopTrack();
         }

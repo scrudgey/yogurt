@@ -250,7 +250,7 @@ public partial class Toolbox : Singleton<Toolbox> {
             initHeight += pb.height;
         } else {
             Inventory holderInv = spiller.GetComponentInParent<Inventory>();
-            if (holderInv) {
+            if (holderInv && initHeight != 0) {
                 initHeight += holderInv.dropHeight;
             }
         }

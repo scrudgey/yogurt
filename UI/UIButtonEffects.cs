@@ -22,13 +22,12 @@ public class UIButtonEffects : MonoBehaviour, IPointerDownHandler, IPointerEnter
     // }
     void OnEnable() {
         Play(startSound);
-
     }
 
     public void Configure() {
         if (prefabSet != null)
             AdoptPrefabSounds(prefabSet);
-        Play(startSound);
+        // Play(startSound);
         foreach (Button button in buttons) {
             button.onClick.AddListener(PlayClickSound);
             UIButtonEffects bfx = button.gameObject.AddComponent<UIButtonEffects>();

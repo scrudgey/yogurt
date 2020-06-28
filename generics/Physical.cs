@@ -159,7 +159,6 @@ public class Physical : MonoBehaviour {
         slider.useLimits = true;
     }
     public void StartGroundMode() {
-        // Debug.Log(name + " start ground mode");
         if (body == null)
             Start();
         doGround = false;

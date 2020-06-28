@@ -85,11 +85,18 @@ public class InputController : Singleton<InputController> {
     public bool escaprePressedThisFrame;
     public bool leftClickHeld;
     public bool leftClickedThisFrame;
+
+    public bool rightClickHeld;
+    public bool rightClickedThisFrame;
+    public bool inventoryPressedThisFrame;
     public InputActionReference MoveAction;
     public InputActionReference FireAction;
     public InputActionReference InteractWithAction;
     public InputActionReference EscapeAction;
     public InputActionReference PrimaryAction;
+    public InputActionReference QuickAction;
+    public InputActionReference InventoryAction;
+    public static readonly float QuickActionMaxDistance = 0.35f;
     public static readonly string bindingFileName = "keybindings.xml";
     public List<InputActionMap> actionMaps() {
         return new List<InputActionMap>{
@@ -97,7 +104,9 @@ public class InputController : Singleton<InputController> {
         FireAction.action.actionMap,
         InteractWithAction.action.actionMap,
         EscapeAction.action.actionMap,
-        PrimaryAction.action.actionMap
+        PrimaryAction.action.actionMap,
+        QuickAction.action.actionMap,
+        InventoryAction.action.actionMap
         };
     }
     public static string BindingSavePath() {
@@ -111,6 +120,8 @@ public class InputController : Singleton<InputController> {
         InteractWithAction.action.Enable();
         EscapeAction.action.Enable();
         PrimaryAction.action.Enable();
+        QuickAction.action.Enable();
+        InventoryAction.action.Enable();
     }
     public void DisableControls() {
         Debug.Log("disable input");
@@ -120,6 +131,8 @@ public class InputController : Singleton<InputController> {
         InteractWithAction.action.Disable();
         EscapeAction.action.Disable();
         PrimaryAction.action.Disable();
+        QuickAction.action.Disable();
+        InventoryAction.action.Disable();
     }
     public void LoadCustomBindings() {
         string path = BindingSavePath();
@@ -187,9 +200,20 @@ public class InputController : Singleton<InputController> {
             leftClickHeld = ctx.ReadValueAsButton();
         };
 
+        // Quick action
+        QuickAction.action.performed += ctx => {
+            rightClickedThisFrame = ctx.ReadValueAsButton();
+            rightClickHeld = ctx.ReadValueAsButton();
+        };
+
         // Escape
         EscapeAction.action.performed += ctx => {
             escaprePressedThisFrame = ctx.ReadValueAsButton();
+        };
+
+        // Inventory
+        InventoryAction.action.performed += ctx => {
+            inventoryPressedThisFrame = ctx.ReadValueAsButton();
         };
 
         // Button up
@@ -239,6 +263,9 @@ public class InputController : Singleton<InputController> {
         firePressedHeld = false;
         firePressedThisFrame = false;
         escaprePressedThisFrame = false;
+        inventoryPressedThisFrame = false;
+        rightClickedThisFrame = false;
+        rightClickHeld = false;
     }
     public void MenuClosedCallback() {
         if (state == ControlState.inMenu || state == ControlState.waitForMenu) {
@@ -269,6 +296,13 @@ public class InputController : Singleton<InputController> {
             }
         }
         escaprePressedThisFrame = false;
+        if (inventoryPressedThisFrame) {
+            Inventory inv = focus.GetComponent<Inventory>();
+            if (inv != null) {
+                UINew.Instance.ShowInventoryMenu();
+            }
+        }
+        inventoryPressedThisFrame = false;
 
         if (state != ControlState.normal & state != ControlState.commandSelect & state != ControlState.hypnosisSelect & state != ControlState.insultSelect & state != ControlState.swearSelect)
             return;
@@ -295,8 +329,12 @@ public class InputController : Singleton<InputController> {
         if (leftClickedThisFrame) {
             LeftClick();
         }
+        if (rightClickedThisFrame) {
+            RightClick();
+        }
         firePressedThisFrame = false;
         leftClickedThisFrame = false;
+        rightClickedThisFrame = false;
     }
     SpriteRenderer WhichIsFirst(SpriteRenderer one, SpriteRenderer two) {
         if (one == null && two == null) {
@@ -375,6 +413,50 @@ public class InputController : Singleton<InputController> {
                 return currentChild.gameObject;
             }
             currentChild = currentChild.parent;
+        }
+    }
+    void RightClick() {
+        switch (state) {
+            case ControlState.swearSelect:
+            case ControlState.insultSelect:
+            case ControlState.hypnosisSelect:
+                LeftClick();
+                return;
+            default:
+                break;
+        }
+        if (state == ControlState.normal || state == ControlState.commandSelect) {
+            if (!UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) {
+                RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue()), Vector2.zero).OrderBy(h => h.collider.gameObject.name).ToArray();
+                GameObject top = GetFrontObject(hits, debug: false);
+                if (top != null) {
+                    GameObject clicked = GetBaseInteractive(top.transform);
+                    GameObject actor = focus.gameObject;
+                    if (commandTarget != null)
+                        actor = commandTarget;
+
+                    if (clicked.transform.IsChildOf(actor.transform) || clicked == actor) {
+                        // clicked self
+                        // if i am holding: stash
+                        Inventory inv = actor.GetComponent<Inventory>();
+                        if (inv != null && inv.holding != null)
+                            inv.StashItem(inv.holding.gameObject);
+                    } else { // clicked other
+                        // if the obj can be picked up:
+                        Inventory inv = actor.GetComponent<Inventory>();
+                        Pickup other = clicked.GetComponent<Pickup>();
+                        if (other != null && inv != null) {
+                            //  if i am holding, stash
+                            if (inv.holding != null)
+                                inv.StashItem(inv.holding.gameObject);
+                            //  pick up the object
+                            if (Vector2.Distance(other.transform.position, actor.transform.position) < QuickActionMaxDistance) {
+                                inv.GetItem(other);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
     void LeftClick() {

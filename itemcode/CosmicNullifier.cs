@@ -1,12 +1,12 @@
 ﻿using UnityEngine;
 
 public class CosmicNullifier : Pickup {
-    public Interaction nullify;
+    // public Interaction nullify;
     public AudioSource audioSource;
     public AudioClip[] nullifySound;
     public GameObject nullifyParticleEffect;
     void Start() {
-        nullify = new Interaction(this, "Nullify", "Nullify");
+        Interaction nullify = new Interaction(this, "Nullify", "Nullify");
         nullify.unlimitedRange = true;
         nullify.validationFunction = true;
         nullify.otherOnSelfConsent = false;

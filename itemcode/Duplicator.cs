@@ -13,6 +13,7 @@ public class Duplicator : Interactive, IDirectable {
     void Start() {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         Interaction dup = new Interaction(this, "Duplicate", "Duplicate");
+        // dup.debug = true;
         dup.unlimitedRange = true;
         dup.validationFunction = true;
         interactions.Add(dup);

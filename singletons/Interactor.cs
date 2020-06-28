@@ -106,7 +106,6 @@ public class Interactor {
                 enabled = false;
                 continue;
             }
-
             List<object> parameters = interaction.CheckDependency(objectParams);
             enabled = parameters != null;
             if (enabled && interaction.parameterTypes.Count > 0) {

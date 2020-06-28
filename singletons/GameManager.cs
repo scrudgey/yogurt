@@ -105,6 +105,7 @@ public partial class GameManager : Singleton<GameManager> {
         {"hell1", "hell"},
         {"venus1", "venus"},
         {"fountain", "ruins"},
+        {"gravy_studio", "gravy commercial studio"},
     };
     public GameData data;
     public string saveGameName = "test";
@@ -119,7 +120,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = false;
+    public bool debug = true;
     public bool failedLevelLoad = false;
     public Gender playerGender;
 
@@ -761,6 +762,7 @@ public partial class GameManager : Singleton<GameManager> {
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("vampire"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("boardroom"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("nullify1"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("nullify2"));
             data.perks["hypnosis"] = true;
             data.perks["vomit"] = true;
             data.perks["eat_all"] = true;

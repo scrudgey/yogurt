@@ -254,6 +254,18 @@ public class MusicController : Singleton<MusicController> {
         nowPlayingMusic = newMusic;
         PlayNextTrack();
     }
+    public void RestartMusic() {
+        if (endCoroutine != null)
+            StopCoroutine(endCoroutine);
+        if (nowPlayingMusic != null) {
+            stack = nowPlayingMusic.tracks;
+        } else {
+            Scene scene = SceneManager.GetActiveScene();
+            Music newMusic = sceneMusic[scene.name]();
+            SetMusic(newMusic);
+        }
+        PlayNextTrack();
+    }
     public void EnqueueMusic(Music music) {
         while (music.tracks.Count > 0) {
             stack.Push(music.tracks.Pop());
