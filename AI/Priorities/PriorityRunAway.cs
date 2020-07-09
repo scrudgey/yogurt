@@ -9,7 +9,6 @@ namespace AI {
         public PriorityRunAway(GameObject g, Controller c) : base(g, c) {
             priorityName = "run away";
             goalRunFromObject = new GoalWalkToObject(gameObject, control, lastAttacker, invert: true);
-            // goalRunFromPoint = new GoalWalkToPoint(gameObject, control, lastDamageArea, invert: true);
             goal = goalRunFromObject;
         }
         public override void ReceiveMessage(Message incoming) {
@@ -29,10 +28,15 @@ namespace AI {
                 }
             }
             if (incoming is MessageInsult) {
+                MessageInsult dam = (MessageInsult)incoming;
+                lastAttacker.val = dam.messenger.gameObject;
                 urgency += Priority.urgencyMinor;
             }
             if (incoming is MessageThreaten) {
-                urgency += Priority.urgencySmall;
+                MessageThreaten dam = (MessageThreaten)incoming;
+                lastAttacker.val = dam.messenger.gameObject;
+                // urgency += Priority.urgencySmall;
+                urgency += 3f;
             }
         }
         public override float Urgency(Personality personality) {

@@ -30,7 +30,7 @@ public partial class UINew : Singleton<UINew> {
         {MenuType.loadoutEditor,            "UI/AdvancedClosetMenu"}
     };
 
-    private static List<MenuType> actionRequired = new List<MenuType> { MenuType.commercialReport, MenuType.diary, MenuType.perk, MenuType.dialogue };
+    private static readonly List<MenuType> ActionRequired = new List<MenuType> { MenuType.commercialReport, MenuType.diary, MenuType.perk, MenuType.dialogue };
     public GameObject activeMenu;
     public MenuType activeMenuType;
 
@@ -50,7 +50,7 @@ public partial class UINew : Singleton<UINew> {
         Canvas canvas = activeMenu.GetComponent<Canvas>();
         canvas.worldCamera = GameManager.Instance.cam;
         activeMenuType = typeMenu;
-        if (actionRequired.Contains(typeMenu)) {
+        if (ActionRequired.Contains(typeMenu)) {
             InputController.Instance.state = InputController.ControlState.waitForMenu;
         } else {
             InputController.Instance.state = InputController.ControlState.inMenu;

@@ -13,12 +13,14 @@ public class DefaultButtonIndicator : MonoBehaviour {
         var deviceLayoutName = default(string);
         var controlPath = default(string);
         // Get display string from action.
-        var action = actionReference.action;
-        if (action != null) {
-            displayString = action.GetBindingDisplayString(bindingIndex, out deviceLayoutName, out controlPath);//, displayStringOptions);
+        if (actionReference != null) {
+            var action = actionReference.action;
+            if (action != null) {
+                displayString = action.GetBindingDisplayString(bindingIndex, out deviceLayoutName, out controlPath);//, displayStringOptions);
+            }
+            // Debug.Log("setting displayname " + displayString);
+            text.text = displayString;
         }
-        // Debug.Log("setting displayname " + displayString);
-        text.text = displayString;
     }
 
 }

@@ -306,6 +306,7 @@ public class InputController : Singleton<InputController> {
 
         if (state != ControlState.normal & state != ControlState.commandSelect & state != ControlState.hypnosisSelect & state != ControlState.insultSelect & state != ControlState.swearSelect)
             return;
+        // Debug.Log($"{focus} {suspendInput}");
         if (focus != null & !suspendInput) {
             controller.ResetInput();
             if (inputVector.y > 0)
@@ -445,15 +446,34 @@ public class InputController : Singleton<InputController> {
                         // if the obj can be picked up:
                         Inventory inv = actor.GetComponent<Inventory>();
                         Pickup other = clicked.GetComponent<Pickup>();
+                        Grabbable grabbable = clicked.GetComponent<Grabbable>();
                         if (other != null && inv != null) {
-                            //  if i am holding, stash
-                            if (inv.holding != null)
-                                inv.StashItem(inv.holding.gameObject);
                             //  pick up the object
                             if (Vector2.Distance(other.transform.position, actor.transform.position) < QuickActionMaxDistance) {
+                                if (inv != null && inv.holding != null)
+                                    inv.StashItem(inv.holding.gameObject);
                                 inv.GetItem(other);
                             }
+                        } else if (grabbable != null && inv != null) {
+                            //  pick up the object
+                            if (Vector2.Distance(grabbable.transform.position, actor.transform.position) < QuickActionMaxDistance) {
+                                if (inv != null && inv.holding != null)
+                                    inv.StashItem(inv.holding.gameObject);
+                                grabbable.Get(inv);
+                            }
+                        } else {
+                            // get all interactions. if there is only one, do that action.
+                            HashSet<InteractionParam> interactions = Interactor.SelfOnOtherInteractions(GameManager.Instance.playerObject, clicked);
+                            if (interactions.Count == 1) {
+                                InteractionParam param = interactions.First();
+                                param.DoAction();
+                                if (!param.interaction.dontWipeInterface) {
+                                    UINew.Instance.RefreshUI(active: true);
+                                    ResetLastLeftClicked();
+                                }
+                            }
                         }
+                        // TODO: take first action, ranked on some priority
                     }
                 }
             }
@@ -487,6 +507,7 @@ public class InputController : Singleton<InputController> {
                     state = ControlState.normal;
                     GameObject target = InputController.Instance.GetBaseInteractive(top.transform);
                     Speech speech = focus.GetComponent<Speech>();
+                    // Debug.Log(target);
                     if (speech) {
                         speech.InsultMonologue(target);
                     }

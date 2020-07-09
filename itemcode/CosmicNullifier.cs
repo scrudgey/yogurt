@@ -16,11 +16,9 @@ public class CosmicNullifier : Pickup {
     public void Nullify(Duplicatable duplicatable) {
         if (duplicatable == null)
             return;
-        if (GameManager.Instance.playerObject == duplicatable.gameObject) {
-            GameManager.Instance.IncrementStat(StatType.nullifications, 1);
-            GameManager.Instance.PlayerDeath();
-        }
         duplicatable.Nullify();
+
+        // TODO: better self-destruct sequence here
         Destroy(gameObject);
         ClaimsManager.Instance.WasDestroyed(gameObject);
     }

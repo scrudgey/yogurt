@@ -439,7 +439,7 @@ public class Speech : Interactive, ISaveable {
     public void Insult(string phrase, GameObject target) {
         MessageSpeech message = new MessageSpeech(phrase, data: new EventData(chaos: 2, disturbing: 1, positive: -2, offensive: Random.Range(2, 3)));
         message.insultTarget = target;
-
+        // Debug.Log(target);
         Say(message);
         MessageNoise noise = new MessageNoise(gameObject);
         Toolbox.Instance.SendMessage(target, this, noise);

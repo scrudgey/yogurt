@@ -10,7 +10,8 @@ public class TreeObject : Damageable {
     private Transform leafSpawnPoint;
     private static List<damageType> immunities = new List<damageType>(){
         damageType.asphyxiation,
-        damageType.fire
+        damageType.fire,
+        damageType.acid
     };
     public override void Awake() {
         base.Awake();

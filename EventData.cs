@@ -191,6 +191,8 @@ public class EventData : Describable {
                     data.whatHappened = attackerName + " annihilated " + victimName + " with cosmic energy";
                 } else if (lastDamage == damageType.explosion) {
                     data.whatHappened = attackerName + " vaporized " + victimName + " in an explosion";
+                } else if (lastDamage == damageType.acid) {
+                    data.whatHappened = $"{attackerName} dissolved {victimName} in acid";
                 }
             } else {
                 data.noun = "death";
@@ -206,6 +208,8 @@ public class EventData : Describable {
                     data.whatHappened = victimName + " was stabbed to death";
                 } else if (lastDamage == damageType.explosion) {
                     data.whatHappened = victimName + " exploded into bloody chunks";
+                } else if (lastDamage == damageType.acid) {
+                    data.whatHappened = $"{victimName} was dissolved in acid";
                 }
             }
         }
@@ -231,7 +235,6 @@ public class EventData : Describable {
         }
 
         data.whatHappened = "the " + victimName + " was destroyed";
-
         if (lastMessage.type == damageType.fire) {
             data.whatHappened = "the " + victimName + " was incinerated";
         } else if (lastMessage.type == damageType.asphyxiation) {
@@ -242,6 +245,8 @@ public class EventData : Describable {
             data.whatHappened = "the " + victimName + " was chopped into pieces";
         } else if (lastMessage.type == damageType.explosion) {
             data.whatHappened = "the " + victimName + " was destroyed in an explosion";
+        } else if (lastMessage.type == damageType.acid) {
+            data.whatHappened = $"the {victimName} dissolved in acid";
         }
 
         if (!lastMessage.impersonal && lastAttacker != null) {
@@ -255,6 +260,8 @@ public class EventData : Describable {
                 data.whatHappened = attackerName + " chopped the " + victimName + " into little pieces";
             } else if (lastMessage.type == damageType.explosion) {
                 data.whatHappened = attackerName + " exploded the " + victimName;
+            } else if (lastMessage.type == damageType.acid) {
+                data.whatHappened = $"{attackerName} dissolved the {victimName} in acid";
             }
         }
         return data;

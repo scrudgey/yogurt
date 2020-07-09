@@ -34,7 +34,8 @@ public partial class Toolbox : Singleton<Toolbox> {
         "Regina Phalange",
         "Horngus",
         "Scrungle",
-        "Nutte"
+        "Nutte",
+        "Crispin",
     };
     static private List<string> normalMaleNames = new List<string>(){
         "Steve",

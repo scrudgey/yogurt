@@ -124,6 +124,7 @@ public class Gibs : MonoBehaviour {
         damageType.cutting,
         damageType.physical,
         damageType.piercing,
-        damageType.explosion
+        damageType.explosion,
+        damageType.acid
     };
 }

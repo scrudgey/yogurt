@@ -120,6 +120,16 @@ public class Eater : Interactive, ISaveable {
         string foodname = Toolbox.Instance.GetName(food.gameObject);
         return "Eat " + foodname;
     }
+    void EnqueueEatenObject(GameObject eaten) {
+        eatenQueue.Enqueue(eaten);
+        eaten.SetActive(false);
+        // this is a last minute cover-your-ass hack to prevent us from 
+        while (eatenQueue.Count > 2) {
+            GameObject oldEaten = eatenQueue.Dequeue();
+            ClaimsManager.Instance.WasDestroyed(oldEaten);
+            Destroy(oldEaten);
+        }
+    }
     public void Eat(Edible food) {
         nutrition += food.nutrition;
         MessageHead head = new MessageHead();
@@ -129,14 +139,10 @@ public class Eater : Interactive, ISaveable {
         Toolbox.Instance.SendMessage(gameObject, this, head);
 
         GameObject eaten = food.gameObject;
+        LiquidContainer container = food.GetComponent<LiquidContainer>();
+        LiquidResevoir reservoir = food.GetComponent<LiquidResevoir>();
+
         eaten.name = Toolbox.Instance.CloneRemover(eaten.name);
-        eaten.SetActive(false);
-        eatenQueue.Enqueue(eaten);
-        if (eatenQueue.Count > 2) {
-            GameObject oldEaten = eatenQueue.Dequeue();
-            ClaimsManager.Instance.WasDestroyed(oldEaten);
-            Destroy(oldEaten);
-        }
 
         //update our status based on our reaction to the food
         int reaction = CheckReaction(food);
@@ -173,27 +179,26 @@ public class Eater : Interactive, ISaveable {
                 }
             }
         }
-        LiquidContainer container = food.GetComponent<LiquidContainer>();
         if (container) {
             if (container.amount > 0) {
                 GameObject sip = Instantiate(Resources.Load("prefabs/droplet"), transform.position, Quaternion.identity) as GameObject;
                 Liquid.MonoLiquidify(sip, container.liquid);
                 Toolbox.Instance.AddLiveBuffs(gameObject, sip);
-                eatenQueue.Enqueue(sip);
-                sip.SetActive(false);
+                Destroy(sip);
+                // EnqueueEatenObject(sip);
             }
         }
-        LiquidResevoir reservoir = food.GetComponent<LiquidResevoir>();
         if (reservoir) {
-            // GameObject sip = new GameObject();
             GameObject sip = Instantiate(Resources.Load("prefabs/droplet"), transform.position, Quaternion.identity) as GameObject;
             Liquid.MonoLiquidify(sip, reservoir.liquid);
             Toolbox.Instance.AddLiveBuffs(gameObject, sip);
-            // Destroy(sip);
-            eatenQueue.Enqueue(sip);
-            sip.SetActive(false);
-            MySaver.disabledPersistents.Add(sip);
+            // EnqueueEatenObject(sip);
+            // MySaver.disabledPersistents.Add(sip);
+            Destroy(sip);
         }
+        EnqueueEatenObject(eaten);
+        eaten.SetActive(false);
+
         if (Toolbox.Instance.CloneRemover(food.name) == "sword") {
             GameManager.Instance.IncrementStat(StatType.swordsEaten, 1);
         }
@@ -217,6 +222,7 @@ public class Eater : Interactive, ISaveable {
         eaten.transform.position = transform.position;
         eaten.transform.SetParent(transform, false);
         eaten.transform.localPosition = Random.insideUnitCircle * (3f / 100);
+
     }
     public bool Eat_Validation(Edible food) {
         if (GameManager.Instance.data == null)
@@ -285,8 +291,12 @@ public class Eater : Interactive, ISaveable {
     }
 
     void ReactToOccurrence(EventData od) {
-        if (netIntrinsics != null && netIntrinsics[BuffType.undead].boolValue)
+        if (netIntrinsics != null && netIntrinsics[BuffType.undead].active())
             return;
+        // do not react to the event if i am mindful
+        if (netIntrinsics != null && netIntrinsics[BuffType.clearHeaded].active()) {
+            return;
+        }
         // Debug.Log(od.whatHappened);
         // foreach (KeyValuePair<Rating, float> kvp in od.ratings) {
         //     Debug.Log(kvp.Key.ToString() + ": " + kvp.Value.ToString());
@@ -302,8 +312,9 @@ public class Eater : Interactive, ISaveable {
         data.floats["nausea"] = nausea;
         data.floats["vomitCountDown"] = vomitCountDown;
         int index = 0;
-        while (eatenQueue.Count > 0) {
+        while (eatenQueue.Count > 0 && index < 2) { // do NOT save anything more than two items!!! seriously!
             GameObject eaten = eatenQueue.Dequeue();
+            Debug.Log($"{this} adding eaten to reference tree: {eaten}");
             MySaver.UpdateGameObjectReference(eaten, data, "eaten" + index.ToString());
             MySaver.AddToReferenceTree(gameObject, eaten);
             index++;
@@ -316,7 +327,7 @@ public class Eater : Interactive, ISaveable {
         if (data.GUIDs.ContainsKey("eaten1")) {
             GameObject eaten = MySaver.IDToGameObject(data.GUIDs["eaten1"]);
             if (eaten != null) {
-                eatenQueue.Enqueue(eaten);
+                EnqueueEatenObject(eaten);
                 eaten.SetActive(false);
                 eaten.transform.position = transform.position;
                 eaten.transform.SetParent(transform, false);
@@ -333,7 +344,8 @@ public class Eater : Interactive, ISaveable {
         if (data.GUIDs.ContainsKey("eaten0")) {
             GameObject eaten = MySaver.IDToGameObject(data.GUIDs["eaten0"]);
             if (eaten != null) {
-                eatenQueue.Enqueue(eaten);
+                // eatenQueue.Enqueue(eaten);
+                EnqueueEatenObject(eaten);
                 eaten.SetActive(false);
                 eaten.transform.position = transform.position;
                 eaten.transform.SetParent(transform, false);

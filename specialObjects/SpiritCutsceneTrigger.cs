@@ -8,6 +8,13 @@ public class SpiritCutsceneTrigger : MonoBehaviour {
     public GameObject spiritPrefab;
     GameObject spirit;
     public Pickup knife;
+
+    void Start() {
+        if (knife == null) {
+            knife = GameObject.Find("silverDagger").GetComponent<Pickup>();
+        }
+    }
+
     void Update() {
         if (knife.holder != null && spirit == null) {
             spirit = GameObject.Instantiate(spiritPrefab, spiritSpawnPoint.position, Quaternion.identity) as GameObject;

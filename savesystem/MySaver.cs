@@ -11,7 +11,7 @@ public class MySaver {
     private static Dictionary<Guid, List<Guid>> referenceTree = new Dictionary<Guid, List<Guid>>();
     public static Dictionary<Guid, GameObject> loadedObjects = new Dictionary<Guid, GameObject>();
     public static Dictionary<GameObject, Guid> savedObjects = new Dictionary<GameObject, Guid>();
-    public static List<GameObject> disabledPersistents = new List<GameObject>();
+    public static HashSet<GameObject> disabledPersistents = new HashSet<GameObject>();
     public static List<Type> LoadOrder = new List<Type>{
         typeof(Intrinsics),
         typeof(Outfit),
@@ -121,7 +121,7 @@ public class MySaver {
                 // Debug.Log(objectDataBase.Count.ToString() +" entries found");
             }
         } else {
-            Debug.Log("NOTE: creating new object database!");
+            // Debug.Log("NOTE: creating new object database!");
             objectDataBase = new SerializableDictionary<Guid, PersistentObject>();
         }
         // retrieve all persistent objects
@@ -227,7 +227,7 @@ public class MySaver {
                 }
             }
         } else {
-            Debug.Log("WEIRD: no existing object database on Load!");
+            // Debug.Log("WEIRD: no existing object database on Load!");
             objectDataBase = new SerializableDictionary<Guid, PersistentObject>();
         }
 
@@ -257,7 +257,7 @@ public class MySaver {
                 GameObject.DestroyImmediate(gameObjectsToDestroy.Pop());
             }
         }
-        disabledPersistents = new List<GameObject>();
+        disabledPersistents = new HashSet<GameObject>();
         List<Guid> sceneIDs = new List<Guid>();
         List<Guid> playerIDs = new List<Guid>();
         var listSerializer = new XmlSerializer(typeof(List<Guid>));

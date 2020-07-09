@@ -138,9 +138,6 @@ public class OccurrenceEat : OccurrenceData {
             yogurt = true;
             AddChild(EventData.Yogurt(eater));
         }
-        // Debug.Log(monoLiquid);
-        // Debug.Log(liquid);
-        // Debug.Log(edible.gameObject.name);
         if (liquid != null) {
             if (liquid.name == "yogurt" || liquid.ingredients.Contains("yogurt")) {
                 yogurt = true;
@@ -148,11 +145,8 @@ public class OccurrenceEat : OccurrenceData {
                     AddChild(EventData.YogurtVomitEat(eater));
                 }
                 if (edible.gameObject.name.ToLower().Contains("puddle")) {
-                    Debug.Log("puddle condition");
                     AddChild(EventData.YogurtFloor(eater));
                     whatHappened = $"{Toolbox.Instance.GetName(eater)} ate yogurt off the floor";
-                    // whatHappened = Toolbox.Instance.GetName(eater) + " drank " + monoLiquid.liquid.name;
-                    // whatHappened += " off the floor";
                 }
                 AddChild(EventData.Yogurt(eater));
             }
@@ -254,8 +248,11 @@ public class OccurrenceSpeech : OccurrenceEvent {
         describable.ResetChildren();
         string speakerName = Toolbox.Instance.GetName(speaker);
         string targetName = "";
-        if (target != null)
-            targetName = Toolbox.Instance.GetName(target);
+        // if (target != null) {
+        //     targetName = Toolbox.Instance.GetName(target);
+        //     Debug.Log(target);
+        //     Debug.Log(targetName);
+        // }
         EventData data = new EventData("dialogue", speakerName + " said " + line);
         data.transcriptLine = speakerName + ": " + line;
         // insert bits here for script desc, transcript line

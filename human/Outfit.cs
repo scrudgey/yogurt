@@ -118,9 +118,13 @@ public class Outfit : Interactive, ISaveable {
 
         Toolbox.Instance.RemoveChildIntrinsics(gameObject, this);
         removed.transform.position = transform.position;
-        // SpriteRenderer sprite = uniform.GetComponent<SpriteRenderer>();
-        // sprite.sortingLayerName = "ground";
         removed.SetActive(true);
+        PhysicalBootstrapper pb = removed.GetComponent<PhysicalBootstrapper>();
+        if (pb) {
+            pb.InitPhysical(0.02f, Vector3.zero);
+        } else {
+            Debug.LogWarning($"no physicalbootstrapper on removed outfit? {removed}");
+        }
         return removed;
     }
     public void SaveData(PersistentComponent data) {

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 public class Duplicatable : Interactive, ISaveable {
     public bool duplicatable = true;
@@ -12,8 +13,12 @@ public class Duplicatable : Interactive, ISaveable {
     void Start() {
         if (nullifyFX == null)
             nullifyFX = Resources.Load("particles/nullify") as GameObject;
-        // if (duplicationPrefab == null)
-        duplicationPrefab = Resources.Load("prefabs/" + Toolbox.Instance.CloneRemover(gameObject.name)) as GameObject;
+
+        string prefabName = Regex.Replace(gameObject.name, @" \(.+\)", "");     // removes "Tom (1)"
+        prefabName = Toolbox.Instance.CloneRemover(prefabName);                 // removes "(clone)"
+        prefabName = PersistentObject.regexSpace.Replace(prefabName, "_");      // changes space to underscore
+        // Debug.Log(prefabName);
+        duplicationPrefab = Resources.Load($"prefabs/{prefabName}") as GameObject;
         if (nullifySounds.Count == 0) {
             nullifySounds = new List<AudioClip>();
             nullifySounds.Add(Resources.Load("sounds/absorbed") as AudioClip);
@@ -36,6 +41,13 @@ public class Duplicatable : Interactive, ISaveable {
         return Nullifiable() && gameObject.GetComponent<Pickup>();
     }
     public void Nullify() {
+        if (GameManager.Instance.playerObject == gameObject) {
+            GameManager.Instance.IncrementStat(StatType.nullifications, 1);
+            GameManager.Instance.PlayerDeath();
+        }
+        if (gameObject.name.Contains("ghost") && SceneManager.GetActiveScene().name == "mayors_attic") {
+            GameManager.Instance.data.ghostsKilled += 1;
+        }
         if (nullifySounds.Count > 0) {
             Toolbox.Instance.AudioSpeaker(nullifySounds[Random.Range(0, nullifySounds.Count)], transform.position);
         }

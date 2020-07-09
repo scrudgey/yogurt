@@ -48,7 +48,7 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         Toolbox.RegisterMessageCallback<MessageDamage>(this, HandleDamage);
     }
     public void HandleDamage(MessageDamage dam) {
-        if (dam.type == damageType.fire || dam.type == damageType.asphyxiation)
+        if (dam.type == damageType.fire || dam.type == damageType.asphyxiation || dam.type == damageType.acid)
             return;
         if (dam.messenger != this)
             Impact(dam);

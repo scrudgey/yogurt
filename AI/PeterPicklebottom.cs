@@ -48,6 +48,7 @@ public class PeterPicklebottom : MonoBehaviour {
             audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         } else {
             state = AIState.passive;
+            controller.Deregister();
         }
     }
     public void PlayThemeSong() {

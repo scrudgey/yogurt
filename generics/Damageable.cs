@@ -5,19 +5,10 @@ using Poisson;
 
 [System.Serializable]
 
-public enum ImpactResult { none, damageNormal, damageStrong, damageCosmic, damageOther, repelNormal, repelEthereal, repelInvulnerable, repelOther }
+public enum ImpactResult { none, damageNormal, damageStrong, damageCosmic, damageOther, damageSilent, repelNormal, repelEthereal, repelInvulnerable, repelOther, repelSilent }
 
-public enum damageType { physical, fire, any, cutting, piercing, cosmic, asphyxiation, explosion }
+public enum damageType { physical, fire, any, cutting, piercing, cosmic, asphyxiation, explosion, acid }
 public abstract class Damageable : MonoBehaviour {
-    // public static Dictionary<damageType, List<BuffType>> blockedBy = new Dictionary<damageType, List<BuffType>>(){
-    //     {damageType.physical, new List<BuffType>(){BuffType.noPhysicalDamage, BuffType.ethereal, BuffType.invulnerable}},
-    //     {damageType.fire, new List<BuffType>(){BuffType.fireproof, BuffType.ethereal, BuffType.invulnerable}},
-    //     {damageType.cutting, new List<BuffType>(){BuffType.noPhysicalDamage, BuffType.ethereal, BuffType.invulnerable}},
-    //     {damageType.piercing, new List<BuffType>(){BuffType.noPhysicalDamage, BuffType.ethereal, BuffType.invulnerable}},
-    //     {damageType.cosmic, new List<BuffType>(){BuffType.invulnerable}},
-    //     {damageType.asphyxiation, new List<BuffType>(){BuffType.undead}},
-    //     {damageType.explosion, new List<BuffType>(){BuffType.noPhysicalDamage, BuffType.ethereal, BuffType.invulnerable}}
-    // };
     public Dictionary<BuffType, Buff> netBuffs = Intrinsics.emptyBuffMap();
     public bool immuneToFire;
     public bool immuneToPhysical;
@@ -101,26 +92,26 @@ public abstract class Damageable : MonoBehaviour {
         if (message.amount == 0)
             return;
 
+        // TODO: immuneToPhysical is kinda bullshit?
         if (message.type == damageType.physical && immuneToPhysical)
             return;
         if (message.type == damageType.fire && immuneToFire)
             return;
 
-        // ImpactResult result = Damages(message, netBuffs);
         ImpactResult result = Vulnerable(message, netBuffs);
         AudioClip[] sounds = new AudioClip[0];
 
         switch (result) {
             case ImpactResult.repelEthereal:
-                if (message.type != damageType.fire)
+                if (message.type != damageType.fire && message.type != damageType.acid)
                     sounds = etherealRepelSounds;
                 break;
             case ImpactResult.repelInvulnerable:
-                if (message.type != damageType.fire)
+                if (message.type != damageType.fire && message.type != damageType.acid)
                     sounds = invulnerableRepelSounds;
                 break;
             case ImpactResult.repelNormal:
-                if (message.type != damageType.fire)
+                if (message.type != damageType.fire && message.type != damageType.acid)
                     sounds = repelSounds;
                 break;
             // case ImpactResult.repelOther:
@@ -150,7 +141,7 @@ public abstract class Damageable : MonoBehaviour {
         if (sounds.Length > 0 && !message.suppressImpactSound) {
             Toolbox.Instance.AudioSpeaker(sounds[Random.Range(0, sounds.Length)], transform.position);
         }
-        if (message.messenger != null)
+        if (message.messenger != null && message.type != damageType.acid)
             message.messenger.SendMessage("ImpactReceived", result, SendMessageOptions.DontRequireReceiver);
 
         if (DamageResults.Contains(result)) {
@@ -181,7 +172,7 @@ public abstract class Damageable : MonoBehaviour {
     }
     public abstract void CalculateDamage(MessageDamage message);
     public virtual void Destruct() {
-        if (gameObject.name == "ghost" && SceneManager.GetActiveScene().name == "mayors_attic") {
+        if (gameObject.name.Contains("ghost") && SceneManager.GetActiveScene().name == "mayors_attic") {
             GameManager.Instance.data.ghostsKilled += 1;
         }
         if (lastMessage == null) {
@@ -203,16 +194,17 @@ public abstract class Damageable : MonoBehaviour {
     }
 
     public static HashSet<ImpactResult> DamageResults = new HashSet<ImpactResult> {
-        ImpactResult.damageNormal, ImpactResult.damageCosmic, ImpactResult.damageStrong, ImpactResult.damageOther
+        ImpactResult.damageNormal, ImpactResult.damageCosmic, ImpactResult.damageStrong, ImpactResult.damageOther, ImpactResult.damageSilent
     };
     public static HashSet<ImpactResult> RepelResults = new HashSet<ImpactResult> {
-        ImpactResult.repelNormal, ImpactResult.repelEthereal, ImpactResult.repelInvulnerable, ImpactResult.repelOther
+        ImpactResult.repelNormal, ImpactResult.repelEthereal, ImpactResult.repelInvulnerable, ImpactResult.repelOther, ImpactResult.repelSilent
     };
     public static ImpactResult Vulnerable(MessageDamage message, Dictionary<BuffType, Buff> netBuffs) {
         if (!message.strength) {
             switch (message.type) {
                 case damageType.physical:
                 case damageType.cutting:
+                case damageType.acid:
                 case damageType.piercing:
                     message.amount = Mathf.Max(message.amount - netBuffs[BuffType.armor].floatValue, 0);
                     break;
@@ -230,6 +222,12 @@ public abstract class Damageable : MonoBehaviour {
             bool undead = netBuffs[BuffType.undead].active();
 
             switch (message.type) {
+                case damageType.acid:
+                    if (message.amount <= 0 || ethereal || invulnerable) {
+                        result = ImpactResult.repelSilent;
+                    } else result = ImpactResult.damageSilent;
+                    break;
+                case damageType.explosion:
                 case damageType.physical:
                 case damageType.cutting:
                 case damageType.piercing:
@@ -266,6 +264,9 @@ public abstract class Damageable : MonoBehaviour {
         }
         if (!RepelResults.Contains(result)) {
             switch (message.type) {
+                case damageType.acid:
+                    result = ImpactResult.damageSilent;
+                    break;
                 case damageType.physical:
                 case damageType.cutting:
                 case damageType.piercing:

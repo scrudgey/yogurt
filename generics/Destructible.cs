@@ -3,7 +3,6 @@
 public class Destructible : Damageable, ISaveable {
     public float maxHealth;
     public float health;
-    // public float bonusHealth;
     public AudioClip[] hitSound;
     public AudioClip[] destroySound;
     public float physicalMultiplier = 1f;
@@ -32,6 +31,7 @@ public class Destructible : Damageable, ISaveable {
     public override void CalculateDamage(MessageDamage message) {
         float damage = message.amount;
         switch (message.type) {
+            case damageType.acid:
             case damageType.piercing:
             case damageType.cutting:
             case damageType.physical:

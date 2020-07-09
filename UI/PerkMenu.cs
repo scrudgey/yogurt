@@ -129,6 +129,7 @@ public class PerkMenu : MonoBehaviour {
         GameManager.Instance.data.perks[selectedPerk.perk.name] = true;
         if (GameManager.Instance.data.perks["vomit"] && GameManager.Instance.data.perks["eat_all"]) {
             GameManager.Instance.UnlockCommercial("dungeon");
+            GameManager.Instance.ReceiveEmail("dungeon_start");
         }
         selectedPerk.GetComponent<Button>().interactable = false;
         UINew.Instance.RefreshUI(active: true);

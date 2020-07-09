@@ -380,14 +380,12 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         }
     }
     void ReactToEvent(EventData dat, HashSet<GameObject> involvedParties) {
-        // Debug.Log(involvedParties);
         // store memory
         EventData memory = new EventData(dat);
         shortTermMemory.Push(memory);
 
         // store reaction to memory?
 
-        // react to specifics of event
         if (involvedParties.Contains(gameObject))
             return;
 
@@ -398,6 +396,13 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                 seenCount += 1;
         }
         lastNEvents.Add(dat.noun);
+
+        // do not react to the event if i am mindful
+        if (netBuffs[BuffType.clearHeaded].active()) {
+            return;
+        }
+
+        // react to specifics of event
         Rating[] ratings = (Rating[])Rating.GetValues(typeof(Rating));
         Toolbox.ShuffleArray<Rating>(ratings);
         foreach (Rating rating in ratings) {

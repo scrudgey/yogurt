@@ -154,10 +154,10 @@ public class Controllable : MonoBehaviour {
         UpdateDefaultInteraction();
     }
     public void HandleNoise(MessageNoise message) {
-        if (hitState >= HitState.stun || fightMode)
-            return;
+        // if (hitState >= HitState.stun || fightMode)
+        //     return;
 
-        LookAtPoint(message.location);
+        // LookAtPoint(message.location);
     }
     public void HandleInventoryMessage(MessageInventoryChanged message) {
         // Debug.Log(gameObject.name + " updating default actions on inv change");

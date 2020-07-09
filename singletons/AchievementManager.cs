@@ -15,9 +15,9 @@ public class AchievementManager : Singleton<AchievementManager> {
     // Callback for Achievement stored
     protected Callback<UserAchievementStored_t> m_UserAchievementStored;
     void Start() {
-        DebugAchievements();
-        if (SteamManager.Initialized)
-            SteamUserStats.ResetAllStats(true);
+        // DebugAchievements();
+        // if (SteamManager.Initialized)
+        //     SteamUserStats.ResetAllStats(true);
     }
     public static List<Achievement> LoadAchievements() {
         List<Achievement> achievements = new List<Achievement>();
@@ -83,6 +83,7 @@ public class AchievementManager : Singleton<AchievementManager> {
     /// 
     /// 
     public void UnlockAchievement(Achievement achievement) {
+        Debug.Log($"unlocking {achievement.title}");
         achievement.complete = true;
         achievement.completedTime = System.DateTime.Now;
         if (SteamManager.Initialized) {

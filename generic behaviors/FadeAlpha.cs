@@ -11,9 +11,10 @@ public class FadeAlpha : MonoBehaviour {
         spriteRenderers.Add(GetComponent<SpriteRenderer>());
     }
     public void Update() {
-
         timer += Time.deltaTime;
         foreach (SpriteRenderer spriteRenderer in spriteRenderers) {
+            if (spriteRenderer == null)
+                continue;
             Color color = spriteRenderer.color;
             color.a = minAlpha + (maxAlpha - minAlpha) * Mathf.Sin(timer * 6.28f / period);
             spriteRenderer.color = color;

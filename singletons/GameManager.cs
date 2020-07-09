@@ -120,7 +120,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = true;
+    public bool debug = false;
     public bool failedLevelLoad = false;
     public Gender playerGender;
 
@@ -196,23 +196,32 @@ public partial class GameManager : Singleton<GameManager> {
     }
     public void ExplodeHead() {
         Head head = playerObject.GetComponentInChildren<Head>();
-        if (head != null) {
-            AudioClip boom = Resources.Load("sounds/explosion/cannon") as AudioClip;
-            PlayPublicSound(boom);
+        Hurtable hurtable = playerObject.GetComponent<Hurtable>();
+        Duplicatable duplicatable = playerObject.GetComponent<Duplicatable>();
 
+        MessageDamage message = new MessageDamage(100f, damageType.physical);
+        Vector2 rand = UnityEngine.Random.insideUnitCircle;
+        message.force = new Vector3(rand.x, rand.y, 2f).normalized;
+
+        if (head != null) {
             GameObject headGibs = Resources.Load("prefabs/gibs/headGibsContainer") as GameObject;
-            MessageDamage message = new MessageDamage(100f, damageType.physical);
-            Vector2 rand = UnityEngine.Random.insideUnitCircle;
-            message.force = new Vector3(rand.x, rand.y, 2f).normalized;
             foreach (Gibs gib in headGibs.GetComponents<Gibs>()) {
                 Gibs newGib = head.gameObject.AddComponent<Gibs>();
                 newGib.CopyFrom(gib);
                 newGib.Emit(message);
             }
-
+            AudioClip boom = Resources.Load("sounds/explosion/cannon") as AudioClip;
+            PlayPublicSound(boom);
             Destroy(head.gameObject);
-            Hurtable hurtable = playerObject.GetComponent<Hurtable>();
+        }
+
+        if (hurtable != null) {
             hurtable.Die(message, damageType.physical);
+        } else if (duplicatable != null) {
+            duplicatable.Nullify();
+        } else {
+            Destroy(playerObject);
+            PlayerDeath();
         }
     }
     public bool InCutsceneLevel() {
@@ -637,7 +646,7 @@ public partial class GameManager : Singleton<GameManager> {
         timeSinceLastSave = 0f;
     }
     public void NewDay() {
-        Debug.Log("New day");
+        // Debug.Log("New day");
         data.loadedDay = false;
         MySaver.CleanupSaves();
         MySaver.SaveObjectDatabase();
@@ -904,7 +913,7 @@ public partial class GameManager : Singleton<GameManager> {
         string filename = Toolbox.Instance.CloneRemover(obj.name);
         if (filename.ToLower() == "droplet" || filename.ToLower() == "puddle")
             return;
-        if (filename.ToLower() == "cosmic_nullifier") {
+        if (filename.ToLower().Contains("cosmic_nullifier")) {
             ReceiveEmail("nullify1");
             UnlockCommercial("nullify1");
         }
@@ -936,6 +945,9 @@ public partial class GameManager : Singleton<GameManager> {
             }
 
             if (pickup == null || !pickup.heavyObject) {
+                if (filename.ToLower().Contains("cosmic_nullifier")) {
+                    ShowDiaryEntry("nullifier");
+                }
                 data.collectedObjects.Add(filename);
                 data.itemCheckedOut[filename] = true;
                 Poptext.PopupCollected(obj);
