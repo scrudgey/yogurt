@@ -13,6 +13,7 @@ public class Bed : Doorway {
     private bool sleeping;
     private bool frame;
     public AudioClip beddingSound;
+    public bool keypressedThisFrame;
     public override void Awake() {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         audioSource.spatialBlend = 0;
@@ -28,6 +29,12 @@ public class Bed : Doorway {
         interactions.Add(makeBed);
         head.gameObject.SetActive(false);
         bubble.gameObject.SetActive(false);
+
+        keypressedThisFrame = false;
+        InputController.Instance.PrimaryAction.action.Enable();
+        InputController.Instance.PrimaryAction.action.performed += ctx => {
+            keypressedThisFrame = ctx.ReadValueAsButton();
+        };
     }
     public void MakeBed() {
         unmade = false;
@@ -87,7 +94,8 @@ public class Bed : Doorway {
                     audioSource.PlayOneShot(snoreSound);
                 }
             }
-            if (Keyboard.current.anyKey.isPressed &&
+            // TODO: prevent early trigger
+            if (animationTimer > 0.02f && keypressedThisFrame &&
             (InputController.Instance.state != InputController.ControlState.cutscene &&
             InputController.Instance.state != InputController.ControlState.inMenu &&
             InputController.Instance.state != InputController.ControlState.waitForMenu
@@ -109,6 +117,8 @@ public class Bed : Doorway {
                 }
                 CheckDiaryEntry();
             }
+
+            keypressedThisFrame = false;
         }
     }
     void CheckDiaryEntry() {

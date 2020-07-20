@@ -69,7 +69,7 @@ public class Buff {
         {BuffType.enraged, "rage"},
         {BuffType.ethereal, "ethereal"},
         {BuffType.fireproof, "fireproof"},
-        {BuffType.invulnerable, "blessed"},
+        {BuffType.invulnerable, "invulnerable"},
         {BuffType.noPhysicalDamage, "nonphysical"},
         {BuffType.poison, "poison"},
         {BuffType.speed, "speed"},

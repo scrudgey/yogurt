@@ -4,12 +4,16 @@ using System;
 
 
 public class TerminateOnStop : MonoBehaviour {
-    List<Type> typesToRemove = new List<Type>(){typeof(Rigidbody2D), typeof(Collider2D), typeof(FlipSpriteRandom)};
+    public Rigidbody2D myRigidBody;
+    List<Type> typesToRemove = new List<Type>() { typeof(Rigidbody2D), typeof(Collider2D), typeof(FlipSpriteRandom), typeof(OrderByY), typeof(FlipScintillator) };
+    void Awake() {
+        myRigidBody = GetComponent<Rigidbody2D>();
+    }
     void Update() {
-        if (GetComponent<Rigidbody2D>().velocity.magnitude < 0.01) {
+        if (myRigidBody.velocity.magnitude < 0.01) {
             DestroyComponents();
             PhysicalBootstrapper pb = GetComponent<PhysicalBootstrapper>();
-            if (pb){
+            if (pb) {
                 pb.DestroyPhysical();
                 Destroy(pb);
             }
@@ -19,10 +23,10 @@ public class TerminateOnStop : MonoBehaviour {
             Destroy(this);
         }
     }
-    void DestroyComponents(){
-        foreach(Type type in typesToRemove){
+    void DestroyComponents() {
+        foreach (Type type in typesToRemove) {
             Component component = GetComponent(type);
-            while (component != null){
+            while (component != null) {
                 DestroyImmediate(component);
                 component = GetComponent(type);
             }

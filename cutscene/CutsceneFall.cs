@@ -17,9 +17,15 @@ public class CutsceneFall : Cutscene {
         playerAnimation = player.GetComponent<AdvancedAnimation>();
         playerCollider = player.GetComponent<Collider2D>();
         playerBody = player.GetComponent<Rigidbody2D>();
-        playerControl = player.GetComponent<Humanoid>();
+        playerControl = player.GetComponent<Controllable>();
         playerHurtable = player.GetComponent<Hurtable>();
         playerInv = GameManager.Instance.playerObject.GetComponent<Inventory>();
+        // if (playerCollider == null) {
+        //     playerCollider = player.transform.Find("footPoint").GetComponent<Collider2D>();
+        // }
+        // if (playerBody == null) {
+        //     player.AddComponent<Rigidbody2D>();
+        // }
         if (playerInv != null) {
             initHolding = playerInv.holding;
         }
@@ -63,6 +69,7 @@ public class CutsceneFall : Cutscene {
                 playerInv.GetItem(initHolding);
             }
             complete = true;
+            Debug.Log("complete");
         }
     }
 }

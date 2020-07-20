@@ -142,14 +142,22 @@ public class Intrinsics : MonoBehaviour, ISaveable {
                         // only delete halo if invuln. is not the hat
                         // delete from head if head exists, otherwise delete from me
                         if (!(head != null && children.ContainsKey(head) && children[head].NetBuffs()[BuffType.invulnerable].active())) {
-                            Transform haloTransform = null;
-                            if (head != null) {
-                                haloTransform = head.transform.Find("halo");
-                            } else {
-                                haloTransform = transform.Find("halo");
-                            }
-                            if (haloTransform != null) {
-                                Destroy(haloTransform.gameObject);
+                            // Transform haloTransform = transform.Find("halo");
+                            // if (head != null) {
+                            //     haloTransform = head.transform.Find("halo");
+                            // } else {
+                            //     haloTransform = transform.Find("halo");
+                            // }
+                            // if (haloTransform != null) {
+                            //     Destroy(haloTransform.gameObject);
+                            // }
+
+                            Transform[] children = transform.GetComponentsInChildren<Transform>();
+                            foreach (var child in children) {
+                                if (child.name.Contains("halo")) {
+                                    //do something with child
+                                    Destroy(child.gameObject);
+                                }
                             }
                         }
                     }

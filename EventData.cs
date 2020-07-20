@@ -84,7 +84,13 @@ public class EventData : Describable {
         data.val = 1f;
         data.popupDesc = "vomit events";
         data.noun = "vomiting";
-        data.whatHappened = Toolbox.Instance.GetName(vomiter) + " vomited up " + Toolbox.Instance.GetName(vomited);
+        string vomitedName = Toolbox.Instance.GetName(vomited);
+        string vomiterName = Toolbox.Instance.GetName(vomiter);
+        if (vomitedName != "") {
+            data.whatHappened = $"{vomiterName} vomited up {vomitedName}";
+        } else {
+            data.whatHappened = $"{vomiterName} vomited!";
+        }
         return data;
     }
     public static EventData VomitYogurt(GameObject vomiter) {
@@ -115,7 +121,7 @@ public class EventData : Describable {
         return data;
     }
     public static EventData YogurtFloor(GameObject eater) {
-        EventData data = new EventData(disgusting: 1, chaos: 1);
+        EventData data = new EventData(disgusting: 2, chaos: 2);
         data.key = "yogurt_floor";
         data.val = 1f;
         data.popupDesc = "yogurt eaten off the floor";
@@ -144,11 +150,14 @@ public class EventData : Describable {
     public static EventData Death(
         GameObject dead,
         GameObject lastAttacker,
-        damageType lastDamage,
+        MessageDamage lastDamage,
         bool monster,
         bool suicide,
-        bool assailant
-        ) {
+        bool assailant) {
+
+        damageType lastDamageType = damageType.any;
+        if (lastDamage != null)
+            lastDamageType = lastDamage.type;
         EventData data = null;
         string victimName = Toolbox.Instance.GetName(dead);
         if (monster) {
@@ -164,7 +173,7 @@ public class EventData : Describable {
             data.whatHappened = victimName + " committed suicide";
             data.noun = "suicide";
             data.popupDesc = "suicides";
-            if (lastDamage == damageType.fire) {
+            if (lastDamage != null && lastDamage.type == damageType.fire) {
                 data.whatHappened = victimName + " self-immolated";
             }
         } else {
@@ -174,32 +183,43 @@ public class EventData : Describable {
             if (assailant) {
                 GameManager.Instance.IncrementStat(StatType.murders, 1);
                 string attackerName = Toolbox.Instance.GetName(lastAttacker);
-                data.whatHappened = attackerName + " murdered " + victimName;
+                data.whatHappened = $"{attackerName} murdered {victimName}";
+                Debug.Log(lastDamage.weaponName);
+                if (lastDamage.weaponName != null)
+                    data.whatHappened += $" with {lastDamage.weaponName}";
                 data.noun = "murder";
                 data.popupDesc = "murders";
-                if (lastDamage == damageType.fire) {
+                if (lastDamageType == damageType.fire) {
                     data.whatHappened += " with fire";
-                } else if (lastDamage == damageType.asphyxiation) {
+                } else if (lastDamageType == damageType.cutting || lastDamageType == damageType.piercing) {
+                    data.whatHappened = $"{attackerName} stabbed {victimName} to death";
+                    if (lastDamage.weaponName != "")
+                        data.whatHappened += $" with {lastDamage.weaponName}";
+                } else if (lastDamageType == damageType.asphyxiation) {
                     data.whatHappened = attackerName + " strangled " + victimName + " to death";
-                } else if (lastDamage == damageType.cosmic) {
+                } else if (lastDamageType == damageType.cosmic) {
                     data.whatHappened = attackerName + " annihilated " + victimName + " with cosmic energy";
-                } else if (lastDamage == damageType.explosion) {
+                } else if (lastDamageType == damageType.explosion) {
                     data.whatHappened = attackerName + " vaporized " + victimName + " in an explosion";
+                } else if (lastDamageType == damageType.acid) {
+                    data.whatHappened = $"{attackerName} dissolved {victimName} in acid";
                 }
             } else {
                 data.noun = "death";
                 data.popupDesc = "deaths";
-                if (lastDamage == damageType.fire) {
+                if (lastDamageType == damageType.fire) {
                     data.whatHappened = victimName + " burned to death";
                     GameManager.Instance.IncrementStat(StatType.immolations, 1);
-                } else if (lastDamage == damageType.asphyxiation) {
+                } else if (lastDamageType == damageType.asphyxiation) {
                     data.whatHappened = victimName + " asphyxiated";
-                } else if (lastDamage == damageType.cosmic) {
+                } else if (lastDamageType == damageType.cosmic) {
                     data.whatHappened = victimName + " was annihilated by cosmic energy";
-                } else if (lastDamage == damageType.cutting || lastDamage == damageType.piercing) {
+                } else if (lastDamageType == damageType.cutting || lastDamageType == damageType.piercing) {
                     data.whatHappened = victimName + " was stabbed to death";
-                } else if (lastDamage == damageType.explosion) {
+                } else if (lastDamageType == damageType.explosion) {
                     data.whatHappened = victimName + " exploded into bloody chunks";
+                } else if (lastDamageType == damageType.acid) {
+                    data.whatHappened = $"{victimName} was dissolved in acid";
                 }
             }
         }
@@ -225,7 +245,6 @@ public class EventData : Describable {
         }
 
         data.whatHappened = "the " + victimName + " was destroyed";
-
         if (lastMessage.type == damageType.fire) {
             data.whatHappened = "the " + victimName + " was incinerated";
         } else if (lastMessage.type == damageType.asphyxiation) {
@@ -236,6 +255,8 @@ public class EventData : Describable {
             data.whatHappened = "the " + victimName + " was chopped into pieces";
         } else if (lastMessage.type == damageType.explosion) {
             data.whatHappened = "the " + victimName + " was destroyed in an explosion";
+        } else if (lastMessage.type == damageType.acid) {
+            data.whatHappened = $"the {victimName} dissolved in acid";
         }
 
         if (!lastMessage.impersonal && lastAttacker != null) {
@@ -249,7 +270,28 @@ public class EventData : Describable {
                 data.whatHappened = attackerName + " chopped the " + victimName + " into little pieces";
             } else if (lastMessage.type == damageType.explosion) {
                 data.whatHappened = attackerName + " exploded the " + victimName;
+            } else if (lastMessage.type == damageType.acid) {
+                data.whatHappened = $"{attackerName} dissolved the {victimName} in acid";
             }
+        }
+        return data;
+    }
+    public static EventData Nullification(GameObject nullified) {
+        string victimName = Toolbox.Instance.GetName(nullified);
+        EventData data = new EventData(offensive: 1, disgusting: 0, disturbing: 2, chaos: 0, positive: 0);
+        data.key = "nullification";
+        data.val = 1f;
+        data.noun = "nullification";
+        data.popupDesc = "objects nullified";
+
+        data.whatHappened = $"the {victimName} was vaporized";
+        if (victimName.ToLower().Contains("effigy")) {
+            data = new EventData(offensive: 1, disgusting: 0, disturbing: 2, chaos: 0, positive: 0);
+            data.noun = "effigy nullification";
+            data.key = "nullify_hatred";
+            data.val = 1f;
+            data.popupDesc = "effigy nullifications";
+            data.whatHappened = $"an offensive effigy was vaporized";
         }
         return data;
     }

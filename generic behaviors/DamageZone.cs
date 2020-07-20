@@ -4,6 +4,7 @@ using System.Collections.Generic;
 public class DamageZone : MonoBehaviour {
     public damageType type;
     public float amount;
+    public bool suppressImpactSounds;
     public MessageDamage message;
     private Dictionary<Collider2D, GameObject> roots = new Dictionary<Collider2D, GameObject>();
     public AudioClip damageSound;
@@ -15,6 +16,7 @@ public class DamageZone : MonoBehaviour {
         audioSource.clip = damageSound;
         message.responsibleParty = gameObject;
         message.impersonal = true;
+        message.suppressImpactSound = suppressImpactSounds;
     }
     void OnTriggerStay2D(Collider2D other) {
         if (enabled == false)

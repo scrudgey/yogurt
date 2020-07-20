@@ -1,28 +1,24 @@
 ﻿using UnityEngine;
 
 public class CosmicNullifier : Pickup {
-    public Interaction nullify;
+    // public Interaction nullify;
     public AudioSource audioSource;
     public AudioClip[] nullifySound;
     public GameObject nullifyParticleEffect;
     void Start() {
-        nullify = new Interaction(this, "Nullify", "Nullify");
+        Interaction nullify = new Interaction(this, "Nullify", "Nullify");
         nullify.unlimitedRange = true;
         nullify.validationFunction = true;
         nullify.otherOnSelfConsent = false;
-        // nullify.inertOnPlayerConsent = false;
-        // nullify.otherOnPlayerConsent = false;
         interactions.Add(nullify);
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
     }
     public void Nullify(Duplicatable duplicatable) {
         if (duplicatable == null)
             return;
-        if (GameManager.Instance.playerObject == duplicatable.gameObject) {
-            GameManager.Instance.IncrementStat(StatType.nullifications, 1);
-            GameManager.Instance.PlayerDeath();
-        }
         duplicatable.Nullify();
+
+        // TODO: better self-destruct sequence here
         Destroy(gameObject);
         ClaimsManager.Instance.WasDestroyed(gameObject);
     }

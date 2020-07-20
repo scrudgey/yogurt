@@ -5,8 +5,16 @@ using System.Text;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Nimrod;
-
+public struct MessagePhrase {
+    public MessagePhrase(string phrase, int profanity) {
+        this.phrase = phrase;
+        this.profanity = profanity;
+    }
+    public string phrase;
+    public int profanity;
+}
 public class Speech : Interactive, ISaveable {
+    public string referent;
     public string speechName;
     static string[] swearWords = new string[]{
         @"\bshit\b",
@@ -23,16 +31,16 @@ public class Speech : Interactive, ISaveable {
         @"\bbootyhole\b",
         @"\bbitchmade\b",
         @"\bmotherfucker\b",
+        @"\bbullshit\b",
         @"\basshole"};
 
-    // asshole
-    // fix whitespace matching
     static string[] swearWhiteList = new string[]{
         @"-ass",
         @"hole",
         @"sack",
         @"made",
         @"mother",
+        @"bull"
     };
     static Regex spaceMatcher = new Regex(@"\b");
 
@@ -51,12 +59,15 @@ public class Speech : Interactive, ISaveable {
 
         return Regex.Replace(instring, genderHook, replacePattern, RegexOptions.IgnoreCase);
     }
-    public static string ProcessDialogue(string phrase, ref List<bool> swearList) {
+    public static MessagePhrase ProcessDialogue(string phrase, ref List<bool> swearList) {
         StringBuilder sb = new StringBuilder(ParseGender(phrase));
+        string uncensoredPhrase = sb.ToString();
+        int profanity = 0;
+
         char censorChar = "∎".ToCharArray()[0];
         foreach (string swear in swearWords) {
             Regex matcher = new Regex(swear);
-            foreach (Match match in matcher.Matches(phrase)) {
+            foreach (Match match in matcher.Matches(uncensoredPhrase)) {
                 for (int i = 0; i < match.Length; i++) {
                     char c = swear.Substring(i, 1).ToCharArray()[0];
                     sb[match.Index + i] = censorChar;
@@ -65,21 +76,23 @@ public class Speech : Interactive, ISaveable {
         }
         foreach (string white in swearWhiteList) {
             Regex matcher = new Regex(white);
-            foreach (Match match in matcher.Matches(phrase)) {
-                string mask = phrase.Substring(match.Index, match.Length);
+            foreach (Match match in matcher.Matches(uncensoredPhrase)) {
+                string mask = uncensoredPhrase.Substring(match.Index, match.Length);
                 for (int i = 0; i < match.Length; i++) {
                     sb[match.Index + i] = white.Substring(i, 1).ToCharArray()[0];
                 }
             }
         }
         for (int i = 0; i < sb.Length; i++) {
-            if (sb[i] != phrase[i]) {
+            if (sb[i] != uncensoredPhrase[i]) {
                 swearList.Add(true);
+                profanity += 1;
             } else {
                 swearList.Add(false);
             }
         }
-        return sb.ToString();
+        return new MessagePhrase(sb.ToString(), profanity);
+        // return sb.ToString();
     }
 
     struct BuffMessage {
@@ -94,7 +107,8 @@ public class Speech : Interactive, ISaveable {
             {BuffType.strength, new BuffMessage("I feel strong!", "I no longer feel strong!")},
             {BuffType.telepathy, new BuffMessage("I can hear thoughts!", "I can no longer hear thoughts!")},
             {BuffType.fireproof, new BuffMessage("I feel fireproof!", "I no longer feel fireproof!")},
-            {BuffType.undead, new BuffMessage("I feel kinda weird!", "I feel blessed!")},
+            {BuffType.undead, new BuffMessage("I feel kinda weird!", "I am invincible!")},
+            {BuffType.ethereal, new BuffMessage("I feel intangible!", "I feel solid!")},
             {BuffType.poison, new BuffMessage("I don't feel so good!", "I feel much better!")},
             {BuffType.invulnerable, new BuffMessage("I am invincible!", "I feel exposed!")},
         };
@@ -145,27 +159,26 @@ public class Speech : Interactive, ISaveable {
     }
     void Awake() {
         LoadGrammar();
-
-
-        GameObject speechFramework = Instantiate(Resources.Load("UI/SpeechChild"), transform.position, Quaternion.identity) as GameObject;
-        speechFramework.name = "SpeechChild";
-        speechFramework.transform.SetParent(transform, false);
-        speechFramework.transform.localPosition = Vector3.zero;
+        if (transform.Find("SpeechChild") == null) {
+            GameObject speechFramework = Instantiate(Resources.Load("UI/SpeechChild"), transform.position, Quaternion.identity) as GameObject;
+            speechFramework.name = "SpeechChild";
+            speechFramework.transform.SetParent(transform, false);
+            speechFramework.transform.localPosition = Vector3.zero;
+        }
         flipper = transform.Find("SpeechChild").gameObject;
         Transform bubbleParent = transform.Find("SpeechChild/Speechbubble");
+        Canvas bubbleCanvas = bubbleParent.GetComponent<Canvas>();
         bubbleText = bubbleParent.transform.Find("Text").gameObject.GetComponent<Text>();
+
         bubbleText.text = "";
         follower = bubbleText.GetComponent<FollowGameObjectInCamera>();
         follower.target = gameObject;
+        if (bubbleCanvas) {
+            bubbleCanvas.worldCamera = Camera.main;
+        }
         if (flipper.transform.localScale != transform.localScale) {
             Vector3 tempscale = transform.localScale;
             flipper.transform.localScale = tempscale;
-        }
-        if (bubbleParent) {
-            Canvas bubbleCanvas = bubbleParent.GetComponent<Canvas>();
-            if (bubbleCanvas) {
-                bubbleCanvas.worldCamera = Camera.main;
-            }
         }
         if (voice != null) {
             AudioClip[] voiceSounds = Resources.LoadAll<AudioClip>("sounds/speechSets/" + voice);
@@ -188,7 +201,7 @@ public class Speech : Interactive, ISaveable {
     void Start() {
         Interaction speak = new Interaction(this, "Look", "Describe");
         speak.unlimitedRange = true;
-        speak.otherOnSelfConsent = false;
+        // speak.otherOnSelfConsent = false;
         speak.selfOnSelfConsent = false;
         speak.holdingOnOtherConsent = false;
         speak.dontWipeInterface = false;
@@ -282,9 +295,6 @@ public class Speech : Interactive, ISaveable {
         }
         if (controlSpeech == null)
             return false;
-        if (controlSpeech.glibSpeakWith) {
-            return false;
-        }
         if (InputController.Instance.state == InputController.ControlState.commandSelect) {
             return InputController.Instance.commandTarget != gameObject;
         } else {
@@ -429,7 +439,7 @@ public class Speech : Interactive, ISaveable {
     public void Insult(string phrase, GameObject target) {
         MessageSpeech message = new MessageSpeech(phrase, data: new EventData(chaos: 2, disturbing: 1, positive: -2, offensive: Random.Range(2, 3)));
         message.insultTarget = target;
-
+        // Debug.Log(target);
         Say(message);
         MessageNoise noise = new MessageNoise(gameObject);
         Toolbox.Instance.SendMessage(target, this, noise);
@@ -510,7 +520,7 @@ public class Speech : Interactive, ISaveable {
             Flammable targetFlammable = target.transform.root.GetComponentInChildren<Flammable>();
             if (targetFlammable) {
                 targetFlammable.heat += 100f;
-                targetFlammable.burnTimer = 1f;
+                targetFlammable.SetBurnTimer();
                 targetFlammable.fireRetardantBuffer = 0f;
                 targetFlammable.onFire = true;
             }
@@ -526,11 +536,13 @@ public class Speech : Interactive, ISaveable {
         Insult(content, target);
 
         List<bool> swearList = new List<bool>();
-        string censoredContent = ProcessDialogue(content, ref swearList);
+        MessagePhrase censoredContent = ProcessDialogue(content, ref swearList);
         swearMask = swearList.ToArray();
-        List<string> strings = new List<string>() { censoredContent };
+        // List<string> strings = new List<string>() { censoredContent };
 
-        Monologue mono = new Monologue(this, strings.ToArray());
+        // var x = new string[1] { censoredContent.phrase };
+
+        Monologue mono = new Monologue(this, new string[1] { censoredContent.phrase });
 
         using (Controller control = new Controller(gameObject)) {
             control.LookAtPoint(target.transform.position);
@@ -552,10 +564,12 @@ public class Speech : Interactive, ISaveable {
 
         Threaten(content, target);
         List<bool> swearList = new List<bool>();
-        string censoredContent = ProcessDialogue(content, ref swearList);
+        MessagePhrase censoredContent = ProcessDialogue(content, ref swearList);
         swearMask = swearList.ToArray();
-        List<string> strings = new List<string>() { censoredContent };
-        Monologue mono = new Monologue(this, strings.ToArray());
+
+        // List<string> strings = new List<string>() { censoredContent };
+        Monologue mono = new Monologue(this, new string[1] { censoredContent.phrase });
+        // Monologue mono = new Monologue(this, strings.ToArray());
 
         // Controllable control = GetComponent<Controllable>();
         // control.LookAtPoint(target.transform.position);

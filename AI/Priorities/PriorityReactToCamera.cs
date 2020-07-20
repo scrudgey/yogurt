@@ -11,7 +11,9 @@ namespace AI {
         });
         public LambdaRef<GameObject> yogurtRef = new LambdaRef<GameObject>(null, () => {
             foreach (LiquidContainer container in GameObject.FindObjectsOfType<LiquidContainer>()) {
-                if (container.liquid != null && container.amount > 0 && container.liquid.name == "yogurt") {
+                if (container.descriptionName == "yogurt cup") {
+                    return container.gameObject;
+                } else if (container.liquid != null && container.amount > 0 && container.liquid.name == "yogurt") {
                     return container.gameObject;
                 }
             }

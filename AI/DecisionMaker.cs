@@ -15,6 +15,7 @@ public class Personality {
     public enum CameraPreference { none, actor, avoidant, ambivalent, excited, eater, gravy };
     public enum PizzaDeliverer { no, yes };
     public enum Dancer { no, follower, leader };
+    public enum Haunt { no, yes };
     public Bravery bravery;
     public Stoicism stoicism;
     public BattleStyle battleStyle;
@@ -24,7 +25,8 @@ public class Personality {
     public CameraPreference camPref;
     public PizzaDeliverer pizzaDeliverer;
     public Dancer dancer;
-    public Personality(Bravery bravery, CameraPreference camPref, Stoicism stoicism, BattleStyle battleStyle, Suggestible suggestible, Social social, CombatProfficiency combatProficiency, PizzaDeliverer pizzaDeliverer, Dancer dancer) {
+    public Haunt haunt;
+    public Personality(Bravery bravery, CameraPreference camPref, Stoicism stoicism, BattleStyle battleStyle, Suggestible suggestible, Social social, CombatProfficiency combatProficiency, PizzaDeliverer pizzaDeliverer, Dancer dancer, Haunt haunt) {
         this.bravery = bravery;
         this.camPref = camPref;
         this.stoicism = stoicism;
@@ -34,6 +36,7 @@ public class Personality {
         this.combatProficiency = combatProficiency;
         this.pizzaDeliverer = pizzaDeliverer;
         this.dancer = dancer;
+        this.haunt = haunt;
     }
 }
 
@@ -42,7 +45,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         Attack, FightFire, ProtectPossessions,
         ReadScript, RunAway, Wander, ProtectZone,
         MakeBalloonAnimals, InvestigateNoise, PrioritySocialize,
-        Panic, Sentry, Trapdoor, DeliverPizza, Dance
+        Panic, Sentry, Trapdoor, DeliverPizza, Dance, Haunt
     }
     // the ONLY reason we need this redundant structure is so that I can expose
     // a selectable default priority type in unity editor.
@@ -62,6 +65,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         {typeof(PriorityTrapdoor), PriorityType.Trapdoor},
         {typeof(PriorityDeliverPizza), PriorityType.DeliverPizza},
         {typeof(PriorityDance), PriorityType.Dance},
+        {typeof(PriorityApproachPlayer), PriorityType.Haunt},
     };
     public string activePriorityName;
     public PriorityType defaultPriorityType;
@@ -80,6 +84,8 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
     public Collider2D warnZone = null;
     public Vector3 guardPoint;
     public bool initialized = false;
+    public bool debug;
+
     void Awake() {
         if (!initialized)
             Initialize();
@@ -143,6 +149,9 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         if (personality.dancer == Personality.Dancer.follower || personality.dancer == Personality.Dancer.leader) {
             InitializePriority(new PriorityDance(gameObject, control), typeof(PriorityDance));
         }
+        if (personality.haunt == Personality.Haunt.yes) {
+            InitializePriority(new PriorityApproachPlayer(gameObject, control), typeof(PriorityApproachPlayer));
+        }
 
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
         Toolbox.RegisterMessageCallback<Message>(this, ReceiveMessage);
@@ -180,6 +189,9 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
             priority.urgency = Mathf.Min(priority.urgency, Priority.urgencyMaximum);
             // if (priority.Urgency(personality) <= Priority.urgencyMinor)
             //     continue;
+            if (debug) {
+                Debug.Log($"{priority.priorityName}: {priority.urgency}");
+            }
             if (priority.Urgency(personality) > activePriority.Urgency(personality))
                 activePriority = priority;
         }

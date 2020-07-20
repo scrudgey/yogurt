@@ -68,10 +68,10 @@ public class MessageSpeech : Message {
                 return null;
         }
         // sswearList = new List<bool>();
-        string censoredPhrase = Speech.ProcessDialogue(phrase, ref speechData.swearList);
-
-        speechData.profanity = Toolbox.LevenshteinDistance(phrase, censoredPhrase);
-        speechData.line = censoredPhrase;
+        MessagePhrase censoredPhrase = Speech.ProcessDialogue(phrase, ref speechData.swearList);
+        // TODO: fix
+        speechData.profanity = censoredPhrase.profanity;
+        speechData.line = censoredPhrase.phrase;
         if (insultTarget != null) {
             speechData.insult = true;
             speechData.target = insultTarget;
@@ -92,6 +92,7 @@ public class MessageDamage : Message {
     public bool impersonal;
     public PhysicalImpact impactor;
     public GameObject responsibleParty;
+    public string weaponName;
     public bool strength;
     public float angleAboveHorizontal;
     public bool suppressGibs;
@@ -111,6 +112,7 @@ public class MessageDamage : Message {
         this.responsibleParty = other.responsibleParty;
         this.strength = other.strength;
         this.angleAboveHorizontal = other.angleAboveHorizontal;
+        this.weaponName = other.weaponName;
     }
 }
 public class MessageHitstun : Message {

@@ -380,23 +380,29 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         }
     }
     void ReactToEvent(EventData dat, HashSet<GameObject> involvedParties) {
-        // Debug.Log(involvedParties);
         // store memory
         EventData memory = new EventData(dat);
         shortTermMemory.Push(memory);
 
         // store reaction to memory?
 
-        // react to specifics of event
         if (involvedParties.Contains(gameObject))
             return;
 
+        // TODO: this could be a lot nicer maybe?
         int seenCount = 0;
         foreach (string noun in lastNEvents) {
             if (noun == dat.noun)
                 seenCount += 1;
         }
         lastNEvents.Add(dat.noun);
+
+        // do not react to the event if i am mindful
+        if (netBuffs[BuffType.clearHeaded].active()) {
+            return;
+        }
+
+        // react to specifics of event
         Rating[] ratings = (Rating[])Rating.GetValues(typeof(Rating));
         Toolbox.ShuffleArray<Rating>(ratings);
         foreach (Rating rating in ratings) {
@@ -404,6 +410,40 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             threshhold *= 1 - (float)seenCount / 5.0f;
             if (UnityEngine.Random.Range(0f, 1f) < threshhold && dat.quality[rating] > 0) {
                 MessageSpeech message = new MessageSpeech(reactions[rating]);
+
+                // embellish the reaction
+                if (UnityEngine.Random.Range(0f, 1f) < threshhold) {
+                    string whatHappened = "";
+                    if (UnityEngine.Random.Range(0f, 1f) < 0.5f) {
+                        whatHappened = dat.whatHappened;
+                    } else {
+                        whatHappened = Toolbox.UppercaseFirst(dat.noun);
+                    }
+                    if (whatHappened == "Imagery") {
+                        whatHappened = dat.whatHappened;
+                    }
+
+                    // if whathappened starts with "I saw"
+                    if (whatHappened.Length > 5 && whatHappened.Substring(0, 5) == "I saw") {
+                        // TODO: use different article here depending
+                        whatHappened = whatHappened.Replace("I saw", "A");
+                    }
+                    string myName = Toolbox.Instance.GetName(gameObject);
+                    if (whatHappened.Contains(myName)) {
+                        whatHappened = whatHappened.Replace(myName, "I");
+                    }
+                    if (UnityEngine.Random.Range(0f, 1f) < 0.5f) {
+                        if (UnityEngine.Random.Range(0f, 1f) < 0.5f)
+                            message.phrase = $"{whatHappened}! {reactions[rating]}";
+                        else
+                            message.phrase = $"{reactions[rating]} {whatHappened}! ";
+                    } else {
+                        message.phrase = $"{whatHappened}!";
+                    }
+                    // message.phrase = $"{dat.whatHappened}! {reactions[rating]}";
+                } else {
+                    message.phrase = reactions[rating];
+                }
                 message.nimrod = true;
                 message.involvedParties.Add(gameObject);
                 message.involvedParties.UnionWith(involvedParties);
@@ -542,7 +582,9 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                     if (protectZone.bounds.Contains(knowledge.transform.position)) {
                         assessment.status = PersonalAssessment.friendStatus.enemy;
                         foreach (Priority priority in decisionMaker.priorities) {
-                            priority.ReceiveMessage(new MessageThreaten());
+                            MessageThreaten threat = new MessageThreaten();
+                            threat.messenger = knowledge.obj.GetComponent<Transform>();
+                            priority.ReceiveMessage(threat);
                         }
                     }
                 }

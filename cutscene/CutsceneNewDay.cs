@@ -39,6 +39,7 @@ public class CutsceneNewDay : Cutscene {
             dayText.color = col;
         }
         if (timer >= stopTime || Keyboard.current.anyKey.isPressed) {
+            InputController.Instance.ResetInput();
             complete = true;
             GameManager.Instance.NewDay();
         }

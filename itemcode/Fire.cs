@@ -9,12 +9,12 @@ public class Fire : MonoBehaviour {
     private float damageTimer;
     static List<string> forbiddenTags = new List<string>(new string[] { "occurrenceFlag", "background", "sightcone" });
     void Start() {
-        message = new MessageDamage(0.15f, damageType.fire);
+        message = new MessageDamage(0.1f, damageType.fire);
         message.impersonal = true;
     }
     void Update() {
         damageTimer += Time.deltaTime;
-        if (damageTimer > 0.15f) {
+        if (damageTimer > 0.1f) {
             damageTimer = 0;
             if (flammable)
                 message.responsibleParty = flammable.responsibleParty;
@@ -59,7 +59,7 @@ public class Fire : MonoBehaviour {
         damageQueue.Add(coll.gameObject);
         if (flammables.TryGetValue(coll.gameObject, out flam)) {
             // flam.heat += Time.deltaTime;
-            flam.burnTimer = 1f;
+            flam.SetBurnTimer();
             if (flammable.responsibleParty != null) {
                 flam.responsibleParty = flammable.responsibleParty;
             }

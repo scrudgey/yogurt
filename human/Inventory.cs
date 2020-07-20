@@ -180,6 +180,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             pickup.transform.position = holdpoint.position;
             pickup.transform.SetParent(holdpoint, false);
             pickup.transform.rotation = Quaternion.identity;
+            pickup.transform.localScale = Vector3.one;
             pickup.transform.localPosition = Vector3.zero;
             pickup.GetComponent<Rigidbody2D>().isKinematic = true;
             pickup.GetComponent<Collider2D>().isTrigger = true;
@@ -207,6 +208,10 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         items.Add(item);
         if (holding != null && item == holding.gameObject)
             SoftDropItem();
+        Bones itemBones = item.GetComponent<Bones>();
+        if (itemBones != null && itemBones.follower != null) {
+            itemBones.follower.gameObject.SetActive(false);
+        }
         item.SetActive(false);
     }
     public bool PlaceItem(Vector2 place) {
@@ -235,7 +240,8 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         holding.GetComponent<Rigidbody2D>().isKinematic = false;
         holding.GetComponent<Collider2D>().isTrigger = false;
         holding = null;
-        UINew.Instance.ClearWorldButtons();
+        if (gameObject == GameManager.Instance.playerObject)
+            UINew.Instance.ClearWorldButtons();
     }
     public void DropItem() {
         if (holding == null)
@@ -258,7 +264,8 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         SpriteRenderer sprite = holding.GetComponent<SpriteRenderer>();
         sprite.sortingLayerName = "main";
         holding = null;
-        UINew.Instance.ClearWorldButtons();
+        if (gameObject == GameManager.Instance.playerObject)
+            UINew.Instance.ClearWorldButtons();
     }
     public void RetrieveItem(string itemName) {
         for (int i = 0; i < items.Count; i++) {
@@ -276,6 +283,11 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
                 holding = items[i].GetComponent<Pickup>();
                 items.RemoveAt(i);
 
+                Bones itemBones = holding.GetComponent<Bones>();
+                if (itemBones != null) {
+                    if (itemBones.follower != null)
+                        itemBones.follower.gameObject.SetActive(true);
+                }
                 break;
             }
         }
@@ -319,7 +331,8 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
                 if (!collider.isTrigger) {
                     Physics2D.IgnoreCollision(collider, phys.physical.objectCollider);
                     Physics2D.IgnoreCollision(collider, phys.physical.horizonCollider);
-                    Physics2D.IgnoreCollision(collider, phys.physical.groundCollider);
+                    if (phys.physical.groundCollider != null)
+                        Physics2D.IgnoreCollision(collider, phys.physical.groundCollider);
                     phys.physical.temporaryDisabledColliders.Add(collider);
                 }
             }
@@ -423,6 +436,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         Slasher s = slash.GetComponent<Slasher>();
 
         MessageDamage message = new MessageDamage(weapon.damage, damageType.physical);
+        message.weaponName = $"a {Toolbox.Instance.GetName(weapon.gameObject)}";
         if (weapon.impactSounds.Length > 0) {
             message.impactSounds = weapon.impactSounds;
         }
@@ -483,6 +497,10 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             Destroy(item);
         }
         items = new List<GameObject>();
+        if (holding != null) {
+            Destroy(holding.gameObject);
+            holding = null;
+        }
     }
     public void SaveData(PersistentComponent data) {
         if (holding != null) {
@@ -510,8 +528,6 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
                 Debug.Log("tried to get loadedobject " + data.ints["holdingID"].ToString() + " but was not found!");
             }
         }
-        // note: trying to reference a key in data.ints that didn't exist here caused a hard crash at runtime
-        // so PROTECT YA NECK!!!
         if (data.ints["itemCount"] > 0) {
             for (int i = 0; i < data.ints["itemCount"]; i++) {
                 GameObject theItem = MySaver.IDToGameObject(data.GUIDs["item" + i.ToString()]);

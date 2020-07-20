@@ -4,9 +4,9 @@ using System.Text.RegularExpressions;
 using UnityEngine.SceneManagement;
 
 public class PersistentObject {
-    private static Regex regexClone = new Regex(@"(.+)\(Clone\)$", RegexOptions.Multiline);
-    private static Regex regexNumber = new Regex(@"(.+)\(\d+\)$", RegexOptions.Multiline);
-    private static Regex regexSpace = new Regex("\\s+", RegexOptions.Multiline);
+    private static readonly Regex regexClone = new Regex(@"(.+)\(Clone\)$", RegexOptions.Multiline);
+    private static readonly Regex regexNumber = new Regex(@"(.+)\(\d+\)$", RegexOptions.Multiline);
+    public static readonly Regex regexSpace = new Regex("\\s+", RegexOptions.Multiline);
     public string name;
     public string prefabPath;
     public bool noPrefab;

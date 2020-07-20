@@ -56,6 +56,8 @@ namespace AI {
                 urgency -= Time.deltaTime / 10f;
         }
         public override float Urgency(Personality personality) {
+            if (personality.haunt == Personality.Haunt.yes)
+                return Priority.urgencyLarge;
             if (netBuffs != null && netBuffs.ContainsKey(BuffType.enraged) && netBuffs[BuffType.enraged].active())
                 return Priority.urgencyLarge;
             if (personality.bravery == Personality.Bravery.brave)

@@ -16,6 +16,10 @@ public class HomeCloset : Interactive {
         // act.otherOnSelfConsent = false;
         interactions.Add(stashAct);
 
+        Interaction stashHatAct = new Interaction(this, "Remove Hat", "StashHat");
+        stashHatAct.validationFunction = true;
+        interactions.Add(stashHatAct);
+
         newBubbleAnimation = GetComponent<AnimateUIBubble>();
         CheckBubble();
     }
@@ -97,6 +101,48 @@ public class HomeCloset : Interactive {
                 return pickup.GetComponent<Edible>() != null;
             case ClosetType.clothing:
                 return pickup.GetComponent<Uniform>() != null;
+            default:
+                return true;
+        }
+    }
+
+
+    public void StashHat(Head head) {
+        GameObject hat = head.RemoveHat().gameObject;
+        ClaimsManager.Instance.WasDestroyed(hat);
+        string prefabName = Toolbox.Instance.CloneRemover(hat.name);
+        GameManager.Instance.data.itemCheckedOut[prefabName] = false;
+        Destroy(hat);
+    }
+    public string StashHat_desc(Head head) {
+        if (head.hat == null)
+            return "stash hat";
+        string itemName = Toolbox.Instance.GetName(head.hat.gameObject);
+        switch (type) {
+            case ClosetType.all:
+                return $"Put {itemName} in closet";
+            case ClosetType.items:
+                return $"Put {itemName} in closet";
+            case ClosetType.food:
+                return $"Put {itemName} in refrigerator";
+            case ClosetType.clothing:
+                return $"Put {itemName} in dresser";
+            default:
+                return $"Put {itemName} away";
+        }
+    }
+    public bool StashHat_Validation(Head head) {
+        if (head.hat == null)
+            return false;
+        switch (type) {
+            case ClosetType.all:
+                return true;
+            case ClosetType.items:
+                return true;
+            case ClosetType.food:
+                return false;
+            case ClosetType.clothing:
+                return true;
             default:
                 return true;
         }

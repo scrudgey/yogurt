@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 [System.Serializable]
 public class LoHi {
     public float low;
@@ -19,6 +20,7 @@ public class Gibs : MonoBehaviour {
     public LoHi initHeight = new LoHi(0.025f, 0.075f);
     public LoHi initVelocity = new LoHi(0.5f, 0.5f);
     public LoHi initAngleFromHorizontal = new LoHi(0.1f, 0.9f);
+    public float impactEmitExpectedPer100;
     public void CopyFrom(Gibs other) {
         applyAnimationSkinColor = other.applyAnimationSkinColor;
         damageCondition = other.damageCondition;
@@ -32,6 +34,11 @@ public class Gibs : MonoBehaviour {
         initVelocity.high = other.initVelocity.high;
         initAngleFromHorizontal.low = other.initAngleFromHorizontal.low;
         initAngleFromHorizontal.high = other.initAngleFromHorizontal.high;
+    }
+    public void Emit(int number, MessageDamage message) {
+        for (int i = 0; i < number; i++) {
+            Emit(message);
+        }
     }
     public void Emit(MessageDamage message) {
         if (message.suppressGibs)
@@ -60,7 +67,7 @@ public class Gibs : MonoBehaviour {
             PhysicalBootstrapper bitPhys = Toolbox.GetOrCreateComponent<PhysicalBootstrapper>(bit);
             PhysicalBootstrapper myBoot = GetComponent<PhysicalBootstrapper>();
             bitPhys.impactsMiss = true;
-            bitPhys.noCollisions = true;
+            // bitPhys.noCollisions = true;
             if (bitPhys.size == PhysicalBootstrapper.shadowSize.normal)
                 bitPhys.size = PhysicalBootstrapper.shadowSize.medium;
             float height = Random.Range(initHeight.low, initHeight.high);
@@ -96,9 +103,8 @@ public class Gibs : MonoBehaviour {
             force.x = force.x * Mathf.Cos(phi);
             force.y = force.y * Mathf.Cos(phi);
             bitPhys.Set3Motion(force);
-            // Debug.Log(force.x);
-            // Debug.Log(force.y);
-            // Debug.Log(force.z);
+            bitPhys.initVelocity = force;
+            bitPhys.doInit = true;
         }
         // Debug.Break();
     }
@@ -107,11 +113,18 @@ public class Gibs : MonoBehaviour {
             return true;
         if (dam1 == damageType.any || dam2 == damageType.any)
             return true;
-        if (dam1 == damageType.physical && (dam2 == damageType.cutting || dam2 == damageType.physical || dam2 == damageType.piercing))
+        if (dam1 == damageType.physical && physicalDamages.Contains(dam2))
             return true;
-        if (dam2 == damageType.physical && (dam1 == damageType.cutting || dam1 == damageType.physical || dam1 == damageType.piercing))
+        if (dam2 == damageType.physical && physicalDamages.Contains(dam1))
             return true;
         return false;
     }
-
+    public static HashSet<damageType> physicalDamages = new HashSet<damageType>(){
+        damageType.any,
+        damageType.cutting,
+        damageType.physical,
+        damageType.piercing,
+        damageType.explosion,
+        damageType.acid
+    };
 }

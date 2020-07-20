@@ -50,7 +50,6 @@ public class Interaction {
         if (methodInfo != null) {
             System.Reflection.ParameterInfo[] pars = methodInfo.GetParameters();
             foreach (System.Reflection.ParameterInfo p in pars) {
-                // Debug.Log(actionName + " " + p.ParameterType.ToString());
                 parameterTypes.Add(p.ParameterType);
             }
         } else {
@@ -87,7 +86,12 @@ public class Interaction {
         if (debug)
             Debug.Log("Checking the dependency for interaction " + actionName);
         // there's probably a nicer way to do this with linq or something
-        foreach (Type requiredType in parameterTypes) {
+        if (this.parameterTypes == null) {
+            Debug.LogError("null parameter types detected!!");
+            Debug.Log(actionName);
+            Debug.Break();
+        }
+        foreach (Type requiredType in this.parameterTypes) {
             bool parameterMatched = false;
             if (debug)
                 Debug.Log("Looking for the required argument of type " + requiredType.ToString());

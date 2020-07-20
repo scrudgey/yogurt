@@ -85,8 +85,8 @@ public class MonoLiquid : MonoBehaviour, ISaveable {
     void OnGroundImpact(Physical phys) {
         EventData data = Toolbox.Instance.DataFlag(
             gameObject,
-            "spilling",
-            liquid.name + " was spilled",
+            $"{liquid.name} spilling",
+            $"{liquid.name} was spilled",
             chaos: 1,
             disgusting: 1);
         // data.whatHappened = liquid.name + " was spilled";

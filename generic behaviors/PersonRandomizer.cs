@@ -64,11 +64,9 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
             Portrait portrait = null;
             switch (gender) {
                 case Gender.male:
-                    // head.baseName = maleHeads[UnityEngine.Random.Range(0, maleHeads.Count)];
                     portrait = maleHeads[UnityEngine.Random.Range(0, maleHeads.Count)].portrait;
                     break;
                 case Gender.female:
-                    // head.baseName = femaleHeads[UnityEngine.Random.Range(0, femaleHeads.Count)];
                     portrait = femaleHeads[UnityEngine.Random.Range(0, femaleHeads.Count)].portrait;
                     break;
             }
@@ -77,12 +75,6 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
             speech.portrait = portrait.sprites.ToArray();
             Toolbox.SetSkinColor(gameObject, portrait.skinColor);
             head.LoadSprites();
-
-            // if (portrait.overrideGenderFemale) {
-            //     Toolbox.SetGender(gameObject, Gender.female);
-            // } else if (portrait.overrideGenderMale) {
-            //     Toolbox.SetGender(gameObject, Gender.male);
-            // }
         } else {
             if (randomizeSkinColor) {
                 SkinColor skinColor = (SkinColor)UnityEngine.Random.Range(0, 3);
@@ -117,7 +109,8 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
                 (Personality.Social)socials.GetValue(random.Next(socials.Length)),
                 (Personality.CombatProfficiency)combatProfficiencies.GetValue(random.Next(combatProfficiencies.Length)),
                 Personality.PizzaDeliverer.no,
-                Personality.Dancer.no
+                Personality.Dancer.no,
+                Personality.Haunt.no
             );
 
             DecisionMaker decisionMaker = GetComponent<DecisionMaker>();
@@ -166,7 +159,10 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
             gibberizer.spacingRange = speech.spacingRange;
             gibberizer.sounds = speech.speakSounds;
         }
-
+        Awareness awareness = GetComponent<Awareness>();
+        if (awareness) {
+            awareness.socializationTimer = -1f * UnityEngine.Random.Range(0f, 10f);
+        }
         configured = true;
     }
 

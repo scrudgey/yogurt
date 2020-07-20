@@ -31,7 +31,7 @@ public class Godhead : MonoBehaviour {
     public void Start() {
         cam = GameObject.FindObjectOfType<CameraControl>();
 
-        if (GameManager.Instance.data.cosmicName != "") {
+        if (GameManager.Instance.data != null && GameManager.Instance.data.cosmicName != "") {
             godSpeech.defaultMonologue = "dancing_god_cosmic";
         }
 
@@ -49,24 +49,39 @@ public class Godhead : MonoBehaviour {
         timer += Time.deltaTime;
         switch (state) {
             case State.moveHand:
+                if (!source.isPlaying) {
+                    source.clip = growl;
+                    source.Play();
+                }
                 UpdateMoveHand();
                 break;
             case State.moveHead:
+                if (!source.isPlaying) {
+                    source.clip = growl;
+                    source.Play();
+                }
                 UpdateMoveHead();
                 break;
             case State.handSlew:
+                source.Stop();
                 if (timer > 2f) {
                     menu = godSpeech.SpeakWith();
                     state = State.dialogue;
                 }
                 break;
             case State.bless:
+                source.Stop();
                 UpdateBless();
                 break;
             case State.destroy:
+                source.Stop();
                 UpdateDestroy();
                 break;
             case State.retract:
+                if (!source.isPlaying) {
+                    source.clip = growl;
+                    source.Play();
+                }
                 UpdateRetract();
                 break;
             default:
@@ -86,6 +101,8 @@ public class Godhead : MonoBehaviour {
             handParticles.Stop();
             hand.localPosition = startHandPoint;
             timer = 0f;
+        } else {
+            source.Stop();
         }
     }
     void UpdateMoveHand() {
@@ -100,6 +117,8 @@ public class Godhead : MonoBehaviour {
             handPointRenderer.enabled = true;
             state = State.handSlew;
             timer = 0f;
+        } else {
+            source.Stop();
         }
     }
 

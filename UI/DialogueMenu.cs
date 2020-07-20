@@ -23,8 +23,7 @@ public class Monologue {
         string line = name_hook.Replace(inString, GameManager.Instance.saveGameName);
         line = cosmic_name_hook.Replace(line, GameManager.Instance.data.cosmicName);
         List<bool> swearList = new List<bool>();
-        line = Speech.ProcessDialogue(line, ref swearList);
-        //  swearMask = swearList.ToArray();
+        line = Speech.ProcessDialogue(line, ref swearList).phrase;
         return line;
     }
     public Monologue(Speech speaker, string[] texts) {
@@ -110,13 +109,14 @@ public class DialogueMenu : MonoBehaviour {
     public bool disableCommand;
     private bool doTrapDoor;
     private bool doVampireAttack;
-    // public MyControls controls;
     public bool keypressedThisFrame;
     void Awake() {
+        keypressedThisFrame = false;
         InputController.Instance.PrimaryAction.action.Enable();
-        InputController.Instance.PrimaryAction.action.performed += _ => {
-            keypressedThisFrame = true;
+        InputController.Instance.PrimaryAction.action.performed += ctx => {
+            keypressedThisFrame = ctx.ReadValueAsButton();
         };
+
     }
 
     public void Start() {
@@ -158,7 +158,9 @@ public class DialogueMenu : MonoBehaviour {
     }
     public void SetText(string newText = "DEFAULT") {
         if (newText == "DEFAULT") {
-            speechText.text = monologue.GetString();
+            List<bool> swearList = new List<bool>();
+            MessagePhrase text = Speech.ProcessDialogue(monologue.GetString(), ref swearList);
+            speechText.text = text.phrase;
             largeText.text = monologue.text.Peek();
         } else {
             speechText.text = newText;
@@ -190,14 +192,14 @@ public class DialogueMenu : MonoBehaviour {
         portrait2.sprite = target.portrait[0];
         portrait1.sprite = instigator.portrait[0];
         targetControl = target.GetComponent<Controllable>();
+        instigatorControl = instigator.GetComponent<Controllable>();
         using (Controller controller = new Controller(targetControl)) {
             controller.SetDirection(instigator.transform.position - target.transform.position);
         }
-        using (Controller controller = new Controller(targetControl)) {
+        using (Controller controller = new Controller(instigatorControl)) {
             controller.SetDirection(target.transform.position - instigator.transform.position);
         }
 
-        instigatorControl = instigator.GetComponent<Controllable>();
         if (targetControl) {
             targetControl.disabled = true;
         }
@@ -523,9 +525,9 @@ public class DialogueMenu : MonoBehaviour {
             if (dialogue.Count > 0 && !waitForKeyPress) {
                 waitForKeyPress = true;
                 if (dialogue.Peek().text.Peek() == "END") {
-                    promptText.text = "[PRESS A TO END]";
+                    promptText.text = "[PRESS ANY KEY TO END]";
                 } else {
-                    promptText.text = "[PRESS A]";
+                    promptText.text = "[PRESS ANY KEY]";
                 }
             }
             return;
@@ -540,7 +542,7 @@ public class DialogueMenu : MonoBehaviour {
             monologue.speaker.gibberizer.StopPlay();
             if (monologue.text.Count > 1) {
                 waitForKeyPress = true;
-                promptText.text = "[PRESS A]";
+                promptText.text = "[PRESS ANY KEY]";
             } else {
                 monologue.text.Pop();
                 if (dialogue.Count == 0)

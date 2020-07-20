@@ -38,6 +38,8 @@ public class VideoCamera : Interactive {
         UpdateStatus();
     }
     public void EnableBubble() {
+        if (doneBubble.activeInHierarchy)
+            return;
         doneBubble.SetActive(true);
         Transform bubbleImage = doneBubble.transform.Find("bubbleFrame1/Image");
         StartCoroutine(EaseIn(bubbleImage));

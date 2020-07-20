@@ -21,9 +21,6 @@ public class Hurtable : Damageable, ISaveable {
     public float maxHealth;
     public float oxygen;
     public float maxOxygen = 100f;
-    // public float bonusHealth;
-    // public float armor;
-    // public bool coughing;
     public bool ethereal;
     private float hitStunCounter;
     private bool doubledOver;
@@ -35,6 +32,7 @@ public class Hurtable : Damageable, ISaveable {
     bool vibrate;
     public bool bleeds = true; // if true, bleed on cutting / piercing damage
     public bool monster = false; // if true, death of this hurtable is not shocking or disturbing
+    public bool ghostly = false; // if true, does not leave a skeleton behind when vaporized
     public Dictionary<damageType, float> totalDamage = new Dictionary<damageType, float>();
     public Collider2D myCollider;
     public bool unknockdownable;
@@ -101,6 +99,7 @@ public class Hurtable : Damageable, ISaveable {
                 damage = message.amount * 10;
                 break;
             case damageType.cosmic:
+                impulse += damage;
                 damage = message.amount;
                 break;
             case damageType.asphyxiation:
@@ -113,7 +112,7 @@ public class Hurtable : Damageable, ISaveable {
         }
 
         // side effect
-        if (message.type != damageType.fire && message.type != damageType.asphyxiation) {
+        if (message.type != damageType.fire && message.type != damageType.asphyxiation && message.type != damageType.acid) {
             hitState = Controllable.AddHitState(hitState, Controllable.HitState.stun);
             hitStunCounter = Random.Range(0.2f, 0.25f);
         }
@@ -192,16 +191,17 @@ public class Hurtable : Damageable, ISaveable {
     public void Die(MessageDamage message, damageType type /* the overall type of damage TODO: rename */) {
         if (hitState == Controllable.HitState.dead)
             return;
-
         Inventory inv = GetComponent<Inventory>();
         if (inv) {
             inv.DropItem();
         }
         if (type == damageType.cosmic || type == damageType.fire) {
-            Instantiate(Resources.Load("prefabs/skeleton"), transform.position, transform.rotation);
-            Toolbox.Instance.AudioSpeaker("Flash Fire Ignite 01", transform.position);
+            if (!ghostly) {
+                Instantiate(Resources.Load("prefabs/skeleton"), transform.position, transform.rotation);
+                Toolbox.Instance.AudioSpeaker("Flash Fire Ignite 01", transform.position);
+            }
             ClaimsManager.Instance.WasDestroyed(gameObject);
-            Destroy(gameObject);
+            Destruct();
         } else if (type == damageType.explosion) {
             Destruct();
         } else {
@@ -214,6 +214,7 @@ public class Hurtable : Damageable, ISaveable {
             Destroy(dizzyEffect);
         }
         hitState = Controllable.AddHitState(hitState, Controllable.HitState.dead);
+        gameObject.SendMessage("OnDie", SendMessageOptions.DontRequireReceiver);
     }
 
     public void Resurrect() {
@@ -237,21 +238,24 @@ public class Hurtable : Damageable, ISaveable {
     public void LogTypeOfDeath(MessageDamage message) {
         bool suicide = lastAttacker == gameObject;
         bool assailant = (lastAttacker != null) && (lastAttacker != gameObject) && !impersonalAttacker;
-        // bool assailant = false;
 
         // TODO: could this logic belong to eventdata / occurrence ?
         if (GameManager.Instance.playerObject == gameObject) {
-            if (message.type == damageType.fire) {
-                if (suicide) {
-                    GameManager.Instance.IncrementStat(StatType.selfImmolations, 1);
+            if (message != null) {
+                if (message.type == damageType.fire) {
+                    if (suicide) {
+                        GameManager.Instance.IncrementStat(StatType.selfImmolations, 1);
+                    }
                 }
-                GameManager.Instance.IncrementStat(StatType.immolations, 1);
-            }
-            if (message.type == damageType.asphyxiation) {
-                GameManager.Instance.IncrementStat(StatType.deathByAsphyxiation, 1);
-            }
-            if (message.type == damageType.explosion) {
-                GameManager.Instance.IncrementStat(StatType.deathByExplosion, 1);
+                if (message.type == damageType.asphyxiation) {
+                    GameManager.Instance.IncrementStat(StatType.deathByAsphyxiation, 1);
+                }
+                if (message.type == damageType.explosion) {
+                    GameManager.Instance.IncrementStat(StatType.deathByExplosion, 1);
+                }
+                if (message.type == damageType.acid) {
+                    GameManager.Instance.IncrementStat(StatType.deathByAcid, 1);
+                }
             }
             if (impersonalAttacker) {
                 GameManager.Instance.IncrementStat(StatType.deathByMisadventure, 1);
@@ -260,6 +264,11 @@ public class Hurtable : Damageable, ISaveable {
                 GameManager.Instance.IncrementStat(StatType.deathByCombat, 1);
             }
             GameManager.Instance.PlayerDeath();
+        } else {
+            if (message.type == damageType.fire) {
+                // TODO: this is wrong?
+                GameManager.Instance.IncrementStat(StatType.immolations, 1);
+            }
         }
 
         OccurrenceDeath occurrenceData = new OccurrenceDeath(monster);
@@ -268,7 +277,9 @@ public class Hurtable : Damageable, ISaveable {
         occurrenceData.damageZone = impersonalAttacker;
         occurrenceData.assailant = assailant;
         occurrenceData.lastAttacker = lastAttacker;
-        occurrenceData.lastDamage = message.type;
+        if (message != null) {
+            occurrenceData.lastDamage = message;
+        }
         Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData);
 
         if (gameObject.name.StartsWith("greaser")) {
@@ -353,7 +364,8 @@ public class Hurtable : Damageable, ISaveable {
             downedTimer = 10f;
         }
         if (myCollider != null) {
-            myCollider.enabled = false;
+            // myCollider.enabled = false;
+            myCollider.gameObject.layer = LayerMask.NameToLayer("FOV");
         }
         Vector3 pivot = transform.position;
         pivot.y -= 0.15f;
@@ -368,6 +380,7 @@ public class Hurtable : Damageable, ISaveable {
         FollowGameObject dizzyFollower = dizzyEffect.GetComponent<FollowGameObject>();
         dizzyFollower.target = gameObject;
         dizzyFollower.Init();
+        gameObject.SendMessage("OnKnockDown", SendMessageOptions.DontRequireReceiver);
     }
     public void GetUp() {
         // Debug.Log(health);
@@ -378,7 +391,8 @@ public class Hurtable : Damageable, ISaveable {
                 health += 0.25f * maxHealth;
             }
         if (myCollider != null) {
-            myCollider.enabled = true;
+            // myCollider.enabled = true;
+            myCollider.gameObject.layer = LayerMask.NameToLayer("feet");
         }
         hitState = Controllable.RemoveHitState(hitState, Controllable.HitState.unconscious);
         doubledOver = false;
@@ -413,8 +427,12 @@ public class Hurtable : Damageable, ISaveable {
     }
     public void Bleed(Vector3 position, Vector3 direction) {
         if (bleeds) {
+
             Liquid blood = Liquid.LoadLiquid("blood");
-            float initHeight = (position.y - transform.position.y) + 0.15f;
+            float initHeight = 0;
+            if (hitState < Controllable.HitState.unconscious) {
+                initHeight = (position.y - transform.position.y) + 0.15f;
+            }
             GameObject drop = Toolbox.Instance.SpawnDroplet(blood, 0.3f, gameObject, initHeight, direction.normalized);
             Edible edible = drop.GetComponent<Edible>();
             edible.human = true;

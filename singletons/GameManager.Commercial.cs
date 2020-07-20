@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public partial class GameManager : Singleton<GameManager> {
 
@@ -24,7 +25,6 @@ public partial class GameManager : Singleton<GameManager> {
 
     public void UnlockCommercial(string filename) {
         //TODO: do not unlock same commercial twice
-        // Debug.Log("unlocking "+filename);
         Commercial unlocked = Commercial.LoadCommercialByFilename(filename);
         foreach (Commercial commercial in data.unlockedCommercials) {
             if (commercial.name == unlocked.name) {
@@ -56,10 +56,6 @@ public partial class GameManager : Singleton<GameManager> {
         foreach (string unlock in commercial.unlockUponCompletion) {
             UnlockCommercial(unlock);
         }
-        GameObject report = UINew.Instance.ShowMenu(UINew.MenuType.commercialReport);
-        CommercialReportMenu menu = report.GetComponent<CommercialReportMenu>();
-        menu.commercial = commercial;
-        report.GetComponent<CommercialReportMenu>().Report(commercial);
         if (commercial.unlockItem != "") {
             ReceivePackage(commercial.unlockItem);
         }
@@ -68,25 +64,52 @@ public partial class GameManager : Singleton<GameManager> {
         }
         UINew.Instance.ClearObjectives();
         UINew.Instance.RefreshUI(active: false);
+
+        GameObject report = UINew.Instance.ShowMenu(UINew.MenuType.commercialReport);
+        CommercialReportMenu menu = report.GetComponent<CommercialReportMenu>();
+        menu.commercial = commercial;
+        report.GetComponent<CommercialReportMenu>().Report(commercial);
     }
     public void StartCommercial(Commercial commercial) {
         GameManager.Instance.data.activeCommercial = commercial;
-        // GameManager.Instance.data.recordingCommercial = true;
         SetRecordingStatus(true);
         foreach (VideoCamera vid in GameObject.FindObjectsOfType<VideoCamera>()) {
             vid.UpdateStatus();
         }
-        if (commercial.name == "1950s Greaser Beatdown") {
-            CutsceneManager.Instance.InitializeCutscene<CutsceneScorpion>();
-        }
         foreach (Objective objective in GameManager.Instance.data.activeCommercial.objectives) {
             UINew.Instance.AddObjective(objective);
         }
+
+        CheckCommercialInitialization(GameManager.Instance.data.activeCommercial, SceneManager.GetActiveScene().name);
     }
     public void SetRecordingStatus(bool value) {
         data.recordingCommercial = value;
         if (GameManager.onRecordingChange != null)
             GameManager.onRecordingChange(value);
+    }
+    public void CheckCommercialInitialization(Commercial commercial, string sceneName) {
+        if (data.commercialsInitializedToday.Contains(commercial.name))
+            return;
+
+        // TODO: check if this level supports greaser entrance first
+        if (commercial.name == "1950s Greaser Beatdown") {
+            data.commercialsInitializedToday.Add(commercial.name);
+            CutsceneManager.Instance.InitializeCutscene<CutsceneScorpion>();
+        }
+
+        if (commercial.name == "Nullify Hate" && sceneName == "studio") {
+            data.commercialsInitializedToday.Add(commercial.name);
+            Transform point1 = GameObject.Find("effigyPoint1").transform;
+            GameObject.Instantiate(Resources.Load("prefabs/effigy"), point1.position, Quaternion.identity);
+        }
+
+        if (commercial.name == "Eradicate Hate and Ignorance" && sceneName == "studio") {
+            data.commercialsInitializedToday.Add(commercial.name);
+            Transform point1 = GameObject.Find("effigyPoint1").transform;
+            Transform point2 = GameObject.Find("effigyPoint2").transform;
+            GameObject.Instantiate(Resources.Load("prefabs/effigy"), point1.position, Quaternion.identity);
+            GameObject.Instantiate(Resources.Load("prefabs/effigy_ignorance"), point2.position, Quaternion.identity);
+        }
     }
 }
 

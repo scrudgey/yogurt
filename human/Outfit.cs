@@ -83,6 +83,12 @@ public class Outfit : Interactive, ISaveable {
         anim.outfitName = newUniform.baseName;
         Toolbox.Instance.SendMessage(gameObject, this, anim);
 
+        if (gameObject == GameManager.Instance.playerObject) {
+            EmailTrigger newUniformTrigger = newUniform.GetComponent<EmailTrigger>();
+            if (newUniformTrigger != null && newUniformTrigger.triggerType == EmailTrigger.EmailTriggerType.onWear) {
+                newUniformTrigger.SendEmail();
+            }
+        }
 
         wornUniformName = Toolbox.Instance.CloneRemover(newUniform.gameObject.name);
         readableUniformName = newUniform.readableName;
@@ -118,9 +124,13 @@ public class Outfit : Interactive, ISaveable {
 
         Toolbox.Instance.RemoveChildIntrinsics(gameObject, this);
         removed.transform.position = transform.position;
-        // SpriteRenderer sprite = uniform.GetComponent<SpriteRenderer>();
-        // sprite.sortingLayerName = "ground";
         removed.SetActive(true);
+        PhysicalBootstrapper pb = removed.GetComponent<PhysicalBootstrapper>();
+        if (pb) {
+            pb.InitPhysical(0.02f, Vector3.zero);
+        } else {
+            Debug.LogWarning($"no physicalbootstrapper on removed outfit? {removed}");
+        }
         return removed;
     }
     public void SaveData(PersistentComponent data) {
@@ -150,6 +160,8 @@ public class Outfit : Interactive, ISaveable {
                 GameObject removedUniform = DonUniform(go.GetComponent<Uniform>(), cleanStains: false);
                 if (removedUniform)
                     Destroy(removedUniform);
+            } else {
+                Debug.LogError($"{this} could not find saved uniform {data.GUIDs["uniform"]}. Possible lost saved object on the loose!");
             }
             initUniform = null;
         }

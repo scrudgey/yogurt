@@ -1,25 +1,14 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using Poisson;
 
 [System.Serializable]
-public class ImpactGibs {
-    public float probability;
-    public Gibs gibs;
-}
-public enum ImpactResult { none, damageNormal, damageStrong, damageCosmic, damageOther, repelNormal, repelEthereal, repelInvulnerable, repelOther }
 
-public enum damageType { physical, fire, any, cutting, piercing, cosmic, asphyxiation, explosion }
+public enum ImpactResult { none, damageNormal, damageStrong, damageCosmic, damageOther, damageSilent, repelNormal, repelEthereal, repelInvulnerable, repelOther, repelSilent }
+
+public enum damageType { physical, fire, any, cutting, piercing, cosmic, asphyxiation, explosion, acid }
 public abstract class Damageable : MonoBehaviour {
-    // public static Dictionary<damageType, List<BuffType>> blockedBy = new Dictionary<damageType, List<BuffType>>(){
-    //     {damageType.physical, new List<BuffType>(){BuffType.noPhysicalDamage, BuffType.ethereal, BuffType.invulnerable}},
-    //     {damageType.fire, new List<BuffType>(){BuffType.fireproof, BuffType.ethereal, BuffType.invulnerable}},
-    //     {damageType.cutting, new List<BuffType>(){BuffType.noPhysicalDamage, BuffType.ethereal, BuffType.invulnerable}},
-    //     {damageType.piercing, new List<BuffType>(){BuffType.noPhysicalDamage, BuffType.ethereal, BuffType.invulnerable}},
-    //     {damageType.cosmic, new List<BuffType>(){BuffType.invulnerable}},
-    //     {damageType.asphyxiation, new List<BuffType>(){BuffType.undead}},
-    //     {damageType.explosion, new List<BuffType>(){BuffType.noPhysicalDamage, BuffType.ethereal, BuffType.invulnerable}}
-    // };
     public Dictionary<BuffType, Buff> netBuffs = Intrinsics.emptyBuffMap();
     public bool immuneToFire;
     public bool immuneToPhysical;
@@ -37,7 +26,7 @@ public abstract class Damageable : MonoBehaviour {
     public Controllable controllable;
     public MessageDamage cacheFiredMessage;
     private float cachedTime;
-    public List<ImpactGibs> impactGibs = new List<ImpactGibs>();
+    private List<Gibs> impactGibs = new List<Gibs>();
     public virtual void Awake() {
         if (gibsContainerPrefab != null) {
             GameObject gibsContainer = Instantiate(gibsContainerPrefab) as GameObject;
@@ -60,7 +49,11 @@ public abstract class Damageable : MonoBehaviour {
             etherealRepelSounds = Resources.LoadAll<AudioClip>("sounds/repel_ethereal/");
         if (invulnerableRepelSounds != null && invulnerableRepelSounds.Length == 0)
             invulnerableRepelSounds = Resources.LoadAll<AudioClip>("sounds/repel_invulnerable/");
-
+        impactGibs = new List<Gibs>();
+        foreach (Gibs gib in GetComponents<Gibs>()) {
+            if (gib.impactEmitExpectedPer100 > 0)
+                impactGibs.Add(gib);
+        }
         rigidbody2D = Toolbox.GetOrCreateComponent<Rigidbody2D>(gameObject);
         rigidbody2D.gravityScale = 0;
         controllable = GetComponent<Controllable>();
@@ -99,26 +92,76 @@ public abstract class Damageable : MonoBehaviour {
         if (message.amount == 0)
             return;
 
+        // TODO: immuneToPhysical is kinda bullshit?
         if (message.type == damageType.physical && immuneToPhysical)
             return;
         if (message.type == damageType.fire && immuneToFire)
             return;
 
-        ImpactResult result = Damages(message, netBuffs);
+        ImpactResult result = Vulnerable(message, netBuffs);
+        AudioClip[] sounds = new AudioClip[0];
+
+        switch (result) {
+            case ImpactResult.repelEthereal:
+                if (message.type != damageType.fire && message.type != damageType.acid)
+                    sounds = etherealRepelSounds;
+                break;
+            case ImpactResult.repelInvulnerable:
+                if (message.type != damageType.fire && message.type != damageType.acid)
+                    sounds = invulnerableRepelSounds;
+                break;
+            case ImpactResult.repelNormal:
+                if (message.type != damageType.fire && message.type != damageType.acid)
+                    sounds = repelSounds;
+                break;
+            // case ImpactResult.repelOther:
+            //     sounds = repelSounds;
+            //     break;
+            case ImpactResult.damageNormal:
+                if (message.impactSounds.Length > 0) {
+                    sounds = message.impactSounds;
+                } else {
+                    sounds = impactSounds;
+                }
+                break;
+            case ImpactResult.damageCosmic:
+                // TODO: cosmic impact effect
+                sounds = cosmicImpactSounds;
+                Instantiate(Resources.Load("particles/cosmic_impact"), transform.position, Quaternion.identity);
+                break;
+            case ImpactResult.damageStrong:
+                sounds = strongImpactSounds;
+                Instantiate(Resources.Load("particles/explosion1"), transform.position, Quaternion.identity);
+                break;
+            default:
+                break;
+        }
+
+        // play sound
+        if (sounds.Length > 0 && !message.suppressImpactSound) {
+            Toolbox.Instance.AudioSpeaker(sounds[Random.Range(0, sounds.Length)], transform.position);
+        }
+        if (message.messenger != null && message.type != damageType.acid)
+            message.messenger.SendMessage("ImpactReceived", result, SendMessageOptions.DontRequireReceiver);
+
         if (DamageResults.Contains(result)) {
             lastMessage = message;
             if (message.responsibleParty != null) {
                 lastAttacker = message.responsibleParty;
             }
             impersonalAttacker = message.impersonal;
-            foreach (ImpactGibs impactGib in impactGibs) {
-                if (Random.Range(0, 1f) <= impactGib.probability)
-                    impactGib.gibs.Emit(message);
+            foreach (Gibs gib in impactGibs) {
+                // expected number of gibs to emit:
+                // damage * ( ratePer100Damage /100)
+                double lambda = (message.amount / 100f) * gib.impactEmitExpectedPer100;
+                int number = Poisson.Poisson.GetPoisson(lambda);
+                if (number > 0)
+                    gib.Emit(number, message);
             }
             CalculateDamage(message);
 
             // UI hit effect if i am the player
-            if (gameObject == GameManager.Instance.playerObject) {
+            if (gameObject == GameManager.Instance.playerObject && message.type != damageType.asphyxiation) {
                 UINew.Instance.Hit();
             }
             // look in the direction 
@@ -129,7 +172,7 @@ public abstract class Damageable : MonoBehaviour {
     }
     public abstract void CalculateDamage(MessageDamage message);
     public virtual void Destruct() {
-        if (gameObject.name == "ghost" && SceneManager.GetActiveScene().name == "mayors_attic") {
+        if (gameObject.name.Contains("ghost") && SceneManager.GetActiveScene().name == "mayors_attic") {
             GameManager.Instance.data.ghostsKilled += 1;
         }
         if (lastMessage == null) {
@@ -151,21 +194,25 @@ public abstract class Damageable : MonoBehaviour {
     }
 
     public static HashSet<ImpactResult> DamageResults = new HashSet<ImpactResult> {
-        ImpactResult.damageNormal, ImpactResult.damageCosmic, ImpactResult.damageStrong, ImpactResult.damageOther
+        ImpactResult.damageNormal, ImpactResult.damageCosmic, ImpactResult.damageStrong, ImpactResult.damageOther, ImpactResult.damageSilent
     };
     public static HashSet<ImpactResult> RepelResults = new HashSet<ImpactResult> {
-        ImpactResult.repelNormal, ImpactResult.repelEthereal, ImpactResult.repelInvulnerable, ImpactResult.repelOther
+        ImpactResult.repelNormal, ImpactResult.repelEthereal, ImpactResult.repelInvulnerable, ImpactResult.repelOther, ImpactResult.repelSilent
     };
-    public ImpactResult Damages(MessageDamage message, Dictionary<BuffType, Buff> netBuffs) {
-
-        // TODO: account for fire
-
-        if (!message.strength)
-            message.amount = Mathf.Max(message.amount - netBuffs[BuffType.armor].floatValue, 0);
-
+    public static ImpactResult Vulnerable(MessageDamage message, Dictionary<BuffType, Buff> netBuffs) {
+        if (!message.strength) {
+            switch (message.type) {
+                case damageType.physical:
+                case damageType.cutting:
+                case damageType.acid:
+                case damageType.piercing:
+                    message.amount = Mathf.Max(message.amount - netBuffs[BuffType.armor].floatValue, 0);
+                    break;
+                default:
+                    break;
+            }
+        }
         ImpactResult result = ImpactResult.none;
-        AudioClip[] sounds = new AudioClip[0];
-
         // blocks
         if (netBuffs != null) {
             float armor = netBuffs[BuffType.armor].floatValue;
@@ -175,30 +222,38 @@ public abstract class Damageable : MonoBehaviour {
             bool undead = netBuffs[BuffType.undead].active();
 
             switch (message.type) {
+                case damageType.acid:
+                    if (message.amount <= 0 || ethereal || invulnerable) {
+                        result = ImpactResult.repelSilent;
+                    } else result = ImpactResult.damageSilent;
+                    break;
+                case damageType.explosion:
                 case damageType.physical:
                 case damageType.cutting:
                 case damageType.piercing:
                     if (message.amount <= 0) {
-                        sounds = repelSounds;
                         result = ImpactResult.repelNormal;
                     }
                     if (ethereal) {
-                        sounds = etherealRepelSounds;
                         result = ImpactResult.repelEthereal;
                     }
                     if (invulnerable) {
-                        sounds = invulnerableRepelSounds;
                         result = ImpactResult.repelInvulnerable;
                     }
                     break;
                 case damageType.cosmic:
                     if (invulnerable) {
-                        sounds = invulnerableRepelSounds;
                         result = ImpactResult.repelInvulnerable;
                     }
                     break;
                 case damageType.fire:
                     if (fireproof) result = ImpactResult.repelOther;
+                    if (ethereal) {
+                        result = ImpactResult.repelEthereal;
+                    }
+                    if (invulnerable) {
+                        result = ImpactResult.repelInvulnerable;
+                    }
                     break;
                 case damageType.asphyxiation:
                     if (undead) result = ImpactResult.repelOther;
@@ -206,25 +261,19 @@ public abstract class Damageable : MonoBehaviour {
                 default:
                     break;
             }
-
         }
-        if (!RepelResults.Contains(result) && !message.suppressImpactSound) {
+        if (!RepelResults.Contains(result)) {
             switch (message.type) {
+                case damageType.acid:
+                    result = ImpactResult.damageSilent;
+                    break;
                 case damageType.physical:
                 case damageType.cutting:
                 case damageType.piercing:
-                    if (message.impactSounds.Length > 0) {
-                        sounds = message.impactSounds;
-                    } else {
-                        sounds = impactSounds;
-                    }
                     result = ImpactResult.damageNormal;
                     break;
                 case damageType.cosmic:
-                    // TODO: cosmic impact effect
-                    sounds = cosmicImpactSounds;
                     result = ImpactResult.damageCosmic;
-                    Instantiate(Resources.Load("particles/cosmic_impact"), transform.position, Quaternion.identity);
                     break;
                 default:
                     result = ImpactResult.damageOther;
@@ -232,17 +281,8 @@ public abstract class Damageable : MonoBehaviour {
             }
             if (message.strength) {
                 result = ImpactResult.damageStrong;
-                sounds = strongImpactSounds;
-                Instantiate(Resources.Load("particles/explosion1"), transform.position, Quaternion.identity);
             }
         }
-
-        // play sound
-        if (sounds.Length > 0) {
-            Toolbox.Instance.AudioSpeaker(sounds[Random.Range(0, sounds.Length)], transform.position);
-        }
-        if (message.messenger != null)
-            message.messenger.SendMessage("ImpactReceived", result, SendMessageOptions.DontRequireReceiver);
         return result;
     }
 }

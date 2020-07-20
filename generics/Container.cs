@@ -66,7 +66,7 @@ public class Container : MayorLock, IExcludable, ISaveable {
         interactions.Add(stasher);
     }
     protected void RemoveRetrieveAction(Pickup pickup) {
-        if (retrieveActions.ContainsKey(pickup))
+        if (!retrieveActions.ContainsKey(pickup))
             return;
         interactions.Remove(retrieveActions[pickup]);
     }
@@ -89,7 +89,6 @@ public class Container : MayorLock, IExcludable, ISaveable {
         if (maxNumber == 0 || items.Count < maxNumber) {
             inv.SoftDropItem();
             AddItem(pickup);
-
         } else {
             Toolbox.Instance.SendMessage(inv.gameObject, this, new MessageSpeech("It's full.") as Message);
         }
@@ -257,6 +256,8 @@ public class Container : MayorLock, IExcludable, ISaveable {
                     PhysicalBootstrapper phys = go.GetComponent<PhysicalBootstrapper>();
                     if (phys)
                         phys.doInit = false;
+                } else {
+                    Debug.LogError($"{this} could not locate contained object {data.GUIDs["item" + i.ToString()]}. Possible lost saved object on the loose!");
                 }
                 // Debug.Log("container containing "+MySaver.loadedObjects[data.ints["item"+i.ToString()]].name);
             }

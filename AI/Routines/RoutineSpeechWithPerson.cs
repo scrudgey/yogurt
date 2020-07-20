@@ -20,8 +20,10 @@ namespace AI {
                 speech.SpeakWith();
                 Inventory myInv = gameObject.GetComponent<Inventory>();
                 Inventory theirInv = target.val.GetComponent<Inventory>();
-                if (myInv.holding != null) {
+                if (myInv.holding != null && theirInv != null) {
                     theirInv.GetItem(myInv.holding);
+                } else if (myInv != null) {
+                    myInv.DropItem();
                 }
                 return status.success;
             } else {

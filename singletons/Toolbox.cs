@@ -250,7 +250,7 @@ public partial class Toolbox : Singleton<Toolbox> {
             initHeight += pb.height;
         } else {
             Inventory holderInv = spiller.GetComponentInParent<Inventory>();
-            if (holderInv) {
+            if (holderInv && initHeight != 0) {
                 initHeight += holderInv.dropHeight;
             }
         }
@@ -263,7 +263,8 @@ public partial class Toolbox : Singleton<Toolbox> {
         foreach (Collider2D collider in spillerColliders) {
             Physics2D.IgnoreCollision(collider, phys.physical.objectCollider, true);
             Physics2D.IgnoreCollision(collider, phys.physical.horizonCollider, true);
-            Physics2D.IgnoreCollision(collider, phys.physical.groundCollider, true);
+            if (phys.physical.groundCollider)
+                Physics2D.IgnoreCollision(collider, phys.physical.groundCollider, true);
         }
         Liquid.MonoLiquidify(droplet, l);
         return droplet;
@@ -326,13 +327,24 @@ public partial class Toolbox : Singleton<Toolbox> {
                     output = match.Groups[1].Value;
                 }
             }
+            // TODO: numbermatcher
         }
         return output;
     }
     public string UnderscoreRemover(string input) {
-
         return underScoreFinder.Replace(input, " ");
     }
+    // public string GetReferent(GameObject obj) {
+    //     Item item = obj.GetComponent<Item>();
+    //     if (item && item.referent != "") {
+    //         return item.referent;
+    //     }
+    //     Speech speech = obj.GetComponent<Speech>();
+    //     if (speech && speech.referent != "") {
+    //         return speech.referent;
+    //     }
+    //     return "A " + GetName(obj);
+    // }
     public string GetName(GameObject obj) {
         // possibly also use intrinsics
         string nameOut = "";
@@ -349,6 +361,9 @@ public partial class Toolbox : Singleton<Toolbox> {
         Item item = obj.GetComponent<Item>();
         if (item) {
             nameOut = item.itemName;
+            // if (item.referent != "") {
+            //     nameOut = item.referent;
+            // } else nameOut = item.itemName;
         } else {
             nameOut = obj.name;
         }
@@ -365,6 +380,10 @@ public partial class Toolbox : Singleton<Toolbox> {
         if (speech) {
             if (speech.speechName != "")
                 nameOut = speech.speechName;
+            // if (speech.referent != "") {
+            //     nameOut = speech.referent;
+            // } else if (speech.speechName != "")
+            //     nameOut = speech.speechName;
         }
         nameOut = CloneRemover(nameOut);
         nameOut = UnderscoreRemover(nameOut);

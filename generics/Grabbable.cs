@@ -22,7 +22,7 @@ public class Grabbable : Item {
             Flammable itemFlammable = item.GetComponent<Flammable>();
             if (itemFlammable) {
                 itemFlammable.heat += 100f;
-                itemFlammable.burnTimer = 1f;
+                itemFlammable.SetBurnTimer();
                 itemFlammable.fireRetardantBuffer = 0f;
                 itemFlammable.onFire = true;
             }
