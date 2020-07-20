@@ -344,17 +344,19 @@ public class MySaver {
         }
         return rootObject;
     }
-    public static void AddToReferenceTree(GameObject parent, GameObject child) {
+    public static bool AddToReferenceTree(GameObject parent, GameObject child) {
         if (parent == null || child == null)
-            return;
+            return false;
         if (savedObjects.ContainsKey(child) && savedObjects.ContainsKey(parent)) {
             AddToReferenceTree(savedObjects[parent], savedObjects[child]);
+            return true;
         } else {
             Debug.LogError("failed to add object to reference tree");
             Debug.LogError(parent);
             Debug.LogError(child);
             Debug.LogError(savedObjects.ContainsKey(parent));
             Debug.LogError(savedObjects.ContainsKey(child));
+            return false;
         }
     }
     public static void AddToReferenceTree(GameObject parent, Guid child) {

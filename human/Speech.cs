@@ -31,16 +31,16 @@ public class Speech : Interactive, ISaveable {
         @"\bbootyhole\b",
         @"\bbitchmade\b",
         @"\bmotherfucker\b",
+        @"\bbullshit\b",
         @"\basshole"};
 
-    // asshole
-    // fix whitespace matching
     static string[] swearWhiteList = new string[]{
         @"-ass",
         @"hole",
         @"sack",
         @"made",
         @"mother",
+        @"bull"
     };
     static Regex spaceMatcher = new Regex(@"\b");
 
@@ -107,7 +107,7 @@ public class Speech : Interactive, ISaveable {
             {BuffType.strength, new BuffMessage("I feel strong!", "I no longer feel strong!")},
             {BuffType.telepathy, new BuffMessage("I can hear thoughts!", "I can no longer hear thoughts!")},
             {BuffType.fireproof, new BuffMessage("I feel fireproof!", "I no longer feel fireproof!")},
-            {BuffType.undead, new BuffMessage("I feel kinda weird!", "I feel blessed!")},
+            {BuffType.undead, new BuffMessage("I feel kinda weird!", "I am invincible!")},
             {BuffType.ethereal, new BuffMessage("I feel intangible!", "I feel solid!")},
             {BuffType.poison, new BuffMessage("I don't feel so good!", "I feel much better!")},
             {BuffType.invulnerable, new BuffMessage("I am invincible!", "I feel exposed!")},

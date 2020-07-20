@@ -214,6 +214,7 @@ public class Hurtable : Damageable, ISaveable {
             Destroy(dizzyEffect);
         }
         hitState = Controllable.AddHitState(hitState, Controllable.HitState.dead);
+        gameObject.SendMessage("OnDie", SendMessageOptions.DontRequireReceiver);
     }
 
     public void Resurrect() {
@@ -277,9 +278,7 @@ public class Hurtable : Damageable, ISaveable {
         occurrenceData.assailant = assailant;
         occurrenceData.lastAttacker = lastAttacker;
         if (message != null) {
-            occurrenceData.lastDamage = message.type;
-        } else {
-            occurrenceData.lastDamage = damageType.any;
+            occurrenceData.lastDamage = message;
         }
         Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData);
 
@@ -365,7 +364,8 @@ public class Hurtable : Damageable, ISaveable {
             downedTimer = 10f;
         }
         if (myCollider != null) {
-            myCollider.enabled = false;
+            // myCollider.enabled = false;
+            myCollider.gameObject.layer = LayerMask.NameToLayer("FOV");
         }
         Vector3 pivot = transform.position;
         pivot.y -= 0.15f;
@@ -380,6 +380,7 @@ public class Hurtable : Damageable, ISaveable {
         FollowGameObject dizzyFollower = dizzyEffect.GetComponent<FollowGameObject>();
         dizzyFollower.target = gameObject;
         dizzyFollower.Init();
+        gameObject.SendMessage("OnKnockDown", SendMessageOptions.DontRequireReceiver);
     }
     public void GetUp() {
         // Debug.Log(health);
@@ -390,7 +391,8 @@ public class Hurtable : Damageable, ISaveable {
                 health += 0.25f * maxHealth;
             }
         if (myCollider != null) {
-            myCollider.enabled = true;
+            // myCollider.enabled = true;
+            myCollider.gameObject.layer = LayerMask.NameToLayer("feet");
         }
         hitState = Controllable.RemoveHitState(hitState, Controllable.HitState.unconscious);
         doubledOver = false;

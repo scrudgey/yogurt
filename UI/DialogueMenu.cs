@@ -109,7 +109,6 @@ public class DialogueMenu : MonoBehaviour {
     public bool disableCommand;
     private bool doTrapDoor;
     private bool doVampireAttack;
-    // public MyControls controls;
     public bool keypressedThisFrame;
     void Awake() {
         keypressedThisFrame = false;
@@ -193,14 +192,14 @@ public class DialogueMenu : MonoBehaviour {
         portrait2.sprite = target.portrait[0];
         portrait1.sprite = instigator.portrait[0];
         targetControl = target.GetComponent<Controllable>();
+        instigatorControl = instigator.GetComponent<Controllable>();
         using (Controller controller = new Controller(targetControl)) {
             controller.SetDirection(instigator.transform.position - target.transform.position);
         }
-        using (Controller controller = new Controller(targetControl)) {
+        using (Controller controller = new Controller(instigatorControl)) {
             controller.SetDirection(target.transform.position - instigator.transform.position);
         }
 
-        instigatorControl = instigator.GetComponent<Controllable>();
         if (targetControl) {
             targetControl.disabled = true;
         }

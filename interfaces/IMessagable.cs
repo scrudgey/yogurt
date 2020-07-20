@@ -92,6 +92,7 @@ public class MessageDamage : Message {
     public bool impersonal;
     public PhysicalImpact impactor;
     public GameObject responsibleParty;
+    public string weaponName;
     public bool strength;
     public float angleAboveHorizontal;
     public bool suppressGibs;
@@ -111,6 +112,7 @@ public class MessageDamage : Message {
         this.responsibleParty = other.responsibleParty;
         this.strength = other.strength;
         this.angleAboveHorizontal = other.angleAboveHorizontal;
+        this.weaponName = other.weaponName;
     }
 }
 public class MessageHitstun : Message {

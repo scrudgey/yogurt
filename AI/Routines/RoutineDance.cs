@@ -106,11 +106,13 @@ namespace AI {
             animator.enabled = false;
             headAnimator.enabled = false;
         }
+        public override void ExitPriority() {
+            LeaveControl();
+        }
         public void LeaveControl() {
             // if (!configured)
             //     return;
             // configured = false;
-
             headAnimation.enabled = true;
             advancedAnimation.enabled = true;
             animator.enabled = true;

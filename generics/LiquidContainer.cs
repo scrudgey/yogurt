@@ -15,7 +15,6 @@ public class LiquidContainer : Interactive, ISaveable {
     }
     public float fillCapacity;
     private float spillTimeout = 0.075f;
-    // protected bool empty;
     public bool lid;
     private bool doSpill = false;
     private float spillSeverity;
@@ -24,6 +23,7 @@ public class LiquidContainer : Interactive, ISaveable {
     public AudioClip[] drinkSounds;
     public bool configured = false;
     public AudioClip fillSound;
+    public Sprite liquidDisplaySprite;
     void Update() {
         if (spillTimeout > 0) {
             spillTimeout -= Time.deltaTime;

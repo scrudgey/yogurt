@@ -127,7 +127,15 @@ public class PerkMenu : MonoBehaviour {
         acceptButton.interactable = false;
         doneButton.interactable = true;
         GameManager.Instance.data.perks[selectedPerk.perk.name] = true;
-        if (GameManager.Instance.data.perks["vomit"] && GameManager.Instance.data.perks["eat_all"]) {
+        if (GameManager.Instance.data.perks["vomit"]) {
+            GameManager.Instance.UnlockTVShow("vampire2");
+        }
+
+        // TODO: check if we've unlocked camcorder, too
+        if (GameManager.Instance.data.perks["vomit"] &&
+        GameManager.Instance.data.perks["eat_all"] &&
+        GameManager.Instance.data.collectedObjects.Contains("camcorder")
+        ) {
             GameManager.Instance.UnlockCommercial("dungeon");
             GameManager.Instance.ReceiveEmail("dungeon_start");
         }

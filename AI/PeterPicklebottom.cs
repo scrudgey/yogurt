@@ -93,7 +93,8 @@ public class PeterPicklebottom : MonoBehaviour {
                 if (timer > 2f * slewTime) {
                     state = AIState.walkToTarget;
                     target.val = targets.Pop();
-                    objRef.val = target.val.gameObject;
+                    if (target.val != null)
+                        objRef.val = target.val.gameObject;
                     timer = 0f;
                     slewTime -= 0.2f;
                     slewTime = Mathf.Max(0.3f, slewTime);

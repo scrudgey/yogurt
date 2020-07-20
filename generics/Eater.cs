@@ -22,11 +22,14 @@ public class Eater : Interactive, ISaveable {
         }
     }
     private bool poisonNausea;
-    public Queue<GameObject> eatenQueue;
+    public Stack<GameObject> eatenStack;
     public float vomitCountDown;
     public Dictionary<BuffType, Buff> netIntrinsics;
+    bool starting = true;
     private void CheckNausea() {
-        //TODO: this is spawning lots of flags
+        if (starting) {
+            return;
+        }
         if (nausea > 15 && nausea < 30 && lastStatement != nauseaStatement.warning) {
             lastStatement = nauseaStatement.warning;
             MessageSpeech message = new MessageSpeech("I don't feel so good!!", data: new EventData(chaos: 1, disturbing: 1, positive: -1));
@@ -39,7 +42,8 @@ public class Eater : Interactive, ISaveable {
         }
     }
     void Awake() {
-        eatenQueue = new Queue<GameObject>();
+        starting = true;
+        eatenStack = new Stack<GameObject>();
         Interaction eatAction = new Interaction(this, "Eat", "Eat");
         // eatAction.defaultPriority = 1;
         eatAction.dontWipeInterface = false;
@@ -50,6 +54,9 @@ public class Eater : Interactive, ISaveable {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
         Toolbox.RegisterMessageCallback<MessageOccurrence>(this, HandleOccurrence);
+    }
+    void Start() {
+        starting = false;
     }
     public void HandleNetIntrinsic(MessageNetIntrinsic message) {
         if (message.netBuffs[BuffType.poison].boolValue) {
@@ -121,11 +128,12 @@ public class Eater : Interactive, ISaveable {
         return "Eat " + foodname;
     }
     void EnqueueEatenObject(GameObject eaten) {
-        eatenQueue.Enqueue(eaten);
+        eatenStack.Push(eaten);
         eaten.SetActive(false);
-        // this is a last minute cover-your-ass hack to prevent us from 
-        while (eatenQueue.Count > 2) {
-            GameObject oldEaten = eatenQueue.Dequeue();
+        // this is a last minute cover-your-ass hack to prevent us from ever saving more than 2 items.
+        // this code is not intended to be reachable.
+        while (eatenStack.Count > 2) {
+            GameObject oldEaten = eatenStack.Pop();
             ClaimsManager.Instance.WasDestroyed(oldEaten);
             Destroy(oldEaten);
         }
@@ -246,8 +254,17 @@ public class Eater : Interactive, ISaveable {
 
         OccurrenceVomit data = new OccurrenceVomit();
         data.vomiter = gameObject;
-        if (eatenQueue.Count > 0) {
-            GameObject eaten = eatenQueue.Dequeue();
+        if (eatenStack.Count > 0) {
+            GameObject eaten = eatenStack.Pop();
+
+            // GameObject eaten = eatenQueue.Dequeue();
+            // string eatenName = Toolbox.Instance.GetName(eaten);
+            // data.strings[$"eaten{index}"] = eatenName;
+            // Debug.Log($"{this} adding eaten to reference tree: {eatenName}");
+            // MySaver.UpdateGameObjectReference(eaten, data, $"eaten{index}");
+            // MySaver.AddToReferenceTree(gameObject, eaten);
+            // index++;
+
             data.vomit = eaten.gameObject;
             eaten.SetActive(true);
             eaten.transform.position = transform.position;
@@ -311,11 +328,18 @@ public class Eater : Interactive, ISaveable {
         data.floats["nutrition"] = nutrition;
         data.floats["nausea"] = nausea;
         data.floats["vomitCountDown"] = vomitCountDown;
+        data.ints["lastStatement"] = (int)lastStatement;
         int index = 0;
-        while (eatenQueue.Count > 0 && index < 2) { // do NOT save anything more than two items!!! seriously!
-            GameObject eaten = eatenQueue.Dequeue();
-            Debug.Log($"{this} adding eaten to reference tree: {eaten}");
-            MySaver.UpdateGameObjectReference(eaten, data, "eaten" + index.ToString());
+        if (data.GUIDs.ContainsKey("eaten1"))
+            data.GUIDs.Remove("eaten1");
+        if (data.GUIDs.ContainsKey("eaten0"))
+            data.GUIDs.Remove("eaten0");
+        while (eatenStack.Count > 0 && index < 2) { // do NOT save anything more than two items!!! seriously!
+            GameObject eaten = eatenStack.Pop();
+            string eatenName = Toolbox.Instance.GetName(eaten);
+            data.strings[$"eaten{index}"] = eatenName;
+            // Debug.Log($"{this} adding eaten to reference tree: {eatenName}");
+            MySaver.UpdateGameObjectReference(eaten, data, $"eaten{index}");
             MySaver.AddToReferenceTree(gameObject, eaten);
             index++;
         }
@@ -324,6 +348,7 @@ public class Eater : Interactive, ISaveable {
         nutrition = data.floats["nutrition"];
         nausea = data.floats["nausea"];
         vomitCountDown = data.floats["vomitCountDown"];
+        lastStatement = (nauseaStatement)data.ints["lastStatement"];
         if (data.GUIDs.ContainsKey("eaten1")) {
             GameObject eaten = MySaver.IDToGameObject(data.GUIDs["eaten1"]);
             if (eaten != null) {
@@ -338,7 +363,7 @@ public class Eater : Interactive, ISaveable {
                         itemBones.Start();
                 }
             } else {
-                // Debug.Log("eaten1 is null");
+                Debug.LogError($"{this} could not locate eaten1 object {data.strings["eaten1"]}. Possible lost saved object on the loose!");
             }
         }
         if (data.GUIDs.ContainsKey("eaten0")) {
@@ -357,6 +382,7 @@ public class Eater : Interactive, ISaveable {
                 }
             } else {
                 // Debug.Log("eaten0 is null");
+                Debug.LogError($"{this} could not locate eaten0 object {data.strings["eaten0"]}. Possible lost saved object on the loose!");
             }
 
         }

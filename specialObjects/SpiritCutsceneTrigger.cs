@@ -10,6 +10,8 @@ public class SpiritCutsceneTrigger : MonoBehaviour {
     public Pickup knife;
 
     void Start() {
+        if (GameManager.Instance.data.foughtSpiritToday)
+            Destroy(gameObject);
         if (knife == null) {
             knife = GameObject.Find("silverDagger").GetComponent<Pickup>();
         }
@@ -24,6 +26,11 @@ public class SpiritCutsceneTrigger : MonoBehaviour {
             AudioClip teleportEnter = Resources.Load("sounds/clown/clown4") as AudioClip;
             GameManager.Instance.PlayPublicSound(teleportEnter);
             GameObject.Instantiate(Resources.Load("particles/ChelaPoof"), spiritSpawnPoint.position, Quaternion.identity);
+            GameManager.Instance.data.foughtSpiritToday = true;
+            Hurtable hurtable = knife.holder.GetComponent<Hurtable>();
+            if (hurtable != null) {
+                hurtable.oxygen = hurtable.maxOxygen;
+            }
             StartCoroutine(WaitAndStart());
         }
     }

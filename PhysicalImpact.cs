@@ -47,7 +47,7 @@ public class PhysicalImpact : MonoBehaviour {
         violence.amount = messageToSend.amount;
         violence.attacker = messageToSend.responsibleParty;
         violence.victim = victim;
-        violence.type = messageToSend.type;
+        violence.lastMessage = messageToSend;
         if (messageToSend.responsibleParty != null) {
             Toolbox.Instance.OccurenceFlag(messageToSend.responsibleParty, violence);
         } else {

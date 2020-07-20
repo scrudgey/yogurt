@@ -5,6 +5,9 @@ using UnityEngine.UI;
 using System;
 
 public class TelevisionShow {
+    public string name;
+    public Sprite[] sprites;
+    public Stack<string> elements = new Stack<string>();
     public static Dictionary<string, Func<Music>> musicTracks = new Dictionary<string, Func<Music>>(){
         {"TVR2", () => new MusicTVR2()},
     };
@@ -17,14 +20,10 @@ public class TelevisionShow {
 
         string graphicPath = lines.Pop();
         show.sprites = Resources.LoadAll<Sprite>("tvGraphic/" + graphicPath);
+        show.name = lines.Pop();
         show.elements = lines;
         return show;
     }
-
-
-    public Sprite[] sprites;
-    public Stack<string> elements = new Stack<string>();
-
     public bool HasNext() {
         return elements.Count > 0;
     }

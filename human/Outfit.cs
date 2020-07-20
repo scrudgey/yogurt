@@ -83,6 +83,12 @@ public class Outfit : Interactive, ISaveable {
         anim.outfitName = newUniform.baseName;
         Toolbox.Instance.SendMessage(gameObject, this, anim);
 
+        if (gameObject == GameManager.Instance.playerObject) {
+            EmailTrigger newUniformTrigger = newUniform.GetComponent<EmailTrigger>();
+            if (newUniformTrigger != null && newUniformTrigger.triggerType == EmailTrigger.EmailTriggerType.onWear) {
+                newUniformTrigger.SendEmail();
+            }
+        }
 
         wornUniformName = Toolbox.Instance.CloneRemover(newUniform.gameObject.name);
         readableUniformName = newUniform.readableName;
@@ -154,6 +160,8 @@ public class Outfit : Interactive, ISaveable {
                 GameObject removedUniform = DonUniform(go.GetComponent<Uniform>(), cleanStains: false);
                 if (removedUniform)
                     Destroy(removedUniform);
+            } else {
+                Debug.LogError($"{this} could not find saved uniform {data.GUIDs["uniform"]}. Possible lost saved object on the loose!");
             }
             initUniform = null;
         }

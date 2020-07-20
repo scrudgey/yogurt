@@ -97,7 +97,10 @@ public class Head : Interactive, IExcludable, ISaveable {
             spriteRenderer.enabled = true;
         }
         hat.head = null;
-        Toolbox.Instance.RemoveChildIntrinsics(GetComponentInParent<Intrinsics>().gameObject, this);
+        Intrinsics parentIntrinsics = GetComponentInParent<Intrinsics>();
+        if (parentIntrinsics != null) {
+            Toolbox.Instance.RemoveChildIntrinsics(parentIntrinsics.gameObject, this);
+        }
         ClaimsManager.Instance.DisclaimObject(hat.gameObject, this);
         HatAnimation hatAnimator = hat.GetComponent<HatAnimation>();
         if (hatAnimator) {

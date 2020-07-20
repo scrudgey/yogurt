@@ -150,11 +150,14 @@ public class EventData : Describable {
     public static EventData Death(
         GameObject dead,
         GameObject lastAttacker,
-        damageType lastDamage,
+        MessageDamage lastDamage,
         bool monster,
         bool suicide,
-        bool assailant
-        ) {
+        bool assailant) {
+
+        damageType lastDamageType = damageType.any;
+        if (lastDamage != null)
+            lastDamageType = lastDamage.type;
         EventData data = null;
         string victimName = Toolbox.Instance.GetName(dead);
         if (monster) {
@@ -170,7 +173,7 @@ public class EventData : Describable {
             data.whatHappened = victimName + " committed suicide";
             data.noun = "suicide";
             data.popupDesc = "suicides";
-            if (lastDamage == damageType.fire) {
+            if (lastDamage != null && lastDamage.type == damageType.fire) {
                 data.whatHappened = victimName + " self-immolated";
             }
         } else {
@@ -180,35 +183,42 @@ public class EventData : Describable {
             if (assailant) {
                 GameManager.Instance.IncrementStat(StatType.murders, 1);
                 string attackerName = Toolbox.Instance.GetName(lastAttacker);
-                data.whatHappened = attackerName + " murdered " + victimName;
+                data.whatHappened = $"{attackerName} murdered {victimName}";
+                Debug.Log(lastDamage.weaponName);
+                if (lastDamage.weaponName != null)
+                    data.whatHappened += $" with {lastDamage.weaponName}";
                 data.noun = "murder";
                 data.popupDesc = "murders";
-                if (lastDamage == damageType.fire) {
+                if (lastDamageType == damageType.fire) {
                     data.whatHappened += " with fire";
-                } else if (lastDamage == damageType.asphyxiation) {
+                } else if (lastDamageType == damageType.cutting || lastDamageType == damageType.piercing) {
+                    data.whatHappened = $"{attackerName} stabbed {victimName} to death";
+                    if (lastDamage.weaponName != "")
+                        data.whatHappened += $" with {lastDamage.weaponName}";
+                } else if (lastDamageType == damageType.asphyxiation) {
                     data.whatHappened = attackerName + " strangled " + victimName + " to death";
-                } else if (lastDamage == damageType.cosmic) {
+                } else if (lastDamageType == damageType.cosmic) {
                     data.whatHappened = attackerName + " annihilated " + victimName + " with cosmic energy";
-                } else if (lastDamage == damageType.explosion) {
+                } else if (lastDamageType == damageType.explosion) {
                     data.whatHappened = attackerName + " vaporized " + victimName + " in an explosion";
-                } else if (lastDamage == damageType.acid) {
+                } else if (lastDamageType == damageType.acid) {
                     data.whatHappened = $"{attackerName} dissolved {victimName} in acid";
                 }
             } else {
                 data.noun = "death";
                 data.popupDesc = "deaths";
-                if (lastDamage == damageType.fire) {
+                if (lastDamageType == damageType.fire) {
                     data.whatHappened = victimName + " burned to death";
                     GameManager.Instance.IncrementStat(StatType.immolations, 1);
-                } else if (lastDamage == damageType.asphyxiation) {
+                } else if (lastDamageType == damageType.asphyxiation) {
                     data.whatHappened = victimName + " asphyxiated";
-                } else if (lastDamage == damageType.cosmic) {
+                } else if (lastDamageType == damageType.cosmic) {
                     data.whatHappened = victimName + " was annihilated by cosmic energy";
-                } else if (lastDamage == damageType.cutting || lastDamage == damageType.piercing) {
+                } else if (lastDamageType == damageType.cutting || lastDamageType == damageType.piercing) {
                     data.whatHappened = victimName + " was stabbed to death";
-                } else if (lastDamage == damageType.explosion) {
+                } else if (lastDamageType == damageType.explosion) {
                     data.whatHappened = victimName + " exploded into bloody chunks";
-                } else if (lastDamage == damageType.acid) {
+                } else if (lastDamageType == damageType.acid) {
                     data.whatHappened = $"{victimName} was dissolved in acid";
                 }
             }

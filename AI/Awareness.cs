@@ -582,7 +582,9 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                     if (protectZone.bounds.Contains(knowledge.transform.position)) {
                         assessment.status = PersonalAssessment.friendStatus.enemy;
                         foreach (Priority priority in decisionMaker.priorities) {
-                            priority.ReceiveMessage(new MessageThreaten());
+                            MessageThreaten threat = new MessageThreaten();
+                            threat.messenger = knowledge.obj.GetComponent<Transform>();
+                            priority.ReceiveMessage(threat);
                         }
                     }
                 }

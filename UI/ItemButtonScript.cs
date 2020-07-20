@@ -13,6 +13,20 @@ public class ItemButtonScript : MonoBehaviour {
         SpriteRenderer itemRenderer = item.GetComponent<SpriteRenderer>();
         buttonText.text = itemComponent.itemName;
         itemName = itemComponent.itemName;
+
+        GameObject liquidIcon = icon.transform.Find("liquid").gameObject;
+        LiquidContainer liquidContainer = item.GetComponent<LiquidContainer>();
+        if (liquidContainer != null) {
+            Image liquidImage = liquidIcon.GetComponent<Image>();
+            if (liquidContainer.liquidDisplaySprite != null) {
+                liquidImage.sprite = liquidContainer.liquidDisplaySprite;
+                liquidImage.color = liquidContainer.liquid.color;
+            } else {
+                liquidIcon.SetActive(false);
+            }
+        } else {
+            liquidIcon.SetActive(false);
+        }
         iconImage.sprite = itemRenderer.sprite;
     }
     public void Clicked() {

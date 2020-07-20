@@ -180,6 +180,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             pickup.transform.position = holdpoint.position;
             pickup.transform.SetParent(holdpoint, false);
             pickup.transform.rotation = Quaternion.identity;
+            pickup.transform.localScale = Vector3.one;
             pickup.transform.localPosition = Vector3.zero;
             pickup.GetComponent<Rigidbody2D>().isKinematic = true;
             pickup.GetComponent<Collider2D>().isTrigger = true;
@@ -435,6 +436,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         Slasher s = slash.GetComponent<Slasher>();
 
         MessageDamage message = new MessageDamage(weapon.damage, damageType.physical);
+        message.weaponName = $"a {Toolbox.Instance.GetName(weapon.gameObject)}";
         if (weapon.impactSounds.Length > 0) {
             message.impactSounds = weapon.impactSounds;
         }
@@ -495,6 +497,10 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             Destroy(item);
         }
         items = new List<GameObject>();
+        if (holding != null) {
+            Destroy(holding.gameObject);
+            holding = null;
+        }
     }
     public void SaveData(PersistentComponent data) {
         if (holding != null) {

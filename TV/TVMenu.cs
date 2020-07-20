@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Text.RegularExpressions;
+using System.Linq;
 using System;
+using TMPro;
 
 public class TVMenu : MonoBehaviour {
     public Text hideText;
-    public Text showText;
+    public TextMeshProUGUI showText;
+    public Text episodeNameText;
     public Image image;
     public TelevisionShow show;
     private Music myTrack;
@@ -20,11 +23,19 @@ public class TVMenu : MonoBehaviour {
     public Regex slewMatcher = new Regex(@"^(?<time>[\d\.]+)");
     public Regex endMatcher = new Regex(@"^<END>");
     public Regex musicMatcher = new Regex(@"<MUSIC:(?<track>\w+)>");
+    public Regex newlineMatcher = new Regex(@"::");
     public List<Sprite> animationSprites = new List<Sprite>();
-
+    public Television television;
     public int animationIndex;
+    public int showIndex;
     public void ChannelCallback(int number) {
-        Debug.Log(number);
+        showIndex += number;
+        if (showIndex >= GameManager.Instance.data.televisionShows.Count) {
+            showIndex = 0;
+        } else if (showIndex < 0) {
+            showIndex = GameManager.Instance.data.televisionShows.Count - 1;
+        }
+        StartShow();
     }
     public void PowerButtonCallback() {
         EndShow();
@@ -33,20 +44,28 @@ public class TVMenu : MonoBehaviour {
     public void Start() {
         slewTime = 0;
         animationTimer = 0;
-
-        // StartShow(TelevisionShow.LoadByFilename("tv1"));
-        StartShow(TelevisionShow.LoadByFilename("vampire1"));
+        // string filename = GameManager.Instance.data.televisionShows.Last();
+        showIndex = GameManager.Instance.data.televisionShows.Count - 1;
+        // StartShow(TelevisionShow.LoadByFilename(filename));
+        StartShow();
     }
-    public void StartShow(TelevisionShow show) {
-        this.show = show;
-        image.color = new Color(255, 255, 255, 255);
+    public void StartShow() {
+        string filename = GameManager.Instance.data.televisionShows[showIndex];
+        if (GameManager.Instance.data.newTelevisionShows.Contains(filename)) {
+            GameManager.Instance.data.newTelevisionShows = new HashSet<string>();
+        }
+        show = TelevisionShow.LoadByFilename(filename);
+        // image.color = new Color(255, 255, 255, 255);
         // image.color = new Color(19, 19, 19, 255);
         timer = 0;
         animationTimer = 0;
         slewTime = 0;
-        image.sprite = show.sprites[0];
+        // image.sprite = show.sprites[0];
+        image.color = new Color(19, 19, 19, 255);
+        image.enabled = false;
         showText.text = "";
         hideText.text = "";
+        episodeNameText.text = show.name;
     }
     public void Update() {
         if (show == null)
@@ -70,7 +89,9 @@ public class TVMenu : MonoBehaviour {
         if (!show.HasNext()) {
             EndShow();
         }
-        string line = show.Next();
+        string line = "";
+        while (line == "")
+            line = show.Next();
         if (musicMatcher.IsMatch(line)) {
             if (myTrack != null)
                 MusicController.Instance.StopTrack();
@@ -81,6 +102,8 @@ public class TVMenu : MonoBehaviour {
             MusicController.Instance.EnqueueMusic(track);
             myTrack = track;
         } else if (spriteMatcher.IsMatch(line)) {
+            image.color = new Color(255, 255, 255, 255);
+            image.enabled = true;
             Match spriteMatch = spriteMatcher.Match(line);
             GroupCollection groups = spriteMatch.Groups;
             int index = int.Parse(groups["index"].Value);
@@ -91,6 +114,8 @@ public class TVMenu : MonoBehaviour {
 
             // Debug.Log("spritematch " + index.ToString());
         } else if (spriteAnimMatcher.IsMatch(line)) {
+            image.color = new Color(255, 255, 255, 255);
+            image.enabled = true;
             Match spriteAnimMatch = spriteAnimMatcher.Match(line);
             GroupCollection groups = spriteAnimMatch.Groups;
             int index1 = int.Parse(groups["index1"].Value);
@@ -118,7 +143,7 @@ public class TVMenu : MonoBehaviour {
             if (line == "***") {
                 hideText.gameObject.SetActive(false);
             }
-
+            line = newlineMatcher.Replace(line, "\n");
             hideText.text = line;
             showText.text = line;
         }
@@ -130,7 +155,6 @@ public class TVMenu : MonoBehaviour {
         hideText.text = "";
         showText.text = "";
         hideText.gameObject.SetActive(false);
-        // image.sprite = null;
         image.color = new Color(19, 19, 19, 255);
         image.enabled = false;
         if (myTrack != null) {
@@ -139,6 +163,7 @@ public class TVMenu : MonoBehaviour {
         }
     }
     void OnDestroy() {
+        television.CheckBubble();
         if (myTrack != null) {
             myTrack = null;
             MusicController.Instance.End();

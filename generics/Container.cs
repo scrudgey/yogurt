@@ -256,6 +256,8 @@ public class Container : MayorLock, IExcludable, ISaveable {
                     PhysicalBootstrapper phys = go.GetComponent<PhysicalBootstrapper>();
                     if (phys)
                         phys.doInit = false;
+                } else {
+                    Debug.LogError($"{this} could not locate contained object {data.GUIDs["item" + i.ToString()]}. Possible lost saved object on the loose!");
                 }
                 // Debug.Log("container containing "+MySaver.loadedObjects[data.ints["item"+i.ToString()]].name);
             }

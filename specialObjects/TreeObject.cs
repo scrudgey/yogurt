@@ -43,7 +43,7 @@ public class TreeObject : Damageable {
         if (Random.Range(0f, 1f) < 0.5f) {
             GameObject newLeaf = Instantiate(leaf, leafSpawnPoint.position + randomBump, Quaternion.identity) as GameObject;
             FallingLeaf newLeafScript = newLeaf.GetComponent<FallingLeaf>();
-            newLeafScript.height = Random.Range(0.9f, 1f);
+            newLeafScript.height = Random.Range(0.8f, 0.85f);
         }
     }
 }

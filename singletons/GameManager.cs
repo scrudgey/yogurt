@@ -43,7 +43,9 @@ public class GameData {
     public List<Achievement> achievements;
     public SerializableDictionary<StatType, Stat> stats = new SerializableDictionary<StatType, Stat>();
     public List<string> commercialsInitializedToday;
-    public List<Email> emails;
+    public List<Email> emails = new List<Email>();
+    public List<string> televisionShows;
+    public HashSet<string> newTelevisionShows;
     public List<string> packages;
     public bool firstTimeLeavingHouse;
     public bool mayorCutsceneHappened;
@@ -57,6 +59,7 @@ public class GameData {
     public bool loadedDay;
     public Int16 ghostsKilled;
     public bool mayorAwardToday;
+    public bool foughtSpiritToday;
     public bool mayorLibraryShuffled;
     public int gangMembersDefeated;
 
@@ -120,7 +123,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = false;
+    public bool debug = true;
     public bool failedLevelLoad = false;
     public Gender playerGender;
 
@@ -566,6 +569,11 @@ public partial class GameManager : Singleton<GameManager> {
             if (outfit != null) {
                 outfit.initUniform = Resources.Load("prefabs/pajamas") as GameObject;
             }
+            Head head = playerObject.GetComponentInChildren<Head>();
+            if (head != null && head.hat != null) {
+                Hat hat = head.RemoveHat();
+                Destroy(hat.gameObject);
+            }
             Inventory focusInv = playerObject.GetComponent<Inventory>();
             if (focusInv) {
                 focusInv.ClearInventory();
@@ -575,8 +583,9 @@ public partial class GameManager : Singleton<GameManager> {
             if (focusEater) {
                 focusEater.nutrition = 0;
                 focusEater.nausea = 0;
-                while (focusEater.eatenQueue.Count > 0) {
-                    GameObject eaten = focusEater.eatenQueue.Dequeue();
+                // empty the stomachs
+                while (focusEater.eatenStack.Count > 0) {
+                    GameObject eaten = focusEater.eatenStack.Pop();
                     Destroy(eaten);
                 }
             }
@@ -640,8 +649,13 @@ public partial class GameManager : Singleton<GameManager> {
         } else {
             InitializePlayableLevel();
         }
-        if (!debug)
+        if (!debug) {
             ReceiveEmail("start");
+            UnlockTVShow("vampire1");
+        } else {
+            UnlockTVShow("vampire1");
+            UnlockTVShow("vampire2");
+        }
         sceneTime = 0f;
         timeSinceLastSave = 0f;
     }
@@ -660,6 +674,7 @@ public partial class GameManager : Singleton<GameManager> {
         data.entryID = -99;
         data.firstTimeLeavingHouse = true;
         data.mayorAwardToday = false;
+        data.foughtSpiritToday = false;
         data.mayorLibraryShuffled = false;
         data.gangMembersDefeated = 0;
         data.activeCommercial = null;
@@ -759,6 +774,10 @@ public partial class GameManager : Singleton<GameManager> {
         data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eat1"));
         data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("gravy1"));
         data.unlockedScenes.Add("studio");
+
+        data.televisionShows = new List<string>();
+        data.newTelevisionShows = new HashSet<string>();
+
         if (debug) {
             data.days = 5;
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eat2"));
@@ -772,6 +791,7 @@ public partial class GameManager : Singleton<GameManager> {
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("boardroom"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("nullify1"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("nullify2"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("dungeon"));
             data.perks["hypnosis"] = true;
             data.perks["vomit"] = true;
             data.perks["eat_all"] = true;
@@ -920,6 +940,12 @@ public partial class GameManager : Singleton<GameManager> {
         if (filename.ToLower() == "strength_potion") {
             ReceiveEmail("strength");
         }
+        if (GameManager.Instance.data.perks["vomit"] &&
+        GameManager.Instance.data.perks["eat_all"] &&
+        filename.ToLower() == "camcorder") {
+            GameManager.Instance.UnlockCommercial("dungeon");
+            GameManager.Instance.ReceiveEmail("dungeon_start");
+        }
         if (data.collectedObjects.Contains(filename))
             return;
         UnityEngine.Object testPrefab = Resources.Load("prefabs/" + filename);
@@ -983,7 +1009,9 @@ public partial class GameManager : Singleton<GameManager> {
         }
     }
     public void ReceiveEmail(string emailName) {
-        // Debug.Log("receiving email "+emailName);
+        if (data == null)
+            return;
+        // Debug.Log("receiving email " + emailName);
         foreach (Email email in data.emails) {
             if (email.filename == emailName) {
                 // Debug.Log("already received email. aborting...");
@@ -996,6 +1024,17 @@ public partial class GameManager : Singleton<GameManager> {
         Computer computer = GameObject.FindObjectOfType<Computer>();
         if (computer != null) {
             computer.CheckBubble();
+        }
+    }
+    public void UnlockTVShow(string showName) {
+        if (data.televisionShows.Contains(showName))
+            return;
+
+        data.televisionShows.Add(showName);
+        data.newTelevisionShows.Add(showName);
+        Television tv = GameObject.FindObjectOfType<Television>();
+        if (tv != null) {
+            tv.CheckBubble();
         }
     }
     public void ReceivePackage(string packageName) {

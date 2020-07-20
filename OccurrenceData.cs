@@ -176,7 +176,7 @@ public class OccurrenceDeath : OccurrenceData {
     public bool damageZone;
     public bool assailant;
     public GameObject lastAttacker;
-    public damageType lastDamage;
+    public MessageDamage lastDamage;
     public bool monster;
     public OccurrenceDeath(bool monster) {
         this.monster = monster;
@@ -279,23 +279,34 @@ public class OccurrenceViolence : OccurrenceData {
     public GameObject attacker;
     public GameObject victim;
     public float amount;
-    public damageType type;
+    public MessageDamage lastMessage;
     public override HashSet<GameObject> involvedParties() {
         return new HashSet<GameObject> { attacker, victim };
     }
     public override void Descriptions() {
         string attackerName = Toolbox.Instance.GetName(attacker);
         string victimName = Toolbox.Instance.GetName(victim);
+
         EventData data = new EventData(disturbing: 2, chaos: 2);
+        Hurtable victimHurtable = victim.GetComponent<Hurtable>();
+        if (victimHurtable == null) {
+            data = new EventData(disturbing: 1, chaos: 1);
+        }
+
         data.noun = "violence";
         data.whatHappened = attackerName + " attacked " + victimName;
-        if (type == damageType.cutting) {
-            data.whatHappened = attackerName + " stabbed " + victimName;
-        } else if (type == damageType.fire) {
+
+        if (lastMessage.type == damageType.cutting) {
+            data.whatHappened = $"{attackerName} stabbed {victimName}";
+        } else if (lastMessage.type == damageType.fire) {
             data.whatHappened = attackerName + " burned " + victimName;
-        } else if (type == damageType.piercing) {
+        } else if (lastMessage.type == damageType.piercing) {
             data.whatHappened = attackerName + " stabbed " + victimName;
         }
+
+        if (lastMessage.weaponName != "")
+            data.whatHappened += $" with {lastMessage.weaponName}";
+
         AddChild(data);
     }
 }

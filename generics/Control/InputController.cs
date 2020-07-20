@@ -48,6 +48,7 @@ public class InputController : Singleton<InputController> {
         }
     }
     private GameObject lastLeftClicked;
+    private GameObject lastClicked;
     public static List<string> forbiddenTags = new List<string>() {
         "fire",
         "sightcone",
@@ -379,6 +380,9 @@ public class InputController : Singleton<InputController> {
         GameObject front = null;
         SpriteRenderer frontRenderer = null;
         foreach (GameObject candidate in candidates) {
+            if (candidate.name == "maincollider") {
+                return candidate;
+            }
             if (front == null) {
                 front = candidate;
                 frontRenderer = candidate.GetComponent<SpriteRenderer>();
@@ -432,6 +436,7 @@ public class InputController : Singleton<InputController> {
                 GameObject top = GetFrontObject(hits, debug: false);
                 if (top != null) {
                     GameObject clicked = GetBaseInteractive(top.transform);
+                    lastClicked = clicked;
                     GameObject actor = focus.gameObject;
                     if (commandTarget != null)
                         actor = commandTarget;
@@ -440,8 +445,16 @@ public class InputController : Singleton<InputController> {
                         // clicked self
                         // if i am holding: stash
                         Inventory inv = actor.GetComponent<Inventory>();
-                        if (inv != null && inv.holding != null)
-                            inv.StashItem(inv.holding.gameObject);
+                        if (inv != null) {
+                            if (inv.holding != null && !inv.holding.heavyObject) {
+                                inv.StashItem(inv.holding.gameObject);
+                                UINew.Instance.RefreshUI(active: true);
+                                ResetLastLeftClicked();
+                            } else {
+                                if (inv.items.Count > 0)
+                                    UINew.Instance.ShowInventoryMenu();
+                            }
+                        }
                     } else { // clicked other
                         // if the obj can be picked up:
                         Inventory inv = actor.GetComponent<Inventory>();
@@ -450,27 +463,59 @@ public class InputController : Singleton<InputController> {
                         if (other != null && inv != null) {
                             //  pick up the object
                             if (Vector2.Distance(other.transform.position, actor.transform.position) < QuickActionMaxDistance) {
-                                if (inv != null && inv.holding != null)
+                                if (inv != null && inv.holding != null && !inv.holding.heavyObject)
                                     inv.StashItem(inv.holding.gameObject);
                                 inv.GetItem(other);
+                                UINew.Instance.RefreshUI(active: true);
+                                ResetLastLeftClicked();
                             }
                         } else if (grabbable != null && inv != null) {
                             //  pick up the object
                             if (Vector2.Distance(grabbable.transform.position, actor.transform.position) < QuickActionMaxDistance) {
-                                if (inv != null && inv.holding != null)
+                                if (inv != null && inv.holding != null && !inv.holding.heavyObject)
                                     inv.StashItem(inv.holding.gameObject);
                                 grabbable.Get(inv);
+                                UINew.Instance.RefreshUI(active: true);
+                                ResetLastLeftClicked();
                             }
                         } else {
                             // get all interactions. if there is only one, do that action.
                             HashSet<InteractionParam> interactions = Interactor.SelfOnOtherInteractions(GameManager.Instance.playerObject, clicked);
                             if (interactions.Count == 1) {
                                 InteractionParam param = interactions.First();
-                                param.DoAction();
-                                if (!param.interaction.dontWipeInterface) {
-                                    UINew.Instance.RefreshUI(active: true);
-                                    ResetLastLeftClicked();
+                                if (InteractionIsWithinRange(param.interaction)) {
+                                    param.DoAction();
+                                    if (!param.interaction.dontWipeInterface) {
+                                        UINew.Instance.RefreshUI(active: true);
+                                        ResetLastLeftClicked();
+                                    }
                                 }
+                            }
+                            if (interactions.Count == 2) {
+                                Dictionary<string, InteractionParam> acts = new Dictionary<string, InteractionParam>();
+                                foreach (InteractionParam ip in interactions) {
+                                    acts[ip.interaction.actionName] = ip;
+                                }
+                                if (acts.ContainsKey("Look")) {
+                                    // do the other action
+                                    HashSet<string> keys = new HashSet<string>(acts.Keys);
+                                    keys.Remove("Look");
+                                    InteractionParam param = acts[keys.First()];
+
+                                    if (InteractionIsWithinRange(param.interaction)) {
+                                        param.DoAction();
+                                        if (!param.interaction.dontWipeInterface) {
+                                            UINew.Instance.RefreshUI(active: true);
+                                            ResetLastLeftClicked();
+                                        }
+                                    }
+                                }
+                                // InteractionParam param = interactions.First();
+                                // param.DoAction();
+                                // if (!param.interaction.dontWipeInterface) {
+                                //     UINew.Instance.RefreshUI(active: true);
+                                //     ResetLastLeftClicked();
+                                // }
                             }
                         }
                         // TODO: take first action, ranked on some priority
@@ -549,18 +594,21 @@ public class InputController : Singleton<InputController> {
             if (!UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) {
                 GameObject top = GetFrontObject(hits, debug: false);
                 if (top != null) {
-                    Clicked(GetBaseInteractive(top.transform), top);
+                    LeftClicked(GetBaseInteractive(top.transform), top);
                 }
             }
         }
     }
-    public void Clicked(GameObject clicked, GameObject clickSite) {
+    public void LeftClicked(GameObject clicked, GameObject clickSite) {
         // Debug.Log("clicked "+clicked.name + " last: "+lastLeftClicked);
         if (lastLeftClicked == clicked) {
             UINew.Instance.ClearWorldButtons();
             lastLeftClicked = null;
+            lastClicked = null;
         } else {
             lastLeftClicked = clicked;
+            lastClicked = clicked;
+            clicked.SendMessage("OnInputClicked", SendMessageOptions.DontRequireReceiver);
             GameObject actor = focus.gameObject;
             if (commandTarget != null)
                 actor = commandTarget;
@@ -573,11 +621,12 @@ public class InputController : Singleton<InputController> {
     }
     public void ResetLastLeftClicked() {
         lastLeftClicked = null;
+        lastClicked = null;
     }
     public bool InteractionIsWithinRange(Interaction i) {
         // TODO: this all should use something other than lastleftclicked, for persistent buttons of sorts.
         // using i.action.parent doesn't work, because some actions are sourced from player gameobject, not "target", whatever it is
-        if (i == null || lastLeftClicked == null)
+        if (i == null || lastClicked == null)
             return false;
         if (i.unlimitedRange)
             return true;
@@ -589,7 +638,7 @@ public class InputController : Singleton<InputController> {
         } else {
             focusColliders = focus.GetComponentsInChildren<Collider2D>();
         }
-        Collider2D clickedCollider = lastLeftClicked.GetComponent<Collider2D>();
+        Collider2D clickedCollider = lastClicked.GetComponent<Collider2D>();
         float dist = float.MaxValue;
         if (clickedCollider != null && focusColliders.Length > 0) {
             foreach (Collider2D focusCollider in focusColliders) {
@@ -603,7 +652,7 @@ public class InputController : Singleton<InputController> {
             }
         }
         if (dist == float.MaxValue) {
-            dist = Vector3.SqrMagnitude(lastLeftClicked.transform.position - focusTransform.position);
+            dist = Vector3.SqrMagnitude(lastClicked.transform.position - focusTransform.position);
         }
         if (dist < i.range) {
             return true;
