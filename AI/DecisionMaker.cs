@@ -224,6 +224,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
                 }
             }
         }
+
         if (protectionZone != null)
             MySaver.UpdateGameObjectReference(protectionZone.gameObject, data, "protectID", overWriteWithNull: false);
         if (warnZone != null)

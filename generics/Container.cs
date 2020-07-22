@@ -235,6 +235,10 @@ public class Container : MayorLock, IExcludable, ISaveable {
         data.bools["disableContents"] = disableContents;
         data.ints["itemCount"] = items.Count;
         data.bools["locked"] = lockObject != null;
+        for (int i = 0; i < items.Count; i++) {
+            if (data.GUIDs.ContainsKey($"item{i}"))
+                data.GUIDs.Remove($"item{i}");
+        }
         if (items.Count > 0) {
             for (int i = 0; i < items.Count; i++) {
                 // data.ints["item"+i.ToString()] = MySaver.GameObjectToID(instance.items[i].gameObject);

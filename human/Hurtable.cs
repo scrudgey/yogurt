@@ -77,7 +77,7 @@ public class Hurtable : Damageable, ISaveable {
         float damage = message.amount;
 
         // if armor subtracted from the damage and i am dead, add it back
-        if (!message.strength && netBuffs[BuffType.armor].floatValue > 0 && hitState == Controllable.HitState.dead)
+        if (hitState == Controllable.HitState.dead && !message.strength && netBuffs[BuffType.armor].floatValue > 0)
             message.amount += netBuffs[BuffType.armor].floatValue;
 
         switch (message.type) {
@@ -195,7 +195,7 @@ public class Hurtable : Damageable, ISaveable {
         if (inv) {
             inv.DropItem();
         }
-        if (type == damageType.cosmic || type == damageType.fire) {
+        if (type == damageType.cosmic || type == damageType.fire || type == damageType.acid) {
             if (!ghostly) {
                 Instantiate(Resources.Load("prefabs/skeleton"), transform.position, transform.rotation);
                 Toolbox.Instance.AudioSpeaker("Flash Fire Ignite 01", transform.position);
@@ -207,13 +207,14 @@ public class Hurtable : Damageable, ISaveable {
         } else {
             KnockDown();
         }
+        hitState = Controllable.AddHitState(hitState, Controllable.HitState.dead);
 
         LogTypeOfDeath(message);
         if (dizzyEffect != null) {
             ClaimsManager.Instance.WasDestroyed(dizzyEffect);
             Destroy(dizzyEffect);
         }
-        hitState = Controllable.AddHitState(hitState, Controllable.HitState.dead);
+
         gameObject.SendMessage("OnDie", SendMessageOptions.DontRequireReceiver);
     }
 
@@ -265,7 +266,7 @@ public class Hurtable : Damageable, ISaveable {
             }
             GameManager.Instance.PlayerDeath();
         } else {
-            if (message.type == damageType.fire) {
+            if (message != null && message.type == damageType.fire) {
                 // TODO: this is wrong?
                 GameManager.Instance.IncrementStat(StatType.immolations, 1);
             }

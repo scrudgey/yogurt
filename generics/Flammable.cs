@@ -21,7 +21,7 @@ public class Flammable : MonoBehaviour, ISaveable {
     // public bool coldFire;
     private float burnTimer;
     public void SetBurnTimer() {
-        burnTimer = 0.2f;
+        burnTimer = 0.1f;
     }
     void Start() {
         pickup = GetComponent<Pickup>();

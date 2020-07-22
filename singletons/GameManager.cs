@@ -123,7 +123,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = true;
+    public bool debug = false;
     public bool failedLevelLoad = false;
     public Gender playerGender;
 
@@ -584,9 +584,10 @@ public partial class GameManager : Singleton<GameManager> {
                 focusEater.nutrition = 0;
                 focusEater.nausea = 0;
                 // empty the stomachs
-                while (focusEater.eatenStack.Count > 0) {
-                    GameObject eaten = focusEater.eatenStack.Pop();
+                while (focusEater.eatenQueue.Count > 0) {
+                    GameObject eaten = focusEater.eatenQueue.First.Value;
                     Destroy(eaten);
+                    focusEater.eatenQueue.RemoveFirst();
                 }
             }
             if (playerHurtable) {

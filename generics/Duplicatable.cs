@@ -26,7 +26,7 @@ public class Duplicatable : Interactive, ISaveable {
     }
     public bool Nullifiable() {
         // don't nullify if it is an uncollected item in the apartment. everything else is fair game.
-        if (SceneManager.GetActiveScene().name == "apartment") {
+        if (nullifiable && SceneManager.GetActiveScene().name == "apartment") {
             if (gameObject.GetComponent<Pickup>()) {
                 if (GameManager.Instance.IsItemCollected(gameObject)) {
                     return true;

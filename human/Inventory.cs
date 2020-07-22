@@ -510,6 +510,16 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             data.GUIDs["holdingID"] = System.Guid.Empty;
         }
         data.ints["itemCount"] = items.Count;
+        List<string> keysToRemove = new List<string>();
+        foreach (string key in data.GUIDs.Keys) {
+            if (key.StartsWith("item")) {
+                // data.GUIDs.Remove(key);
+                keysToRemove.Add(key);
+            }
+        }
+        foreach (string key in keysToRemove) {
+            data.GUIDs.Remove(key);
+        }
         if (items.Count > 0) {
             for (int i = 0; i < items.Count; i++) {
                 MySaver.UpdateGameObjectReference(items[i], data, "item" + i.ToString());

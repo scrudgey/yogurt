@@ -729,6 +729,9 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         data.ints["hitstate"] = (int)hitState;
         data.knowledgeBase = new List<SerializedKnowledge>();
         data.people = new List<SerializedPersonalAssessment>();
+        if (data.GUIDs.ContainsKey("possession")) {
+            data.GUIDs.Remove("possession");
+        }
         if (possession != null) {
             MySaver.UpdateGameObjectReference(possession, data, "possession", overWriteWithNull: false);
             // MySaver.AddToReferenceTree(data.id, possession);

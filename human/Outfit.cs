@@ -135,6 +135,9 @@ public class Outfit : Interactive, ISaveable {
     }
     public void SaveData(PersistentComponent data) {
 
+        if (data.GUIDs.ContainsKey("uniform")) {
+            data.GUIDs.Remove("uniform");
+        }
         if (uniform != null) {
             MySaver.AddToReferenceTree(gameObject, uniform.gameObject);
             MySaver.UpdateGameObjectReference(uniform.gameObject, data, "uniform");

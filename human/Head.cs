@@ -97,10 +97,10 @@ public class Head : Interactive, IExcludable, ISaveable {
             spriteRenderer.enabled = true;
         }
         hat.head = null;
-        Intrinsics parentIntrinsics = GetComponentInParent<Intrinsics>();
-        if (parentIntrinsics != null) {
-            Toolbox.Instance.RemoveChildIntrinsics(parentIntrinsics.gameObject, this);
-        }
+        // Intrinsics parentIntrinsics = GetComponentInParent<Intrinsics>();
+        // if (parentIntrinsics != null) {
+        Toolbox.Instance.RemoveChildIntrinsics(transform.parent.gameObject, this);
+        // }
         ClaimsManager.Instance.DisclaimObject(hat.gameObject, this);
         HatAnimation hatAnimator = hat.GetComponent<HatAnimation>();
         if (hatAnimator) {
@@ -136,6 +136,8 @@ public class Head : Interactive, IExcludable, ISaveable {
         }
     }
     public void SaveData(PersistentComponent data) {
+        if (data.GUIDs.ContainsKey("hat"))
+            data.GUIDs.Remove("hat");
         if (hat != null) {
             MySaver.UpdateGameObjectReference(hat.gameObject, data, "hat");
             MySaver.AddToReferenceTree(data.id, hat.gameObject);

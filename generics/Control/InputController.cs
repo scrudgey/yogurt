@@ -380,9 +380,9 @@ public class InputController : Singleton<InputController> {
         GameObject front = null;
         SpriteRenderer frontRenderer = null;
         foreach (GameObject candidate in candidates) {
-            if (candidate.name == "maincollider") {
-                return candidate;
-            }
+            // if (candidate.name == "maincollider") {
+            //     return candidate;
+            // }
             if (front == null) {
                 front = candidate;
                 frontRenderer = candidate.GetComponent<SpriteRenderer>();
@@ -437,6 +437,7 @@ public class InputController : Singleton<InputController> {
                 if (top != null) {
                     GameObject clicked = GetBaseInteractive(top.transform);
                     lastClicked = clicked;
+                    clicked.SendMessage("OnInputClicked", SendMessageOptions.DontRequireReceiver);
                     GameObject actor = focus.gameObject;
                     if (commandTarget != null)
                         actor = commandTarget;

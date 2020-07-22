@@ -18,8 +18,9 @@ public class Speech : Interactive, ISaveable {
     public string speechName;
     static string[] swearWords = new string[]{
         @"\bshit\b",
-        @"\bfucked\b",
+        @"\bshitty\b",
         @"\bfuck\b",
+        @"\bfucked\b",
         @"\bfucking\b",
         @"\bshazbotting\b",
         @"\bshazbot\b",
@@ -585,6 +586,8 @@ public class Speech : Interactive, ISaveable {
     public Monologue Riposte(bool say = false) {
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
+
+        // TODO: react to insults
         Monologue mono = new Monologue(this, new string[] { "How dare you!" });
         if (say) {
             MessageSpeech message = new MessageSpeech("How dare you!", data: new EventData(chaos: 1, disturbing: 0, positive: -1, offensive: 0));

@@ -184,7 +184,6 @@ public class EventData : Describable {
                 GameManager.Instance.IncrementStat(StatType.murders, 1);
                 string attackerName = Toolbox.Instance.GetName(lastAttacker);
                 data.whatHappened = $"{attackerName} murdered {victimName}";
-                Debug.Log(lastDamage.weaponName);
                 if (lastDamage.weaponName != null)
                     data.whatHappened += $" with {lastDamage.weaponName}";
                 data.noun = "murder";

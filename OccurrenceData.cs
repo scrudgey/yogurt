@@ -103,7 +103,10 @@ public class OccurrenceEat : OccurrenceData {
     public bool yogurt;
     public bool gravy;
     public override HashSet<GameObject> involvedParties() {
+        // if (edible != null)
         return new HashSet<GameObject> { eater, edible.gameObject };
+        // else
+        // return new HashSet<GameObject> { eater };
     }
     public override void Descriptions() {
         MonoLiquid monoLiquid = edible.GetComponent<MonoLiquid>();
@@ -304,7 +307,7 @@ public class OccurrenceViolence : OccurrenceData {
             data.whatHappened = attackerName + " stabbed " + victimName;
         }
 
-        if (lastMessage.weaponName != "")
+        if (lastMessage.weaponName != null)
             data.whatHappened += $" with {lastMessage.weaponName}";
 
         AddChild(data);

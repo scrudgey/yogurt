@@ -22,7 +22,7 @@ public class Eater : Interactive, ISaveable {
         }
     }
     private bool poisonNausea;
-    public Stack<GameObject> eatenStack;
+    public LinkedList<GameObject> eatenQueue;
     public float vomitCountDown;
     public Dictionary<BuffType, Buff> netIntrinsics;
     bool starting = true;
@@ -43,7 +43,7 @@ public class Eater : Interactive, ISaveable {
     }
     void Awake() {
         starting = true;
-        eatenStack = new Stack<GameObject>();
+        eatenQueue = new LinkedList<GameObject>();
         Interaction eatAction = new Interaction(this, "Eat", "Eat");
         // eatAction.defaultPriority = 1;
         eatAction.dontWipeInterface = false;
@@ -128,12 +128,16 @@ public class Eater : Interactive, ISaveable {
         return "Eat " + foodname;
     }
     void EnqueueEatenObject(GameObject eaten) {
-        eatenStack.Push(eaten);
+        // add to first:        eaten -> {secondEaten, firstEaten}
+        eatenQueue.AddFirst(eaten);
+
         eaten.SetActive(false);
-        // this is a last minute cover-your-ass hack to prevent us from ever saving more than 2 items.
-        // this code is not intended to be reachable.
-        while (eatenStack.Count > 2) {
-            GameObject oldEaten = eatenStack.Pop();
+        while (eatenQueue.Count > 2) {// {eaten, secondEaten, firstEaten}
+            // remove first-in-first-out
+            // {eaten, secondEaten} -> firstEaten
+            GameObject oldEaten = eatenQueue.Last.Value;
+            eatenQueue.RemoveLast();
+
             ClaimsManager.Instance.WasDestroyed(oldEaten);
             Destroy(oldEaten);
         }
@@ -254,8 +258,12 @@ public class Eater : Interactive, ISaveable {
 
         OccurrenceVomit data = new OccurrenceVomit();
         data.vomiter = gameObject;
-        if (eatenStack.Count > 0) {
-            GameObject eaten = eatenStack.Pop();
+        if (eatenQueue.Count > 0) {
+            // pop from the stack: last-in-first-out
+            // {eaten, secondEaten} 
+            // eaten <- {secondEaten} 
+            GameObject eaten = eatenQueue.First.Value;
+            eatenQueue.RemoveFirst();
 
             // GameObject eaten = eatenQueue.Dequeue();
             // string eatenName = Toolbox.Instance.GetName(eaten);
@@ -291,7 +299,7 @@ public class Eater : Interactive, ISaveable {
             if (edible) {
                 edible.vomit = true;
             }
-            eaten = null;
+            // eaten = null;
         }
         Toolbox.Instance.OccurenceFlag(gameObject, data);
         MessageHead head = new MessageHead();
@@ -334,8 +342,12 @@ public class Eater : Interactive, ISaveable {
             data.GUIDs.Remove("eaten1");
         if (data.GUIDs.ContainsKey("eaten0"))
             data.GUIDs.Remove("eaten0");
-        while (eatenStack.Count > 0 && index < 2) { // do NOT save anything more than two items!!! seriously!
-            GameObject eaten = eatenStack.Pop();
+        while (eatenQueue.Count > 0 && index < 2) { // do NOT save anything more than two items!!! seriously!
+                                                    // remove first-in-first-out
+                                                    // GameObject eaten = eatenStack.Pop();
+            GameObject eaten = eatenQueue.First.Value;
+            eatenQueue.RemoveFirst();
+
             string eatenName = Toolbox.Instance.GetName(eaten);
             data.strings[$"eaten{index}"] = eatenName;
             // Debug.Log($"{this} adding eaten to reference tree: {eatenName}");
