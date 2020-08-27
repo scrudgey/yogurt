@@ -46,7 +46,6 @@ public class PeterPicklebottom : MonoBehaviour {
             }
             if (targets.Count > 0) {
                 target.val = targets.Pop();
-                Debug.Log(target.val);
                 objRef.val = target.val.gameObject;
             }
             state = AIState.walkToTarget;
@@ -75,10 +74,12 @@ public class PeterPicklebottom : MonoBehaviour {
 
         switch (state) {
             case AIState.walkToTarget:
-                if (target.val == null && targets.Count > 0) {
+                while (target.val == null && targets.Count > 0) {
                     target.val = targets.Pop();
-                    objRef.val = target.val.gameObject;
-                    Debug.Log(target.val);
+                    if (target.val != null) {
+                        objRef.val = target.val.gameObject;
+                        Debug.Log(target.val);
+                    }
                 }
                 if (target.val == null && targets.Count == 0) {
                     state = AIState.leave;

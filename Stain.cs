@@ -31,11 +31,7 @@ public class Stain : MonoBehaviour, ISaveable {
         } else {
             stainRenderer.sortingOrder = parentMask.backSortingOrder;
         }
-
-
         transform.SetParent(parent.transform, true);
-
-
     }
     public void RemoveStain() {
         Destroy(gameObject);
@@ -46,13 +42,15 @@ public class Stain : MonoBehaviour, ISaveable {
         MySaver.AddToReferenceTree(parent, data.id);
         MonoLiquid stainLiquid = GetComponent<MonoLiquid>();
         if (stainLiquid != null)
-            data.strings["liquid"] = stainLiquid.liquid.filename;
+            data.liquids["liquid"] = stainLiquid.liquid;
+        // data.strings["liquid"] = stainLiquid.liquid.filename;
     }
     public void LoadData(PersistentComponent data) {
         if (data.GUIDs["parentID"] != System.Guid.Empty) {
             ConfigureParentObject(MySaver.IDToGameObject(data.GUIDs["parentID"]));
             if (data.strings.ContainsKey("liquid")) {
-                Liquid.MonoLiquidify(gameObject, Liquid.LoadLiquid(data.strings["liquid"]));
+                Liquid.MonoLiquidify(gameObject, data.liquids["liquid"]);
+                // Liquid.MonoLiquidify(gameObject, Liquid.LoadLiquid(data.strings["liquid"]));
             }
         } else {
             RemoveStain();

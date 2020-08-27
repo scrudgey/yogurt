@@ -204,6 +204,8 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         }
     }
     void OnCollisionEnter2D(Collision2D coll) {
+        // Debug.Log(coll.gameObject);
+        // Debug.Log(physical.currentMode);
         if (coll.gameObject == horizon) {
             if (coll.relativeVelocity.magnitude > 0.1) {
                 Bounce();
@@ -215,7 +217,7 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
             if (physical == null)
                 return;
             if (physical.currentMode == Physical.mode.zip) {
-                if (coll.otherCollider.transform.root == transform.root) {
+                if (coll.collider.transform.root == transform.root) {
                     return;
                 }
                 Collision(coll);
@@ -224,7 +226,9 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
 
         if (coll.gameObject.transform.root == transform.root)
             return;
-
+        if (coll.gameObject.name.ToLower().Contains("chemical spray")) {
+            return;
+        }
         if (coll.relativeVelocity.magnitude > 0.1) {
             if (impactSounds != null && !silentImpact)
                 if (impactSounds.Length > 0) {
@@ -321,6 +325,8 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         if (collision.otherCollider.transform.root == collision.collider.transform.root) {
             return;
         }
+        if (collision.gameObject.name.ToLower().Contains("chemical spray"))
+            return;
 
         // Debug.Log("physical collision: " + gameObject.name + " + " + collision.gameObject.name);
         // Debug.Log(collision.relativeVelocity.magnitude);
@@ -398,7 +404,8 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
                 impulse = impulse * (bounceCoefficient / 0.5f);
                 Add3Motion(impulse);
             }
-            if (impactSounds != null && impactSounds.Length > 0) {
+
+            if (!message.suppressImpactSound && impactSounds != null && impactSounds.Length > 0) {
                 AudioClip ac = impactSounds[Random.Range(0, impactSounds.Length)];
                 if (ac != null)
                     audioSource.PlayOneShot(ac);

@@ -32,6 +32,7 @@ public class Speech : Interactive, ISaveable {
         @"\bbootyhole\b",
         @"\bbitchmade\b",
         @"\bmotherfucker\b",
+        @"\bmotherfuckers\b",
         @"\bbullshit\b",
         @"\basshole"};
 
@@ -147,13 +148,19 @@ public class Speech : Interactive, ISaveable {
     public bool configured = false;
     public Grammar grammar = new Grammar();
     public List<string> otherNimrodDefs;
+    public string randomPhraseGrammar;
     public void LoadGrammar() {
         grammar = new Grammar();
         grammar.Load("structure");
         // grammar.Load("flavor_test");
         grammar.Load("flavor_" + flavor);
         grammar.Load("threat");
-        grammar.Load("random_phrase");
+        // TODO: load a different random if it is set
+        if (randomPhraseGrammar != null && randomPhraseGrammar != "") {
+            grammar.Load(randomPhraseGrammar);
+        } else {
+            grammar.Load("random_phrase");
+        }
         foreach (string otherFile in otherNimrodDefs) {
             grammar.Load(otherFile);
         }
@@ -520,10 +527,7 @@ public class Speech : Interactive, ISaveable {
             Toolbox.Instance.SendMessage(target, this, burnNotice);
             Flammable targetFlammable = target.transform.root.GetComponentInChildren<Flammable>();
             if (targetFlammable) {
-                targetFlammable.heat += 100f;
-                targetFlammable.SetBurnTimer();
-                targetFlammable.fireRetardantBuffer = 0f;
-                targetFlammable.onFire = true;
+                targetFlammable.SpontaneouslyCombust();
             }
         }
     }

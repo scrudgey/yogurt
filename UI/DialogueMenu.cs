@@ -112,12 +112,14 @@ public class DialogueMenu : MonoBehaviour {
     public bool keypressedThisFrame;
     void Awake() {
         keypressedThisFrame = false;
-        InputController.Instance.PrimaryAction.action.Enable();
         InputController.Instance.PrimaryAction.action.performed += ctx => {
             keypressedThisFrame = ctx.ReadValueAsButton();
         };
-
+        InputController.Instance.PrimaryAction.action.Enable();
     }
+    // void OnEnable() {
+    //     InputController.Instance.PrimaryAction.action.Enable();
+    // }
 
     public void Start() {
         if (configured)
@@ -627,6 +629,10 @@ public class DialogueMenu : MonoBehaviour {
             target.GetComponent<Godhead>().Destroy();
             UINew.Instance.CloseActiveMenu();
         }
+        if (text == "TRADERCALLBACK") {
+            nextLine = true;
+            TraderCallback();
+        }
         if (nextLine)
             NextLine();
     }
@@ -644,6 +650,13 @@ public class DialogueMenu : MonoBehaviour {
         MessageInsult message = new MessageInsult();
         Toolbox.Instance.SendMessage(vampire, instigator, message);
         Toolbox.Instance.SendMessage(vampire, instigator, message);
+    }
+    public void TraderCallback() {
+        Trader trader = target.GetComponent<Trader>();
+        Inventory playerInventory = instigator.GetComponent<Inventory>();
+        if (playerInventory != null && trader != null) {
+            trader.Trade(playerInventory);
+        }
     }
     public void MayorAward() {
         GameObject mayor = GameObject.Find("Mayor");

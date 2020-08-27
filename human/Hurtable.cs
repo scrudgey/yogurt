@@ -36,6 +36,7 @@ public class Hurtable : Damageable, ISaveable {
     public Dictionary<damageType, float> totalDamage = new Dictionary<damageType, float>();
     public Collider2D myCollider;
     public bool unknockdownable;
+    private List<AudioClip> knockdownSounds;
     public void Reset() {
         health = maxHealth;
         oxygen = maxOxygen;
@@ -50,6 +51,10 @@ public class Hurtable : Damageable, ISaveable {
         Toolbox.RegisterMessageCallback<MessageHead>(this, HandleHead);
         Toolbox.RegisterMessageCallback<MessageStun>(this, HandleStun);
         myCollider = GetComponent<Collider2D>();
+        knockdownSounds = new List<AudioClip>();
+        knockdownSounds.Add(Resources.Load("sounds/8bit_impact1") as AudioClip);
+        knockdownSounds.Add(Resources.Load("sounds/8bit_impact2") as AudioClip);
+        knockdownSounds.Add(Resources.Load("sounds/8bit_impact3") as AudioClip);
     }
     void HandleHead(MessageHead head) {
         if (head.type == MessageHead.HeadType.vomiting) {
@@ -114,7 +119,11 @@ public class Hurtable : Damageable, ISaveable {
         // side effect
         if (message.type != damageType.fire && message.type != damageType.asphyxiation && message.type != damageType.acid) {
             hitState = Controllable.AddHitState(hitState, Controllable.HitState.stun);
-            hitStunCounter = Random.Range(0.2f, 0.25f);
+            if (gameObject != GameManager.Instance.playerObject) {
+                hitStunCounter = Random.Range(0.2f, 0.25f);
+            } else {
+                hitStunCounter = Random.Range(0.1f, 0.2f);
+            }
         }
 
         // special effect
@@ -134,6 +143,11 @@ public class Hurtable : Damageable, ISaveable {
                     break;
             }
             Toolbox.Instance.SendMessage(gameObject, this, speechMessage);
+        }
+
+        // player adjustment
+        if (gameObject == GameManager.Instance.playerObject) {
+            damage *= 0.75f; // fudge factor
         }
 
         /**
@@ -316,9 +330,9 @@ public class Hurtable : Damageable, ISaveable {
                 hitState = Controllable.RemoveHitState(hitState, Controllable.HitState.stun);
             }
         }
-        if (health < 0.5 * maxHealth) {
+        if (health < 0.75 * maxHealth) {
             if (gameObject == GameManager.Instance.playerObject) {
-                health += Time.deltaTime * 6f;
+                health += Time.deltaTime * 10f;
             }
         }
         if (oxygen <= maxOxygen) {
@@ -366,7 +380,11 @@ public class Hurtable : Damageable, ISaveable {
         }
         if (myCollider != null) {
             // myCollider.enabled = false;
-            myCollider.gameObject.layer = LayerMask.NameToLayer("FOV");
+            myCollider.gameObject.layer = LayerMask.NameToLayer("knockdown");
+        }
+        if (knockdownSounds.Count > 0) {
+            AudioClip clip = knockdownSounds[Random.Range(0, knockdownSounds.Count)];
+            Toolbox.Instance.AudioSpeaker(clip, transform.position);
         }
         Vector3 pivot = transform.position;
         pivot.y -= 0.15f;

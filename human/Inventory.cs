@@ -2,6 +2,7 @@
 using UnityEngine.Rendering;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections;
 
 public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     public Controllable.HitState hitstate;
@@ -185,8 +186,11 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             pickup.GetComponent<Rigidbody2D>().isKinematic = true;
             pickup.GetComponent<Collider2D>().isTrigger = true;
             pickup.holder = this;
-            if (pickup.pickupSounds.Length > 0)
-                GetComponent<AudioSource>().PlayOneShot(pickup.pickupSounds[Random.Range(0, pickup.pickupSounds.Length)]);
+            if (pickup.pickupSounds.Length > 0) {
+                AudioClip clip = pickup.pickupSounds[Random.Range(0, pickup.pickupSounds.Length)];
+                if (clip != null)
+                    audioSource.PlayOneShot(clip);
+            }
             holding = pickup;
         }
     }
@@ -356,14 +360,20 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     }
     void Update() {
         if (holding) {
-            if (directionAngle > 45 && directionAngle < 135) {
-                holdSortGroup.sortingLayerName = "main";
-                holdSortGroup.sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
-            } else {
+            if (holding.dontUseHoldpoint) {
                 holdSortGroup.sortingLayerName = "air";
                 holdSortGroup.sortingOrder = GetComponent<Renderer>().sortingOrder + 2;
+                holding.transform.position = transform.position;
+            } else {
+                if (directionAngle > 45 && directionAngle < 135) {
+                    holdSortGroup.sortingLayerName = "main";
+                    holdSortGroup.sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
+                } else {
+                    holdSortGroup.sortingLayerName = "air";
+                    holdSortGroup.sortingOrder = GetComponent<Renderer>().sortingOrder + 2;
+                }
+                holding.transform.position = holdpoint.transform.position;
             }
-            holding.transform.position = holdpoint.transform.position;
             if (holdpoint_angle != 0 && currentAnimation == MessageAnimation.AnimType.none) {
                 string dirString = Toolbox.Instance.DirectionToString(direction);
                 if (dirString == "left" || dirString == "right") {
@@ -407,6 +417,11 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
                     break;
             }
         }
+
+        // foreach (Rigidbody2D body in holding.GetComponentsInChildren<Rigidbody2D>()) {
+        //     Debug.Log(body);
+        //     body.AddForce(direction * 50f);
+        // }
     }
     public string SwingItem_desc(MeleeWeapon weapon) {
         string weaponname = Toolbox.Instance.GetName(weapon.gameObject);
@@ -446,7 +461,31 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         message.strength = netBuffs[BuffType.strength].boolValue;
         message.type = weapon.damageType;
         s.message = message;
+
+        foreach (Rigidbody2D body in holding.GetComponentsInChildren<Rigidbody2D>()) {
+            // Debug.Log(body);
+            body.AddForce(message.force * -5f, ForceMode2D.Impulse);
+            // body.AddForce((body.transform.position - holdpoint.transform.position) * 30f);
+            // if (direction.x >= 0) {
+            //     body.AddTorque(30f);
+            // } else {
+            //     body.AddTorque(-30f);
+            // }
+            // StartCoroutine(flail(body, message.force));
+        }
     }
+    // IEnumerator flail(Rigidbody2D body, Vector2 force) {
+    //     float timer = 0f;
+    //     while (timer < 0.1f) {
+    //         body.AddForce(force, ForceMode.Impulse);
+    //         if (direction.x >= 0) {
+    //             body.AddTorque(0.3f);
+    //         } else {
+    //             body.AddTorque(0.3f);
+    //         }
+    //         yield return null;
+    //     }
+    // }
     public void DropMessage(GameObject obj) {
         SoftDropItem();
         MessageStun message = new MessageStun();

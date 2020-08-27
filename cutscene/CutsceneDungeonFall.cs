@@ -88,7 +88,7 @@ public class CutsceneDungeonFall : CutsceneFall {
                 GameObject pickup = playerInventory.items[0];
                 playerInventory.items.RemoveAt(0);
                 Dump(pickup);
-            } else if (playerOutfit != null && playerOutfit.wornUniformName != "nude" && playerOutfit.wornUniformName != "nude_female") {
+            } else if (playerOutfit != null && !playerOutfit.nude) {
                 // dump outfit
                 GameObject removedUniform = playerOutfit.RemoveUniform();
                 playerOutfit.GoNude();

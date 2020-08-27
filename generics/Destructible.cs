@@ -7,6 +7,8 @@ public class Destructible : Damageable, ISaveable {
     public AudioClip[] destroySound;
     public float physicalMultiplier = 1f;
     public float fireMultiplier = 1f;
+    public float cosmicMultiplier = 1f;
+    public float explosionMultiplier = 2f;
     public AudioSource audioSource;
     public override void Awake() {
         base.Awake();
@@ -43,8 +45,11 @@ public class Destructible : Damageable, ISaveable {
             case damageType.asphyxiation:
                 damage = 0;
                 break;
+            case damageType.cosmic:
+                damage = message.amount * cosmicMultiplier;
+                break;
             case damageType.explosion:
-                damage = message.amount * 2f;
+                damage = message.amount * explosionMultiplier;
                 break;
             default:
                 break;
@@ -82,6 +87,9 @@ public class Destructible : Damageable, ISaveable {
         }
     }
     void OnCollisionEnter2D(Collision2D col) {
+        // Debug.Log(coll.gameObject.name);
+        if (col.gameObject.name.ToLower().Contains("chemical spray"))
+            return;
         float vel = col.relativeVelocity.magnitude;
         if (vel > 0.5f) {
             //if we were hit hard, take a splatter damage

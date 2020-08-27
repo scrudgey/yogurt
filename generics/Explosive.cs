@@ -25,6 +25,12 @@ public class DamageThreshhold {
     public bool Explode() {
         return amount >= threshholdAmount;
     }
+    public DamageThreshhold(damageType type, ThreshholdType threshholdType, float amount, float impulse) {
+        this.type = type;
+        this.threshholdType = threshholdType;
+        this.threshholdAmount = amount;
+        this.impulseFactor = impulse;
+    }
 }
 public class Explosive : MonoBehaviour {
     public bool exploding = false;

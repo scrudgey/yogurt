@@ -1,7 +1,10 @@
 ﻿using UnityEngine;
 
 public class Outfit : Interactive, ISaveable {
+    public enum NudityType { normal, fullNude }
     public Gender gender;
+    public NudityType nudityType;
+    public bool nude;
     public string wornUniformName;
     public string readableUniformName;
     public string pluralUniformType;
@@ -45,24 +48,28 @@ public class Outfit : Interactive, ISaveable {
         GoNude();
     }
     public void GoNude() {
+        nude = true;
         initUniform = null;
         uniform = null;
         MessageAnimation anim = new MessageAnimation();
-        if (gender == Gender.male) {
-            anim.outfitName = "nude";
-            wornUniformName = "nude";
-            readableUniformName = "body";
-        } else {
-            anim.outfitName = "nude_female";
-            wornUniformName = "nude_female";
-            readableUniformName = "body";
+        if (nudityType == NudityType.normal) {
+            if (gender == Gender.male) {
+                anim.outfitName = "nude";
+            } else {
+                anim.outfitName = "nude_female";
+            }
+        } else if (nudityType == NudityType.fullNude) {
+            anim.outfitName = "nude_demon";
         }
+        wornUniformName = "nude";
+        readableUniformName = "body";
+
         Toolbox.Instance.SendMessage(gameObject, this, anim);
     }
     public bool StealUniform_Validation(Outfit otherOutfit) {
         if (otherOutfit == this)
             return false;
-        if (wornUniformName == "nude" || wornUniformName == "nude_female")
+        if (nude)
             return false;
         if (hitState >= Controllable.HitState.unconscious)
             return true;
@@ -90,12 +97,11 @@ public class Outfit : Interactive, ISaveable {
             }
         }
 
+        nude = false;
         wornUniformName = Toolbox.Instance.CloneRemover(newUniform.gameObject.name);
         readableUniformName = newUniform.readableName;
         pluralUniformType = newUniform.pluralName;
         GameManager.Instance.CheckItemCollection(newUniform.gameObject, gameObject);
-        // ClaimsManager.Instance.WasDestroyed(uniform.gameObject);
-        // Destroy(uniform.gameObject);
         this.uniform = newUniform.gameObject;
         Toolbox.Instance.AddChildIntrinsics(gameObject, this, newUniform.gameObject);
         newUniform.gameObject.SetActive(false);
@@ -112,7 +118,7 @@ public class Outfit : Interactive, ISaveable {
         return "Wear " + uniformName;
     }
     public GameObject RemoveUniform() {
-        if (wornUniformName == "nude" || wornUniformName == "nude_female")
+        if (nude)
             return null;
         GameObject removed = null;
         if (uniform != null) {
@@ -146,6 +152,7 @@ public class Outfit : Interactive, ISaveable {
         data.strings["worn"] = wornUniformName;
         data.ints["hitstate"] = (int)hitState;
         data.ints["gender"] = (int)gender;
+        data.bools["nude"] = nude;
     }
     void OnDestroy() {
         if (uniform != null) {
@@ -155,6 +162,7 @@ public class Outfit : Interactive, ISaveable {
     public void LoadData(PersistentComponent data) {
         wornUniformName = data.strings["worn"];
         string wornuniform = data.strings["worn"];
+        nude = data.bools["nude"];
 
         if (data.GUIDs.ContainsKey("uniform")) {
             GameObject go = MySaver.IDToGameObject(data.GUIDs["uniform"]);
@@ -169,7 +177,7 @@ public class Outfit : Interactive, ISaveable {
             initUniform = null;
         }
 
-        if (wornuniform == "nude" || wornUniformName == "nude_female") {
+        if (nude) {
             GoNude();
         }
 

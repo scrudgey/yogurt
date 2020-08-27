@@ -10,7 +10,7 @@ public class SquirtGun : LiquidContainer, IDirectable {
     public string lastPressed;
     public float velocity;
     public AudioClip squirtSound;
-    private AudioSource audioSource;
+    protected AudioSource audioSource;
     override public void Awake() {
         if (!configured) {
             configured = true;
@@ -79,10 +79,11 @@ public class SquirtGun : LiquidContainer, IDirectable {
             return false;
         }
     }
-    public void doSquirt(Vector3 direction, Vector3 position) {
+    public virtual void doSquirt(Vector3 direction, Vector3 position) {
         GameObject droplet = Toolbox.Instance.SpawnDroplet(liquid, 0, gameObject, 0.05f, velocity * direction, noCollision: false);
         droplet.transform.position = position;
-        audioSource.PlayOneShot(squirtSound);
+        if (squirtSound != null)
+            audioSource.PlayOneShot(squirtSound);
         foreach (Collider2D myCollider in transform.root.GetComponentsInChildren<Collider2D>()) {
             foreach (Collider2D dropCollider in droplet.transform.root.GetComponentsInChildren<Collider2D>()) {
                 Physics2D.IgnoreCollision(myCollider, dropCollider, true);

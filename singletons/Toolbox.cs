@@ -9,7 +9,8 @@ public enum SkinColor {
     dark,
     darker,
     undead,
-    clown
+    clown,
+    demon
 }
 public enum Gender {
     male,
@@ -345,11 +346,10 @@ public partial class Toolbox : Singleton<Toolbox> {
     //     }
     //     return "A " + GetName(obj);
     // }
-    public string GetName(GameObject obj) {
+    public string GetName(GameObject obj, bool skipMainCollider = false) {
         // possibly also use intrinsics
-        string nameOut = "";
         if (obj == null) {
-            return nameOut;
+            return "";
         }
         if (obj == GameManager.Instance.playerObject) {
             return GameManager.Instance.saveGameName;
@@ -358,14 +358,14 @@ public partial class Toolbox : Singleton<Toolbox> {
         if (dup && dup.adoptedName != "") {
             return dup.adoptedName;
         }
+        string nameOut = obj.name;
+
         Item item = obj.GetComponent<Item>();
         if (item) {
             nameOut = item.itemName;
             // if (item.referent != "") {
             //     nameOut = item.referent;
             // } else nameOut = item.itemName;
-        } else {
-            nameOut = obj.name;
         }
         LiquidContainer container = obj.GetComponent<LiquidContainer>();
         if (container) {
@@ -390,11 +390,29 @@ public partial class Toolbox : Singleton<Toolbox> {
         if (new List<String> { "blf", "blm", "brf", "Brm", "Tom" }.Contains(nameOut)) {
             return GameManager.Instance.saveGameName;
         }
+        if (nameOut == "mainCollider") {
+            Debug.Log("main collider found!");
+            if (skipMainCollider) {
+                return GetName(obj.transform.parent.gameObject);
+            }
+        }
         return nameOut;
+    }
+    public HashSet<MessageRouter> ChildRouters(GameObject host) {
+        HashSet<MessageRouter> routers = new HashSet<MessageRouter>(host.GetComponentsInChildren<MessageRouter>());
+        Inventory inv = host.GetComponent<Inventory>();
+        if (inv) {
+            if (inv.holding != null) {
+                HashSet<MessageRouter> holdingRouters = new HashSet<MessageRouter>(inv.holding.GetComponentsInChildren<MessageRouter>());
+                routers.ExceptWith(holdingRouters);
+            }
+        }
+        return routers;
     }
     public void SendMessage(GameObject host, Component messenger, Message message, bool sendUpwards = true) {
         message.messenger = messenger;
-        HashSet<MessageRouter> routers = new HashSet<MessageRouter>(host.GetComponentsInChildren<MessageRouter>());
+        // TODO: do not propagate all the way to held objects
+        HashSet<MessageRouter> routers = ChildRouters(host);
         if (sendUpwards) {
             foreach (MessageRouter superRouter in host.GetComponentsInParent<MessageRouter>()) {
                 routers.Add(superRouter);
@@ -551,6 +569,10 @@ public partial class Toolbox : Singleton<Toolbox> {
         {skinDefault, new Color32(238, 238, 238, 255)},
         {skinDefaultDark, new Color32(238, 238, 238, 255)}
     };
+    static Dictionary<Color, Color> skinThemeDemon = new Dictionary<Color, Color>(){
+        {skinDefault, new Color32(196, 20, 17, 255)},
+        {skinDefaultDark, new Color32(176, 17, 10, 255)}
+    };
 
     static Dictionary<SkinColor, Dictionary<Color, Color>> skinThemes = new Dictionary<SkinColor, Dictionary<Color, Color>>{
         {SkinColor.light, skinThemeLight},
@@ -558,6 +580,7 @@ public partial class Toolbox : Singleton<Toolbox> {
         {SkinColor.darker, skinThemeDarker},
         {SkinColor.undead, skinThemeUndead},
         {SkinColor.clown, skinThemeClown},
+        {SkinColor.demon, skinThemeDemon},
     };
     // this could be done with messages
     public static void SetSkinColor(GameObject target, SkinColor color) {

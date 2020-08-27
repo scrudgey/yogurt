@@ -115,6 +115,7 @@ public class InputController : Singleton<InputController> {
     }
 
     public void EnableControls() {
+        Debug.Log("enable input");
         // enable controls
         MoveAction.action.Enable();
         FireAction.action.Enable();
@@ -184,7 +185,6 @@ public class InputController : Singleton<InputController> {
         // // Restrict the controls to one control scheme.
         // controls.bindingGroup = InputBinding.MaskByGroup(controls.controlSchemes.First(x => x.name == "Keyboard&Mouse").bindingGroup);
         LoadCustomBindings();
-        EnableControls();
 
         // Move
         MoveAction.action.performed += ctx => inputVector = ctx.ReadValue<Vector2>();
@@ -221,6 +221,8 @@ public class InputController : Singleton<InputController> {
         FireAction.action.canceled += _ => firePressedHeld = false;
         InteractWithAction.action.canceled += _ => leftClickHeld = false;
         MoveAction.action.canceled += _ => inputVector = Vector2.zero;
+
+        EnableControls();
     }
     void ChangeState(ControlState previousState) {
         // TODO: code for transitioning between states

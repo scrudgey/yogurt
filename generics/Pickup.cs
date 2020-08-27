@@ -6,4 +6,5 @@ public class Pickup : Item {
     public bool heavyObject;
     public bool largeObject;
     public Sprite icon;
+    public bool dontUseHoldpoint;
 }

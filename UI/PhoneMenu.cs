@@ -17,9 +17,14 @@ public class PhoneMenu : MonoBehaviour {
     private Button callButton;
     public List<Button> builtInButtons;
     public UIButtonEffects effects;
+    void Awake() {
+        numbersList = transform.Find("main/Numbers");
+        foreach (Transform child in numbersList) {
+            Destroy(child.gameObject);
+        }
+    }
     void Start() {
         effects = GetComponent<UIButtonEffects>();
-        numbersList = transform.Find("main/Numbers");
         callButtonImage = transform.Find("main/ButtonBar/Call").GetComponent<Image>();
         callButton = transform.Find("main/ButtonBar/Call").GetComponent<Button>();
         callButton.interactable = false;

@@ -8,13 +8,18 @@ public class ItemCollectionButton : MonoBehaviour {
     public string itemName;
     public string description;
     public Sprite sprite;
-    public void Configure(ItemCollectionInspector inspector, string name){
+    public void Configure(ItemCollectionInspector inspector, string name) {
         this.inspector = inspector;
 
         GameObject tempObject = Instantiate(Resources.Load("prefabs/" + name)) as GameObject;
         Item tempItem = tempObject.GetComponent<Item>();
         // set icon
-        this.sprite = tempObject.GetComponent<SpriteRenderer>().sprite;
+        Pickup itemPickup = tempObject.GetComponent<Pickup>();
+        SpriteRenderer itemRenderer = tempObject.GetComponent<SpriteRenderer>();
+        if (itemPickup != null && itemPickup.icon != null) {
+            sprite = itemPickup.icon;
+        } else sprite = itemRenderer.sprite;
+        // this.sprite = tempObject.GetComponent<SpriteRenderer>().sprite;
         this.itemName = tempItem.itemName;
         // set description
         if (tempItem.longDescription != "") {
@@ -28,7 +33,7 @@ public class ItemCollectionButton : MonoBehaviour {
         Text myText = transform.Find("Text").GetComponent<Text>();
         myText.text = itemName;
     }
-    public void ButtonClicked(){
+    public void ButtonClicked() {
         inspector.EntryClickedCallback(this);
     }
 }

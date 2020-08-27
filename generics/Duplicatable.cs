@@ -58,6 +58,20 @@ public class Duplicatable : Interactive, ISaveable {
         EventData nullData = EventData.Nullification(gameObject);
         Toolbox.Instance.OccurenceFlag(gameObject, nullData);
 
+        Container container = GetComponent<Container>();
+        if (container != null) {
+            while (container.items.Count > 0) {
+                if (container.items[0] == null) {
+                    container.items.RemoveAt(0);
+                } else {
+                    foreach (MonoBehaviour component in container.items[0].GetComponents<MonoBehaviour>())
+                        component.enabled = true;
+                    Pickup removed = container.Dump(container.items[0]);
+                    Destroy(removed.gameObject);
+                }
+            }
+        }
+
         ClaimsManager.Instance.WasDestroyed(gameObject);
         Destroy(gameObject);
     }

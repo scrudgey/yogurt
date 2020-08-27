@@ -29,7 +29,7 @@ public enum TrackName {
     mountain,
     greaser,
     imp,
-    venus
+    venus,
 }
 [System.Serializable]
 public class Track {
@@ -158,7 +158,7 @@ public class MusicController : Singleton<MusicController> {
         {TrackName.apartment, "Main Vamp w keys YC3"},
         {TrackName.creepyAmbient, "ForestMoon Alternate Loop YC3"},
         {TrackName.lithophone, "Lithophone LOOP REMIX YC3"},
-        {TrackName.jingle, "jingle1"},
+        {TrackName.jingle, "Yogurt JINGLE Ver. #7 Jingle All The Way YC3 2020"},
         {TrackName.moonCave, "Moon Cave Loop YC3"},
         {TrackName.moonWarp, "Moon WARP Loop YC3"},
         {TrackName.fillerBeat, "Filler Beat YC3"},
@@ -166,9 +166,9 @@ public class MusicController : Singleton<MusicController> {
         {TrackName.chela, "Chela Theme YC3"},
         {TrackName.dracIntro, "Dracula Mansion INTRO YC3"},
         {TrackName.dracLoop, "Dracula Mansion LOOP YC3"},
-        {TrackName.itemAcquired, "Item Acquisition YC3"},
+        {TrackName.itemAcquired, "Item Acquisition Ver#2 - No One Suspects The Acquisition YC3 2020"},
         {TrackName.congrats, "Short CONGRATS YC3"},
-        {TrackName.mayor, "Mayor's House #2 improved YC3 2020"},
+        {TrackName.mayor, "Mayor_s House #3 Housin_ Thangs YC3 2020"},
         {TrackName.mayor_attic, "Mayor's ATTIC #1 YC3"},
         {TrackName.tv_r2d2, "TV-r2d2"},
         {TrackName.mountain, "Mountain Ambience #2 YC3 2020"},

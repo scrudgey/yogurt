@@ -251,11 +251,9 @@ public class OccurrenceSpeech : OccurrenceEvent {
         describable.ResetChildren();
         string speakerName = Toolbox.Instance.GetName(speaker);
         string targetName = "";
-        // if (target != null) {
-        //     targetName = Toolbox.Instance.GetName(target);
-        //     Debug.Log(target);
-        //     Debug.Log(targetName);
-        // }
+        if (target != null) {
+            targetName = Toolbox.Instance.GetName(target, skipMainCollider: true);
+        }
         EventData data = new EventData("dialogue", speakerName + " said " + line);
         data.transcriptLine = speakerName + ": " + line;
         // insert bits here for script desc, transcript line

@@ -11,16 +11,27 @@ public class CutsceneScorpion : Cutscene {
     private RoutineWalkToPoint walkRoutine;
     private GameObject greaserPrefab;
     private List<GameObject> greasers = new List<GameObject>();
+    private CameraControl camControl;
     Speech speech;
     private int numSwitchblades = 0;
-    public override void Configure() {
-        configured = true;
-        state = State.spawn;
-        foreach (Doorway door in GameObject.FindObjectsOfType<Doorway>()) {
-            if (!door.spawnPoint && door.entryID != 420) {
-                doorway = door;
+    public static Doorway FindValidDoorway() {
+        foreach (Doorway doorway in GameObject.FindObjectsOfType<Doorway>()) {
+            if (doorway.name == "door" && !doorway.spawnPoint && doorway.entryID != 420) {
+                return doorway;
             }
         }
+        return null;
+    }
+    public override void Configure() {
+        configured = true;
+        camControl = GameObject.FindObjectOfType<CameraControl>();
+        state = State.spawn;
+        doorway = FindValidDoorway();
+        // foreach (Doorway door in GameObject.FindObjectsOfType<Doorway>()) {
+        //     if (!door.spawnPoint && door.entryID != 420) {
+        //         doorway = door;
+        //     }
+        // }
         greaserPrefab = Resources.Load("prefabs/greaser") as GameObject;
         MusicController.Instance.EnqueueMusic(new MusicGreaser());
     }
@@ -51,6 +62,9 @@ public class CutsceneScorpion : Cutscene {
 
         GameObject greaser = GameObject.Instantiate(greaserPrefab, doorway.transform.position, Quaternion.identity) as GameObject;
         greasers.Add(greaser);
+        if (greasers.Count == 1) {
+            camControl.focus = greaser;
+        }
 
         DecisionMaker ai = greaser.GetComponent<DecisionMaker>();
         ai.enabled = false;
@@ -75,6 +89,7 @@ public class CutsceneScorpion : Cutscene {
     }
 
     public void MenuWasClosed() {
+        camControl.focus = GameManager.Instance.playerObject;
         foreach (GameObject greaser in greasers) {
             DecisionMaker ai = greaser.GetComponent<DecisionMaker>();
             ai.enabled = true;

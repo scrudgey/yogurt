@@ -13,6 +13,16 @@ public class Package : Interactive, ISaveable {
         gibs.particle = Resources.Load("prefabs/" + contents) as GameObject;
         gibs.number = 1;
         gibs.damageCondition = damageType.any;
+
+        Bones bones = GetComponent<Bones>();
+        if (bones != null) {
+            // set sprite
+            GameObject obj = Resources.Load("prefabs/" + contents) as GameObject;
+            SpriteRenderer objRenderer = obj.GetComponent<SpriteRenderer>();
+            bones.boneSprite = objRenderer.sprite;
+
+            bones.Start();
+        }
     }
     public void Open() {
         Destructible destructo = GetComponent<Destructible>();

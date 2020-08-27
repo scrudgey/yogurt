@@ -109,6 +109,8 @@ public partial class GameManager : Singleton<GameManager> {
         {"venus1", "venus"},
         {"fountain", "ruins"},
         {"gravy_studio", "gravy commercial studio"},
+        {"hells_kitchen", "hell's kitchen"},
+        {"venus_temple", "venus temple"},
     };
     public GameData data;
     public string saveGameName = "test";
@@ -123,10 +125,10 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = false;
+    public bool debug = true;
     public bool failedLevelLoad = false;
     public Gender playerGender;
-
+    public bool loadingSavedGame = false;
     public delegate void BooleanObserver(bool value);
     public static BooleanObserver onRecordingChange;
 
@@ -265,8 +267,8 @@ public partial class GameManager : Singleton<GameManager> {
         Outfit playerOutfit = target.GetComponent<Outfit>();
         if (playerOutfit) {
             playerGender = playerOutfit.gender;
-            string prefabName = playerOutfit.wornUniformName;
-            if (prefabName != "nude" && prefabName != "nude_female") {
+            if (!playerOutfit.nude) {
+                string prefabName = playerOutfit.wornUniformName;
                 GameObject uniform = Instantiate(Resources.Load("prefabs/" + prefabName)) as GameObject;
                 CheckItemCollection(uniform, playerObject);
                 DestroyImmediate(uniform);
@@ -289,6 +291,10 @@ public partial class GameManager : Singleton<GameManager> {
             if (playerInv.holding)
                 CheckItemCollection(playerInv.holding.gameObject, playerObject);
         }
+        Collider2D collider = target.GetComponent<Collider2D>();
+        foreach (CameraZoomZone zoomZone in GameObject.FindObjectsOfType<CameraZoomZone>()) {
+            zoomZone.ForceRecalculate(collider);
+        }
         // refresh UI
         UINew.Instance.RefreshUI(active: true);
     }
@@ -302,6 +308,7 @@ public partial class GameManager : Singleton<GameManager> {
         Toolbox.Instance.numberOfLiveSpeakers = 0;
         publicAudio.Stop();
         sceneTime = 0f;
+        Flammable.audioPlayingFires = new HashSet<Flammable>(); // probably unnecessary
         if (InCutsceneLevel()) {
             InitializeNonPlayableLevel();
         } else {
@@ -407,10 +414,32 @@ public partial class GameManager : Singleton<GameManager> {
         }
 
         SetFocus(playerObject);
-        // cam.transform.position = playerObject.transform.position;
         InputController.Instance.state = InputController.ControlState.normal;
         UINew.Instance.RefreshUI(active: true);
+        // do not enter if we are loading the scene from main menu
+        if (!loadingSavedGame) {
+            SpecificSceneInitialize(sceneName);
+            PlayerEnter();
+        }
+        loadingSavedGame = false;
 
+        Vector3 position = playerObject.transform.position;
+        position.z = -10;
+        cam.transform.position = position;
+
+
+        if (data.activeCommercial != null) {
+            CheckCommercialInitialization(data.activeCommercial, sceneName);
+        }
+        if (playerIsDead) {
+            UINew.Instance.RefreshUI(active: false);
+            Instantiate(Resources.Load("UI/deathMenu"));
+            CameraControl camControl = FindObjectOfType<CameraControl>();
+            camControl.audioSource.PlayOneShot(Resources.Load("sounds/xylophone/x4") as AudioClip);
+            Toolbox.Instance.SwitchAudioListener(GameObject.Find("Main Camera"));
+        }
+    }
+    public void SpecificSceneInitialize(string sceneName) {
         if (sceneName == "neighborhood") {
             GameObject packageSpawnPoint = GameObject.Find("packageSpawnPoint");
             if (data.firstTimeLeavingHouse) {
@@ -474,16 +503,8 @@ public partial class GameManager : Singleton<GameManager> {
                 }
             }
         }
-        PlayerEnter();
-        if (data.activeCommercial != null) {
-            CheckCommercialInitialization(data.activeCommercial, sceneName);
-        }
-        if (playerIsDead) {
-            UINew.Instance.RefreshUI(active: false);
-            Instantiate(Resources.Load("UI/deathMenu"));
-            CameraControl camControl = FindObjectOfType<CameraControl>();
-            camControl.audioSource.PlayOneShot(Resources.Load("sounds/xylophone/x4") as AudioClip);
-            Toolbox.Instance.SwitchAudioListener(GameObject.Find("Main Camera"));
+        if (data.days >= 2) {
+            UnlockTVShow("vampire1");
         }
     }
     public GameObject InstantiatePlayerPrefab() {
@@ -572,7 +593,7 @@ public partial class GameManager : Singleton<GameManager> {
             Head head = playerObject.GetComponentInChildren<Head>();
             if (head != null && head.hat != null) {
                 Hat hat = head.RemoveHat();
-                Destroy(hat.gameObject);
+                DestroyImmediate(hat.gameObject);
             }
             Inventory focusInv = playerObject.GetComponent<Inventory>();
             if (focusInv) {
@@ -586,8 +607,8 @@ public partial class GameManager : Singleton<GameManager> {
                 // empty the stomachs
                 while (focusEater.eatenQueue.Count > 0) {
                     GameObject eaten = focusEater.eatenQueue.First.Value;
-                    Destroy(eaten);
                     focusEater.eatenQueue.RemoveFirst();
+                    DestroyImmediate(eaten);
                 }
             }
             if (playerHurtable) {
@@ -609,12 +630,12 @@ public partial class GameManager : Singleton<GameManager> {
                     AdvancedAnimation advAnim = playerObject.GetComponent<AdvancedAnimation>();
 
                     if (headAnim && headAnim.skinColor == SkinColor.undead) {
-                        Debug.Log("setting head to " + data.defaultSkinColor.ToString());
+                        // Debug.Log("setting head to " + data.defaultSkinColor.ToString());
                         headAnim.skinColor = data.defaultSkinColor;
                         headAnim.LoadSprites();
                     }
                     if (advAnim && advAnim.skinColor == SkinColor.undead) {
-                        Debug.Log("setting adv anim to " + data.defaultSkinColor.ToString());
+                        // Debug.Log("setting adv anim to " + data.defaultSkinColor.ToString());
                         advAnim.skinColor = data.defaultSkinColor;
                         advAnim.LoadSprites();
                     }
@@ -630,7 +651,7 @@ public partial class GameManager : Singleton<GameManager> {
             } else {
                 awaitNewDayPrompt = false;
                 // show WASD
-                GameObject.Instantiate(Resources.Load("UI/WASD"), new Vector3(0.183f, -0.703f, 0f), Quaternion.identity);
+                GameObject.Instantiate(Resources.Load("UI/WASD"), new Vector3(-0.73f, -0.703f, 0f), Quaternion.identity);
             }
 
             bed.SleepCutscene();
@@ -652,7 +673,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
         if (!debug) {
             ReceiveEmail("start");
-            UnlockTVShow("vampire1");
+            // UnlockTVShow("vampire1");
         } else {
             UnlockTVShow("vampire1");
             UnlockTVShow("vampire2");
@@ -894,6 +915,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
     }
     public void LoadGameDataIntoMemory(string gameName) {
+        loadingSavedGame = true;
         MySaver.objectDataBase = null;
         saveGameName = gameName;
         // Debug.Log("Loadsavegame into memory");

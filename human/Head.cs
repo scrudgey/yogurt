@@ -153,5 +153,6 @@ public class Head : Interactive, IExcludable, ISaveable {
                 DonHat(hat.GetComponent<Hat>());
             }
         }
+        transform.localRotation = Quaternion.identity;
     }
 }

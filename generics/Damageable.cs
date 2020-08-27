@@ -99,8 +99,8 @@ public abstract class Damageable : MonoBehaviour {
             return;
 
         ImpactResult result = Vulnerable(message, netBuffs);
-        AudioClip[] sounds = new AudioClip[0];
 
+        AudioClip[] sounds = new AudioClip[0];
         switch (result) {
             case ImpactResult.repelEthereal:
                 if (message.type != damageType.fire && message.type != damageType.acid)

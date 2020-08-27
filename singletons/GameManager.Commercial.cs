@@ -93,8 +93,10 @@ public partial class GameManager : Singleton<GameManager> {
 
         // TODO: check if this level supports greaser entrance first
         if (commercial.name == "1950s Greaser Beatdown") {
-            data.commercialsInitializedToday.Add(commercial.name);
-            CutsceneManager.Instance.InitializeCutscene<CutsceneScorpion>();
+            if (CutsceneScorpion.FindValidDoorway() != null) {
+                data.commercialsInitializedToday.Add(commercial.name);
+                CutsceneManager.Instance.InitializeCutscene<CutsceneScorpion>();
+            }
         }
 
         if (commercial.name == "Nullify Hate" && sceneName == "studio") {

@@ -223,7 +223,7 @@ public class Physical : MonoBehaviour {
         body.drag = 0;
         body.mass = 1;
         foreach (Physical phys in FindObjectsOfType<Physical>()) {
-            if (phys != this) {
+            if (phys != this && phys != null && phys.objectCollider != null) {
                 Physics2D.IgnoreCollision(horizonCollider, phys.objectCollider, true);
                 Physics2D.IgnoreCollision(objectCollider, phys.horizonCollider, true);
             }

@@ -158,16 +158,26 @@ public class Eater : Interactive, ISaveable {
 
         //update our status based on our reaction to the food
         int reaction = CheckReaction(food);
-        if (reaction > 0) {
-            Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Yummy!", data: new EventData(positive: 1)));
+        if (netIntrinsics[BuffType.clearHeaded].active()) {
+            if (reaction > 0) {
+                Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Good food.", data: new EventData(positive: 1)));
+            }
+            if (reaction < 0) {
+                Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I did not enjoy that.", data: new EventData(positive: -1)));
+            }
+        } else {
+            if (reaction > 0) {
+                Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Yummy!", data: new EventData(positive: 1)));
+            }
+            if (reaction < 0) {
+                nausea += 30;
+                Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Yuck", data: new EventData(positive: -1)));
+            }
+            if (reaction == 0) {
+                Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Refreshing!", data: new EventData(positive: 1)));
+            }
         }
-        if (reaction < 0) {
-            nausea += 30;
-            Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Yuck", data: new EventData(positive: -1)));
-        }
-        if (reaction == 0) {
-            Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Refreshing!", data: new EventData(positive: 1)));
-        }
+
         if (nutrition > 50) {
             Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I'm full!"));
         }

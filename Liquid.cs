@@ -191,7 +191,6 @@ public class Liquid {
     public static void MonoLiquidify(GameObject target, Liquid liquid) {
         // Debug.Log(target);
         // Debug.Log(liquid == null);
-        // TODO: create intrinsics on gameobject and add liquid intrinsic
         MonoLiquid monoLiquid = Toolbox.GetOrCreateComponent<MonoLiquid>(target);
         monoLiquid.liquid = liquid;
         monoLiquid.edible.nutrition = liquid.nutrition;
@@ -201,7 +200,6 @@ public class Liquid {
         monoLiquid.edible.offal = liquid.offal > 0;
         monoLiquid.edible.pureeColor = liquid.color;
         monoLiquid.edible.vomit = liquid.vomit;
-        monoLiquid.edible.eatSound = Resources.Load("sounds/eating/slurp") as AudioClip;
         if (liquid.flammable) {
             Flammable existingFlammable = target.transform.root.GetComponentInChildren<Flammable>();
             if (existingFlammable == null) {

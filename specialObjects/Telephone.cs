@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-
+using System.Collections.Generic;
 public class Telephone : Item {
     AudioSource source;
     public Doorway enterDoor;
@@ -8,6 +8,7 @@ public class Telephone : Item {
     public float pizzaTime;
     public AudioClip phoneUp;
     public AudioClip phoneDown;
+    public List<AudioClip> dialSounds;
     void Start() {
         source = Toolbox.Instance.SetUpAudioSource(gameObject);
         Interaction use = new Interaction(this, "Phone", "UsePhone");
@@ -35,7 +36,7 @@ public class Telephone : Item {
         }
     }
     public void ClownCallback() {
-        if (fireTime <= 0) {
+        if (clownTime <= 0) {
             MessageSpeech message = new MessageSpeech("Ho ho! Sit tight! We have dispatched a clown to your location!");
             Toolbox.Instance.SendMessage(gameObject, this, message);
             clownTime = 10f;
@@ -87,6 +88,7 @@ public class Telephone : Item {
         }
     }
     public void MenuCallback(PhoneNumberButton.phoneNumber type) {
+        PlayDialSound();
         switch (type) {
             case PhoneNumberButton.phoneNumber.fire:
                 FireButtonCallback();
@@ -100,5 +102,8 @@ public class Telephone : Item {
             default:
                 break;
         }
+    }
+    public void PlayDialSound() {
+        source.PlayOneShot(dialSounds[Random.Range(0, dialSounds.Count)]);
     }
 }

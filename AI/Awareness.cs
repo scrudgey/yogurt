@@ -500,17 +500,17 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                 attacker.status = PersonalAssessment.friendStatus.enemy;
             }
         }
-        if (dat.victim == gameObject) {
-            // A. Getting hit
-            // B. Getting hit, but not enough to hurt
-            // MessageSpeech message = new MessageSpeech("How dare you!");
-            // Debug.Log(dat.amount);
-            // Toolbox.Instance.SendMessage(gameObject, this, message);
-        } else if (dat.attacker != gameObject) {
-            // F. Witnessing violence to other
-            MessageSpeech message = new MessageSpeech("Whoah! Yikes!");
-            Toolbox.Instance.SendMessage(gameObject, this, message);
-        }
+        // if (dat.victim == gameObject) {
+        //     // A. Getting hit
+        //     // B. Getting hit, but not enough to hurt
+        //     // MessageSpeech message = new MessageSpeech("How dare you!");
+        //     // Debug.Log(dat.amount);
+        //     // Toolbox.Instance.SendMessage(gameObject, this, message);
+        // } else if (dat.attacker != gameObject) {
+        //     // F. Witnessing violence to other
+        //     // MessageSpeech message = new MessageSpeech("Whoah! Yikes!");
+        //     // Toolbox.Instance.SendMessage(gameObject, this, message);
+        // }
         if (attacker == null || victim == null) {
             return;
         }

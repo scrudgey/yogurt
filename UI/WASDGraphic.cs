@@ -25,6 +25,8 @@ public class WASDGraphic : MonoBehaviour {
             Color letterColor = text.color;
             letterColor.a = (float)PennerDoubleAnimation.QuintEaseIn(timer, 0, 1, fadeInTime);
             text.color = letterColor;
+
+            // set text to inputcontroller
         }
         foreach (Outline outline in outlines) {
             // adjust colr here
