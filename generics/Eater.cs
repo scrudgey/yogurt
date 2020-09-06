@@ -192,6 +192,7 @@ public class Eater : Interactive, ISaveable {
         MonoLiquid mliquid = food.GetComponent<MonoLiquid>();
         if (mliquid) {
             eatData.liquid = mliquid.liquid;
+            GameManager.Instance.CheckLiquidCollection(mliquid.liquid, gameObject);
             if (mliquid.liquid != null) {
                 if (mliquid.liquid.name == "yogurt") {
                     GameManager.Instance.IncrementStat(StatType.yogurtEaten, 1);

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using System;
 
 public class Toilet : Container {
     private AudioSource audioSource;
@@ -67,7 +68,28 @@ public class Toilet : Container {
         ClaimsManager.Instance.WasDestroyed(target.gameObject);
         MySaver.Save();
         MyMarker marker = target.GetComponent<MyMarker>();
-        GameManager.Instance.data.toiletItems.Add(marker.id);
+
+        HashSet<Guid> itemTree = new HashSet<Guid>();
+        MySaver.RecursivelyAddTree(itemTree, marker.id);
+
+        if (MySaver.objectDataBase.ContainsKey(marker.id)) {
+            PersistentObject itemObj = MySaver.objectDataBase[marker.id];
+            foreach (KeyValuePair<string, PersistentObject> kvp in itemObj.persistentChildren) {
+                MySaver.RecursivelyAddTree(itemTree, kvp.Value.id);
+            }
+        }
+
+        // foreach (GameObject child in marker.persistentChildren) {
+        //     // add the child object's referents to tree
+        //     RecursivelyAddTree(playerTree, childPersistent.id);
+        //     playerTree.Remove(childPersistent.id);
+        // }
+        // using (FileStream sceneStream = File.Create(scenePath)) {
+        //     listSerializer.Serialize(sceneStream, savedIDs.ToList().Except(playerTree.ToList()).ToList());
+        // }
+        foreach (Guid idn in itemTree) {
+            GameManager.Instance.data.toiletItems.Add(idn);
+        }
         Destroy(target.gameObject);
     }
 }

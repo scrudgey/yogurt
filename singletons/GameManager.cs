@@ -14,11 +14,13 @@ public class GameData {
     public float money;
     public List<string> collectedObjects;
     public List<string> collectedItems;
+    public List<Liquid> collectedLiquids;
     public List<string> newCollectedItems;
     public List<string> collectedFood;
     public List<string> newCollectedFood;
     public List<string> collectedClothes;
     public List<string> newCollectedClothes;
+    public List<Liquid> newCollectedLiquids;
     public int[] collectedChelas = new int[10];
     public int itemsCollectedToday;
     public int clothesCollectedToday;
@@ -62,7 +64,7 @@ public class GameData {
     public bool foughtSpiritToday;
     public bool mayorLibraryShuffled;
     public int gangMembersDefeated;
-
+    public bool lichRevivalToday;
     public Commercial activeCommercial;
     public bool recordingCommercial;
 
@@ -105,11 +107,12 @@ public partial class GameManager : Singleton<GameManager> {
         {"cave4", "tomb"},
         {"apartment", "apartment"},
         {"boardroom", "yogurt HQ"},
-        {"hell1", "hell"},
+        // {"hell1", "hell"},
         {"venus1", "venus"},
         {"fountain", "ruins"},
         {"gravy_studio", "gravy commercial studio"},
         {"hells_kitchen", "hell's kitchen"},
+        {"hells_landing", "hell's landing"},
         {"venus_temple", "venus temple"},
     };
     public GameData data;
@@ -117,6 +120,7 @@ public partial class GameManager : Singleton<GameManager> {
     private CameraControl cameraControl;
     public Camera cam;
     public GameObject playerObject;
+    public Vector3 lastPlayerPosition;
     public float gravity = 3.0f;
     public float sceneTime;
     private bool awaitNewDayPrompt;
@@ -178,6 +182,9 @@ public partial class GameManager : Singleton<GameManager> {
     void Update() {
         if (data == null)
             return;
+        if (playerObject != null) {
+            lastPlayerPosition = playerObject.transform.position;
+        }
         string sceneName = SceneManager.GetActiveScene().name;
         timeSinceLastSave += Time.deltaTime;
         intervalTimer += Time.deltaTime;
@@ -294,6 +301,10 @@ public partial class GameManager : Singleton<GameManager> {
         Collider2D collider = target.GetComponent<Collider2D>();
         foreach (CameraZoomZone zoomZone in GameObject.FindObjectsOfType<CameraZoomZone>()) {
             zoomZone.ForceRecalculate(collider);
+        }
+        Hurtable hurtable = target.GetComponent<Hurtable>();
+        if (hurtable != null) {
+            playerIsDead = hurtable.hitState == Controllable.HitState.dead;
         }
         // refresh UI
         UINew.Instance.RefreshUI(active: true);
@@ -477,6 +488,9 @@ public partial class GameManager : Singleton<GameManager> {
         if (sceneName == "space") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneSpace>();
         }
+        if (sceneName == "portal") {
+            CutsceneManager.Instance.InitializeCutscene<CutscenePortal>();
+        }
         if (sceneName == "moon1" && (data.entryID == 420 || data.entryID == 99)) {
             CutsceneManager.Instance.InitializeCutscene<CutsceneMoonLanding>();
         }
@@ -493,6 +507,7 @@ public partial class GameManager : Singleton<GameManager> {
             Collider2D toiletZone = GameObject.Find("toiletZone").GetComponent<Collider2D>();
             Bounds bounds = toiletZone.bounds;
             MySaver.LoadObjects(data.toiletItems);
+            MySaver.HandleLoadedPersistents(data.toiletItems, newDayLoad: false);
             foreach (MyMarker marker in GameObject.FindObjectsOfType<MyMarker>()) {
                 if (data.toiletItems.Contains(marker.id)) {
                     marker.transform.position = bounds.center + new Vector3(
@@ -701,6 +716,7 @@ public partial class GameManager : Singleton<GameManager> {
         data.gangMembersDefeated = 0;
         data.activeCommercial = null;
         data.loadedSewerItemsToday = false;
+        data.lichRevivalToday = false;
         data.commercialsInitializedToday = new List<string>();
         SetRecordingStatus(false);
     }
@@ -772,6 +788,8 @@ public partial class GameManager : Singleton<GameManager> {
             {"swear", false},
             {"potion", false},
             {"burn", false},
+            {"beverage", false},
+            {"resurrection", false}
         };
         data.collectedClothes.Add("blue_shirt");
         data.collectedClothes.Add("pajamas");
@@ -814,12 +832,15 @@ public partial class GameManager : Singleton<GameManager> {
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("nullify1"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("nullify2"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("dungeon"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("hell"));
             data.perks["hypnosis"] = true;
             data.perks["vomit"] = true;
             data.perks["eat_all"] = true;
             data.perks["swear"] = true;
             data.perks["potion"] = false;
             data.perks["burn"] = false;
+            data.perks["resurrection"] = false;
+            data.perks["beverage"] = false;
             data.collectedObjects.Add("crown");
             data.collectedClothes.Add("crown");
             data.itemCheckedOut["crown"] = false;
@@ -949,7 +970,15 @@ public partial class GameManager : Singleton<GameManager> {
         }
         return data;
     }
-
+    public void CheckLiquidCollection(Liquid l, GameObject owner) {
+        if (owner != playerObject)
+            return;
+        if (data.collectedLiquids.Contains(l))
+            return;
+        Debug.Log("collecting liquid " + l.name);
+        data.collectedLiquids.Add(l);
+        data.newCollectedLiquids.Add(l);
+    }
     public void CheckItemCollection(GameObject obj, GameObject owner) {
         if (owner != playerObject)
             return;

@@ -4,16 +4,22 @@ using UnityEngine.UI;
 public class ItemButtonScript : MonoBehaviour {
     public string itemName;
     public Inventory inventory;
-    public void SetButtonAttributes(GameObject item, Inventory inv) {
+    public BagOfHolding bagOfHolding;
+    public GameObject item;
+    public void SetButtonAttributes(GameObject item, Inventory inv, BagOfHolding bag) {
         inventory = inv;
+        bagOfHolding = bag;
+        this.item = item;
         Text buttonText = transform.Find("Text").GetComponent<Text>();
         GameObject icon = transform.Find("icon").gameObject;
         Item itemComponent = item.GetComponent<Item>();
         Image iconImage = icon.GetComponent<Image>();
         Pickup itemPickup = item.GetComponent<Pickup>();
         SpriteRenderer itemRenderer = item.GetComponent<SpriteRenderer>();
-        buttonText.text = itemComponent.itemName;
-        itemName = itemComponent.itemName;
+        if (itemComponent != null) {
+            itemName = itemComponent.itemName;
+        } else itemName = Toolbox.Instance.GetName(item);
+        buttonText.text = itemName;
 
         GameObject liquidIcon = icon.transform.Find("liquid").gameObject;
         LiquidContainer liquidContainer = item.GetComponent<LiquidContainer>();
@@ -41,7 +47,13 @@ public class ItemButtonScript : MonoBehaviour {
         } else iconImage.sprite = itemRenderer.sprite;
     }
     public void Clicked() {
-        inventory.RetrieveItem(itemName);
-        UINew.Instance.CloseActiveMenu();
+        if (inventory != null) {
+            inventory.RetrieveItem(itemName);
+            UINew.Instance.CloseActiveMenu();
+        }
+        if (bagOfHolding != null) {
+            bagOfHolding.Remove(item);
+            UINew.Instance.CloseActiveMenu();
+        }
     }
 }

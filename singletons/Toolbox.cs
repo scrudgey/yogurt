@@ -593,22 +593,24 @@ public partial class Toolbox : Singleton<Toolbox> {
             headAnimation.skinColor = color;
         }
     }
-    public static void SetGender(GameObject target, Gender gender) {
+    public static void SetGender(GameObject target, Gender gender, bool changeHead = true) {
         // Speech speech = target.GetComponent<Speech>();
         HeadAnimation headAnimation = target.GetComponentInChildren<HeadAnimation>();
         Outfit outfit = target.GetComponent<Outfit>();
 
-        switch (gender) {
-            case Gender.male:
-                headAnimation.spriteSheet = "generic3_head";
-                headAnimation.baseName = "generic3";
-                break;
-            case Gender.female:
-                headAnimation.spriteSheet = "girl_head";
-                headAnimation.baseName = "girl";
-                break;
-            default:
-                break;
+        if (changeHead) {
+            switch (gender) {
+                case Gender.male:
+                    headAnimation.spriteSheet = "generic3_head";
+                    headAnimation.baseName = "generic3";
+                    break;
+                case Gender.female:
+                    headAnimation.spriteSheet = "girl_head";
+                    headAnimation.baseName = "girl";
+                    break;
+                default:
+                    break;
+            }
         }
         if (outfit != null) {
             outfit.gender = gender;

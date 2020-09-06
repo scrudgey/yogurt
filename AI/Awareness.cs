@@ -82,7 +82,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
     // private Controllable control;
     private float speciousPresent;
     private const float perceptionInterval = 0.25f;
-    private List<GameObject> fieldOfView = new List<GameObject>();
+    public List<GameObject> fieldOfView = new List<GameObject>();
     private bool viewed;
     public Controllable.HitState hitState;
     public Ref<GameObject> nearestEnemy = new Ref<GameObject>(null);
@@ -624,6 +624,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                 Debug.Log("no root controllable. quitting...");
             return null;
         }
+
         GameObject rootObject = rootControllable.gameObject;
         if (debug)
             Debug.Log("root object: " + rootObject.name);

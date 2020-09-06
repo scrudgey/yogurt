@@ -30,6 +30,7 @@ public enum TrackName {
     greaser,
     imp,
     venus,
+    creeptunnel
 }
 [System.Serializable]
 public class Track {
@@ -151,6 +152,11 @@ public class MusicVenus : Music {
         tracks = new Stack<Track>(new List<Track> { new Track(TrackName.venus) });
     }
 }
+public class MusicCreep : Music {
+    public MusicCreep() {
+        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.creeptunnel) });
+    }
+}
 public class MusicController : Singleton<MusicController> {
 
     static Dictionary<TrackName, string> trackFiles = new Dictionary<TrackName, string>(){
@@ -175,12 +181,14 @@ public class MusicController : Singleton<MusicController> {
         {TrackName.greaser, "Greaser Theme #5 ALL IN -- YC3 2020"},
         {TrackName.imp, "IMP's Theme Draft #11 CABBAGEPATCH ADAMS _ YC3 2020"},
         {TrackName.venus, "VENUS Theme1 YC3"},
+        {TrackName.creeptunnel, "Creep Tunnels Draft #5 YESSIR"}
     };
 
     static Dictionary<string, Func<Music>> sceneMusic = new Dictionary<string, Func<Music>>() {
         {"title", () => new MusicTitle()},
         {"chamber", () => new MusicChamber()},
         {"space", () => new MusicSpace()},
+        {"portal", () => new MusicSpace()},
         {"moon1", () => new MusicMoon()},
         {"moon_pool", () => new MusicMoon()},
         {"moon_town", () => new MusicMoon()},
@@ -208,6 +216,9 @@ public class MusicController : Singleton<MusicController> {
         {"mountain", () => new MusicMountain()},
         {"volcano", () => new MusicMountain()},
         {"venus1", () => new MusicVenus()},
+        {"venus_temple", () => new MusicVenus()},
+        {"hells_kitchen", () => new MusicCreep()},
+        {"hells_landing", () => new MusicCreep()},
     };
     // TODO: add studio
     public static Dictionary<TrackName, AudioClip> tracks = new Dictionary<TrackName, AudioClip>();

@@ -45,7 +45,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         Attack, FightFire, ProtectPossessions,
         ReadScript, RunAway, Wander, ProtectZone,
         MakeBalloonAnimals, InvestigateNoise, PrioritySocialize,
-        Panic, Sentry, Trapdoor, DeliverPizza, Dance, Haunt
+        Panic, Sentry, Trapdoor, DeliverPizza, Dance, Haunt, Taunt
     }
     // the ONLY reason we need this redundant structure is so that I can expose
     // a selectable default priority type in unity editor.
@@ -66,6 +66,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         {typeof(PriorityDeliverPizza), PriorityType.DeliverPizza},
         {typeof(PriorityDance), PriorityType.Dance},
         {typeof(PriorityApproachPlayer), PriorityType.Haunt},
+        {typeof(PriorityTaunt), PriorityType.Taunt}
     };
     public string activePriorityName;
     public PriorityType defaultPriorityType;
@@ -151,6 +152,9 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         }
         if (personality.haunt == Personality.Haunt.yes) {
             InitializePriority(new PriorityApproachPlayer(gameObject, control), typeof(PriorityApproachPlayer));
+        }
+        if (defaultPriorityType == PriorityType.Taunt) {
+            InitializePriority(new PriorityTaunt(gameObject, control), typeof(PriorityTaunt));
         }
 
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
