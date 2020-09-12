@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-
+using System.Collections.Generic;
 public class Edible : Interactive, ISaveable {
     public bool inedible;
     public float nutrition;
@@ -48,6 +48,9 @@ public class Edible : Interactive, ISaveable {
             returnLiquid.color = pureeColor;
             returnLiquid.color.a = 255f;
             returnLiquid.name = Toolbox.Instance.GetName(gameObject) + " juice";
+
+            returnLiquid.atomicLiquids = new HashSet<Liquid>();
+            returnLiquid.atomicLiquids.Add(new Liquid(returnLiquid));
         }
         returnLiquid.ingredients.Add(Toolbox.Instance.CloneRemover(gameObject.name));
         return returnLiquid;

@@ -96,7 +96,7 @@ public class Achievement {
         return true;
     }
     public Achievement() { }
-    public Achievement(Achievement source) {
+    public Achievement(Achievement source) { // deepcopy
         icon = source.icon;
         complete = source.complete;
         title = source.title;

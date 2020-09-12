@@ -108,4 +108,5 @@ public class BuffData {
         this.prefabName = prefabName;
         this.spriteColor = color;
     }
+    public BuffData() { }
 }

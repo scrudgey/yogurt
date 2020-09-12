@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 public class Outfit : Interactive, ISaveable {
-    public enum NudityType { normal, fullNude }
+    public enum NudityType { normal, fullNude, demogorgon }
     public Gender gender;
     public NudityType nudityType;
     public bool nude;
@@ -52,14 +52,22 @@ public class Outfit : Interactive, ISaveable {
         initUniform = null;
         uniform = null;
         MessageAnimation anim = new MessageAnimation();
-        if (nudityType == NudityType.normal) {
-            if (gender == Gender.male) {
-                anim.outfitName = "nude";
-            } else {
-                anim.outfitName = "nude_female";
-            }
-        } else if (nudityType == NudityType.fullNude) {
-            anim.outfitName = "nude_demon";
+
+        switch (nudityType) {
+            default:
+            case NudityType.normal:
+                if (gender == Gender.male) {
+                    anim.outfitName = "nude";
+                } else {
+                    anim.outfitName = "nude_female";
+                }
+                break;
+            case NudityType.fullNude:
+                anim.outfitName = "nude_demon";
+                break;
+            case NudityType.demogorgon:
+                anim.outfitName = "demogorgon";
+                break;
         }
         wornUniformName = "nude";
         readableUniformName = "body";

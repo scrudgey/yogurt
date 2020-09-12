@@ -45,6 +45,8 @@ public class PersonalAssessment {
 }
 
 public class Awareness : MonoBehaviour, ISaveable, IDirectable {
+    public enum WarnType { knight, demogorgon }
+    public WarnType warnType;
     public List<Ref<GameObject>> newPeopleList = new List<Ref<GameObject>>();
     public float socializationTimer;
     public static Dictionary<Rating, string> reactions = new Dictionary<Rating, string>(){
@@ -570,11 +572,24 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                         assessment.status != PersonalAssessment.friendStatus.enemy) {
                         assessment.timeWarned = GameManager.Instance.sceneTime;
                         string phrase = "";
-                        if (!assessment.warned) {
-                            phrase = "Halt! Come no closer!";
-                        } else {
-                            phrase = "I am sworn to protect this bridge";
+                        switch (warnType) {
+                            default:
+                            case WarnType.knight:
+                                if (!assessment.warned) {
+                                    phrase = "Halt! Come no closer!";
+                                } else {
+                                    phrase = "I am sworn to protect this bridge";
+                                }
+                                break;
+                            case WarnType.demogorgon:
+                                if (!assessment.warned) {
+                                    phrase = "Stay back!";
+                                } else {
+                                    phrase = "I will kill you if you come any closer!";
+                                }
+                                break;
                         }
+
                         MessageSpeech message = new MessageSpeech(phrase);
                         Toolbox.Instance.SendMessage(gameObject, this, message);
                         assessment.warned = true;

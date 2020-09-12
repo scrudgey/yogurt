@@ -21,6 +21,7 @@ public class GameData {
     public List<string> collectedClothes;
     public List<string> newCollectedClothes;
     public List<Liquid> newCollectedLiquids;
+    public SerializableDictionary<string, MutablePotionData> collectedPotions;
     public int[] collectedChelas = new int[10];
     public int itemsCollectedToday;
     public int clothesCollectedToday;
@@ -773,9 +774,15 @@ public partial class GameManager : Singleton<GameManager> {
         data.newCollectedItems = new List<string>();
         data.collectedObjects = new List<string>();
         data.collectedFood = new List<string>();
+        data.collectedLiquids = new List<Liquid>();
+        data.newCollectedLiquids = new List<Liquid>();
         data.newCollectedFood = new List<string>();
         data.collectedClothes = new List<string>();
         data.newCollectedClothes = new List<string>();
+        data.collectedPotions = new SerializableDictionary<string, MutablePotionData>();
+        foreach (PotionData potionData in PotionComponent.LoadAllPotions()) {
+            data.collectedPotions[potionData.name] = new MutablePotionData(potionData);
+        }
         data.commercialsInitializedToday = new List<string>();
 
         data.packages = new List<string>();
@@ -840,7 +847,7 @@ public partial class GameManager : Singleton<GameManager> {
             data.perks["potion"] = false;
             data.perks["burn"] = false;
             data.perks["resurrection"] = false;
-            data.perks["beverage"] = false;
+            data.perks["beverage"] = true;
             data.collectedObjects.Add("crown");
             data.collectedClothes.Add("crown");
             data.itemCheckedOut["crown"] = false;
@@ -973,11 +980,30 @@ public partial class GameManager : Singleton<GameManager> {
     public void CheckLiquidCollection(Liquid l, GameObject owner) {
         if (owner != playerObject)
             return;
-        if (data.collectedLiquids.Contains(l))
-            return;
-        Debug.Log("collecting liquid " + l.name);
-        data.collectedLiquids.Add(l);
-        data.newCollectedLiquids.Add(l);
+        foreach (Liquid atomicLiquid in l.atomicLiquids) {
+            // again, not redefining equality because i'm lazy / kinda buzzed
+            bool match = false;
+            foreach (Liquid collectedLiquid in data.collectedLiquids) {
+                if (collectedLiquid.Equals(atomicLiquid)) {
+                    match = true;
+                    continue;
+                }
+            }
+            if (match) continue;
+            // Debug.Log($"collecting {atomicLiquid.name}");
+            Liquid newAtomicLiquid = new Liquid(atomicLiquid);
+            data.collectedLiquids.Add(newAtomicLiquid);
+            data.newCollectedLiquids.Add(newAtomicLiquid);
+        }
+
+        foreach (Liquid collectedLiquid in data.collectedLiquids) {
+            if (collectedLiquid.Equals(l))
+                return;
+        }
+        Debug.Log($"collecting {l.name}");
+        Liquid newLiquid = new Liquid(l);
+        data.collectedLiquids.Add(new Liquid(newLiquid));
+        data.newCollectedLiquids.Add(new Liquid(newLiquid));
     }
     public void CheckItemCollection(GameObject obj, GameObject owner) {
         if (owner != playerObject)

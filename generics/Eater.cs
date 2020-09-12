@@ -323,6 +323,8 @@ public class Eater : Interactive, ISaveable {
         }
         Liquid vomitLiquid = Liquid.LoadLiquid("vomit");
         vomitLiquid.vomit = true;
+        vomitLiquid.atomicLiquids = new HashSet<Liquid>();
+        vomitLiquid.atomicLiquids.Add(new Liquid(vomitLiquid));
         Toolbox.Instance.SpawnDroplet(vomitLiquid, 0f, gameObject, 0.05f);
     }
 

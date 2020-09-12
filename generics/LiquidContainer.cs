@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public class LiquidContainer : Interactive, ISaveable {
     public SpriteRenderer liquidSprite;
@@ -121,11 +122,10 @@ public class LiquidContainer : Interactive, ISaveable {
             l = Liquid.MixLiquids(liquid, l);
 
             // not ideal to put this here instead of in MixLiquids, but we need monobehavior
-            Buff mixedBuff = Liquid.MixPotion(l);
-            if (mixedBuff != null) {
-                l.buffs.Add(mixedBuff);
+            List<Buff> mixedBuff = Liquid.MixPotion(l);
+            if (mixedBuff.Count > 0) {
+                l.buffs.AddRange(mixedBuff);
                 l.name = Liquid.GetName(l);
-                // TODO: play special effect
                 GameObject.Instantiate(Resources.Load("particles/potionMixEffect"), transform.position, Quaternion.identity);
             }
         }

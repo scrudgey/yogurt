@@ -47,9 +47,11 @@ public class DeathMenu : MonoBehaviour {
     public void ResurrectButtonCallback() {
         GameManager.Instance.data.lichRevivalToday = true;
         GameObject lich = GameObject.Instantiate(Resources.Load("prefabs/Lich"), GameManager.Instance.lastPlayerPosition, Quaternion.identity) as GameObject;
+        Destroy(GameManager.Instance.playerObject);
         GameManager.Instance.SetFocus(lich);
         Toolbox.SetGender(lich, GameManager.Instance.data.defaultGender, changeHead: false);
         Destroy(gameObject);
+        GameObject.Instantiate(Resources.Load("particles/licheffect"), GameManager.Instance.lastPlayerPosition, Quaternion.identity);
     }
     IEnumerator ChangeMusic() {
         MusicController.Instance.StopTrack();

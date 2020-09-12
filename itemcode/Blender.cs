@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 
 public class Blender : Container, ISaveable {
+    public enum BlenderType { blender, cauldron }
+    public BlenderType blenderType;
     public bool power;
     private bool vibrate;
     public Sprite[] spriteSheet;
@@ -23,13 +25,15 @@ public class Blender : Container, ISaveable {
     }
     protected override void PopulateContentActions() {
         base.PopulateContentActions();
-        Interaction powerAct = new Interaction(this, "Power", "Power");
-        Interaction lidAct = new Interaction(this, "Lid", "Lid");
-        powerAct.holdingOnOtherConsent = false;
-        lidAct.holdingOnOtherConsent = false;
+        if (blenderType == BlenderType.blender) {
+            Interaction powerAct = new Interaction(this, "Power", "Power");
+            Interaction lidAct = new Interaction(this, "Lid", "Lid");
+            powerAct.holdingOnOtherConsent = false;
+            lidAct.holdingOnOtherConsent = false;
 
-        interactions.Add(powerAct);
-        interactions.Add(lidAct);
+            interactions.Add(powerAct);
+            interactions.Add(lidAct);
+        }
     }
     void FixedUpdate() {
         if (power) {
@@ -133,13 +137,6 @@ public class Blender : Container, ISaveable {
         if (edible && edible.blendable) {
             liquidContainer.FillWithLiquid(edible.Liquify());
         }
-        // Gibs[] gibses = obj.GetComponents<Gibs>();
-        // foreach (Gibs gibs in gibses) {
-        //     if (gibs.notPhysical)
-        //         continue;
-        //     // EmitParticle(gibs.particle);
-        //     Destroy(gibs);
-        // }
     }
     public void EmitParticle(GameObject particle) {
         GameObject bit = Instantiate(particle, transform.position, Quaternion.identity) as GameObject;

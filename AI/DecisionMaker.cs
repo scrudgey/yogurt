@@ -84,6 +84,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
     public BoxCollider2D protectionZone = null;
     public Collider2D warnZone = null;
     public Vector3 guardPoint;
+    public Vector2 guardDirection = Vector2.right;
     public bool initialized = false;
     public bool debug;
 
@@ -133,7 +134,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
             InitializePriority(new PriorityReactToCamera(gameObject, control, personality.camPref), typeof(PriorityReactToCamera));
         }
         if (protectionZone != null) {
-            InitializePriority(new PriorityProtectZone(gameObject, control, protectionZone, guardPoint), typeof(PriorityProtectZone));
+            InitializePriority(new PriorityProtectZone(gameObject, control, protectionZone, guardPoint, guardDirection), typeof(PriorityProtectZone));
         }
         if (defaultPriorityType == PriorityType.MakeBalloonAnimals) {
             InitializePriority(new PriorityMakeBalloonAnimals(gameObject, control), typeof(PriorityMakeBalloonAnimals));
@@ -255,7 +256,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
             }
         }
         if (protectionZone != null) {
-            priorities.Add(new PriorityProtectZone(gameObject, control, protectionZone, guardPoint));
+            priorities.Add(new PriorityProtectZone(gameObject, control, protectionZone, guardPoint, guardDirection));
         }
 
         foreach (Priority priority in priorities) {
