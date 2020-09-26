@@ -67,7 +67,7 @@ public class BeverageMenu : MonoBehaviour {
         UINew.Instance.CloseActiveMenu();
     }
     public void MouseOver(LiquidEntryScript script) {
-        nameText.text = script.liquid.name;
+        nameText.text = Liquid.GetName(script.liquid);
         var ingredients = from liquid in script.liquid.atomicLiquids select liquid.name;
         var buffs = from buff in script.liquid.buffs select Buff.buffNames[buff.type];
 

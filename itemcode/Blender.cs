@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 public class Blender : Container, ISaveable {
-    public enum BlenderType { blender, cauldron }
+    public enum BlenderType { blender, cauldron, interactiveCauldron }
     public BlenderType blenderType;
     public bool power;
     private bool vibrate;
@@ -33,6 +33,10 @@ public class Blender : Container, ISaveable {
 
             interactions.Add(powerAct);
             interactions.Add(lidAct);
+        } else if (blenderType == BlenderType.interactiveCauldron) {
+            Interaction powerAct = new Interaction(this, "Power", "Power");
+            powerAct.holdingOnOtherConsent = false;
+            interactions.Add(powerAct);
         }
     }
     void FixedUpdate() {
@@ -76,7 +80,7 @@ public class Blender : Container, ISaveable {
                 message.suppressImpactSound = true;
                 Toolbox.Instance.SendMessage(items[0].gameObject, this, message, false);
             }
-            if (liquidContainer.amount > 0 && !liquidContainer.lid) {
+            if (liquidContainer.amount > 0 && !liquidContainer.lid && blenderType == BlenderType.blender) {
                 liquidContainer.Spill(1f);
             }
         }
@@ -164,10 +168,13 @@ public class Blender : Container, ISaveable {
     public override void LoadData(PersistentComponent data) {
         base.LoadData(data);
         power = data.bools["power"];
-        if (data.bools["lid"]) {
-            spriteRenderer.sprite = spriteSheet[0];
-        } else {
-            spriteRenderer.sprite = spriteSheet[1];
+        if (blenderType == BlenderType.blender) {
+            if (data.bools["lid"]) {
+                spriteRenderer.sprite = spriteSheet[0];
+            } else {
+                spriteRenderer.sprite = spriteSheet[1];
+            }
         }
+
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System;
 
 public class Controllable : MonoBehaviour {
-
+    public bool big; // if true, cannot fit in doors
     public static List<Type> ControlPriority = new List<Type>{
         typeof(Intrinsics),
         typeof(Outfit),

@@ -10,7 +10,7 @@ public class RecipeEntryScript : MonoBehaviour {
     public void Configure(MutablePotionData data, RecipeMenu menu) {
         this.potionData = data;
         this.menu = menu;
-        myText.text = $"potion of {data.potionData.name}";
+        myText.text = $"potion of {data.name}";
     }
     public void Clicked() {
         menu.ItemClick(this);

@@ -74,6 +74,7 @@ public class Hurtable : Damageable, ISaveable {
         }
         if (intrins.netBuffs[BuffType.death].active()) {
             health = float.MinValue;
+            GameManager.Instance.IncrementStat(StatType.deathByPotion, 1);
             Die(lastMessage, damageType.physical);
         }
         base.NetIntrinsicsChanged(intrins);
@@ -161,7 +162,7 @@ public class Hurtable : Damageable, ISaveable {
         totalDamage[message.type] += damage;
 
         // if the damage is fire or cutting, we die at health 0
-        if (health <= 0 && (message.type == damageType.fire || message.type == damageType.cutting)) {
+        if (health <= 0 && (message.type == damageType.fire || message.type == damageType.cutting || message.type == damageType.acid)) {
             Die(message, message.type);
         }
         // otherwise, we die at health -50%
@@ -271,6 +272,9 @@ public class Hurtable : Damageable, ISaveable {
                 if (message.type == damageType.acid) {
                     GameManager.Instance.IncrementStat(StatType.deathByAcid, 1);
                 }
+                if (message.type == damageType.fire) {
+                    GameManager.Instance.IncrementStat(StatType.deathByFire, 1);
+                }
             }
             if (impersonalAttacker) {
                 GameManager.Instance.IncrementStat(StatType.deathByMisadventure, 1);
@@ -306,7 +310,8 @@ public class Hurtable : Damageable, ISaveable {
     override protected void Update() {
         base.Update();
         if (impulse > 0) {
-            impulse -= Time.deltaTime * 25f;
+            impulse -= Time.deltaTime * 40f;
+
         }
         if (downedTimer > 0) {
             downedTimer -= Time.deltaTime;

@@ -60,7 +60,7 @@ public partial class UINew : Singleton<UINew> {
                         }
                     }
                 } else if (target != null) {
-                    lastTarget = Toolbox.Instance.GetName(target);
+                    lastTarget = Toolbox.Instance.GetName(target, applyThe: false);
                     SetActionText(lastTarget);
                 } else if (cursorOverButton) {
                     SetActionText(actionButtonText);

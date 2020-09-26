@@ -58,6 +58,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         };
     public DecisionMaker decisionMaker;
     public List<GameObject> initialAwareness;
+    public List<GameObject> initialFriends;
     public DropOutStack.DropOutStack<EventData> shortTermMemory = new DropOutStack.DropOutStack<EventData>(1000);
     public GameObject possession;
     public Collider2D protectZone;
@@ -111,6 +112,11 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                 Perceive();
             }
         }
+        if (initialFriends != null)
+            foreach (GameObject other in initialFriends) {
+                PersonalAssessment assessment = FormPersonalAssessment(other);
+                assessment.status = PersonalAssessment.friendStatus.friend;
+            }
     }
     void Awake() {
         lastNEvents.Limit = 25;
@@ -434,6 +440,9 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                     if (whatHappened.Contains(myName)) {
                         whatHappened = whatHappened.Replace(myName, "I");
                     }
+
+                    whatHappened = Toolbox.CapitalizeFirstLetter(whatHappened);
+
                     if (UnityEngine.Random.Range(0f, 1f) < 0.5f) {
                         if (UnityEngine.Random.Range(0f, 1f) < 0.5f)
                             message.phrase = $"{whatHappened}! {reactions[rating]}";
@@ -569,7 +578,9 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                 if (protectZone != null) {
                     if (warnZone.bounds.Contains(knowledge.transform.position) &&
                         GameManager.Instance.sceneTime - assessment.timeWarned > 7f &&
-                        assessment.status != PersonalAssessment.friendStatus.enemy) {
+                        assessment.status != PersonalAssessment.friendStatus.enemy &&
+                        assessment.status != PersonalAssessment.friendStatus.friend) {
+
                         assessment.timeWarned = GameManager.Instance.sceneTime;
                         string phrase = "";
                         switch (warnType) {
@@ -594,7 +605,10 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                         Toolbox.Instance.SendMessage(gameObject, this, message);
                         assessment.warned = true;
                     }
-                    if (protectZone.bounds.Contains(knowledge.transform.position)) {
+                    if (protectZone.bounds.Contains(knowledge.transform.position) &&
+                        assessment.status != PersonalAssessment.friendStatus.friend) {
+
+                        // set enemy
                         assessment.status = PersonalAssessment.friendStatus.enemy;
                         foreach (Priority priority in decisionMaker.priorities) {
                             MessageThreaten threat = new MessageThreaten();

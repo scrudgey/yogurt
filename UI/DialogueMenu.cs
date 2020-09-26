@@ -19,9 +19,17 @@ public class Monologue {
     public Monologue() { }
     static private Regex name_hook = new Regex(@"\$name");
     static private Regex cosmic_name_hook = new Regex(@"\$cosmicName");
+    static private Regex either_name_hook = new Regex(@"\$eitherName");
     public static string replaceHooks(string inString) {
         string line = name_hook.Replace(inString, GameManager.Instance.saveGameName);
         line = cosmic_name_hook.Replace(line, GameManager.Instance.data.cosmicName);
+
+        string bestName = GameManager.Instance.saveGameName;
+        if (GameManager.Instance.data.cosmicName != "") {
+            bestName = GameManager.Instance.data.cosmicName;
+        }
+        line = either_name_hook.Replace(line, bestName);
+
         List<bool> swearList = new List<bool>();
         line = Speech.ProcessDialogue(line, ref swearList).phrase;
         return line;
@@ -52,7 +60,7 @@ public class Monologue {
     }
 }
 
-public class DialogueMenu : MonoBehaviour {
+public partial class DialogueMenu : MonoBehaviour {
     public enum TextSize { normal, large };
     private AudioSource audioSource;
     public Speech instigator;
@@ -552,7 +560,7 @@ public class DialogueMenu : MonoBehaviour {
                 promptText.text = "";
             }
         }
-        if (blitCounter > 2) {
+        if (blitCounter > 5) {
             if (instigator.portrait.Length > 1) {
                 List<Sprite> unusedSprites = new List<Sprite>(instigator.portrait);
                 unusedSprites.Remove(portrait1.sprite);
@@ -573,124 +581,5 @@ public class DialogueMenu : MonoBehaviour {
             SetMonologue(dialogue.Pop());
         }
         CheckForCommands(monologue.text.Peek());
-    }
-    public void CheckForCommands(string text) {
-        if (text == "IMPCALLBACK1") {
-            UINew.Instance.CloseActiveMenu();
-            CutsceneImp cutscene = (CutsceneImp)CutsceneManager.Instance.cutscene;
-            cutscene.FirstIngredient();
-        }
-        if (text == "IMPCALLBACK2") {
-            UINew.Instance.CloseActiveMenu();
-            CutsceneImp cutscene = (CutsceneImp)CutsceneManager.Instance.cutscene;
-            cutscene.SecondIngredient();
-        }
-        if (text == "IMPCALLBACK3") {
-            UINew.Instance.CloseActiveMenu();
-            CutsceneImp cutscene = (CutsceneImp)CutsceneManager.Instance.cutscene;
-            cutscene.Finish();
-        }
-
-        // while (nextLine) {
-        bool nextLine = false;
-        if (text == "END") {
-            if (UINew.Instance.activeMenuType == UINew.MenuType.dialogue)
-                UINew.Instance.CloseActiveMenu();
-        }
-        if (text == "POLESTARCALLBACK") {
-            PoleStarCallback();
-            nextLine = true;
-        }
-        if (text == "VAMPIRETRAP") {
-            doTrapDoor = true;
-            nextLine = true;
-        }
-        if (text == "VAMPIREATTACK") {
-            doVampireAttack = true;
-            nextLine = true;
-        }
-        if (text == "TEXTSIZE:NORMAL") {
-            textSize = TextSize.normal;
-            nextLine = true;
-        }
-        if (text == "TEXTSIZE:LARGE") {
-            textSize = TextSize.large;
-            nextLine = true;
-        }
-        if (text == "MAYORAWARDCALLBACK") {
-            MayorAward();
-            nextLine = true;
-        }
-        if (text == "GODBLESS") {
-            target.GetComponent<Godhead>().Bless();
-            UINew.Instance.CloseActiveMenu();
-        }
-        if (text == "GODDESTROY") {
-            target.GetComponent<Godhead>().Destroy();
-            UINew.Instance.CloseActiveMenu();
-        }
-        if (text == "TRADERCALLBACK") {
-            nextLine = true;
-            TraderCallback();
-        }
-        if (nextLine)
-            NextLine();
-    }
-    public void PoleStarCallback() {
-        target.defaultMonologue = "polestar";
-        GameManager.Instance.data.teleporterUnlocked = true;
-        GameManager.Instance.data.cosmicName = GameManager.Instance.CosmicName();
-    }
-    public void VampireTrap() {
-        TrapDoor trapdoor = GameObject.Find("trapdoor").GetComponent<TrapDoor>();
-        trapdoor.Activate();
-    }
-    public void VampireAttack() {
-        GameObject vampire = target.gameObject;
-        MessageInsult message = new MessageInsult();
-        Toolbox.Instance.SendMessage(vampire, instigator, message);
-        Toolbox.Instance.SendMessage(vampire, instigator, message);
-    }
-    public void TraderCallback() {
-        Trader trader = target.GetComponent<Trader>();
-        Inventory playerInventory = instigator.GetComponent<Inventory>();
-        if (playerInventory != null && trader != null) {
-            trader.Trade(playerInventory);
-        }
-    }
-    public void MayorAward() {
-        GameObject mayor = GameObject.Find("Mayor");
-        if (mayor != null) {
-            Inventory mayorInventory = mayor.GetComponent<Inventory>();
-            Controllable mayorControl = mayor.GetComponent<Controllable>();
-            Speech mayorSpeech = mayor.GetComponent<Speech>();
-            GameObject key = GameObject.Instantiate(Resources.Load("prefabs/key_to_city"), mayor.transform.position, Quaternion.identity) as GameObject;
-            Pickup keyPickup = key.GetComponent<Pickup>();
-            mayorInventory.GetItem(keyPickup);
-            mayorSpeech.defaultMonologue = "mayor_normal";
-            GameManager.Instance.data.mayorAwardToday = true;
-            GameManager.Instance.StartCoroutine(AwardRoutine(mayorControl, mayorInventory));
-        }
-    }
-    IEnumerator AwardRoutine(Controllable controllable, Inventory inv) {
-        using (Controller control = new Controller(controllable)) {
-            control.LookAtPoint(target.transform.position);
-
-            yield return new WaitForSeconds(0.1f);
-            control.ResetInput();
-            control.LookAtPoint(GameManager.Instance.playerObject.transform.position);
-            controllable.disabled = true;
-            yield return new WaitForSeconds(1.0f);
-            control.LookAtPoint(GameManager.Instance.playerObject.transform.position);
-            // AudioClip congratsClip = Resources.Load("music/Short CONGRATS YC3") as AudioClip;
-            MusicController.Instance.EnqueueMusic(new MusicCongrats());
-            GameObject confetti = Resources.Load("particles/confetti explosion") as GameObject;
-            // Toolbox.Instance.AudioSpeaker(congratsClip, controllable.transform.position);
-            GameObject.Instantiate(confetti, controllable.transform.position, Quaternion.identity);
-            yield return new WaitForSeconds(3f);
-            control.LookAtPoint(GameManager.Instance.playerObject.transform.position);
-            inv.DropItem();
-            yield return new WaitForSeconds(0.5f);
-        }
     }
 }

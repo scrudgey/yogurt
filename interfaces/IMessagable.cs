@@ -154,3 +154,9 @@ public class MessageOnCamera : Message {
         this.value = value;
     }
 }
+public class MessageSmoothieOrder : Message {
+    public int idn;
+    public MessageSmoothieOrder(int idn) {
+        this.idn = idn;
+    }
+}

@@ -14,7 +14,7 @@ public struct MessagePhrase {
     public int profanity;
 }
 public class Speech : Interactive, ISaveable {
-    public string referent;
+    public bool the;
     public string speechName;
     static string[] swearWords = new string[]{
         @"\bshit\b",
@@ -61,8 +61,18 @@ public class Speech : Interactive, ISaveable {
 
         return Regex.Replace(instring, genderHook, replacePattern, RegexOptions.IgnoreCase);
     }
+    public static string ParseDayHook(string instring) {
+        //Use named capturing groups to make life easier
+        // var pattern = "(?<label>\"formatter\"): ([\"])(?<tag>.*)([\"])";
+        string dayHook = @"\$\$DAYS\$\$";
+        //Create a substitution pattern for the Replace method
+        string replacePattern = $"{GameManager.Instance.data.days - 2} days";
+        return Regex.Replace(instring, dayHook, replacePattern, RegexOptions.IgnoreCase);
+    }
     public static MessagePhrase ProcessDialogue(string phrase, ref List<bool> swearList) {
-        StringBuilder sb = new StringBuilder(ParseGender(phrase));
+        string origString = ParseGender(phrase);
+        origString = ParseDayHook(origString);
+        StringBuilder sb = new StringBuilder(origString);
         string uncensoredPhrase = sb.ToString();
         int profanity = 0;
 
@@ -184,8 +194,8 @@ public class Speech : Interactive, ISaveable {
         if (bubbleCanvas) {
             bubbleCanvas.worldCamera = Camera.main;
         }
-        if (flipper.transform.localScale != transform.localScale) {
-            Vector3 tempscale = transform.localScale;
+        if (flipper.transform.localScale != transform.localScale.normalized) {
+            Vector3 tempscale = transform.localScale.normalized;
             flipper.transform.localScale = tempscale;
         }
         if (voice != null) {
@@ -397,8 +407,9 @@ public class Speech : Interactive, ISaveable {
     public void LateUpdate() {
         // if the parent scale is flipped, we need to flip the flipper back to keep
         // the text properly oriented.
-        if (flipper.transform.localScale != transform.localScale) {
-            Vector3 tempscale = transform.localScale;
+        float scale = transform.localScale.magnitude / 1.73205f;
+        Vector3 tempscale = (1f / scale) * transform.localScale / scale;
+        if (flipper.transform.localScale != tempscale) {
             flipper.transform.localScale = tempscale;
         }
     }

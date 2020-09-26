@@ -57,25 +57,33 @@ public class RecipeMenu : MonoBehaviour {
         GameObject playerObject = GameManager.Instance.playerObject;
         MutablePotionData data = itemScript.potionData;
 
-        nameText.text = $"potion of {data.potionData.name}";
-        buffTitle.text = Buff.buffNames[data.potionData.buff.type];
-        buffDescription.text = data.potionData.bookDescription;
+        nameText.text = $"potion of {data.name}";
+
+        PotionData potionData = data.myPotionData();
+
+        if (potionData.makeYogurt) {
+            buffTitle.text = "Recipe for Yogurt";
+        } else {
+            buffTitle.text = Buff.buffNames[potionData.buff.type];
+
+        }
+        buffDescription.text = potionData.bookDescription;
 
         if (data.unlockedIngredient1) {
-            ingredient1Image.sprite = data.potionData.ingredient1.icon;
-            ingredient1Image.color = data.potionData.ingredient1.spriteColor;
-            ingredient1Text.text = data.potionData.ingredient1.name;
+            ingredient1Image.sprite = potionData.ingredient1.icon;
+            ingredient1Image.color = potionData.ingredient1.spriteColor;
+            ingredient1Text.text = potionData.ingredient1.name;
         } else {
-            ingredient1Image.sprite = data.potionData.ingredient1.icon;
+            ingredient1Image.sprite = potionData.ingredient1.icon;
             ingredient1Image.color = Color.black;
             ingredient1Text.text = "???";
         }
         if (data.unlockedIngredient2) {
-            ingredient2Image.sprite = data.potionData.ingredient2.icon;
-            ingredient2Image.color = data.potionData.ingredient2.spriteColor;
-            ingredient2Text.text = data.potionData.ingredient2.name;
+            ingredient2Image.sprite = potionData.ingredient2.icon;
+            ingredient2Image.color = potionData.ingredient2.spriteColor;
+            ingredient2Text.text = potionData.ingredient2.name;
         } else {
-            ingredient2Image.sprite = data.potionData.ingredient2.icon;
+            ingredient2Image.sprite = potionData.ingredient2.icon;
             ingredient2Image.color = Color.black;
             ingredient2Text.text = "???";
         }

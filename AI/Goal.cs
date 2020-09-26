@@ -28,6 +28,8 @@ namespace AI {
                     return status.failure;
                 }
             }
+            // Debug.Log(this.GetType());
+            // Debug.Log(successCondition);
             return successCondition.Evaluate();
         }
         public virtual void Update() {
@@ -47,6 +49,7 @@ namespace AI {
             }
 
             if (fulfillingRequirements) {
+                // Debug.Log($"{this.GetType()} requirements met");
                 // Debug.Log(control.gameObject.name + " " + this.ToString() + " requirements met"); ;
                 control.ResetInput();
             }

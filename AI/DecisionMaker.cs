@@ -45,7 +45,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         Attack, FightFire, ProtectPossessions,
         ReadScript, RunAway, Wander, ProtectZone,
         MakeBalloonAnimals, InvestigateNoise, PrioritySocialize,
-        Panic, Sentry, Trapdoor, DeliverPizza, Dance, Haunt, Taunt
+        Panic, Sentry, Trapdoor, DeliverPizza, Dance, Haunt, Taunt, SellSmoothies, SingPraise
     }
     // the ONLY reason we need this redundant structure is so that I can expose
     // a selectable default priority type in unity editor.
@@ -66,7 +66,10 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         {typeof(PriorityDeliverPizza), PriorityType.DeliverPizza},
         {typeof(PriorityDance), PriorityType.Dance},
         {typeof(PriorityApproachPlayer), PriorityType.Haunt},
-        {typeof(PriorityTaunt), PriorityType.Taunt}
+        {typeof(PriorityTaunt), PriorityType.Taunt},
+        {typeof(PrioritySellSmoothies), PriorityType.SellSmoothies},
+        {typeof(PrioritySingPraise), PriorityType.SingPraise},
+
     };
     public string activePriorityName;
     public PriorityType defaultPriorityType;
@@ -140,7 +143,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
             InitializePriority(new PriorityMakeBalloonAnimals(gameObject, control), typeof(PriorityMakeBalloonAnimals));
         }
         if (defaultPriorityType == PriorityType.Sentry) {
-            InitializePriority(new PrioritySentry(gameObject, control), typeof(PrioritySentry));
+            InitializePriority(new PrioritySentry(gameObject, control, guardPoint, guardDirection), typeof(PrioritySentry));
         }
         if (defaultPriorityType == PriorityType.Trapdoor) {
             InitializePriority(new PriorityTrapdoor(gameObject, control, transform.position), typeof(PriorityTrapdoor));
@@ -156,6 +159,12 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         }
         if (defaultPriorityType == PriorityType.Taunt) {
             InitializePriority(new PriorityTaunt(gameObject, control), typeof(PriorityTaunt));
+        }
+        if (defaultPriorityType == PriorityType.SellSmoothies) {
+            InitializePriority(new PrioritySellSmoothies(gameObject, control, guardPoint), typeof(PrioritySellSmoothies));
+        }
+        if (defaultPriorityType == PriorityType.SingPraise) {
+            InitializePriority(new PrioritySingPraise(gameObject, control), typeof(PrioritySingPraise));
         }
 
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);

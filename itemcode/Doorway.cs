@@ -38,6 +38,12 @@ public class Doorway : Interactive {
                     }
                 }
             }
+            Controllable playerControllable = GameManager.Instance.playerObject.GetComponent<Controllable>();
+            if (playerControllable != null && playerControllable.big) {
+                MessageSpeech message = new MessageSpeech("I can't fit through this!");
+                Toolbox.Instance.SendMessage(GameManager.Instance.playerObject, this, message);
+                return;
+            }
         }
         if (leaveSound != null)
             GameManager.Instance.publicAudio.PlayOneShot(leaveSound);

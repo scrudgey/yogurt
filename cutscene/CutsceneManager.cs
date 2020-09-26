@@ -69,4 +69,9 @@ public class CutsceneManager : Singleton<CutsceneManager> {
         if (cutscene != null)
             cutscene.EscapePressed();
     }
+    public System.Collections.IEnumerator waitAndStartCutscene<T>(int waitTime) where T : Cutscene, new() {
+        yield return new WaitForSeconds(waitTime);
+        InitializeCutscene<T>();
+        yield return null;
+    }
 }

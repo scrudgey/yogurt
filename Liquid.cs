@@ -57,6 +57,7 @@ public class Liquid { //: IEquatable<Liquid> {
             this.buffs.Add(new Buff(buff));
         }
     }
+
     public bool Equals(Liquid that) {
         return this.name == that.name &&
         this.filename == that.filename &&
@@ -126,39 +127,56 @@ public class Liquid { //: IEquatable<Liquid> {
         List<PotionData> potions = PotionComponent.LoadAllPotions();
         List<Buff> newlyMixedBuffs = new List<Buff>();
         foreach (PotionData potion in potions) {
-            if (potion.Satisfied(liq.ingredients) && !liq.buffs.Contains(potion.buff)) {
-                // liq.ingredients.Remove(potion.ingredient1.prefabName);
-                // liq.ingredients.Remove(potion.ingredient2.prefabName);
-                Buff newBuff = potion.buff;
-                if (GameManager.Instance.data.perks["potion"]) {
-                    newBuff.lifetime = 0;
+            if (potion.Satisfied(liq.ingredients)) {
+                if (potion.makeYogurt) {
+                    liq = LoadLiquid("yogurt");
+
+                } else if (!liq.buffs.Contains(potion.buff)) {
+                    // liq.ingredients.Remove(potion.ingredient1.prefabName);
+                    // liq.ingredients.Remove(potion.ingredient2.prefabName);
+                    Buff newBuff = potion.buff;
+                    if (GameManager.Instance.data.perks["potion"]) {
+                        newBuff.lifetime = 0;
+                    }
+                    newlyMixedBuffs.Add(newBuff);
                 }
+
                 // unlock potion
                 MutablePotionData mutableData = GameManager.Instance.data.collectedPotions[potion.name];
-                Debug.Log($"unlocking {mutableData.potionData.name} potion");
+                Debug.Log($"unlocking {mutableData.name} potion");
                 mutableData.unlockedIngredient1 = true;
                 mutableData.unlockedIngredient2 = true;
                 GameManager.Instance.data.collectedPotions[potion.name] = mutableData;
-                // return newBuff;
-                newlyMixedBuffs.Add(newBuff);
             }
         }
         return newlyMixedBuffs;
     }
+    public static bool MixYogurt(Liquid liquid) {
+        GameObject potionPrefab = Resources.Load("data/potions/yogurt") as GameObject;
+        PotionComponent component = potionPrefab.GetComponent<PotionComponent>();
+        PotionData potionData = new PotionData(component.potionData);
+        return potionData.Satisfied(liquid.ingredients);
+    }
     public static string GetName(Liquid liq) {
+
+        string returnString = "";
+
         if (liq.buffs.Count > 0) {
-            return NameOfBuffs(liq);
+            returnString = NameOfBuffs(liq);
         } else if (liq.ingredients.Count == 0) {
-            return liq.name;
+            returnString = liq.name;
         } else if (liq.ingredients.Count == 1) {
-            return liq.ingredients.ToList()[0] + " juice";
+            returnString = liq.ingredients.ToList()[0] + " juice";
         } else if (liq.ingredients.Count == 2) {
             List<string> ingredients = liq.ingredients.ToList();
-            return ingredients[0] + "-" + ingredients[1] + " juice";
+            returnString = ingredients[0] + "-" + ingredients[1] + " juice";
         } else if (liq.ingredients.Count > 2) {
-            return NameOfQualities(liq);
+            returnString = NameOfQualities(liq);
         }
-        return "";
+        if (liq.vomit) {
+            returnString = "vomited-up " + returnString;
+        }
+        return returnString;
     }
     public static string NameOfQualities(Liquid liq) {
         Dictionary<string, float> qualities = new Dictionary<string, float>(){

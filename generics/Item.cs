@@ -8,4 +8,5 @@ public class Item : Interactive {
     public string referent;
     [TextArea(5, 10)]
     public string impDescription;
+    public bool the;
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 public class Eater : Interactive, ISaveable {
+    public bool strongStomach; // if true, does not get nauseated from disgusting / disturbing occurrences
     public float nutrition;
     public enum preference { neutral, likes, dislikes }
     enum nauseaStatement { none, warning, imminent }
@@ -329,6 +330,8 @@ public class Eater : Interactive, ISaveable {
     }
 
     void ReactToOccurrence(EventData od) {
+        if (strongStomach)
+            return;
         if (netIntrinsics != null && netIntrinsics[BuffType.undead].active())
             return;
         // do not react to the event if i am mindful

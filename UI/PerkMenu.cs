@@ -53,21 +53,27 @@ public class PerkMenu : MonoBehaviour {
     }
     void PopulatePerkList() {
         effects.buttons = new List<Button>(builtInButtons);
-        GameObject[] perkPrefabs = Resources.LoadAll("data/perks/", typeof(GameObject))
-            .Cast<GameObject>()
-            .ToArray();
+        List<GameObject> perkPrefabs = Resources.LoadAll("data/perks/", typeof(GameObject))
+    .Cast<GameObject>()
+    .ToList();
         requiredText.text = "";
         foreach (Transform child in buttonList) {
             Destroy(child.gameObject);
         }
 
         Dictionary<GameObject, PerkComponent> perkComponents = new Dictionary<GameObject, PerkComponent>();
+        List<GameObject> removeThese = new List<GameObject>();
         foreach (GameObject prefab in perkPrefabs) {
             PerkComponent component = prefab.GetComponent<PerkComponent>();
-            if (component)
+            if (component && !component.disablePerk)
                 perkComponents[prefab] = component;
+            if (component && component.disablePerk)
+                removeThese.Add(prefab);
         }
-        perkPrefabs = perkPrefabs.OrderBy(p => perkComponents[p].perk.requiredPerks).ToArray();
+        foreach (GameObject removeMe in removeThese) {
+            perkPrefabs.Remove(removeMe);
+        }
+        perkPrefabs = perkPrefabs.OrderBy(p => perkComponents[p].perk.requiredPerks).ToList();
         foreach (GameObject prefab in perkPrefabs) {
             PerkComponent component = perkComponents[prefab];
 

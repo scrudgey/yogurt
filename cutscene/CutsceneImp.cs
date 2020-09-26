@@ -225,7 +225,7 @@ public class CutsceneImp : Cutscene {
         foreach (Buff buff in intrinsics.buffs) {
             PotionData dat = buffMap[buff.type];
             MutablePotionData mutableData = GameManager.Instance.data.collectedPotions[dat.name];
-            Debug.Log($"unlocking {mutableData.potionData.name} potion");
+            Debug.Log($"unlocking {mutableData.name} potion");
             mutableData.unlockedIngredient1 = true;
             mutableData.unlockedIngredient2 = true;
             GameManager.Instance.data.collectedPotions[dat.name] = mutableData;
@@ -250,13 +250,13 @@ public class CutsceneImp : Cutscene {
                 // unlock the ingredient
                 if (kvp.Value.ingredient1.prefabName == analyzand.name) {
                     MutablePotionData mutableData = GameManager.Instance.data.collectedPotions[kvp.Value.name];
-                    Debug.Log($"unlocking {mutableData.potionData.name} ingredient 1");
+                    Debug.Log($"unlocking {mutableData.name} ingredient 1");
                     mutableData.unlockedIngredient1 = true;
                     GameManager.Instance.data.collectedPotions[kvp.Value.name] = mutableData;
                 }
                 if (kvp.Value.ingredient2.prefabName == analyzand.name) {
                     MutablePotionData mutableData = GameManager.Instance.data.collectedPotions[kvp.Value.name];
-                    Debug.Log($"unlocking {mutableData.potionData.name} ingredient 2");
+                    Debug.Log($"unlocking {mutableData.name} ingredient 2");
 
                     mutableData.unlockedIngredient2 = true;
                     GameManager.Instance.data.collectedPotions[kvp.Value.name] = mutableData;
@@ -272,14 +272,14 @@ public class CutsceneImp : Cutscene {
                 if (kvp.Value.ingredient1.prefabName == liquidContainer.liquid.name) {
 
                     MutablePotionData mutableData = GameManager.Instance.data.collectedPotions[kvp.Value.name];
-                    Debug.Log($"unlocking {mutableData.potionData.name} ingredient 1");
+                    Debug.Log($"unlocking {mutableData.name} ingredient 1");
 
                     mutableData.unlockedIngredient1 = true;
                     GameManager.Instance.data.collectedPotions[kvp.Value.name] = mutableData;
                 }
                 if (kvp.Value.ingredient2.prefabName == liquidContainer.liquid.name) {
                     MutablePotionData mutableData = GameManager.Instance.data.collectedPotions[kvp.Value.name];
-                    Debug.Log($"unlocking {mutableData.potionData.name} ingredient 2");
+                    Debug.Log($"unlocking {mutableData.name} ingredient 2");
 
                     mutableData.unlockedIngredient2 = true;
                     GameManager.Instance.data.collectedPotions[kvp.Value.name] = mutableData;

@@ -115,7 +115,7 @@ public class InputController : Singleton<InputController> {
     }
 
     public void EnableControls() {
-        Debug.Log("enable input");
+        // Debug.Log("enable input");
         // enable controls
         MoveAction.action.Enable();
         FireAction.action.Enable();

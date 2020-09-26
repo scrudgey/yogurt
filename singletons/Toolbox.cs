@@ -16,14 +16,14 @@ public enum Gender {
     male,
     female
 }
-public static class ExtensionMethods {
-    public static TKey FindKeyByValue<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TValue value) {
-        TKey returnkey = default(TKey);
-        foreach (KeyValuePair<TKey, TValue> pair in dictionary)
-            if (value.Equals(pair.Value)) returnkey = pair.Key;
-        return returnkey;
-    }
-}
+// public static class ExtensionMethods {
+//     public static TKey FindKeyByValue<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TValue value) {
+//         TKey returnkey = default(TKey);
+//         foreach (KeyValuePair<TKey, TValue> pair in dictionary)
+//             if (value.Equals(pair.Value)) returnkey = pair.Key;
+//         return returnkey;
+//     }
+// }
 
 public partial class Toolbox : Singleton<Toolbox> {
     protected Toolbox() { } // guarantee this will be always a singleton only - can't use the constructor!
@@ -346,14 +346,14 @@ public partial class Toolbox : Singleton<Toolbox> {
     //     }
     //     return "A " + GetName(obj);
     // }
-    public string GetName(GameObject obj, bool skipMainCollider = false) {
+    public string GetName(GameObject obj, bool skipMainCollider = false, bool applyThe = true) {
         // possibly also use intrinsics
         if (obj == null) {
             return "";
         }
-        if (obj == GameManager.Instance.playerObject) {
-            return GameManager.Instance.saveGameName;
-        }
+        // if (obj == GameManager.Instance.playerObject) {
+        //     return GameManager.Instance.saveGameName;
+        // }
         Duplicatable dup = obj.GetComponent<Duplicatable>();
         if (dup && dup.adoptedName != "") {
             return dup.adoptedName;
@@ -387,6 +387,10 @@ public partial class Toolbox : Singleton<Toolbox> {
         }
         nameOut = CloneRemover(nameOut);
         nameOut = UnderscoreRemover(nameOut);
+
+        if ((speech != null && applyThe && speech.the) || (item != null && applyThe && item.the))
+            nameOut = $"the {nameOut.ToLower()}";
+
         if (new List<String> { "blf", "blm", "brf", "Brm", "Tom" }.Contains(nameOut)) {
             return GameManager.Instance.saveGameName;
         }
@@ -627,5 +631,15 @@ public partial class Toolbox : Singleton<Toolbox> {
         DestroyAfterTime dat = target.AddComponent<DestroyAfterTime>();
         dat.deactivate = true;
         dat.lifetime = 3f;
+    }
+    public static string CapitalizeFirstLetter(string inString) {
+        if (inString == null)
+            return null;
+        if (inString.Length == 0)
+            return inString;
+        else if (inString.Length == 1)
+            return char.ToUpper(inString[0]).ToString();
+        else
+            return char.ToUpper(inString[0]) + inString.Substring(1);
     }
 }

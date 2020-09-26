@@ -26,11 +26,12 @@ namespace AI {
                 }
             }
         }
-        public RoutineWalkToGameobject(GameObject g, Controller c, Ref<GameObject> targetObject, bool invert = false, Vector2 localOffset = new Vector2()) : base(g, c) {
+        public RoutineWalkToGameobject(GameObject g, Controller c, Ref<GameObject> targetObject, bool invert = false, Vector2 localOffset = new Vector2(), float distance = 0.2f) : base(g, c) {
             routineThought = "I'm walking over to the " + g.name + ".";
             this.target = targetObject;
             this.invert = invert;
             this.localOffset = localOffset;
+            this.minDistance = distance;
         }
         protected override status DoUpdate() {
             if (target.val != null) {

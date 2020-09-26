@@ -17,6 +17,8 @@ public class CameraZoomZone : MonoBehaviour {
     //     }
     // }
     public void ForceRecalculate(Collider2D other) {
+        if (other == null)
+            return;
         // float distance = Vector2.Distance(other.transform.position, transform.position);
         float distance = Vector2.Distance(other.ClosestPoint(transform.position), transform.position);
         // float distance = other.ClosestPoint(transform.position);

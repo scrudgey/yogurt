@@ -38,6 +38,7 @@ public struct PotionData {
     public string buffDescription;
     [TextArea(3, 10)]
     public string bookDescription;
+    public bool makeYogurt;
     public PotionData(PotionData that) { // deepcopy
         this.name = that.name;
         this.ingredient1 = that.ingredient1;
@@ -45,6 +46,7 @@ public struct PotionData {
         this.buff = that.buff;
         this.buffDescription = that.buffDescription;
         this.bookDescription = that.bookDescription;
+        this.makeYogurt = that.makeYogurt;
     }
     public HashSet<string> RequiredItems() {
         return new HashSet<string>() { ingredient1.prefabName, ingredient2.prefabName };
@@ -60,12 +62,17 @@ public struct PotionData {
 }
 
 public struct MutablePotionData {
-    public PotionData potionData;
     public bool unlockedIngredient1;
     public bool unlockedIngredient2;
+    public string name;
     public MutablePotionData(PotionData potionData) {
-        this.potionData = potionData;
+        // this.potionData = new PotionData(potionData);
         this.unlockedIngredient1 = false;
         this.unlockedIngredient2 = false;
+        this.name = potionData.name;
+    }
+    public PotionData myPotionData() {
+        GameObject prefab = Resources.Load($"data/potions/{name}") as GameObject;
+        return prefab.GetComponent<PotionComponent>().potionData;
     }
 }

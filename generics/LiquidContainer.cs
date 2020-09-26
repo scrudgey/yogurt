@@ -123,7 +123,10 @@ public class LiquidContainer : Interactive, ISaveable {
 
             // not ideal to put this here instead of in MixLiquids, but we need monobehavior
             List<Buff> mixedBuff = Liquid.MixPotion(l);
-            if (mixedBuff.Count > 0) {
+            if (Liquid.MixYogurt(l)) {
+                l = Liquid.LoadLiquid("yogurt");
+                GameObject.Instantiate(Resources.Load("particles/potionMixEffect"), transform.position, Quaternion.identity);
+            } else if (mixedBuff.Count > 0) {
                 l.buffs.AddRange(mixedBuff);
                 l.name = Liquid.GetName(l);
                 GameObject.Instantiate(Resources.Load("particles/potionMixEffect"), transform.position, Quaternion.identity);

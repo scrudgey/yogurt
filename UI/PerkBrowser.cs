@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Linq;
 using System.Collections.Generic;
 
+
 public class PerkBrowser : MonoBehaviour {
     public Transform buttonList;
     public Image perkImage;
@@ -44,21 +45,27 @@ public class PerkBrowser : MonoBehaviour {
     }
     void PopulatePerkList() {
         effects.buttons = new List<Button>();
-        GameObject[] perkPrefabs = Resources.LoadAll("data/perks/", typeof(GameObject))
+        List<GameObject> perkPrefabs = Resources.LoadAll("data/perks/", typeof(GameObject))
             .Cast<GameObject>()
-            .ToArray();
+            .ToList();
         requiredText.text = "";
         foreach (Transform child in buttonList) {
             Destroy(child.gameObject);
         }
 
         Dictionary<GameObject, PerkComponent> perkComponents = new Dictionary<GameObject, PerkComponent>();
+        List<GameObject> removeThese = new List<GameObject>();
         foreach (GameObject prefab in perkPrefabs) {
             PerkComponent component = prefab.GetComponent<PerkComponent>();
-            if (component)
+            if (component && !component.disablePerk)
                 perkComponents[prefab] = component;
+            if (component && component.disablePerk)
+                removeThese.Add(prefab);
         }
-        perkPrefabs = perkPrefabs.OrderBy(p => perkComponents[p].perk.requiredPerks).ToArray();
+        foreach (GameObject removeMe in removeThese) {
+            perkPrefabs.Remove(removeMe);
+        }
+        perkPrefabs = perkPrefabs.OrderBy(p => perkComponents[p].perk.requiredPerks).ToList();
         bool initialButton = false;
         foreach (GameObject prefab in perkPrefabs) {
             PerkComponent component = perkComponents[prefab];

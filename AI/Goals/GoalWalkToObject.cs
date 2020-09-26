@@ -12,7 +12,7 @@ namespace AI {
             target = t;
             // TODO: if invert, change success condition
             successCondition = new ConditionCloseToObject(g, target, range, localOffset: localOffset);
-            routines.Add(new RoutineWalkToGameobject(g, c, target, invert: invert, localOffset: localOffset));
+            routines.Add(new RoutineWalkToGameobject(g, c, target, invert: invert, localOffset: localOffset, distance: range));
         }
         public GoalWalkToObject(GameObject g, Controller c, Type objType, float range = 0.2f) : base(g, c) {
             // GameObject targetObject = GameObject.FindObjectOfType<typeof(objType)>();

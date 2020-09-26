@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class EmailTrigger : MonoBehaviour {
-    public enum EmailTriggerType { none, onDie, onKnockDown, onClick, onWear }
+    public enum EmailTriggerType { none, onDie, onKnockDown, onClick, onWear, onEnter }
     public EmailTriggerType triggerType;
     public string emailFilename;
     public bool isQuitting = false;
-
+    public BoxCollider2D zone;
     void OnApplicationQuit() {
         isQuitting = true;
     }
@@ -36,5 +36,16 @@ public class EmailTrigger : MonoBehaviour {
         if (triggerType == EmailTriggerType.onClick) {
             SendEmail();
         }
+    }
+    void Update() {
+        if (zone != null && GameManager.Instance.playerObject != null) {
+            if (triggerType == EmailTriggerType.onEnter) {
+                if (zone.bounds.Contains(GameManager.Instance.playerObject.transform.position)) {
+                    SendEmail();
+                    Destroy(gameObject);
+                }
+            }
+        }
+
     }
 }

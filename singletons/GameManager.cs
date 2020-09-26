@@ -53,6 +53,7 @@ public class GameData {
     public bool firstTimeLeavingHouse;
     public bool mayorCutsceneHappened;
     public bool visitedStudio;
+    public bool visitedThroneRoom;
     public bool finishedCommercial;
     public bool visitedMoon;
     public bool teleporterUnlocked;
@@ -115,6 +116,8 @@ public partial class GameManager : Singleton<GameManager> {
         {"hells_kitchen", "hell's kitchen"},
         {"hells_landing", "hell's landing"},
         {"venus_temple", "venus temple"},
+        {"hells_vomit_ratchet", "hell's utility tunnel"},
+        {"lower_hell", "lower hell"},
     };
     public GameData data;
     public string saveGameName = "test";
@@ -226,6 +229,7 @@ public partial class GameManager : Singleton<GameManager> {
             AudioClip boom = Resources.Load("sounds/explosion/cannon") as AudioClip;
             PlayPublicSound(boom);
             Destroy(head.gameObject);
+            IncrementStat(StatType.deathByExplodingHead, 1);
         }
 
         if (hurtable != null) {
@@ -519,10 +523,17 @@ public partial class GameManager : Singleton<GameManager> {
                 }
             }
         }
+        if (sceneName == "devils_throneroom") {
+            if (!data.visitedThroneRoom) {
+                StartCoroutine(CutsceneManager.Instance.waitAndStartCutscene<CutsceneThroneroom>(2));
+                data.visitedThroneRoom = true;
+            }
+        }
         if (data.days >= 2) {
             UnlockTVShow("vampire1");
         }
     }
+
     public GameObject InstantiatePlayerPrefab() {
         // Debug.Log("instantiate player");
         GameObject obj = GameObject.Instantiate(Resources.Load("prefabs/" + data.prefabName)) as GameObject;
@@ -676,6 +687,18 @@ public partial class GameManager : Singleton<GameManager> {
         if (computer != null) {
             computer.CheckBubble();
         }
+        // instantiate original player character if missing?
+        // not prefabname
+        // data.prefabName 
+        // List<string> origPrefabs = new List<string>() { "Tom", "Tina", "Brf", "Brm", "Blf", "Blm" };
+        Debug.Log(data.prefabName.ToLower());
+        Debug.Log(Toolbox.Instance.CloneRemover(playerObject.name).ToLower());
+        if (!data.prefabName.ToLower().Contains(Toolbox.Instance.CloneRemover(playerObject.name).ToLower())) {
+            Debug.Log("instantiating player prefab on apartment newday");
+            GameObject origPlayer = InstantiatePlayerPrefab();
+            GameObject spawnPoint = GameObject.Find("SpawnPoint");
+            origPlayer.transform.position = spawnPoint.transform.position;
+        }
     }
 
     public void NewGame(bool switchlevel = true) {
@@ -794,7 +817,7 @@ public partial class GameManager : Singleton<GameManager> {
             {"hypnosis", false},
             {"swear", false},
             {"potion", false},
-            {"burn", false},
+            // {"burn", false},
             {"beverage", false},
             {"resurrection", false}
         };
@@ -840,6 +863,7 @@ public partial class GameManager : Singleton<GameManager> {
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("nullify2"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("dungeon"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("hell"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("satan"));
             data.perks["hypnosis"] = true;
             data.perks["vomit"] = true;
             data.perks["eat_all"] = true;
@@ -858,6 +882,7 @@ public partial class GameManager : Singleton<GameManager> {
             data.mayorCutsceneHappened = true;
             data.visitedStudio = true;
             data.visitedMoon = true;
+            data.visitedThroneRoom = true;
             data.finishedCommercial = true;
 
             data.collectedObjects.Add("package");
@@ -978,6 +1003,7 @@ public partial class GameManager : Singleton<GameManager> {
         return data;
     }
     public void CheckLiquidCollection(Liquid l, GameObject owner) {
+        Debug.Log("check liquid");
         if (owner != playerObject)
             return;
         foreach (Liquid atomicLiquid in l.atomicLiquids) {
@@ -990,20 +1016,43 @@ public partial class GameManager : Singleton<GameManager> {
                 }
             }
             if (match) continue;
-            // Debug.Log($"collecting {atomicLiquid.name}");
+            Debug.Log($"collecting {atomicLiquid.name}");
             Liquid newAtomicLiquid = new Liquid(atomicLiquid);
             data.collectedLiquids.Add(newAtomicLiquid);
             data.newCollectedLiquids.Add(newAtomicLiquid);
         }
 
         foreach (Liquid collectedLiquid in data.collectedLiquids) {
-            if (collectedLiquid.Equals(l))
+            if (collectedLiquid.Equals(l)) {
+                CheckLiquidAchievement();
                 return;
+            }
         }
         Debug.Log($"collecting {l.name}");
         Liquid newLiquid = new Liquid(l);
         data.collectedLiquids.Add(new Liquid(newLiquid));
         data.newCollectedLiquids.Add(new Liquid(newLiquid));
+        CheckLiquidAchievement();
+    }
+    public void CheckLiquidAchievement() {
+
+        int collectedRegWater = 0;
+        int collectedRiverWater = 0;
+        int collectedMoonWater = 0;
+        int collectedToiletWater = 0;
+        foreach (Liquid liquid in data.collectedLiquids) {
+            if (liquid.name.ToLower() == "water")
+                collectedRegWater = 1;
+            if (liquid.name.ToLower() == "river water")
+                collectedRiverWater = 1;
+            if (liquid.name.ToLower() == "toilet water")
+                collectedToiletWater = 1;
+            if (liquid.name.ToLower() == "moon water")
+                collectedMoonWater = 1;
+        }
+        Debug.Log($"{collectedRegWater} {collectedRiverWater} {collectedToiletWater} {collectedMoonWater}");
+        int totalWaters = collectedRegWater + collectedRiverWater + collectedToiletWater + collectedMoonWater;
+        SetStat(StatType.typesOfWaterCollected, totalWaters);
     }
     public void CheckItemCollection(GameObject obj, GameObject owner) {
         if (owner != playerObject)
@@ -1155,6 +1204,7 @@ public partial class GameManager : Singleton<GameManager> {
             "Magna Morti",
             "Quadriceps Potentia",
             "Pontifex Prime",
+            "Hapax Legomenon"
         };
         return names[UnityEngine.Random.Range(0, names.Count)];
     }

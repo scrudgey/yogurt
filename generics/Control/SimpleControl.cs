@@ -12,11 +12,12 @@ public class SimpleControl : Controllable, ISaveable {
         }
         set {
             if (value != _scaleVector) {
-                transform.localScale = value;
+                transform.localScale = scaleFactor * value;
             }
             _scaleVector = value;
         }
     }
+    public float scaleFactor = 1f;
     public override void Awake() {
         base.Awake();
         baseSpeed = maxSpeed;

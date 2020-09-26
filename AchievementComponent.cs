@@ -21,6 +21,9 @@ public enum StatType {
     deathByAsphyxiation,
     deathByExplosion,
     deathByAcid,
+    deathByExplodingHead,
+    deathByPotion,
+    deathByFire,
     mayorsSassed,
     actsOfCannibalism,
     heartsEaten,
@@ -29,7 +32,8 @@ public enum StatType {
     monstersKilled,
     murders,
     bedsMade,
-    booksBurned
+    booksBurned,
+    typesOfWaterCollected
 }
 
 [System.Serializable]

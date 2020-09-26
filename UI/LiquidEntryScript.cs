@@ -10,7 +10,8 @@ public class LiquidEntryScript : MonoBehaviour {
     public BeverageMenu menu;
     public void Configure(Liquid liquid) {
         this.liquid = liquid;
-        entryText.text = liquid.name;
+        // entryText.text = liquid.name;
+        entryText.text = Liquid.GetName(liquid);
         if (GameManager.Instance.data.newCollectedLiquids.Contains(liquid)) {
             newText.text = "new!";
             newText.enabled = true;
