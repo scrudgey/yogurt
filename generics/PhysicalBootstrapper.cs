@@ -23,7 +23,6 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
     private Vector3 setV;
     private Vector3 addV;
     public GameObject thrownBy;
-    public Collider2D objectCollider;
     public PersistentComponent loadData;
     public bool doLoad;
     private bool isQuitting = false;
@@ -96,13 +95,7 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         // Set up ground object
         groundObject = new GameObject(name + " Ground");
         groundObject.tag = "footprint";
-        // if (noCollisions) {
-        //     // groundObject.layer = 15;
-        //     foreach (Collider2D collider in groundObject.GetComponents<Collider2D>()) {
-        //         collider.enabled = false;
-        //     }
-        // }
-        groundObject.layer = 16;
+        groundObject.layer = LayerMask.NameToLayer("groundcollider");
 
         groundObject.transform.position = initPos;
         Toolbox.Instance.SetUpAudioSource(groundObject);
@@ -116,7 +109,6 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         groundBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         groundBody.interpolation = RigidbodyInterpolation2D.Interpolate;
         //box collider
-        // if (!noCollisions) {
         groundCollider = groundObject.AddComponent<CapsuleCollider2D>();
         groundCollider.direction = CapsuleDirection2D.Horizontal;
         groundCollider.sharedMaterial = Resources.Load<PhysicsMaterial2D>("ground");
@@ -128,11 +120,10 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         foreach (Collider2D myCollider in GetComponents<Collider2D>()) {
             Physics2D.IgnoreCollision(groundCollider, myCollider, true);
         }
-        // }
 
 
         horizon = new GameObject("horizon");
-        horizon.layer = 9;
+        horizon.layer = LayerMask.NameToLayer("horizon");
         Rigidbody2D shadowBody = horizon.AddComponent<Rigidbody2D>();
         shadowBody.bodyType = RigidbodyType2D.Kinematic;
         horizon.AddComponent<EdgeCollider2D>();
@@ -140,7 +131,6 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         horizon.transform.SetParent(groundObject.transform);
         shadowBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         shadowBody.interpolation = RigidbodyInterpolation2D.Interpolate;
-        objectCollider = GetComponent<Collider2D>();
 
         hingeObject.transform.SetParent(groundObject.transform);
         Vector2 tempPos = Vector2.zero;

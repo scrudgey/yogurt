@@ -55,7 +55,7 @@ public class Flammable : MonoBehaviour, ISaveable {
         fireRadius.isTrigger = true;
         fireRadius.radius = 0.1f;
         fireRadius.name = "fire";
-        fire.gameObject.layer = 13;
+        fire.gameObject.layer = LayerMask.NameToLayer("impact");
         //ensure that there is a speaker
         audioSource = Toolbox.Instance.SetUpAudioSource(fireChild);
         burnSounds = Resources.Load("sounds/Crackling Fire", typeof(AudioClip)) as AudioClip;

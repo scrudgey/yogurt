@@ -18,8 +18,10 @@ public class Speech : Interactive, ISaveable {
     public string speechName;
     static string[] swearWords = new string[]{
         @"\bshit\b",
+        @"\bShit\b",
         @"\bshitty\b",
         @"\bfuck\b",
+        @"\bFuck\b",
         @"\bfucked\b",
         @"\bfucking\b",
         @"\bshazbotting\b",

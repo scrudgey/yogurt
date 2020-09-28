@@ -99,9 +99,9 @@ public class MonoLiquid : MonoBehaviour, ISaveable {
         // data.whatHappened = liquid.name + " was spilled";
         // data.noun = "spilling";
         GameObject puddle = Instantiate(Resources.Load("prefabs/Puddle"), transform.position, Quaternion.identity) as GameObject;
-        // puddle.layer = 4;
         PhysicalBootstrapper pb = GetComponent<PhysicalBootstrapper>();
-        pb.DestroyPhysical();
+        if (pb != null)
+            pb.DestroyPhysical();
         Liquid.MonoLiquidify(puddle, liquid);
         Edible puddleEdible = puddle.GetComponent<Edible>();
         Edible edible = GetComponent<Edible>();

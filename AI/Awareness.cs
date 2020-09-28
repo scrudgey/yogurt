@@ -293,7 +293,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         if (other.transform.IsChildOf(transform.root))
             return;
         // if it's background
-        if (other.gameObject.layer == 8)
+        if (other.gameObject.layer == LayerMask.NameToLayer("background"))
             return;
         if (speciousPresent <= 0) {
             if (viewed == false) {

@@ -105,9 +105,9 @@ public class Physical : MonoBehaviour {
             // projectiles should be on their own layer: if i placed them on main, they would 
             // not collide with their footprint. if i placed them on feet, they would not collide with 
             // extended objects.
-            trueObject.layer = 11;
+            trueObject.layer = LayerMask.NameToLayer("projectile");
         } else {
-            trueObject.layer = 10;
+            trueObject.layer = LayerMask.NameToLayer("object");
         }
         if (doGround) {
             doGround = false;
@@ -184,11 +184,10 @@ public class Physical : MonoBehaviour {
         }
         suppressLandSound = false;
         SetSliderLimit(1f * objectCollider.Distance(horizonCollider).distance);
-        // if (noCollisions) {
-        //     gameObject.layer = 15;
-        // } else {
-        gameObject.layer = 16;
-        // }
+
+        // currently, no reason for this code
+        gameObject.layer = LayerMask.NameToLayer("groundcollider");
+
         if (spriteRenderer)
             spriteRenderer.enabled = false;
         if (objectRenderer)
@@ -228,8 +227,11 @@ public class Physical : MonoBehaviour {
                 Physics2D.IgnoreCollision(objectCollider, phys.horizonCollider, true);
             }
         }
-        gameObject.layer = 16;
-        // gameObject.layer = 15;
+
+        // TODO: different layer on fly mode
+        gameObject.layer = LayerMask.NameToLayer("groundcollider");
+
+
         if (spriteRenderer)
             spriteRenderer.enabled = true;
         if (objectRenderer)

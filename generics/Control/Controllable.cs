@@ -143,7 +143,7 @@ public class Controllable : MonoBehaviour {
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
         Toolbox.RegisterMessageCallback<MessageDirectable>(this, HandleDirectable);
         Toolbox.RegisterMessageCallback<MessageInventoryChanged>(this, HandleInventoryMessage);
-        Toolbox.RegisterMessageCallback<MessageNoise>(this, HandleNoise);
+        // Toolbox.RegisterMessageCallback<MessageNoise>(this, HandleNoise);
     }
     public virtual void Start() {
         foreach (Component component in gameObject.GetComponentsInChildren<Component>()) {
@@ -153,12 +153,12 @@ public class Controllable : MonoBehaviour {
         }
         UpdateDefaultInteraction();
     }
-    public void HandleNoise(MessageNoise message) {
-        // if (hitState >= HitState.stun || fightMode)
-        //     return;
+    // public void HandleNoise(MessageNoise message) {
+    //     // if (hitState >= HitState.stun || fightMode)
+    //     //     return;
 
-        // LookAtPoint(message.location);
-    }
+    //     // LookAtPoint(message.location);
+    // }
     public void HandleInventoryMessage(MessageInventoryChanged message) {
         // Debug.Log(gameObject.name + " updating default actions on inv change");
         UpdateDefaultInteraction();

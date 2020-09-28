@@ -384,7 +384,6 @@ public class Hurtable : Damageable, ISaveable {
             downedTimer = 10f;
         }
         if (myCollider != null) {
-            // myCollider.enabled = false;
             myCollider.gameObject.layer = LayerMask.NameToLayer("knockdown");
         }
         if (knockdownSounds.Count > 0) {
@@ -415,7 +414,6 @@ public class Hurtable : Damageable, ISaveable {
                 health += 0.25f * maxHealth;
             }
         if (myCollider != null) {
-            // myCollider.enabled = true;
             myCollider.gameObject.layer = LayerMask.NameToLayer("feet");
         }
         hitState = Controllable.RemoveHitState(hitState, Controllable.HitState.unconscious);

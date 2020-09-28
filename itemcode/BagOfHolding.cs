@@ -169,6 +169,12 @@ public class BagOfHolding : Interactive, IExcludable, ISaveable {
         if (physical)// && physical.doInit)
             physical.InitPhysical(0.05f, Vector2.zero);
 
+        // restart head animation
+        HeadAnimation playerHead = pickup.GetComponentInChildren<HeadAnimation>();
+        if (playerHead) {
+            playerHead.UpdateSequence();
+        }
+
         ClaimsManager.Instance.DisclaimObject(pickup.gameObject, this);
         items.Remove(pickup);
         PopulateContentActions();

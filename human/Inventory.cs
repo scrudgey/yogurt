@@ -428,16 +428,21 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         return "Swing " + weaponname;
     }
     void EndSwing() {
+        holding.SendMessage("EndSwingWeapon", SendMessageOptions.DontRequireReceiver);
         MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.swinging, false);
         Toolbox.Instance.SendMessage(gameObject, this, anim);
         if (holding) {
             holding.GetComponent<Renderer>().sortingLayerName = "main";
             holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
+            Debug.Log(holding.transform.localRotation);
+
+            holding.transform.localRotation = Quaternion.identity;
         }
     }
     void StartSwing() {
         if (holding == null)
             return;
+        holding.SendMessage("StartSwingWeapon", SendMessageOptions.DontRequireReceiver);
         Dictionary<BuffType, Buff> netBuffs = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject).NetBuffs();
 
         GameObject slash = Instantiate(Resources.Load("Slash2"), transform.position, transform.rotation) as GameObject;
@@ -462,30 +467,19 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         message.type = weapon.damageType;
         s.message = message;
 
-        foreach (Rigidbody2D body in holding.GetComponentsInChildren<Rigidbody2D>()) {
-            // Debug.Log(body);
-            body.AddForce(message.force * -5f, ForceMode2D.Impulse);
-            // body.AddForce((body.transform.position - holdpoint.transform.position) * 30f);
-            // if (direction.x >= 0) {
-            //     body.AddTorque(30f);
-            // } else {
-            //     body.AddTorque(-30f);
-            // }
-            // StartCoroutine(flail(body, message.force));
-        }
+        // foreach (Rigidbody2D body in holding.GetComponentsInChildren<Rigidbody2D>()) {
+        //     // Debug.Log(body);
+        //     body.AddForce(message.force * -5f, ForceMode2D.Impulse);
+        //     // body.AddForce((body.transform.position - holdpoint.transform.position) * 30f);
+        //     // if (direction.x >= 0) {
+        //     //     body.AddTorque(30f);
+        //     // } else {
+        //     //     body.AddTorque(-30f);
+        //     // }
+        //     // StartCoroutine(flail(body, message.force));
+        // }
     }
-    // IEnumerator flail(Rigidbody2D body, Vector2 force) {
-    //     float timer = 0f;
-    //     while (timer < 0.1f) {
-    //         body.AddForce(force, ForceMode.Impulse);
-    //         if (direction.x >= 0) {
-    //             body.AddTorque(0.3f);
-    //         } else {
-    //             body.AddTorque(0.3f);
-    //         }
-    //         yield return null;
-    //     }
-    // }
+
     public void DropMessage(GameObject obj) {
         SoftDropItem();
         MessageStun message = new MessageStun();
