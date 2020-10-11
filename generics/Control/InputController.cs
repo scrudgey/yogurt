@@ -57,7 +57,8 @@ public class InputController : Singleton<InputController> {
         "occurrenceFlag",
         "occurrenceSound",
         "footprint",
-        "zombieSpawnZone"
+        "zombieSpawnZone",
+        "sky"
         };
     public static List<ControlState> selectionStates = new List<ControlState>(){InputController.ControlState.swearSelect,
                                                                                 InputController.ControlState.insultSelect,

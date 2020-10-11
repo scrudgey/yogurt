@@ -434,8 +434,6 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         if (holding) {
             holding.GetComponent<Renderer>().sortingLayerName = "main";
             holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
-            Debug.Log(holding.transform.localRotation);
-
             holding.transform.localRotation = Quaternion.identity;
         }
     }

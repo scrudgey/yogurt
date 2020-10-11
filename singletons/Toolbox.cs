@@ -174,6 +174,30 @@ public partial class Toolbox : Singleton<Toolbox> {
         source.outputAudioMixerGroup = sfxMixer.FindMatchingGroups("Master")[0];
         return source;
     }
+    public AudioSource SetUpGlobalAudioSource(GameObject g) {
+        AudioSource source = g.GetComponent<AudioSource>();
+        if (!source) {
+            source = g.AddComponent<AudioSource>();
+        }
+        if (sfxMixer == null) {
+            sfxMixer = Resources.Load("mixers/SoundEffectMixer") as AudioMixer;
+        }
+
+        source.loop = false;
+        source.volume = 1;
+        source.pitch = 1;
+        source.panStereo = 0;
+        source.spatialBlend = 0;
+        source.dopplerLevel = 0;
+        source.spread = 360;
+        source.rolloffMode = AudioRolloffMode.Logarithmic;
+        source.minDistance = 9990f;
+        source.maxDistance = 9999f;
+
+
+        source.outputAudioMixerGroup = sfxMixer.FindMatchingGroups("Master")[0];
+        return source;
+    }
     public void AudioSpeaker(string clipName, Vector3 position) {
         if (numberOfLiveSpeakers > 10)
             return;

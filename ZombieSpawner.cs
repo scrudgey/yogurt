@@ -12,11 +12,11 @@ public class ZombieSpawner : MonoBehaviour {
     private State state;
 
     void OnTriggerEnter2D(Collider2D col) {
-        if (col.tag == "background")
+        if (col.tag == "background" || col.tag == "sky")
             Destroy(gameObject);
     }
     void OnTriggerStay2D(Collider2D col) {
-        if (col.tag == "background")
+        if (col.tag == "background" || col.tag == "sky")
             Destroy(gameObject);
     }
     void Update() {

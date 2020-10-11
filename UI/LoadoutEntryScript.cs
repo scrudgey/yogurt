@@ -36,6 +36,7 @@ public class LoadoutEntryScript : MonoBehaviour {
         }
     }
     public void Configure(ItemEntryScript script) {
+        Debug.Log(script);
         this.itemEntryScript = script;
         Text entryText = transform.Find("item").GetComponent<Text>();
         prefabName = script.prefabName;

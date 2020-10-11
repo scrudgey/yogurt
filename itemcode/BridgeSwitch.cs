@@ -10,7 +10,7 @@ public class BridgeSwitch : Interactive, ISaveable {
     public AudioClip bridgeAppearSound;
     private AudioSource audioSource;
     public GameObject bridge;
-    public Collider2D bridgeCollider;
+    public GameObject bridgeCollider;
     public AudioClip onSound;
     public AudioClip offSound;
     public void Awake() {
@@ -21,18 +21,17 @@ public class BridgeSwitch : Interactive, ISaveable {
     public void Teleport() {
         on = !on;
         Activate();
-        // do teleport
     }
     public void Activate() {
         if (on) {
             bridge.SetActive(true);
-            bridgeCollider.enabled = false;
+            bridgeCollider.SetActive(false);
             spriteRenderer.sprite = upSprite;
             audioSource.PlayOneShot(onSound);
 
         } else {
             bridge.SetActive(false);
-            bridgeCollider.enabled = true;
+            bridgeCollider.SetActive(true);
             spriteRenderer.sprite = downSprite;
             audioSource.PlayOneShot(offSound);
 

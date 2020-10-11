@@ -1050,7 +1050,6 @@ public partial class GameManager : Singleton<GameManager> {
             if (liquid.name.ToLower() == "moon water")
                 collectedMoonWater = 1;
         }
-        Debug.Log($"{collectedRegWater} {collectedRiverWater} {collectedToiletWater} {collectedMoonWater}");
         int totalWaters = collectedRegWater + collectedRiverWater + collectedToiletWater + collectedMoonWater;
         SetStat(StatType.typesOfWaterCollected, totalWaters);
     }

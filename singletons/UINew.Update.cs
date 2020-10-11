@@ -95,9 +95,11 @@ public partial class UINew : Singleton<UINew> {
                 if (cursorText.activeInHierarchy)
                     cursorText.SetActive(false);
                 if (highlight) {
-                    Cursor.SetCursor(cursorHighlight, new Vector2(28, 16), CursorMode.Auto);
+                    // Cursor.SetCursor(cursorHighlight, new Vector2(28, 16), CursorMode.Auto);
+                    Cursor.SetCursor(cursorHighlight, new Vector2(56, 34), CursorMode.Auto);
                 } else {
-                    Cursor.SetCursor(cursorDefault, new Vector2(28, 16), CursorMode.Auto);
+                    // Cursor.SetCursor(cursorDefault, new Vector2(28, 16), CursorMode.Auto);
+                    Cursor.SetCursor(cursorDefault, new Vector2(56, 34), CursorMode.Auto);
                 }
                 break;
             case InputController.ControlState.inMenu:

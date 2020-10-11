@@ -247,6 +247,8 @@ public class Container : MayorLock, IExcludable, ISaveable {
         }
         if (items.Count > 0) {
             for (int i = 0; i < items.Count; i++) {
+                if (items[i] == null || items[i].gameObject == null)
+                    continue;
                 // data.ints["item"+i.ToString()] = MySaver.GameObjectToID(instance.items[i].gameObject);
                 MySaver.UpdateGameObjectReference(items[i].gameObject, data, "item" + i.ToString());
                 MySaver.AddToReferenceTree(data.id, items[i].gameObject);

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 public class Physical : MonoBehaviour {
     public enum mode { none, fly, ground, zip }
     public AudioClip[] landSounds = new AudioClip[0];
@@ -20,6 +21,7 @@ public class Physical : MonoBehaviour {
     private bool doZip;
     private bool doStartTable;
     private bool doStopTable;
+    private bool doFall;
     private SpriteRenderer spriteRenderer;
     public SpriteRenderer objectRenderer;
     public float groundDrag;
@@ -128,6 +130,10 @@ public class Physical : MonoBehaviour {
         if (doStopTable) {
             doStopTable = false;
             StopTable();
+        }
+        if (doFall) {
+            doFall = false;
+            DoFall();
         }
         if (currentMode == mode.ground) {
             if (objectCollider.Distance(horizonCollider).isOverlapped) {
@@ -250,9 +256,31 @@ public class Physical : MonoBehaviour {
             // START TABLE
             table = coll.GetComponentInParent<Table>();
             doStartTable = true;
-            // Debug.Log(name + " table collision detected, dostarttable true");
-            // Debug.Break();
         }
+        if (coll.tag == "sky") {
+            Fall();
+        }
+    }
+    void OnTriggerStay2D(Collider2D coll) {
+        if (coll.tag == "sky") {
+            Fall();
+        }
+    }
+    public void Fall() {
+        doFall = true;
+    }
+    public void DoFall() {
+        Vector3 objOriginalPosition = objectBody.transform.position;
+        Collider2D skyCollider = Physics2D.OverlapBox(transform.position, 0.01f * Vector2.one, 0, 1 << LayerMask.NameToLayer("sky"), -Mathf.Infinity, Mathf.Infinity);
+        int index = 0;
+        while (skyCollider != null && index < 500) {
+            Vector3 position = transform.position;
+            position.y -= 0.01f;
+            transform.position = position;
+            skyCollider = Physics2D.OverlapBox(transform.position, 0.01f * Vector2.one, 0, 1 << LayerMask.NameToLayer("sky"), -Mathf.Infinity, Mathf.Infinity);
+            index += 1;
+        }
+        objectBody.transform.position = objOriginalPosition;
     }
     void OnTriggerExit2D(Collider2D coll) {
         if (coll.tag == "table" && coll.gameObject != gameObject) {
