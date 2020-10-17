@@ -34,6 +34,10 @@ public class StartMenu : MonoBehaviour {
     public Image previewPortrait;
 
     // public MyControls controls;
+    public AudioClip menuOpenSound;
+    public AudioClip menuOpenMoreSound;
+    public AudioClip menuClosedSound;
+    public AudioClip effectSound;
     bool keypressedThisFrame;
     void Awake() {
         // controls = new MyControls();
@@ -56,7 +60,7 @@ public class StartMenu : MonoBehaviour {
         statsBrowser.gameObject.SetActive(false);
         mainMenu.SetActive(false);
         alert.SetActive(false);
-        logo.SetActive(true);
+        // logo.SetActive(true);
         state = menuState.anykey;
     }
     void Update() {
@@ -64,6 +68,7 @@ public class StartMenu : MonoBehaviour {
             state = menuState.main;
             mainMenu.SetActive(true);
             prompt.SetActive(false);
+            GameManager.Instance.PlayPublicSound(menuOpenSound);
         }
         if (keypressedThisFrame) {
             if (saveInspector.gameObject.activeInHierarchy) {
@@ -131,7 +136,7 @@ public class StartMenu : MonoBehaviour {
         } else {
             RandomizeName();
         }
-        // TODO: randomize gender, skin color
+        GameManager.Instance.PlayPublicSound(menuOpenSound);
     }
 
 
@@ -140,18 +145,23 @@ public class StartMenu : MonoBehaviour {
     }
     public void LoadButton() {
         SwitchMenu(menuState.load);
+        GameManager.Instance.PlayPublicSound(menuOpenSound);
     }
     public void NewGameCancel() {
         SwitchMenu(menuState.main);
+        GameManager.Instance.PlayPublicSound(menuClosedSound);
     }
     public void LoadGameCancel() {
         SwitchMenu(menuState.main);
+        GameManager.Instance.PlayPublicSound(menuClosedSound);
     }
     public void SettingsButton() {
         SwitchMenu(menuState.settings);
+        GameManager.Instance.PlayPublicSound(menuOpenSound);
     }
     public void CloseSettingsMenu() {
         SwitchMenu(menuState.main);
+        GameManager.Instance.PlayPublicSound(menuClosedSound);
     }
     public void ContinueButton() {
         // TODO: catch if there is no save game
@@ -189,6 +199,7 @@ public class StartMenu : MonoBehaviour {
                 SwitchMenu(menuState.main);
                 break;
         }
+        GameManager.Instance.PlayPublicSound(menuClosedSound);
     }
     public void NewGameOK() {
         InputField field = newGameMenu.transform.Find("InputField").gameObject.GetComponent<InputField>();
@@ -240,40 +251,47 @@ public class StartMenu : MonoBehaviour {
         loadGameMenu.gameObject.SetActive(false);
         saveInspector.gameObject.SetActive(true);
         saveInspector.Initialize(this, saveGame);
+        GameManager.Instance.PlayPublicSound(menuOpenMoreSound);
     }
     public void InspectItemCollection(GameData data) {
         saveInspector.gameObject.SetActive(false);
         itemCollectionInspector.gameObject.SetActive(true);
         itemCollectionInspector.Initialize(this, data);
-        // ite
+        GameManager.Instance.PlayPublicSound(menuOpenMoreSound);
     }
     public void CloseItemCollectionInspector() {
         itemCollectionInspector.gameObject.SetActive(false);
         saveInspector.gameObject.SetActive(true);
+        // GameManager.Instance.PlayPublicSound(menuClosedSound);
     }
     public void InspectAchievements(GameData data) {
         saveInspector.gameObject.SetActive(false);
         achievementBrowser.gameObject.SetActive(true);
         achievementBrowser.Initialize(data);
+        GameManager.Instance.PlayPublicSound(menuOpenMoreSound);
     }
     public void CloseAchievementBrowser() {
         achievementBrowser.gameObject.SetActive(false);
         saveInspector.gameObject.SetActive(true);
+        // GameManager.Instance.PlayPublicSound(menuClosedSound);
     }
     public void InspectStats(GameData data) {
         saveInspector.gameObject.SetActive(false);
         statsBrowser.gameObject.SetActive(true);
         statsBrowser.Initialize(data);
+        GameManager.Instance.PlayPublicSound(menuOpenMoreSound);
     }
     public void CloseStatsBrowser() {
         statsBrowser.gameObject.SetActive(false);
         saveInspector.gameObject.SetActive(true);
+        // GameManager.Instance.PlayPublicSound(menuClosedSound);
     }
 
     public void ShowAlert(string text) {
         alert.SetActive(true);
         Text alertText = alert.transform.Find("Text").GetComponent<Text>();
         alertText.text = text;
+        GameManager.Instance.PlayPublicSound(menuOpenMoreSound);
     }
     public void RandomizePlayer() {
         InputField input = newGameMenu.transform.Find("InputField").GetComponent<InputField>();
@@ -364,11 +382,4 @@ public class StartMenu : MonoBehaviour {
 
         previewPrefab.sprite = Toolbox.ApplySkinToneToSprite(newSprite, selectedSkinColor);
     }
-
-    // void RemapButtonClicked(InputAction actionToRebind) {
-    //     var rebindOperation = actionToRebind.PerformInteractiveRebinding()
-    //                 .WithControlsExcluding("Mouse") // To avoid accidental input from mouse motion
-    //                 .OnMatchWaitForAnother(0.1f)
-    //                 .Start();
-    // }
 }

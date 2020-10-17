@@ -74,8 +74,10 @@ public class Hurtable : Damageable, ISaveable {
         }
         if (intrins.netBuffs[BuffType.death].active()) {
             health = float.MinValue;
-            GameManager.Instance.IncrementStat(StatType.deathByPotion, 1);
-            Die(lastMessage, damageType.physical);
+            if (gameObject == GameManager.Instance.playerObject)
+                GameManager.Instance.IncrementStat(StatType.deathByPotion, 1);
+            // Die(lastMessage, damageType.physical);
+            GameManager.Instance.ExplodeHead(gameObject);
         }
         base.NetIntrinsicsChanged(intrins);
     }

@@ -342,20 +342,19 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         }
         Impact(message);
         AudioClip impactSound = null;
-        if (impactSounds != null && !silentImpact) {
-            if (impactSounds.Length > 0) {
-                impactSound = impactSounds[Random.Range(0, impactSounds.Length)];
-            } else {
-                impactSound = Resources.Load("sounds/8bit_impact1", typeof(AudioClip)) as AudioClip;
-            }
-        } else {
+        if (impactSounds != null && impactSounds.Length > 0 && !silentImpact) {
+            impactSound = impactSounds[Random.Range(0, impactSounds.Length)];
+        } else if (!silentImpact) {
             impactSound = Resources.Load("sounds/8bit_impact1", typeof(AudioClip)) as AudioClip;
         }
         if (impactSound)
             Toolbox.Instance.AudioSpeaker(impactSound, transform.position);
-        // Collider2D mycollider = GetComponent<Collider2D>();
-        // Debug.Log("Collision: "+mycollider.name+" collided with "+collision.collider.name);
+
+        Collider2D mycollider = GetComponent<Collider2D>();
+        // Debug.Log($"{silentImpact} {impactSound}");
+        // Debug.Log("Collision: " + mycollider.name + " collided with " + collision.collider.name);
         // Debug.Log(Physics2D.GetIgnoreCollision(mycollider, collision.collider));
+        // Debug.Break();
     }
     public void Impact(MessageDamage message) {
         if (physical == null)

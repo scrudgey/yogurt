@@ -185,7 +185,7 @@ public class MusicController : Singleton<MusicController> {
     };
 
     static Dictionary<string, Func<Music>> sceneMusic = new Dictionary<string, Func<Music>>() {
-        {"title", () => new MusicTitle()},
+        // {"title", () => new MusicTitle()},
         {"chamber", () => new MusicChamber()},
         {"space", () => new MusicSpace()},
         {"portal", () => new MusicSpace()},

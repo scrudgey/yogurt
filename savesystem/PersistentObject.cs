@@ -58,6 +58,8 @@ public class PersistentObject {
             // id = marker.id;
             apartmentObject = marker.apartmentObject;
             foreach (GameObject childObject in marker.persistentChildren) {
+                if (childObject == null)
+                    continue;
                 PersistentObject persistentChildObject = new PersistentObject(childObject);
                 persistentChildObject.parentObject = childObject.name;
                 persistentChildren[childObject.name] = persistentChildObject;

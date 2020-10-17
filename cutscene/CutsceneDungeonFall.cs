@@ -80,6 +80,7 @@ public class CutsceneDungeonFall : CutsceneFall {
         // rotate
         if (dumpTimer > dumpInterval) {
             dumpTimer = 0;
+            dumpInterval *= 0.9f;
             if (playerInventory != null && playerInventory.holding != null) {
                 GameObject toDump = playerInventory.holding.gameObject;
                 playerInventory.SoftDropItem();

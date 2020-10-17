@@ -33,7 +33,8 @@ public enum StatType {
     murders,
     bedsMade,
     booksBurned,
-    typesOfWaterCollected
+    typesOfWaterCollected,
+    headsExploded
 }
 
 [System.Serializable]

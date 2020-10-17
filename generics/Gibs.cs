@@ -82,7 +82,6 @@ public class Gibs : MonoBehaviour {
             bit.transform.position = transform.position + randomWalk + new Vector3(0, height, 0);
 
             // TODO: figure this out
-            // TODO: allow strong impacts to affect
             // emit in the direction between point of impact and center of mass
             // if we both have physical, calculate z direction as well
 
@@ -106,7 +105,6 @@ public class Gibs : MonoBehaviour {
             bitPhys.initVelocity = force;
             bitPhys.doInit = true;
         }
-        // Debug.Break();
     }
     public static bool DamageTypeMatch(damageType dam1, damageType dam2) {
         if (dam1 == dam2)

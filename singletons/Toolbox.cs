@@ -220,8 +220,6 @@ public partial class Toolbox : Singleton<Toolbox> {
     ///Spawn a droplet of liquid l at poisition pos.
     ///</summary>
     public GameObject SpawnDroplet(Vector3 pos, Liquid l) {
-        // Debug.Log(l == null);
-        /// this is a test
         Vector2 initialVelocity = Vector2.zero;
         initialVelocity = UnityEngine.Random.insideUnitCircle;
         if (initialVelocity.y < 0)
@@ -229,7 +227,6 @@ public partial class Toolbox : Singleton<Toolbox> {
         return SpawnDroplet(pos, l, initialVelocity);
     }
     public GameObject SpawnDroplet(Vector3 pos, Liquid l, Vector3 initialVelocity) {
-        // Debug.Log(l == null);
         GameObject droplet = Instantiate(Resources.Load("prefabs/droplet"), pos, Quaternion.identity) as GameObject;
         PhysicalBootstrapper phys = droplet.GetComponent<PhysicalBootstrapper>();
         phys.initHeight = pos.z;
@@ -240,11 +237,9 @@ public partial class Toolbox : Singleton<Toolbox> {
         return droplet;
     }
     public GameObject SpawnDroplet(Liquid l, float severity, GameObject spiller) {
-        // Debug.Log(l == null);
         return SpawnDroplet(l, severity, spiller, 0.01f);
     }
     public GameObject SpawnDroplet(Liquid l, float severity, GameObject spiller, float initHeight, bool noCollision = true) {
-        // Debug.Log(l == null);
         Vector3 initialVelocity = Vector2.zero;
         Vector3 randomVelocity = spiller.transform.right * UnityEngine.Random.Range(-0.2f, 0.2f);
         initialVelocity.x = spiller.transform.up.x * UnityEngine.Random.Range(0.8f, 1.3f);
@@ -254,7 +249,6 @@ public partial class Toolbox : Singleton<Toolbox> {
         return SpawnDroplet(l, severity, spiller, initHeight, initialVelocity, noCollision: noCollision);
     }
     public GameObject SpawnDroplet(Liquid l, float severity, GameObject spiller, float initHeight, Vector3 initVelocity, bool noCollision = true) {
-        // Debug.Log(l == null);
         Vector3 initialVelocity = Vector2.zero;
         if (initVelocity == Vector3.zero) {
             Vector3 randomVelocity = spiller.transform.right * UnityEngine.Random.Range(-0.2f, 0.2f);
@@ -282,6 +276,7 @@ public partial class Toolbox : Singleton<Toolbox> {
         droplet.transform.position = initpos;
         phys.noCollisions = noCollision;
         phys.doInit = false;
+        phys.silentImpact = true;
         phys.InitPhysical(initHeight, initialVelocity);
         phys.physical.StartFlyMode();
         Collider2D[] spillerColliders = spiller.transform.root.GetComponentsInChildren<Collider2D>();
@@ -665,5 +660,19 @@ public partial class Toolbox : Singleton<Toolbox> {
             return char.ToUpper(inString[0]).ToString();
         else
             return char.ToUpper(inString[0]) + inString.Substring(1);
+    }
+
+    public static double NextGaussianDouble() {
+        double u, v, S;
+
+        do {
+            u = 2.0 * UnityEngine.Random.value - 1.0;
+            v = 2.0 * UnityEngine.Random.value - 1.0;
+            S = u * u + v * v;
+        }
+        while (S >= 1.0);
+
+        double fac = Math.Sqrt(-2.0 * Math.Log(S) / S);
+        return u * fac;
     }
 }

@@ -86,7 +86,7 @@ public class MessageSpeech : Message {
 public class MessageDamage : Message {
     public float amount;
     public damageType type;
-    public Vector2 force;
+    public Vector3 force;
     public AudioClip[] impactSounds = new AudioClip[0];
     public bool suppressImpactSound;
     public bool impersonal;

@@ -8,7 +8,7 @@ namespace AI {
             satanObject.val = GameObject.Find("Satan");
             GoalWalkToObject walkGoal = new GoalWalkToObject(g, c, satanObject, range: 0.4f);
 
-            GoalInflateBalloons balloonGoal = new GoalInflateBalloons(g, c, "data/dialogue/praise_phrases", low: 2f, high: 10f);
+            GoalInflateBalloons balloonGoal = new GoalInflateBalloons(g, c, "data/dialogue/praise_phrases", low: 2f, high: 10f, lowF: 0.2f, highF: 5f);
             balloonGoal.requirements.Add(walkGoal);
 
             goal = balloonGoal;

@@ -49,7 +49,7 @@ public class CutsceneManager : Singleton<CutsceneManager> {
             }
         }
     }
-    void Update() {
+    void FixedUpdate() {
         if (cutscene == null) {
             return;
         }
@@ -65,6 +65,7 @@ public class CutsceneManager : Singleton<CutsceneManager> {
             }
         }
     }
+
     public void EscapePressed() {
         if (cutscene != null)
             cutscene.EscapePressed();

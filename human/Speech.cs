@@ -501,7 +501,7 @@ public class Speech : Interactive, ISaveable {
         }
     }
     // double-exponential seat easing function
-    public float DoubleSeat(float x, float a, float w, float max, float min) {
+    public static float DoubleSeat(float x, float a, float w, float max, float min) {
         float result = 0f;
         if (x / w > 1) {
             x = w;

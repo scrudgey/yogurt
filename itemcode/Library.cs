@@ -112,7 +112,6 @@ public class Library : MonoBehaviour {
 
     public static Book nextBook() {
         if (bookBag.Count == 0) {
-            Debug.Log("shuffling bookbag");
             bookBag = new Stack<Book>(Toolbox.Shuffle(books));
         }
         return bookBag.Pop();

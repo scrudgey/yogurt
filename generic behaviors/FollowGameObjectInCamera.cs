@@ -3,6 +3,7 @@ public class FollowGameObjectInCamera : MonoBehaviour {
     public GameObject target;
     private RectTransform rect;
     private RectTransform canvasRect;
+    public Vector3 offset = new Vector3(0f, 0.25f, 0f);
     void Start() {
         rect = (RectTransform)transform;
         canvasRect = transform.parent.GetComponent<RectTransform>();
@@ -11,7 +12,7 @@ public class FollowGameObjectInCamera : MonoBehaviour {
         if (target == null)
             return;
         Rect camRect = Camera.main.pixelRect;
-        Vector2 orig = target.transform.position + new Vector3(0f, 0.25f, 0f);
+        Vector2 orig = target.transform.position + offset;
         Vector2 pos = Camera.main.WorldToViewportPoint(orig);
         pos.y = Mathf.Clamp(pos.y, 0.1f, 0.9f);
         Vector2 screenPos = new Vector2(

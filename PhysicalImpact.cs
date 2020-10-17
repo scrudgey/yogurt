@@ -33,7 +33,7 @@ public class PhysicalImpact : MonoBehaviour {
         }
         impactedObjects.Add(collider.transform.root);
         MessageDamage messageToSend = new MessageDamage(message);
-        if (messageToSend.force == Vector2.zero) {
+        if (messageToSend.force == Vector3.zero) {
             // this might have unintended side effects
             messageToSend.force = collider.transform.position - transform.position;
             messageToSend.force = messageToSend.force.normalized;

@@ -147,6 +147,15 @@ public class EventData : Describable {
         data.whatHappened = Toolbox.Instance.GetName(cannibal) + " commited cannibalism";
         return data;
     }
+    public static EventData HeadExplosion(GameObject victim) {
+        EventData data = new EventData(offensive: 2, disgusting: 4, disturbing: 3, chaos: 4, positive: -2);
+        data.key = "head_explosion";
+        data.val = 1f;
+        data.popupDesc = "heads exploded";
+        data.noun = "head explosions";
+        data.whatHappened = $"{Toolbox.Instance.GetName(victim)}'s head exploded";
+        return data;
+    }
     public static EventData Death(
         GameObject dead,
         GameObject lastAttacker,

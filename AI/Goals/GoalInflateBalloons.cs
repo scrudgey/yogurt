@@ -9,10 +9,10 @@ namespace AI {
         List<string> phrases;
         float lowTimeRange;
         float highTimeRange;
-        public GoalInflateBalloons(GameObject g, Controller c, string phrasePath, float low = 10f, float high = 20f) : base(g, c) {
+        public GoalInflateBalloons(GameObject g, Controller c, string phrasePath, float low = 10f, float high = 20f, float lowF = 1.5f, float highF = 20.5f) : base(g, c) {
             goalThought = "I'm inflating balloons.";
             successCondition = new ConditionFail(g);
-            routines.Add(new RoutineWanderAndPressF(g, c));
+            routines.Add(new RoutineWanderAndPressF(g, c, lowTime: lowF, hiTime: highF));
             LoadPhrases(phrasePath);
             this.lowTimeRange = low;
             this.highTimeRange = high;

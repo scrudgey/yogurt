@@ -210,35 +210,53 @@ public partial class GameManager : Singleton<GameManager> {
             UINew.Instance.ShowSceneText("- " + GameManager.sceneNames[sceneName] + " -");
         }
     }
-    public void ExplodeHead() {
-        Head head = playerObject.GetComponentInChildren<Head>();
-        Hurtable hurtable = playerObject.GetComponent<Hurtable>();
-        Duplicatable duplicatable = playerObject.GetComponent<Duplicatable>();
-
+    public void ExplodeHead(GameObject target) {
+        Head head = target.GetComponentInChildren<Head>();
+        Hurtable hurtable = target.GetComponent<Hurtable>();
+        Duplicatable duplicatable = target.GetComponent<Duplicatable>();
         MessageDamage message = new MessageDamage(100f, damageType.physical);
-        Vector2 rand = UnityEngine.Random.insideUnitCircle;
-        message.force = new Vector3(rand.x, rand.y, 2f).normalized;
-
         if (head != null) {
+            Liquid blood = Liquid.LoadLiquid("blood");
+
             GameObject headGibs = Resources.Load("prefabs/gibs/headGibsContainer") as GameObject;
             foreach (Gibs gib in headGibs.GetComponents<Gibs>()) {
                 Gibs newGib = head.gameObject.AddComponent<Gibs>();
                 newGib.CopyFrom(gib);
+                newGib.initHeight = new LoHi(0.05f, 0.2f);
+                newGib.initAngleFromHorizontal = new LoHi(0.7f, 0.9f);
+                newGib.initVelocity = new LoHi(1f, 2f);
+                Vector2 rand = UnityEngine.Random.insideUnitCircle;
+                message.force = new Vector3(rand.x * 5f, rand.y * 5f, UnityEngine.Random.Range(5f, 30f));
                 newGib.Emit(message);
             }
             AudioClip boom = Resources.Load("sounds/explosion/cannon") as AudioClip;
-            PlayPublicSound(boom);
+            // PlayPublicSound(boom);
+            Toolbox.Instance.AudioSpeaker(boom, target.transform.position);
             Destroy(head.gameObject);
-            IncrementStat(StatType.deathByExplodingHead, 1);
-        }
+            IncrementStat(StatType.headsExploded, 1);
+            EventData headExpldeData = EventData.HeadExplosion(target);
+            Toolbox.Instance.OccurenceFlag(head.gameObject, headExpldeData);
 
+            for (int i = 0; i < 10; i++) {
+                Vector2 rand = UnityEngine.Random.insideUnitCircle;
+                Vector3 velocity = new Vector3(rand.x * UnityEngine.Random.Range(0.1f, 5f), rand.y * UnityEngine.Random.Range(0.1f, 5f), UnityEngine.Random.Range(1f, 5f));
+                Vector3 pos = head.transform.position;
+                pos.z = 0.18f;
+                Toolbox.Instance.SpawnDroplet(pos, blood, velocity);
+            }
+        }
         if (hurtable != null) {
             hurtable.Die(message, damageType.physical);
         } else if (duplicatable != null) {
             duplicatable.Nullify();
         } else {
-            Destroy(playerObject);
-            PlayerDeath();
+            Destroy(target);
+            if (target == playerObject) {
+                PlayerDeath();
+            }
+        }
+        if (target == playerObject) {
+            IncrementStat(StatType.deathByExplodingHead, 1);
         }
     }
     public bool InCutsceneLevel() {
