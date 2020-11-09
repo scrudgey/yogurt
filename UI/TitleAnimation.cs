@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Easings;
+using UnityEngine.InputSystem;
+
 
 public class TitleAnimation : MonoBehaviour {
     public enum State { splatter, whiteout, main }
@@ -45,22 +47,36 @@ public class TitleAnimation : MonoBehaviour {
         return texture;
     }
     void Start() {
-        StartCoroutine(doSplat(Random.Range(0, 1f)));
         Sprite blankSprite = Sprite.Create(
-                InitializeTexture(),
-                new Rect(0, 0, width, height),
-                new Vector2(0.5f, 0.5f),
-                100,
-                1,
-                SpriteMeshType.Tight,
-                new Vector4(0, 0, width, height) // a guess
-                );
-
+          InitializeTexture(),
+          new Rect(0, 0, width, height),
+          new Vector2(0.5f, 0.5f),
+          100,
+          1,
+          SpriteMeshType.Tight,
+          new Vector4(0, 0, width, height) // a guess
+          );
         maskImage.sprite = blankSprite;
         renderingCamera = FindObjectOfType<Camera>();
+        if (GameManager.Instance.titleIntroPlayed) {
+            Skip();
+        } else {
+            StartCoroutine(doSplat(Random.Range(0, 1f)));
+        }
+    }
+    void Skip() {
+        timer = 0;
+        state = State.whiteout;
+        GameManager.Instance.PlayPublicSound(whiteOutSound);
+        for (int i = 0; i < 10; i++) {
+            StartCoroutine(doSplat(Random.Range(0, 1f / (float)i)));
+        }
     }
     void Update() {
         if (state == State.splatter) {
+            if (Keyboard.current.anyKey.isPressed) {
+                Skip();
+            }
             timer += Time.deltaTime;
             if (timer > splatInterval) {
                 splatInterval *= 0.8f;
@@ -98,6 +114,7 @@ public class TitleAnimation : MonoBehaviour {
     }
 
     void ClearEffects() {
+        GameManager.Instance.titleIntroPlayed = true;
         GameManager.Instance.PlayPublicSound(revealSound);
         whiteOut.enabled = false;
         mask.enabled = false;
@@ -114,22 +131,11 @@ public class TitleAnimation : MonoBehaviour {
     }
     void Splat() {
         GameManager.Instance.PlayPublicSound(splatSounds[Random.Range(0, splatSounds.Length)]);
-        // maskImage.sprite = AddSplatToSprite(maskImage.sprite);
         AddSplatToSprite(maskImage.sprite);
     }
 
-
     void AddSplatToSprite(Sprite inSprite) {
         PasteSplatIntoTexture(inSprite.texture);
-        // return Sprite.Create(
-        //     inSprite.texture,
-        //     new Rect(0, 0, width, height),
-        //     new Vector2(0.5f, 0.5f),
-        //     100,
-        //     1,
-        //     SpriteMeshType.FullRect,
-        //     new Vector4(0, 0, width, height) // a guess
-        // );
     }
 
     void PasteSplatIntoTexture(Texture2D texture) {
@@ -139,24 +145,16 @@ public class TitleAnimation : MonoBehaviour {
 
         double mean = width / 2;
         double stdDev = height / 2;
-        // int splatX = Random.Range(0, width);
-        // int splatY = Random.Range(0, height);
         int splatX = (int)(width / 5 * (Toolbox.NextGaussianDouble() + 2));
         int splatY = (int)(height / 5 * (Toolbox.NextGaussianDouble() + 1));
         // Debug.Log($"{splatX} {splatY}");
 
-        // MathNet.Numerics.Distributions.Normal normalDist = new Normal(mean, stdDev);
-        // double randomGaussianValue = normalDist.Sample();
-
-        // Texture2D texture = new Texture2D(inTexture.width, inTexture.height);
         texture.filterMode = FilterMode.Point;
         texture.wrapMode = TextureWrapMode.Clamp;
         int y = 0;
         while (y < texture.height) {
             int x = 0;
             while (x < texture.width) {
-                // Color originalColor = inTexture.GetPixel(x, y);
-                // texture.SetPixel(x, y, originalColor);
                 if (x > splatX && x < splatX + 64 && y > splatY && y < splatY + 64) {
                     if (splat.GetPixel(x - splatX, splatOffsetY + y - splatY) == Color.black) {
                         texture.SetPixel(x, y, Color.white);
@@ -168,7 +166,7 @@ public class TitleAnimation : MonoBehaviour {
             }
             ++y;
         }
-        texture.name = ($"mod");
+        // texture.name = ($"mod");
         texture.Apply();
 
         // spawn droplets
@@ -180,9 +178,7 @@ public class TitleAnimation : MonoBehaviour {
         for (int i = 0; i < 10; i++) {
             if (Random.Range(0, 1f) < 0.5f)
                 SpawnDrip(splatX + Random.Range(16, 48), splatY + Random.Range(16, 48));
-
         }
-        // return texture;
     }
     void SpawnDroplet(Vector2 position) {
         // convert texture coordinates to world position

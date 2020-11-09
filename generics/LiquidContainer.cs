@@ -25,6 +25,7 @@ public class LiquidContainer : Interactive, ISaveable {
     public bool configured = false;
     public AudioClip fillSound;
     public Sprite liquidDisplaySprite;
+    public bool mixWeakPotions;
     void Update() {
         if (spillTimeout > 0) {
             spillTimeout -= Time.deltaTime;
@@ -123,6 +124,11 @@ public class LiquidContainer : Interactive, ISaveable {
 
             // not ideal to put this here instead of in MixLiquids, but we need monobehavior
             List<Buff> mixedBuff = Liquid.MixPotion(l);
+            if (mixWeakPotions) {
+                foreach (Buff buff in mixedBuff) {
+                    buff.lifetime = 15f;
+                }
+            }
             if (Liquid.MixYogurt(l)) {
                 l = Liquid.LoadLiquid("yogurt");
                 GameObject.Instantiate(Resources.Load("particles/potionMixEffect"), transform.position, Quaternion.identity);

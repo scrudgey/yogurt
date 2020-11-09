@@ -116,6 +116,9 @@ public class MySaver {
                 using (System.IO.Stream objectsStream = new FileStream(objectsPath, FileMode.Open)) {
                     objectDataBase = persistentSerializer.Deserialize(objectsStream) as SerializableDictionary<Guid, PersistentObject>;
                 }
+                // foreach (KeyValuePair<Guid, PersistentObject> kvp in objectDataBase) {
+                //     Debug.Log($"{kvp.Key}: {kvp.Value}");
+                // }
                 // objectDataBase = persistentSerializer.Deserialize(objectsStream) as SerializableDictionary<int, PersistentObject>;
                 // objectsStream.Close();
                 // Debug.Log(objectDataBase.Count.ToString() +" entries found");
@@ -130,9 +133,11 @@ public class MySaver {
         // add those objects which are disabled and would therefore not be found by our first search
         foreach (GameObject disabledPersistent in disabledPersistents) {
             objectList.Add(disabledPersistent);
+            // Debug.Log($"saving disabled persistent: {disabledPersistent}");
         }
         foreach (MyMarker mark in GameObject.FindObjectsOfType<MyMarker>()) {
             objectList.Add(mark.gameObject);
+            // Debug.Log($"saving regular marked object: {mark.gameObject}");
         }
         Dictionary<GameObject, Guid> objectIDs = new Dictionary<GameObject, Guid>();
         HashSet<Guid> savedIDs = new HashSet<Guid>();
@@ -142,11 +147,22 @@ public class MySaver {
             PersistentObject persistent;
             // either get the existing persistent in the database, or make a new one
             if (objectDataBase.ContainsKey(marker.id)) {
+                // Debug.Log($"updating persistent object {gameObject}: {marker.id}");
                 persistent = objectDataBase[marker.id];
                 persistent.Update(gameObject);
             } else {
+
+                // Debug.Log($"creating new persistent object {gameObject}: {marker.id}");
+                // creation of new persistent object.
+                // it will take the id of the MyMarker.
+                // TODO: make this myMarker.ToPersistentObject();
                 persistent = new PersistentObject(gameObject);
-                marker.id = persistent.id;
+
+                // marker.id = persistent.id;
+
+                // critical: this is the only place we add persistent objects to the database.
+                objectDataBase[marker.id] = persistent;
+                loadedObjects[marker.id] = gameObject;
             }
             persistents[gameObject] = persistent;
             objectIDs.Add(gameObject, persistent.id);
@@ -167,6 +183,9 @@ public class MySaver {
                 playerTree.Remove(childPersistent.id);
             }
             using (FileStream sceneStream = File.Create(scenePath)) {
+                // foreach (Guid savedGuid in savedIDs) {
+                //     Debug.Log($"saving {savedGuid} to {scenePath}...");
+                // }
                 listSerializer.Serialize(sceneStream, savedIDs.ToList().Except(playerTree.ToList()).ToList());
             }
         }
@@ -189,6 +208,9 @@ public class MySaver {
         }
         if (playerTree.Count > 0) {
             using (FileStream playerStream = File.Create(playerPath)) {
+                // foreach (Guid savedGuid in playerTree) {
+                //     Debug.Log($"saving {savedGuid} to {playerPath}...");
+                // }
                 listSerializer.Serialize(playerStream, playerTree.ToList());
             }
         }
@@ -339,7 +361,7 @@ public class MySaver {
                 }
                 Toolbox.GetOrCreateComponent<Intrinsics>(go);
             } else {
-                Debug.LogError("object " + idn.ToString() + " not found in database");
+                Debug.LogError($"object {idn} not found in database");
             }
         }
         return rootObject;
@@ -460,6 +482,10 @@ public class MySaver {
         FileInfo[] files = dir.GetFiles();
         foreach (FileInfo file in files) {
             string temppath = Path.Combine(destDirName, file.Name);
+            FileInfo info = new FileInfo(temppath);
+            if (info.Exists) {
+                info.Delete();
+            }
             file.CopyTo(temppath, false);
         }
 

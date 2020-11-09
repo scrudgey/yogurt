@@ -70,7 +70,6 @@ namespace AI {
         public override void ReceiveMessage(Message incoming) {
             if (incoming is MessageSmoothieOrder) {
                 MessageSmoothieOrder message = (MessageSmoothieOrder)incoming;
-                Debug.Log($"got smoothie order {message.idn}");
                 smoothieOrder.val = message.idn;
             }
         }

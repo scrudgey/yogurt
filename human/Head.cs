@@ -93,6 +93,8 @@ public class Head : Interactive, IExcludable, ISaveable {
         return "Take hat";
     }
     public Hat RemoveHat() {
+        if (hat == null)
+            return null;
         if (hat.helmet) {
             spriteRenderer.enabled = true;
         }

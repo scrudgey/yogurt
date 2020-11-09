@@ -81,15 +81,21 @@ public class OccurrenceFire : OccurrenceData {
         return new HashSet<GameObject> { flamingObject };
     }
     public override void Descriptions() {
-        EventData data = new EventData(chaos: 2);
+        Hurtable hurtable = flamingObject.GetComponent<Hurtable>();
         string objectName = Toolbox.Instance.GetName(flamingObject);
+        EventData data = new EventData(chaos: 2);
+
+        data.whatHappened = $"the {objectName} burned";
+        if (hurtable) {
+            data = new EventData(chaos: 3, disturbing: 2, offensive: 1, positive: -1);
+            data.whatHappened = $"{objectName} burned";
+        }
         data.noun = "fire";
-        data.whatHappened = "the " + objectName + " burned";
+
         AddChild(data);
         if (objectName == "table") {
             if (extinguished == false) {
                 AddChild(EventData.TableFire());
-                // children.Add(EventData.TableFire());
             }
         }
     }
@@ -286,7 +292,7 @@ public class OccurrenceViolence : OccurrenceData {
     }
     public override void Descriptions() {
         string attackerName = Toolbox.Instance.GetName(attacker);
-        string victimName = Toolbox.Instance.GetName(victim);
+        string victimName = Toolbox.Instance.GetName(victim, skipMainCollider: true);
 
         EventData data = new EventData(disturbing: 2, chaos: 2);
         Hurtable victimHurtable = victim.GetComponent<Hurtable>();

@@ -147,7 +147,7 @@ public partial class UINew : Singleton<UINew> {
             // world coordinates of button 
             // start from anchor position and offset around a circle
             // Vector2 initLocation = (Vector2)target.transform.position + Toolbox.Instance.RotateZ(Vector2.right / 30, angle);
-            Vector2 initLocation = (Vector2)renderingCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue()) + Toolbox.Instance.RotateZ(Vector2.right / 20, angle);
+            Vector2 initLocation = (Vector2)renderingCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue()) + Toolbox.Instance.RotateZ(Vector2.right / 15, angle);
             // CreateIndicator(initLocation, Color.white);
 
             // button world position to screen position
@@ -175,17 +175,17 @@ public partial class UINew : Singleton<UINew> {
             if (!firstBody)
                 firstBody = button.gameobject.GetComponent<Rigidbody2D>();
 
-            float radius = 0.2f;
+            // this is a world coordinate. it should scale with screen view size.
+            // it should be a fixed "pixel width
+            // float radius = 0.05f * (renderingCamera.pixelWidth / 800f);
+            float radius = 0.45f / (renderingCamera.pixelWidth / 800f);
 
             // set up spring connection to anchor
             SpringJoint2D anchorSpring = buttonAnchor.AddComponent<SpringJoint2D>();
             anchorSpring.autoConfigureDistance = false;
-            // anchorSpring.distance = 0.25f;
             anchorSpring.distance = radius;
-            // anchorSpring.dampingRatio = 0.9f;
             anchorSpring.dampingRatio = dampingRatio;
             anchorSpring.frequency = frequency;
-            // anchorSpring.frequency = 35f;
             anchorSpring.connectedBody = button.gameobject.GetComponent<Rigidbody2D>();
 
             // a = 2r sin(π n)

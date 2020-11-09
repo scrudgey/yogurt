@@ -40,8 +40,16 @@ public class ZombieSpawner : MonoBehaviour {
             case State.hand:
                 if (timer > 5f) {
                     Toolbox.Instance.AudioSpeaker(spawnSound, transform.position);
-                    GameObject.Instantiate(zombiePrefab, transform.position + new Vector3(0, 0.1f, 0), Quaternion.identity);
+                    GameObject zombie = GameObject.Instantiate(zombiePrefab, transform.position + new Vector3(0, 0.1f, 0), Quaternion.identity);
                     Destroy(gameObject);
+                    Controllable controllable = zombie.GetComponent<Controllable>();
+                    using (Controller control = new Controller(controllable)) {
+                        if (Random.Range(0, 1f) < 0.5f) {
+                            controllable.SetDirection(Vector2.right, control);
+                        } else {
+                            controllable.SetDirection(Vector2.left, control);
+                        }
+                    }
                 }
                 break;
         }

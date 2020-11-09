@@ -56,6 +56,7 @@ public partial class UINew : Singleton<UINew> {
     public AudioClip actionMenuOpenSound;
     public AudioClip actionButtonPressedSound;
     public AudioSource audioSource;
+    public StomachDisplayManager stomachDisplayManager;
     public void Start() {
         Awake();
     }
@@ -114,6 +115,8 @@ public partial class UINew : Singleton<UINew> {
         objectivesContainer = UICanvas.transform.Find("objectives");
         fader = UICanvas.transform.Find("fader").GetComponent<FadeInOut>();
         iconDock = UICanvas.transform.Find("iconDock");
+        if (stomachDisplayManager == null)
+            stomachDisplayManager = UICanvas.GetComponentInChildren<StomachDisplayManager>();
         topRightRectTransform = topRightBar.GetComponent<RectTransform>();
         if (lifebarDefaultSize == Vector2.zero)
             lifebarDefaultSize = new Vector2(lifebar.rect.width, lifebar.rect.height);
@@ -162,6 +165,9 @@ public partial class UINew : Singleton<UINew> {
             child.gameObject.SetActive(active);
         }
 
+        // stomach contents
+        UpdateStomachDisplay();
+
         if (active) {
             // top action buttons
             UpdateTopActionButtons();
@@ -170,6 +176,9 @@ public partial class UINew : Singleton<UINew> {
             if (GameManager.Instance.playerObject.GetComponent<Hurtable>()) {
                 topRightBar.SetActive(true);
             }
+            stomachDisplayManager.gameObject.SetActive(true);
+        } else {
+            stomachDisplayManager.gameObject.SetActive(false);
         }
 
     }

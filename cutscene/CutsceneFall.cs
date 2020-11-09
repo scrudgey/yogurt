@@ -69,7 +69,7 @@ public class CutsceneFall : Cutscene {
                 playerInv.GetItem(initHolding);
             }
             complete = true;
-            Debug.Log("complete");
+            // Debug.Log("complete");
         }
     }
 }

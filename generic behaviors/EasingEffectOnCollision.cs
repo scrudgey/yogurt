@@ -25,10 +25,7 @@ public class EasingEffectOnCollision : MonoBehaviour {
             return;
         times += 1;
         StartCoroutine(DoEffect(destroyOnFinish: times > maxTimes));
-        // audioSource.PlayOneShot(bounceSounds[Random.Range(0, bounceSounds.Length)]);
         GameManager.Instance.PlayPublicSound(bounceSounds[Random.Range(0, bounceSounds.Length)]);
-        // audioSource.PlayOneShot(bounceSounds[Random.Range(0, bounceSounds.Length)]);
-        // StartCoroutine(WaitAndReenableCollider());
     }
 
     IEnumerator DoEffect(bool destroyOnFinish = false) {

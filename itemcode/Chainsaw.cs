@@ -81,7 +81,7 @@ public class Chainsaw : Pickup, ISaveable {
                     } else {
                         Toolbox.Instance.OccurenceFlag(gameObject, violence);
                     }
-
+                    damageMessage.suppressImpactSound = true;
                     Toolbox.Instance.SendMessage(obj, damageMessage.responsibleParty.transform, damageMessage);
                 }
             }

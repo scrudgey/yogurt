@@ -109,6 +109,8 @@ public class Container : MayorLock, IExcludable, ISaveable {
         }
     }
     public void AddItem(Pickup pickup) {
+        if (pickup == null)
+            return;
         items.Add(pickup);
         ClaimsManager.Instance.ClaimObject(pickup.gameObject, this);
 

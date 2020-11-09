@@ -5,8 +5,6 @@ using UnityEngine.UI;
 using Easings;
 using UnityEngine.InputSystem;
 
-// TODO: change this
-
 public class WASDGraphic : MonoBehaviour {
     public List<Text> letters;
     public List<Outline> outlines;

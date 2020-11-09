@@ -88,6 +88,10 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             if (holding)
                 DropItem();
         }
+        if (message.type == MessageAnimation.AnimType.panic && message.value == true) {
+            if (holding)
+                DropItem();
+        }
         if (message.value) {
             currentAnimation = message.type;
         } else {
@@ -246,6 +250,15 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         holding = null;
         if (gameObject == GameManager.Instance.playerObject)
             UINew.Instance.ClearWorldButtons();
+        // Debug.Log(InputController.Instance.lastAction);
+        if (InputController.Instance.lastAction.ToLower().Contains("swingitem")) {
+            // we were just swinging a weapon, so we should enter fight mode
+            Controllable controllable = gameObject.GetComponent<Controllable>();
+            if (!controllable.fightMode) {
+                InputController.Instance.controller.ToggleFightMode();
+                UINew.Instance.UpdateTopActionButtons();
+            }
+        }
     }
     public void DropItem() {
         if (holding == null)
@@ -266,10 +279,20 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             holding.transform.SetParent(null);
         }
         SpriteRenderer sprite = holding.GetComponent<SpriteRenderer>();
-        sprite.sortingLayerName = "main";
+        if (sprite != null)
+            sprite.sortingLayerName = "main";
         holding = null;
         if (gameObject == GameManager.Instance.playerObject)
             UINew.Instance.ClearWorldButtons();
+        // Debug.Log(InputController.Instance.lastAction);
+        if (InputController.Instance.lastAction.ToLower().Contains("swingitem")) {
+            // we were just swinging a weapon, so we should enter fight mode
+            Controllable controllable = gameObject.GetComponent<Controllable>();
+            if (!controllable.fightMode) {
+                InputController.Instance.controller.ToggleFightMode();
+                UINew.Instance.UpdateTopActionButtons();
+            }
+        }
     }
     public void RetrieveItem(string itemName) {
         for (int i = 0; i < items.Count; i++) {
@@ -428,10 +451,10 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         return "Swing " + weaponname;
     }
     void EndSwing() {
-        holding.SendMessage("EndSwingWeapon", SendMessageOptions.DontRequireReceiver);
         MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.swinging, false);
         Toolbox.Instance.SendMessage(gameObject, this, anim);
         if (holding) {
+            holding.SendMessage("EndSwingWeapon", SendMessageOptions.DontRequireReceiver);
             holding.GetComponent<Renderer>().sortingLayerName = "main";
             holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
             holding.transform.localRotation = Quaternion.identity;
@@ -566,7 +589,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             if (go != null) {
                 GetItem(go.GetComponent<Pickup>());
             } else {
-                Debug.Log("tried to get loadedobject " + data.ints["holdingID"].ToString() + " but was not found!");
+                Debug.Log("tried to get loadedobject " + data.GUIDs["holdingID"].ToString() + " but was not found!");
             }
         }
         if (data.ints["itemCount"] > 0) {

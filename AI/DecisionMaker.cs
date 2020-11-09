@@ -212,10 +212,12 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         activePriorityName = activePriority.priorityName;
 
         if (activePriority != oldActivePriority) {
-            control.ResetInput();
-            if (oldActivePriority != null)
-                oldActivePriority.ExitPriority();
-            activePriority.EnterPriority();
+            if (control.Authenticate()) {
+                control.ResetInput();
+                if (oldActivePriority != null)
+                    oldActivePriority.ExitPriority();
+                activePriority.EnterPriority();
+            }
         }
         if (activePriority != null) {
             // Debug.Log(activePriority.ToString() + " " + activePriority.Urgency(personality).ToString());

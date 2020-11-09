@@ -6,10 +6,12 @@ namespace AI {
     public class RoutineTransferItem : Routine {
         public Ref<GameObject> target;
         public GoalBlendSmoothie smoothieGoal;
+        // public Ref<int> smoothieOrder;
         public Inventory inventory;
         public RoutineTransferItem(GameObject g, Controller c, Ref<GameObject> target, GoalBlendSmoothie smoothieGoal) : base(g, c) {
             this.target = target;
             this.smoothieGoal = smoothieGoal;
+            // this.smoothieOrder = smoothieOrder;
             inventory = gameObject.GetComponent<Inventory>();
         }
         protected override status DoUpdate() {

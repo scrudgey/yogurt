@@ -126,6 +126,7 @@ public class Controllable : MonoBehaviour {
     public float directionAngle = 0;
     public HashSet<IDirectable> directables = new HashSet<IDirectable>();
     public bool fightMode;
+    public bool running;
     public bool disabled = false;
     public HitState hitState;
     public GameObject lastRightClicked;
@@ -256,6 +257,11 @@ public class Controllable : MonoBehaviour {
     public virtual void ToggleFightMode(Controller controller) {
         if (Authenticate(controller)) {
             ToggleFightMode();
+        }
+    }
+    public virtual void SetRun(Controller controller, bool value) {
+        if (Authenticate(controller)) {
+            running = value;
         }
     }
 }

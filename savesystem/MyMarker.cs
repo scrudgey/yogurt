@@ -5,6 +5,11 @@ public class MyMarker : MonoBehaviour, IExcludable {
     public List<GameObject> persistentChildren;
     public bool staticObject;
     public bool apartmentObject;
+    void Awake() {
+        if (id == System.Guid.Empty)
+            id = System.Guid.NewGuid();
+        // Debug.Log($"{gameObject} {id}");
+    }
     void OnDisable() {
         MySaver.disabledPersistents.Add(gameObject);
     }

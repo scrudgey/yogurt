@@ -95,10 +95,8 @@ public partial class UINew : Singleton<UINew> {
                 if (cursorText.activeInHierarchy)
                     cursorText.SetActive(false);
                 if (highlight) {
-                    // Cursor.SetCursor(cursorHighlight, new Vector2(28, 16), CursorMode.Auto);
                     Cursor.SetCursor(cursorHighlight, new Vector2(56, 34), CursorMode.Auto);
                 } else {
-                    // Cursor.SetCursor(cursorDefault, new Vector2(28, 16), CursorMode.Auto);
                     Cursor.SetCursor(cursorDefault, new Vector2(56, 34), CursorMode.Auto);
                 }
                 break;
@@ -106,7 +104,7 @@ public partial class UINew : Singleton<UINew> {
             case InputController.ControlState.waitForMenu:
                 if (cursorText.activeInHierarchy)
                     cursorText.SetActive(false);
-                Cursor.SetCursor(cursorHighlight, new Vector2(28, 16), CursorMode.Auto);
+                Cursor.SetCursor(cursorHighlight, new Vector2(56, 34), CursorMode.Auto);
                 break;
             case InputController.ControlState.commandSelect:
                 SetCursorText("COMMAND");
@@ -187,13 +185,13 @@ public partial class UINew : Singleton<UINew> {
         }
 
         bool highlight = false;
+        GameObject target = null;
         RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue()), Vector2.zero);
         foreach (RaycastHit2D hit in hits) {
             if (hit.collider != null && !InputController.forbiddenTags.Contains(hit.collider.tag)) {
                 highlight = true;
             }
         }
-        GameObject target = null;
         if (highlight) {
             GameObject top = InputController.Instance.GetFrontObject(hits);
             target = InputController.Instance.GetBaseInteractive(top.transform);
@@ -202,5 +200,15 @@ public partial class UINew : Singleton<UINew> {
 
         UpdateCursor(highlight);
         UpdateActionText(highlight, target, cursorOverButton);
+    }
+    public void UpdateStomachDisplay() {
+        if (GameManager.Instance.playerObject == null)
+            return;
+        if (!GameManager.Instance.data.perks["vomit"])
+            return;
+        Eater eater = GameManager.Instance.playerObject.GetComponent<Eater>();
+        if (eater != null && stomachDisplayManager != null) {
+            stomachDisplayManager.UpdateContents(eater);
+        }
     }
 }

@@ -138,4 +138,9 @@ public class Controller : IDisposable {
             controllable.ToggleFightMode(this);
         }
     }
+    public void SetRun(bool value) {
+        if (controllable != null) {
+            controllable.SetRun(this, value);
+        }
+    }
 }

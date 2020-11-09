@@ -10,6 +10,7 @@ public class LoadGameMenu : MonoBehaviour {
     public StartMenu startMenu;
     public UIButtonEffects effects;
     public Button cancelButton;
+    public GameObject noSaveGameIndicator;
 
     public DateTime order(String name, Dictionary<String, GameData> datas) {
         if (name == "test" || name == "Unity") {
@@ -24,8 +25,11 @@ public class LoadGameMenu : MonoBehaviour {
         effects.buttons = new List<Button> { cancelButton };
         GameObject saveGamePanel = transform.Find("Scroll View/Viewport/Content").gameObject;
         int children = saveGamePanel.transform.childCount;
-        for (int i = 0; i < children; ++i)
+        for (int i = 0; i < children; ++i) {
+            if (saveGamePanel.transform.GetChild(i).gameObject.gameObject == noSaveGameIndicator)
+                continue;
             Destroy(saveGamePanel.transform.GetChild(i).gameObject);
+        }
         DirectoryInfo info = new DirectoryInfo(Application.persistentDataPath);
         List<DirectoryInfo> dirs = info.GetDirectories().ToList();
 
@@ -38,10 +42,12 @@ public class LoadGameMenu : MonoBehaviour {
         }
 
         dirs = dirs.OrderBy(d => order(d.Name, datas)).Reverse().ToList();
-
         foreach (DirectoryInfo dir in dirs) {
             if (dir.Name == "test" || dir.Name == "Unity")
                 continue;
+            if (noSaveGameIndicator != null) {
+                Destroy(noSaveGameIndicator);
+            }
             GameObject newSelector = spawnSaveGameSelector();
             SaveGameSelectorScript script = newSelector.GetComponent<SaveGameSelectorScript>();
             Button scriptButton = newSelector.GetComponent<Button>();

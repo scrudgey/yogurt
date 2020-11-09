@@ -83,6 +83,7 @@ public class InputController : Singleton<InputController> {
     public Vector2 inputVector;
     public bool firePressedHeld;
     public bool firePressedThisFrame;
+    public bool runHeld;
     // public bool escapeHeld;
     public bool escaprePressedThisFrame;
     public bool leftClickHeld;
@@ -93,6 +94,7 @@ public class InputController : Singleton<InputController> {
     public bool inventoryPressedThisFrame;
     public InputActionReference MoveAction;
     public InputActionReference FireAction;
+    public InputActionReference RunAction;
     public InputActionReference InteractWithAction;
     public InputActionReference EscapeAction;
     public InputActionReference PrimaryAction;
@@ -100,6 +102,7 @@ public class InputController : Singleton<InputController> {
     public InputActionReference InventoryAction;
     public static readonly float QuickActionMaxDistance = 0.35f;
     public static readonly string bindingFileName = "keybindings.xml";
+    public string lastAction = "";
     public List<InputActionMap> actionMaps() {
         return new List<InputActionMap>{
         MoveAction.action.actionMap,
@@ -108,7 +111,8 @@ public class InputController : Singleton<InputController> {
         EscapeAction.action.actionMap,
         PrimaryAction.action.actionMap,
         QuickAction.action.actionMap,
-        InventoryAction.action.actionMap
+        InventoryAction.action.actionMap,
+        RunAction.action.actionMap,
         };
     }
     public static string BindingSavePath() {
@@ -125,6 +129,7 @@ public class InputController : Singleton<InputController> {
         PrimaryAction.action.Enable();
         QuickAction.action.Enable();
         InventoryAction.action.Enable();
+        RunAction.action.Enable();
     }
     public void DisableControls() {
         Debug.Log("disable input");
@@ -136,6 +141,7 @@ public class InputController : Singleton<InputController> {
         PrimaryAction.action.Disable();
         QuickAction.action.Disable();
         InventoryAction.action.Disable();
+        RunAction.action.Disable();
     }
     public void LoadCustomBindings() {
         string path = BindingSavePath();
@@ -196,6 +202,11 @@ public class InputController : Singleton<InputController> {
             firePressedHeld = ctx.ReadValueAsButton();
         };
 
+        // Run
+        RunAction.action.performed += ctx => {
+            runHeld = ctx.ReadValueAsButton();
+        };
+
         // Left click
         InteractWithAction.action.performed += ctx => {
             leftClickedThisFrame = ctx.ReadValueAsButton();
@@ -222,6 +233,7 @@ public class InputController : Singleton<InputController> {
         FireAction.action.canceled += _ => firePressedHeld = false;
         InteractWithAction.action.canceled += _ => leftClickHeld = false;
         MoveAction.action.canceled += _ => inputVector = Vector2.zero;
+        RunAction.action.canceled += _ => runHeld = false;
 
         EnableControls();
     }
@@ -270,6 +282,7 @@ public class InputController : Singleton<InputController> {
         inventoryPressedThisFrame = false;
         rightClickedThisFrame = false;
         rightClickHeld = false;
+        runHeld = false;
     }
     public void MenuClosedCallback() {
         if (state == ControlState.inMenu || state == ControlState.waitForMenu) {
@@ -324,9 +337,15 @@ public class InputController : Singleton<InputController> {
             //Fire key 
             if (firePressedThisFrame) {
                 controller.ShootPressed();
+                UINew.Instance.RefreshUI(active: true);
             }
             if (firePressedHeld) {
                 controller.ShootHeld();
+            }
+            if (runHeld) {
+                controller.SetRun(true);
+            } else {
+                controller.SetRun(false);
             }
         }
 

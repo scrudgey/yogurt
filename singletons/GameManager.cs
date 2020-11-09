@@ -47,6 +47,8 @@ public class GameData {
     public SerializableDictionary<StatType, Stat> stats = new SerializableDictionary<StatType, Stat>();
     public List<string> commercialsInitializedToday;
     public List<Email> emails = new List<Email>();
+    public List<string> phoneQueue = new List<string>();
+    public List<string> phoneCallsAll = new List<string>();
     public List<string> televisionShows;
     public HashSet<string> newTelevisionShows;
     public List<string> packages;
@@ -69,6 +71,7 @@ public class GameData {
     public bool lichRevivalToday;
     public Commercial activeCommercial;
     public bool recordingCommercial;
+
 
     public List<System.Guid> toiletItems = new List<System.Guid>();
     public bool loadedSewerItemsToday = false;
@@ -120,6 +123,7 @@ public partial class GameManager : Singleton<GameManager> {
         {"lower_hell", "lower hell"},
     };
     public GameData data;
+    public bool titleIntroPlayed;
     public string saveGameName = "test";
     private CameraControl cameraControl;
     public Camera cam;
@@ -133,10 +137,11 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = true;
+    public bool debug = false;
     public bool failedLevelLoad = false;
     public Gender playerGender;
     public bool loadingSavedGame = false;
+    private System.Collections.IEnumerator throneroomCoroutine;
     public delegate void BooleanObserver(bool value);
     public static BooleanObserver onRecordingChange;
 
@@ -161,6 +166,8 @@ public partial class GameManager : Singleton<GameManager> {
             // ReceivePackage("kaiser_helmet");
             // ReceivePackage("duplicator");
             // ReceivePackage("golf_club");
+
+            // ReceivePhoneCall("office");
         }
         if (saveGameName == "test")
             MySaver.CleanupSaves();
@@ -174,6 +181,10 @@ public partial class GameManager : Singleton<GameManager> {
         Scene scene = SceneManager.GetActiveScene();
         if (scene.name == "boardroom_cutscene") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneBoardroom>();
+            CutsceneManager.Instance.cutscene.Configure();
+        }
+        if (scene.name == "office_cutscene") {
+            CutsceneManager.Instance.InitializeCutscene<CutsceneOffice>();
             CutsceneManager.Instance.cutscene.Configure();
         }
         if (scene.name == "anti_mayor_cutscene") {
@@ -211,42 +222,11 @@ public partial class GameManager : Singleton<GameManager> {
         }
     }
     public void ExplodeHead(GameObject target) {
-        Head head = target.GetComponentInChildren<Head>();
         Hurtable hurtable = target.GetComponent<Hurtable>();
         Duplicatable duplicatable = target.GetComponent<Duplicatable>();
-        MessageDamage message = new MessageDamage(100f, damageType.physical);
-        if (head != null) {
-            Liquid blood = Liquid.LoadLiquid("blood");
-
-            GameObject headGibs = Resources.Load("prefabs/gibs/headGibsContainer") as GameObject;
-            foreach (Gibs gib in headGibs.GetComponents<Gibs>()) {
-                Gibs newGib = head.gameObject.AddComponent<Gibs>();
-                newGib.CopyFrom(gib);
-                newGib.initHeight = new LoHi(0.05f, 0.2f);
-                newGib.initAngleFromHorizontal = new LoHi(0.7f, 0.9f);
-                newGib.initVelocity = new LoHi(1f, 2f);
-                Vector2 rand = UnityEngine.Random.insideUnitCircle;
-                message.force = new Vector3(rand.x * 5f, rand.y * 5f, UnityEngine.Random.Range(5f, 30f));
-                newGib.Emit(message);
-            }
-            AudioClip boom = Resources.Load("sounds/explosion/cannon") as AudioClip;
-            // PlayPublicSound(boom);
-            Toolbox.Instance.AudioSpeaker(boom, target.transform.position);
-            Destroy(head.gameObject);
-            IncrementStat(StatType.headsExploded, 1);
-            EventData headExpldeData = EventData.HeadExplosion(target);
-            Toolbox.Instance.OccurenceFlag(head.gameObject, headExpldeData);
-
-            for (int i = 0; i < 10; i++) {
-                Vector2 rand = UnityEngine.Random.insideUnitCircle;
-                Vector3 velocity = new Vector3(rand.x * UnityEngine.Random.Range(0.1f, 5f), rand.y * UnityEngine.Random.Range(0.1f, 5f), UnityEngine.Random.Range(1f, 5f));
-                Vector3 pos = head.transform.position;
-                pos.z = 0.18f;
-                Toolbox.Instance.SpawnDroplet(pos, blood, velocity);
-            }
-        }
         if (hurtable != null) {
-            hurtable.Die(message, damageType.physical);
+            // hurtable.Die(message, damageType.physical);
+            hurtable.ExplodeHead();
         } else if (duplicatable != null) {
             duplicatable.Nullify();
         } else {
@@ -255,12 +235,9 @@ public partial class GameManager : Singleton<GameManager> {
                 PlayerDeath();
             }
         }
-        if (target == playerObject) {
-            IncrementStat(StatType.deathByExplodingHead, 1);
-        }
     }
     public bool InCutsceneLevel() {
-        return SceneManager.GetActiveScene().buildIndex <= 3;
+        return SceneManager.GetActiveScene().buildIndex <= 4;
         // return SceneManager.GetActiveScene().buildIndex <= 4;
     }
     public void FocusIntrinsicsChanged(Intrinsics intrinsics) {
@@ -342,6 +319,8 @@ public partial class GameManager : Singleton<GameManager> {
         Toolbox.Instance.numberOfLiveSpeakers = 0;
         publicAudio.Stop();
         sceneTime = 0f;
+        // Debug.Log($"scene was loaded: {scene.name}");
+        MusicController.Instance.SceneChange(scene.name);
         Flammable.audioPlayingFires = new HashSet<Flammable>(); // probably unnecessary
         if (InCutsceneLevel()) {
             InitializeNonPlayableLevel();
@@ -362,7 +341,8 @@ public partial class GameManager : Singleton<GameManager> {
                 return;
             }
         }
-        MusicController.Instance.SceneChange(scene.name);
+        if (throneroomCoroutine != null)
+            StopCoroutine(throneroomCoroutine);
         Time.timeScale = 0f;
     }
     public void DoLeaveScene(string toSceneName, int toEntryNumber) {
@@ -377,10 +357,6 @@ public partial class GameManager : Singleton<GameManager> {
     }
     void ResetGameState() {
         try {
-            // FileInfo playerFile = new FileInfo(GameManager.Instance.data.lastSavedPlayerPath);
-            // if (playerFile.Exists) {
-            //     playerFile.Delete();
-            // }
             MySaver.BackupFailedSave();
             MySaver.CleanupSaves();
 
@@ -511,8 +487,15 @@ public partial class GameManager : Singleton<GameManager> {
         if (sceneName == "space") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneSpace>();
         }
-        if (sceneName == "portal") {
-            CutsceneManager.Instance.InitializeCutscene<CutscenePortal>();
+        if (sceneName == "portal_hell") {
+            CutscenePortal cutscene = new CutscenePortal();
+            cutscene.destination = CutscenePortal.Destination.hell;
+            CutsceneManager.Instance.InitializeCutscene(cutscene);
+        }
+        if (sceneName == "portal_venus") {
+            CutscenePortal cutscene = new CutscenePortal();
+            cutscene.destination = CutscenePortal.Destination.venus;
+            CutsceneManager.Instance.InitializeCutscene(cutscene);
         }
         if (sceneName == "moon1" && (data.entryID == 420 || data.entryID == 99)) {
             CutsceneManager.Instance.InitializeCutscene<CutsceneMoonLanding>();
@@ -543,8 +526,14 @@ public partial class GameManager : Singleton<GameManager> {
         }
         if (sceneName == "devils_throneroom") {
             if (!data.visitedThroneRoom) {
-                StartCoroutine(CutsceneManager.Instance.waitAndStartCutscene<CutsceneThroneroom>(2));
+                throneroomCoroutine = CutsceneManager.Instance.waitAndStartCutscene<CutsceneThroneroom>(2);
+                StartCoroutine(throneroomCoroutine);
                 data.visitedThroneRoom = true;
+            }
+        }
+        if (sceneName == "apartment") {
+            if (data.days == 3) {
+                ReceivePhoneCall("office");
             }
         }
         if (data.days >= 2) {
@@ -559,6 +548,7 @@ public partial class GameManager : Singleton<GameManager> {
         return obj;
     }
     public void InitializeNonPlayableLevel() {
+        cam = GameObject.FindObjectOfType<Camera>();
         string sceneName = SceneManager.GetActiveScene().name;
         InputController.Instance.state = InputController.ControlState.cutscene;
         UINew.Instance.RefreshUI();
@@ -568,6 +558,9 @@ public partial class GameManager : Singleton<GameManager> {
         }
         if (sceneName == "boardroom_cutscene") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneBoardroom>();
+        }
+        if (sceneName == "office_cutscene") {
+            CutsceneManager.Instance.InitializeCutscene<CutsceneOffice>();
         }
         if (sceneName == "anti_mayor_cutscene") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneAntiMayor>();
@@ -705,12 +698,7 @@ public partial class GameManager : Singleton<GameManager> {
         if (computer != null) {
             computer.CheckBubble();
         }
-        // instantiate original player character if missing?
-        // not prefabname
-        // data.prefabName 
-        // List<string> origPrefabs = new List<string>() { "Tom", "Tina", "Brf", "Brm", "Blf", "Blm" };
-        Debug.Log(data.prefabName.ToLower());
-        Debug.Log(Toolbox.Instance.CloneRemover(playerObject.name).ToLower());
+        // instantiate original player character if missing
         if (!data.prefabName.ToLower().Contains(Toolbox.Instance.CloneRemover(playerObject.name).ToLower())) {
             Debug.Log("instantiating player prefab on apartment newday");
             GameObject origPlayer = InstantiatePlayerPrefab();
@@ -748,6 +736,9 @@ public partial class GameManager : Singleton<GameManager> {
             data.itemCheckedOut[key] = false;
         }
         DetermineClosetNews();
+        // if (data.days == 3) {
+        //     ReceivePhoneCall("office");
+        // }
         SceneManager.LoadScene("apartment");
         sceneTime = 0f;
         data.entryID = -99;
@@ -800,6 +791,16 @@ public partial class GameManager : Singleton<GameManager> {
         SceneManager.LoadScene("anti_mayor_cutscene");
         sceneTime = 0f;
         data.entryID = -99;
+    }
+    public void OfficeCutscene() {
+        SceneManager.LoadScene("office_cutscene");
+        sceneTime = 0f;
+        data.entryID = -99;
+    }
+    public void ReturnToPhone() {
+        SceneManager.LoadScene("apartment");
+        sceneTime = 0f;
+        data.entryID = 77;
     }
     public void TitleScreen() {
         data = null;
@@ -886,7 +887,7 @@ public partial class GameManager : Singleton<GameManager> {
             data.perks["vomit"] = true;
             data.perks["eat_all"] = true;
             data.perks["swear"] = true;
-            data.perks["potion"] = false;
+            data.perks["potion"] = true;
             data.perks["burn"] = false;
             data.perks["resurrection"] = false;
             data.perks["beverage"] = true;
@@ -1021,7 +1022,7 @@ public partial class GameManager : Singleton<GameManager> {
         return data;
     }
     public void CheckLiquidCollection(Liquid l, GameObject owner) {
-        Debug.Log("check liquid");
+        // Debug.Log("check liquid");
         if (owner != playerObject)
             return;
         foreach (Liquid atomicLiquid in l.atomicLiquids) {
@@ -1034,7 +1035,7 @@ public partial class GameManager : Singleton<GameManager> {
                 }
             }
             if (match) continue;
-            Debug.Log($"collecting {atomicLiquid.name}");
+            // Debug.Log($"collecting {atomicLiquid.name}");
             Liquid newAtomicLiquid = new Liquid(atomicLiquid);
             data.collectedLiquids.Add(newAtomicLiquid);
             data.newCollectedLiquids.Add(newAtomicLiquid);
@@ -1046,7 +1047,7 @@ public partial class GameManager : Singleton<GameManager> {
                 return;
             }
         }
-        Debug.Log($"collecting {l.name}");
+        // Debug.Log($"collecting {l.name}");
         Liquid newLiquid = new Liquid(l);
         data.collectedLiquids.Add(new Liquid(newLiquid));
         data.newCollectedLiquids.Add(new Liquid(newLiquid));
@@ -1170,6 +1171,17 @@ public partial class GameManager : Singleton<GameManager> {
             computer.CheckBubble();
         }
     }
+    public void ReceivePhoneCall(string cutscene) {
+        if (data == null)
+            return;
+        if (data.phoneCallsAll.Contains(cutscene))
+            return;
+        Debug.Log("receiving phoneCall " + cutscene);
+        data.phoneQueue.Add(cutscene);
+        Telephone computer = GameObject.FindObjectOfType<Telephone>();
+        computer.PhoneCall(cutscene);
+        data.phoneCallsAll.Add(cutscene);
+    }
     public void UnlockTVShow(string showName) {
         if (data.televisionShows.Contains(showName))
             return;
@@ -1221,7 +1233,18 @@ public partial class GameManager : Singleton<GameManager> {
             "Magna Morti",
             "Quadriceps Potentia",
             "Pontifex Prime",
-            "Hapax Legomenon"
+            "Hapax Legomenon",
+            "Tetrax Noster",
+            "Nobilissimus",
+            "Princeps Oculus",
+            "Cubicularius Draconus",
+            "Ipsissimus",
+            "Magister Oraculum",
+            "Adeptus Lux",
+            "Arcanum Arcanorum",
+            "Tesseract Invisible",
+            "The Infinite Circle",
+            "Astron Argon",
         };
         return names[UnityEngine.Random.Range(0, names.Count)];
     }

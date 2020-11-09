@@ -17,6 +17,8 @@ public class DoorwayZone : Doorway {
             return;
         if (InputController.forbiddenTags.Contains(collider.tag))
             return;
+        if (GameManager.Instance.playerObject == null)
+            return;
         if (collider.transform == GameManager.Instance.playerObject.transform || collider.transform.IsChildOf(GameManager.Instance.playerObject.transform)) {
             Leave();
         }

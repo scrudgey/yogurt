@@ -21,6 +21,7 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
     public bool randomizeDirection;
     public bool randomizeSpeech;
     public List<Uniform> randomOutfits;
+    public List<Uniform> randomFemaleOutfits;
     public List<Pickup> randomItems;
     public List<Hat> randomHats;
     public List<PortraitComponent> maleHeads;
@@ -43,12 +44,9 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
 
         Gender gender = defaultGender;
 
-        if (randomOutfits != null && randomOutfits.Count > 0) {
-            Outfit outfit = GetComponent<Outfit>();
-            Uniform uniform = GameObject.Instantiate(randomOutfits[UnityEngine.Random.Range(0, randomOutfits.Count)]);
-            GameObject removedUniform = outfit.DonUniform(uniform, cleanStains: false);
-            if (removedUniform)
-                Destroy(removedUniform);
+        if (randomizeGender) {
+            gender = (Gender)UnityEngine.Random.Range(0, 2);
+            Toolbox.SetGender(gameObject, gender);
         }
 
         if (randomizeDirection) {
@@ -57,10 +55,29 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
             controllable.direction = newDirection;
         }
 
-        if (randomizeGender) {
-            gender = (Gender)UnityEngine.Random.Range(0, 2);
-            Toolbox.SetGender(gameObject, gender);
+        Outfit outfit = GetComponent<Outfit>();
+        Uniform uniform = null;
+
+        switch (gender) {
+            case Gender.male:
+                if (randomOutfits != null && randomOutfits.Count > 0) {
+                    uniform = GameObject.Instantiate(randomOutfits[UnityEngine.Random.Range(0, randomOutfits.Count)]);
+                    GameObject removedUniform = outfit.DonUniform(uniform, cleanStains: false);
+                    if (removedUniform)
+                        Destroy(removedUniform);
+                }
+                break;
+            case Gender.female:
+                if (randomFemaleOutfits != null && randomFemaleOutfits.Count > 0) {
+                    uniform = GameObject.Instantiate(randomFemaleOutfits[UnityEngine.Random.Range(0, randomFemaleOutfits.Count)]);
+                    GameObject removedUniform = outfit.DonUniform(uniform, cleanStains: false);
+                    if (removedUniform)
+                        Destroy(removedUniform);
+                }
+                break;
         }
+
+
 
         if (randomizeHead) {
             HeadAnimation head = GetComponentInChildren<HeadAnimation>();

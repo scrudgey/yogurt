@@ -9,6 +9,7 @@ public class CutscenePortal : Cutscene {
     GameObject player;
     Transform playerTransform;
     LorentzAttractor attractor;
+    MessageSpeech message;
     public override void Configure() {
         player = GameManager.Instance.playerObject;
         playerTransform = player.transform;
@@ -19,6 +20,12 @@ public class CutscenePortal : Cutscene {
         if (timer == 0) {
             UINew.Instance.RefreshUI();
             player.transform.position = Vector3.zero;
+        }
+        if (Random.Range(0, 75) < 1f) {
+            message = new MessageSpeech("{disturbreact}");
+            message.nimrod = true;
+            message.interrupt = true;
+            Toolbox.Instance.SendMessage(player, CutsceneManager.Instance, message);
         }
         timer += Time.deltaTime;
         if (timer > 10.0f) {

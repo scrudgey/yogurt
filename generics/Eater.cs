@@ -327,6 +327,9 @@ public class Eater : Interactive, ISaveable {
         vomitLiquid.atomicLiquids = new HashSet<Liquid>();
         vomitLiquid.atomicLiquids.Add(new Liquid(vomitLiquid));
         Toolbox.Instance.SpawnDroplet(vomitLiquid, 0f, gameObject, 0.05f);
+        if (gameObject == GameManager.Instance.playerObject) {
+            UINew.Instance.RefreshUI(active: true);
+        }
     }
 
     void ReactToOccurrence(EventData od) {
@@ -358,6 +361,8 @@ public class Eater : Interactive, ISaveable {
             data.GUIDs.Remove("eaten1");
         if (data.GUIDs.ContainsKey("eaten0"))
             data.GUIDs.Remove("eaten0");
+
+        LinkedList<GameObject> newEatenQueue = new LinkedList<GameObject>();
         while (eatenQueue.Count > 0 && index < 2) { // do NOT save anything more than two items!!! seriously!
                                                     // remove first-in-first-out
                                                     // GameObject eaten = eatenStack.Pop();
@@ -367,10 +372,13 @@ public class Eater : Interactive, ISaveable {
             string eatenName = Toolbox.Instance.GetName(eaten);
             data.strings[$"eaten{index}"] = eatenName;
             // Debug.Log($"{this} adding eaten to reference tree: {eatenName}");
+            // Debug.Log($"saving eaten {eaten}");
             MySaver.UpdateGameObjectReference(eaten, data, $"eaten{index}");
             MySaver.AddToReferenceTree(gameObject, eaten);
             index++;
+            newEatenQueue.AddLast(eaten);
         }
+        eatenQueue = newEatenQueue;
     }
     public void LoadData(PersistentComponent data) {
         nutrition = data.floats["nutrition"];

@@ -12,9 +12,11 @@ public class CameraControl : MonoBehaviour {
         set {
             _focus = value;
             focusBody = value.GetComponent<Rigidbody2D>();
+            focusControl = value.GetComponent<Controllable>();
         }
     }
     public Rigidbody2D focusBody;
+    public Controllable focusControl;
     Vector3 focusVelocity = Vector3.zero;
     private Vector3 smoothVelocity = Vector3.zero;
     private Vector3 shakeVector = Vector3.zero;
@@ -134,11 +136,15 @@ public class CameraControl : MonoBehaviour {
         }
 
 
+        float smoothConstant = smoothing;
+        if (focusControl.running) {
+            smoothConstant /= 2f;
+        }
         if (state == ControlState.lerpToCenter) {
-            tempVector = Vector3.SmoothDamp(tempVector, targetPosition, ref smoothVelocity, smoothing);
+            tempVector = Vector3.SmoothDamp(tempVector, targetPosition, ref smoothVelocity, smoothConstant);
             // tempVector = Vector3.Lerp(tempVector, targetPosition, smoothing);
         } else if (state == ControlState.lerpToPoint) {
-            tempVector = Vector3.SmoothDamp(tempVector, pointTarget, ref smoothVelocity, smoothing);
+            tempVector = Vector3.SmoothDamp(tempVector, pointTarget, ref smoothVelocity, smoothConstant);
             // tempVector = Vector3.Lerp(tempVector, pointTarget, smoothing);
         }
 

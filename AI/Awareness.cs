@@ -480,7 +480,6 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         switch (assessment.status) {
             case PersonalAssessment.friendStatus.enemy:
                 phrase = "{greet-enemy}";
-
                 break;
             case PersonalAssessment.friendStatus.friend:
                 phrase = "{greet-friend}";
@@ -489,6 +488,10 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             case PersonalAssessment.friendStatus.neutral:
                 phrase = "{greet-neutral}";
                 break;
+        }
+        Speech mySpeech = GetComponent<Speech>();
+        if (mySpeech != null) {
+            mySpeech.grammar.SetSymbol("interlocutor", Toolbox.Instance.GetName(target));
         }
         MessageSpeech message = new MessageSpeech(phrase);
         message.nimrod = true;

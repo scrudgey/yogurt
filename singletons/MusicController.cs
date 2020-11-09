@@ -30,10 +30,12 @@ public enum TrackName {
     greaser,
     imp,
     venus,
-    creeptunnel
+    creeptunnel,
+    lowerhell,
+    satansthone
 }
 [System.Serializable]
-public class Track {
+public class Track : IEquatable<Track> {
     public TrackName trackName;
     public float playTime;
     public bool loop;
@@ -42,6 +44,34 @@ public class Track {
         this.trackName = trackName;
         this.loop = loop;
         this.volume = vol;
+    }
+    public override bool Equals(object obj) {
+        return this.Equals(obj as Track);
+    }
+
+    public bool Equals(Track p) {
+        // If parameter is null, return false.
+        if (System.Object.ReferenceEquals(p, null)) {
+            return false;
+        }
+
+        // Optimization for a common success case.
+        if (System.Object.ReferenceEquals(this, p)) {
+            return true;
+        }
+
+        // If run-time types are not exactly the same, return false.
+        if (this.GetType() != p.GetType()) {
+            return false;
+        }
+
+        // Return true if the fields match.
+        // Note that the base class is not invoked because it is
+        // System.Object, which defines Equals as reference equality.
+        return (p.trackName == trackName);
+    }
+    public override int GetHashCode() {
+        return trackName.GetHashCode();
     }
 }
 [System.Serializable]
@@ -157,6 +187,16 @@ public class MusicCreep : Music {
         tracks = new Stack<Track>(new List<Track> { new Track(TrackName.creeptunnel) });
     }
 }
+public class MusicHell : Music {
+    public MusicHell() {
+        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.lowerhell) });
+    }
+}
+public class MusicThroneroom : Music {
+    public MusicThroneroom() {
+        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.satansthone) });
+    }
+}
 public class MusicController : Singleton<MusicController> {
 
     static Dictionary<TrackName, string> trackFiles = new Dictionary<TrackName, string>(){
@@ -181,7 +221,9 @@ public class MusicController : Singleton<MusicController> {
         {TrackName.greaser, "Greaser Theme #5 ALL IN -- YC3 2020"},
         {TrackName.imp, "IMP's Theme Draft #11 CABBAGEPATCH ADAMS _ YC3 2020"},
         {TrackName.venus, "VENUS Theme1 YC3"},
-        {TrackName.creeptunnel, "Creep Tunnels Draft #5 YESSIR"}
+        {TrackName.creeptunnel, "Creep Tunnels Draft #5 YESSIR"},
+        {TrackName.lowerhell, "Lower HELL Draftz Test #5 YC3 2020"},
+        {TrackName.satansthone, "Final SATAN VER#1 Vox _ No Bass YC3 2020"},
     };
 
     static Dictionary<string, Func<Music>> sceneMusic = new Dictionary<string, Func<Music>>() {
@@ -189,6 +231,8 @@ public class MusicController : Singleton<MusicController> {
         {"chamber", () => new MusicChamber()},
         {"space", () => new MusicSpace()},
         {"portal", () => new MusicSpace()},
+        {"portal_venus", () => new MusicSpace()},
+        {"portal_hell", () => new MusicSpace()},
         {"moon1", () => new MusicMoon()},
         {"moon_pool", () => new MusicMoon()},
         {"moon_town", () => new MusicMoon()},
@@ -219,6 +263,9 @@ public class MusicController : Singleton<MusicController> {
         {"venus_temple", () => new MusicVenus()},
         {"hells_kitchen", () => new MusicCreep()},
         {"hells_landing", () => new MusicCreep()},
+        {"lower_hell", () => new MusicHell()},
+        {"devils_throneroom", () => new MusicThroneroom()},
+        {"office_cutscene", () => new MusicBeat()},
     };
     // TODO: add studio
     public static Dictionary<TrackName, AudioClip> tracks = new Dictionary<TrackName, AudioClip>();
@@ -260,7 +307,11 @@ public class MusicController : Singleton<MusicController> {
         }
     }
     public void SetMusic(Music newMusic) {
-        if (nowPlayingMusic != null && newMusic.GetType() == nowPlayingMusic.GetType()) {
+        // if (nowPlayingMusic != null) {
+        //     Debug.Log(MusicEquality(newMusic, nowPlayingMusic));
+        //     Debug.Log($"{newMusic.GetType()} {nowPlayingMusic.GetType()}");
+        // }
+        if (nowPlayingMusic != null && MusicEquality(newMusic, nowPlayingMusic)) {
             return;
         }
         if (endCoroutine != null)
@@ -268,6 +319,15 @@ public class MusicController : Singleton<MusicController> {
         stack = newMusic.tracks;
         nowPlayingMusic = newMusic;
         PlayNextTrack();
+    }
+    public bool MusicEquality(Music music1, Music music2) {
+        if (music1.GetType() != music2.GetType())
+            return false;
+        if (music1.tracks.Count != music2.tracks.Count)
+            return false;
+        if (music1.tracks.Peek() != music2.tracks.Peek())
+            return false;
+        return true;
     }
     public void RestartMusic() {
         if (endCoroutine != null)

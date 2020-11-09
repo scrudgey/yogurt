@@ -47,9 +47,6 @@ public class CutsceneBoardroom : Cutscene {
         using (Controller controller = new Controller(curlyObj)) {
             controller.SetDirection(Vector2.left);
         }
-        // moeObj.GetComponent<Humanoid>().SetDirection(Vector2.down);
-        // larryObj.GetComponent<Humanoid>().SetDirection(Vector2.right);
-        // curlyObj.GetComponent<Humanoid>().SetDirection(Vector2.left);
         moeControl = moeObj.GetComponentInChildren<HeadAnimation>();
         moeControl.DirectionChange(Vector2.down);
         moe = moeObj.GetComponent<Speech>();

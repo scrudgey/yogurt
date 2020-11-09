@@ -36,6 +36,7 @@ public class Hurtable : Damageable, ISaveable {
     public Dictionary<damageType, float> totalDamage = new Dictionary<damageType, float>();
     public Collider2D myCollider;
     public bool unknockdownable;
+    public bool headExploded;
     private List<AudioClip> knockdownSounds;
     public void Reset() {
         health = maxHealth;
@@ -233,6 +234,12 @@ public class Hurtable : Damageable, ISaveable {
         }
 
         gameObject.SendMessage("OnDie", SendMessageOptions.DontRequireReceiver);
+    }
+    public void OnDestruct() {
+        Head head = GetComponentInChildren<Head>();
+        if (head != null && head.hat != null) {
+            head.RemoveHat();
+        }
     }
 
     public void Resurrect() {
@@ -462,24 +469,72 @@ public class Hurtable : Damageable, ISaveable {
             edible.human = true;
         }
     }
+    public void ExplodeHead() {
+        if (headExploded)
+            return;
+        headExploded = true;
+        Head head = GetComponentInChildren<Head>();
+        MessageDamage message = new MessageDamage(100f, damageType.physical);
+        if (head != null) {
+            head.RemoveHat();
+            Liquid blood = Liquid.LoadLiquid("blood");
+
+            GameObject headGibs = Resources.Load("prefabs/gibs/headGibsContainer") as GameObject;
+            foreach (Gibs gib in headGibs.GetComponents<Gibs>()) {
+                Gibs newGib = head.gameObject.AddComponent<Gibs>();
+                newGib.CopyFrom(gib);
+                newGib.initHeight = new LoHi(0.05f, 0.2f);
+                newGib.initAngleFromHorizontal = new LoHi(0.7f, 0.9f);
+                newGib.initVelocity = new LoHi(1f, 2f);
+                Vector2 rand = UnityEngine.Random.insideUnitCircle;
+                message.force = new Vector3(rand.x * 5f, rand.y * 5f, UnityEngine.Random.Range(5f, 30f));
+                newGib.Emit(message);
+            }
+            AudioClip boom = Resources.Load("sounds/explosion/cannon") as AudioClip;
+            // PlayPublicSound(boom);
+            Toolbox.Instance.AudioSpeaker(boom, transform.position);
+            Destroy(head.gameObject);
+            GameManager.Instance.IncrementStat(StatType.headsExploded, 1);
+            EventData headExpldeData = EventData.HeadExplosion(gameObject);
+            Toolbox.Instance.OccurenceFlag(head.gameObject, headExpldeData);
+
+            for (int i = 0; i < 10; i++) {
+                Vector2 rand = UnityEngine.Random.insideUnitCircle;
+                Vector3 velocity = new Vector3(rand.x * UnityEngine.Random.Range(0.1f, 5f), rand.y * UnityEngine.Random.Range(0.1f, 5f), UnityEngine.Random.Range(1f, 5f));
+                Vector3 pos = head.transform.position;
+                pos.z = 0.18f;
+                Toolbox.Instance.SpawnDroplet(pos, blood, velocity);
+            }
+        }
+        Die(message, damageType.physical);
+        if (gameObject == GameManager.Instance.playerObject) {
+            GameManager.Instance.IncrementStat(StatType.deathByExplodingHead, 1);
+        }
+    }
     public void SaveData(PersistentComponent data) {
         data.floats["health"] = health;
         data.floats["maxHealth"] = maxHealth;
-        // data.floats["bonusHealth"] = bonusHealth;
         data.floats["impulse"] = impulse;
         data.floats["downed_timer"] = downedTimer;
         data.ints["hitstate"] = (int)hitState;
         data.floats["oxygen"] = oxygen;
         data.floats["hitstuncounter"] = hitStunCounter;
+        data.bools["headExploded"] = headExploded;
     }
     public void LoadData(PersistentComponent data) {
         health = data.floats["health"];
         maxHealth = data.floats["maxHealth"];
-        // bonusHealth = data.floats["bonusHealth"];
         impulse = data.floats["impulse"];
         downedTimer = data.floats["downed_timer"];
         hitState = (Controllable.HitState)data.ints["hitstate"];
         oxygen = data.floats["oxygen"];
         hitStunCounter = data.floats["hitstuncounter"];
+        headExploded = data.bools["headExploded"];
+        if (headExploded) {
+            Head head = GetComponentInChildren<Head>();
+            if (head != null) {
+                Destroy(head.gameObject);
+            }
+        }
     }
 }

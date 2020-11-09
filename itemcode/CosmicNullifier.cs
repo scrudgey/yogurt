@@ -20,6 +20,7 @@ public class CosmicNullifier : Pickup {
 
         // TODO: better self-destruct sequence here
         Destroy(gameObject);
+        GameObject.Instantiate(Resources.Load("particles/nullifier_destruction"), transform.position, Quaternion.identity);
         ClaimsManager.Instance.WasDestroyed(gameObject);
     }
     public bool Nullify_Validation(Duplicatable duplicatable) {

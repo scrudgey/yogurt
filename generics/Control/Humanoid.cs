@@ -42,6 +42,7 @@ public class Humanoid : SimpleControl {
                 ToggleFightMode();
         }
     }
+
     public override void FixedUpdate() {
         if (hitState > Controllable.HitState.none) {
             myRigidBody.drag = 10f;

@@ -27,11 +27,6 @@ public class CutsceneScorpion : Cutscene {
         camControl = GameObject.FindObjectOfType<CameraControl>();
         state = State.spawn;
         doorway = FindValidDoorway();
-        // foreach (Doorway door in GameObject.FindObjectsOfType<Doorway>()) {
-        //     if (!door.spawnPoint && door.entryID != 420) {
-        //         doorway = door;
-        //     }
-        // }
         greaserPrefab = Resources.Load("prefabs/greaser") as GameObject;
         MusicController.Instance.EnqueueMusic(new MusicGreaser());
     }
@@ -56,9 +51,32 @@ public class CutsceneScorpion : Cutscene {
         }
     }
     private IEnumerator walkCoroutine() {
-        Vector2 random = Random.insideUnitCircle.normalized;
-        random.y = -1 * Mathf.Abs(random.y);
-        Vector2 target = (Vector2)doorway.transform.position + random;
+        // Vector2 random = Random.insideUnitCircle.normalized;
+        // random.y = -1 * Mathf.Abs(random.y);
+        // Vector2 target = (Vector2)doorway.transform.position + random;
+
+        Vector2 target = (Vector2)doorway.transform.position;
+        switch (greasers.Count) {
+            default:
+            case 0:
+                target += new Vector2(-1, -1);
+                break;
+            case 1:
+                target += new Vector2(-1, -1);
+                break;
+            case 2:
+                target += new Vector2(1, -1);
+
+                break;
+            case 3:
+                target += new Vector2(1, -1);
+
+                break;
+            case 4:
+                target += new Vector2(0, -1);
+
+                break;
+        }
 
         GameObject greaser = GameObject.Instantiate(greaserPrefab, doorway.transform.position, Quaternion.identity) as GameObject;
         greasers.Add(greaser);

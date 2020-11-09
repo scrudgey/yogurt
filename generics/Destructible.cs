@@ -116,7 +116,9 @@ public class Destructible : Damageable, ISaveable {
 
         if (vel > 0.1f && hitSound.Length > 0) {
             // GetComponent<AudioSource>().PlayOneShot(hitSound[Random.Range(0, hitSound.Length)]);
-            audioSource.PlayOneShot(hitSound[Random.Range(0, hitSound.Length)]);
+            AudioClip clip = hitSound[Random.Range(0, hitSound.Length)];
+            if (clip != null)
+                audioSource.PlayOneShot(clip);
         }
     }
 

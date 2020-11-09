@@ -26,6 +26,7 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
     private bool throwing;
     private bool fighting;
     private bool punching;
+    private bool panic;
     private Sprite[] sprites;
     public string baseName;
     private int baseFrame;
@@ -34,6 +35,7 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
     public Controllable.HitState hitState;
     public Rigidbody2D body;
     private bool doubledOver;
+    public Controllable controllable;
     void Awake() {
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animation>();
@@ -43,6 +45,7 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
         Toolbox.RegisterMessageCallback<MessageInventoryChanged>(this, HandleInventoryMessage);
         Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
         body = GetComponent<Rigidbody2D>();
+        controllable = GetComponent<Controllable>();
     }
     void Start() {
         MessageDirectable message = new MessageDirectable();
@@ -101,6 +104,9 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
             case MessageAnimation.AnimType.punching:
                 punching = anim.value;
                 break;
+            case MessageAnimation.AnimType.panic:
+                panic = anim.value;
+                break;
             default:
                 break;
         }
@@ -138,13 +144,14 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
             updateSequence = GetThrowState(updateSequence);
         } else if (punching) {
             updateSequence = GetFightState(updateSequence);
+        } else if (fighting && body.velocity.magnitude < 0.1) {
+            updateSequence = GetFightState(updateSequence);
+        } else if (panic) {
+            updateSequence = GetPanicState(updateSequence);
         } else {
-            if (fighting && body.velocity.magnitude < 0.1) {
-                updateSequence = GetFightState(updateSequence);
-            } else {
-                updateSequence = GetWalkState(updateSequence);
-            }
+            updateSequence = GetWalkState(updateSequence);
         }
+
         if (hitState > Controllable.HitState.none) {
             updateSequence = GetHitStunState("generic3");
             if (sequence == null)
@@ -184,6 +191,8 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
         return updateSequence;
     }
     string GetWalkState(string updateSequence) {
+        if (controllable.running)
+            return GetRunningState(updateSequence);
         switch (lastPressed) {
             case "down":
                 baseFrame = 7;
@@ -199,7 +208,48 @@ public class AdvancedAnimation : MonoBehaviour, ISaveable, IDirectable {
             baseFrame += 21;
         }
         if (body.velocity.magnitude > 0.1) {
-            updateSequence = updateSequence + "_run_" + lastPressed; ;
+            updateSequence = updateSequence + "_run_" + lastPressed;
+            baseFrame += 1;
+        } else {
+            updateSequence = updateSequence + "_idle_" + lastPressed;
+        }
+        return updateSequence;
+    }
+
+    string GetRunningState(string updateSequence) {
+        switch (lastPressed) {
+            case "down":
+                baseFrame = 89;
+                break;
+            case "up":
+                baseFrame = 94;
+                break;
+            default:
+                baseFrame = 84;
+                break;
+        }
+        if (body.velocity.magnitude > 0.1) {
+            updateSequence = updateSequence + "_panic_right";
+            baseFrame += 1;
+        } else {
+            updateSequence = updateSequence + "_idle_" + lastPressed;
+        }
+        return updateSequence;
+    }
+    string GetPanicState(string updateSequence) {
+        switch (lastPressed) {
+            case "down":
+                baseFrame = 74;
+                break;
+            case "up":
+                baseFrame = 79;
+                break;
+            default:
+                baseFrame = 69;
+                break;
+        }
+        if (body.velocity.magnitude > 0.1) {
+            updateSequence = updateSequence + "_panic_right";
             baseFrame += 1;
         } else {
             updateSequence = updateSequence + "_idle_" + lastPressed;

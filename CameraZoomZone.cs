@@ -12,21 +12,18 @@ public class CameraZoomZone : MonoBehaviour {
     public Vector3 minOffset;
     public Vector3 maxOffset;
     public bool ignoreDistanceEffects;
-    // public void OnTriggerExit2D(Collider2D other) {
-    //     if (other.gameObject == GameManager.Instance.playerObject) {
+    public Coroutine zoomOutCoroutine;
+    public float zoomOutTime = 3f;
 
-    //     }
-    // }
     public void ForceRecalculate(Collider2D other) {
         if (other == null)
             return;
-        // float distance = Vector2.Distance(other.transform.position, transform.position);
-        // float distance = other.ClosestPoint(transform.position);
 
         if (ignoreDistanceEffects) {
-            control.offset = new Vector3(maxOffset.x, maxOffset.y, maxOffset.z);
-            control.maxSize = maxZoom;
+            control.offset = Vector3.Lerp(control.offset, maxOffset, 0.01f);
+            control.maxSize = Mathf.Lerp(control.maxSize, maxZoom, 0.01f);
         } else {
+
             float distance = Vector2.Distance(other.ClosestPoint(transform.position), transform.position);
 
             float t = circle.radius - distance;
@@ -56,19 +53,48 @@ public class CameraZoomZone : MonoBehaviour {
 
     }
     public void OnTriggerStay2D(Collider2D other) {
-        if (other.gameObject == GameManager.Instance.playerObject && !ignoreDistanceEffects) {
+        if (InputController.forbiddenTags.Contains(other.tag))
+            return;
+        if (other.gameObject == GameManager.Instance.playerObject) {
+            if (zoomOutCoroutine != null) {
+                StopCoroutine(zoomOutCoroutine);
+                zoomOutCoroutine = null;
+            }
             ForceRecalculate(other);
         }
     }
     public void OnTriggerEnter2D(Collider2D other) {
-        if (other.gameObject == GameManager.Instance.playerObject && ignoreDistanceEffects) {
+        if (InputController.forbiddenTags.Contains(other.tag))
+            return;
+        if (other.gameObject == GameManager.Instance.playerObject) {
+            if (zoomOutCoroutine != null) {
+                StopCoroutine(zoomOutCoroutine);
+                zoomOutCoroutine = null;
+            }
             ForceRecalculate(other);
         }
     }
     public void OnTriggerExit2D(Collider2D other) {
+        if (InputController.forbiddenTags.Contains(other.tag))
+            return;
         if (ignoreDistanceEffects) {
-            control.offset = new Vector3(minOffset.x, minOffset.y, minOffset.z);
-            control.maxSize = minZoom;
+            zoomOutCoroutine = StartCoroutine(ZoomOut());
         }
+    }
+
+    IEnumerator ZoomOut() {
+        float timer = 0;
+        yield return null;
+        while (timer < zoomOutTime) {
+            timer += Time.deltaTime;
+            float zoom = (float)PennerDoubleAnimation.Linear(timer, control.maxSize, minZoom - control.maxSize, zoomOutTime);
+            float offsetX = (float)PennerDoubleAnimation.Linear(timer, control.offset.x, minOffset.x - control.offset.x, zoomOutTime);
+            float offsetY = (float)PennerDoubleAnimation.Linear(timer, control.offset.y, minOffset.y - control.offset.y, zoomOutTime);
+            float offsetZ = (float)PennerDoubleAnimation.Linear(timer, control.offset.z, minOffset.z - control.offset.z, zoomOutTime);
+            control.maxSize = zoom;
+            control.offset = new Vector3(offsetX, offsetY, offsetZ);
+            yield return null;
+        }
+        yield return null;
     }
 }

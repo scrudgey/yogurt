@@ -4,8 +4,11 @@ namespace AI {
     public class PriorityAttack : Priority {
         private Inventory inventory;
         private float updateInterval;
+        private Goal wanderGoal;
+        private Goal fightGoal;
         private Dictionary<BuffType, Buff> netBuffs = new Dictionary<BuffType, Buff>();
         public PriorityAttack(GameObject g, Controller c) : base(g, c) {
+
             priorityName = "attack";
             inventory = gameObject.GetComponent<Inventory>();
 
@@ -21,6 +24,8 @@ namespace AI {
 
             // Goal punchGoal = new Goal(gameObject, control);
             // punchGoal.routines.Add(new RoutinePunchAt(gameObject, control, awareness.nearestEnemy, awareness.decisionMaker.personality.combatProficiency));
+            fightGoal = punchGoal;
+            wanderGoal = new GoalWander(g, c);
 
 
             goal = punchGoal;
@@ -52,8 +57,12 @@ namespace AI {
             }
         }
         public override void Update() {
-            if (awareness.nearestEnemy.val == null)
+            if (awareness.nearestEnemy.val == null) {
                 urgency -= Time.deltaTime / 10f;
+                goal = wanderGoal;
+            } else {
+                goal = fightGoal;
+            }
         }
         public override float Urgency(Personality personality) {
             if (personality.haunt == Personality.Haunt.yes)

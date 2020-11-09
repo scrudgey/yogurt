@@ -39,6 +39,8 @@ public class UIButtonEffects : MonoBehaviour, IPointerDownHandler, IPointerEnter
             AdoptPrefabSounds(prefabSet);
         // Play(startSound);
         foreach (Button button in buttons) {
+            if (button == null)
+                continue;
             button.onClick.AddListener(PlayClickSound);
             // UIButtonEffects bfx = button.gameObject.AddComponent<UIButtonEffects>();
             UIButtonEffects bfx = Toolbox.GetOrCreateComponent<UIButtonEffects>(button.gameObject);

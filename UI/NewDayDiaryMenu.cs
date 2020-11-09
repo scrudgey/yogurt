@@ -29,6 +29,9 @@ public class NewDayDiaryMenu : MonoBehaviour {
             newPanel.transform.SetParent(commercialsPanel.transform);
             RectTransform rectTransform = newPanel.GetComponent<RectTransform>();
             rectTransform.localScale = Vector3.one;
+            Vector3 pos = rectTransform.localPosition;
+            pos.z = 0;
+            rectTransform.localPosition = pos;
         }
         GameManager.Instance.data.newUnlockedCommercials = new HashSet<Commercial>();
     }

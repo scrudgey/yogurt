@@ -77,7 +77,7 @@ public class Liquid { //: IEquatable<Liquid> {
         // this.buffs == that.buffs;
     }
     public static Liquid MixLiquids(Liquid l1, Liquid l2) {
-        Liquid returnLiquid = l1;
+        Liquid returnLiquid = new Liquid(l1);
         returnLiquid.filename = l1.filename;
         returnLiquid.vegetable = l1.vegetable + l2.vegetable;
         returnLiquid.meat = l1.meat + l2.meat;
@@ -92,29 +92,29 @@ public class Liquid { //: IEquatable<Liquid> {
         // returnLiquid.color = new Color(returnLiquid.colorR / 255.0F, returnLiquid.colorG / 255.0F, returnLiquid.colorB / 255.0F);
 
         if (l2.ingredients.Count > 0) {
-            l1.ingredients.AddRange(l2.ingredients);
-            l1.ingredients = l1.ingredients.Distinct().ToList();
+            returnLiquid.ingredients.AddRange(l2.ingredients);
+            returnLiquid.ingredients = returnLiquid.ingredients.Distinct().ToList();
         }
-        l1.ingredients.Add(l1.name);
-        l1.ingredients.Add(l2.name);
+        returnLiquid.ingredients.Add(returnLiquid.name);
+        returnLiquid.ingredients.Add(l2.name);
 
         // TODO: smarter add here
-        l1.buffs.AddRange(l2.buffs);
+        returnLiquid.buffs.AddRange(l2.buffs);
 
-        l1.name = GetName(l1);
+        returnLiquid.name = GetName(returnLiquid);
 
         // I'm doing this instead of redefining equality / hash because I don't feel like it
         foreach (Liquid atomicLiquid in l2.atomicLiquids) {
             bool collision = false;
-            foreach (Liquid myLiquid in l1.atomicLiquids) {
+            foreach (Liquid myLiquid in returnLiquid.atomicLiquids) {
                 if (myLiquid.Equals(atomicLiquid)) {
                     collision = true;
                     break;
                 }
             }
             if (!collision) {
-                Debug.Log("adding atomic liquid " + atomicLiquid.name);
-                l1.atomicLiquids.Add(atomicLiquid);
+                // Debug.Log("adding atomic liquid " + atomicLiquid.name);
+                returnLiquid.atomicLiquids.Add(atomicLiquid);
             }
         }
         return returnLiquid;

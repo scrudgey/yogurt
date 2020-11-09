@@ -11,7 +11,8 @@ public class MessageAnimation : Message {
         swinging,
         fighting,
         punching,
-        outfit
+        outfit,
+        panic
     };
     public AnimType type;
     public bool value;

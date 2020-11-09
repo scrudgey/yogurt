@@ -28,7 +28,7 @@ public class BeverageMenu : MonoBehaviour {
             Destroy(childObject.gameObject);
         }
         List<Liquid> itemList = GameManager.Instance.data.collectedLiquids;
-        itemList = itemList.OrderBy(i => i.name).ToList();
+        itemList = itemList.OrderBy(i => Liquid.GetName(i)).ToList();
         bool mousedover = false;
         foreach (Liquid liquid in itemList) {
             LiquidEntryScript script = spawnEntry();
