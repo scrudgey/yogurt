@@ -266,6 +266,10 @@ public class MusicController : Singleton<MusicController> {
         {"lower_hell", () => new MusicHell()},
         {"devils_throneroom", () => new MusicThroneroom()},
         {"office_cutscene", () => new MusicBeat()},
+        {"airport_cutscene", () => new MusicBeat()},
+        {"hallucination", () => new MusicMountain()},
+        {"boardroom", () => new MusicBeat()},
+        {"office", () => new MusicBeat()},
     };
     // TODO: add studio
     public static Dictionary<TrackName, AudioClip> tracks = new Dictionary<TrackName, AudioClip>();
@@ -325,8 +329,9 @@ public class MusicController : Singleton<MusicController> {
             return false;
         if (music1.tracks.Count != music2.tracks.Count)
             return false;
-        if (music1.tracks.Peek() != music2.tracks.Peek())
-            return false;
+        if (music1.tracks.Count > 0 && music2.tracks.Count > 0)
+            if (music1.tracks.Peek().trackName != music2.tracks.Peek().trackName)
+                return false;
         return true;
     }
     public void RestartMusic() {

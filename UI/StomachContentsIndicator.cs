@@ -16,7 +16,7 @@ public class StomachContentsIndicator : MonoBehaviour {
     public Coroutine easeInCoroutine;
     public Coroutine easeOutCoroutine;
     public void Configure(GameObject item, System.Guid id) {
-        //  todo: borrow more code from inventory display
+        // Debug.Log($"configure stomach indicator for id {id}");
         this.itemId = id;
         this.rectTransform = GetComponent<RectTransform>();
         SpriteRenderer spriteRenderer = item.GetComponent<SpriteRenderer>();

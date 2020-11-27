@@ -118,6 +118,9 @@ public partial class DialogueMenu : MonoBehaviour {
     private bool doTrapDoor;
     private bool doVampireAttack;
     public bool keypressedThisFrame;
+    static List<string> cutsceneDialogues = new List<string>{
+        "polestar_first", "vampire", "dancing_god", "dancing_god_bless", "dancing_god_destroy", "magician", "magician2", "magician3"
+    };
     void Awake() {
         keypressedThisFrame = false;
         InputController.Instance.PrimaryAction.action.performed += ctx => {
@@ -178,7 +181,7 @@ public partial class DialogueMenu : MonoBehaviour {
         }
     }
 
-    public void Configure(Speech instigator, Speech target, bool interruptDefault = false) {
+    public void Configure(Speech instigator, Speech target, bool interruptDefault = false, string dialogue = null) {
         Start();
         this.instigator = instigator;
         this.target = target;
@@ -223,12 +226,9 @@ public partial class DialogueMenu : MonoBehaviour {
             return;
         }
         if (target.hitState <= Controllable.HitState.stun) {
-            //     if (message.value && cameraMonologue != "") {
-            //     defaultMonologue = cameraMonologue;
-            // } else {
-
-            // }
-            if (target.onCamera && target.cameraMonologue != "") {
+            if (dialogue != null) {
+                LoadDialogueTree(dialogue);
+            } else if (target.onCamera && target.cameraMonologue != "") {
                 LoadDialogueTree(target.cameraMonologue);
             } else if (target.defaultMonologue != "") {
                 LoadDialogueTree(target.defaultMonologue);
@@ -272,7 +272,7 @@ public partial class DialogueMenu : MonoBehaviour {
     public void LoadDialogueTree(string filename) {
         // Debug.Log("load " + filename);
         // CUTSCENE-STYLE DIALOGUE (NO INTERACTION)
-        if (filename == "polestar_first" || filename == "vampire" || filename == "dancing_god" || filename == "dancing_god_bless" || filename == "dancing_god_destroy") {
+        if (cutsceneDialogues.Contains(filename)) {
             cutsceneDialogue = true;
             EnableButtons();
         }
@@ -466,6 +466,16 @@ public partial class DialogueMenu : MonoBehaviour {
                 break;
         }
     }
+    public void Inquire() {
+        Say(instigator, "Are you the previous yogurt commercial actor?");
+        Say(target, "I am not the previous yogurt commercial actor.");
+    }
+    public void InquireSuccess() {
+        Say(instigator, "Are you the previous yogurt commercial actor?");
+        Say(target, "Yes, I used to be the yogurt commercial actor.");
+        LoadDialogueTree("detective_success");
+    }
+
 
     public void Say(Speech speaker, string text) {
         Monologue newLogue = new Monologue(speaker, new string[] { text });

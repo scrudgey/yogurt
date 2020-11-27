@@ -71,8 +71,9 @@ public class PersistentObject {
             id = System.Guid.NewGuid();
         }
 
-        prefabPath = @"prefabs/" + name;
-        prefabPath = regexSpace.Replace(prefabPath, "_");
+        // prefabPath = @"prefabs/" + name;
+        // prefabPath = regexSpace.Replace(prefabPath, "_");
+        prefabPath = Toolbox.GetPrefabPath(gameObject);
         if (Resources.Load(prefabPath) == null) {
             noPrefab = true;
             name = gameObject.name;

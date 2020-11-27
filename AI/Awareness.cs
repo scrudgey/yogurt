@@ -115,7 +115,8 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         if (initialFriends != null)
             foreach (GameObject other in initialFriends) {
                 PersonalAssessment assessment = FormPersonalAssessment(other);
-                assessment.status = PersonalAssessment.friendStatus.friend;
+                if (assessment != null)
+                    assessment.status = PersonalAssessment.friendStatus.friend;
             }
     }
     void Awake() {

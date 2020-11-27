@@ -104,7 +104,8 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         awareness.decisionMaker = this;
         awareness.enabled = this.enabled;
         control = new Controller(GetComponent<Controllable>());
-
+        control.lostControlDelegate += LostControl;
+        control.gainedControlDelegate += GainedControl;
         // start awareness with knowledge of possessions
         if (possession != null) {
             initialAwareness.Add(possession);
@@ -169,6 +170,14 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
 
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
         Toolbox.RegisterMessageCallback<Message>(this, ReceiveMessage);
+    }
+    public void LostControl() {
+        if (activePriority != null)
+            activePriority.ExitPriority();
+    }
+    public void GainedControl() {
+        if (activePriority != null)
+            activePriority.EnterPriority();
     }
     public void InitializePriority(Priority priority, Type type) {
         priorities.Add(priority);
@@ -270,6 +279,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
             priorities.Add(new PriorityProtectZone(gameObject, control, protectionZone, guardPoint, guardDirection));
         }
 
+
         foreach (Priority priority in priorities) {
             foreach (Type priorityType in priorityTypes.Keys) {
                 if (priority.GetType() == priorityType) {
@@ -277,6 +287,18 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
                     if (data.floats.ContainsKey(priorityName)) {
                         priority.urgency = data.floats[priorityName];
                     }
+                }
+            }
+
+            // this is a hack to prevent the pizza delivery boy from trying to deliver pizzas after save/load.
+            // true solution would require making priorities stateful.
+            if (defaultPriorityType == PriorityType.DeliverPizza) {
+                if (priority.GetType() == typeof(PriorityWander)) {
+                    defaultPriority = priority;
+                }
+                if (priority.GetType() == typeof(PriorityDeliverPizza)) {
+                    PriorityDeliverPizza pdp = (PriorityDeliverPizza)priority;
+                    pdp.boolSwitch.conditionMet = true;
                 }
             }
         }

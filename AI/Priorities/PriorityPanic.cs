@@ -6,8 +6,8 @@ namespace AI {
             priorityName = "panic";
             goal = new GoalPanic(g, c);
 
-            c.lostControlDelegate += LeaveControl;
-            c.gainedControlDelegate += AssumeControl;
+            // c.lostControlDelegate += LeaveControl;
+            // c.gainedControlDelegate += AssumeControl;
         }
         public override void Update() {
             if (urgency > 0) {
@@ -60,10 +60,12 @@ namespace AI {
         public void LeaveControl() {
             MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.panic, false);
             Toolbox.Instance.SendMessage(gameObject, GameManager.Instance, anim);
+            // Debug.Log("sending stop panic notice");
         }
         public void AssumeControl() {
             MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.panic, true);
             Toolbox.Instance.SendMessage(gameObject, GameManager.Instance, anim);
+            // Debug.Log("sending panic notice");
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-
+using System;
+using System.Linq;
 public class LiquidContainer : Interactive, ISaveable {
     public SpriteRenderer liquidSprite;
     public Liquid liquid;
@@ -134,6 +135,21 @@ public class LiquidContainer : Interactive, ISaveable {
                 GameObject.Instantiate(Resources.Load("particles/potionMixEffect"), transform.position, Quaternion.identity);
             } else if (mixedBuff.Count > 0) {
                 l.buffs.AddRange(mixedBuff);
+
+                // flatten list of buffs
+                List<Buff> flattenedBuffs = new List<Buff>();
+                foreach (BuffType buffType in Enum.GetValues(typeof(BuffType))) {
+                    IEnumerable<Buff> subBuffs = l.buffs.Where(x => x.type == buffType);
+                    if (subBuffs.Count() > 0) {
+
+                        flattenedBuffs.Add(l.buffs
+                        .Where(x => x.type == buffType)
+                        .Aggregate<Buff>((prod, next) => prod + next)
+                        );
+                    }
+                }
+                l.buffs = flattenedBuffs;
+
                 l.name = Liquid.GetName(l);
                 GameObject.Instantiate(Resources.Load("particles/potionMixEffect"), transform.position, Quaternion.identity);
             }
@@ -191,7 +207,7 @@ public class LiquidContainer : Interactive, ISaveable {
             eater.Eat(sip.GetComponent<Edible>());
             amount -= 1f;
             if (drinkSounds.Length > 0) {
-                Toolbox.Instance.AudioSpeaker(drinkSounds[Random.Range(0, drinkSounds.Length - 1)], transform.position);
+                Toolbox.Instance.AudioSpeaker(drinkSounds[UnityEngine.Random.Range(0, drinkSounds.Length - 1)], transform.position);
             }
             GameManager.Instance.CheckItemCollection(gameObject, eater.gameObject);
         }

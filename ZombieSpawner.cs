@@ -50,6 +50,14 @@ public class ZombieSpawner : MonoBehaviour {
                             controllable.SetDirection(Vector2.left, control);
                         }
                     }
+                    Awareness ai = zombie.GetComponent<Awareness>();
+                    foreach (DecisionMaker other in GameObject.FindObjectsOfType<DecisionMaker>()) {
+                        Intrinsics intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(other.gameObject);
+                        if (!intrinsics.NetBuffs()[BuffType.undead].active()) {
+                            PersonalAssessment assessment = ai.FormPersonalAssessment(other.gameObject);
+                            assessment.status = PersonalAssessment.friendStatus.enemy;
+                        }
+                    }
                 }
                 break;
         }

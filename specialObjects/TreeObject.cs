@@ -67,7 +67,6 @@ public class TreeObject : Damageable {
     }
 
     public void CutDown() {
-        Debug.Log("cut down");
         cutdown = true;
         hinger.useLimits = false;
         springer.enabled = false;

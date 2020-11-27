@@ -98,7 +98,10 @@ public class HomeCloset : Interactive {
             case ClosetType.items:
                 return true;
             case ClosetType.food:
-                return pickup.GetComponent<Edible>() != null;
+                Edible edible = pickup.GetComponent<Edible>();
+                if (edible != null) {
+                    return !edible.inedible;
+                } else return false;
             case ClosetType.clothing:
                 return pickup.GetComponent<Uniform>() != null;
             default:

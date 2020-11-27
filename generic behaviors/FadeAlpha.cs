@@ -23,6 +23,8 @@ public class FadeAlpha : MonoBehaviour {
 
     void OnDestroy() {
         foreach (SpriteRenderer spriteRenderer in spriteRenderers) {
+            if (spriteRenderer == null)
+                continue;
             Color color = spriteRenderer.color;
             color.a = 1f;
             spriteRenderer.color = color;

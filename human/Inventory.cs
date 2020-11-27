@@ -55,6 +55,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     public List<AudioClip> punchSounds;
     private AudioSource audioSource;
     private MessageAnimation.AnimType currentAnimation;
+    private bool configured;
     void Awake() {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         holdpoint = transform.Find("holdpoint");
@@ -126,6 +127,9 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         }
     }
     public void Start() {
+        if (configured)
+            return;
+        configured = true;
         if (initHolding) {
             if (initHolding.activeInHierarchy) {
                 Pickup pickup = initHolding.GetComponent<Pickup>();

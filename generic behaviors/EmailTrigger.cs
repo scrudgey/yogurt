@@ -29,7 +29,7 @@ public class EmailTrigger : MonoBehaviour {
         }
     }
     public void SendEmail() {
-        Debug.Log($"Send email {emailFilename}");
+        // Debug.Log($"Send email {emailFilename}");
         GameManager.Instance.ReceiveEmail(emailFilename);
     }
     public void OnInputClicked() {

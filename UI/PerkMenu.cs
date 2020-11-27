@@ -46,10 +46,47 @@ public class PerkMenu : MonoBehaviour {
                 numberCollected += 1;
             }
         }
-        levelText.text = "Level: " + numberCollected.ToString();
+        levelText.text = "";
+
+        SetLevelText();
         PopulatePerkList();
 
         MusicController.Instance.EnqueueMusic(new MusicChela());
+    }
+    void SetLevelText() {
+        string text = $"Level {numberCollected} ";
+        switch (numberCollected) {
+            default:
+            case 1:
+                text += "Yogurt Neophyte";
+                break;
+
+            case 2:
+                text += "Yogurt Adept";
+                break;
+
+            case 3:
+                text += "Yogurtmancer";
+                break;
+            case 4:
+                text += "Yogurtmancer";
+                break;
+
+            case 5:
+                text += "Yogurt Master";
+                break;
+            case 6:
+                text += "Yogurt Master";
+                break;
+            case 7:
+                text += "Yogurt Master";
+                break;
+
+            case 8:
+                text += "Yogurt Champion";
+                break;
+        }
+        levelText.text = text;
     }
     void PopulatePerkList() {
         effects.buttons = new List<Button>(builtInButtons);
@@ -151,7 +188,7 @@ public class PerkMenu : MonoBehaviour {
         GameManager.Instance.PlayPublicSound(Resources.Load("sounds/8-bit/BOUNCE3") as AudioClip);
 
         numberCollected += 1;
-        levelText.text = "Level: " + numberCollected.ToString();
+        SetLevelText();
     }
     public void DoneButtonClick() {
         UINew.Instance.CloseActiveMenu();

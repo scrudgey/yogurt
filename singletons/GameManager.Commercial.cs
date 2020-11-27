@@ -62,6 +62,12 @@ public partial class GameManager : Singleton<GameManager> {
         if (commercial.email != "") {
             ReceiveEmail(commercial.email);
         }
+        Debug.Log(commercial.hallucination);
+        if (commercial.hallucination != "") {
+
+            data.queuedMagicianSequences.Add(commercial.hallucination);
+            Debug.Log(data.queuedMagicianSequences);
+        }
         UINew.Instance.ClearObjectives();
         UINew.Instance.RefreshUI(active: false);
 

@@ -33,6 +33,10 @@ public partial class Toolbox : Singleton<Toolbox> {
     static Regex doublePunctuationRegex = new Regex(@"[/./?!][/./?!]");
     static Regex cloneFinder = new Regex(@"(.+)\(Clone\)$", RegexOptions.Multiline);
     static Regex underScoreFinder = new Regex(@"_", RegexOptions.Multiline);
+
+    private static readonly Regex regexClone = new Regex(@"(.+)\(Clone\)$", RegexOptions.Multiline);
+    private static readonly Regex regexNumber = new Regex(@"(.+)\(\d+\)$", RegexOptions.Multiline);
+    public static readonly Regex regexSpace = new Regex("\\s+", RegexOptions.Multiline);
     AudioMixer sfxMixer;
     void Start() {
         sfxMixer = Resources.Load("mixers/SoundEffectMixer") as AudioMixer;
@@ -312,6 +316,22 @@ public partial class Toolbox : Singleton<Toolbox> {
             field.SetValue(copy, field.GetValue(original));
         }
         return copy;
+    }
+    public static string GetPrefabPath(GameObject gameObject) {
+
+        string name = gameObject.name;
+        MatchCollection matches = regexClone.Matches(name);
+        if (matches.Count > 0) {                                    // the object is a clone, capture just the normal name
+            name = matches[0].Groups[1].Value;
+        }
+        matches = regexNumber.Matches(name);
+        if (matches.Count > 0) {
+            name = matches[0].Groups[1].Value;
+        }
+        name = name.Trim();
+        string prefabPath = @"prefabs/" + name;
+        prefabPath = regexSpace.Replace(prefabPath, "_");
+        return prefabPath;
     }
     public Vector2 RandomVector(Vector2 baseDir, float angleSpread) {
         float baseAngle = (float)Mathf.Atan2(baseDir.y, baseDir.x);

@@ -73,6 +73,11 @@ public partial class DialogueMenu : MonoBehaviour {
             nextLine = true;
             SmoothieCallback(3);
         }
+        if (text == "INQUIRE") {
+            nextLine = true;
+            Debug.Log("inquire");
+            Inquire();
+        }
         if (text == "CHARONCALLBACK") {
             nextLine = true;
             UINew.Instance.CloseActiveMenu();

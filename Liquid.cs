@@ -22,6 +22,7 @@ public class Liquid { //: IEquatable<Liquid> {
     public List<string> ingredients = new List<string>();
     public List<Buff> buffs = new List<Buff>();
     public HashSet<Liquid> atomicLiquids = new HashSet<Liquid>();
+    public bool newLiquid;
     public Liquid() {
         // needed for serialization
     }
@@ -41,6 +42,7 @@ public class Liquid { //: IEquatable<Liquid> {
         this.flammable = that.flammable;
         this.vomit = that.vomit;
         this.ingredients = that.ingredients;
+        this.newLiquid = that.newLiquid;
 
         this.ingredients = new List<string>();
         foreach (string ingredient in that.ingredients) {
@@ -61,11 +63,11 @@ public class Liquid { //: IEquatable<Liquid> {
     public bool Equals(Liquid that) {
         return this.name == that.name &&
         this.filename == that.filename &&
-        this.colorR == that.colorR &&
-        this.colorG == that.colorG &&
-        this.colorB == that.colorB &&
-        this.colorA == that.colorA &&
-        this.color == that.color &&
+        // this.colorR == that.colorR &&
+        // this.colorG == that.colorG &&
+        // this.colorB == that.colorB &&
+        // this.colorA == that.colorA &&
+        // this.color == that.color &&
         this.nutrition == that.nutrition &&
         this.vegetable == that.vegetable &&
         this.meat == that.meat &&
@@ -279,7 +281,7 @@ public class Liquid { //: IEquatable<Liquid> {
     }
     public static void MonoLiquidify(GameObject target, Liquid liquid) {
         MonoLiquid monoLiquid = Toolbox.GetOrCreateComponent<MonoLiquid>(target);
-        monoLiquid.liquid = liquid;
+        monoLiquid.liquid = new Liquid(liquid);
         monoLiquid.edible.nutrition = liquid.nutrition;
         monoLiquid.edible.vegetable = liquid.vegetable > 0;
         monoLiquid.edible.meat = liquid.meat > 0;

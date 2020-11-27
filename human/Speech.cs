@@ -68,7 +68,7 @@ public class Speech : Interactive, ISaveable {
         // var pattern = "(?<label>\"formatter\"): ([\"])(?<tag>.*)([\"])";
         string dayHook = @"\$\$DAYS\$\$";
         //Create a substitution pattern for the Replace method
-        string replacePattern = $"{GameManager.Instance.data.days - 2} days";
+        string replacePattern = $"{GameManager.Instance.data.days - GameManager.HellDoorClosesOnDay} days";
         return Regex.Replace(instring, dayHook, replacePattern, RegexOptions.IgnoreCase);
     }
     public static MessagePhrase ProcessDialogue(string phrase, ref List<bool> swearList) {
@@ -161,6 +161,7 @@ public class Speech : Interactive, ISaveable {
     public Grammar grammar = new Grammar();
     public List<string> otherNimrodDefs;
     public string randomPhraseGrammar;
+    public bool magician;
     public void LoadGrammar() {
         grammar = new Grammar();
         grammar.Load("structure");
@@ -286,14 +287,40 @@ public class Speech : Interactive, ISaveable {
             }
         }
     }
+    public void MagicianCallback() {
+        if (GameManager.Instance.data.activeMagicianSequence != "") {
+            GameManager.Instance.data.queuedDiaryEntry = GameManager.Instance.data.activeMagicianSequence;
+            GameManager.Instance.data.finishedMagicianSequences.Add(GameManager.Instance.data.activeMagicianSequence);
+            GameManager.Instance.data.activeMagicianSequence = "";
+            GameManager.Instance.data.yogurtDetective = true;
+
+            // spawn portal
+            Vector3 pos = new Vector3(-1.802f, -1.395f, 0f);
+            GameObject portal = GameObject.Instantiate(Resources.Load("cutscene/portal"), pos, Quaternion.identity) as GameObject;
+            GameObject particle1 = GameObject.Instantiate(Resources.Load("cutscene/portalParticle"), pos, Quaternion.identity) as GameObject;
+            GameObject particle2 = GameObject.Instantiate(Resources.Load("cutscene/portalParticle"), pos, Quaternion.identity) as GameObject;
+            CircularMotion motion2 = particle2.GetComponent<CircularMotion>();
+            motion2.radius = 0.15f;
+            motion2.frequency = -14;
+
+            // set portal
+            Doorway doorway = portal.GetComponent<Doorway>();
+            doorway.destination = "apartment";
+            doorway.destinationEntry = -99;
+
+            defaultMonologue = "magician_closed";
+        }
+    }
     public DialogueMenu SpeakWith() {
-        // TODO: fix commanding someone to speak with player
         UINew.Instance.RefreshUI();
         DialogueMenu menu = UINew.Instance.ShowMenu(UINew.MenuType.dialogue).GetComponent<DialogueMenu>();
         if (InputController.Instance.commandTarget == null) {
             menu.Configure(GameManager.Instance.playerObject.GetComponent<Speech>(), this);
         } else {
             menu.Configure(InputController.Instance.commandTarget.GetComponent<Speech>(), this);
+        }
+        if (magician) {
+            menu.menuClosed += MagicianCallback;
         }
         return menu;
     }
@@ -556,16 +583,27 @@ public class Speech : Interactive, ISaveable {
         List<bool> swearList = new List<bool>();
         MessagePhrase censoredContent = ProcessDialogue(content, ref swearList);
         swearMask = swearList.ToArray();
-        // List<string> strings = new List<string>() { censoredContent };
-
-        // var x = new string[1] { censoredContent.phrase };
-
         Monologue mono = new Monologue(this, new string[1] { censoredContent.phrase });
 
         using (Controller control = new Controller(gameObject)) {
             control.LookAtPoint(target.transform.position);
         }
         return mono;
+    }
+    public void DetectMonologue(GameObject target) {
+        DialogueMenu menu = UINew.Instance.ShowMenu(UINew.MenuType.dialogue).GetComponent<DialogueMenu>();
+        if (target.gameObject.name == "CEO") {
+            menu.Configure(this, target.GetComponent<Speech>(), dialogue: "detective_success");
+            menu.monologue = new Monologue();
+            menu.node = null;
+            menu.InquireSuccess();
+        } else {
+            menu.Configure(this, target.GetComponent<Speech>(), dialogue: "detective");
+            menu.monologue = new Monologue();
+            menu.node = null;
+            menu.dialogueTree = new List<DialogueNode>();
+            menu.Inquire();
+        }
     }
     public Monologue ThreatMonologue(GameObject target) {
         if (hitState >= Controllable.HitState.stun)

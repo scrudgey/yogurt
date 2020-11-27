@@ -16,7 +16,6 @@ public class CommercialReportMenu : MonoBehaviour {
     public void NewDayButton() {
         UINew.Instance.CloseActiveMenu();
         MySaver.Save();
-        // MySaver.SaveObjectDatabase();
         if (GameManager.Instance.data.activeCommercial.cutscene != "none") {
             if (GameManager.Instance.data.activeCommercial.gravy) {
                 GameManager.Instance.AntiMayorCutscene();

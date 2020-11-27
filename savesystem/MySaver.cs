@@ -49,8 +49,10 @@ public class MySaver {
                 continue;
             if (file.Name == LoadoutEditor.loadoutFileName)
                 continue;
-            if (file.Name != "apartment_state.xml")
+            if (file.Name != "apartment_state.xml") {
+                // Debug.Log($"deleting file {file.FullName}");
                 File.Delete(file.FullName);
+            }
         }
         // GARBAGE COLLECTION
         // TODO: maybe a smarter algorithm here?
@@ -62,20 +64,14 @@ public class MySaver {
             using (var playerStream = new FileStream(playerPath, FileMode.Open)) {
                 playerIDs = listSerializer.Deserialize(playerStream) as List<Guid>;
             }
-            if (objectDataBase != null) {
-                foreach (KeyValuePair<Guid, PersistentObject> kvp in objectDataBase) {
-                    if (kvp.Value.sceneName != "apartment" && !GameManager.Instance.data.toiletItems.Contains(kvp.Key)) {
-                        if (!playerIDs.Contains(kvp.Key))
-                            removeEntries.Push(kvp.Key);
-                    }
-                }
-            }
-        } else {
-            if (objectDataBase != null) {
-                foreach (KeyValuePair<Guid, PersistentObject> kvp in objectDataBase) {
-                    if (kvp.Value.sceneName != "apartment") {
+
+        }
+        if (objectDataBase != null) {
+            foreach (KeyValuePair<Guid, PersistentObject> kvp in objectDataBase) {
+                // if the object is not in the toilet, apartment, or on the player, we will remove it.
+                if (kvp.Value.sceneName != "apartment" && !GameManager.Instance.data.toiletItems.Contains(kvp.Key)) {
+                    if (!playerIDs.Contains(kvp.Key))
                         removeEntries.Push(kvp.Key);
-                    }
                 }
             }
         }
@@ -108,6 +104,8 @@ public class MySaver {
         string objectsPath = GameManager.Instance.ObjectsSavePath();
         string scenePath = GameManager.Instance.LevelSavePath();
         string playerPath = GameManager.Instance.PlayerSavePath();
+        GameManager.Instance.data.lastSavedPlayerPath = playerPath;
+
         if (File.Exists(objectsPath)) {
             if (objectDataBase == null) {
                 var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<Guid, PersistentObject>));
@@ -159,7 +157,6 @@ public class MySaver {
                 persistent = new PersistentObject(gameObject);
 
                 // marker.id = persistent.id;
-
                 // critical: this is the only place we add persistent objects to the database.
                 objectDataBase[marker.id] = persistent;
                 loadedObjects[marker.id] = gameObject;
@@ -193,7 +190,7 @@ public class MySaver {
         // note: the order of operations here means that child objects aren't in the scene or player trees.
         Stack<Guid> playerChildObjects = new Stack<Guid>();
         if (playerTree == null)
-            Debug.Log("null player tree! wtf");
+            Debug.LogWarning("null player tree! wtf");
         foreach (Guid idn in playerTree) {
             if (objectDataBase.ContainsKey(idn)) {
                 if (objectDataBase[idn].childObject) {
@@ -215,7 +212,6 @@ public class MySaver {
             }
         }
 
-        // close the XML serialization stream
         GameManager.Instance.SaveGameData();
         if (!File.Exists(objectsPath)) {
             SaveObjectDatabase();
@@ -226,7 +222,7 @@ public class MySaver {
             return;
         var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<Guid, PersistentObject>));
         string objectsPath = GameManager.Instance.ObjectsSavePath();
-
+        // Debug.Log("saving object database");
         using (FileStream objectStream = File.Create(objectsPath)) {
             persistentSerializer.Serialize(objectStream, objectDataBase);
         }
@@ -289,12 +285,15 @@ public class MySaver {
             }
             LoadObjects(sceneIDs, newDayLoad: newDayLoad);
         }
+        // Debug.Log(File.Exists(playerPath));
         if (File.Exists(playerPath)) {
             using (var playerStream = new FileStream(playerPath, FileMode.Open)) {
                 playerIDs = listSerializer.Deserialize(playerStream) as List<Guid>;
             }
             playerObject = LoadObjects(playerIDs);
+            // Debug.Log(playerObject);
         } else {
+            // Debug.Log("defaulting player prefab");
             playerObject = GameManager.Instance.InstantiatePlayerPrefab();
         }
         HandleLoadedPersistents(sceneIDs, newDayLoad: newDayLoad);

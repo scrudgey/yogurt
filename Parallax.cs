@@ -34,6 +34,8 @@ public class Parallax : MonoBehaviour {
         }
     }
     void Update() {
+        if (GameManager.Instance.cam == null)
+            return;
         Vector3 difference = (Vector2)GameManager.Instance.cam.transform.position - originalPosition;
         foreach (ParallaxLayer layer in layers) {
             layer.transform.position = baseLayer.position + difference * layer.speed + (Vector3)layer.offset;

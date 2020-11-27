@@ -176,9 +176,9 @@ public partial class UINew : Singleton<UINew> {
                 firstBody = button.gameobject.GetComponent<Rigidbody2D>();
 
             // this is a world coordinate. it should scale with screen view size.
-            // it should be a fixed "pixel width
+            // it should be a fixed "pixel width"
             // float radius = 0.05f * (renderingCamera.pixelWidth / 800f);
-            float radius = 0.45f / (renderingCamera.pixelWidth / 800f);
+            float radius = 0.45f * renderingCamera.orthographicSize;// / (renderingCamera.pixelWidth / 800f);
 
             // set up spring connection to anchor
             SpringJoint2D anchorSpring = buttonAnchor.AddComponent<SpringJoint2D>();

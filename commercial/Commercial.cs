@@ -20,6 +20,7 @@ public class Commercial : MetaDescribable<DescribableOccurrenceData> {
     public List<string> unlockUponCompletion;
     public string unlockItem = "";
     public string email = "";
+    public string hallucination = "";
     public HashSet<string> yogurtEaterOutfits = new HashSet<string>();
     public HashSet<string> yogurtEaterNames = new HashSet<string>();
     public HashSet<string> visitedLocations = new HashSet<string>();
@@ -37,6 +38,7 @@ public class Commercial : MetaDescribable<DescribableOccurrenceData> {
         this.unlockItem = other.unlockItem;
         this.email = other.email;
         this.gravy = other.gravy;
+        this.hallucination = other.hallucination;
     }
     public static Commercial LoadCommercialByFilename(string filename) {
         Commercial c = new Commercial();
@@ -70,6 +72,8 @@ public class Commercial : MetaDescribable<DescribableOccurrenceData> {
                 c.objectives.Add(new ObjectiveScorpion());
             } else if (key == "gravyCommercial") {
                 c.gravy = true;
+            } else if (key == "hallucination") {
+                c.hallucination = bits[1];
             } else {
                 c.objectives.Add(new ObjectiveProperty(bits));
             }

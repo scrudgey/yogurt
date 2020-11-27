@@ -297,7 +297,8 @@ public class Eater : Interactive, ISaveable {
             if (mono) {
                 Destroy(eaten);
                 GameObject droplet = Toolbox.Instance.SpawnDroplet(mono.liquid, 0f, gameObject, 0.15f);
-                mono.liquid.vomit = true;
+                // mono.liquid.vomit = true;
+                droplet.GetComponent<MonoLiquid>().liquid.vomit = true;
                 mono.edible.vomit = true;
                 if (mono.liquid.name == "yogurt") {
                     GameManager.Instance.IncrementStat(StatType.yogurtVomit, 1);
@@ -381,6 +382,7 @@ public class Eater : Interactive, ISaveable {
         eatenQueue = newEatenQueue;
     }
     public void LoadData(PersistentComponent data) {
+        eatenQueue = new LinkedList<GameObject>();
         nutrition = data.floats["nutrition"];
         nausea = data.floats["nausea"];
         vomitCountDown = data.floats["vomitCountDown"];
@@ -405,7 +407,6 @@ public class Eater : Interactive, ISaveable {
         if (data.GUIDs.ContainsKey("eaten0")) {
             GameObject eaten = MySaver.IDToGameObject(data.GUIDs["eaten0"]);
             if (eaten != null) {
-                // eatenQueue.Enqueue(eaten);
                 EnqueueEatenObject(eaten);
                 eaten.SetActive(false);
                 eaten.transform.position = transform.position;

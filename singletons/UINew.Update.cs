@@ -23,7 +23,9 @@ public partial class UINew : Singleton<UINew> {
                 List<InputController.ControlState> selectStates = new List<InputController.ControlState>{
                     InputController.ControlState.swearSelect,
                     InputController.ControlState.insultSelect,
-                    InputController.ControlState.hypnosisSelect};
+                    InputController.ControlState.hypnosisSelect,
+                    InputController.ControlState.detectSelect
+                    };
                 if (InputController.Instance.state == InputController.ControlState.commandSelect) {
                     string commandName = Toolbox.Instance.GetName(InputController.Instance.commandTarget);
                     if (target != null) {
@@ -44,6 +46,9 @@ public partial class UINew : Singleton<UINew> {
                             case InputController.ControlState.hypnosisSelect:
                                 SetActionText("Hypnotize " + lastTarget);
                                 break;
+                            case InputController.ControlState.detectSelect:
+                                SetActionText("Question " + lastTarget);
+                                break;
                         }
                     } else {
                         switch (InputController.Instance.state) {
@@ -56,7 +61,9 @@ public partial class UINew : Singleton<UINew> {
                             case InputController.ControlState.hypnosisSelect:
                                 SetActionText("Hypnotize ...");
                                 break;
-
+                            case InputController.ControlState.detectSelect:
+                                SetActionText("Question ...");
+                                break;
                         }
                     }
                 } else if (target != null) {
@@ -114,6 +121,9 @@ public partial class UINew : Singleton<UINew> {
                 break;
             case InputController.ControlState.insultSelect:
                 SetCursorText("INSULT");
+                break;
+            case InputController.ControlState.detectSelect:
+                SetCursorText("QUESTION");
                 break;
             case InputController.ControlState.swearSelect:
                 SetCursorText("SWEAR\nAT");

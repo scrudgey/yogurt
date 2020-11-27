@@ -8,9 +8,9 @@ public class IssixDialogueSwitcher : MonoBehaviour {
     void Update() {
         if (GameManager.Instance.data == null)
             return;
-        if (GameManager.Instance.data.days > 3 && mySpeech.defaultMonologue != "issix_closed") {
+        if (GameManager.Instance.data.days > GameManager.HellDoorClosesOnDay && mySpeech.defaultMonologue != "issix_closed") {
             mySpeech.defaultMonologue = "issix_closed";
-        } else if (GameManager.Instance.data.days <= 3 && mySpeech.defaultMonologue != "issix_open") {
+        } else if (GameManager.Instance.data.days <= GameManager.HellDoorClosesOnDay && mySpeech.defaultMonologue != "issix_open") {
             mySpeech.defaultMonologue = "issix_open";
         }
     }

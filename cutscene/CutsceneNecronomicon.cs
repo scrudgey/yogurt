@@ -114,7 +114,8 @@ public class CutsceneNeconomicon : Cutscene {
                 // raise zombies
                 float sinusoid = 0.04f * Mathf.Sin(timer * 3.14f);
                 Vector3 newPos = new Vector3(hoverInitPosition.x, hoverInitPosition.y + sinusoid, hoverInitPosition.z);
-                player.transform.position = newPos;
+                if (player != null)
+                    player.transform.position = newPos;
                 if (zombieTimer <= 0f) {
                     zombieTimer = UnityEngine.Random.Range(0.45f, 1.0f);
                     SpawnZombie(player);
@@ -139,7 +140,8 @@ public class CutsceneNeconomicon : Cutscene {
                 break;
             case State.falling:
                 // lerp back to init position
-                player.transform.position = Vector3.Lerp(player.transform.position, initPosition, 0.1f);
+                if (player != null)
+                    player.transform.position = Vector3.Lerp(player.transform.position, initPosition, 0.1f);
                 if (timer > 1f) {
                     timer = 0f;
                     state = State.end;

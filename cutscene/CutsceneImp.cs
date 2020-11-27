@@ -225,7 +225,6 @@ public class CutsceneImp : Cutscene {
         foreach (Buff buff in intrinsics.buffs) {
             PotionData dat = buffMap[buff.type];
             MutablePotionData mutableData = GameManager.Instance.data.collectedPotions[dat.name];
-            Debug.Log($"unlocking {mutableData.name} potion");
             mutableData.unlockedIngredient1 = true;
             mutableData.unlockedIngredient2 = true;
             GameManager.Instance.data.collectedPotions[dat.name] = mutableData;

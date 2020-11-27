@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
 public class CutscenePortal : Cutscene {
-    public enum Destination { none, venus, hell };
+    public enum Destination { none, venus, hell, magic };
     public Destination destination;
     private float timer;
     GameObject player;
@@ -38,6 +38,9 @@ public class CutscenePortal : Cutscene {
                 GameManager.Instance.data.entryID = 420;
             } else if (destination == Destination.hell) {
                 SceneManager.LoadScene("hells_landing");
+                GameManager.Instance.data.entryID = 420;
+            } else if (destination == Destination.magic) {
+                SceneManager.LoadScene("hallucination");
                 GameManager.Instance.data.entryID = 420;
             }
         }

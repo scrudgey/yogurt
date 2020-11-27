@@ -170,7 +170,7 @@ public class StartMenu : MonoBehaviour {
         DirectoryInfo info = new DirectoryInfo(Application.persistentDataPath);
         DirectoryInfo[] dirs = info.GetDirectories();
         foreach (DirectoryInfo dir in dirs) {
-            if (dir.Name == "test" || dir.Name == "Unity")
+            if (dir.Name == "test" || dir.Name == "Unity" || dir.Name == "crashdump")
                 continue;
             GameData data = GameManager.Instance.LoadGameData(dir.Name);
             datas.Add(dir.Name);

@@ -53,7 +53,6 @@ public class Bed : Doorway {
     }
     public void Sleep() {
         MySaver.Save();
-        // MySaver.SaveObjectDatabase();
         GameManager.Instance.NewDayCutscene();
     }
     public void SleepCutscene() {
@@ -78,7 +77,7 @@ public class Bed : Doorway {
             if (dup.PickleReady())
                 collectible++;
         }
-        if (collectible > 1 && GameManager.Instance.data.days > 1 && !GameManager.Instance.data.loadedDay) {
+        if (collectible > 1 && GameManager.Instance.data.days > 1 && !GameManager.Instance.data.loadedDay && GameManager.Instance.data.activeMagicianSequence == "") {
             CutsceneManager.Instance.InitializeCutscene<CutscenePickleBottom>();
         }
         UINew.Instance.RefreshUI(active: false);
@@ -130,6 +129,11 @@ public class Bed : Doorway {
         }
     }
     void CheckDiaryEntry() {
+        if (GameManager.Instance.data.queuedDiaryEntry != "") {
+            GameManager.Instance.ShowDiaryEntry(GameManager.Instance.data.queuedDiaryEntry);
+            GameManager.Instance.data.queuedDiaryEntry = "";
+            return;
+        }
         if (GameManager.Instance.data.days == 1) {
             GameManager.Instance.ShowDiaryEntry("diaryNew");
             return;

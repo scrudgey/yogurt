@@ -69,7 +69,7 @@ public class BeverageMenu : MonoBehaviour {
     public void MouseOver(LiquidEntryScript script) {
         nameText.text = Liquid.GetName(script.liquid);
         var ingredients = from liquid in script.liquid.atomicLiquids select liquid.name;
-        var buffs = from buff in script.liquid.buffs select Buff.buffNames[buff.type];
+        // var buffs = from buff in script.liquid.buffs select Buff.buffNames[buff.type];
 
         ingredientsText.text = "";
         buffsText.text = "";
@@ -77,8 +77,16 @@ public class BeverageMenu : MonoBehaviour {
 
 
         ingredientsText.text = string.Join("\n", ingredients.ToList());
-        buffsText.text = string.Join("\n", buffs.ToList());
+        // buffsText.text = string.Join("\n", buffs.ToList());
         icon.color = script.liquid.color;
+
+        foreach (Buff buff in script.liquid.buffs) {
+            string buffName = Buff.buffNames[buff.type];
+            if (buff.lifetime == 0) {
+                buffName = "permanent " + buffName;
+            }
+            buffsText.text = buffsText.text + buffName + "\n";
+        }
 
         if (ingredientsText.text == "") {
             ingredientsText.text = script.liquid.name;

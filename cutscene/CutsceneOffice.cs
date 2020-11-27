@@ -142,7 +142,6 @@ public class CutsceneOffice : Cutscene {
         timer += Time.deltaTime;
         globalTimer += Time.deltaTime;
         // dialogue scene
-        // if (moeSpeech.speaking || larrySpeech.speaking || curlySpeech.speaking || ceoSpeech.speaking) {
         if (ceoSpeech.speaking) {
             timer = 0;
             return;
@@ -174,19 +173,14 @@ public class CutsceneOffice : Cutscene {
         }
         if (line == "<LEFT>") {
             Vector3 scale = new Vector3(-1, 1, 1);
-            // moeObj.transform.localScale = scale;
-            // moeControl.DirectionChange(Vector2.left);
         } else if (line == "<RIGHT>") {
             Vector3 scale = new Vector3(1, 1, 1);
-            // moeObj.transform.localScale = scale;
             ceoControl.SetDirection(Vector2.right);
         } else if (line == "<DOWN>") {
             Vector3 scale = new Vector3(1, 1, 1);
-            // moeObj.transform.localScale = scale;
             ceoControl.SetDirection(Vector2.down);
         } else if (line == "<UP>") {
             Vector3 scale = new Vector3(1, 1, 1);
-            // moeObj.transform.localScale = scale;
             ceoControl.SetDirection(Vector2.up);
         } else if (line == "<STOP PANIC>") {
             StopPanicMode();
@@ -206,9 +200,9 @@ public class CutsceneOffice : Cutscene {
             ProcessLine();
     }
     void EndCutscene() {
+        StopPanicMode();
         complete = true;
         CleanUp();
-        // GameManager.Instance.NewDayCutscene();
         GameManager.Instance.ReturnToPhone();
     }
     bool LoadScript(string filename) {
@@ -221,8 +215,7 @@ public class CutsceneOffice : Cutscene {
         }
     }
     public override void EscapePressed() {
-        complete = true;
-        GameManager.Instance.NewDayCutscene();
+        EndCutscene();
     }
     public override void CleanUp() {
         moeControl.Dispose();

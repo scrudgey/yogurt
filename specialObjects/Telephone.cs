@@ -16,7 +16,6 @@ public class Telephone : Item {
     public AnimateUIBubble newBubble;
     public string incomingCall;
     void Awake() {
-
         source = Toolbox.Instance.SetUpAudioSource(gameObject);
     }
     void Start() {
@@ -57,11 +56,16 @@ public class Telephone : Item {
         menu.telephone = this;
     }
     public void AnswerPhone() {
+        MySaver.Save();
         isRinging = false;
         CheckBubble();
         // switch on cutscene type
         GameManager.Instance.data.phoneQueue.Remove(incomingCall);
-        GameManager.Instance.OfficeCutscene();
+        if (incomingCall == "office") {
+            GameManager.Instance.OfficeCutscene();
+        } else if (incomingCall == "airplane") {
+            GameManager.Instance.AirplaneCutscene();
+        }
     }
     public string UsePhone_desc() {
         return "Use telephone";

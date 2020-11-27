@@ -12,9 +12,10 @@ public class LiquidEntryScript : MonoBehaviour {
         this.liquid = liquid;
         // entryText.text = liquid.name;
         entryText.text = Liquid.GetName(liquid);
-        if (GameManager.Instance.data.newCollectedLiquids.Contains(liquid)) {
+        if (liquid.newLiquid) {
             newText.text = "new!";
             newText.enabled = true;
+            liquid.newLiquid = false;
         } else {
             newText.enabled = false;
         }

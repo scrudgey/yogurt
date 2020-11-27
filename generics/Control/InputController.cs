@@ -18,7 +18,8 @@ public class InputController : Singleton<InputController> {
         swearSelect,
         insultSelect,
         cutscene,
-        hypnosisSelect
+        hypnosisSelect,
+        detectSelect
     }
     private Controllable _focus;
     public Controllable focus {
@@ -63,7 +64,8 @@ public class InputController : Singleton<InputController> {
     public static List<ControlState> selectionStates = new List<ControlState>(){InputController.ControlState.swearSelect,
                                                                                 InputController.ControlState.insultSelect,
                                                                                 InputController.ControlState.hypnosisSelect,
-                                                                                InputController.ControlState.commandSelect};
+                                                                                InputController.ControlState.commandSelect,
+                                                                                InputController.ControlState.detectSelect};
     private ControlState _state;
     public ControlState state {
         get { return _state; }
@@ -313,6 +315,18 @@ public class InputController : Singleton<InputController> {
             }
         }
         escaprePressedThisFrame = false;
+
+        if (state == ControlState.inMenu || state == ControlState.waitForMenu) {
+            if (inventoryPressedThisFrame) {
+                Inventory inv = focus.GetComponent<Inventory>();
+                if (inv != null) {
+                    UINew.Instance.ShowInventoryMenu();
+                }
+            }
+        } else if (state != ControlState.normal & state != ControlState.commandSelect & state != ControlState.hypnosisSelect & state != ControlState.insultSelect & state != ControlState.swearSelect & state != ControlState.detectSelect) {
+            inventoryPressedThisFrame = false;
+            return;
+        }
         if (inventoryPressedThisFrame) {
             Inventory inv = focus.GetComponent<Inventory>();
             if (inv != null) {
@@ -320,9 +334,6 @@ public class InputController : Singleton<InputController> {
             }
         }
         inventoryPressedThisFrame = false;
-
-        if (state != ControlState.normal & state != ControlState.commandSelect & state != ControlState.hypnosisSelect & state != ControlState.insultSelect & state != ControlState.swearSelect)
-            return;
         // Debug.Log($"{focus} {suspendInput}");
         if (focus != null & !suspendInput) {
             controller.ResetInput();
@@ -348,6 +359,7 @@ public class InputController : Singleton<InputController> {
                 controller.SetRun(false);
             }
         }
+
 
         // left click
         if (leftClickedThisFrame) {
@@ -447,6 +459,7 @@ public class InputController : Singleton<InputController> {
             case ControlState.swearSelect:
             case ControlState.insultSelect:
             case ControlState.hypnosisSelect:
+            case ControlState.detectSelect:
                 LeftClick();
                 return;
             default:
@@ -578,6 +591,18 @@ public class InputController : Singleton<InputController> {
                     // Debug.Log(target);
                     if (speech) {
                         speech.InsultMonologue(target);
+                    }
+                    UINew.Instance.SetActionText("");
+                }
+                return;
+            case ControlState.detectSelect:
+                GameObject detectTop = InputController.Instance.GetFrontObject(hits);
+                if (detectTop != null) {
+                    state = ControlState.normal;
+                    GameObject target = InputController.Instance.GetBaseInteractive(detectTop.transform);
+                    Speech speech = focus.GetComponent<Speech>();
+                    if (speech) {
+                        speech.DetectMonologue(target);
                     }
                     UINew.Instance.SetActionText("");
                 }
