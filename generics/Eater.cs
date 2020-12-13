@@ -140,6 +140,7 @@ public class Eater : Interactive, ISaveable {
             eatenQueue.RemoveLast();
 
             ClaimsManager.Instance.WasDestroyed(oldEaten);
+            MySaver.RemoveObject(oldEaten);
             Destroy(oldEaten);
         }
     }

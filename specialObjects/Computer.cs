@@ -29,6 +29,7 @@ public class Computer : Item {
             InputController.Instance.state != InputController.ControlState.inMenu &&
             InputController.Instance.state != InputController.ControlState.waitForMenu
             ) {
+            UINew.Instance.RefreshUI(active: false);
             GameObject menu = UINew.Instance.ShowMenu(UINew.MenuType.email);
             menu.GetComponent<EmailUI>().computer = this;
         }

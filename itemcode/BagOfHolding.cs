@@ -22,6 +22,10 @@ public class BagOfHolding : Interactive, IExcludable, ISaveable {
         stasher.validationFunction = true;
         interactions.Add(stasher);
 
+        Interaction stuffer = new Interaction(this, "Put", "Stash");
+        stuffer.validationFunction = true;
+        interactions.Add(stuffer);
+
         if (items.Count > 0) {
             Interaction power = new Interaction(this, "Browse...", "ShowInventoryMenu");
             power.descString = "Browse contents";
@@ -55,15 +59,56 @@ public class BagOfHolding : Interactive, IExcludable, ISaveable {
             }
         }
     }
+
+    public bool Stash_Validation(Inventory holder) {
+        if (!holder.holding)
+            return false;
+        GameObject obj = holder.holding.gameObject;
+        MyMarker marker = obj.GetComponent<MyMarker>();
+        if (marker != null && !marker.apartmentObject) {
+
+            // if the player is holding something, we want to invalidate so that "put" will apply to the held object
+            // Inventory inv = obj.GetComponent<Inventory>();
+            // if (inv != null && inv.holding != null) {
+            //     return false;
+            // }
+
+            return true;
+        } else return false;
+    }
+    virtual public void Stash(Inventory holder) {
+        if (!holder.holding)
+            return;
+        GameObject obj = holder.holding.gameObject;
+        if (maxNumber == 0 || items.Count < maxNumber) {
+            AddItem(obj);
+        } else {
+            // Toolbox.Instance.SendMessage(inv.gameObject, this, new MessageSpeech("It's full.") as Message);
+        }
+    }
+
+    public string Stash_desc(Inventory holder) {
+        if (!holder.holding)
+            return "";
+        GameObject obj = holder.holding.gameObject;
+        if (obj) {
+            string itemname = Toolbox.Instance.GetName(obj);
+            string myname = Toolbox.Instance.GetName(gameObject);
+            return "Put " + itemname + " in " + myname;
+        } else {
+            return "";
+        }
+    }
+
     public bool Store_Validation(GameObject obj) {
         MyMarker marker = obj.GetComponent<MyMarker>();
         if (marker != null && !marker.apartmentObject) {
 
             // if the player is holding something, we want to invalidate so that "put" will apply to the held object
-            Inventory inv = obj.GetComponent<Inventory>();
-            if (inv != null && inv.holding != null) {
-                return false;
-            }
+            // Inventory inv = obj.GetComponent<Inventory>();
+            // if (inv != null && inv.holding != null) {
+            //     return false;
+            // }
 
             return true;
         } else return false;

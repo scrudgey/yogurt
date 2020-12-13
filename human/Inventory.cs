@@ -255,10 +255,10 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         if (gameObject == GameManager.Instance.playerObject)
             UINew.Instance.ClearWorldButtons();
         // Debug.Log(InputController.Instance.lastAction);
-        if (InputController.Instance.lastAction.ToLower().Contains("swingitem")) {
+        if (InputController.Instance.lastAction != null && InputController.Instance.lastAction.ToLower().Contains("swingitem")) {
             // we were just swinging a weapon, so we should enter fight mode
             Controllable controllable = gameObject.GetComponent<Controllable>();
-            if (!controllable.fightMode) {
+            if (InputController.Instance.focus == controllable && !controllable.fightMode) {
                 InputController.Instance.controller.ToggleFightMode();
                 UINew.Instance.UpdateTopActionButtons();
             }
@@ -267,6 +267,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     public void DropItem() {
         if (holding == null)
             return;
+        // Debug.Log($"dropping {holding.gameObject}");
         ClaimsManager.Instance.DisclaimObject(holding.gameObject, this);
         holding.holder = null;
         holding.GetComponent<Rigidbody2D>().isKinematic = false;
@@ -289,10 +290,10 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         if (gameObject == GameManager.Instance.playerObject)
             UINew.Instance.ClearWorldButtons();
         // Debug.Log(InputController.Instance.lastAction);
-        if (InputController.Instance.lastAction.ToLower().Contains("swingitem")) {
+        if (InputController.Instance.lastAction != null && InputController.Instance.lastAction.ToLower().Contains("swingitem")) {
             // we were just swinging a weapon, so we should enter fight mode
             Controllable controllable = gameObject.GetComponent<Controllable>();
-            if (!controllable.fightMode) {
+            if (InputController.Instance.focus == controllable && !controllable.fightMode) {
                 InputController.Instance.controller.ToggleFightMode();
                 UINew.Instance.UpdateTopActionButtons();
             }
@@ -552,10 +553,12 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     }
     public void ClearInventory() {
         foreach (GameObject item in items) {
+            MySaver.RemoveObject(item.gameObject);
             Destroy(item);
         }
         items = new List<GameObject>();
         if (holding != null) {
+            MySaver.RemoveObject(holding.gameObject);
             Destroy(holding.gameObject);
             holding = null;
         }

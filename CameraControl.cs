@@ -137,7 +137,7 @@ public class CameraControl : MonoBehaviour {
 
 
         float smoothConstant = smoothing;
-        if (focusControl.running) {
+        if (focusControl != null && focusControl.running) {
             smoothConstant /= 2f;
         }
         if (state == ControlState.lerpToCenter) {

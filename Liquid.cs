@@ -134,8 +134,6 @@ public class Liquid { //: IEquatable<Liquid> {
                     liq = LoadLiquid("yogurt");
 
                 } else if (!liq.buffs.Contains(potion.buff)) {
-                    // liq.ingredients.Remove(potion.ingredient1.prefabName);
-                    // liq.ingredients.Remove(potion.ingredient2.prefabName);
                     Buff newBuff = potion.buff;
                     if (GameManager.Instance.data.perks["potion"]) {
                         newBuff.lifetime = 0;
@@ -145,7 +143,6 @@ public class Liquid { //: IEquatable<Liquid> {
 
                 // unlock potion
                 MutablePotionData mutableData = GameManager.Instance.data.collectedPotions[potion.name];
-                Debug.Log($"unlocking {mutableData.name} potion");
                 mutableData.unlockedIngredient1 = true;
                 mutableData.unlockedIngredient2 = true;
                 GameManager.Instance.data.collectedPotions[potion.name] = mutableData;

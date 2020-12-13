@@ -71,7 +71,6 @@ public class CutsceneAirport : Cutscene {
         ceoHeadAnimation = ceoObj.GetComponentInChildren<HeadAnimation>();
         ceoHeadAnimation.DirectionChange(Vector2.down);
 
-        // moeControl = moeObj.GetComponentInChildren<HeadAnimation>();
         moeSpeech = moeObj.GetComponent<Speech>();
         larrySpeech = larryObj.GetComponent<Speech>();
         curlySpeech = curlyObj.GetComponent<Speech>();

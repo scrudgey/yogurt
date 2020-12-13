@@ -65,6 +65,8 @@ public class Telephone : Item {
             GameManager.Instance.OfficeCutscene();
         } else if (incomingCall == "airplane") {
             GameManager.Instance.AirplaneCutscene();
+        } else if (incomingCall == "bar") {
+            GameManager.Instance.BarCutscene();
         }
     }
     public string UsePhone_desc() {

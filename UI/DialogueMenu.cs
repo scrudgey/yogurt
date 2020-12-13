@@ -469,6 +469,7 @@ public partial class DialogueMenu : MonoBehaviour {
     public void Inquire() {
         Say(instigator, "Are you the previous yogurt commercial actor?");
         Say(target, "I am not the previous yogurt commercial actor.");
+        // TODO: set up a node
     }
     public void InquireSuccess() {
         Say(instigator, "Are you the previous yogurt commercial actor?");

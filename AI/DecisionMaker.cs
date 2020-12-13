@@ -97,6 +97,8 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
     }
 
     public void Initialize() {
+        if (initialized)
+            return;
         // Debug.Log("decision maker initialize");
         initialized = true;
         // make sure there's Awareness
@@ -221,7 +223,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         activePriorityName = activePriority.priorityName;
 
         if (activePriority != oldActivePriority) {
-            if (control.Authenticate()) {
+            if (control.Authenticate(debug: true)) {
                 control.ResetInput();
                 if (oldActivePriority != null)
                     oldActivePriority.ExitPriority();

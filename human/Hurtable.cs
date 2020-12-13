@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine.SceneManagement;
 
 public class Hurtable : Damageable, ISaveable {
+    public enum BloodType { blood, oil }
     private Controllable.HitState _hitState;
     public Controllable.HitState hitState {
         get { return _hitState; }
@@ -30,6 +31,7 @@ public class Hurtable : Damageable, ISaveable {
     public GameObject dizzyEffect;
     public float timeSinceLastCough;
     bool vibrate;
+    public BloodType bloodType;
     public bool bleeds = true; // if true, bleed on cutting / piercing damage
     public bool monster = false; // if true, death of this hurtable is not shocking or disturbing
     public bool ghostly = false; // if true, does not leave a skeleton behind when vaporized
@@ -79,6 +81,17 @@ public class Hurtable : Damageable, ISaveable {
                 GameManager.Instance.IncrementStat(StatType.deathByPotion, 1);
             // Die(lastMessage, damageType.physical);
             GameManager.Instance.ExplodeHead(gameObject);
+        }
+        if (intrins.netBuffs[BuffType.undead].active()) {
+            // switch gibs to undead gibs
+            // delete all gibs
+            foreach (Gibs gibs in GetComponents<Gibs>()) {
+                Destroy(gibs);
+            }
+            // set new gibs prefab
+            gibsContainerPrefab = Resources.Load("prefabs/gibs/undeadGibsContainer") as GameObject;
+            // load undead gibs
+            LoadGibsPrefab();
         }
         base.NetIntrinsicsChanged(intrins);
     }
@@ -362,6 +375,7 @@ public class Hurtable : Damageable, ISaveable {
             GetUp();
         }
         if (impulse > 75f && !doubledOver && hitState < Controllable.HitState.unconscious) {
+            // Debug.Log($"{gameObject} doubling over {impulse} {doubledOver} {hitState}");
             DoubleOver(true);
         }
         if (impulse <= 0f && doubledOver && hitState < Controllable.HitState.unconscious) {
@@ -458,8 +472,16 @@ public class Hurtable : Damageable, ISaveable {
     }
     public void Bleed(Vector3 position, Vector3 direction) {
         if (bleeds) {
-
-            Liquid blood = Liquid.LoadLiquid("blood");
+            Liquid blood = null;
+            switch (bloodType) {
+                default:
+                case BloodType.blood:
+                    blood = Liquid.LoadLiquid("blood");
+                    break;
+                case BloodType.oil:
+                    blood = Liquid.LoadLiquid("oil");
+                    break;
+            }
             float initHeight = 0;
             if (hitState < Controllable.HitState.unconscious) {
                 initHeight = (position.y - transform.position.y) + 0.15f;
@@ -477,7 +499,16 @@ public class Hurtable : Damageable, ISaveable {
         MessageDamage message = new MessageDamage(100f, damageType.physical);
         if (head != null) {
             head.RemoveHat();
-            Liquid blood = Liquid.LoadLiquid("blood");
+            Liquid blood = null;
+            switch (bloodType) {
+                default:
+                case BloodType.blood:
+                    blood = Liquid.LoadLiquid("blood");
+                    break;
+                case BloodType.oil:
+                    blood = Liquid.LoadLiquid("oil");
+                    break;
+            }
 
             GameObject headGibs = Resources.Load("prefabs/gibs/headGibsContainer") as GameObject;
             foreach (Gibs gib in headGibs.GetComponents<Gibs>()) {
@@ -488,7 +519,14 @@ public class Hurtable : Damageable, ISaveable {
                 newGib.initVelocity = new LoHi(1f, 2f);
                 Vector2 rand = UnityEngine.Random.insideUnitCircle;
                 message.force = new Vector3(rand.x * 5f, rand.y * 5f, UnityEngine.Random.Range(5f, 30f));
-                newGib.Emit(message);
+                List<GameObject> gibs = newGib.Emit(message);
+                // apply my blood to the drop dripper
+                foreach (GameObject g in gibs) {
+                    DropDripper dripper = g.GetComponent<DropDripper>();
+                    if (dripper != null) {
+                        dripper.liquid = blood;
+                    }
+                }
             }
             AudioClip boom = Resources.Load("sounds/explosion/cannon") as AudioClip;
             // PlayPublicSound(boom);

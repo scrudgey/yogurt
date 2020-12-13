@@ -164,7 +164,7 @@ public class MusicTVR2 : Music {
 }
 public class MusicMountain : Music {
     public MusicMountain() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.mountain, vol: 4f) });
+        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.mountain, vol: 6f) });
     }
 }
 public class MusicImp : Music {
@@ -270,6 +270,7 @@ public class MusicController : Singleton<MusicController> {
         {"hallucination", () => new MusicMountain()},
         {"boardroom", () => new MusicBeat()},
         {"office", () => new MusicBeat()},
+        {"bar", () => new MusicBeat()},
     };
     // TODO: add studio
     public static Dictionary<TrackName, AudioClip> tracks = new Dictionary<TrackName, AudioClip>();

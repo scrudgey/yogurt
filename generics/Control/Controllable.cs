@@ -107,7 +107,7 @@ public class Controllable : MonoBehaviour {
             }
         }
     }
-    public bool Authenticate(Controller controller) {
+    public bool Authenticate(Controller controller, bool debug = false) {
         return controlStack.Count > 0 && controlStack.Peek() == controller;
     }
     public string lastPressed = "right";

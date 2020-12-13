@@ -136,19 +136,7 @@ public class LiquidContainer : Interactive, ISaveable {
             } else if (mixedBuff.Count > 0) {
                 l.buffs.AddRange(mixedBuff);
 
-                // flatten list of buffs
-                List<Buff> flattenedBuffs = new List<Buff>();
-                foreach (BuffType buffType in Enum.GetValues(typeof(BuffType))) {
-                    IEnumerable<Buff> subBuffs = l.buffs.Where(x => x.type == buffType);
-                    if (subBuffs.Count() > 0) {
-
-                        flattenedBuffs.Add(l.buffs
-                        .Where(x => x.type == buffType)
-                        .Aggregate<Buff>((prod, next) => prod + next)
-                        );
-                    }
-                }
-                l.buffs = flattenedBuffs;
+                l.buffs = Buff.FlattenBuffs(l.buffs);
 
                 l.name = Liquid.GetName(l);
                 GameObject.Instantiate(Resources.Load("particles/potionMixEffect"), transform.position, Quaternion.identity);

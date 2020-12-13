@@ -43,7 +43,7 @@ public class LoadGameMenu : MonoBehaviour {
 
         dirs = dirs.OrderBy(d => order(d.Name, datas)).Reverse().ToList();
         foreach (DirectoryInfo dir in dirs) {
-            if (dir.Name == "test" || dir.Name == "Unity")
+            if (dir.Name == "test" || dir.Name == "Unity" || dir.Name == "crashdump")
                 continue;
             if (noSaveGameIndicator != null) {
                 Destroy(noSaveGameIndicator);

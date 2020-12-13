@@ -293,6 +293,7 @@ public class Speech : Interactive, ISaveable {
             GameManager.Instance.data.finishedMagicianSequences.Add(GameManager.Instance.data.activeMagicianSequence);
             GameManager.Instance.data.activeMagicianSequence = "";
             GameManager.Instance.data.yogurtDetective = true;
+            GameManager.Instance.ResetDailyMetrics();
 
             // spawn portal
             Vector3 pos = new Vector3(-1.802f, -1.395f, 0f);
@@ -592,17 +593,30 @@ public class Speech : Interactive, ISaveable {
     }
     public void DetectMonologue(GameObject target) {
         DialogueMenu menu = UINew.Instance.ShowMenu(UINew.MenuType.dialogue).GetComponent<DialogueMenu>();
-        if (target.gameObject.name == "CEO") {
-            menu.Configure(this, target.GetComponent<Speech>(), dialogue: "detective_success");
-            menu.monologue = new Monologue();
-            menu.node = null;
-            menu.InquireSuccess();
+        Controllable targetControllable = target.GetComponent<Controllable>();
+        if (targetControllable.hitState <= Controllable.HitState.stun) {
+            if (target.gameObject.name == "CEO") {
+                menu.Configure(this, target.GetComponent<Speech>(), dialogue: "detective_success");
+                menu.monologue = new Monologue();
+                menu.node = null;
+                menu.InquireSuccess();
+            } else {
+                menu.Configure(this, target.GetComponent<Speech>(), dialogue: "detective");
+                Monologue monologue = new Monologue();
+                menu.monologue = monologue;
+                DialogueNode node = new DialogueNode();
+                node.responses.Add("Thank you.");
+                node.responseLinks.Add(0);
+                menu.node = node;
+
+                menu.dialogueTree = new List<DialogueNode>();
+                DialogueNode endNode = new DialogueNode();
+                endNode.text = new List<string> { "END" };
+                menu.dialogueTree.Add(endNode);
+                menu.Inquire();
+            }
         } else {
-            menu.Configure(this, target.GetComponent<Speech>(), dialogue: "detective");
-            menu.monologue = new Monologue();
-            menu.node = null;
-            menu.dialogueTree = new List<DialogueNode>();
-            menu.Inquire();
+            menu.Configure(this, target.GetComponent<Speech>(), dialogue: "target_unresponsive");
         }
     }
     public Monologue ThreatMonologue(GameObject target) {

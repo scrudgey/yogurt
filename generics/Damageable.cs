@@ -36,14 +36,7 @@ public abstract class Damageable : MonoBehaviour {
     private List<Gibs> impactGibs = new List<Gibs>();
     public float blockTextTimer;
     public virtual void Awake() {
-        if (gibsContainerPrefab != null) {
-            GameObject gibsContainer = Instantiate(gibsContainerPrefab) as GameObject;
-            foreach (Gibs gib in gibsContainer.GetComponents<Gibs>()) {
-                Gibs newGib = gameObject.AddComponent<Gibs>();
-                newGib.CopyFrom(gib);
-            }
-            Destroy(gibsContainer);
-        }
+        LoadGibsPrefab();
         if (impactSounds != null && impactSounds.Length == 0)
             impactSounds = Resources.LoadAll<AudioClip>("sounds/impact_normal/");
         if (strongImpactSounds != null && strongImpactSounds.Length == 0)
@@ -67,6 +60,16 @@ public abstract class Damageable : MonoBehaviour {
         controllable = GetComponent<Controllable>();
         Toolbox.RegisterMessageCallback<MessageDamage>(this, HandleMessageDamage);
         Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
+    }
+    public void LoadGibsPrefab() {
+        if (gibsContainerPrefab != null) {
+            GameObject gibsContainer = Instantiate(gibsContainerPrefab) as GameObject;
+            foreach (Gibs gib in gibsContainer.GetComponents<Gibs>()) {
+                Gibs newGib = gameObject.AddComponent<Gibs>();
+                newGib.CopyFrom(gib);
+            }
+            Destroy(gibsContainer);
+        }
     }
     public virtual void HandleNetIntrinsic(MessageNetIntrinsic message) {
         netBuffs = message.netBuffs;
@@ -158,6 +161,11 @@ public abstract class Damageable : MonoBehaviour {
             case ImpactResult.damageStrong:
                 sounds = strongImpactSounds;
                 Instantiate(Resources.Load("particles/explosion1"), transform.position, Quaternion.identity);
+
+                CameraControl cam = GameObject.FindObjectOfType<CameraControl>();
+                float distanceToCamera = Vector2.Distance(transform.position, cam.transform.position) * 10;
+                float amount = Mathf.Min(0.2f, 0.2f / distanceToCamera);
+                cam.Shake(amount);
                 break;
             default:
                 break;

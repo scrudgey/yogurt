@@ -6,10 +6,16 @@ using UnityEngine.SceneManagement;
 
 public class ScriptSelectionMenu : MonoBehaviour {
     Text descriptionText;
+    public Text commercialTitleText;
     GameObject scrollContent;
     ScriptListEntry lastClicked;
     public List<Button> builtInButtons;
     public UIButtonEffects effects;
+    public Image headImage;
+    public Sprite[] headSprites;
+    float timer = 0;
+    float pauseCountDown = 0f;
+    int headIndex;
     void Start() {
         effects = GetComponent<UIButtonEffects>();
         GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
@@ -24,6 +30,23 @@ public class ScriptSelectionMenu : MonoBehaviour {
         } else LoadCommercials();
 
         effects.Configure();
+    }
+    void Update() {
+        if (pauseCountDown > 0f) {
+            pauseCountDown -= Time.unscaledDeltaTime;
+            return;
+        }
+        timer += Time.unscaledDeltaTime;
+        if (timer > 0.1f) {
+            timer = 0f;
+            headIndex += 1;
+            if (headIndex > 1) headIndex = 0;
+            headImage.sprite = headSprites[headIndex];
+            if (UnityEngine.Random.Range(0, 100f) < 3f) {
+                pauseCountDown = Random.Range(1f, 2f);
+                headImage.sprite = headSprites[0];
+            }
+        }
     }
     public void LoadCommercials(bool gravy = false) {
         GameObject firstEntry = null;
@@ -83,5 +106,6 @@ public class ScriptSelectionMenu : MonoBehaviour {
         descriptionText.text = entry.commercial.description;
         lastClicked = entry;
         lastClicked.highlight = true;
+        commercialTitleText.text = entry.commercial.name;
     }
 }

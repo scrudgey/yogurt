@@ -68,19 +68,7 @@ public class SoundEffect : MonoBehaviour {
     public void Say(string message) {
         if (message == "")
             return;
-
-        // OccurrenceSpeech speechData = message.ToOccurrenceSpeech(grammar);
-        // if (speechData == null)
-        //     return;
-        // speechData.speaker = gameObject;
-
-        // if (speechData != null)
-        //     Toolbox.Instance.OccurenceFlag(gameObject, speechData);
-
         speakTime = Speech.DoubleSeat(message.Length, 2f, 50f, 5f, 2f);
-        // speakTimeTotal = speakTime;
-        // speakSpeed = message.phrase.Length / speakTime;
-        // swearMask = speechData.swearList.ToArray();
         words = message;
         bubbleText.color = Color.green;
     }

@@ -10,11 +10,18 @@ public class CutscenePortal : Cutscene {
     Transform playerTransform;
     LorentzAttractor attractor;
     MessageSpeech message;
+    Controller playerController;
     public override void Configure() {
         player = GameManager.Instance.playerObject;
         playerTransform = player.transform;
         attractor = new LorentzAttractor();
         configured = true;
+
+        // Controllable playerControllable = GameManager.Instance.playerObject.GetComponent<Controllable>();
+        // if (playerControllable != null) {
+        //     playerControllable.enabled = false;
+        // }
+        playerController = new Controller(player);
     }
     public override void Update() {
         if (timer == 0) {
@@ -29,6 +36,7 @@ public class CutscenePortal : Cutscene {
         }
         timer += Time.deltaTime;
         if (timer > 10.0f) {
+            playerController.Dispose();
             complete = true;
             if (destination == Destination.none) {
                 SceneManager.LoadScene("hells_landing");

@@ -64,14 +64,12 @@ public class MySaver {
             using (var playerStream = new FileStream(playerPath, FileMode.Open)) {
                 playerIDs = listSerializer.Deserialize(playerStream) as List<Guid>;
             }
-
         }
         if (objectDataBase != null) {
             foreach (KeyValuePair<Guid, PersistentObject> kvp in objectDataBase) {
                 // if the object is not in the toilet, apartment, or on the player, we will remove it.
-                if (kvp.Value.sceneName != "apartment" && !GameManager.Instance.data.toiletItems.Contains(kvp.Key)) {
-                    if (!playerIDs.Contains(kvp.Key))
-                        removeEntries.Push(kvp.Key);
+                if (kvp.Value.sceneName != "apartment" && !GameManager.Instance.data.toiletItems.Contains(kvp.Key) && !playerIDs.Contains(kvp.Key)) {
+                    removeEntries.Push(kvp.Key);
                 }
             }
         }
@@ -104,6 +102,8 @@ public class MySaver {
         string objectsPath = GameManager.Instance.ObjectsSavePath();
         string scenePath = GameManager.Instance.LevelSavePath();
         string playerPath = GameManager.Instance.PlayerSavePath();
+
+        Debug.LogWarning($"setting last saved player path {playerPath}");
         GameManager.Instance.data.lastSavedPlayerPath = playerPath;
 
         if (File.Exists(objectsPath)) {
@@ -223,6 +223,7 @@ public class MySaver {
         var persistentSerializer = new XmlSerializer(typeof(SerializableDictionary<Guid, PersistentObject>));
         string objectsPath = GameManager.Instance.ObjectsSavePath();
         // Debug.Log("saving object database");
+        Debug.LogWarning($"saving object database");
         using (FileStream objectStream = File.Create(objectsPath)) {
             persistentSerializer.Serialize(objectStream, objectDataBase);
         }
@@ -285,15 +286,12 @@ public class MySaver {
             }
             LoadObjects(sceneIDs, newDayLoad: newDayLoad);
         }
-        // Debug.Log(File.Exists(playerPath));
         if (File.Exists(playerPath)) {
             using (var playerStream = new FileStream(playerPath, FileMode.Open)) {
                 playerIDs = listSerializer.Deserialize(playerStream) as List<Guid>;
             }
             playerObject = LoadObjects(playerIDs);
-            // Debug.Log(playerObject);
         } else {
-            // Debug.Log("defaulting player prefab");
             playerObject = GameManager.Instance.InstantiatePlayerPrefab();
         }
         HandleLoadedPersistents(sceneIDs, newDayLoad: newDayLoad);
@@ -350,6 +348,7 @@ public class MySaver {
                     Debug.Log("WARNING: Object not found " + persistent.prefabPath);
                     continue;
                 }
+                Debug.Log($"loaded object {idn} {go}");
                 loadedObjects[persistent.id] = go;
                 go.name = Toolbox.Instance.CloneRemover(go.name);
                 if (!rootObject)
@@ -494,6 +493,29 @@ public class MySaver {
                 string temppath = Path.Combine(destDirName, subdir.Name);
                 DirectoryCopy(subdir.FullName, temppath, copySubDirs);
             }
+        }
+    }
+
+    /*
+    * why is this here? if a component disables an object and later destroys it, it will remain
+    * as a disabled persistent, and won't be cleaned up properly in some situations.
+    */
+    public static void RemoveObject(GameObject gameObject) {
+        MyMarker marker = gameObject.GetComponent<MyMarker>();
+        if (marker != null) {
+            if (objectDataBase.ContainsKey(marker.id)) {
+                Debug.Log($"removing persistent object {gameObject}");
+                objectDataBase.Remove(marker.id);
+            } else {
+                Debug.LogWarning($"remove id {marker.id} not in object database!");
+            }
+        } else {
+            Debug.LogWarning($"asked to remove saved object {gameObject} with no marker");
+        }
+
+        if (disabledPersistents.Contains(gameObject)) {
+            disabledPersistents.Remove(gameObject);
+            Debug.Log($"removing disabled persistent {gameObject}");
         }
     }
 }

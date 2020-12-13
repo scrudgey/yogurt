@@ -30,9 +30,9 @@ public class Controller : IDisposable {
     public ControlDelegate lostControlDelegate;
     public ControlDelegate gainedControlDelegate;
 
-    public bool Authenticate() {
+    public bool Authenticate(bool debug = false) {
         if (controllable != null) {
-            return controllable.Authenticate(this);
+            return controllable.Authenticate(this, debug: debug);
         } else {
             return false;
         }

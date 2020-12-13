@@ -35,8 +35,6 @@ public class PersistentObject {
         sceneName = SceneManager.GetActiveScene().name;
     }
     public PersistentObject(GameObject gameObject) {
-        // id = MySaver.NextIDNumber();
-        // id = System.Guid.NewGuid();
         creationDate = GameManager.Instance.data.days;
 
         name = gameObject.name;

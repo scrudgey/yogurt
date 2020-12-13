@@ -33,6 +33,7 @@ public class SlushieMachine : Item {
         }
     }
     public void Power() {
+        UINew.Instance.RefreshUI(active: false);
         GameObject menu = UINew.Instance.ShowMenu(UINew.MenuType.beverageMenu);
         BeverageMenu bevMenu = menu.GetComponent<BeverageMenu>();
         bevMenu.PopulateItemList();

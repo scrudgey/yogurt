@@ -99,6 +99,8 @@ public class CutsceneNeconomicon : Cutscene {
                     }
                     bool necroGates = false;
                     foreach (NecroGate necroGate in GameObject.FindObjectsOfType<NecroGate>()) {
+                        if (Vector2.Distance(player.transform.position, necroGate.transform.position) > 2f)
+                            continue;
                         necroGate.Unlock();
                         necroGates = true;
                     }

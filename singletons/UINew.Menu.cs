@@ -19,7 +19,7 @@ public partial class UINew : Singleton<UINew> {
         {MenuType.scriptSelect,             "UI/ScriptSelector"},
         {MenuType.commercialReport,         "UI/commercialReport"},
         {MenuType.newDayReport,             "UI/NewDayReport"},
-        {MenuType.email,                    "UI/EmailUI"},
+        {MenuType.email,                    "UI/NeoEmailUI"},
         {MenuType.diary,                    "UI/Diary"},
         {MenuType.dialogue,                 "UI/DialogueMenu"},
         {MenuType.phone,                    "UI/PhoneMenu"},

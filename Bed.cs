@@ -130,17 +130,17 @@ public class Bed : Doorway {
     }
     void CheckDiaryEntry() {
         if (GameManager.Instance.data.queuedDiaryEntry != "") {
-            GameManager.Instance.ShowDiaryEntry(GameManager.Instance.data.queuedDiaryEntry);
+            GameManager.Instance.ShowDiaryEntryDelay(GameManager.Instance.data.queuedDiaryEntry, delay: 0.5f);
             GameManager.Instance.data.queuedDiaryEntry = "";
             return;
         }
         if (GameManager.Instance.data.days == 1) {
-            GameManager.Instance.ShowDiaryEntry("diaryNew");
+            GameManager.Instance.ShowDiaryEntryDelay("diaryNew", delay: 0.5f);
             return;
         }
         if (GameManager.Instance.data.deaths >= 1 && GameManager.Instance.data.deathCutscenesPlayed == 0) {
             GameManager.Instance.data.deathCutscenesPlayed = 1;
-            GameManager.Instance.ShowDiaryEntry("death1");
+            GameManager.Instance.ShowDiaryEntryDelay("death1", delay: 0.5f);
             return;
         }
         InputController.Instance.state = InputController.ControlState.normal;

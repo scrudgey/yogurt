@@ -20,7 +20,6 @@ public class Projectile : MonoBehaviour {
     void OnTriggerEnter2D(Collider2D coll) {
         if (coll.isTrigger)
             return;
-        Debug.Log(coll.gameObject);
         Hurtable hurtable = coll.gameObject.GetComponentInParent<Hurtable>();
         if (hurtable) {
             Toolbox.Instance.SendMessage(coll.gameObject, this, message);
@@ -29,7 +28,7 @@ public class Projectile : MonoBehaviour {
             Toolbox.Instance.AudioSpeaker(wallImpactSounds[Random.Range(0, wallImpactSounds.Length)], transform.position);
         }
         ClaimsManager.Instance.WasDestroyed(gameObject);
-        Destroy(gameObject);
+        Dispose();
         if (destroyEffect != null) {
             GameObject.Instantiate(destroyEffect, transform.position, Quaternion.identity);
         }
@@ -39,14 +38,14 @@ public class Projectile : MonoBehaviour {
         if (hurtable) {
             Toolbox.Instance.SendMessage(coll.gameObject, this, message);
             ClaimsManager.Instance.WasDestroyed(gameObject);
-            Destroy(gameObject);
+            Dispose();
             if (destroyEffect != null) {
                 GameObject.Instantiate(destroyEffect, transform.position, Quaternion.identity);
             }
         } else {
             if (destroyOnImpact) {
                 ClaimsManager.Instance.WasDestroyed(gameObject);
-                Destroy(gameObject);
+                Dispose();
                 if (destroyEffect != null) {
                     GameObject.Instantiate(destroyEffect, transform.position, Quaternion.identity);
                 }
@@ -54,6 +53,13 @@ public class Projectile : MonoBehaviour {
                 Rebound(coll);
             }
         }
+    }
+    void Dispose() {
+        // gameObject.SetActive(false);
+        // foreach (Collider2D collider in gameObject.GetComponents<Collider2D>()) {
+        //     Destroy(collider);
+        // }
+        Destroy(gameObject, 5);
     }
 
     void Rebound(Collision2D coll) {

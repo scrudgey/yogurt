@@ -135,11 +135,11 @@ public partial class Toolbox : Singleton<Toolbox> {
         occurrence.data = occurrenceData;
         noiseOccurrence.data = occurrenceData;
         occurrenceData.CalculateDescriptions();
+        Debug.Log(occurrenceData.describable.whatHappened);
         // Debug.Log(occurrenceData.describable.whatHappened);
-        // Debug.Log(occurrenceData.describable.whatHappened);
-        // if (occurrenceData.describable.whatHappened.ToLower().Contains("maincollider")) {
-        //     Debug.LogError(occurrenceData.describable.whatHappened);
-        // }
+        if (occurrenceData.describable.whatHappened.ToLower().Contains("tina")) {
+            Debug.LogError(occurrenceData.describable.whatHappened);
+        }
     }
     public void OccurenceFlag(GameObject spawner, OccurrenceData data) {
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
@@ -149,10 +149,10 @@ public partial class Toolbox : Singleton<Toolbox> {
         occurrence.data = data;
         noiseOccurrence.data = data;
         data.CalculateDescriptions();
-        // Debug.Log(data.describable.whatHappened);
-        // if (data.describable.whatHappened.ToLower().Contains("maincollider")) {
-        //     Debug.LogError(data.describable.whatHappened);
-        // }
+        Debug.Log(data.describable.whatHappened);
+        if (data.describable.whatHappened.ToLower().Contains("tina")) {
+            Debug.LogError(data.describable.whatHappened);
+        }
     }
     public EventData DataFlag(GameObject spawner, string noun, string whatHappened, float chaos = 0, float disgusting = 0, float disturbing = 0, float offensive = 0, float positive = 0) {
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
@@ -168,10 +168,10 @@ public partial class Toolbox : Singleton<Toolbox> {
 
         occurrence.data = data;
         // Debug.Log(data.describable.whatHappened);
-        // Debug.Log(data.describable.whatHappened);
-        // if (data.describable.whatHappened.ToLower().Contains("maincollider")) {
-        //     Debug.LogError(data.describable.whatHappened);
-        // }
+        Debug.Log(data.describable.whatHappened);
+        if (data.describable.whatHappened.ToLower().Contains("tina")) {
+            Debug.LogError(data.describable.whatHappened);
+        }
         return eventData;
     }
     public AudioSource SetUpAudioSource(GameObject g) {
@@ -444,7 +444,7 @@ public partial class Toolbox : Singleton<Toolbox> {
         if ((speech != null && applyThe && speech.the) || (item != null && applyThe && item.the))
             nameOut = $"the {nameOut.ToLower()}";
 
-        if (new List<String> { "blf", "blm", "brf", "Brm", "Tom" }.Contains(nameOut)) {
+        if (new List<String> { "blf", "blm", "brf", "Brm", "Tom", "Tina" }.Contains(nameOut)) {
             return GameManager.Instance.saveGameName;
         }
         if (nameOut.ToLower().Contains("maincollider")) {

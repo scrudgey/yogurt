@@ -32,6 +32,7 @@ public class InputController : Singleton<InputController> {
                 EnableControls();
                 focusHurtable = _focus.GetComponent<Hurtable>();
                 controller.Register(_focus);
+                // Debug.Log($"registering controllable {_focus}");
             }
         }
     }
@@ -613,7 +614,6 @@ public class InputController : Singleton<InputController> {
                     state = ControlState.normal;
                     GameObject target = InputController.Instance.GetBaseInteractive(hypnoTop.transform);
                     Intrinsics targetIntrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(target);
-                    // Intrinsics targetIntrinsics = target.GetComponent<Intrinsics>();
                     if (targetIntrinsics.NetBuffs()[BuffType.clearHeaded].boolValue) {
                         UINew.Instance.SetActionText("");
                         MessageSpeech message = new MessageSpeech("Something prevents my hypnotic power!");

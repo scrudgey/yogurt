@@ -24,6 +24,8 @@ public partial class GameManager : Singleton<GameManager> {
     }
 
     public void UnlockCommercial(string filename) {
+        if (data == null)
+            Start();
         //TODO: do not unlock same commercial twice
         Commercial unlocked = Commercial.LoadCommercialByFilename(filename);
         foreach (Commercial commercial in data.unlockedCommercials) {

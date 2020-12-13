@@ -206,6 +206,13 @@ public class CutsceneImp : Cutscene {
         if (intrinsics == null)
             return false;
 
+        List<Buff> buffs = new List<Buff>(intrinsics.buffs);
+        LiquidResevoir resevoir = analyzand.GetComponent<LiquidResevoir>();
+        if (resevoir != null) {
+            buffs.AddRange(resevoir.liquid.buffs);
+        }
+        buffs = Buff.FlattenBuffs(buffs);
+
         Comparison<Buff> comparison = (Buff x, Buff y) => {
             // Less than 0	x is less than y.
             // 0	x equals y.
@@ -219,10 +226,10 @@ public class CutsceneImp : Cutscene {
             }
             return 0;
         };
-        intrinsics.buffs.Sort(comparison);
+        buffs.Sort(comparison);
 
         // unlock potions 
-        foreach (Buff buff in intrinsics.buffs) {
+        foreach (Buff buff in buffs) {
             PotionData dat = buffMap[buff.type];
             MutablePotionData mutableData = GameManager.Instance.data.collectedPotions[dat.name];
             mutableData.unlockedIngredient1 = true;
@@ -231,12 +238,13 @@ public class CutsceneImp : Cutscene {
         }
 
         // unlock the whole potion
-        if (intrinsics.buffs.Count > 0) {
-            buffType = intrinsics.buffs[0].type; // TODO: change
+        if (buffs.Count > 0) {
+            buffType = buffs[0].type;
             potionData = buffMap[buffType];
             return true;
         } else if (intrinsics.liveBuffs.Count > 0) {
-            buffType = intrinsics.liveBuffs[0].type; // TODO: change
+            intrinsics.liveBuffs.Sort(comparison);
+            buffType = intrinsics.liveBuffs[0].type;
             potionData = buffMap[buffType];
             return true;
         }

@@ -35,7 +35,8 @@ public class Godhead : MonoBehaviour {
             godSpeech.defaultMonologue = "dancing_god_cosmic";
         }
 
-        source = Toolbox.Instance.SetUpAudioSource(gameObject);
+        // source = Toolbox.Instance.SetUpAudioSource(gameObject);
+        source = Toolbox.Instance.SetUpGlobalAudioSource(gameObject);
         state = State.moveHead;
         hand.gameObject.SetActive(false);
         headDelta = endPoint - startPoint;
@@ -66,6 +67,7 @@ public class Godhead : MonoBehaviour {
                 source.Stop();
                 if (timer > 2f) {
                     menu = godSpeech.SpeakWith();
+                    menu.cutsceneDialogue = true;
                     state = State.dialogue;
                 }
                 break;
@@ -148,6 +150,7 @@ public class Godhead : MonoBehaviour {
         if (timer > 1f) {
             godSpeech.defaultMonologue = "dancing_god_bless";
             menu = godSpeech.SpeakWith();
+            menu.cutsceneDialogue = true;
             menu.menuClosed += FinalSpeechCallback;
             state = State.dialogue;
         }
@@ -178,6 +181,7 @@ public class Godhead : MonoBehaviour {
         if (timer > 1f) {
             godSpeech.defaultMonologue = "dancing_god_destroy";
             menu = godSpeech.SpeakWith();
+            menu.cutsceneDialogue = true;
             menu.menuClosed += FinalSpeechCallback;
             state = State.dialogue;
         }
