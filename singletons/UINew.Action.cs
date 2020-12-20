@@ -123,7 +123,7 @@ public partial class UINew : Singleton<UINew> {
         }
     }
     private GameObject CircularizeButtons(List<ActionButton> buttons, GameObject target) {
-        // DeleteAllIndicators();
+        DeleteAllIndicators();
         float incrementAngle = (Mathf.PI * 2f) / buttons.Count;
         float angle = 0f;
         RectTransform canvasRect = UICanvas.GetComponent<RectTransform>();
@@ -147,7 +147,7 @@ public partial class UINew : Singleton<UINew> {
             // world coordinates of button 
             // start from anchor position and offset around a circle
             // Vector2 initLocation = (Vector2)target.transform.position + Toolbox.Instance.RotateZ(Vector2.right / 30, angle);
-            Vector2 initLocation = (Vector2)renderingCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue()) + Toolbox.Instance.RotateZ(Vector2.right / 15, angle);
+            Vector2 initLocation = (Vector2)renderingCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue()) + Toolbox.Instance.RotateZ(Vector2.right / 5, angle);
             // CreateIndicator(initLocation, Color.white);
 
             // button world position to screen position
@@ -159,16 +159,16 @@ public partial class UINew : Singleton<UINew> {
             // CreateIndicator(initPosition, Color.blue);
 
             if (initPosition.y > canvasRect.rect.height / 2f) {
-                initPosition.y = canvasRect.rect.height / 2f - 50f;
+                initPosition.y = (canvasRect.rect.height / 2f) - 1f;
             }
             if (initPosition.y < canvasRect.rect.height / -2f) {
-                initPosition.y = canvasRect.rect.height / -2f + 50f;
+                initPosition.y = (canvasRect.rect.height / -2f) + 1f;
             }
             if (initPosition.x > canvasRect.rect.width / 2f) {
-                initPosition.x = canvasRect.rect.width / 2f - 50f;
+                initPosition.x = (canvasRect.rect.width / 2f) - 1f;
             }
             if (initPosition.x < canvasRect.rect.width / -2f) {
-                initPosition.x = canvasRect.rect.width / -2f + 50f;
+                initPosition.x = (canvasRect.rect.width / -2f) + 1f;
             }
             button.gameobject.transform.localPosition = initPosition;
 
@@ -216,7 +216,6 @@ public partial class UINew : Singleton<UINew> {
         buttonAnchor.transform.SetParent(target.transform);
 
         audioSource.PlayOneShot(actionMenuOpenSound);
-
         return buttonAnchor;
     }
 

@@ -10,7 +10,17 @@ public class SaveInspector : MonoBehaviour {
     public Text totalTimeText;
     public Text completionText;
     public Text itemCountText;
+    public Text commercialCountText;
+    public Text locationCountText;
+    public Text recipeCountText;
     public Text achievementCountText;
+
+    public Text itemPercentText;
+    public Text commercialPercentText;
+    public Text locationPercentText;
+    public Text recipePercentText;
+    public Text achievementPercentText;
+
     public Image headShot;
     public GameData data;
     public string saveName;
@@ -34,27 +44,76 @@ public class SaveInspector : MonoBehaviour {
         Sprite[] sprites = Resources.LoadAll<Sprite>("spritesheets/" + data.headSpriteSheet);
         headShot.sprite = Toolbox.ApplySkinToneToSprite(sprites[0], data.headSkinColor);
 
-        itemCountText.text = data.collectedObjects.Count.ToString() + "/95";
-        int completeAchievements = 0;
-        foreach (Achievement achievement in save.data.achievements) {
-            if (achievement.complete)
-                completeAchievements += 1;
-        }
-        achievementCountText.text = completeAchievements.ToString() + "/" + data.achievements.Count.ToString();
+        SetCompletionText(data);
+
         completionText.text = "Completion: " + Completion(data).ToString("0") + "%";
     }
-    public static float Completion(GameData data) {
-        int completeAchievements = 0;
-        foreach (Achievement achievement in data.achievements) {
-            if (achievement.complete)
-                completeAchievements += 1;
+    public void SetCompletionText(GameData gameData) {
+        void SetText(Text text, Text percentText, CompletionStat stat, bool divideByTwo = false) {
+            float readableFrac = stat.fraction * 100f;
+            if (divideByTwo) {
+                text.text = $"{stat.count / 2} / {stat.max / 2}";
+            } else {
+                text.text = $"{stat.count} / {stat.max}";
+            }
+            percentText.text = $"{readableFrac.ToString("0")}%";
         }
+
+        CompletionData data = new CompletionData(gameData);
+
+        SetText(itemCountText, itemPercentText, data.objectStat);
+        SetText(achievementCountText, achievementPercentText, data.achievementStat);
+        SetText(locationCountText, locationPercentText, data.levelStat);
+        SetText(recipeCountText, recipePercentText, data.recipeStat, divideByTwo: true);
+        SetText(commercialCountText, commercialPercentText, data.commercialStat);
+    }
+    public static float Completion(GameData gameData) {
+
+        CompletionData data = new CompletionData(gameData);
+
         float completion = 0;
-        completion += 0.25f * data.collectedObjects.Count / 95;
-        completion += 0.25f * data.completeCommercials.Count / 17f;
-        completion += 0.25f * completeAchievements / data.achievements.Count;
-        completion += 0.25f * data.unlockedScenes.Count / GameManager.sceneNames.Count;
+
+        completion += 0.2f * data.objectStat.fraction;
+        completion += 0.2f * data.commercialStat.fraction;
+        completion += 0.2f * data.achievementStat.fraction;
+        completion += 0.2f * data.levelStat.fraction;
+        completion += 0.2f * data.recipeStat.fraction;
+
         return completion * 100f;
+    }
+    public struct CompletionStat {
+        public int count;
+        public int max;
+        public float fraction;
+        public CompletionStat(int count, int max) {
+            this.count = count;
+            this.max = max;
+            this.fraction = (1.0f * count) / max;
+        }
+    }
+    public struct CompletionData {
+        public CompletionStat objectStat;
+        public CompletionStat commercialStat;
+        public CompletionStat achievementStat;
+        public CompletionStat levelStat;
+        public CompletionStat recipeStat;
+        public CompletionData(GameData data) {
+            int completeAchievements = 0;
+            foreach (Achievement achievement in data.achievements) {
+                if (achievement.complete)
+                    completeAchievements += 1;
+            }
+            int completeIngredients = 0;
+            foreach (MutablePotionData potionData in data.collectedPotions.Values) {
+                if (potionData.unlockedIngredient1) completeIngredients += 1;
+                if (potionData.unlockedIngredient2) completeIngredients += 1;
+            }
+            this.objectStat = new CompletionStat(data.collectedObjects.Count, 128); // note: regenerate these numbers
+            this.commercialStat = new CompletionStat(data.completeCommercials.Count, 23);
+            this.achievementStat = new CompletionStat(completeAchievements, data.achievements.Count);
+            this.levelStat = new CompletionStat(data.unlockedScenes.Count, GameManager.sceneNames.Count);
+            this.recipeStat = new CompletionStat(data.collectedPotions.Count, 13 * 2);
+        }
     }
     public void ItemCollectionCallback() {
         startMenu.InspectItemCollection(data);

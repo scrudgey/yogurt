@@ -41,7 +41,7 @@ namespace AI {
 
             Goal approach = new GoalWalkToObject(gameObject, control, cauldronObject, range: 0.1f);
             approach.requirements.Add(holdIngredientGoal);
-            approach.ignoreRequirementsIfConditionMet = true;
+            // approach.ignoreRequirementsIfConditionMet = true;
 
             GoalBlendSmoothie blendIngredientGoal = new GoalBlendSmoothie(gameObject, c, cauldronObject, smoothieOrder);
             blendIngredientGoal.requirements.Add(approach);

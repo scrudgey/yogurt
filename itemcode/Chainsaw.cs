@@ -63,13 +63,15 @@ public class Chainsaw : Pickup, ISaveable {
                     continue;
                 if (transform.IsChildOf(obj.transform.root))
                     continue;
+                if (InputController.forbiddenTags.Contains(obj.tag))
+                    continue;
                 if (obj != null) {
                     if (holder != null) {
                         damageMessage.responsibleParty = holder.gameObject;
                     } else {
                         damageMessage.responsibleParty = gameObject;
                     }
-
+                    damageMessage.weaponName = "a chainsaw";
                     OccurrenceViolence violence = new OccurrenceViolence();
                     violence.amount = damageMessage.amount;
                     violence.attacker = damageMessage.responsibleParty;
@@ -88,7 +90,7 @@ public class Chainsaw : Pickup, ISaveable {
             damageQueue = new HashSet<GameObject>();
         }
         if (revTimer > 0) {
-            if (audioSource.clip != rev && audioSource.clip != revStop) {
+            if (audioSource.clip != rev) {// && audioSource.clip != revStop) {
                 audioSource.clip = rev;
                 audioSource.Play();
             }

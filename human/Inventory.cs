@@ -217,6 +217,10 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         return desire.accept;
     }
     public void StashItem(GameObject item) {
+        if (!item.transform.IsChildOf(transform)) {
+            item.transform.SetParent(holdpoint, false);
+            item.transform.localPosition = Vector3.zero;
+        }
         items.Add(item);
         if (holding != null && item == holding.gameObject)
             SoftDropItem();

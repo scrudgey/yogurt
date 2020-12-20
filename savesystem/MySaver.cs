@@ -11,6 +11,9 @@ public class MySaver {
     private static Dictionary<Guid, List<Guid>> referenceTree = new Dictionary<Guid, List<Guid>>();
     public static Dictionary<Guid, GameObject> loadedObjects = new Dictionary<Guid, GameObject>();
     public static Dictionary<GameObject, Guid> savedObjects = new Dictionary<GameObject, Guid>();
+
+    // this parameter keeps track of persistent objects that have been disabled, because GameObject.FindObjectsOfType<MyMarker>
+    // won't find disabled objects. Hence we must keep track of them ourselves. This HashSet is reset at the start of each new level / load .
     public static HashSet<GameObject> disabledPersistents = new HashSet<GameObject>();
     public static List<Type> LoadOrder = new List<Type>{
         typeof(Intrinsics),
@@ -32,6 +35,17 @@ public class MySaver {
         string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
         string destPath = Path.Combine(Application.persistentDataPath, "crashdump");
         DirectoryCopy(path, destPath, true);
+    }
+    public static void DeleteSave(string saveGameName) {
+        string path = Path.Combine(Application.persistentDataPath, saveGameName);
+        // Get the subdirectories for the specified directory.
+        DirectoryInfo dir = new DirectoryInfo(path);
+        if (!dir.Exists) {
+            throw new DirectoryNotFoundException(
+                "Source directory does not exist or could not be found: "
+                + path);
+        }
+        dir.Delete(true);
     }
     public static void CleanupSaves() {
         string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
@@ -103,7 +117,6 @@ public class MySaver {
         string scenePath = GameManager.Instance.LevelSavePath();
         string playerPath = GameManager.Instance.PlayerSavePath();
 
-        Debug.LogWarning($"setting last saved player path {playerPath}");
         GameManager.Instance.data.lastSavedPlayerPath = playerPath;
 
         if (File.Exists(objectsPath)) {
@@ -114,12 +127,6 @@ public class MySaver {
                 using (System.IO.Stream objectsStream = new FileStream(objectsPath, FileMode.Open)) {
                     objectDataBase = persistentSerializer.Deserialize(objectsStream) as SerializableDictionary<Guid, PersistentObject>;
                 }
-                // foreach (KeyValuePair<Guid, PersistentObject> kvp in objectDataBase) {
-                //     Debug.Log($"{kvp.Key}: {kvp.Value}");
-                // }
-                // objectDataBase = persistentSerializer.Deserialize(objectsStream) as SerializableDictionary<int, PersistentObject>;
-                // objectsStream.Close();
-                // Debug.Log(objectDataBase.Count.ToString() +" entries found");
             }
         } else {
             // Debug.Log("NOTE: creating new object database!");
@@ -502,7 +509,7 @@ public class MySaver {
     */
     public static void RemoveObject(GameObject gameObject) {
         MyMarker marker = gameObject.GetComponent<MyMarker>();
-        if (marker != null) {
+        if (marker != null && objectDataBase != null) {
             if (objectDataBase.ContainsKey(marker.id)) {
                 Debug.Log($"removing persistent object {gameObject}");
                 objectDataBase.Remove(marker.id);

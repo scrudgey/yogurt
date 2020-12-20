@@ -147,7 +147,7 @@ public partial class GameManager : Singleton<GameManager> {
     public AudioSource publicAudio;
     public bool playerIsDead;
     public bool debug = false;
-    public bool demo = false;
+    public bool demo = true;
     public bool failedLevelLoad = false;
     public Gender playerGender;
     public bool loadingSavedGame = false;
@@ -172,14 +172,14 @@ public partial class GameManager : Singleton<GameManager> {
         InitSettings();
         if (data == null) {
             data = InitializedGameData();
-            ReceiveEmail("duplicator");
-            ReceiveEmail("armor");
-            ReceiveEmail("cannon");
-            ReceiveEmail("gravy1");
-            ReceiveEmail("hell");
-            ReceiveEmail("scorpion");
-            ReceiveEmail("boardroom");
-            ReceivePackage("golf_club");
+            // ReceiveEmail("duplicator");
+            // ReceiveEmail("armor");
+            // ReceiveEmail("cannon");
+            // ReceiveEmail("gravy1");
+            // ReceiveEmail("hell");
+            // ReceiveEmail("scorpion");
+            // ReceiveEmail("boardroom");
+            // ReceivePackage("golf_club");
 
             // ReceivePhoneCall("airplane");
             // ReceivePhoneCall("office");
@@ -345,7 +345,8 @@ public partial class GameManager : Singleton<GameManager> {
     public void SceneWasLoaded(Scene scene, LoadSceneMode mode) {
         UINew.Instance.FadeIn(() => DoSceneWasLoaded(scene, mode));
         Toolbox.Instance.numberOfLiveSpeakers = 0;
-        publicAudio.Stop();
+        if (publicAudio != null)
+            publicAudio.Stop();
         sceneTime = 0f;
         // Debug.Log($"scene was loaded: {scene.name}");
         MusicController.Instance.SceneChange(scene.name);
@@ -477,8 +478,8 @@ public partial class GameManager : Singleton<GameManager> {
             UINew.Instance.RefreshUI(active: false);
             Instantiate(Resources.Load("UI/deathMenu"));
             CameraControl camControl = FindObjectOfType<CameraControl>();
+            Toolbox.Instance.SwitchAudioListener(camControl.gameObject);
             camControl.audioSource.PlayOneShot(Resources.Load("sounds/xylophone/x4") as AudioClip);
-            Toolbox.Instance.SwitchAudioListener(GameObject.Find("Main Camera"));
         }
     }
     public void SpecificSceneInitialize(string sceneName) {
@@ -508,7 +509,6 @@ public partial class GameManager : Singleton<GameManager> {
                 if (ctt != null)
                     ctt.Enable();
             }
-            // ShowDiaryEntry("diaryStudio");
             throneroomCoroutine = waitAndShowDiary(1.5f, "diaryStudio");
             StartCoroutine(throneroomCoroutine);
         }
@@ -627,7 +627,7 @@ public partial class GameManager : Singleton<GameManager> {
         Debug.Log($"setting up magician sequence {sequence}");
         data.activeMagicianSequence = sequence;
         // spawn the portal & effects
-        Vector3 pos = new Vector3(-0.821f, -0.395f, 0f);
+        Vector3 pos = new Vector3(-0.863f, 0.604f, 0f);
         GameObject.Instantiate(Resources.Load("cutscene/portal"), pos, Quaternion.identity);
         GameObject particle1 = GameObject.Instantiate(Resources.Load("cutscene/portalParticle"), pos, Quaternion.identity) as GameObject;
         GameObject particle2 = GameObject.Instantiate(Resources.Load("cutscene/portalParticle"), pos, Quaternion.identity) as GameObject;
@@ -640,6 +640,7 @@ public partial class GameManager : Singleton<GameManager> {
         motion2.frequency = -14;
 
         GameObject nightShade = GameObject.Instantiate(Resources.Load("UI/nightShade")) as GameObject;
+        nightShade.GetComponent<FadeInOut>().state = FadeInOut.State.pingPong;
         nightShade.GetComponent<Canvas>().worldCamera = cam;
     }
 
@@ -792,9 +793,10 @@ public partial class GameManager : Singleton<GameManager> {
             string prefabPath = Toolbox.GetPrefabPath(playerObject);
             Destroy(playerObject);
             playerObject = GameObject.Instantiate(Resources.Load(prefabPath)) as GameObject;
-            // SetFocus(playerObject);
+            SetFocus(playerObject);
             playerObject.SetActive(false);
             UINew.Instance.RefreshUI(active: false);
+            // playerIsDead = false;
         }
         if (playerHurtable) {
             playerHurtable.Reset();
@@ -952,6 +954,7 @@ public partial class GameManager : Singleton<GameManager> {
         };
         data.collectedClothes.Add("blue_shirt");
         data.collectedClothes.Add("pajamas");
+        data.collectedClothes.Add("blue_skirt");
 
         data.collectedObjects.Add("glass_jar");
         data.collectedObjects.Add("blue_shirt");
@@ -1000,9 +1003,11 @@ public partial class GameManager : Singleton<GameManager> {
             data.perks["eat_all"] = true;
             data.perks["swear"] = true;
             data.perks["potion"] = true;
-            data.perks["burn"] = false;
+            // data.perks["burn"] = false;
             data.perks["resurrection"] = false;
             data.perks["beverage"] = true;
+            data.perks["resurrection"] = true;
+
             data.collectedObjects.Add("crown");
             data.collectedClothes.Add("crown");
             data.itemCheckedOut["crown"] = false;
@@ -1062,7 +1067,6 @@ public partial class GameManager : Singleton<GameManager> {
         Debug.LogWarning("saving game data");
         data.secondsPlayed += timeSinceLastSave;
         data.lastScene = SceneManager.GetActiveScene().name;
-        Debug.LogWarning($"setting last scene {data.lastScene}");
         data.SetSaveDateTime();
 
         var serializer = new XmlSerializer(typeof(GameData));
@@ -1365,6 +1369,9 @@ public partial class GameManager : Singleton<GameManager> {
             "Tesseract Invisible",
             "The Infinite Circle",
             "Astron Argon",
+            "Travicullaris",
+            "Void Treader",
+            "Stellar Flame",
         };
         return names[UnityEngine.Random.Range(0, names.Count)];
     }

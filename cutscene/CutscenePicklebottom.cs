@@ -21,6 +21,8 @@ public class CutscenePickleBottom : Cutscene {
         UINew.Instance.RefreshUI();
         nightShade = GameObject.Instantiate(Resources.Load("UI/nightShade")) as GameObject;
         nightShade.GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
+        FadeInOut fader = nightShade.GetComponent<FadeInOut>();
+        fader.enabled = false;
         peterAI = peter.GetComponent<PeterPicklebottom>();
         peterAI.door = doorway;
         peterAI.PlayThemeSong();

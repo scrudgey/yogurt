@@ -10,8 +10,7 @@ public class DropDripper : MonoBehaviour, ISaveable {
     private float timer;
     public int amount = 5;
     void Start() {
-        if (liquid == null)
-            liquid = Liquid.LoadLiquid(liquidType);
+        liquid = Liquid.LoadLiquid(liquidType);
         pBoot = GetComponent<PhysicalBootstrapper>();
         pickup = GetComponent<Pickup>();
         if (pBoot == null) {

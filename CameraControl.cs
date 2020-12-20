@@ -43,7 +43,7 @@ public class CameraControl : MonoBehaviour {
     public GameObject centerRadiusIndicator;
     public GameObject pointRadiusIndicator;
     public Vector3 outOfBoundsOffset;
-    void Start() {
+    void Awake() {
         mainCamera = GetComponent<Camera>();
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         if (showDebugIndicators) {
@@ -61,7 +61,7 @@ public class CameraControl : MonoBehaviour {
         }
     }
     public void Shake(float intensity) {
-        if (intensity < 0.001f)
+        if (intensity < 0.0001f)
             return;
         this.intensity = intensity;
     }
@@ -177,7 +177,7 @@ public class CameraControl : MonoBehaviour {
         tempVector.z = -1f;
         transform.position = tempVector;
 
-        if (intensity > 0.01) {
+        if (intensity > 0.001) {
             shakeVector = Random.insideUnitCircle * intensity;
             intensity = intensity * 0.95f;
         } else shakeVector = Vector3.zero;

@@ -384,7 +384,7 @@ public class Speech : Interactive, ISaveable {
     }
     void Update() {
         if (speakTime > 0) {
-            speakTime -= Time.deltaTime;
+            speakTime -= Time.unscaledDeltaTime;
             if (!speaking) {
                 MessageHead head = new MessageHead();
                 head.type = MessageHead.HeadType.speaking;
@@ -409,7 +409,7 @@ public class Speech : Interactive, ISaveable {
             Stop();
         }
         if (!speaking && queue.Count > 0) {
-            queueTime += Time.deltaTime;
+            queueTime += Time.unscaledDeltaTime;
             if (queueTime > 1f) {
                 queueTime = Random.Range(-10f, 0f);
                 int index = Random.Range(0, queue.Count);
@@ -563,14 +563,14 @@ public class Speech : Interactive, ISaveable {
             control.LookAtPoint(target.transform.position);
         }
 
-        if (GameManager.Instance.data.perks["burn"]) {
-            MessageDamage burnNotice = new MessageDamage(10f, damageType.fire);
-            Toolbox.Instance.SendMessage(target, this, burnNotice);
-            Flammable targetFlammable = target.transform.root.GetComponentInChildren<Flammable>();
-            if (targetFlammable) {
-                targetFlammable.SpontaneouslyCombust();
-            }
-        }
+        // if (GameManager.Instance.data.perks["burn"]) {
+        //     MessageDamage burnNotice = new MessageDamage(10f, damageType.fire);
+        //     Toolbox.Instance.SendMessage(target, this, burnNotice);
+        //     Flammable targetFlammable = target.transform.root.GetComponentInChildren<Flammable>();
+        //     if (targetFlammable) {
+        //         targetFlammable.SpontaneouslyCombust();
+        //     }
+        // }
     }
     public Monologue InsultMonologue(GameObject target) {
         if (hitState >= Controllable.HitState.stun)

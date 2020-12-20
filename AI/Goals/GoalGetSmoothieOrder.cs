@@ -9,8 +9,12 @@ namespace AI {
         public Ref<int> smoothieOrder;
         public static List<string> callOuts = new List<string>{
             "Smoothie! Getcha smoothie heah!",
+            "Smoothie! Getcha smoothie heah!",
             "I scream, you scream! Let's have a smoothie!",
-            "Fuck! Oh shit! Shit ass smoothie dick cock motherfucker!!!",
+            "I scream, you scream! Let's have a smoothie!",
+            "Smoothies! Refreshing cold smoothies!",
+            "Smoothies! Refreshing cold smoothies!",
+            "Shit ass smoothie dick cock motherfucker!!!",
             ""
         };
         public GoalGetSmoothieOrder(GameObject g, Controller c, Ref<int> smoothieOrder) : base(g, c) {
@@ -25,7 +29,7 @@ namespace AI {
             utteranceTimer -= Time.deltaTime;
             if (utteranceTimer <= 0f) {
                 EventData ed = new EventData(positive: 1);
-                utteranceTimer = UnityEngine.Random.Range(10f, 20f);
+                utteranceTimer = UnityEngine.Random.Range(20f, 45f);
                 string phrase = callOuts[UnityEngine.Random.Range(0, callOuts.Count)];
                 MessageSpeech message = new MessageSpeech(phrase, data: ed);
                 Toolbox.Instance.SendMessage(gameObject, gameObject.transform, message);

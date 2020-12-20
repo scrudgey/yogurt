@@ -289,6 +289,7 @@ public class Eater : Interactive, ISaveable {
             data.vomit = eaten.gameObject;
             eaten.SetActive(true);
             eaten.transform.position = transform.position;
+            eaten.transform.SetParent(null);
             PhysicalBootstrapper phys = eaten.GetComponent<PhysicalBootstrapper>();
             if (phys) {
                 phys.doInit = true;

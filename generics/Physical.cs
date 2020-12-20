@@ -242,6 +242,9 @@ public class Physical : MonoBehaviour {
             spriteRenderer.enabled = true;
         if (objectRenderer)
             objectRenderer.sortingLayerName = "air";
+
+
+        bootstrapper.BroadcastMessage("FlyModeStart", this, SendMessageOptions.DontRequireReceiver);
     }
     public void StartZipMode() {
         doZip = false;

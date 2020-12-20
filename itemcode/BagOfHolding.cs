@@ -63,6 +63,9 @@ public class BagOfHolding : Interactive, IExcludable, ISaveable {
     public bool Stash_Validation(Inventory holder) {
         if (!holder.holding)
             return false;
+        if (holder.holding.gameObject == gameObject) {
+            return false;
+        }
         GameObject obj = holder.holding.gameObject;
         MyMarker marker = obj.GetComponent<MyMarker>();
         if (marker != null && !marker.apartmentObject) {

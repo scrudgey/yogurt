@@ -77,7 +77,7 @@ public class Bed : Doorway {
             if (dup.PickleReady())
                 collectible++;
         }
-        if (collectible > 1 && GameManager.Instance.data.days > 1 && !GameManager.Instance.data.loadedDay && GameManager.Instance.data.activeMagicianSequence == "") {
+        if (collectible > 3 && GameManager.Instance.data.days > 1 && !GameManager.Instance.data.loadedDay && GameManager.Instance.data.activeMagicianSequence == "") {
             CutsceneManager.Instance.InitializeCutscene<CutscenePickleBottom>();
         }
         UINew.Instance.RefreshUI(active: false);

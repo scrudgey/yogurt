@@ -162,7 +162,7 @@ public class CutsceneBar : Cutscene {
                 larryDespondent.PoundFist();
             } else if (line == "<CURLYPOUND>") {
                 curlyDespondent.PoundFist();
-            } else if (line == "<BARTENDER>") {
+            } else if (line == "<BART>") {
                 state = State.bartenderWalkLeft;
                 timer = 0f;
             } else if (line == "<PHONECALL>") {

@@ -83,6 +83,10 @@ public class Hurtable : Damageable, ISaveable {
             GameManager.Instance.ExplodeHead(gameObject);
         }
         if (intrins.netBuffs[BuffType.undead].active()) {
+            if (gibsContainerPrefab != null && gibsContainerPrefab.name == "vampireCorpseGibsContainer") {
+                base.NetIntrinsicsChanged(intrins);
+                return;
+            }
             // switch gibs to undead gibs
             // delete all gibs
             foreach (Gibs gibs in GetComponents<Gibs>()) {
@@ -525,6 +529,15 @@ public class Hurtable : Damageable, ISaveable {
                     DropDripper dripper = g.GetComponent<DropDripper>();
                     if (dripper != null) {
                         dripper.liquid = blood;
+                        switch (bloodType) {
+                            default:
+                            case BloodType.blood:
+                                dripper.liquidType = "blood";
+                                break;
+                            case BloodType.oil:
+                                dripper.liquidType = "oil";
+                                break;
+                        }
                     }
                 }
             }

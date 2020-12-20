@@ -27,7 +27,7 @@ namespace AI {
             } else if (waitTimer > 0 && !condition.conditionMet) {
                 waitTimer += Time.deltaTime;
                 if (waitTimer > 5f) {
-                    // Debug.Log("meeting condition");
+                    Debug.Log("meeting condition");
                     condition.conditionMet = true;
                     blender.Power();
                     Inventory inv = gameObject.GetComponent<Inventory>();
@@ -47,6 +47,7 @@ namespace AI {
         public void Reset() {
             waitTimer = 0;
             condition.conditionMet = false;
+            // Debug.Log($"blender condition {condition.conditionMet}");
         }
     }
 }

@@ -493,73 +493,84 @@ public class InputController : Singleton<InputController> {
                             }
                         }
                     } else { // clicked other
-                        // if the obj can be picked up:
-                        Inventory inv = actor.GetComponent<Inventory>();
-                        Pickup other = clicked.GetComponent<Pickup>();
-                        Grabbable grabbable = clicked.GetComponent<Grabbable>();
-                        if (other != null && inv != null) {
-                            //  pick up the object
-                            if (Vector2.Distance(other.transform.position, actor.transform.position) < QuickActionMaxDistance) {
-                                if (inv != null && inv.holding != null && !inv.holding.heavyObject)
-                                    inv.StashItem(inv.holding.gameObject);
-                                inv.GetItem(other);
-                                UINew.Instance.RefreshUI(active: true);
-                                ResetLastLeftClicked();
-                            }
-                        } else if (grabbable != null && inv != null) {
-                            //  pick up the object
-                            if (Vector2.Distance(grabbable.transform.position, actor.transform.position) < QuickActionMaxDistance) {
-                                if (inv != null && inv.holding != null && !inv.holding.heavyObject)
-                                    inv.StashItem(inv.holding.gameObject);
-                                grabbable.Get(inv);
-                                UINew.Instance.RefreshUI(active: true);
-                                ResetLastLeftClicked();
-                            }
-                        } else {
-                            // get all interactions. if there is only one, do that action.
-                            HashSet<InteractionParam> interactions = Interactor.SelfOnOtherInteractions(GameManager.Instance.playerObject, clicked);
-                            if (interactions.Count == 1) {
-                                InteractionParam param = interactions.First();
-                                if (InteractionIsWithinRange(param.interaction)) {
-                                    param.DoAction();
-                                    if (!param.interaction.dontWipeInterface) {
-                                        UINew.Instance.RefreshUI(active: true);
-                                        ResetLastLeftClicked();
-                                    }
-                                }
-                            }
-                            if (interactions.Count == 2) {
-                                Dictionary<string, InteractionParam> acts = new Dictionary<string, InteractionParam>();
-                                foreach (InteractionParam ip in interactions) {
-                                    acts[ip.interaction.actionName] = ip;
-                                }
-                                if (acts.ContainsKey("Look")) {
-                                    // do the other action
-                                    HashSet<string> keys = new HashSet<string>(acts.Keys);
-                                    keys.Remove("Look");
-                                    InteractionParam param = acts[keys.First()];
-
-                                    if (InteractionIsWithinRange(param.interaction)) {
-                                        param.DoAction();
-                                        if (!param.interaction.dontWipeInterface) {
-                                            UINew.Instance.RefreshUI(active: true);
-                                            ResetLastLeftClicked();
-                                        }
-                                    }
-                                }
-                                // InteractionParam param = interactions.First();
-                                // param.DoAction();
-                                // if (!param.interaction.dontWipeInterface) {
-                                //     UINew.Instance.RefreshUI(active: true);
-                                //     ResetLastLeftClicked();
-                                // }
-                            }
-                        }
-                        // TODO: take first action, ranked on some priority
+                        DoQuickAction(actor, clicked);
                     }
                 }
             }
         }
+    }
+
+    public void DoQuickAction(GameObject actor, GameObject clicked) {
+        Inventory inv = actor.GetComponent<Inventory>();
+        Pickup other = clicked.GetComponent<Pickup>();
+        Grabbable grabbable = clicked.GetComponent<Grabbable>();
+        Bed bed = clicked.GetComponent<Bed>();
+        VideoCamera camera = clicked.GetComponent<VideoCamera>();
+        if (bed != null) {
+            if (Vector2.Distance(clicked.transform.position, actor.transform.position) < QuickActionMaxDistance) {
+                bed.MakeBed();
+                UINew.Instance.RefreshUI(active: true);
+                ResetLastLeftClicked();
+            }
+        } else if (camera != null) {
+            if (!GameManager.Instance.data.recordingCommercial && Vector2.Distance(clicked.transform.position, actor.transform.position) < QuickActionMaxDistance) {
+                camera.Enable();
+                UINew.Instance.RefreshUI(active: true);
+                ResetLastLeftClicked();
+            }
+        } else if (other != null && inv != null) {  // if the obj can be picked up:
+            //  pick up the object
+            if (Vector2.Distance(clicked.transform.position, actor.transform.position) < QuickActionMaxDistance) {
+                if (inv != null && inv.holding != null && !inv.holding.heavyObject)
+                    inv.StashItem(inv.holding.gameObject);
+                inv.GetItem(other);
+                UINew.Instance.RefreshUI(active: true);
+                ResetLastLeftClicked();
+            }
+        } else if (grabbable != null && inv != null) {
+            //  pick up the object
+            if (Vector2.Distance(clicked.transform.position, actor.transform.position) < QuickActionMaxDistance) {
+                if (inv != null && inv.holding != null && !inv.holding.heavyObject)
+                    inv.StashItem(inv.holding.gameObject);
+                grabbable.Get(inv);
+                UINew.Instance.RefreshUI(active: true);
+                ResetLastLeftClicked();
+            }
+        } else {
+            // get all interactions. if there is only one, do that action.
+            HashSet<InteractionParam> interactions = Interactor.SelfOnOtherInteractions(GameManager.Instance.playerObject, clicked);
+            if (interactions.Count == 1) {
+                InteractionParam param = interactions.First();
+                if (InteractionIsWithinRange(param.interaction)) {
+                    param.DoAction();
+                    if (!param.interaction.dontWipeInterface) {
+                        UINew.Instance.RefreshUI(active: true);
+                        ResetLastLeftClicked();
+                    }
+                }
+            }
+            if (interactions.Count == 2) {
+                Dictionary<string, InteractionParam> acts = new Dictionary<string, InteractionParam>();
+                foreach (InteractionParam ip in interactions) {
+                    acts[ip.interaction.actionName] = ip;
+                }
+                if (acts.ContainsKey("Look")) {
+                    // do the other action
+                    HashSet<string> keys = new HashSet<string>(acts.Keys);
+                    keys.Remove("Look");
+                    InteractionParam param = acts[keys.First()];
+
+                    if (InteractionIsWithinRange(param.interaction)) {
+                        param.DoAction();
+                        if (!param.interaction.dontWipeInterface) {
+                            UINew.Instance.RefreshUI(active: true);
+                            ResetLastLeftClicked();
+                        }
+                    }
+                }
+            }
+        }
+        // TODO: take first action, ranked on some priority
     }
     void LeftClick() {
         if (state == ControlState.inMenu || state == ControlState.waitForMenu)
@@ -602,8 +613,12 @@ public class InputController : Singleton<InputController> {
                     state = ControlState.normal;
                     GameObject target = InputController.Instance.GetBaseInteractive(detectTop.transform);
                     Speech speech = focus.GetComponent<Speech>();
-                    if (speech) {
+                    Speech targetSpeech = target.GetComponent<Speech>();
+                    if (speech != null && targetSpeech != null) {
                         speech.DetectMonologue(target);
+                    } else if (speech != null) {
+                        MessageSpeech message = new MessageSpeech("Are you the previous yogurt commercial actor?");
+                        Toolbox.Instance.SendMessage(focus.gameObject, this, message);
                     }
                     UINew.Instance.SetActionText("");
                 }

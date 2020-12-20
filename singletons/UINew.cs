@@ -173,7 +173,7 @@ public partial class UINew : Singleton<UINew> {
             UpdateTopActionButtons();
 
             // health bar
-            if (GameManager.Instance.playerObject.GetComponent<Hurtable>()) {
+            if (GameManager.Instance.playerObject != null && GameManager.Instance.playerObject.GetComponent<Hurtable>()) {
                 topRightBar.SetActive(true);
             }
             stomachDisplayManager.gameObject.SetActive(true);

@@ -164,7 +164,7 @@ public abstract class Damageable : MonoBehaviour {
 
                 CameraControl cam = GameObject.FindObjectOfType<CameraControl>();
                 float distanceToCamera = Vector2.Distance(transform.position, cam.transform.position) * 10;
-                float amount = Mathf.Min(0.2f, 0.2f / distanceToCamera);
+                float amount = Mathf.Min(0.1f, 0.1f / distanceToCamera);
                 cam.Shake(amount);
                 break;
             default:

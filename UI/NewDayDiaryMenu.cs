@@ -69,6 +69,7 @@ public class NewDayDiaryMenu : MonoBehaviour {
         } else topItemIcon.sprite = itemRenderer.sprite;
 
         // Destroy(item);
+        // DestroyImmediate(item);
     }
 
     public void OkayButtonCallback() {

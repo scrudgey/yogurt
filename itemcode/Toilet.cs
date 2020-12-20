@@ -79,17 +79,12 @@ public class Toilet : Container {
             }
         }
 
-        // foreach (GameObject child in marker.persistentChildren) {
-        //     // add the child object's referents to tree
-        //     RecursivelyAddTree(playerTree, childPersistent.id);
-        //     playerTree.Remove(childPersistent.id);
-        // }
-        // using (FileStream sceneStream = File.Create(scenePath)) {
-        //     listSerializer.Serialize(sceneStream, savedIDs.ToList().Except(playerTree.ToList()).ToList());
-        // }
         foreach (Guid idn in itemTree) {
             GameManager.Instance.data.toiletItems.Add(idn);
         }
+        // there needs to be a disabled objects cleanup here!
+        // if there is a disabled object that belongs to the flushed object but is not in the flushed object
+        // it will not be cleaned up properly.
         Destroy(target.gameObject);
     }
 }

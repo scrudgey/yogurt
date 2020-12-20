@@ -155,10 +155,12 @@ public class Godhead : MonoBehaviour {
             state = State.dialogue;
         }
     }
-    public static void BlessItem(PhysicalBootstrapper item) {
-        item.gameObject.SetActive(true);
-        item.InitPhysical(0.05f, Vector3.zero);
-        item.physical.StartGroundMode();
+    public static void BlessItem(PhysicalBootstrapper item, bool doInit = true) {
+        if (doInit) {
+            item.gameObject.SetActive(true);
+            item.InitPhysical(0.05f, Vector3.zero);
+            item.physical.StartGroundMode();
+        }
 
         Intrinsics itemIntrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(item.gameObject);
         Uniform uniform = item.GetComponent<Uniform>();

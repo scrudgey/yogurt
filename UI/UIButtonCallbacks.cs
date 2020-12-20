@@ -33,7 +33,7 @@ public class UIButtonCallbacks : MonoBehaviour {
         // MessageSpeech message = new MessageSpeech("what is this janky-ass bullshit? an ass? assholes!");
         // speech.Say(message);
 
-        // EnumerateCollectibles();
+        EnumerateCollectibles();
 
         // GameObject target = GameObject.Find("blue_shirt");
         // if (target != null) {
@@ -41,9 +41,9 @@ public class UIButtonCallbacks : MonoBehaviour {
         //     Godhead.BlessItem(pb);
         // }
 
-        string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
-        DirectoryInfo dataDir = new DirectoryInfo(path);
-        dataDir.Delete(true);
+        // string path = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName);
+        // DirectoryInfo dataDir = new DirectoryInfo(path);
+        // dataDir.Delete(true);
 
         // Debug.Log("test");
         // Grammar g = new Grammar();
@@ -56,6 +56,9 @@ public class UIButtonCallbacks : MonoBehaviour {
         //     UINew.Instance.FadeOut(() => { Debug.Log("done faded"); });
         // }
         // faded = !faded;
+
+        // GameObject keg = GameObject.Find("gunpowder_keg");
+        // Godhead.BlessItem(keg.GetComponent<PhysicalBootstrapper>(), doInit: false);
     }
     public void HypnosisButtonClick() {
         if (InputController.Instance.state == InputController.ControlState.inMenu)

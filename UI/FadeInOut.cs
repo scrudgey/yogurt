@@ -6,12 +6,15 @@ using Easings;
 using System;
 
 public class FadeInOut : MonoBehaviour {
-    public enum State { none, fadeIn, fadeOut };
+    public enum State { none, fadeIn, fadeOut, pingPong };
     public State state;
     public Image image;
     public float timer;
     public float fadeInTime = 0.5f;
     public float fadeOutTime = 0.5f;
+    public float minAlpha;
+    public float maxAlpha;
+    public float period;
     public Action callback;
     public void FadeIn(Action callback) {
         if (state != State.fadeIn) {
@@ -39,6 +42,9 @@ public class FadeInOut : MonoBehaviour {
             case State.fadeOut:
                 fadeOutUpdate();
                 break;
+            case State.pingPong:
+                pingPongUpdate();
+                break;
             default:
                 break;
         }
@@ -64,5 +70,10 @@ public class FadeInOut : MonoBehaviour {
                 callback();
             callback = null;
         }
+    }
+    public void pingPongUpdate() {
+        float alpha = minAlpha + (maxAlpha - minAlpha) * (Mathf.Sin(timer * 6.28f / period) + 1) / 2;
+        Color color = new Color(0, 0, 0, alpha);
+        image.color = color;
     }
 }

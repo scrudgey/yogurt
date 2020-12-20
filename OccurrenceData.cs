@@ -260,7 +260,7 @@ public class OccurrenceSpeech : OccurrenceEvent {
         if (target != null) {
             targetName = Toolbox.Instance.GetName(target, skipMainCollider: true);
         }
-        EventData data = new EventData("dialogue", speakerName + " said " + line);
+        EventData data = new EventData("dialogue", $"{speakerName} said \"{line}\"");
         data.transcriptLine = speakerName + ": " + line;
         // insert bits here for script desc, transcript line
         if (threat) {

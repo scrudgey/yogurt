@@ -42,7 +42,16 @@ public partial class Toolbox : Singleton<Toolbox> {
         "Warbler",
         "Ol' Drinky",
         "Pointyknife, The Manstabber",
-        "The Traveler"
+        "The Traveler",
+        "Scrumpi",
+        "Poggle",
+        "Hoggle",
+        "Chewy",
+        "Scuzzbucket",
+        "Frobenius",
+        "Crad",
+        "Vern",
+        "The Pope"
     };
     static private List<string> normalMaleNames = new List<string>(){
         "Steve",

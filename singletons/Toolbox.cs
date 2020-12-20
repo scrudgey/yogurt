@@ -135,7 +135,6 @@ public partial class Toolbox : Singleton<Toolbox> {
         occurrence.data = occurrenceData;
         noiseOccurrence.data = occurrenceData;
         occurrenceData.CalculateDescriptions();
-        Debug.Log(occurrenceData.describable.whatHappened);
         // Debug.Log(occurrenceData.describable.whatHappened);
         if (occurrenceData.describable.whatHappened.ToLower().Contains("tina")) {
             Debug.LogError(occurrenceData.describable.whatHappened);
@@ -149,7 +148,7 @@ public partial class Toolbox : Singleton<Toolbox> {
         occurrence.data = data;
         noiseOccurrence.data = data;
         data.CalculateDescriptions();
-        Debug.Log(data.describable.whatHappened);
+        // Debug.Log(data.describable.whatHappened);
         if (data.describable.whatHappened.ToLower().Contains("tina")) {
             Debug.LogError(data.describable.whatHappened);
         }
@@ -168,7 +167,6 @@ public partial class Toolbox : Singleton<Toolbox> {
 
         occurrence.data = data;
         // Debug.Log(data.describable.whatHappened);
-        Debug.Log(data.describable.whatHappened);
         if (data.describable.whatHappened.ToLower().Contains("tina")) {
             Debug.LogError(data.describable.whatHappened);
         }

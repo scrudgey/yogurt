@@ -14,6 +14,7 @@ public class StartMenu : MonoBehaviour {
     public ItemCollectionInspector itemCollectionInspector;
     public AchievementBrowser achievementBrowser;
     public StatsBrowser statsBrowser;
+    public DeleteInspector deleteInspector;
     public GameObject settingsMenu;
     public GameObject prompt;
     public GameObject alert;
@@ -38,12 +39,9 @@ public class StartMenu : MonoBehaviour {
     public AudioClip menuOpenMoreSound;
     public AudioClip menuClosedSound;
     public AudioClip effectSound;
+    public AudioClip flushSound;
     bool keypressedThisFrame;
     void Awake() {
-        // controls = new MyControls();
-
-        // controls.Player.Escape.Enable();
-
         InputController.Instance.EscapeAction.action.performed += _ => keypressedThisFrame = true;
     }
 
@@ -58,6 +56,7 @@ public class StartMenu : MonoBehaviour {
         itemCollectionInspector.gameObject.SetActive(false);
         achievementBrowser.gameObject.SetActive(false);
         statsBrowser.gameObject.SetActive(false);
+        deleteInspector.gameObject.SetActive(false);
         mainMenu.SetActive(false);
         alert.SetActive(false);
         // logo.SetActive(true);
@@ -110,6 +109,7 @@ public class StartMenu : MonoBehaviour {
         mainMenu.SetActive(false);
         saveInspector.gameObject.SetActive(false);
         settingsMenu.SetActive(false);
+        deleteInspector.gameObject.SetActive(false);
         switch (switchTo) {
             case menuState.startNew:
                 OpenNewGameMenu();
@@ -154,6 +154,13 @@ public class StartMenu : MonoBehaviour {
     public void LoadGameCancel() {
         SwitchMenu(menuState.main);
         GameManager.Instance.PlayPublicSound(menuClosedSound);
+    }
+    public void DeleteGame(SaveGameSelectorScript saveGame) {
+        // Debug.Log($"delete {saveGame.saveName}");
+        MySaver.DeleteSave(saveGame.saveName);
+        deleteInspector.gameObject.SetActive(false);
+        SwitchMenu(menuState.load);
+        GameManager.Instance.PlayPublicSound(flushSound);
     }
     public void SettingsButton() {
         SwitchMenu(menuState.settings);
@@ -251,6 +258,12 @@ public class StartMenu : MonoBehaviour {
         loadGameMenu.gameObject.SetActive(false);
         saveInspector.gameObject.SetActive(true);
         saveInspector.Initialize(this, saveGame);
+        GameManager.Instance.PlayPublicSound(menuOpenMoreSound);
+    }
+    public void DeleteSaveGamePrompt(SaveGameSelectorScript saveGame) {
+        loadGameMenu.gameObject.SetActive(false);
+        deleteInspector.gameObject.SetActive(true);
+        deleteInspector.Initialize(this, saveGame);
         GameManager.Instance.PlayPublicSound(menuOpenMoreSound);
     }
     public void InspectItemCollection(GameData data) {

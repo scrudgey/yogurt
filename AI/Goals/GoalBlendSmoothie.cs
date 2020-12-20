@@ -27,6 +27,7 @@ namespace AI {
         public void Reset() {
             routine.Reset();
             smoothieOrder.val = -1;
+            condition.conditionMet = false;
             // Debug.Log(smoothieOrder.val);
         }
 
