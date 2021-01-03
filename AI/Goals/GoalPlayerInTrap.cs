@@ -7,8 +7,14 @@ namespace AI {
         public GoalPlayerInTrap(GameObject g, Controller c, Ref<GameObject> target) : base(g, c) {
             goalThought = "I'm looking for something.";
             routines.Add(new Routine(g, c));
-            TrapDoor trapdoor = GameObject.Find("trapdoor").GetComponent<TrapDoor>();
-            successCondition = new ConditionPlayerInTrap(g, target, trapdoor);
+            GameObject trapObj = GameObject.Find("trapdoor");
+            if (trapObj != null) {
+                TrapDoor trapdoor = trapObj.GetComponent<TrapDoor>();
+                successCondition = new ConditionPlayerInTrap(g, target, trapdoor);
+            } else {
+                successCondition = new ConditionFail(g);
+            }
+
         }
     }
 }

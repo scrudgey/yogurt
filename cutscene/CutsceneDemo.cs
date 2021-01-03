@@ -15,7 +15,6 @@ public class CutsceneDemo : Cutscene {
     }
     public void MenuWasClosed() {
         complete = true;
-        // UINew.Instance.RefreshUI(active: false);
         GameObject.Destroy(polestar);
         GameManager.Instance.NewDay();
     }

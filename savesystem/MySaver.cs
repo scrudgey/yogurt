@@ -516,6 +516,12 @@ public class MySaver {
             } else {
                 Debug.LogWarning($"remove id {marker.id} not in object database!");
             }
+
+
+            if (GameManager.Instance.data.toiletItems.Contains(marker.id)) {
+                Debug.Log($"removing toilet object {gameObject}");
+                GameManager.Instance.data.toiletItems.Remove(marker.id);
+            }
         } else {
             Debug.LogWarning($"asked to remove saved object {gameObject} with no marker");
         }
@@ -524,5 +530,6 @@ public class MySaver {
             disabledPersistents.Remove(gameObject);
             Debug.Log($"removing disabled persistent {gameObject}");
         }
+
     }
 }

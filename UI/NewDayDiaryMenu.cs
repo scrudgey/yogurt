@@ -68,8 +68,7 @@ public class NewDayDiaryMenu : MonoBehaviour {
             }
         } else topItemIcon.sprite = itemRenderer.sprite;
 
-        // Destroy(item);
-        // DestroyImmediate(item);
+        // do not destroy item, because it's just a loaded prefab.
     }
 
     public void OkayButtonCallback() {

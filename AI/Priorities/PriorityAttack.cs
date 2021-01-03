@@ -65,6 +65,8 @@ namespace AI {
             }
         }
         public override float Urgency(Personality personality) {
+            if (awareness.nearestEnemy.val == null)
+                return urgencyMinor;
             if (personality.haunt == Personality.Haunt.yes)
                 return Priority.urgencyLarge;
             if (netBuffs != null && netBuffs.ContainsKey(BuffType.enraged) && netBuffs[BuffType.enraged].active())

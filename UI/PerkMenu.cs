@@ -10,6 +10,7 @@ public class PerkMenu : MonoBehaviour {
     public Text perkDescText;
     public Text requiredText;
     public Text levelText;
+    public Text buttonText;
     public Button doneButton;
     public Button acceptButton;
     public bool perkChosen;
@@ -166,6 +167,7 @@ public class PerkMenu : MonoBehaviour {
     public void AcceptButtonClicked() {
         if (selectedPerk == null)
             return;
+        buttonText.text = "CHOOSE PERK (0)";
         perkChosen = true;
         acceptButton.interactable = false;
         doneButton.interactable = true;
@@ -184,7 +186,6 @@ public class PerkMenu : MonoBehaviour {
         }
         selectedPerk.GetComponent<Button>().interactable = false;
         UINew.Instance.RefreshUI(active: true);
-        // UINew.Instance.PlayUISound("sounds/8-bit/BOUNCE3");
         GameManager.Instance.PlayPublicSound(Resources.Load("sounds/8-bit/BOUNCE3") as AudioClip);
 
         numberCollected += 1;

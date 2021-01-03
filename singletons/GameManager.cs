@@ -108,7 +108,7 @@ public partial class GameManager : Singleton<GameManager> {
         {"chamber", "meditation chamber"},
         {"dungeon", "oubliette"},
         {"potion", "apothecary"},
-        {"cave3", "sewer"},
+        {"cave3", "sewers"},
         {"moon_pool", "moon pool"},
         {"moon_town", "moon town"},
         {"neighborhood", "outdoors"},
@@ -146,8 +146,8 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = false;
-    public bool demo = true;
+    public bool debug = true;
+    public bool demo = false;
     public bool failedLevelLoad = false;
     public Gender playerGender;
     public bool loadingSavedGame = false;
@@ -261,7 +261,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
     }
     public bool InCutsceneLevel() {
-        return SceneManager.GetActiveScene().buildIndex <= 6;
+        return SceneManager.GetActiveScene().buildIndex <= 7;
     }
     public void FocusIntrinsicsChanged(Intrinsics intrinsics) {
         Dictionary<BuffType, Buff> netBuffs = intrinsics.NetBuffs();
@@ -560,11 +560,17 @@ public partial class GameManager : Singleton<GameManager> {
             MySaver.HandleLoadedPersistents(data.toiletItems, newDayLoad: false);
             foreach (MyMarker marker in GameObject.FindObjectsOfType<MyMarker>()) {
                 if (data.toiletItems.Contains(marker.id)) {
-                    marker.transform.position = bounds.center + new Vector3(
+                    Debug.Log($"loading toilet item {marker.gameObject}");
+                    Vector3 newPos = bounds.center + new Vector3(
                         (UnityEngine.Random.value - 0.5f) * bounds.size.x,
                         (UnityEngine.Random.value - 0.5f) * bounds.size.y,
                         (UnityEngine.Random.value - 0.5f) * bounds.size.z
                     );
+                    marker.transform.position = newPos;
+                    PhysicalBootstrapper pb = marker.gameObject.GetComponent<PhysicalBootstrapper>();
+                    pb.doLoad = false;
+                    // Debug.Log($"toilet position {marker.transform.position}");
+                    // MySaver.objectDataBase[marker.id].transformPosition = newPos;
                 }
             }
         }
@@ -616,6 +622,13 @@ public partial class GameManager : Singleton<GameManager> {
         // TODO: switch magician dialogue in hallucination scene
         if (data.days >= 2) {
             UnlockTVShow("vampire1");
+        }
+
+        if (demo) {
+            if (sceneName == "moon1") {
+                throneroomCoroutine = CutsceneManager.Instance.waitAndStartCutscene<CutsceneDemo>(3);
+                StartCoroutine(throneroomCoroutine);
+            }
         }
     }
     public System.Collections.IEnumerator waitAndShowDiary(float waitTime, string diary) {
@@ -673,6 +686,9 @@ public partial class GameManager : Singleton<GameManager> {
         }
         if (sceneName == "anti_mayor_cutscene") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneAntiMayor>();
+        }
+        if (sceneName == "ending_cutscene") {
+            CutsceneManager.Instance.InitializeCutscene<CutsceneEnding>();
         }
     }
     void PlayerEnter() {
@@ -886,6 +902,11 @@ public partial class GameManager : Singleton<GameManager> {
     }
     public void BoardRoomCutscene() {
         SceneManager.LoadScene("boardroom_cutscene");
+        sceneTime = 0f;
+        data.entryID = -99;
+    }
+    public void EndingCutscene() {
+        SceneManager.LoadScene("ending_cutscene");
         sceneTime = 0f;
         data.entryID = -99;
     }

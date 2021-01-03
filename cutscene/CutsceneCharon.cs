@@ -68,7 +68,7 @@ public class CutsceneCharon : Cutscene {
                 // state = State.stop;
                 ratchetCollider.enabled = true;
             }
-            if (charon.transform.position.x >= 12.34) {
+            if (charon.transform.position.x >= 8.2) {
                 state = State.stop;
             }
         } else if (state == State.stop) {

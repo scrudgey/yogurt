@@ -246,7 +246,7 @@ public class Speech : Interactive, ISaveable {
     void HandleOnCamera(MessageOnCamera message) {
         onCamera = message.value;
     }
-    void HandleSpeech(MessageSpeech message) {
+    public void HandleSpeech(MessageSpeech message) {
         if (message.swearTarget != null) {
             Swear(target: message.swearTarget);
             return;
@@ -431,7 +431,6 @@ public class Speech : Interactive, ISaveable {
         speaking = false;
         // bubbleParent.SetActive(false);
         bubbleText.text = "";
-        speakTime = 0;
         queueTime = 0;
     }
     public void LateUpdate() {
@@ -478,7 +477,7 @@ public class Speech : Interactive, ISaveable {
         if (inDialogue)
             return;
 
-        speakTime = DoubleSeat(message.phrase.Length, 2f, 50f, 5f, 2f);
+        speakTime = DurationHold(message.phrase);
         speakTimeTotal = speakTime;
         speakSpeed = message.phrase.Length / speakTime;
         swearMask = speechData.swearList.ToArray();
@@ -528,19 +527,7 @@ public class Speech : Interactive, ISaveable {
             }
         }
     }
-    // double-exponential seat easing function
-    public static float DoubleSeat(float x, float a, float w, float max, float min) {
-        float result = 0f;
-        if (x / w > 1) {
-            x = w;
-        }
-        if (x / w <= 0.5) {
-            result = Mathf.Pow(2 * x / w, a) / 2 * (max - min) + min;
-        } else {
-            result = (1f - Mathf.Pow(2f - 2f * (x / w), a) / 2f) * (max - min) + min;
-        }
-        return result;
-    }
+
     public void Swear(GameObject target = null) {
         if (!target) {
             MessageSpeech message = new MessageSpeech("shazbot!");
@@ -695,6 +682,27 @@ public class Speech : Interactive, ISaveable {
         spacingRange.y = data.floats["spacingHigh"];
         voice = data.strings["speechSet"];
         glibSpeakWith = data.bools["glibSpeakWith"];
+    }
+
+
+    public static float DurationHold(string phrase) {
+        return DoubleSeat(phrase.Length, 2f, 50f, 5f, 2f);
+    }
+    public static float DoubleSeat(float x, float a, float w, float max, float min) {
+        float result = 0f;
+        if (x / w > 1) {
+            x = w;
+        }
+        if (x / w <= 0.5) {
+            result = Mathf.Pow(2 * x / w, a) / 2 * (max - min) + min;
+        } else {
+            result = (1f - Mathf.Pow(2f - 2f * (x / w), a) / 2f) * (max - min) + min;
+        }
+        return result;
+    }
+    public static float LinearDuration(string phrase) {
+        float slope = GameManager.Instance.GetDurationCoefficient();
+        return slope * phrase.Length + 1;
     }
 }
 

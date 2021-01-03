@@ -16,10 +16,15 @@ public class CommercialReportMenu : MonoBehaviour {
     public void NewDayButton() {
         UINew.Instance.CloseActiveMenu();
         MySaver.Save();
-        if (GameManager.Instance.data.activeCommercial.cutscene != "none") {
-            if (GameManager.Instance.data.activeCommercial.gravy) {
+        Commercial commercial = GameManager.Instance.data.activeCommercial;
+        if (commercial != null && GameManager.Instance.data.activeCommercial.cutscene != "none") {
+            if (commercial.gravy) {
                 GameManager.Instance.AntiMayorCutscene();
-            } else GameManager.Instance.BoardRoomCutscene();
+            } else if (commercial.cutscene == "ending") {
+                GameManager.Instance.EndingCutscene();
+            } else {
+                GameManager.Instance.BoardRoomCutscene();
+            }
         } else {
             GameManager.Instance.NewDayCutscene();
         }

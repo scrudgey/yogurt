@@ -68,7 +68,7 @@ public class SoundEffect : MonoBehaviour {
     public void Say(string message) {
         if (message == "")
             return;
-        speakTime = Speech.DoubleSeat(message.Length, 2f, 50f, 5f, 2f);
+        speakTime = Speech.DurationHold(message);
         words = message;
         bubbleText.color = Color.green;
     }

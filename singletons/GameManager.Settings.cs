@@ -8,6 +8,7 @@ public partial class GameManager : Singleton<GameManager> {
     static readonly string prefsKey_MusicVolume = "GameManager_MusicVolume";
     static readonly string prefsKey_SFXVolume = "GameManager_SFXVolume";
     static readonly string prefsKey_MusicOn = "GameManager_MusicOn";
+    static readonly string prefsKey_Duration = "GameManager_DurationCoefficient";
     AudioMixer sfxMixer;
     AudioMixer musicMixer;
     public void InitSettings() {
@@ -35,6 +36,9 @@ public partial class GameManager : Singleton<GameManager> {
             MusicController.Instance.StopTrack();
         }
     }
+    public void SetDurationCoefficient(float val) {
+        PlayerPrefs.SetFloat(prefsKey_Duration, val);
+    }
 
     public float GetMusicVolume() {
         return PlayerPrefs.GetFloat(prefsKey_MusicVolume, 1f);
@@ -44,6 +48,9 @@ public partial class GameManager : Singleton<GameManager> {
     }
     public bool GetMusicState() {
         return PlayerPrefs.GetInt(prefsKey_MusicOn, 1) == 1;
+    }
+    public float GetDurationCoefficient() {
+        return PlayerPrefs.GetFloat(prefsKey_Duration, 0.1f);
     }
 }
 

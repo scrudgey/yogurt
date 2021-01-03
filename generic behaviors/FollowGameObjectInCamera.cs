@@ -28,7 +28,7 @@ public class FollowGameObjectInCamera : MonoBehaviour {
             pos.y * canvasRect.sizeDelta.y
             );
         // prevent going off screen on the left
-        screenPos.x = Mathf.Max(screenPos.x, rect.rect.width / 4f);
+        screenPos.x = Mathf.Max(screenPos.x, rect.rect.width / 2f);
 
         // Debug.Log($"{screenPos.x} : {canvasRect.rect.width} - {rect.rect.width / 2f} = {canvasRect.rect.width - rect.rect.width / 2f}");
 
@@ -36,7 +36,7 @@ public class FollowGameObjectInCamera : MonoBehaviour {
         screenPos.x = Mathf.Min(screenPos.x, canvasRect.rect.width - (rect.rect.width / 2f));
 
         // prevent ging below the screen
-        screenPos.y = Mathf.Max(screenPos.y, rect.rect.height / 4f);
+        screenPos.y = Mathf.Max(screenPos.y, rect.rect.height / 2f);
 
         // prevent going above the screen
         screenPos.y = Mathf.Min(screenPos.y, camRect.height - (rect.rect.height / 2f));

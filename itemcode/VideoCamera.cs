@@ -123,6 +123,9 @@ public class VideoCamera : Interactive {
         }
     }
     public void Enable() {
+        CameraTutorialText ctt = GetComponent<CameraTutorialText>();
+        if (ctt != null)
+            ctt.Disable();
         UINew.Instance.ShowMenu(UINew.MenuType.scriptSelect);
     }
     public bool Enable_Validation() {

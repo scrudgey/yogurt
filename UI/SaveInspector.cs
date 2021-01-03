@@ -112,7 +112,7 @@ public class SaveInspector : MonoBehaviour {
             this.commercialStat = new CompletionStat(data.completeCommercials.Count, 23);
             this.achievementStat = new CompletionStat(completeAchievements, data.achievements.Count);
             this.levelStat = new CompletionStat(data.unlockedScenes.Count, GameManager.sceneNames.Count);
-            this.recipeStat = new CompletionStat(data.collectedPotions.Count, 13 * 2);
+            this.recipeStat = new CompletionStat(completeIngredients, 13 * 2);
         }
     }
     public void ItemCollectionCallback() {

@@ -349,7 +349,8 @@ public class InputController : Singleton<InputController> {
             //Fire key 
             if (firePressedThisFrame) {
                 controller.ShootPressed();
-                UINew.Instance.RefreshUI(active: true);
+                if (controller.Authenticate())
+                    UINew.Instance.RefreshUI(active: true);
             }
             if (firePressedHeld) {
                 controller.ShootHeld();
