@@ -32,12 +32,14 @@ public class NewDayDiaryMenu : MonoBehaviour {
         foreach (Commercial commercial in GameManager.Instance.data.newUnlockedCommercials) {
             GameObject newPanel = GameObject.Instantiate(Resources.Load("UI/panelText")) as GameObject;
             newPanel.GetComponent<Text>().text = commercial.name;
-            newPanel.transform.SetParent(commercialsPanel.transform);
+            newPanel.transform.SetParent(commercialsPanel.transform, false);
+            newPanel.transform.localScale = Vector3.one;
             RectTransform rectTransform = newPanel.GetComponent<RectTransform>();
             // rectTransform.localScale = Vector3.one;
             Vector3 pos = rectTransform.localPosition;
             pos.z = 0;
             rectTransform.localPosition = pos;
+            rectTransform.localScale = Vector3.one;
         }
         GameManager.Instance.data.newUnlockedCommercials = new HashSet<Commercial>();
 

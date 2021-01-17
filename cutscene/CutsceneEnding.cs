@@ -11,6 +11,7 @@ public class CutsceneEnding : Cutscene {
     public abstract class Module {
         public GameObject gameObject;
         public bool complete;
+        public bool fade;
         abstract public void Update();
         abstract public void Start();
         abstract public void End();
@@ -47,7 +48,9 @@ public class CutsceneEnding : Cutscene {
         public override void Start() {
             gameObject.SetActive(true);
             fadeIn = true;
-            UINew.Instance.FadeIn(() => { fadeIn = false; Debug.Log("fade in callback"); });
+            UINew.Instance.FadeIn(() => {
+                fadeIn = false;
+            });
         }
         public override void End() {
             gameObject.SetActive(false);
@@ -243,7 +246,6 @@ public class CutsceneEnding : Cutscene {
     public override void Configure() {
         if (configured)
             return;
-        Debug.Log("config cutscene");
         configured = true;
         controller = GameObject.FindObjectOfType<EndingCutsceneController>();
         CameraControl camControl = GameObject.FindObjectOfType<CameraControl>();
@@ -254,24 +256,25 @@ public class CutsceneEnding : Cutscene {
         newsModule = new NewsModule(controller.objNews, "endingNews", controller.NewsMoeSpeech, null, null, controller.ViewingSatanSpeech);
         hqModule = new HQModule(controller.objHQ, "endingHQ", controller.HQMoeSpeech, controller.HQCurlySpeech, controller.HQLarrySpeech, controller.HQCEOSpeech);
         state = State.start;
-        viewingModule.scriptTimeSpace = 0f;
         getCurrentModule().Start();
     }
 
     public override void Update() {
         Module module = getCurrentModule();
         module.Update();
-        if (module.complete) {
-            UINew.Instance.FadeOut(() => doNextModule(module));
-            UINew.Instance.FadeIn(() => { fadeIn = false; Debug.Log("fade in callback"); });
+        if (module.complete && !module.fade) {
+            module.fade = true;
+            UINew.Instance.FadeOut(() => {
+                doNextModule(module);
+            });
         }
     }
     public void doNextModule(Module module) {
         module.End();
         NextModule();
-        getCurrentModule().Start();
     }
     void NextModule() {
+        bool startNextmodule = true;
         // switch to next module
         switch (state) {
             case State.start:
@@ -289,18 +292,24 @@ public class CutsceneEnding : Cutscene {
             case State.hq:
             default:
                 EndCutscene();
+                startNextmodule = false;
                 break;
+        }
+        if (startNextmodule) {
+            getCurrentModule().Start();
         }
     }
     void EndCutscene() {
-        Debug.Log("end cutscene");
         complete = true;
         CleanUp();
-        GameManager.Instance.ReturnToPhone();
+        // GameManager.Instance.data.creditSequence = true;
+        GameManager.Instance.data.state = GameState.endCredits;
+
+        GameManager.Instance.DoLeaveScene("neighborhood", 1);
     }
 
     public override void EscapePressed() {
-        EndCutscene();
+        // EndCutscene();
     }
     public override void CleanUp() {
         foreach (Module module in new List<Module> { startModule, viewingModule, streetModule, newsModule, hqModule }) {

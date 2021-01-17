@@ -264,4 +264,9 @@ public class Controllable : MonoBehaviour {
             running = value;
         }
     }
+    public virtual void ShowInventory(Controller controller) {
+        if (Authenticate(controller)) {
+            UINew.Instance.ShowInventoryMenu();
+        }
+    }
 }

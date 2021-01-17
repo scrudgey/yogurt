@@ -116,6 +116,7 @@ public partial class DialogueMenu : MonoBehaviour {
     public bool cutsceneDialogue;
     public bool disableCommand;
     private bool doTrapDoor;
+    private bool doCEOSequence;
     private bool doVampireAttack;
     public bool keypressedThisFrame;
     static List<string> cutsceneDialogues = new List<string>{
@@ -181,7 +182,7 @@ public partial class DialogueMenu : MonoBehaviour {
         }
     }
 
-    public void Configure(Speech instigator, Speech target, bool interruptDefault = false, string dialogue = null) {
+    public void Configure(Speech instigator, Speech target, bool interruptDefault = false, string dialogue = null, bool recuit = false) {
         Start();
         this.instigator = instigator;
         this.target = target;
@@ -246,6 +247,9 @@ public partial class DialogueMenu : MonoBehaviour {
             VampireAttack();
         if (doTrapDoor)
             VampireTrap();
+        if (doCEOSequence) {
+            GameManager.Instance.StartCEOSequence();
+        }
         if (targetControl)
             targetControl.disabled = false;
         if (instigatorControl)
@@ -254,6 +258,7 @@ public partial class DialogueMenu : MonoBehaviour {
         //     targetAnchoriteDance.StartDance();
         if (menuClosed != null)
             menuClosed();
+        menuClosed = null;
     }
     public void UpdateActiveText() {
         switch (textSize) {
@@ -396,6 +401,7 @@ public partial class DialogueMenu : MonoBehaviour {
         string[] ender = new string[] { "END" };
         Say(new Monologue(target, ender));
     }
+
     void DeclineCommand() {
         List<string> response = new List<string>();
         response.Add("I'd rather not.");
@@ -404,6 +410,21 @@ public partial class DialogueMenu : MonoBehaviour {
     void AcceptCommand() {
         List<string> response = new List<string>();
         response.Add("Why certainly my good man!");
+        Say(new Monologue(target, response.ToArray()));
+    }
+    public void RecruitAsk(Speech targetSpeech) {
+        Speech playerSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
+        Configure(playerSpeech, targetSpeech, interruptDefault: true);
+
+        List<string> request = new List<string>();
+        request.Add("Say, how would you like to be the new yogurt commercial actor?");
+        Say(new Monologue(instigator, request.ToArray()));
+
+        string[] ender = new string[] { "END" };
+        Say(new Monologue(target, ender));
+
+        List<string> response = new List<string>();
+        response.Add("It has always been my dream to be a yogurt commercial actor!");
         Say(new Monologue(target, response.ToArray()));
     }
     public void HandCommandCallback(ActionButtonScript.buttonType btype) {

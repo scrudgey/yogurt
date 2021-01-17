@@ -678,6 +678,12 @@ public partial class Toolbox : Singleton<Toolbox> {
             return outfit.gender;
         } else return Gender.male;
     }
+    public static SkinColor GetSkinColor(GameObject target) {
+        AdvancedAnimation advancedAnimation = target.GetComponent<AdvancedAnimation>();
+        if (advancedAnimation != null) {
+            return advancedAnimation.skinColor;
+        } else return SkinColor.light;
+    }
 
     public void deactivateEventually(GameObject target) {
         DestroyAfterTime dat = target.AddComponent<DestroyAfterTime>();

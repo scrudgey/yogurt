@@ -321,7 +321,8 @@ public class InputController : Singleton<InputController> {
             if (inventoryPressedThisFrame) {
                 Inventory inv = focus.GetComponent<Inventory>();
                 if (inv != null) {
-                    UINew.Instance.ShowInventoryMenu();
+                    // UINew.Instance.ShowInventoryMenu();
+                    controller.ShowInventory();
                 }
             }
         } else if (state != ControlState.normal & state != ControlState.commandSelect & state != ControlState.hypnosisSelect & state != ControlState.insultSelect & state != ControlState.swearSelect & state != ControlState.detectSelect) {
@@ -331,7 +332,8 @@ public class InputController : Singleton<InputController> {
         if (inventoryPressedThisFrame) {
             Inventory inv = focus.GetComponent<Inventory>();
             if (inv != null) {
-                UINew.Instance.ShowInventoryMenu();
+                // UINew.Instance.ShowInventoryMenu();
+                controller.ShowInventory();
             }
         }
         inventoryPressedThisFrame = false;
@@ -490,7 +492,8 @@ public class InputController : Singleton<InputController> {
                                 ResetLastLeftClicked();
                             } else {
                                 if (inv.items.Count > 0)
-                                    UINew.Instance.ShowInventoryMenu();
+                                    // UINew.Instance.ShowInventoryMenu();
+                                    controller.ShowInventory();
                             }
                         }
                     } else { // clicked other

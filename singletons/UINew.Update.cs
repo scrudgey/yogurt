@@ -206,7 +206,10 @@ public partial class UINew : Singleton<UINew> {
             GameObject top = InputController.Instance.GetFrontObject(hits);
             target = InputController.Instance.GetBaseInteractive(top.transform);
         }
-        bool cursorOverButton = EventSystem.current.IsPointerOverGameObject();
+        bool cursorOverButton = false;
+        if (EventSystem.current != null) {
+            cursorOverButton = EventSystem.current.IsPointerOverGameObject();
+        }
 
         UpdateCursor(highlight);
         UpdateActionText(highlight, target, cursorOverButton);

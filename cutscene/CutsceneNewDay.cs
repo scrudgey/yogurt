@@ -14,10 +14,13 @@ public class CutsceneNewDay : Cutscene {
     private float stopDayFade = 2.5f;
     private float stopTime = 12f;
     public override void Configure() {
+        Debug.Log("starting new day cutscene");
         configured = true;
         canvas = GameObject.Find("Canvas");
         tomText = canvas.transform.Find("tomText").GetComponent<Text>();
         dayText = canvas.transform.Find("dayText").GetComponent<Text>();
+        tomText.color = Color.clear;
+        dayText.color = Color.clear;
 
         tomText.text = GameManager.Instance.saveGameName + "'s house";
         dayText.text = "Day " + GameManager.Instance.data.days.ToString();
@@ -38,7 +41,7 @@ public class CutsceneNewDay : Cutscene {
             col.a = (float)PennerDoubleAnimation.ExpoEaseIn(timer - startDayFade, 0, 1, stopDayFade - startDayFade);
             dayText.color = col;
         }
-        if (timer >= stopTime || Keyboard.current.anyKey.isPressed) {
+        if (timer >= stopTime || (timer > startDayFade && Keyboard.current.anyKey.isPressed)) {
             InputController.Instance.ResetInput();
             complete = true;
             GameManager.Instance.NewDay();

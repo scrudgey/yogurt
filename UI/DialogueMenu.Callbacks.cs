@@ -86,6 +86,14 @@ public partial class DialogueMenu : MonoBehaviour {
                 CutsceneManager.Instance.InitializeCutscene<CutsceneCharon>();
             }
         }
+        if (text == "SATANCALLBACK") {
+            nextLine = true;
+            GameManager.Instance.data.state = GameState.ceoPlus;
+            doCEOSequence = true;
+            // menuClosed += () => {
+            //     GameManager.Instance.StartCEOSequence();
+            // };
+        }
         if (nextLine)
             NextLine();
     }

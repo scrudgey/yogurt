@@ -48,7 +48,7 @@ public class SaveGameSelectorScript : MonoBehaviour {
     }
 
     public void DeleteClicked() {
-        Debug.Log($"detele {saveName}");
+        // Debug.Log($"detele {saveName}");
         startMenu.DeleteSaveGamePrompt(this);
     }
 }

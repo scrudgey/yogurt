@@ -6,6 +6,13 @@ using UnityEngine.SceneManagement;
 using System.Linq;
 using System;
 
+public enum GameState {
+    normal,
+    endCredits,
+    postCredits,
+    ceoPlus
+}
+
 [System.Serializable]
 public class GameData {
     public string prefabName;
@@ -78,6 +85,9 @@ public class GameData {
     public List<System.Guid> toiletItems = new List<System.Guid>();
     public bool loadedSewerItemsToday = false;
     public bool yogurtDetective = false;
+    public bool showedFirstCEODiary = false;
+    public GameState state = GameState.postCredits;
+
     public GameData() {
         days = 0;
         SetSaveDateTime();
@@ -187,12 +197,35 @@ public partial class GameManager : Singleton<GameManager> {
         if (saveGameName == "test")
             MySaver.CleanupSaves();
         if (!InCutsceneLevel()) {
-            NewGame(switchlevel: false);
+            if (data.state == GameState.endCredits) {
+                Debug.Log("start credit sequence");
+                // change music to credit sequence?
+                cam = GameObject.FindObjectOfType<Camera>();
+                CutsceneManager.Instance.InitializeCutscene<CutsceneCredits>();
+                CutsceneManager.Instance.cutscene.Configure();
+            } else {
+                NewGame(switchlevel: false);
+            }
         } else {
             InitializeNonPlayableLevel();
         }
+
+        // these are for debug. in production, data.state will never start as anything other than normal.
+        // remember to change the real code, in scene was loaded
+        if (data.state == GameState.postCredits) {
+            SetupDevilsOffer();
+        }
+        if (data.state == GameState.ceoPlus) {
+            GameObject origPlayer = GameManager.Instance.playerObject;
+            GameObject ceo = GameObject.Instantiate(Resources.Load("prefabs/CEO"), GameManager.Instance.playerObject.transform.position, Quaternion.identity) as GameObject;
+            GameManager.Instance.SetFocus(ceo);
+            GameObject.Destroy(origPlayer);
+            GameManager.Instance.data.prefabName = "CEO";
+            MySaver.Save();
+        }
         SceneManager.sceneLoaded += SceneWasLoaded;
         // these bits are for debug!
+
         Scene scene = SceneManager.GetActiveScene();
         if (scene.name == "boardroom_cutscene") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneBoardroom>();
@@ -261,7 +294,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
     }
     public bool InCutsceneLevel() {
-        return SceneManager.GetActiveScene().buildIndex <= 7;
+        return SceneManager.GetActiveScene().buildIndex <= 8;
     }
     public void FocusIntrinsicsChanged(Intrinsics intrinsics) {
         Dictionary<BuffType, Buff> netBuffs = intrinsics.NetBuffs();
@@ -343,21 +376,30 @@ public partial class GameManager : Singleton<GameManager> {
         UINew.Instance.FadeOut(() => DoLeaveScene(toSceneName, toEntryNumber));
     }
     public void SceneWasLoaded(Scene scene, LoadSceneMode mode) {
-        UINew.Instance.FadeIn(() => DoSceneWasLoaded(scene, mode));
+        UINew.Instance.Blackout();
+
         Toolbox.Instance.numberOfLiveSpeakers = 0;
         if (publicAudio != null)
             publicAudio.Stop();
         sceneTime = 0f;
         // Debug.Log($"scene was loaded: {scene.name}");
-        MusicController.Instance.SceneChange(scene.name);
         Flammable.audioPlayingFires = new HashSet<Flammable>(); // probably unnecessary
 
         if (throneroomCoroutine != null)
             StopCoroutine(throneroomCoroutine);
 
-        if (InCutsceneLevel()) {
+        if (data != null && data.state == GameState.endCredits) {
+            // if this is a credit sequence, run the credit cutscene
+
+            // change music to credit sequence?
+            cam = GameObject.FindObjectOfType<Camera>();
+            CutsceneManager.Instance.InitializeCutscene<CutsceneCredits>();
+            CutsceneManager.Instance.cutscene.Configure();
+        } else if (InCutsceneLevel()) {
+            MusicController.Instance.SceneChange(scene.name);
             InitializeNonPlayableLevel();
         } else {
+            MusicController.Instance.SceneChange(scene.name);
             try {
                 InitializePlayableLevel(loadLevel: true);
                 failedLevelLoad = false;
@@ -374,17 +416,40 @@ public partial class GameManager : Singleton<GameManager> {
                 return;
             }
         }
+        if (data != null && data.state == GameState.postCredits) {
+            SetupDevilsOffer();
+        }
         Time.timeScale = 0f;
+        UINew.Instance.FadeIn(() => Time.timeScale = 1f);
+    }
+    public void SetupDevilsOffer() {
+        // post credits: the devil's offer
+        data.teleportedToday = true;
+        Transform satanRoot = GameObject.Find("Satan").transform;
+        Transform playerRoot = playerObject.transform;
+        GameObject doorway = GameObject.Find("doorway");
+        // GameObject hastur = GameObject.Find("Hastur");
+        // GameObject shabnax = GameObject.Find("Shabnax");
+        // Destroy(hastur);
+        // Destroy(shabnax);
+        Destroy(doorway);
+        foreach (MyMarker marker in FindObjectsOfType<MyMarker>()) {
+            if (marker.transform.IsChildOf(satanRoot) || marker.transform.IsChildOf(playerRoot)) {
+                continue;
+            }
+            Destroy(marker.gameObject);
+        }
+        GameObject lockedDoor = GameObject.Find("lockedDoor");
+        lockedDoor.GetComponent<SpriteRenderer>().enabled = true;
+        lockedDoor.GetComponent<PolygonCollider2D>().enabled = true;
+        satanRoot.GetComponent<Speech>().defaultMonologue = "satan_offer";
+        satanRoot.GetComponent<Awareness>().FormPersonalAssessment(playerObject).status = PersonalAssessment.friendStatus.friend;
     }
     public void DoLeaveScene(string toSceneName, int toEntryNumber) {
         Time.timeScale = 1f;
-
         MySaver.Save();
         data.entryID = toEntryNumber;
         SceneManager.LoadScene(toSceneName);
-    }
-    public void DoSceneWasLoaded(Scene scene, LoadSceneMode mode) {
-        Time.timeScale = 1f;
     }
     void ResetGameState() {
         try {
@@ -485,6 +550,10 @@ public partial class GameManager : Singleton<GameManager> {
     public void SpecificSceneInitialize(string sceneName) {
         if (sceneName == "neighborhood") {
             GameObject packageSpawnPoint = GameObject.Find("packageSpawnPoint");
+            if (data.state == GameState.ceoPlus) {
+                GameObject condo = GameObject.Find("condos2/condo");
+                condo.GetComponent<SpriteRenderer>().enabled = true;
+            }
             if (data.firstTimeLeavingHouse) {
                 foreach (string package in data.packages) {
                     if (!data.collectedItems.Contains(package)) {
@@ -540,6 +609,20 @@ public partial class GameManager : Singleton<GameManager> {
             CutscenePortal cutscene = new CutscenePortal();
             cutscene.destination = CutscenePortal.Destination.venus;
             CutsceneManager.Instance.InitializeCutscene(cutscene);
+        }
+        if (sceneName == "portal_ceo") {
+            CutscenePortal cutscene = new CutscenePortal();
+            cutscene.destination = CutscenePortal.Destination.ceo;
+            CutsceneManager.Instance.InitializeCutscene(cutscene);
+        }
+        if (sceneName == "office") {
+            // remove the other CEO
+            if (data.state == GameState.ceoPlus) {
+                foreach (GameObject ceo in GameObject.FindObjectsOfType<GameObject>().Where(obj => obj.name == "CEO")) {
+                    if (ceo != playerObject)
+                        Destroy(ceo);
+                }
+            }
         }
         if (sceneName == "moon1" && (data.entryID == 420 || data.entryID == 99)) {
             CutsceneManager.Instance.InitializeCutscene<CutsceneMoonLanding>();
@@ -606,6 +689,11 @@ public partial class GameManager : Singleton<GameManager> {
                     break;
                 }
             }
+            if (data.state == GameState.ceoPlus && !data.showedFirstCEODiary) {
+                data.showedFirstCEODiary = true;
+                StartCoroutine(waitAndShowDiary(1.5f, "ceo"));
+                StartCoroutine(waitAndShowDiary(3.5f, "ceo2"));
+            }
         }
         if (sceneName == "hallucination") {
             if (data.activeMagicianSequence != "") {
@@ -653,7 +741,8 @@ public partial class GameManager : Singleton<GameManager> {
         motion2.frequency = -14;
 
         GameObject nightShade = GameObject.Instantiate(Resources.Load("UI/nightShade")) as GameObject;
-        nightShade.GetComponent<FadeInOut>().state = FadeInOut.State.pingPong;
+        // nightShade.GetComponent<FadeInOut>().state = FadeInOut.State.pingPong;
+        nightShade.GetComponent<FadeInOut>().PingPong(0.2f, 0.53f, 8, Color.black);
         nightShade.GetComponent<Canvas>().worldCamera = cam;
     }
 
@@ -935,6 +1024,10 @@ public partial class GameManager : Singleton<GameManager> {
         sceneTime = 0f;
         data.entryID = 77;
     }
+    public void StartCEOSequence() {
+        data.state = GameState.ceoPlus;
+        DoLeaveScene("portal_ceo", -99);
+    }
     public void TitleScreen() {
         data = null;
         SceneManager.LoadScene("title");
@@ -1055,6 +1148,13 @@ public partial class GameManager : Singleton<GameManager> {
         // initialize achievements
         data.achievements = AchievementManager.LoadAchievements();
         data.stats = new SerializableDictionary<StatType, Stat>();
+
+        // TODO: DELETE THIS!!!
+        // unlock satan's throneroom- not in the ordinary game.
+        // data.unlockedScenes.Add("devils_throneroom");
+        // sceneNames["devils_throneroom"] = "devils_throneroom";
+        // data.teleporterUnlocked = true;
+
         return data;
     }
 
@@ -1349,8 +1449,6 @@ public partial class GameManager : Singleton<GameManager> {
         }
         Diary diary = diaryObject.GetComponent<Diary>();
         diary.loadDiaryName = diaryName;
-
-
     }
     public void ShowDiaryEntryDelay(string diaryName, float delay = 2f) {
         throneroomCoroutine = waitAndShowDiary(delay, diaryName);
@@ -1363,10 +1461,15 @@ public partial class GameManager : Singleton<GameManager> {
         data.deaths += 1;
         MySaver.Save();
         UINew.Instance.RefreshUI(active: false);
-        Instantiate(Resources.Load("UI/deathMenu"));
-        CameraControl camControl = FindObjectOfType<CameraControl>();
-        camControl.audioSource.PlayOneShot(Resources.Load("sounds/xylophone/x4") as AudioClip);
-        Toolbox.Instance.SwitchAudioListener(GameObject.Find("Main Camera"));
+        if (data.state == GameState.postCredits) {
+            Debug.Log("start good ending!");
+            CutsceneManager.Instance.InitializeCutscene<CutscenePostCreditsDeath>();
+        } else {
+            Instantiate(Resources.Load("UI/deathMenu"));
+            CameraControl camControl = FindObjectOfType<CameraControl>();
+            camControl.audioSource.PlayOneShot(Resources.Load("sounds/xylophone/x4") as AudioClip);
+            Toolbox.Instance.SwitchAudioListener(GameObject.Find("Main Camera"));
+        }
     }
 
     public string CosmicName() {

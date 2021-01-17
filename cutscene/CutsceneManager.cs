@@ -33,6 +33,7 @@ public class CutsceneManager : Singleton<CutsceneManager> {
             cutscene.Configure();
     }
     public void InitializeCutscene(Cutscene cut) {
+        InputController.Instance.state = InputController.ControlState.cutscene;
         cutscene = cut;
     }
     public void LevelWasLoaded(Scene scene, LoadSceneMode mode) {

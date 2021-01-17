@@ -121,7 +121,7 @@ public class Intrinsics : MonoBehaviour, ISaveable {
                     break;
                 case BuffType.invulnerable:
                     if (kvp.Value.active()) {
-                        Debug.Log($"{this} handling intrinsic invulnerability");
+                        // Debug.Log($"{this} handling intrinsic invulnerability");
                         // only create halo if invuln. is not the hat
                         // add to head if head exists, else add to me
                         if (!(head != null && children.ContainsKey(head) && children[head].NetBuffs()[BuffType.invulnerable].active())) {

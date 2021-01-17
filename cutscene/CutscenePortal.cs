@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
 public class CutscenePortal : Cutscene {
-    public enum Destination { none, venus, hell, magic };
+    public enum Destination { none, venus, hell, magic, ceo };
     public Destination destination;
     private float timer;
     GameObject player;
@@ -35,6 +35,20 @@ public class CutscenePortal : Cutscene {
             Toolbox.Instance.SendMessage(player, CutsceneManager.Instance, message);
         }
         timer += Time.deltaTime;
+        if (destination == Destination.ceo && timer > 5f && GameManager.Instance.data.prefabName != "CEO") {
+            playerController.Dispose();
+            GameObject origPlayer = GameManager.Instance.playerObject;
+            GameObject ceo = GameObject.Instantiate(Resources.Load("prefabs/CEO"), GameManager.Instance.playerObject.transform.position, Quaternion.identity) as GameObject;
+            GameManager.Instance.SetFocus(ceo);
+            GameObject.Destroy(origPlayer);
+            GameManager.Instance.data.prefabName = "CEO";
+            MySaver.Save();
+            UINew.Instance.RefreshUI(active: false);
+
+            playerTransform = ceo.transform;
+            attractor = new LorentzAttractor();
+            playerController = new Controller(ceo);
+        }
         if (timer > 10.0f) {
             playerController.Dispose();
             complete = true;
@@ -50,6 +64,9 @@ public class CutscenePortal : Cutscene {
             } else if (destination == Destination.magic) {
                 SceneManager.LoadScene("hallucination");
                 GameManager.Instance.data.entryID = 420;
+            } else if (destination == Destination.ceo) {
+                SceneManager.LoadScene("apartment");
+                GameManager.Instance.data.entryID = -99;
             }
         }
         Vector3 lorentz = attractor.next(Time.deltaTime);

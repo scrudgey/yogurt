@@ -143,4 +143,9 @@ public class Controller : IDisposable {
             controllable.SetRun(this, value);
         }
     }
+    public void ShowInventory() {
+        if (controllable != null) {
+            controllable.ShowInventory(this);
+        }
+    }
 }
