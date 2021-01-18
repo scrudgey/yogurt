@@ -21,21 +21,12 @@ public class CutscenePickleBottom : Cutscene {
         UINew.Instance.RefreshUI();
         nightShade = GameObject.Instantiate(Resources.Load("UI/nightShade")) as GameObject;
         nightShade.GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
+        FadeInOut fader = nightShade.GetComponent<FadeInOut>();
+        fader.enabled = false;
         peterAI = peter.GetComponent<PeterPicklebottom>();
         peterAI.door = doorway;
         peterAI.PlayThemeSong();
-
-        // TODO
-        // random 2 / 3 items?
-        peterAI.targets = new Stack<Duplicatable>();
-        int maxNumber = Random.Range(5, 10);
-        foreach (Duplicatable dup in GameObject.FindObjectsOfType<Duplicatable>()) {
-            if (dup.PickleReady()) {
-                peterAI.targets.Push(dup);
-            }
-            if (peterAI.targets.Count >= maxNumber)
-                break;
-        }
+        peterAI.SetTargets(); // unnecessary?
         UINew.Instance.SetActionText("You have been visited by Peter Picklebottom");
         Toolbox.Instance.SwitchAudioListener(GameObject.Find("Main Camera"));
         configured = true;

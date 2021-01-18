@@ -12,7 +12,7 @@ namespace AI {
             routineThought = "Panic!!!!";
         }
         public override void Configure() {
-            wanderTime = UnityEngine.Random.Range(0, 2);
+            wanderTime = UnityEngine.Random.Range(0.5f, 1);
             dir = (DirectionEnum)(UnityEngine.Random.Range(0, 4));
         }
         protected override status DoUpdate() {
@@ -34,7 +34,7 @@ namespace AI {
                 }
             } else {
                 if (wanderTime < 0f) {
-                    wanderTime = UnityEngine.Random.Range(0, 0.25f);
+                    wanderTime = UnityEngine.Random.Range(0.5f, 1f);
                     dir = (DirectionEnum)(UnityEngine.Random.Range(0, 4));
                     control.ResetInput();
                     if (UnityEngine.Random.Range(0, 1f) < 0.1f) {

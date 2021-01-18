@@ -27,7 +27,7 @@ public class PauseMenu : MonoBehaviour {
         UINew.Instance.ShowMenu(UINew.MenuType.perkBrowser);
     }
     public void ExplodeHeadClick() {
-        GameManager.Instance.ExplodeHead();
+        GameManager.Instance.ExplodeHead(GameManager.Instance.playerObject);
         UINew.Instance.CloseActiveMenu();
     }
 }

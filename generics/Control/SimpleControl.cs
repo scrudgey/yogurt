@@ -3,6 +3,8 @@
 public class SimpleControl : Controllable, ISaveable {
     protected float baseSpeed;
     public float maxSpeed;
+    public float panicSpeed;
+    public float sprintSpeed;
     public float maxAcceleration;
     public float friction;
     private Vector3 _scaleVector;
@@ -12,19 +14,32 @@ public class SimpleControl : Controllable, ISaveable {
         }
         set {
             if (value != _scaleVector) {
-                transform.localScale = value;
+                transform.localScale = scaleFactor * value;
             }
             _scaleVector = value;
         }
     }
+    public float scaleFactor = 1f;
     public override void Awake() {
         base.Awake();
         baseSpeed = maxSpeed;
         // myRigidBody = GetComponent<Rigidbody2D>();
         Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
+        Toolbox.RegisterMessageCallback<MessageAnimation>(this, HandleAnimation);
     }
     void HandleNetIntrinsic(MessageNetIntrinsic message) {
         maxSpeed = baseSpeed + message.netBuffs[BuffType.speed].floatValue;
+    }
+    void HandleAnimation(MessageAnimation animationMessage) {
+        if (animationMessage.type == MessageAnimation.AnimType.panic) {
+            if (animationMessage.value) {
+                panicSpeed = 0.2f;
+            } else {
+                panicSpeed = 0;
+            }
+        } else {
+
+        }
     }
     public virtual void FixedUpdate() {
         Vector2 acceleration = Vector2.zero;
@@ -36,21 +51,44 @@ public class SimpleControl : Controllable, ISaveable {
         } else {
             myRigidBody.drag = 1f;
         }
+        if (running) {
+            sprintSpeed = 0.2f;
+        } else {
+            sprintSpeed = 0f;
+        }
         // Do the normal controls stuff
         // set vertical force or damp if neither up nor down is held
-        if (upFlag)
-            acceleration.y = maxAcceleration;
-        if (downFlag)
-            acceleration.y = -1 * maxAcceleration;
+        if (upFlag) {
+            if (running) {
+                acceleration.y = maxAcceleration * 2f;
+            } else {
+                acceleration.y = maxAcceleration;
+            }
+        }
+        if (downFlag) {
+            if (running) {
+                acceleration.y = -2 * maxAcceleration;
+            } else {
+                acceleration.y = -1 * maxAcceleration;
+            }
+        }
         if (!upFlag && !downFlag) {
             deceleration.y = -1 * friction * GetComponent<Rigidbody2D>().velocity.y;
         }
         // set horizontal force, or damp is neither left nor right held
         if (leftFlag) {
-            acceleration.x = -1 * maxAcceleration;
+            if (running) {
+                acceleration.x = -2 * maxAcceleration;
+            } else {
+                acceleration.x = -1 * maxAcceleration;
+            }
         }
         if (rightFlag) {
-            acceleration.x = maxAcceleration;
+            if (running) {
+                acceleration.x = 2f * maxAcceleration;
+            } else {
+                acceleration.x = maxAcceleration;
+            }
         }
         if (!rightFlag && !leftFlag) {
             deceleration.x = -1 * friction * GetComponent<Rigidbody2D>().velocity.x;
@@ -59,8 +97,9 @@ public class SimpleControl : Controllable, ISaveable {
         myRigidBody.AddForce(acceleration + deceleration);
         // clamp velocity to maximum
         // there's probably a more efficient way to do this calculation but whatevs
-        if (myRigidBody.velocity.magnitude > maxSpeed)
-            myRigidBody.velocity = Vector2.ClampMagnitude(myRigidBody.velocity, maxSpeed);
+        float bonusSpeed = Mathf.Max(panicSpeed, sprintSpeed);
+        if (myRigidBody.velocity.magnitude > (maxSpeed + bonusSpeed))
+            myRigidBody.velocity = Vector2.ClampMagnitude(myRigidBody.velocity, (maxSpeed + bonusSpeed));
         // use the scale x trick for left-facing animations
         Vector2 vel = myRigidBody.velocity;
         if (vel.x < -0.1) {
@@ -113,5 +152,14 @@ public class SimpleControl : Controllable, ISaveable {
     protected override void SetDirection(Vector2 d) {
         base.SetDirection(d);
         UpdateDirection();
+    }
+
+    // bootstrapper.BroadcastMessage("GroundModeStart", this, SendMessageOptions.DontRequireReceiver);
+    public void GroundModeStart() {
+        this.enabled = true;
+    }
+    public void FlyModeStart() {
+        this.enabled = false;
+
     }
 }

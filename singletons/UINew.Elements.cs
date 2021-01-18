@@ -155,9 +155,57 @@ public partial class UINew : Singleton<UINew> {
         return icon;
     }
     public void FadeOut(Action callback) {
-        fader.FadeOut(callback);
+        // Debug.Log("fade out");
+        fader.FadeOut(callback, Color.black);
     }
     public void FadeIn(Action callback) {
-        fader.FadeIn(callback);
+        // Debug.Log("fade in");
+        fader.FadeIn(callback, Color.black);
+    }
+    public void Blackout() {
+        fader.Black();
+    }
+    public void Clear() {
+        fader.Clear();
+    }
+    public void FadeInCredits(string title, string contents, bool left = true) {
+        if (left) {
+            creditsLeftContent.text = contents;
+            creditsLeftTitle.text = title;
+
+            creditsLeftContent.GetComponent<FadeInOut>().FadeOut(() => { }, Color.white);
+            creditsLeftTitle.GetComponent<FadeInOut>().FadeOut(() => { }, Color.white);
+        } else {
+            creditsRightContent.text = contents;
+            creditsRightTitle.text = title;
+
+            creditsRightContent.GetComponent<FadeInOut>().FadeOut(() => { }, Color.white);
+            creditsRightTitle.GetComponent<FadeInOut>().FadeOut(() => { }, Color.white);
+        }
+    }
+    public void FadeOutCredits(bool left = true) {
+        if (left) {
+            // creditsLeftContent.text = "";
+            // creditsLeftTitle.text = "";
+
+            creditsLeftContent.GetComponent<FadeInOut>().FadeIn(() => { }, Color.white);
+            creditsLeftTitle.GetComponent<FadeInOut>().FadeIn(() => { }, Color.white);
+        } else {
+            // creditsRightContent.text = "";
+            // creditsRightTitle.text = "";
+
+            creditsRightContent.GetComponent<FadeInOut>().FadeIn(() => { }, Color.white);
+            creditsRightTitle.GetComponent<FadeInOut>().FadeIn(() => { }, Color.white);
+        }
+    }
+    public void FadeInMoreCredits(string left, string right) {
+        creditsLeftMoreContent.text = left;
+        creditsRightMoreContent.text = right;
+    }
+    public void FadeOutMoreCredits() {
+        // creditsLeftMoreContent.text = "";
+        // creditsRightMoreContent.text = "";
+        creditsLeftMoreContent.color = Color.clear;
+        creditsRightMoreContent.color = Color.clear;
     }
 }

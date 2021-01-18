@@ -17,10 +17,11 @@ public class Bones : MonoBehaviour {
         //     Destroy(this);
         //     return;
         // }
-
-        GameObject bone = GameObject.Instantiate(Resources.Load("bonesFollower")) as GameObject;
-        SpriteRenderer boneSpriteRenderer = bone.GetComponent<SpriteRenderer>();
-        follower = bone.GetComponent<BonesFollower>();
+        if (follower == null) {
+            GameObject bone = GameObject.Instantiate(Resources.Load("bonesFollower")) as GameObject;
+            follower = bone.GetComponent<BonesFollower>();
+        }
+        SpriteRenderer boneSpriteRenderer = follower.gameObject.GetComponent<SpriteRenderer>();
         follower.follow = this;
         if (boneSprite != null) {
             boneSpriteRenderer.sprite = boneSprite;

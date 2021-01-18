@@ -44,6 +44,9 @@ namespace AI {
             if (goal == callFD && callFD.phoneCalled) {
                 goal = useFireExtinguisher;
             }
+            if (getExt.findingFail && callFD.findingFail) {
+                urgency = 0;
+            }
         }
         public override void ReceiveMessage(Message incoming) {
             if (incoming is MessageNetIntrinsic) {

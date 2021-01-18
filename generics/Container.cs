@@ -21,6 +21,11 @@ public class Container : MayorLock, IExcludable, ISaveable {
                     // it's a prefab
                     GameObject newObj = GameObject.Instantiate(item.gameObject, transform.position, Quaternion.identity);
                     AddItem(newObj.GetComponent<Pickup>());
+                    Bones itemBones = newObj.GetComponent<Bones>();
+                    if (itemBones != null) {
+                        if (itemBones.follower == null)
+                            itemBones.Start();
+                    }
                 } else {
                     AddItem(item);
                 }
@@ -104,6 +109,8 @@ public class Container : MayorLock, IExcludable, ISaveable {
         }
     }
     public void AddItem(Pickup pickup) {
+        if (pickup == null)
+            return;
         items.Add(pickup);
         ClaimsManager.Instance.ClaimObject(pickup.gameObject, this);
 
@@ -167,7 +174,7 @@ public class Container : MayorLock, IExcludable, ISaveable {
         items.Remove(pickup);
         RemoveRetrieveAction(pickup);
     }
-    public void Dump(Pickup pickup) {
+    public Pickup Dump(Pickup pickup) {
         Vector3 pos = transform.position;
         pickup.transform.parent = null;
         pickup.GetComponent<Collider2D>().enabled = true;
@@ -193,6 +200,7 @@ public class Container : MayorLock, IExcludable, ISaveable {
         ClaimsManager.Instance.DisclaimObject(pickup.gameObject, this);
         items.Remove(pickup);
         RemoveRetrieveAction(pickup);
+        return pickup;
     }
     public void DropMessage(GameObject obj) {
         Pickup pickup = obj.GetComponent<Pickup>();
@@ -235,8 +243,14 @@ public class Container : MayorLock, IExcludable, ISaveable {
         data.bools["disableContents"] = disableContents;
         data.ints["itemCount"] = items.Count;
         data.bools["locked"] = lockObject != null;
+        for (int i = 0; i < items.Count; i++) {
+            if (data.GUIDs.ContainsKey($"item{i}"))
+                data.GUIDs.Remove($"item{i}");
+        }
         if (items.Count > 0) {
             for (int i = 0; i < items.Count; i++) {
+                if (items[i] == null || items[i].gameObject == null)
+                    continue;
                 // data.ints["item"+i.ToString()] = MySaver.GameObjectToID(instance.items[i].gameObject);
                 MySaver.UpdateGameObjectReference(items[i].gameObject, data, "item" + i.ToString());
                 MySaver.AddToReferenceTree(data.id, items[i].gameObject);
@@ -256,6 +270,11 @@ public class Container : MayorLock, IExcludable, ISaveable {
                     PhysicalBootstrapper phys = go.GetComponent<PhysicalBootstrapper>();
                     if (phys)
                         phys.doInit = false;
+                    Bones itemBones = go.GetComponent<Bones>();
+                    if (itemBones != null) {
+                        if (itemBones.follower == null)
+                            itemBones.Start();
+                    }
                 } else {
                     Debug.LogError($"{this} could not locate contained object {data.GUIDs["item" + i.ToString()]}. Possible lost saved object on the loose!");
                 }

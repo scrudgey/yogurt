@@ -11,7 +11,8 @@ public class MessageAnimation : Message {
         swinging,
         fighting,
         punching,
-        outfit
+        outfit,
+        panic
     };
     public AnimType type;
     public bool value;
@@ -86,7 +87,7 @@ public class MessageSpeech : Message {
 public class MessageDamage : Message {
     public float amount;
     public damageType type;
-    public Vector2 force;
+    public Vector3 force;
     public AudioClip[] impactSounds = new AudioClip[0];
     public bool suppressImpactSound;
     public bool impersonal;
@@ -152,5 +153,11 @@ public class MessageOnCamera : Message {
     public bool value;
     public MessageOnCamera(bool value) {
         this.value = value;
+    }
+}
+public class MessageSmoothieOrder : Message {
+    public int idn;
+    public MessageSmoothieOrder(int idn) {
+        this.idn = idn;
     }
 }

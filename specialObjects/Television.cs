@@ -29,6 +29,7 @@ public class Television : Item {
         }
     }
     public void Power() {
+        UINew.Instance.RefreshUI(active: false);
         GameObject menu = UINew.Instance.ShowMenu(UINew.MenuType.tv);
         menu.GetComponent<TVMenu>().television = this;
     }

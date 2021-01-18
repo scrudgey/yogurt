@@ -15,6 +15,12 @@ public class Bed : Doorway {
     public AudioClip beddingSound;
     public bool keypressedThisFrame;
     public override void Awake() {
+        keypressedThisFrame = false;
+        InputController.Instance.PrimaryAction.action.performed += ctx => {
+            keypressedThisFrame = ctx.ReadValueAsButton();
+        };
+        InputController.Instance.PrimaryAction.action.Enable();
+
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         audioSource.spatialBlend = 0;
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -30,12 +36,10 @@ public class Bed : Doorway {
         head.gameObject.SetActive(false);
         bubble.gameObject.SetActive(false);
 
-        keypressedThisFrame = false;
-        InputController.Instance.PrimaryAction.action.Enable();
-        InputController.Instance.PrimaryAction.action.performed += ctx => {
-            keypressedThisFrame = ctx.ReadValueAsButton();
-        };
     }
+    // void OnEnable() {
+    //     InputController.Instance.PrimaryAction.action.Enable();
+    // }
     public void MakeBed() {
         unmade = false;
         if (spriteRenderer) {
@@ -49,7 +53,6 @@ public class Bed : Doorway {
     }
     public void Sleep() {
         MySaver.Save();
-        // MySaver.SaveObjectDatabase();
         GameManager.Instance.NewDayCutscene();
     }
     public void SleepCutscene() {
@@ -74,25 +77,16 @@ public class Bed : Doorway {
             if (dup.PickleReady())
                 collectible++;
         }
-        if (collectible > 1 && GameManager.Instance.data.days > 1 && !GameManager.Instance.data.loadedDay) {
+        if (collectible > 3 && GameManager.Instance.data.days > 1 && !GameManager.Instance.data.loadedDay && GameManager.Instance.data.activeMagicianSequence == "") {
             CutsceneManager.Instance.InitializeCutscene<CutscenePickleBottom>();
         }
+        UINew.Instance.RefreshUI(active: false);
         Update();
     }
     void Update() {
         if (sleeping) {
-            animationTimer += Time.deltaTime;
-            if (animationTimer > 1f) {
-                animationTimer = 0f;
-                frame = !frame;
-                if (frame) {
-                    head.sprite = headSprites[0];
-                    bubble.sprite = bubbleSprites[0];
-                } else {
-                    head.sprite = headSprites[1];
-                    bubble.sprite = bubbleSprites[1];
-                    audioSource.PlayOneShot(snoreSound);
-                }
+            if (keypressedThisFrame) {
+                Debug.Log("key pressed for bed");
             }
             // TODO: prevent early trigger
             if (animationTimer > 0.02f && keypressedThisFrame &&
@@ -117,18 +111,36 @@ public class Bed : Doorway {
                 }
                 CheckDiaryEntry();
             }
-
             keypressedThisFrame = false;
+
+            animationTimer += Time.deltaTime;
+            if (animationTimer > 1f) {
+                animationTimer = 0f;
+                frame = !frame;
+                if (frame) {
+                    head.sprite = headSprites[0];
+                    bubble.sprite = bubbleSprites[0];
+                } else {
+                    head.sprite = headSprites[1];
+                    bubble.sprite = bubbleSprites[1];
+                    audioSource.PlayOneShot(snoreSound);
+                }
+            }
         }
     }
     void CheckDiaryEntry() {
+        if (GameManager.Instance.data.queuedDiaryEntry != "") {
+            GameManager.Instance.ShowDiaryEntryDelay(GameManager.Instance.data.queuedDiaryEntry, delay: 0.5f);
+            GameManager.Instance.data.queuedDiaryEntry = "";
+            return;
+        }
         if (GameManager.Instance.data.days == 1) {
-            GameManager.Instance.ShowDiaryEntry("diaryNew");
+            GameManager.Instance.ShowDiaryEntryDelay("diaryNew", delay: 0.5f);
             return;
         }
         if (GameManager.Instance.data.deaths >= 1 && GameManager.Instance.data.deathCutscenesPlayed == 0) {
             GameManager.Instance.data.deathCutscenesPlayed = 1;
-            GameManager.Instance.ShowDiaryEntry("death1");
+            GameManager.Instance.ShowDiaryEntryDelay("death1", delay: 0.5f);
             return;
         }
         InputController.Instance.state = InputController.ControlState.normal;

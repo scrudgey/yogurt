@@ -14,12 +14,15 @@ public struct MessagePhrase {
     public int profanity;
 }
 public class Speech : Interactive, ISaveable {
-    public string referent;
+    public bool the;
     public string speechName;
     static string[] swearWords = new string[]{
         @"\bshit\b",
-        @"\bfucked\b",
+        @"\bShit\b",
+        @"\bshitty\b",
         @"\bfuck\b",
+        @"\bFuck\b",
+        @"\bfucked\b",
         @"\bfucking\b",
         @"\bshazbotting\b",
         @"\bshazbot\b",
@@ -31,6 +34,7 @@ public class Speech : Interactive, ISaveable {
         @"\bbootyhole\b",
         @"\bbitchmade\b",
         @"\bmotherfucker\b",
+        @"\bmotherfuckers\b",
         @"\bbullshit\b",
         @"\basshole"};
 
@@ -59,8 +63,18 @@ public class Speech : Interactive, ISaveable {
 
         return Regex.Replace(instring, genderHook, replacePattern, RegexOptions.IgnoreCase);
     }
+    public static string ParseDayHook(string instring) {
+        //Use named capturing groups to make life easier
+        // var pattern = "(?<label>\"formatter\"): ([\"])(?<tag>.*)([\"])";
+        string dayHook = @"\$\$DAYS\$\$";
+        //Create a substitution pattern for the Replace method
+        string replacePattern = $"{GameManager.Instance.data.days - GameManager.HellDoorClosesOnDay} days";
+        return Regex.Replace(instring, dayHook, replacePattern, RegexOptions.IgnoreCase);
+    }
     public static MessagePhrase ProcessDialogue(string phrase, ref List<bool> swearList) {
-        StringBuilder sb = new StringBuilder(ParseGender(phrase));
+        string origString = ParseGender(phrase);
+        origString = ParseDayHook(origString);
+        StringBuilder sb = new StringBuilder(origString);
         string uncensoredPhrase = sb.ToString();
         int profanity = 0;
 
@@ -146,13 +160,20 @@ public class Speech : Interactive, ISaveable {
     public bool configured = false;
     public Grammar grammar = new Grammar();
     public List<string> otherNimrodDefs;
+    public string randomPhraseGrammar;
+    public bool magician;
     public void LoadGrammar() {
         grammar = new Grammar();
         grammar.Load("structure");
         // grammar.Load("flavor_test");
         grammar.Load("flavor_" + flavor);
         grammar.Load("threat");
-        grammar.Load("random_phrase");
+        // TODO: load a different random if it is set
+        if (randomPhraseGrammar != null && randomPhraseGrammar != "") {
+            grammar.Load(randomPhraseGrammar);
+        } else {
+            grammar.Load("random_phrase");
+        }
         foreach (string otherFile in otherNimrodDefs) {
             grammar.Load(otherFile);
         }
@@ -176,8 +197,8 @@ public class Speech : Interactive, ISaveable {
         if (bubbleCanvas) {
             bubbleCanvas.worldCamera = Camera.main;
         }
-        if (flipper.transform.localScale != transform.localScale) {
-            Vector3 tempscale = transform.localScale;
+        if (flipper.transform.localScale != transform.localScale.normalized) {
+            Vector3 tempscale = transform.localScale.normalized;
             flipper.transform.localScale = tempscale;
         }
         if (voice != null) {
@@ -225,7 +246,7 @@ public class Speech : Interactive, ISaveable {
     void HandleOnCamera(MessageOnCamera message) {
         onCamera = message.value;
     }
-    void HandleSpeech(MessageSpeech message) {
+    public void HandleSpeech(MessageSpeech message) {
         if (message.swearTarget != null) {
             Swear(target: message.swearTarget);
             return;
@@ -266,14 +287,41 @@ public class Speech : Interactive, ISaveable {
             }
         }
     }
+    public void MagicianCallback() {
+        if (GameManager.Instance.data.activeMagicianSequence != "") {
+            GameManager.Instance.data.queuedDiaryEntry = GameManager.Instance.data.activeMagicianSequence;
+            GameManager.Instance.data.finishedMagicianSequences.Add(GameManager.Instance.data.activeMagicianSequence);
+            GameManager.Instance.data.activeMagicianSequence = "";
+            GameManager.Instance.data.yogurtDetective = true;
+            GameManager.Instance.ResetDailyMetrics();
+
+            // spawn portal
+            Vector3 pos = new Vector3(-1.802f, -1.395f, 0f);
+            GameObject portal = GameObject.Instantiate(Resources.Load("cutscene/portal"), pos, Quaternion.identity) as GameObject;
+            GameObject particle1 = GameObject.Instantiate(Resources.Load("cutscene/portalParticle"), pos, Quaternion.identity) as GameObject;
+            GameObject particle2 = GameObject.Instantiate(Resources.Load("cutscene/portalParticle"), pos, Quaternion.identity) as GameObject;
+            CircularMotion motion2 = particle2.GetComponent<CircularMotion>();
+            motion2.radius = 0.15f;
+            motion2.frequency = -14;
+
+            // set portal
+            Doorway doorway = portal.GetComponent<Doorway>();
+            doorway.destination = "apartment";
+            doorway.destinationEntry = -99;
+
+            defaultMonologue = "magician_closed";
+        }
+    }
     public DialogueMenu SpeakWith() {
-        // TODO: fix commanding someone to speak with player
         UINew.Instance.RefreshUI();
         DialogueMenu menu = UINew.Instance.ShowMenu(UINew.MenuType.dialogue).GetComponent<DialogueMenu>();
         if (InputController.Instance.commandTarget == null) {
             menu.Configure(GameManager.Instance.playerObject.GetComponent<Speech>(), this);
         } else {
             menu.Configure(InputController.Instance.commandTarget.GetComponent<Speech>(), this);
+        }
+        if (magician) {
+            menu.menuClosed += MagicianCallback;
         }
         return menu;
     }
@@ -336,7 +384,7 @@ public class Speech : Interactive, ISaveable {
     }
     void Update() {
         if (speakTime > 0) {
-            speakTime -= Time.deltaTime;
+            speakTime -= Time.unscaledDeltaTime;
             if (!speaking) {
                 MessageHead head = new MessageHead();
                 head.type = MessageHead.HeadType.speaking;
@@ -361,7 +409,7 @@ public class Speech : Interactive, ISaveable {
             Stop();
         }
         if (!speaking && queue.Count > 0) {
-            queueTime += Time.deltaTime;
+            queueTime += Time.unscaledDeltaTime;
             if (queueTime > 1f) {
                 queueTime = Random.Range(-10f, 0f);
                 int index = Random.Range(0, queue.Count);
@@ -383,14 +431,14 @@ public class Speech : Interactive, ISaveable {
         speaking = false;
         // bubbleParent.SetActive(false);
         bubbleText.text = "";
-        speakTime = 0;
         queueTime = 0;
     }
     public void LateUpdate() {
         // if the parent scale is flipped, we need to flip the flipper back to keep
         // the text properly oriented.
-        if (flipper.transform.localScale != transform.localScale) {
-            Vector3 tempscale = transform.localScale;
+        float scale = transform.localScale.magnitude / 1.73205f;
+        Vector3 tempscale = (1f / scale) * transform.localScale / scale;
+        if (flipper.transform.localScale != tempscale) {
             flipper.transform.localScale = tempscale;
         }
     }
@@ -429,7 +477,7 @@ public class Speech : Interactive, ISaveable {
         if (inDialogue)
             return;
 
-        speakTime = DoubleSeat(message.phrase.Length, 2f, 50f, 5f, 2f);
+        speakTime = DurationHold(message.phrase);
         speakTimeTotal = speakTime;
         speakSpeed = message.phrase.Length / speakTime;
         swearMask = speechData.swearList.ToArray();
@@ -479,19 +527,7 @@ public class Speech : Interactive, ISaveable {
             }
         }
     }
-    // double-exponential seat easing function
-    public float DoubleSeat(float x, float a, float w, float max, float min) {
-        float result = 0f;
-        if (x / w > 1) {
-            x = w;
-        }
-        if (x / w <= 0.5) {
-            result = Mathf.Pow(2 * x / w, a) / 2 * (max - min) + min;
-        } else {
-            result = (1f - Mathf.Pow(2f - 2f * (x / w), a) / 2f) * (max - min) + min;
-        }
-        return result;
-    }
+
     public void Swear(GameObject target = null) {
         if (!target) {
             MessageSpeech message = new MessageSpeech("shazbot!");
@@ -514,17 +550,14 @@ public class Speech : Interactive, ISaveable {
             control.LookAtPoint(target.transform.position);
         }
 
-        if (GameManager.Instance.data.perks["burn"]) {
-            MessageDamage burnNotice = new MessageDamage(10f, damageType.fire);
-            Toolbox.Instance.SendMessage(target, this, burnNotice);
-            Flammable targetFlammable = target.transform.root.GetComponentInChildren<Flammable>();
-            if (targetFlammable) {
-                targetFlammable.heat += 100f;
-                targetFlammable.SetBurnTimer();
-                targetFlammable.fireRetardantBuffer = 0f;
-                targetFlammable.onFire = true;
-            }
-        }
+        // if (GameManager.Instance.data.perks["burn"]) {
+        //     MessageDamage burnNotice = new MessageDamage(10f, damageType.fire);
+        //     Toolbox.Instance.SendMessage(target, this, burnNotice);
+        //     Flammable targetFlammable = target.transform.root.GetComponentInChildren<Flammable>();
+        //     if (targetFlammable) {
+        //         targetFlammable.SpontaneouslyCombust();
+        //     }
+        // }
     }
     public Monologue InsultMonologue(GameObject target) {
         if (hitState >= Controllable.HitState.stun)
@@ -538,16 +571,40 @@ public class Speech : Interactive, ISaveable {
         List<bool> swearList = new List<bool>();
         MessagePhrase censoredContent = ProcessDialogue(content, ref swearList);
         swearMask = swearList.ToArray();
-        // List<string> strings = new List<string>() { censoredContent };
-
-        // var x = new string[1] { censoredContent.phrase };
-
         Monologue mono = new Monologue(this, new string[1] { censoredContent.phrase });
 
         using (Controller control = new Controller(gameObject)) {
             control.LookAtPoint(target.transform.position);
         }
         return mono;
+    }
+    public void DetectMonologue(GameObject target) {
+        DialogueMenu menu = UINew.Instance.ShowMenu(UINew.MenuType.dialogue).GetComponent<DialogueMenu>();
+        Controllable targetControllable = target.GetComponent<Controllable>();
+        if (targetControllable.hitState <= Controllable.HitState.stun) {
+            if (target.gameObject.name == "CEO") {
+                menu.Configure(this, target.GetComponent<Speech>(), dialogue: "detective_success");
+                menu.monologue = new Monologue();
+                menu.node = null;
+                menu.InquireSuccess();
+            } else {
+                menu.Configure(this, target.GetComponent<Speech>(), dialogue: "detective");
+                Monologue monologue = new Monologue();
+                menu.monologue = monologue;
+                DialogueNode node = new DialogueNode();
+                node.responses.Add("Thank you.");
+                node.responseLinks.Add(0);
+                menu.node = node;
+
+                menu.dialogueTree = new List<DialogueNode>();
+                DialogueNode endNode = new DialogueNode();
+                endNode.text = new List<string> { "END" };
+                menu.dialogueTree.Add(endNode);
+                menu.Inquire();
+            }
+        } else {
+            menu.Configure(this, target.GetComponent<Speech>(), dialogue: "target_unresponsive");
+        }
     }
     public Monologue ThreatMonologue(GameObject target) {
         if (hitState >= Controllable.HitState.stun)
@@ -585,6 +642,8 @@ public class Speech : Interactive, ISaveable {
     public Monologue Riposte(bool say = false) {
         if (hitState >= Controllable.HitState.stun)
             return Ellipsis();
+
+        // TODO: react to insults
         Monologue mono = new Monologue(this, new string[] { "How dare you!" });
         if (say) {
             MessageSpeech message = new MessageSpeech("How dare you!", data: new EventData(chaos: 1, disturbing: 0, positive: -1, offensive: 0));
@@ -623,6 +682,27 @@ public class Speech : Interactive, ISaveable {
         spacingRange.y = data.floats["spacingHigh"];
         voice = data.strings["speechSet"];
         glibSpeakWith = data.bools["glibSpeakWith"];
+    }
+
+
+    public static float DurationHold(string phrase) {
+        return DoubleSeat(phrase.Length, 2f, 50f, 5f, 2f);
+    }
+    public static float DoubleSeat(float x, float a, float w, float max, float min) {
+        float result = 0f;
+        if (x / w > 1) {
+            x = w;
+        }
+        if (x / w <= 0.5) {
+            result = Mathf.Pow(2 * x / w, a) / 2 * (max - min) + min;
+        } else {
+            result = (1f - Mathf.Pow(2f - 2f * (x / w), a) / 2f) * (max - min) + min;
+        }
+        return result;
+    }
+    public static float LinearDuration(string phrase) {
+        float slope = GameManager.Instance.GetDurationCoefficient();
+        return slope * phrase.Length + 1;
     }
 }
 

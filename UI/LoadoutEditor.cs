@@ -48,6 +48,7 @@ public class LoadoutEditor : MonoBehaviour {
         script.transform.SetParent(itemCollection, false);
         itemScripts[script] = newObject;
         script.enableItem = !GameManager.Instance.data.itemCheckedOut[name];
+        // Debug.Log($"{name} {script.enableItem}");
         return script;
     }
     private LoadoutEntryScript spawnLoadoutScript(ItemEntryScript itemScript) {
@@ -59,6 +60,7 @@ public class LoadoutEditor : MonoBehaviour {
         loadoutScripts[script] = newObject;
         loadoutItems.Add(itemScript);
         script.enableItem = !GameManager.Instance.data.itemCheckedOut[itemScript.prefabName];
+        // Debug.Log($"{name} {script.enableItem}");
         return script;
     }
 
@@ -98,7 +100,6 @@ public class LoadoutEditor : MonoBehaviour {
         bool mousedOver = false;
         foreach (string name in itemList) {
             ItemEntryScript script = spawnEntry(name);
-            // effects.buttons.Add(script.GetComponentInChildren<Button>());
             Button entryButton = script.gameObject.GetComponentInChildren<Button>();
             effects.buttons.Add(entryButton);
             if (!mousedOver) {
@@ -308,7 +309,7 @@ public class LoadoutEditor : MonoBehaviour {
                 playerInventory.StashItem(item);
             }
         }
-        if (loadoutClothes != null) {
+        if (loadoutClothes != null && !GameManager.Instance.data.itemCheckedOut[loadoutClothes.prefabName]) {
             GameObject item = SpawnPrefab(loadoutClothes.prefabName);
             Uniform itemUniform = item.GetComponent<Uniform>();
             if (playerOutfit != null && itemUniform != null) {
@@ -318,7 +319,7 @@ public class LoadoutEditor : MonoBehaviour {
                 }
             }
         }
-        if (loadoutHat != null) {
+        if (loadoutHat != null && !GameManager.Instance.data.itemCheckedOut[loadoutHat.prefabName]) {
             GameObject item = SpawnPrefab(loadoutHat.prefabName);
             Head playerHead = playerObject.GetComponentInChildren<Head>();
             Hat itemHat = item.GetComponent<Hat>();
@@ -358,10 +359,12 @@ public class LoadoutEditor : MonoBehaviour {
             }
         }
         if (loadout.ContainsKey(keyHat)) {
-            SetHat(itemScriptList.Find(x => x.prefabName == loadout[keyHat]));
+            ItemEntryScript itemScript = itemScriptList.Find(x => x.prefabName == loadout[keyHat]);
+            SetHat(itemScript);
         }
         if (loadout.ContainsKey(keyClothes)) {
-            SetClothes(itemScriptList.Find(x => x.prefabName == loadout[keyClothes]));
+            ItemEntryScript itemScript = itemScriptList.Find(x => x.prefabName == loadout[keyClothes]);
+            SetClothes(itemScript);
         }
     }
 

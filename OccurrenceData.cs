@@ -81,15 +81,21 @@ public class OccurrenceFire : OccurrenceData {
         return new HashSet<GameObject> { flamingObject };
     }
     public override void Descriptions() {
-        EventData data = new EventData(chaos: 2);
+        Hurtable hurtable = flamingObject.GetComponent<Hurtable>();
         string objectName = Toolbox.Instance.GetName(flamingObject);
+        EventData data = new EventData(chaos: 2);
+
+        data.whatHappened = $"the {objectName} burned";
+        if (hurtable) {
+            data = new EventData(chaos: 3, disturbing: 2, offensive: 1, positive: -1);
+            data.whatHappened = $"{objectName} burned";
+        }
         data.noun = "fire";
-        data.whatHappened = "the " + objectName + " burned";
+
         AddChild(data);
         if (objectName == "table") {
             if (extinguished == false) {
                 AddChild(EventData.TableFire());
-                // children.Add(EventData.TableFire());
             }
         }
     }
@@ -103,7 +109,10 @@ public class OccurrenceEat : OccurrenceData {
     public bool yogurt;
     public bool gravy;
     public override HashSet<GameObject> involvedParties() {
+        // if (edible != null)
         return new HashSet<GameObject> { eater, edible.gameObject };
+        // else
+        // return new HashSet<GameObject> { eater };
     }
     public override void Descriptions() {
         MonoLiquid monoLiquid = edible.GetComponent<MonoLiquid>();
@@ -248,12 +257,10 @@ public class OccurrenceSpeech : OccurrenceEvent {
         describable.ResetChildren();
         string speakerName = Toolbox.Instance.GetName(speaker);
         string targetName = "";
-        // if (target != null) {
-        //     targetName = Toolbox.Instance.GetName(target);
-        //     Debug.Log(target);
-        //     Debug.Log(targetName);
-        // }
-        EventData data = new EventData("dialogue", speakerName + " said " + line);
+        if (target != null) {
+            targetName = Toolbox.Instance.GetName(target, skipMainCollider: true);
+        }
+        EventData data = new EventData("dialogue", $"{speakerName} said \"{line}\"");
         data.transcriptLine = speakerName + ": " + line;
         // insert bits here for script desc, transcript line
         if (threat) {
@@ -285,7 +292,7 @@ public class OccurrenceViolence : OccurrenceData {
     }
     public override void Descriptions() {
         string attackerName = Toolbox.Instance.GetName(attacker);
-        string victimName = Toolbox.Instance.GetName(victim);
+        string victimName = Toolbox.Instance.GetName(victim, skipMainCollider: true);
 
         EventData data = new EventData(disturbing: 2, chaos: 2);
         Hurtable victimHurtable = victim.GetComponent<Hurtable>();
@@ -304,7 +311,7 @@ public class OccurrenceViolence : OccurrenceData {
             data.whatHappened = attackerName + " stabbed " + victimName;
         }
 
-        if (lastMessage.weaponName != "")
+        if (lastMessage.weaponName != null)
             data.whatHappened += $" with {lastMessage.weaponName}";
 
         AddChild(data);

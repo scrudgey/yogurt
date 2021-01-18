@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 public class Eater : Interactive, ISaveable {
+    public bool strongStomach; // if true, does not get nauseated from disgusting / disturbing occurrences
     public float nutrition;
     public enum preference { neutral, likes, dislikes }
     enum nauseaStatement { none, warning, imminent }
@@ -22,7 +23,7 @@ public class Eater : Interactive, ISaveable {
         }
     }
     private bool poisonNausea;
-    public Stack<GameObject> eatenStack;
+    public LinkedList<GameObject> eatenQueue;
     public float vomitCountDown;
     public Dictionary<BuffType, Buff> netIntrinsics;
     bool starting = true;
@@ -43,7 +44,7 @@ public class Eater : Interactive, ISaveable {
     }
     void Awake() {
         starting = true;
-        eatenStack = new Stack<GameObject>();
+        eatenQueue = new LinkedList<GameObject>();
         Interaction eatAction = new Interaction(this, "Eat", "Eat");
         // eatAction.defaultPriority = 1;
         eatAction.dontWipeInterface = false;
@@ -128,13 +129,18 @@ public class Eater : Interactive, ISaveable {
         return "Eat " + foodname;
     }
     void EnqueueEatenObject(GameObject eaten) {
-        eatenStack.Push(eaten);
+        // add to first:        eaten -> {secondEaten, firstEaten}
+        eatenQueue.AddFirst(eaten);
+
         eaten.SetActive(false);
-        // this is a last minute cover-your-ass hack to prevent us from ever saving more than 2 items.
-        // this code is not intended to be reachable.
-        while (eatenStack.Count > 2) {
-            GameObject oldEaten = eatenStack.Pop();
+        while (eatenQueue.Count > 2) {// {eaten, secondEaten, firstEaten}
+            // remove first-in-first-out
+            // {eaten, secondEaten} -> firstEaten
+            GameObject oldEaten = eatenQueue.Last.Value;
+            eatenQueue.RemoveLast();
+
             ClaimsManager.Instance.WasDestroyed(oldEaten);
+            MySaver.RemoveObject(oldEaten);
             Destroy(oldEaten);
         }
     }
@@ -154,16 +160,26 @@ public class Eater : Interactive, ISaveable {
 
         //update our status based on our reaction to the food
         int reaction = CheckReaction(food);
-        if (reaction > 0) {
-            Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Yummy!", data: new EventData(positive: 1)));
+        if (netIntrinsics[BuffType.clearHeaded].active()) {
+            if (reaction > 0) {
+                Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Good food.", data: new EventData(positive: 1)));
+            }
+            if (reaction < 0) {
+                Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I did not enjoy that.", data: new EventData(positive: -1)));
+            }
+        } else {
+            if (reaction > 0) {
+                Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Yummy!", data: new EventData(positive: 1)));
+            }
+            if (reaction < 0) {
+                nausea += 30;
+                Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Yuck", data: new EventData(positive: -1)));
+            }
+            if (reaction == 0) {
+                Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Refreshing!", data: new EventData(positive: 1)));
+            }
         }
-        if (reaction < 0) {
-            nausea += 30;
-            Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Yuck", data: new EventData(positive: -1)));
-        }
-        if (reaction == 0) {
-            Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("Refreshing!", data: new EventData(positive: 1)));
-        }
+
         if (nutrition > 50) {
             Toolbox.Instance.SendMessage(gameObject, this, new MessageSpeech("I'm full!"));
         }
@@ -178,6 +194,7 @@ public class Eater : Interactive, ISaveable {
         MonoLiquid mliquid = food.GetComponent<MonoLiquid>();
         if (mliquid) {
             eatData.liquid = mliquid.liquid;
+            GameManager.Instance.CheckLiquidCollection(mliquid.liquid, gameObject);
             if (mliquid.liquid != null) {
                 if (mliquid.liquid.name == "yogurt") {
                     GameManager.Instance.IncrementStat(StatType.yogurtEaten, 1);
@@ -254,8 +271,12 @@ public class Eater : Interactive, ISaveable {
 
         OccurrenceVomit data = new OccurrenceVomit();
         data.vomiter = gameObject;
-        if (eatenStack.Count > 0) {
-            GameObject eaten = eatenStack.Pop();
+        if (eatenQueue.Count > 0) {
+            // pop from the stack: last-in-first-out
+            // {eaten, secondEaten} 
+            // eaten <- {secondEaten} 
+            GameObject eaten = eatenQueue.First.Value;
+            eatenQueue.RemoveFirst();
 
             // GameObject eaten = eatenQueue.Dequeue();
             // string eatenName = Toolbox.Instance.GetName(eaten);
@@ -268,6 +289,7 @@ public class Eater : Interactive, ISaveable {
             data.vomit = eaten.gameObject;
             eaten.SetActive(true);
             eaten.transform.position = transform.position;
+            eaten.transform.SetParent(null);
             PhysicalBootstrapper phys = eaten.GetComponent<PhysicalBootstrapper>();
             if (phys) {
                 phys.doInit = true;
@@ -277,7 +299,8 @@ public class Eater : Interactive, ISaveable {
             if (mono) {
                 Destroy(eaten);
                 GameObject droplet = Toolbox.Instance.SpawnDroplet(mono.liquid, 0f, gameObject, 0.15f);
-                mono.liquid.vomit = true;
+                // mono.liquid.vomit = true;
+                droplet.GetComponent<MonoLiquid>().liquid.vomit = true;
                 mono.edible.vomit = true;
                 if (mono.liquid.name == "yogurt") {
                     GameManager.Instance.IncrementStat(StatType.yogurtVomit, 1);
@@ -291,7 +314,7 @@ public class Eater : Interactive, ISaveable {
             if (edible) {
                 edible.vomit = true;
             }
-            eaten = null;
+            // eaten = null;
         }
         Toolbox.Instance.OccurenceFlag(gameObject, data);
         MessageHead head = new MessageHead();
@@ -304,10 +327,17 @@ public class Eater : Interactive, ISaveable {
         }
         Liquid vomitLiquid = Liquid.LoadLiquid("vomit");
         vomitLiquid.vomit = true;
+        vomitLiquid.atomicLiquids = new HashSet<Liquid>();
+        vomitLiquid.atomicLiquids.Add(new Liquid(vomitLiquid));
         Toolbox.Instance.SpawnDroplet(vomitLiquid, 0f, gameObject, 0.05f);
+        if (gameObject == GameManager.Instance.playerObject) {
+            UINew.Instance.RefreshUI(active: true);
+        }
     }
 
     void ReactToOccurrence(EventData od) {
+        if (strongStomach)
+            return;
         if (netIntrinsics != null && netIntrinsics[BuffType.undead].active())
             return;
         // do not react to the event if i am mindful
@@ -334,17 +364,27 @@ public class Eater : Interactive, ISaveable {
             data.GUIDs.Remove("eaten1");
         if (data.GUIDs.ContainsKey("eaten0"))
             data.GUIDs.Remove("eaten0");
-        while (eatenStack.Count > 0 && index < 2) { // do NOT save anything more than two items!!! seriously!
-            GameObject eaten = eatenStack.Pop();
+
+        LinkedList<GameObject> newEatenQueue = new LinkedList<GameObject>();
+        while (eatenQueue.Count > 0 && index < 2) { // do NOT save anything more than two items!!! seriously!
+                                                    // remove first-in-first-out
+                                                    // GameObject eaten = eatenStack.Pop();
+            GameObject eaten = eatenQueue.First.Value;
+            eatenQueue.RemoveFirst();
+
             string eatenName = Toolbox.Instance.GetName(eaten);
             data.strings[$"eaten{index}"] = eatenName;
             // Debug.Log($"{this} adding eaten to reference tree: {eatenName}");
+            // Debug.Log($"saving eaten {eaten}");
             MySaver.UpdateGameObjectReference(eaten, data, $"eaten{index}");
             MySaver.AddToReferenceTree(gameObject, eaten);
             index++;
+            newEatenQueue.AddLast(eaten);
         }
+        eatenQueue = newEatenQueue;
     }
     public void LoadData(PersistentComponent data) {
+        eatenQueue = new LinkedList<GameObject>();
         nutrition = data.floats["nutrition"];
         nausea = data.floats["nausea"];
         vomitCountDown = data.floats["vomitCountDown"];
@@ -369,7 +409,6 @@ public class Eater : Interactive, ISaveable {
         if (data.GUIDs.ContainsKey("eaten0")) {
             GameObject eaten = MySaver.IDToGameObject(data.GUIDs["eaten0"]);
             if (eaten != null) {
-                // eatenQueue.Enqueue(eaten);
                 EnqueueEatenObject(eaten);
                 eaten.SetActive(false);
                 eaten.transform.position = transform.position;

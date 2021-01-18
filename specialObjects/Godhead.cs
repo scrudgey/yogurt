@@ -35,7 +35,8 @@ public class Godhead : MonoBehaviour {
             godSpeech.defaultMonologue = "dancing_god_cosmic";
         }
 
-        source = Toolbox.Instance.SetUpAudioSource(gameObject);
+        // source = Toolbox.Instance.SetUpAudioSource(gameObject);
+        source = Toolbox.Instance.SetUpGlobalAudioSource(gameObject);
         state = State.moveHead;
         hand.gameObject.SetActive(false);
         headDelta = endPoint - startPoint;
@@ -66,6 +67,7 @@ public class Godhead : MonoBehaviour {
                 source.Stop();
                 if (timer > 2f) {
                     menu = godSpeech.SpeakWith();
+                    menu.cutsceneDialogue = true;
                     state = State.dialogue;
                 }
                 break;
@@ -148,14 +150,17 @@ public class Godhead : MonoBehaviour {
         if (timer > 1f) {
             godSpeech.defaultMonologue = "dancing_god_bless";
             menu = godSpeech.SpeakWith();
+            menu.cutsceneDialogue = true;
             menu.menuClosed += FinalSpeechCallback;
             state = State.dialogue;
         }
     }
-    public static void BlessItem(PhysicalBootstrapper item) {
-        item.gameObject.SetActive(true);
-        item.InitPhysical(0.05f, Vector3.zero);
-        item.physical.StartGroundMode();
+    public static void BlessItem(PhysicalBootstrapper item, bool doInit = true) {
+        if (doInit) {
+            item.gameObject.SetActive(true);
+            item.InitPhysical(0.05f, Vector3.zero);
+            item.physical.StartGroundMode();
+        }
 
         Intrinsics itemIntrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(item.gameObject);
         Uniform uniform = item.GetComponent<Uniform>();
@@ -178,6 +183,7 @@ public class Godhead : MonoBehaviour {
         if (timer > 1f) {
             godSpeech.defaultMonologue = "dancing_god_destroy";
             menu = godSpeech.SpeakWith();
+            menu.cutsceneDialogue = true;
             menu.menuClosed += FinalSpeechCallback;
             state = State.dialogue;
         }

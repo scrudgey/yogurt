@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine.SceneManagement;
 
 public class Hurtable : Damageable, ISaveable {
+    public enum BloodType { blood, oil }
     private Controllable.HitState _hitState;
     public Controllable.HitState hitState {
         get { return _hitState; }
@@ -30,12 +31,15 @@ public class Hurtable : Damageable, ISaveable {
     public GameObject dizzyEffect;
     public float timeSinceLastCough;
     bool vibrate;
+    public BloodType bloodType;
     public bool bleeds = true; // if true, bleed on cutting / piercing damage
     public bool monster = false; // if true, death of this hurtable is not shocking or disturbing
     public bool ghostly = false; // if true, does not leave a skeleton behind when vaporized
     public Dictionary<damageType, float> totalDamage = new Dictionary<damageType, float>();
     public Collider2D myCollider;
     public bool unknockdownable;
+    public bool headExploded;
+    private List<AudioClip> knockdownSounds;
     public void Reset() {
         health = maxHealth;
         oxygen = maxOxygen;
@@ -50,6 +54,10 @@ public class Hurtable : Damageable, ISaveable {
         Toolbox.RegisterMessageCallback<MessageHead>(this, HandleHead);
         Toolbox.RegisterMessageCallback<MessageStun>(this, HandleStun);
         myCollider = GetComponent<Collider2D>();
+        knockdownSounds = new List<AudioClip>();
+        knockdownSounds.Add(Resources.Load("sounds/8bit_impact1") as AudioClip);
+        knockdownSounds.Add(Resources.Load("sounds/8bit_impact2") as AudioClip);
+        knockdownSounds.Add(Resources.Load("sounds/8bit_impact3") as AudioClip);
     }
     void HandleHead(MessageHead head) {
         if (head.type == MessageHead.HeadType.vomiting) {
@@ -69,7 +77,25 @@ public class Hurtable : Damageable, ISaveable {
         }
         if (intrins.netBuffs[BuffType.death].active()) {
             health = float.MinValue;
-            Die(lastMessage, damageType.physical);
+            if (gameObject == GameManager.Instance.playerObject)
+                GameManager.Instance.IncrementStat(StatType.deathByPotion, 1);
+            // Die(lastMessage, damageType.physical);
+            GameManager.Instance.ExplodeHead(gameObject);
+        }
+        if (intrins.netBuffs[BuffType.undead].active()) {
+            if (gibsContainerPrefab != null && gibsContainerPrefab.name == "vampireCorpseGibsContainer") {
+                base.NetIntrinsicsChanged(intrins);
+                return;
+            }
+            // switch gibs to undead gibs
+            // delete all gibs
+            foreach (Gibs gibs in GetComponents<Gibs>()) {
+                Destroy(gibs);
+            }
+            // set new gibs prefab
+            gibsContainerPrefab = Resources.Load("prefabs/gibs/undeadGibsContainer") as GameObject;
+            // load undead gibs
+            LoadGibsPrefab();
         }
         base.NetIntrinsicsChanged(intrins);
     }
@@ -77,7 +103,7 @@ public class Hurtable : Damageable, ISaveable {
         float damage = message.amount;
 
         // if armor subtracted from the damage and i am dead, add it back
-        if (!message.strength && netBuffs[BuffType.armor].floatValue > 0 && hitState == Controllable.HitState.dead)
+        if (hitState == Controllable.HitState.dead && !message.strength && netBuffs[BuffType.armor].floatValue > 0)
             message.amount += netBuffs[BuffType.armor].floatValue;
 
         switch (message.type) {
@@ -114,7 +140,11 @@ public class Hurtable : Damageable, ISaveable {
         // side effect
         if (message.type != damageType.fire && message.type != damageType.asphyxiation && message.type != damageType.acid) {
             hitState = Controllable.AddHitState(hitState, Controllable.HitState.stun);
-            hitStunCounter = Random.Range(0.2f, 0.25f);
+            if (gameObject != GameManager.Instance.playerObject) {
+                hitStunCounter = Random.Range(0.2f, 0.25f);
+            } else {
+                hitStunCounter = Random.Range(0.1f, 0.2f);
+            }
         }
 
         // special effect
@@ -136,6 +166,11 @@ public class Hurtable : Damageable, ISaveable {
             Toolbox.Instance.SendMessage(gameObject, this, speechMessage);
         }
 
+        // player adjustment
+        if (gameObject == GameManager.Instance.playerObject) {
+            damage *= 0.75f; // fudge factor
+        }
+
         /**
         **  health adjustment
         **/
@@ -147,7 +182,7 @@ public class Hurtable : Damageable, ISaveable {
         totalDamage[message.type] += damage;
 
         // if the damage is fire or cutting, we die at health 0
-        if (health <= 0 && (message.type == damageType.fire || message.type == damageType.cutting)) {
+        if (health <= 0 && (message.type == damageType.fire || message.type == damageType.cutting || message.type == damageType.acid)) {
             Die(message, message.type);
         }
         // otherwise, we die at health -50%
@@ -195,7 +230,7 @@ public class Hurtable : Damageable, ISaveable {
         if (inv) {
             inv.DropItem();
         }
-        if (type == damageType.cosmic || type == damageType.fire) {
+        if (type == damageType.cosmic || type == damageType.fire || type == damageType.acid) {
             if (!ghostly) {
                 Instantiate(Resources.Load("prefabs/skeleton"), transform.position, transform.rotation);
                 Toolbox.Instance.AudioSpeaker("Flash Fire Ignite 01", transform.position);
@@ -207,14 +242,21 @@ public class Hurtable : Damageable, ISaveable {
         } else {
             KnockDown();
         }
+        hitState = Controllable.AddHitState(hitState, Controllable.HitState.dead);
 
         LogTypeOfDeath(message);
         if (dizzyEffect != null) {
             ClaimsManager.Instance.WasDestroyed(dizzyEffect);
             Destroy(dizzyEffect);
         }
-        hitState = Controllable.AddHitState(hitState, Controllable.HitState.dead);
+
         gameObject.SendMessage("OnDie", SendMessageOptions.DontRequireReceiver);
+    }
+    public void OnDestruct() {
+        Head head = GetComponentInChildren<Head>();
+        if (head != null && head.hat != null) {
+            head.RemoveHat();
+        }
     }
 
     public void Resurrect() {
@@ -256,6 +298,9 @@ public class Hurtable : Damageable, ISaveable {
                 if (message.type == damageType.acid) {
                     GameManager.Instance.IncrementStat(StatType.deathByAcid, 1);
                 }
+                if (message.type == damageType.fire) {
+                    GameManager.Instance.IncrementStat(StatType.deathByFire, 1);
+                }
             }
             if (impersonalAttacker) {
                 GameManager.Instance.IncrementStat(StatType.deathByMisadventure, 1);
@@ -265,7 +310,7 @@ public class Hurtable : Damageable, ISaveable {
             }
             GameManager.Instance.PlayerDeath();
         } else {
-            if (message.type == damageType.fire) {
+            if (message != null && message.type == damageType.fire) {
                 // TODO: this is wrong?
                 GameManager.Instance.IncrementStat(StatType.immolations, 1);
             }
@@ -291,7 +336,8 @@ public class Hurtable : Damageable, ISaveable {
     override protected void Update() {
         base.Update();
         if (impulse > 0) {
-            impulse -= Time.deltaTime * 25f;
+            impulse -= Time.deltaTime * 40f;
+
         }
         if (downedTimer > 0) {
             downedTimer -= Time.deltaTime;
@@ -315,9 +361,9 @@ public class Hurtable : Damageable, ISaveable {
                 hitState = Controllable.RemoveHitState(hitState, Controllable.HitState.stun);
             }
         }
-        if (health < 0.5 * maxHealth) {
+        if (health < 0.75 * maxHealth) {
             if (gameObject == GameManager.Instance.playerObject) {
-                health += Time.deltaTime * 6f;
+                health += Time.deltaTime * 10f;
             }
         }
         if (oxygen <= maxOxygen) {
@@ -333,6 +379,7 @@ public class Hurtable : Damageable, ISaveable {
             GetUp();
         }
         if (impulse > 75f && !doubledOver && hitState < Controllable.HitState.unconscious) {
+            // Debug.Log($"{gameObject} doubling over {impulse} {doubledOver} {hitState}");
             DoubleOver(true);
         }
         if (impulse <= 0f && doubledOver && hitState < Controllable.HitState.unconscious) {
@@ -364,8 +411,11 @@ public class Hurtable : Damageable, ISaveable {
             downedTimer = 10f;
         }
         if (myCollider != null) {
-            // myCollider.enabled = false;
-            myCollider.gameObject.layer = LayerMask.NameToLayer("FOV");
+            myCollider.gameObject.layer = LayerMask.NameToLayer("knockdown");
+        }
+        if (knockdownSounds.Count > 0) {
+            AudioClip clip = knockdownSounds[Random.Range(0, knockdownSounds.Count)];
+            Toolbox.Instance.AudioSpeaker(clip, transform.position);
         }
         Vector3 pivot = transform.position;
         pivot.y -= 0.15f;
@@ -391,7 +441,6 @@ public class Hurtable : Damageable, ISaveable {
                 health += 0.25f * maxHealth;
             }
         if (myCollider != null) {
-            // myCollider.enabled = true;
             myCollider.gameObject.layer = LayerMask.NameToLayer("feet");
         }
         hitState = Controllable.RemoveHitState(hitState, Controllable.HitState.unconscious);
@@ -427,8 +476,16 @@ public class Hurtable : Damageable, ISaveable {
     }
     public void Bleed(Vector3 position, Vector3 direction) {
         if (bleeds) {
-
-            Liquid blood = Liquid.LoadLiquid("blood");
+            Liquid blood = null;
+            switch (bloodType) {
+                default:
+                case BloodType.blood:
+                    blood = Liquid.LoadLiquid("blood");
+                    break;
+                case BloodType.oil:
+                    blood = Liquid.LoadLiquid("oil");
+                    break;
+            }
             float initHeight = 0;
             if (hitState < Controllable.HitState.unconscious) {
                 initHeight = (position.y - transform.position.y) + 0.15f;
@@ -438,24 +495,97 @@ public class Hurtable : Damageable, ISaveable {
             edible.human = true;
         }
     }
+    public void ExplodeHead() {
+        if (headExploded)
+            return;
+        headExploded = true;
+        Head head = GetComponentInChildren<Head>();
+        MessageDamage message = new MessageDamage(100f, damageType.physical);
+        if (head != null) {
+            head.RemoveHat();
+            Liquid blood = null;
+            switch (bloodType) {
+                default:
+                case BloodType.blood:
+                    blood = Liquid.LoadLiquid("blood");
+                    break;
+                case BloodType.oil:
+                    blood = Liquid.LoadLiquid("oil");
+                    break;
+            }
+
+            GameObject headGibs = Resources.Load("prefabs/gibs/headGibsContainer") as GameObject;
+            foreach (Gibs gib in headGibs.GetComponents<Gibs>()) {
+                Gibs newGib = head.gameObject.AddComponent<Gibs>();
+                newGib.CopyFrom(gib);
+                newGib.initHeight = new LoHi(0.05f, 0.2f);
+                newGib.initAngleFromHorizontal = new LoHi(0.7f, 0.9f);
+                newGib.initVelocity = new LoHi(1f, 2f);
+                Vector2 rand = UnityEngine.Random.insideUnitCircle;
+                message.force = new Vector3(rand.x * 5f, rand.y * 5f, UnityEngine.Random.Range(5f, 30f));
+                List<GameObject> gibs = newGib.Emit(message);
+                // apply my blood to the drop dripper
+                foreach (GameObject g in gibs) {
+                    DropDripper dripper = g.GetComponent<DropDripper>();
+                    if (dripper != null) {
+                        dripper.liquid = blood;
+                        switch (bloodType) {
+                            default:
+                            case BloodType.blood:
+                                dripper.liquidType = "blood";
+                                break;
+                            case BloodType.oil:
+                                dripper.liquidType = "oil";
+                                break;
+                        }
+                    }
+                }
+            }
+            AudioClip boom = Resources.Load("sounds/explosion/cannon") as AudioClip;
+            // PlayPublicSound(boom);
+            Toolbox.Instance.AudioSpeaker(boom, transform.position);
+            Destroy(head.gameObject);
+            GameManager.Instance.IncrementStat(StatType.headsExploded, 1);
+            EventData headExpldeData = EventData.HeadExplosion(gameObject);
+            Toolbox.Instance.OccurenceFlag(head.gameObject, headExpldeData);
+
+            for (int i = 0; i < 10; i++) {
+                Vector2 rand = UnityEngine.Random.insideUnitCircle;
+                Vector3 velocity = new Vector3(rand.x * UnityEngine.Random.Range(0.1f, 5f), rand.y * UnityEngine.Random.Range(0.1f, 5f), UnityEngine.Random.Range(1f, 5f));
+                Vector3 pos = head.transform.position;
+                pos.z = 0.18f;
+                Toolbox.Instance.SpawnDroplet(pos, blood, velocity);
+            }
+        }
+        Die(message, damageType.physical);
+        if (gameObject == GameManager.Instance.playerObject) {
+            GameManager.Instance.IncrementStat(StatType.deathByExplodingHead, 1);
+        }
+    }
     public void SaveData(PersistentComponent data) {
         data.floats["health"] = health;
         data.floats["maxHealth"] = maxHealth;
-        // data.floats["bonusHealth"] = bonusHealth;
         data.floats["impulse"] = impulse;
         data.floats["downed_timer"] = downedTimer;
         data.ints["hitstate"] = (int)hitState;
         data.floats["oxygen"] = oxygen;
         data.floats["hitstuncounter"] = hitStunCounter;
+        data.bools["headExploded"] = headExploded;
     }
     public void LoadData(PersistentComponent data) {
         health = data.floats["health"];
         maxHealth = data.floats["maxHealth"];
-        // bonusHealth = data.floats["bonusHealth"];
         impulse = data.floats["impulse"];
         downedTimer = data.floats["downed_timer"];
         hitState = (Controllable.HitState)data.ints["hitstate"];
         oxygen = data.floats["oxygen"];
         hitStunCounter = data.floats["hitstuncounter"];
+        headExploded = data.bools["headExploded"];
+        if (headExploded) {
+            Head head = GetComponentInChildren<Head>();
+            if (head != null) {
+                Destroy(head.gameObject);
+            }
+        }
     }
 }

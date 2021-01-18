@@ -88,6 +88,8 @@ public class Trader : Interactive, ISaveable {
         give = null;
     }
     public void SaveData(PersistentComponent data) {
+        if (data.GUIDs.ContainsKey("give"))
+            data.GUIDs.Remove("give");
         if (give != null) {
             MySaver.UpdateGameObjectReference(give, data, "give");
             // MySaver.AddToReferenceTree(data.id, give);

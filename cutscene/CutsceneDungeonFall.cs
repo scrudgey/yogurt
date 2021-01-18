@@ -80,6 +80,7 @@ public class CutsceneDungeonFall : CutsceneFall {
         // rotate
         if (dumpTimer > dumpInterval) {
             dumpTimer = 0;
+            dumpInterval *= 0.9f;
             if (playerInventory != null && playerInventory.holding != null) {
                 GameObject toDump = playerInventory.holding.gameObject;
                 playerInventory.SoftDropItem();
@@ -88,7 +89,7 @@ public class CutsceneDungeonFall : CutsceneFall {
                 GameObject pickup = playerInventory.items[0];
                 playerInventory.items.RemoveAt(0);
                 Dump(pickup);
-            } else if (playerOutfit != null && playerOutfit.wornUniformName != "nude" && playerOutfit.wornUniformName != "nude_female") {
+            } else if (playerOutfit != null && !playerOutfit.nude) {
                 // dump outfit
                 GameObject removedUniform = playerOutfit.RemoveUniform();
                 playerOutfit.GoNude();

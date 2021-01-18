@@ -36,6 +36,22 @@ public partial class Toolbox : Singleton<Toolbox> {
         "Scrungle",
         "Nutte",
         "Crispin",
+        "Jean-Pierre",
+        "Pokey",
+        "Gong Farmer",
+        "Warbler",
+        "Ol' Drinky",
+        "Pointyknife, The Manstabber",
+        "The Traveler",
+        "Scrumpi",
+        "Poggle",
+        "Hoggle",
+        "Chewy",
+        "Scuzzbucket",
+        "Frobenius",
+        "Crad",
+        "Vern",
+        "The Pope"
     };
     static private List<string> normalMaleNames = new List<string>(){
         "Steve",
@@ -60,14 +76,29 @@ public partial class Toolbox : Singleton<Toolbox> {
         "Patty",
         "Carol"
     };
+
+    public static Stack<string> weirdNameStack = new Stack<string>();
+    public static Stack<string> normalMaleNameStack = new Stack<string>();
+    public static Stack<string> normalFemaleNameStack = new Stack<string>();
     public static string SuggestWeirdName() {
-        return weirdNames[UnityEngine.Random.Range(0, weirdNames.Count)];
+        if (weirdNameStack.Count == 0) {
+            weirdNameStack = new Stack<string>(Toolbox.Shuffle(weirdNames));
+        }
+        return weirdNameStack.Pop();
     }
     public static string SuggestNormalName(Gender gender) {
         if (gender == Gender.male) {
-            return normalMaleNames[UnityEngine.Random.Range(0, normalMaleNames.Count)];
+            if (normalMaleNameStack.Count == 0) {
+                normalMaleNameStack = new Stack<string>(Toolbox.Shuffle(normalMaleNames));
+            }
+            return normalMaleNameStack.Pop();
+            // return normalMaleNames[UnityEngine.Random.Range(0, normalMaleNames.Count)];
         } else {
-            return normalFemaleNames[UnityEngine.Random.Range(0, normalFemaleNames.Count)];
+            if (normalFemaleNameStack.Count == 0) {
+                normalFemaleNameStack = new Stack<string>(Toolbox.Shuffle(normalFemaleNames));
+            }
+            return normalFemaleNameStack.Pop();
+            // return normalFemaleNames[UnityEngine.Random.Range(0, normalFemaleNames.Count)];
         }
     }
 }

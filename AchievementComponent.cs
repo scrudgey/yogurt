@@ -21,6 +21,9 @@ public enum StatType {
     deathByAsphyxiation,
     deathByExplosion,
     deathByAcid,
+    deathByExplodingHead,
+    deathByPotion,
+    deathByFire,
     mayorsSassed,
     actsOfCannibalism,
     heartsEaten,
@@ -29,7 +32,9 @@ public enum StatType {
     monstersKilled,
     murders,
     bedsMade,
-    booksBurned
+    booksBurned,
+    typesOfWaterCollected,
+    headsExploded
 }
 
 [System.Serializable]
@@ -96,7 +101,7 @@ public class Achievement {
         return true;
     }
     public Achievement() { }
-    public Achievement(Achievement source) {
+    public Achievement(Achievement source) { // deepcopy
         icon = source.icon;
         complete = source.complete;
         title = source.title;

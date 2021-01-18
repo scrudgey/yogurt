@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using Nimrod;
 
 [System.Serializable]
 public class Portrait {
@@ -20,12 +21,15 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
     public bool randomizeDirection;
     public bool randomizeSpeech;
     public List<Uniform> randomOutfits;
+    public List<Uniform> randomFemaleOutfits;
     public List<Pickup> randomItems;
     public List<Hat> randomHats;
     public List<PortraitComponent> maleHeads;
     public List<PortraitComponent> femaleHeads;
     public List<Voice> randomVoices;
     public List<String> randomFlavor;
+    // public List<String> randomNames;
+    public String randomNameGrammar;
     public float randomHatProbability;
     public float randomItemProbability;
     public float deleteProbability;
@@ -40,12 +44,9 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
 
         Gender gender = defaultGender;
 
-        if (randomOutfits != null) {
-            Outfit outfit = GetComponent<Outfit>();
-            Uniform uniform = GameObject.Instantiate(randomOutfits[UnityEngine.Random.Range(0, randomOutfits.Count)]);
-            GameObject removedUniform = outfit.DonUniform(uniform, cleanStains: false);
-            if (removedUniform)
-                Destroy(removedUniform);
+        if (randomizeGender) {
+            gender = (Gender)UnityEngine.Random.Range(0, 2);
+            Toolbox.SetGender(gameObject, gender);
         }
 
         if (randomizeDirection) {
@@ -54,10 +55,29 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
             controllable.direction = newDirection;
         }
 
-        if (randomizeGender) {
-            gender = (Gender)UnityEngine.Random.Range(0, 2);
-            Toolbox.SetGender(gameObject, gender);
+        Outfit outfit = GetComponent<Outfit>();
+        Uniform uniform = null;
+
+        switch (gender) {
+            case Gender.male:
+                if (randomOutfits != null && randomOutfits.Count > 0) {
+                    uniform = GameObject.Instantiate(randomOutfits[UnityEngine.Random.Range(0, randomOutfits.Count)]);
+                    GameObject removedUniform = outfit.DonUniform(uniform, cleanStains: false);
+                    if (removedUniform)
+                        Destroy(removedUniform);
+                }
+                break;
+            case Gender.female:
+                if (randomFemaleOutfits != null && randomFemaleOutfits.Count > 0) {
+                    uniform = GameObject.Instantiate(randomFemaleOutfits[UnityEngine.Random.Range(0, randomFemaleOutfits.Count)]);
+                    GameObject removedUniform = outfit.DonUniform(uniform, cleanStains: false);
+                    if (removedUniform)
+                        Destroy(removedUniform);
+                }
+                break;
         }
+
+
 
         if (randomizeHead) {
             HeadAnimation head = GetComponentInChildren<HeadAnimation>();
@@ -118,7 +138,7 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
             decisionMaker.Initialize();
         }
 
-        if (randomItems != null) {
+        if (randomItems != null && randomItems.Count > 0) {
             if (UnityEngine.Random.Range(0f, 1f) < randomItemProbability) {
                 Inventory inv = GetComponent<Inventory>();
                 Pickup randomItem = GameObject.Instantiate(randomItems[UnityEngine.Random.Range(0, randomItems.Count)], transform.position, Quaternion.identity);
@@ -126,7 +146,7 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
             }
         }
 
-        if (randomHats != null) {
+        if (randomHats != null && randomHats.Count > 0) {
             if (UnityEngine.Random.Range(0f, 1f) < randomHatProbability) {
                 Head head = GetComponentInChildren<Head>();
                 Hat randomHat = GameObject.Instantiate(randomHats[UnityEngine.Random.Range(0, randomHats.Count)], transform.position, Quaternion.identity);
@@ -159,10 +179,21 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
             gibberizer.spacingRange = speech.spacingRange;
             gibberizer.sounds = speech.speakSounds;
         }
+        if (randomNameGrammar != null && randomNameGrammar != "") {
+            Speech speech = GetComponent<Speech>();
+            Grammar grammar = new Grammar();
+            grammar.Load(randomNameGrammar);
+            speech.speechName = grammar.Parse("{main}");
+        }
+        // if (randomNames.Count > 0) {
+        //     Speech speech = GetComponent<Speech>();
+        //     speech.speechName = randomNames[UnityEngine.Random.Range(0, randomNames.Count)];
+        // }
         Awareness awareness = GetComponent<Awareness>();
         if (awareness) {
             awareness.socializationTimer = -1f * UnityEngine.Random.Range(0f, 10f);
         }
+
         configured = true;
     }
 

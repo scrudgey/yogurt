@@ -12,11 +12,11 @@ public class ZombieSpawner : MonoBehaviour {
     private State state;
 
     void OnTriggerEnter2D(Collider2D col) {
-        if (col.tag == "background")
+        if (col.tag == "background" || col.tag == "sky")
             Destroy(gameObject);
     }
     void OnTriggerStay2D(Collider2D col) {
-        if (col.tag == "background")
+        if (col.tag == "background" || col.tag == "sky")
             Destroy(gameObject);
     }
     void Update() {
@@ -40,8 +40,24 @@ public class ZombieSpawner : MonoBehaviour {
             case State.hand:
                 if (timer > 5f) {
                     Toolbox.Instance.AudioSpeaker(spawnSound, transform.position);
-                    GameObject.Instantiate(zombiePrefab, transform.position + new Vector3(0, 0.1f, 0), Quaternion.identity);
+                    GameObject zombie = GameObject.Instantiate(zombiePrefab, transform.position + new Vector3(0, 0.1f, 0), Quaternion.identity);
                     Destroy(gameObject);
+                    Controllable controllable = zombie.GetComponent<Controllable>();
+                    using (Controller control = new Controller(controllable)) {
+                        if (Random.Range(0, 1f) < 0.5f) {
+                            controllable.SetDirection(Vector2.right, control);
+                        } else {
+                            controllable.SetDirection(Vector2.left, control);
+                        }
+                    }
+                    Awareness ai = zombie.GetComponent<Awareness>();
+                    foreach (DecisionMaker other in GameObject.FindObjectsOfType<DecisionMaker>()) {
+                        Intrinsics intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(other.gameObject);
+                        if (!intrinsics.NetBuffs()[BuffType.undead].active()) {
+                            PersonalAssessment assessment = ai.FormPersonalAssessment(other.gameObject);
+                            assessment.status = PersonalAssessment.friendStatus.enemy;
+                        }
+                    }
                 }
                 break;
         }

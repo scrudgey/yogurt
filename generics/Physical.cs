@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 public class Physical : MonoBehaviour {
     public enum mode { none, fly, ground, zip }
     public AudioClip[] landSounds = new AudioClip[0];
@@ -20,6 +21,7 @@ public class Physical : MonoBehaviour {
     private bool doZip;
     private bool doStartTable;
     private bool doStopTable;
+    private bool doFall;
     private SpriteRenderer spriteRenderer;
     public SpriteRenderer objectRenderer;
     public float groundDrag;
@@ -105,9 +107,9 @@ public class Physical : MonoBehaviour {
             // projectiles should be on their own layer: if i placed them on main, they would 
             // not collide with their footprint. if i placed them on feet, they would not collide with 
             // extended objects.
-            trueObject.layer = 11;
+            trueObject.layer = LayerMask.NameToLayer("projectile");
         } else {
-            trueObject.layer = 10;
+            trueObject.layer = LayerMask.NameToLayer("object");
         }
         if (doGround) {
             doGround = false;
@@ -128,6 +130,10 @@ public class Physical : MonoBehaviour {
         if (doStopTable) {
             doStopTable = false;
             StopTable();
+        }
+        if (doFall) {
+            doFall = false;
+            DoFall();
         }
         if (currentMode == mode.ground) {
             if (objectCollider.Distance(horizonCollider).isOverlapped) {
@@ -184,11 +190,10 @@ public class Physical : MonoBehaviour {
         }
         suppressLandSound = false;
         SetSliderLimit(1f * objectCollider.Distance(horizonCollider).distance);
-        // if (noCollisions) {
-        //     gameObject.layer = 15;
-        // } else {
-        gameObject.layer = 16;
-        // }
+
+        // currently, no reason for this code
+        gameObject.layer = LayerMask.NameToLayer("groundcollider");
+
         if (spriteRenderer)
             spriteRenderer.enabled = false;
         if (objectRenderer)
@@ -223,17 +228,23 @@ public class Physical : MonoBehaviour {
         body.drag = 0;
         body.mass = 1;
         foreach (Physical phys in FindObjectsOfType<Physical>()) {
-            if (phys != this) {
+            if (phys != this && phys != null && phys.objectCollider != null) {
                 Physics2D.IgnoreCollision(horizonCollider, phys.objectCollider, true);
                 Physics2D.IgnoreCollision(objectCollider, phys.horizonCollider, true);
             }
         }
-        gameObject.layer = 16;
-        // gameObject.layer = 15;
+
+        // TODO: different layer on fly mode
+        gameObject.layer = LayerMask.NameToLayer("groundcollider");
+
+
         if (spriteRenderer)
             spriteRenderer.enabled = true;
         if (objectRenderer)
             objectRenderer.sortingLayerName = "air";
+
+
+        bootstrapper.BroadcastMessage("FlyModeStart", this, SendMessageOptions.DontRequireReceiver);
     }
     public void StartZipMode() {
         doZip = false;
@@ -248,9 +259,31 @@ public class Physical : MonoBehaviour {
             // START TABLE
             table = coll.GetComponentInParent<Table>();
             doStartTable = true;
-            // Debug.Log(name + " table collision detected, dostarttable true");
-            // Debug.Break();
         }
+        if (coll.tag == "sky") {
+            Fall();
+        }
+    }
+    void OnTriggerStay2D(Collider2D coll) {
+        if (coll.tag == "sky") {
+            Fall();
+        }
+    }
+    public void Fall() {
+        doFall = true;
+    }
+    public void DoFall() {
+        Vector3 objOriginalPosition = objectBody.transform.position;
+        Collider2D skyCollider = Physics2D.OverlapBox(transform.position, 0.01f * Vector2.one, 0, 1 << LayerMask.NameToLayer("sky"), -Mathf.Infinity, Mathf.Infinity);
+        int index = 0;
+        while (skyCollider != null && index < 500) {
+            Vector3 position = transform.position;
+            position.y -= 0.01f;
+            transform.position = position;
+            skyCollider = Physics2D.OverlapBox(transform.position, 0.01f * Vector2.one, 0, 1 << LayerMask.NameToLayer("sky"), -Mathf.Infinity, Mathf.Infinity);
+            index += 1;
+        }
+        objectBody.transform.position = objOriginalPosition;
     }
     void OnTriggerExit2D(Collider2D coll) {
         if (coll.tag == "table" && coll.gameObject != gameObject) {

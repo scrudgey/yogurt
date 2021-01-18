@@ -147,6 +147,15 @@ public class EventData : Describable {
         data.whatHappened = Toolbox.Instance.GetName(cannibal) + " commited cannibalism";
         return data;
     }
+    public static EventData HeadExplosion(GameObject victim) {
+        EventData data = new EventData(offensive: 2, disgusting: 4, disturbing: 3, chaos: 4, positive: -2);
+        data.key = "head_explosion";
+        data.val = 1f;
+        data.popupDesc = "heads exploded";
+        data.noun = "head explosions";
+        data.whatHappened = $"{Toolbox.Instance.GetName(victim)}'s head exploded";
+        return data;
+    }
     public static EventData Death(
         GameObject dead,
         GameObject lastAttacker,
@@ -184,7 +193,6 @@ public class EventData : Describable {
                 GameManager.Instance.IncrementStat(StatType.murders, 1);
                 string attackerName = Toolbox.Instance.GetName(lastAttacker);
                 data.whatHappened = $"{attackerName} murdered {victimName}";
-                Debug.Log(lastDamage.weaponName);
                 if (lastDamage.weaponName != null)
                     data.whatHappened += $" with {lastDamage.weaponName}";
                 data.noun = "murder";
@@ -193,8 +201,12 @@ public class EventData : Describable {
                     data.whatHappened += " with fire";
                 } else if (lastDamageType == damageType.cutting || lastDamageType == damageType.piercing) {
                     data.whatHappened = $"{attackerName} stabbed {victimName} to death";
-                    if (lastDamage.weaponName != "")
+                    if (lastDamage.weaponName != "") {
                         data.whatHappened += $" with {lastDamage.weaponName}";
+                        if (lastDamage.weaponName == "a chainsaw") {
+                            data.whatHappened = $"{attackerName} carved {victimName} up with a chainsaw";
+                        }
+                    }
                 } else if (lastDamageType == damageType.asphyxiation) {
                     data.whatHappened = attackerName + " strangled " + victimName + " to death";
                 } else if (lastDamageType == damageType.cosmic) {

@@ -13,7 +13,8 @@ namespace AI {
             if (inv) {
                 if (inv.holding) {
                     string holdingName = Toolbox.Instance.CloneRemover(inv.holding.name);
-                    if (holdingName == name) {
+                    // Debug.Log($"{holdingName} <-> {name}");
+                    if (holdingName.ToLower().Contains(name.ToLower())) {
                         return status.success;
                     } else {
                         return status.neutral;

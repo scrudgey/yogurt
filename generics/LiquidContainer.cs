@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
-
+using System.Collections.Generic;
+using System;
+using System.Linq;
 public class LiquidContainer : Interactive, ISaveable {
     public SpriteRenderer liquidSprite;
     public Liquid liquid;
@@ -24,6 +26,7 @@ public class LiquidContainer : Interactive, ISaveable {
     public bool configured = false;
     public AudioClip fillSound;
     public Sprite liquidDisplaySprite;
+    public bool mixWeakPotions;
     void Update() {
         if (spillTimeout > 0) {
             spillTimeout -= Time.deltaTime;
@@ -121,11 +124,21 @@ public class LiquidContainer : Interactive, ISaveable {
             l = Liquid.MixLiquids(liquid, l);
 
             // not ideal to put this here instead of in MixLiquids, but we need monobehavior
-            Buff mixedBuff = Liquid.MixPotion(l);
-            if (mixedBuff != null) {
-                l.buffs.Add(mixedBuff);
+            List<Buff> mixedBuff = Liquid.MixPotion(l);
+            if (mixWeakPotions) {
+                foreach (Buff buff in mixedBuff) {
+                    buff.lifetime = 15f;
+                }
+            }
+            if (Liquid.MixYogurt(l)) {
+                l = Liquid.LoadLiquid("yogurt");
+                GameObject.Instantiate(Resources.Load("particles/potionMixEffect"), transform.position, Quaternion.identity);
+            } else if (mixedBuff.Count > 0) {
+                l.buffs.AddRange(mixedBuff);
+
+                l.buffs = Buff.FlattenBuffs(l.buffs);
+
                 l.name = Liquid.GetName(l);
-                // TODO: play special effect
                 GameObject.Instantiate(Resources.Load("particles/potionMixEffect"), transform.position, Quaternion.identity);
             }
         }
@@ -182,7 +195,7 @@ public class LiquidContainer : Interactive, ISaveable {
             eater.Eat(sip.GetComponent<Edible>());
             amount -= 1f;
             if (drinkSounds.Length > 0) {
-                Toolbox.Instance.AudioSpeaker(drinkSounds[Random.Range(0, drinkSounds.Length - 1)], transform.position);
+                Toolbox.Instance.AudioSpeaker(drinkSounds[UnityEngine.Random.Range(0, drinkSounds.Length - 1)], transform.position);
             }
             GameManager.Instance.CheckItemCollection(gameObject, eater.gameObject);
         }

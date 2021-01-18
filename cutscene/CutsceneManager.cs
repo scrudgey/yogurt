@@ -33,6 +33,7 @@ public class CutsceneManager : Singleton<CutsceneManager> {
             cutscene.Configure();
     }
     public void InitializeCutscene(Cutscene cut) {
+        InputController.Instance.state = InputController.ControlState.cutscene;
         cutscene = cut;
     }
     public void LevelWasLoaded(Scene scene, LoadSceneMode mode) {
@@ -49,7 +50,7 @@ public class CutsceneManager : Singleton<CutsceneManager> {
             }
         }
     }
-    void Update() {
+    void FixedUpdate() {
         if (cutscene == null) {
             return;
         }
@@ -65,8 +66,14 @@ public class CutsceneManager : Singleton<CutsceneManager> {
             }
         }
     }
+
     public void EscapePressed() {
         if (cutscene != null)
             cutscene.EscapePressed();
+    }
+    public System.Collections.IEnumerator waitAndStartCutscene<T>(int waitTime) where T : Cutscene, new() {
+        yield return new WaitForSeconds(waitTime);
+        InitializeCutscene<T>();
+        yield return null;
     }
 }

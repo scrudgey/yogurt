@@ -26,7 +26,7 @@ public class Duplicatable : Interactive, ISaveable {
     }
     public bool Nullifiable() {
         // don't nullify if it is an uncollected item in the apartment. everything else is fair game.
-        if (SceneManager.GetActiveScene().name == "apartment") {
+        if (nullifiable && SceneManager.GetActiveScene().name == "apartment") {
             if (gameObject.GetComponent<Pickup>()) {
                 if (GameManager.Instance.IsItemCollected(gameObject)) {
                     return true;
@@ -57,6 +57,20 @@ public class Duplicatable : Interactive, ISaveable {
         // OccurrenceEat eatData = new OccurrenceEat();
         EventData nullData = EventData.Nullification(gameObject);
         Toolbox.Instance.OccurenceFlag(gameObject, nullData);
+
+        Container container = GetComponent<Container>();
+        if (container != null) {
+            while (container.items.Count > 0) {
+                if (container.items[0] == null) {
+                    container.items.RemoveAt(0);
+                } else {
+                    foreach (MonoBehaviour component in container.items[0].GetComponents<MonoBehaviour>())
+                        component.enabled = true;
+                    Pickup removed = container.Dump(container.items[0]);
+                    Destroy(removed.gameObject);
+                }
+            }
+        }
 
         ClaimsManager.Instance.WasDestroyed(gameObject);
         Destroy(gameObject);

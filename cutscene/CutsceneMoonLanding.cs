@@ -108,7 +108,7 @@ public class CutsceneMoonLanding : Cutscene {
 
         if (!GameManager.Instance.data.visitedMoon) {
             GameManager.Instance.data.visitedMoon = true;
-            GameManager.Instance.ShowDiaryEntry("moon");
+            GameManager.Instance.ShowDiaryEntryDelay("moon", delay: 0.5f);
         }
     }
 }

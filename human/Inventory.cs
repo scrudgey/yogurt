@@ -2,6 +2,7 @@
 using UnityEngine.Rendering;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections;
 
 public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     public Controllable.HitState hitstate;
@@ -54,6 +55,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     public List<AudioClip> punchSounds;
     private AudioSource audioSource;
     private MessageAnimation.AnimType currentAnimation;
+    private bool configured;
     void Awake() {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         holdpoint = transform.Find("holdpoint");
@@ -84,6 +86,10 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     }
     void HandleAnimation(MessageAnimation message) {
         if (message.type == MessageAnimation.AnimType.fighting && message.value == true) {
+            if (holding)
+                DropItem();
+        }
+        if (message.type == MessageAnimation.AnimType.panic && message.value == true) {
             if (holding)
                 DropItem();
         }
@@ -121,6 +127,9 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         }
     }
     public void Start() {
+        if (configured)
+            return;
+        configured = true;
         if (initHolding) {
             if (initHolding.activeInHierarchy) {
                 Pickup pickup = initHolding.GetComponent<Pickup>();
@@ -185,8 +194,11 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             pickup.GetComponent<Rigidbody2D>().isKinematic = true;
             pickup.GetComponent<Collider2D>().isTrigger = true;
             pickup.holder = this;
-            if (pickup.pickupSounds.Length > 0)
-                GetComponent<AudioSource>().PlayOneShot(pickup.pickupSounds[Random.Range(0, pickup.pickupSounds.Length)]);
+            if (pickup.pickupSounds.Length > 0) {
+                AudioClip clip = pickup.pickupSounds[Random.Range(0, pickup.pickupSounds.Length)];
+                if (clip != null)
+                    audioSource.PlayOneShot(clip);
+            }
             holding = pickup;
         }
     }
@@ -205,6 +217,10 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         return desire.accept;
     }
     public void StashItem(GameObject item) {
+        if (!item.transform.IsChildOf(transform)) {
+            item.transform.SetParent(holdpoint, false);
+            item.transform.localPosition = Vector3.zero;
+        }
         items.Add(item);
         if (holding != null && item == holding.gameObject)
             SoftDropItem();
@@ -242,10 +258,20 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         holding = null;
         if (gameObject == GameManager.Instance.playerObject)
             UINew.Instance.ClearWorldButtons();
+        // Debug.Log(InputController.Instance.lastAction);
+        if (InputController.Instance.lastAction != null && InputController.Instance.lastAction.ToLower().Contains("swingitem")) {
+            // we were just swinging a weapon, so we should enter fight mode
+            Controllable controllable = gameObject.GetComponent<Controllable>();
+            if (InputController.Instance.focus == controllable && !controllable.fightMode) {
+                InputController.Instance.controller.ToggleFightMode();
+                UINew.Instance.UpdateTopActionButtons();
+            }
+        }
     }
     public void DropItem() {
         if (holding == null)
             return;
+        // Debug.Log($"dropping {holding.gameObject}");
         ClaimsManager.Instance.DisclaimObject(holding.gameObject, this);
         holding.holder = null;
         holding.GetComponent<Rigidbody2D>().isKinematic = false;
@@ -262,10 +288,20 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             holding.transform.SetParent(null);
         }
         SpriteRenderer sprite = holding.GetComponent<SpriteRenderer>();
-        sprite.sortingLayerName = "main";
+        if (sprite != null)
+            sprite.sortingLayerName = "main";
         holding = null;
         if (gameObject == GameManager.Instance.playerObject)
             UINew.Instance.ClearWorldButtons();
+        // Debug.Log(InputController.Instance.lastAction);
+        if (InputController.Instance.lastAction != null && InputController.Instance.lastAction.ToLower().Contains("swingitem")) {
+            // we were just swinging a weapon, so we should enter fight mode
+            Controllable controllable = gameObject.GetComponent<Controllable>();
+            if (InputController.Instance.focus == controllable && !controllable.fightMode) {
+                InputController.Instance.controller.ToggleFightMode();
+                UINew.Instance.UpdateTopActionButtons();
+            }
+        }
     }
     public void RetrieveItem(string itemName) {
         for (int i = 0; i < items.Count; i++) {
@@ -356,14 +392,20 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     }
     void Update() {
         if (holding) {
-            if (directionAngle > 45 && directionAngle < 135) {
-                holdSortGroup.sortingLayerName = "main";
-                holdSortGroup.sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
-            } else {
+            if (holding.dontUseHoldpoint) {
                 holdSortGroup.sortingLayerName = "air";
                 holdSortGroup.sortingOrder = GetComponent<Renderer>().sortingOrder + 2;
+                holding.transform.position = transform.position;
+            } else {
+                if (directionAngle > 45 && directionAngle < 135) {
+                    holdSortGroup.sortingLayerName = "main";
+                    holdSortGroup.sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
+                } else {
+                    holdSortGroup.sortingLayerName = "air";
+                    holdSortGroup.sortingOrder = GetComponent<Renderer>().sortingOrder + 2;
+                }
+                holding.transform.position = holdpoint.transform.position;
             }
-            holding.transform.position = holdpoint.transform.position;
             if (holdpoint_angle != 0 && currentAnimation == MessageAnimation.AnimType.none) {
                 string dirString = Toolbox.Instance.DirectionToString(direction);
                 if (dirString == "left" || dirString == "right") {
@@ -407,6 +449,11 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
                     break;
             }
         }
+
+        // foreach (Rigidbody2D body in holding.GetComponentsInChildren<Rigidbody2D>()) {
+        //     Debug.Log(body);
+        //     body.AddForce(direction * 50f);
+        // }
     }
     public string SwingItem_desc(MeleeWeapon weapon) {
         string weaponname = Toolbox.Instance.GetName(weapon.gameObject);
@@ -416,13 +463,16 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.swinging, false);
         Toolbox.Instance.SendMessage(gameObject, this, anim);
         if (holding) {
+            holding.SendMessage("EndSwingWeapon", SendMessageOptions.DontRequireReceiver);
             holding.GetComponent<Renderer>().sortingLayerName = "main";
             holding.GetComponent<Renderer>().sortingOrder = GetComponent<Renderer>().sortingOrder - 1;
+            holding.transform.localRotation = Quaternion.identity;
         }
     }
     void StartSwing() {
         if (holding == null)
             return;
+        holding.SendMessage("StartSwingWeapon", SendMessageOptions.DontRequireReceiver);
         Dictionary<BuffType, Buff> netBuffs = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject).NetBuffs();
 
         GameObject slash = Instantiate(Resources.Load("Slash2"), transform.position, transform.rotation) as GameObject;
@@ -446,7 +496,20 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         message.strength = netBuffs[BuffType.strength].boolValue;
         message.type = weapon.damageType;
         s.message = message;
+
+        // foreach (Rigidbody2D body in holding.GetComponentsInChildren<Rigidbody2D>()) {
+        //     // Debug.Log(body);
+        //     body.AddForce(message.force * -5f, ForceMode2D.Impulse);
+        //     // body.AddForce((body.transform.position - holdpoint.transform.position) * 30f);
+        //     // if (direction.x >= 0) {
+        //     //     body.AddTorque(30f);
+        //     // } else {
+        //     //     body.AddTorque(-30f);
+        //     // }
+        //     // StartCoroutine(flail(body, message.force));
+        // }
     }
+
     public void DropMessage(GameObject obj) {
         SoftDropItem();
         MessageStun message = new MessageStun();
@@ -494,10 +557,12 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     }
     public void ClearInventory() {
         foreach (GameObject item in items) {
+            MySaver.RemoveObject(item.gameObject);
             Destroy(item);
         }
         items = new List<GameObject>();
         if (holding != null) {
+            MySaver.RemoveObject(holding.gameObject);
             Destroy(holding.gameObject);
             holding = null;
         }
@@ -510,6 +575,16 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             data.GUIDs["holdingID"] = System.Guid.Empty;
         }
         data.ints["itemCount"] = items.Count;
+        List<string> keysToRemove = new List<string>();
+        foreach (string key in data.GUIDs.Keys) {
+            if (key.StartsWith("item")) {
+                // data.GUIDs.Remove(key);
+                keysToRemove.Add(key);
+            }
+        }
+        foreach (string key in keysToRemove) {
+            data.GUIDs.Remove(key);
+        }
         if (items.Count > 0) {
             for (int i = 0; i < items.Count; i++) {
                 MySaver.UpdateGameObjectReference(items[i], data, "item" + i.ToString());
@@ -525,7 +600,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
             if (go != null) {
                 GetItem(go.GetComponent<Pickup>());
             } else {
-                Debug.Log("tried to get loadedobject " + data.ints["holdingID"].ToString() + " but was not found!");
+                Debug.Log("tried to get loadedobject " + data.GUIDs["holdingID"].ToString() + " but was not found!");
             }
         }
         if (data.ints["itemCount"] > 0) {

@@ -6,4 +6,7 @@ public class Item : Interactive {
     [TextArea(3, 10)]
     public string longDescription;
     public string referent;
+    [TextArea(5, 10)]
+    public string impDescription;
+    public bool the;
 }

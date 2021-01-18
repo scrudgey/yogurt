@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System;
 
 public class Controllable : MonoBehaviour {
-
+    public bool big; // if true, cannot fit in doors
     public static List<Type> ControlPriority = new List<Type>{
         typeof(Intrinsics),
         typeof(Outfit),
@@ -107,7 +107,7 @@ public class Controllable : MonoBehaviour {
             }
         }
     }
-    public bool Authenticate(Controller controller) {
+    public bool Authenticate(Controller controller, bool debug = false) {
         return controlStack.Count > 0 && controlStack.Peek() == controller;
     }
     public string lastPressed = "right";
@@ -126,6 +126,7 @@ public class Controllable : MonoBehaviour {
     public float directionAngle = 0;
     public HashSet<IDirectable> directables = new HashSet<IDirectable>();
     public bool fightMode;
+    public bool running;
     public bool disabled = false;
     public HitState hitState;
     public GameObject lastRightClicked;
@@ -143,7 +144,7 @@ public class Controllable : MonoBehaviour {
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
         Toolbox.RegisterMessageCallback<MessageDirectable>(this, HandleDirectable);
         Toolbox.RegisterMessageCallback<MessageInventoryChanged>(this, HandleInventoryMessage);
-        Toolbox.RegisterMessageCallback<MessageNoise>(this, HandleNoise);
+        // Toolbox.RegisterMessageCallback<MessageNoise>(this, HandleNoise);
     }
     public virtual void Start() {
         foreach (Component component in gameObject.GetComponentsInChildren<Component>()) {
@@ -153,12 +154,12 @@ public class Controllable : MonoBehaviour {
         }
         UpdateDefaultInteraction();
     }
-    public void HandleNoise(MessageNoise message) {
-        // if (hitState >= HitState.stun || fightMode)
-        //     return;
+    // public void HandleNoise(MessageNoise message) {
+    //     // if (hitState >= HitState.stun || fightMode)
+    //     //     return;
 
-        // LookAtPoint(message.location);
-    }
+    //     // LookAtPoint(message.location);
+    // }
     public void HandleInventoryMessage(MessageInventoryChanged message) {
         // Debug.Log(gameObject.name + " updating default actions on inv change");
         UpdateDefaultInteraction();
@@ -256,6 +257,16 @@ public class Controllable : MonoBehaviour {
     public virtual void ToggleFightMode(Controller controller) {
         if (Authenticate(controller)) {
             ToggleFightMode();
+        }
+    }
+    public virtual void SetRun(Controller controller, bool value) {
+        if (Authenticate(controller)) {
+            running = value;
+        }
+    }
+    public virtual void ShowInventory(Controller controller) {
+        if (Authenticate(controller)) {
+            UINew.Instance.ShowInventoryMenu();
         }
     }
 }

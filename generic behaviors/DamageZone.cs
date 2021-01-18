@@ -24,22 +24,29 @@ public class DamageZone : MonoBehaviour {
         if (InputController.forbiddenTags.Contains(other.tag))
             return;
 
-        if (!roots.ContainsKey(other)) {
-            roots[other] = InputController.Instance.GetBaseInteractive(other.transform);
-        }
+        // TODO: cache needs invalidation
+        // if (!roots.ContainsKey(other)) {
+        //     roots[other] = InputController.Instance.GetBaseInteractive(other.transform);
+        // }
 
-        GameObject root = roots[other];
-        if (damageQueue.Contains(root))
+        // GameObject root = roots[other];
+        if (damageQueue.Contains(other.gameObject))
             return;
 
-        damageQueue.Add(root);
+        damageQueue.Add(other.gameObject);
     }
     void FixedUpdate() {
+        HashSet<GameObject> roots = new HashSet<GameObject>();
         foreach (GameObject obj in damageQueue) {
+            if (obj == null) continue;
+            roots.Add(InputController.Instance.GetBaseInteractive(obj.transform));
+        }
+        foreach (GameObject obj in roots) {
             if (obj == null)
                 continue;
-            message.amount = amount * Time.deltaTime;
+            message.amount = amount * Time.fixedDeltaTime;
             Toolbox.Instance.SendMessage(obj, this, message, sendUpwards: false);
+            // Debug.Log($"sending damage to {obj} {message.amount}");
         }
         damageQueue = new HashSet<GameObject>();
     }

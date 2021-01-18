@@ -19,9 +19,17 @@ public class Monologue {
     public Monologue() { }
     static private Regex name_hook = new Regex(@"\$name");
     static private Regex cosmic_name_hook = new Regex(@"\$cosmicName");
+    static private Regex either_name_hook = new Regex(@"\$eitherName");
     public static string replaceHooks(string inString) {
         string line = name_hook.Replace(inString, GameManager.Instance.saveGameName);
         line = cosmic_name_hook.Replace(line, GameManager.Instance.data.cosmicName);
+
+        string bestName = GameManager.Instance.saveGameName;
+        if (GameManager.Instance.data.cosmicName != "") {
+            bestName = GameManager.Instance.data.cosmicName;
+        }
+        line = either_name_hook.Replace(line, bestName);
+
         List<bool> swearList = new List<bool>();
         line = Speech.ProcessDialogue(line, ref swearList).phrase;
         return line;
@@ -52,7 +60,7 @@ public class Monologue {
     }
 }
 
-public class DialogueMenu : MonoBehaviour {
+public partial class DialogueMenu : MonoBehaviour {
     public enum TextSize { normal, large };
     private AudioSource audioSource;
     public Speech instigator;
@@ -108,16 +116,22 @@ public class DialogueMenu : MonoBehaviour {
     public bool cutsceneDialogue;
     public bool disableCommand;
     private bool doTrapDoor;
+    private bool doCEOSequence;
     private bool doVampireAttack;
     public bool keypressedThisFrame;
+    static List<string> cutsceneDialogues = new List<string>{
+        "polestar_first", "vampire", "dancing_god", "dancing_god_bless", "dancing_god_destroy", "magician", "magician2", "magician3"
+    };
     void Awake() {
         keypressedThisFrame = false;
-        InputController.Instance.PrimaryAction.action.Enable();
         InputController.Instance.PrimaryAction.action.performed += ctx => {
             keypressedThisFrame = ctx.ReadValueAsButton();
         };
-
+        InputController.Instance.PrimaryAction.action.Enable();
     }
+    // void OnEnable() {
+    //     InputController.Instance.PrimaryAction.action.Enable();
+    // }
 
     public void Start() {
         if (configured)
@@ -168,7 +182,7 @@ public class DialogueMenu : MonoBehaviour {
         }
     }
 
-    public void Configure(Speech instigator, Speech target, bool interruptDefault = false) {
+    public void Configure(Speech instigator, Speech target, bool interruptDefault = false, string dialogue = null, bool recuit = false) {
         Start();
         this.instigator = instigator;
         this.target = target;
@@ -213,12 +227,9 @@ public class DialogueMenu : MonoBehaviour {
             return;
         }
         if (target.hitState <= Controllable.HitState.stun) {
-            //     if (message.value && cameraMonologue != "") {
-            //     defaultMonologue = cameraMonologue;
-            // } else {
-
-            // }
-            if (target.onCamera && target.cameraMonologue != "") {
+            if (dialogue != null) {
+                LoadDialogueTree(dialogue);
+            } else if (target.onCamera && target.cameraMonologue != "") {
                 LoadDialogueTree(target.cameraMonologue);
             } else if (target.defaultMonologue != "") {
                 LoadDialogueTree(target.defaultMonologue);
@@ -236,6 +247,9 @@ public class DialogueMenu : MonoBehaviour {
             VampireAttack();
         if (doTrapDoor)
             VampireTrap();
+        if (doCEOSequence) {
+            GameManager.Instance.StartCEOSequence();
+        }
         if (targetControl)
             targetControl.disabled = false;
         if (instigatorControl)
@@ -244,6 +258,7 @@ public class DialogueMenu : MonoBehaviour {
         //     targetAnchoriteDance.StartDance();
         if (menuClosed != null)
             menuClosed();
+        menuClosed = null;
     }
     public void UpdateActiveText() {
         switch (textSize) {
@@ -262,7 +277,7 @@ public class DialogueMenu : MonoBehaviour {
     public void LoadDialogueTree(string filename) {
         // Debug.Log("load " + filename);
         // CUTSCENE-STYLE DIALOGUE (NO INTERACTION)
-        if (filename == "polestar_first" || filename == "vampire" || filename == "dancing_god" || filename == "dancing_god_bless" || filename == "dancing_god_destroy") {
+        if (cutsceneDialogues.Contains(filename)) {
             cutsceneDialogue = true;
             EnableButtons();
         }
@@ -386,6 +401,7 @@ public class DialogueMenu : MonoBehaviour {
         string[] ender = new string[] { "END" };
         Say(new Monologue(target, ender));
     }
+
     void DeclineCommand() {
         List<string> response = new List<string>();
         response.Add("I'd rather not.");
@@ -394,6 +410,21 @@ public class DialogueMenu : MonoBehaviour {
     void AcceptCommand() {
         List<string> response = new List<string>();
         response.Add("Why certainly my good man!");
+        Say(new Monologue(target, response.ToArray()));
+    }
+    public void RecruitAsk(Speech targetSpeech) {
+        Speech playerSpeech = GameManager.Instance.playerObject.GetComponent<Speech>();
+        Configure(playerSpeech, targetSpeech, interruptDefault: true);
+
+        List<string> request = new List<string>();
+        request.Add("Say, how would you like to be the new yogurt commercial actor?");
+        Say(new Monologue(instigator, request.ToArray()));
+
+        string[] ender = new string[] { "END" };
+        Say(new Monologue(target, ender));
+
+        List<string> response = new List<string>();
+        response.Add("It has always been my dream to be a yogurt commercial actor!");
         Say(new Monologue(target, response.ToArray()));
     }
     public void HandCommandCallback(ActionButtonScript.buttonType btype) {
@@ -456,6 +487,17 @@ public class DialogueMenu : MonoBehaviour {
                 break;
         }
     }
+    public void Inquire() {
+        Say(instigator, "Are you the previous yogurt commercial actor?");
+        Say(target, "I am not the previous yogurt commercial actor.");
+        // TODO: set up a node
+    }
+    public void InquireSuccess() {
+        Say(instigator, "Are you the previous yogurt commercial actor?");
+        Say(target, "Yes, I used to be the yogurt commercial actor.");
+        LoadDialogueTree("detective_success");
+    }
+
 
     public void Say(Speech speaker, string text) {
         Monologue newLogue = new Monologue(speaker, new string[] { text });
@@ -550,7 +592,7 @@ public class DialogueMenu : MonoBehaviour {
                 promptText.text = "";
             }
         }
-        if (blitCounter > 2) {
+        if (blitCounter > 5) {
             if (instigator.portrait.Length > 1) {
                 List<Sprite> unusedSprites = new List<Sprite>(instigator.portrait);
                 unusedSprites.Remove(portrait1.sprite);
@@ -571,113 +613,5 @@ public class DialogueMenu : MonoBehaviour {
             SetMonologue(dialogue.Pop());
         }
         CheckForCommands(monologue.text.Peek());
-    }
-    public void CheckForCommands(string text) {
-        if (text == "IMPCALLBACK1") {
-            UINew.Instance.CloseActiveMenu();
-            CutsceneImp cutscene = (CutsceneImp)CutsceneManager.Instance.cutscene;
-            cutscene.FirstIngredient();
-        }
-        if (text == "IMPCALLBACK2") {
-            UINew.Instance.CloseActiveMenu();
-            CutsceneImp cutscene = (CutsceneImp)CutsceneManager.Instance.cutscene;
-            cutscene.SecondIngredient();
-        }
-        if (text == "IMPCALLBACK3") {
-            UINew.Instance.CloseActiveMenu();
-            CutsceneImp cutscene = (CutsceneImp)CutsceneManager.Instance.cutscene;
-            cutscene.Finish();
-        }
-
-        // while (nextLine) {
-        bool nextLine = false;
-        if (text == "END") {
-            if (UINew.Instance.activeMenuType == UINew.MenuType.dialogue)
-                UINew.Instance.CloseActiveMenu();
-        }
-        if (text == "POLESTARCALLBACK") {
-            PoleStarCallback();
-            nextLine = true;
-        }
-        if (text == "VAMPIRETRAP") {
-            doTrapDoor = true;
-            nextLine = true;
-        }
-        if (text == "VAMPIREATTACK") {
-            doVampireAttack = true;
-            nextLine = true;
-        }
-        if (text == "TEXTSIZE:NORMAL") {
-            textSize = TextSize.normal;
-            nextLine = true;
-        }
-        if (text == "TEXTSIZE:LARGE") {
-            textSize = TextSize.large;
-            nextLine = true;
-        }
-        if (text == "MAYORAWARDCALLBACK") {
-            MayorAward();
-            nextLine = true;
-        }
-        if (text == "GODBLESS") {
-            target.GetComponent<Godhead>().Bless();
-            UINew.Instance.CloseActiveMenu();
-        }
-        if (text == "GODDESTROY") {
-            target.GetComponent<Godhead>().Destroy();
-            UINew.Instance.CloseActiveMenu();
-        }
-        if (nextLine)
-            NextLine();
-    }
-    public void PoleStarCallback() {
-        target.defaultMonologue = "polestar";
-        GameManager.Instance.data.teleporterUnlocked = true;
-        GameManager.Instance.data.cosmicName = GameManager.Instance.CosmicName();
-    }
-    public void VampireTrap() {
-        TrapDoor trapdoor = GameObject.Find("trapdoor").GetComponent<TrapDoor>();
-        trapdoor.Activate();
-    }
-    public void VampireAttack() {
-        GameObject vampire = target.gameObject;
-        MessageInsult message = new MessageInsult();
-        Toolbox.Instance.SendMessage(vampire, instigator, message);
-        Toolbox.Instance.SendMessage(vampire, instigator, message);
-    }
-    public void MayorAward() {
-        GameObject mayor = GameObject.Find("Mayor");
-        if (mayor != null) {
-            Inventory mayorInventory = mayor.GetComponent<Inventory>();
-            Controllable mayorControl = mayor.GetComponent<Controllable>();
-            Speech mayorSpeech = mayor.GetComponent<Speech>();
-            GameObject key = GameObject.Instantiate(Resources.Load("prefabs/key_to_city"), mayor.transform.position, Quaternion.identity) as GameObject;
-            Pickup keyPickup = key.GetComponent<Pickup>();
-            mayorInventory.GetItem(keyPickup);
-            mayorSpeech.defaultMonologue = "mayor_normal";
-            GameManager.Instance.data.mayorAwardToday = true;
-            GameManager.Instance.StartCoroutine(AwardRoutine(mayorControl, mayorInventory));
-        }
-    }
-    IEnumerator AwardRoutine(Controllable controllable, Inventory inv) {
-        using (Controller control = new Controller(controllable)) {
-            control.LookAtPoint(target.transform.position);
-
-            yield return new WaitForSeconds(0.1f);
-            control.ResetInput();
-            control.LookAtPoint(GameManager.Instance.playerObject.transform.position);
-            controllable.disabled = true;
-            yield return new WaitForSeconds(1.0f);
-            control.LookAtPoint(GameManager.Instance.playerObject.transform.position);
-            // AudioClip congratsClip = Resources.Load("music/Short CONGRATS YC3") as AudioClip;
-            MusicController.Instance.EnqueueMusic(new MusicCongrats());
-            GameObject confetti = Resources.Load("particles/confetti explosion") as GameObject;
-            // Toolbox.Instance.AudioSpeaker(congratsClip, controllable.transform.position);
-            GameObject.Instantiate(confetti, controllable.transform.position, Quaternion.identity);
-            yield return new WaitForSeconds(3f);
-            control.LookAtPoint(GameManager.Instance.playerObject.transform.position);
-            inv.DropItem();
-            yield return new WaitForSeconds(0.5f);
-        }
     }
 }

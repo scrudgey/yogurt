@@ -28,7 +28,8 @@ public class SaveGameSelectorScript : MonoBehaviour {
     public void Configure(StartMenu startMenu, DirectoryInfo dir, GameData data) {
         this.data = data;
         this.startMenu = startMenu;
-        nameText.text = dir.Name;
+        // nameText.text = dir.Name;
+        nameText.text = $"{dir.Name} - Day {data.days}";
         saveName = dir.Name;
 
         TimeSpan t = TimeSpan.FromSeconds(0f);
@@ -44,5 +45,10 @@ public class SaveGameSelectorScript : MonoBehaviour {
     }
     public void Clicked() {
         startMenu.InspectSaveGame(this);
+    }
+
+    public void DeleteClicked() {
+        // Debug.Log($"detele {saveName}");
+        startMenu.DeleteSaveGamePrompt(this);
     }
 }

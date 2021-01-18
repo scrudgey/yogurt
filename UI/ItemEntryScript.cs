@@ -83,7 +83,12 @@ public class ItemEntryScript : MonoBehaviour, IPointerEnterHandler {
         }
         GameObject tempObject = Instantiate(Resources.Load("prefabs/" + name)) as GameObject;
         Item tempItem = tempObject.GetComponent<Item>();
-        sprite = tempObject.GetComponent<SpriteRenderer>().sprite;
+        Pickup itemPickup = tempObject.GetComponent<Pickup>();
+        SpriteRenderer itemRenderer = tempObject.GetComponent<SpriteRenderer>();
+        if (itemPickup != null && itemPickup.icon != null) {
+            sprite = itemPickup.icon;
+        } else sprite = itemRenderer.sprite;
+        // sprite = tempObject.GetComponent<SpriteRenderer>().sprite;
         if (tempItem != null) {
             if (tempItem.longDescription != "") {
                 description = tempItem.longDescription;
@@ -104,6 +109,13 @@ public class ItemEntryScript : MonoBehaviour, IPointerEnterHandler {
                     kvp.Value.lifetime = 0;
                     buffs.Add(kvp.Value);
                 }
+            }
+        }
+        LiquidResevoir resevoir = tempObject.GetComponent<LiquidResevoir>();
+        if (resevoir != null && resevoir.liquid != null) {
+            foreach (Buff buff in resevoir.liquid.buffs) {
+                buff.lifetime = 0;
+                buffs.Add(buff);
             }
         }
 

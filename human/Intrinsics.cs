@@ -121,7 +121,7 @@ public class Intrinsics : MonoBehaviour, ISaveable {
                     break;
                 case BuffType.invulnerable:
                     if (kvp.Value.active()) {
-
+                        // Debug.Log($"{this} handling intrinsic invulnerability");
                         // only create halo if invuln. is not the hat
                         // add to head if head exists, else add to me
                         if (!(head != null && children.ContainsKey(head) && children[head].NetBuffs()[BuffType.invulnerable].active())) {
@@ -142,21 +142,13 @@ public class Intrinsics : MonoBehaviour, ISaveable {
                         // only delete halo if invuln. is not the hat
                         // delete from head if head exists, otherwise delete from me
                         if (!(head != null && children.ContainsKey(head) && children[head].NetBuffs()[BuffType.invulnerable].active())) {
-                            // Transform haloTransform = transform.Find("halo");
-                            // if (head != null) {
-                            //     haloTransform = head.transform.Find("halo");
-                            // } else {
-                            //     haloTransform = transform.Find("halo");
-                            // }
-                            // if (haloTransform != null) {
-                            //     Destroy(haloTransform.gameObject);
-                            // }
-
                             Transform[] children = transform.GetComponentsInChildren<Transform>();
                             foreach (var child in children) {
+                                if (child == null)
+                                    continue;
                                 if (child.name.Contains("halo")) {
-                                    //do something with child
-                                    Destroy(child.gameObject);
+                                    Debug.Log($"Destroying {child.gameObject}");
+                                    DestroyImmediate(child.gameObject);
                                 }
                             }
                         }
@@ -230,16 +222,25 @@ public class Intrinsics : MonoBehaviour, ISaveable {
     }
     public void SaveData(PersistentComponent data) {
         data.buffs = new List<Buff>();
+        data.ints["buffCount"] = buffs.Count;
+        foreach (Buff b in buffs) {
+            data.buffs.Add(new Buff(b));
+        }
         foreach (Buff b in liveBuffs) {
             data.buffs.Add(new Buff(b));
         }
     }
     public void LoadData(PersistentComponent data) {
         liveBuffs = new List<Buff>();
+        buffs = new List<Buff>();
         foreach (Buff b in data.buffs) {
-            liveBuffs.Add(new Buff(b));
+            if (buffs.Count < data.ints["buffCount"]) {
+                buffs.Add(new Buff(b));
+            } else {
+                liveBuffs.Add(new Buff(b));
+            }
         }
-        if (data.buffs.Count > 0)// || blessed)
+        if (data.buffs.Count > 0)
             IntrinsicsChanged();
     }
     public static Dictionary<BuffType, Buff> emptyBuffMap() {

@@ -24,6 +24,8 @@ public partial class GameManager : Singleton<GameManager> {
     }
 
     public void UnlockCommercial(string filename) {
+        if (data == null)
+            data = InitializedGameData();
         //TODO: do not unlock same commercial twice
         Commercial unlocked = Commercial.LoadCommercialByFilename(filename);
         foreach (Commercial commercial in data.unlockedCommercials) {
@@ -62,6 +64,12 @@ public partial class GameManager : Singleton<GameManager> {
         if (commercial.email != "") {
             ReceiveEmail(commercial.email);
         }
+        Debug.Log(commercial.hallucination);
+        if (commercial.hallucination != "") {
+
+            data.queuedMagicianSequences.Add(commercial.hallucination);
+            Debug.Log(data.queuedMagicianSequences);
+        }
         UINew.Instance.ClearObjectives();
         UINew.Instance.RefreshUI(active: false);
 
@@ -93,8 +101,10 @@ public partial class GameManager : Singleton<GameManager> {
 
         // TODO: check if this level supports greaser entrance first
         if (commercial.name == "1950s Greaser Beatdown") {
-            data.commercialsInitializedToday.Add(commercial.name);
-            CutsceneManager.Instance.InitializeCutscene<CutsceneScorpion>();
+            if (CutsceneScorpion.FindValidDoorway() != null) {
+                data.commercialsInitializedToday.Add(commercial.name);
+                CutsceneManager.Instance.InitializeCutscene<CutsceneScorpion>();
+            }
         }
 
         if (commercial.name == "Nullify Hate" && sceneName == "studio") {

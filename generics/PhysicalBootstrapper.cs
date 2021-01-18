@@ -23,7 +23,6 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
     private Vector3 setV;
     private Vector3 addV;
     public GameObject thrownBy;
-    public Collider2D objectCollider;
     public PersistentComponent loadData;
     public bool doLoad;
     private bool isQuitting = false;
@@ -96,13 +95,7 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         // Set up ground object
         groundObject = new GameObject(name + " Ground");
         groundObject.tag = "footprint";
-        // if (noCollisions) {
-        //     // groundObject.layer = 15;
-        //     foreach (Collider2D collider in groundObject.GetComponents<Collider2D>()) {
-        //         collider.enabled = false;
-        //     }
-        // }
-        groundObject.layer = 16;
+        groundObject.layer = LayerMask.NameToLayer("groundcollider");
 
         groundObject.transform.position = initPos;
         Toolbox.Instance.SetUpAudioSource(groundObject);
@@ -116,7 +109,6 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         groundBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         groundBody.interpolation = RigidbodyInterpolation2D.Interpolate;
         //box collider
-        // if (!noCollisions) {
         groundCollider = groundObject.AddComponent<CapsuleCollider2D>();
         groundCollider.direction = CapsuleDirection2D.Horizontal;
         groundCollider.sharedMaterial = Resources.Load<PhysicsMaterial2D>("ground");
@@ -128,11 +120,10 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         foreach (Collider2D myCollider in GetComponents<Collider2D>()) {
             Physics2D.IgnoreCollision(groundCollider, myCollider, true);
         }
-        // }
 
 
         horizon = new GameObject("horizon");
-        horizon.layer = 9;
+        horizon.layer = LayerMask.NameToLayer("horizon");
         Rigidbody2D shadowBody = horizon.AddComponent<Rigidbody2D>();
         shadowBody.bodyType = RigidbodyType2D.Kinematic;
         horizon.AddComponent<EdgeCollider2D>();
@@ -140,7 +131,6 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         horizon.transform.SetParent(groundObject.transform);
         shadowBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         shadowBody.interpolation = RigidbodyInterpolation2D.Interpolate;
-        objectCollider = GetComponent<Collider2D>();
 
         hingeObject.transform.SetParent(groundObject.transform);
         Vector2 tempPos = Vector2.zero;
@@ -204,6 +194,8 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         }
     }
     void OnCollisionEnter2D(Collision2D coll) {
+        // Debug.Log(coll.gameObject);
+        // Debug.Log(physical.currentMode);
         if (coll.gameObject == horizon) {
             if (coll.relativeVelocity.magnitude > 0.1) {
                 Bounce();
@@ -215,7 +207,7 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
             if (physical == null)
                 return;
             if (physical.currentMode == Physical.mode.zip) {
-                if (coll.otherCollider.transform.root == transform.root) {
+                if (coll.collider.transform.root == transform.root) {
                     return;
                 }
                 Collision(coll);
@@ -224,20 +216,23 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
 
         if (coll.gameObject.transform.root == transform.root)
             return;
-
+        if (coll.gameObject.name.ToLower().Contains("chemical spray")) {
+            return;
+        }
         if (coll.relativeVelocity.magnitude > 0.1) {
             if (impactSounds != null && !silentImpact)
                 if (impactSounds.Length > 0) {
                     audioSource.PlayOneShot(impactSounds[Random.Range(0, impactSounds.Length)]);
                 }
             if (coll.gameObject != horizon) {
+                string name1 = Toolbox.Instance.GetName(coll.gameObject);
+                string name2 = Toolbox.Instance.GetName(gameObject);
+
                 EventData data = Toolbox.Instance.DataFlag(
                     gameObject,
                     "collision",
-                    Toolbox.Instance.CloneRemover(coll.gameObject.name) + " collided with " + Toolbox.Instance.CloneRemover(gameObject.name),
+                    $"{name1} collided with {name2}",
                     chaos: 1);
-                // data.noun = "collision";
-                // data.whatHappened = Toolbox.Instance.CloneRemover(coll.gameObject.name) + " collided with " + Toolbox.Instance.CloneRemover(gameObject.name);
             }
         }
 
@@ -321,6 +316,8 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         if (collision.otherCollider.transform.root == collision.collider.transform.root) {
             return;
         }
+        if (collision.gameObject.name.ToLower().Contains("chemical spray"))
+            return;
 
         // Debug.Log("physical collision: " + gameObject.name + " + " + collision.gameObject.name);
         // Debug.Log(collision.relativeVelocity.magnitude);
@@ -346,20 +343,19 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
         }
         Impact(message);
         AudioClip impactSound = null;
-        if (impactSounds != null && !silentImpact) {
-            if (impactSounds.Length > 0) {
-                impactSound = impactSounds[Random.Range(0, impactSounds.Length)];
-            } else {
-                impactSound = Resources.Load("sounds/8bit_impact1", typeof(AudioClip)) as AudioClip;
-            }
-        } else {
+        if (impactSounds != null && impactSounds.Length > 0 && !silentImpact) {
+            impactSound = impactSounds[Random.Range(0, impactSounds.Length)];
+        } else if (!silentImpact) {
             impactSound = Resources.Load("sounds/8bit_impact1", typeof(AudioClip)) as AudioClip;
         }
         if (impactSound)
             Toolbox.Instance.AudioSpeaker(impactSound, transform.position);
-        // Collider2D mycollider = GetComponent<Collider2D>();
-        // Debug.Log("Collision: "+mycollider.name+" collided with "+collision.collider.name);
+
+        Collider2D mycollider = GetComponent<Collider2D>();
+        // Debug.Log($"{silentImpact} {impactSound}");
+        // Debug.Log("Collision: " + mycollider.name + " collided with " + collision.collider.name);
         // Debug.Log(Physics2D.GetIgnoreCollision(mycollider, collision.collider));
+        // Debug.Break();
     }
     public void Impact(MessageDamage message) {
         if (physical == null)
@@ -398,7 +394,8 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
                 impulse = impulse * (bounceCoefficient / 0.5f);
                 Add3Motion(impulse);
             }
-            if (impactSounds != null && impactSounds.Length > 0) {
+
+            if (!message.suppressImpactSound && impactSounds != null && impactSounds.Length > 0) {
                 AudioClip ac = impactSounds[Random.Range(0, impactSounds.Length)];
                 if (ac != null)
                     audioSource.PlayOneShot(ac);

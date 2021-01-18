@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using Easings;
 using UnityEngine.EventSystems;
+using TMPro;
 
 public partial class UINew : Singleton<UINew> {
 
@@ -52,6 +53,17 @@ public partial class UINew : Singleton<UINew> {
     public GameObject buttonAnchor;
     public FadeInOut fader;
     public List<string> previousTopButtons = new List<string>();
+    public AudioClip mouseOverObjectSound;
+    public AudioClip actionMenuOpenSound;
+    public AudioClip actionButtonPressedSound;
+    public AudioSource audioSource;
+    public StomachDisplayManager stomachDisplayManager;
+    public Text creditsLeftTitle;
+    public Text creditsLeftContent;
+    public Text creditsRightTitle;
+    public Text creditsRightContent;
+    public TextMeshProUGUI creditsLeftMoreContent;
+    public TextMeshProUGUI creditsRightMoreContent;
     public void Start() {
         Awake();
     }
@@ -63,11 +75,21 @@ public partial class UINew : Singleton<UINew> {
         // Sprite[] sprites = Resources.LoadAll<Sprite>("UI/Cursor2_128");
         // cursorDefault = sprites[0].texture;
         // cursorHighlight = sprites[1].texture;
-        cursorDefault = (Texture2D)Resources.Load("UI/cursor3_64_2");
-        cursorHighlight = (Texture2D)Resources.Load("UI/cursor3_64_1");
+
+
+        cursorDefault = (Texture2D)Resources.Load("UI/cursor_128_2");
+        cursorHighlight = (Texture2D)Resources.Load("UI/cursor_128_1");
+
+        // cursorDefault = (Texture2D)Resources.Load("UI/cursor3_64_2");
+        // cursorHighlight = (Texture2D)Resources.Load("UI/cursor3_64_1");
         cursorTarget = (Texture2D)Resources.Load("UI/cursor3_target3");
     }
     public void ConfigureUIElements() {
+        actionMenuOpenSound = Resources.Load("sounds/UI/plunger-pop-4") as AudioClip;
+        // actionMenuOpenSound = Resources.Load("sounds/UI/plunger-ffpop") as AudioClip;
+        audioSource = Toolbox.Instance.SetUpGlobalAudioSource(gameObject);
+
+
         init = true;
         UICanvas = GameObject.Find("NeoUICanvas");
         if (UICanvas == null) {
@@ -100,6 +122,22 @@ public partial class UINew : Singleton<UINew> {
         objectivesContainer = UICanvas.transform.Find("objectives");
         fader = UICanvas.transform.Find("fader").GetComponent<FadeInOut>();
         iconDock = UICanvas.transform.Find("iconDock");
+        creditsLeftContent = UICanvas.transform.Find("credits/leftCredits/credContents").GetComponent<Text>();
+        creditsLeftTitle = UICanvas.transform.Find("credits/leftCredits/credTitle").GetComponent<Text>();
+        creditsLeftMoreContent = UICanvas.transform.Find("credits/leftCredits/muchText").GetComponent<TextMeshProUGUI>();
+        creditsRightContent = UICanvas.transform.Find("credits/rightCredits/credContents").GetComponent<Text>();
+        creditsRightTitle = UICanvas.transform.Find("credits/rightCredits/credTitle").GetComponent<Text>();
+        creditsRightMoreContent = UICanvas.transform.Find("credits/rightCredits/muchText").GetComponent<TextMeshProUGUI>();
+
+        creditsLeftContent.text = "";
+        creditsLeftTitle.text = "";
+        creditsLeftMoreContent.text = "";
+        creditsRightContent.text = "";
+        creditsRightTitle.text = "";
+        creditsRightMoreContent.text = "";
+
+        if (stomachDisplayManager == null)
+            stomachDisplayManager = UICanvas.GetComponentInChildren<StomachDisplayManager>();
         topRightRectTransform = topRightBar.GetComponent<RectTransform>();
         if (lifebarDefaultSize == Vector2.zero)
             lifebarDefaultSize = new Vector2(lifebar.rect.width, lifebar.rect.height);
@@ -148,14 +186,21 @@ public partial class UINew : Singleton<UINew> {
             child.gameObject.SetActive(active);
         }
 
+        // stomach contents
+        UpdateStomachDisplay();
+
         if (active) {
             // top action buttons
             UpdateTopActionButtons();
 
             // health bar
-            if (GameManager.Instance.playerObject.GetComponent<Hurtable>()) {
+            if (GameManager.Instance.playerObject != null && GameManager.Instance.playerObject.GetComponent<Hurtable>()) {
                 topRightBar.SetActive(true);
             }
+            stomachDisplayManager.gameObject.SetActive(true);
+        } else {
+            if (stomachDisplayManager != null)
+                stomachDisplayManager.gameObject.SetActive(false);
         }
 
     }

@@ -9,20 +9,21 @@ public enum SkinColor {
     dark,
     darker,
     undead,
-    clown
+    clown,
+    demon
 }
 public enum Gender {
     male,
     female
 }
-public static class ExtensionMethods {
-    public static TKey FindKeyByValue<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TValue value) {
-        TKey returnkey = default(TKey);
-        foreach (KeyValuePair<TKey, TValue> pair in dictionary)
-            if (value.Equals(pair.Value)) returnkey = pair.Key;
-        return returnkey;
-    }
-}
+// public static class ExtensionMethods {
+//     public static TKey FindKeyByValue<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TValue value) {
+//         TKey returnkey = default(TKey);
+//         foreach (KeyValuePair<TKey, TValue> pair in dictionary)
+//             if (value.Equals(pair.Value)) returnkey = pair.Key;
+//         return returnkey;
+//     }
+// }
 
 public partial class Toolbox : Singleton<Toolbox> {
     protected Toolbox() { } // guarantee this will be always a singleton only - can't use the constructor!
@@ -32,6 +33,10 @@ public partial class Toolbox : Singleton<Toolbox> {
     static Regex doublePunctuationRegex = new Regex(@"[/./?!][/./?!]");
     static Regex cloneFinder = new Regex(@"(.+)\(Clone\)$", RegexOptions.Multiline);
     static Regex underScoreFinder = new Regex(@"_", RegexOptions.Multiline);
+
+    private static readonly Regex regexClone = new Regex(@"(.+)\(Clone\)$", RegexOptions.Multiline);
+    private static readonly Regex regexNumber = new Regex(@"(.+)\(\d+\)$", RegexOptions.Multiline);
+    public static readonly Regex regexSpace = new Regex("\\s+", RegexOptions.Multiline);
     AudioMixer sfxMixer;
     void Start() {
         sfxMixer = Resources.Load("mixers/SoundEffectMixer") as AudioMixer;
@@ -130,6 +135,10 @@ public partial class Toolbox : Singleton<Toolbox> {
         occurrence.data = occurrenceData;
         noiseOccurrence.data = occurrenceData;
         occurrenceData.CalculateDescriptions();
+        // Debug.Log(occurrenceData.describable.whatHappened);
+        if (occurrenceData.describable.whatHappened.ToLower().Contains("tina")) {
+            Debug.LogError(occurrenceData.describable.whatHappened);
+        }
     }
     public void OccurenceFlag(GameObject spawner, OccurrenceData data) {
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
@@ -139,6 +148,10 @@ public partial class Toolbox : Singleton<Toolbox> {
         occurrence.data = data;
         noiseOccurrence.data = data;
         data.CalculateDescriptions();
+        // Debug.Log(data.describable.whatHappened);
+        if (data.describable.whatHappened.ToLower().Contains("tina")) {
+            Debug.LogError(data.describable.whatHappened);
+        }
     }
     public EventData DataFlag(GameObject spawner, string noun, string whatHappened, float chaos = 0, float disgusting = 0, float disturbing = 0, float offensive = 0, float positive = 0) {
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
@@ -153,7 +166,10 @@ public partial class Toolbox : Singleton<Toolbox> {
         data.CalculateDescriptions();
 
         occurrence.data = data;
-
+        // Debug.Log(data.describable.whatHappened);
+        if (data.describable.whatHappened.ToLower().Contains("tina")) {
+            Debug.LogError(data.describable.whatHappened);
+        }
         return eventData;
     }
     public AudioSource SetUpAudioSource(GameObject g) {
@@ -169,6 +185,31 @@ public partial class Toolbox : Singleton<Toolbox> {
         source.minDistance = 1f;
         source.maxDistance = 5.42f;
         source.spatialBlend = 1;
+        source.spread = 0.2f;
+
+        source.outputAudioMixerGroup = sfxMixer.FindMatchingGroups("Master")[0];
+        return source;
+    }
+    public AudioSource SetUpGlobalAudioSource(GameObject g) {
+        AudioSource source = g.GetComponent<AudioSource>();
+        if (!source) {
+            source = g.AddComponent<AudioSource>();
+        }
+        if (sfxMixer == null) {
+            sfxMixer = Resources.Load("mixers/SoundEffectMixer") as AudioMixer;
+        }
+
+        source.loop = false;
+        source.volume = 1;
+        source.pitch = 1;
+        source.panStereo = 0;
+        source.spatialBlend = 0;
+        source.dopplerLevel = 0;
+        source.spread = 360;
+        source.rolloffMode = AudioRolloffMode.Logarithmic;
+        source.minDistance = 9990f;
+        source.maxDistance = 9999f;
+
 
         source.outputAudioMixerGroup = sfxMixer.FindMatchingGroups("Master")[0];
         return source;
@@ -195,8 +236,6 @@ public partial class Toolbox : Singleton<Toolbox> {
     ///Spawn a droplet of liquid l at poisition pos.
     ///</summary>
     public GameObject SpawnDroplet(Vector3 pos, Liquid l) {
-        // Debug.Log(l == null);
-        /// this is a test
         Vector2 initialVelocity = Vector2.zero;
         initialVelocity = UnityEngine.Random.insideUnitCircle;
         if (initialVelocity.y < 0)
@@ -204,7 +243,6 @@ public partial class Toolbox : Singleton<Toolbox> {
         return SpawnDroplet(pos, l, initialVelocity);
     }
     public GameObject SpawnDroplet(Vector3 pos, Liquid l, Vector3 initialVelocity) {
-        // Debug.Log(l == null);
         GameObject droplet = Instantiate(Resources.Load("prefabs/droplet"), pos, Quaternion.identity) as GameObject;
         PhysicalBootstrapper phys = droplet.GetComponent<PhysicalBootstrapper>();
         phys.initHeight = pos.z;
@@ -215,11 +253,9 @@ public partial class Toolbox : Singleton<Toolbox> {
         return droplet;
     }
     public GameObject SpawnDroplet(Liquid l, float severity, GameObject spiller) {
-        // Debug.Log(l == null);
         return SpawnDroplet(l, severity, spiller, 0.01f);
     }
     public GameObject SpawnDroplet(Liquid l, float severity, GameObject spiller, float initHeight, bool noCollision = true) {
-        // Debug.Log(l == null);
         Vector3 initialVelocity = Vector2.zero;
         Vector3 randomVelocity = spiller.transform.right * UnityEngine.Random.Range(-0.2f, 0.2f);
         initialVelocity.x = spiller.transform.up.x * UnityEngine.Random.Range(0.8f, 1.3f);
@@ -229,7 +265,6 @@ public partial class Toolbox : Singleton<Toolbox> {
         return SpawnDroplet(l, severity, spiller, initHeight, initialVelocity, noCollision: noCollision);
     }
     public GameObject SpawnDroplet(Liquid l, float severity, GameObject spiller, float initHeight, Vector3 initVelocity, bool noCollision = true) {
-        // Debug.Log(l == null);
         Vector3 initialVelocity = Vector2.zero;
         if (initVelocity == Vector3.zero) {
             Vector3 randomVelocity = spiller.transform.right * UnityEngine.Random.Range(-0.2f, 0.2f);
@@ -257,6 +292,7 @@ public partial class Toolbox : Singleton<Toolbox> {
         droplet.transform.position = initpos;
         phys.noCollisions = noCollision;
         phys.doInit = false;
+        phys.silentImpact = true;
         phys.InitPhysical(initHeight, initialVelocity);
         phys.physical.StartFlyMode();
         Collider2D[] spillerColliders = spiller.transform.root.GetComponentsInChildren<Collider2D>();
@@ -278,6 +314,22 @@ public partial class Toolbox : Singleton<Toolbox> {
             field.SetValue(copy, field.GetValue(original));
         }
         return copy;
+    }
+    public static string GetPrefabPath(GameObject gameObject) {
+
+        string name = gameObject.name;
+        MatchCollection matches = regexClone.Matches(name);
+        if (matches.Count > 0) {                                    // the object is a clone, capture just the normal name
+            name = matches[0].Groups[1].Value;
+        }
+        matches = regexNumber.Matches(name);
+        if (matches.Count > 0) {
+            name = matches[0].Groups[1].Value;
+        }
+        name = name.Trim();
+        string prefabPath = @"prefabs/" + name;
+        prefabPath = regexSpace.Replace(prefabPath, "_");
+        return prefabPath;
     }
     public Vector2 RandomVector(Vector2 baseDir, float angleSpread) {
         float baseAngle = (float)Mathf.Atan2(baseDir.y, baseDir.x);
@@ -345,27 +397,26 @@ public partial class Toolbox : Singleton<Toolbox> {
     //     }
     //     return "A " + GetName(obj);
     // }
-    public string GetName(GameObject obj) {
+    public string GetName(GameObject obj, bool skipMainCollider = false, bool applyThe = true) {
         // possibly also use intrinsics
-        string nameOut = "";
         if (obj == null) {
-            return nameOut;
+            return "";
         }
-        if (obj == GameManager.Instance.playerObject) {
-            return GameManager.Instance.saveGameName;
-        }
+        // if (obj == GameManager.Instance.playerObject) {
+        //     return GameManager.Instance.saveGameName;
+        // }
         Duplicatable dup = obj.GetComponent<Duplicatable>();
         if (dup && dup.adoptedName != "") {
             return dup.adoptedName;
         }
+        string nameOut = obj.name;
+
         Item item = obj.GetComponent<Item>();
         if (item) {
             nameOut = item.itemName;
             // if (item.referent != "") {
             //     nameOut = item.referent;
             // } else nameOut = item.itemName;
-        } else {
-            nameOut = obj.name;
         }
         LiquidContainer container = obj.GetComponent<LiquidContainer>();
         if (container) {
@@ -387,14 +438,37 @@ public partial class Toolbox : Singleton<Toolbox> {
         }
         nameOut = CloneRemover(nameOut);
         nameOut = UnderscoreRemover(nameOut);
-        if (new List<String> { "blf", "blm", "brf", "Brm", "Tom" }.Contains(nameOut)) {
+
+        if ((speech != null && applyThe && speech.the) || (item != null && applyThe && item.the))
+            nameOut = $"the {nameOut.ToLower()}";
+
+        if (new List<String> { "blf", "blm", "brf", "Brm", "Tom", "Tina" }.Contains(nameOut)) {
             return GameManager.Instance.saveGameName;
+        }
+        if (nameOut.ToLower().Contains("maincollider")) {
+            if (!skipMainCollider)
+                Debug.LogWarning("maincollider found");
+            if (skipMainCollider) {
+                return GetName(obj.transform.parent.gameObject);
+            }
         }
         return nameOut;
     }
+    public HashSet<MessageRouter> ChildRouters(GameObject host) {
+        HashSet<MessageRouter> routers = new HashSet<MessageRouter>(host.GetComponentsInChildren<MessageRouter>());
+        Inventory inv = host.GetComponent<Inventory>();
+        if (inv) {
+            if (inv.holding != null) {
+                HashSet<MessageRouter> holdingRouters = new HashSet<MessageRouter>(inv.holding.GetComponentsInChildren<MessageRouter>());
+                routers.ExceptWith(holdingRouters);
+            }
+        }
+        return routers;
+    }
     public void SendMessage(GameObject host, Component messenger, Message message, bool sendUpwards = true) {
         message.messenger = messenger;
-        HashSet<MessageRouter> routers = new HashSet<MessageRouter>(host.GetComponentsInChildren<MessageRouter>());
+        // TODO: do not propagate all the way to held objects
+        HashSet<MessageRouter> routers = ChildRouters(host);
         if (sendUpwards) {
             foreach (MessageRouter superRouter in host.GetComponentsInParent<MessageRouter>()) {
                 routers.Add(superRouter);
@@ -551,6 +625,10 @@ public partial class Toolbox : Singleton<Toolbox> {
         {skinDefault, new Color32(238, 238, 238, 255)},
         {skinDefaultDark, new Color32(238, 238, 238, 255)}
     };
+    static Dictionary<Color, Color> skinThemeDemon = new Dictionary<Color, Color>(){
+        {skinDefault, new Color32(196, 20, 17, 255)},
+        {skinDefaultDark, new Color32(176, 17, 10, 255)}
+    };
 
     static Dictionary<SkinColor, Dictionary<Color, Color>> skinThemes = new Dictionary<SkinColor, Dictionary<Color, Color>>{
         {SkinColor.light, skinThemeLight},
@@ -558,6 +636,7 @@ public partial class Toolbox : Singleton<Toolbox> {
         {SkinColor.darker, skinThemeDarker},
         {SkinColor.undead, skinThemeUndead},
         {SkinColor.clown, skinThemeClown},
+        {SkinColor.demon, skinThemeDemon},
     };
     // this could be done with messages
     public static void SetSkinColor(GameObject target, SkinColor color) {
@@ -570,22 +649,24 @@ public partial class Toolbox : Singleton<Toolbox> {
             headAnimation.skinColor = color;
         }
     }
-    public static void SetGender(GameObject target, Gender gender) {
+    public static void SetGender(GameObject target, Gender gender, bool changeHead = true) {
         // Speech speech = target.GetComponent<Speech>();
         HeadAnimation headAnimation = target.GetComponentInChildren<HeadAnimation>();
         Outfit outfit = target.GetComponent<Outfit>();
 
-        switch (gender) {
-            case Gender.male:
-                headAnimation.spriteSheet = "generic3_head";
-                headAnimation.baseName = "generic3";
-                break;
-            case Gender.female:
-                headAnimation.spriteSheet = "girl_head";
-                headAnimation.baseName = "girl";
-                break;
-            default:
-                break;
+        if (changeHead) {
+            switch (gender) {
+                case Gender.male:
+                    headAnimation.spriteSheet = "generic3_head";
+                    headAnimation.baseName = "generic3";
+                    break;
+                case Gender.female:
+                    headAnimation.spriteSheet = "girl_head";
+                    headAnimation.baseName = "girl";
+                    break;
+                default:
+                    break;
+            }
         }
         if (outfit != null) {
             outfit.gender = gender;
@@ -597,10 +678,40 @@ public partial class Toolbox : Singleton<Toolbox> {
             return outfit.gender;
         } else return Gender.male;
     }
+    public static SkinColor GetSkinColor(GameObject target) {
+        AdvancedAnimation advancedAnimation = target.GetComponent<AdvancedAnimation>();
+        if (advancedAnimation != null) {
+            return advancedAnimation.skinColor;
+        } else return SkinColor.light;
+    }
 
     public void deactivateEventually(GameObject target) {
         DestroyAfterTime dat = target.AddComponent<DestroyAfterTime>();
         dat.deactivate = true;
         dat.lifetime = 3f;
+    }
+    public static string CapitalizeFirstLetter(string inString) {
+        if (inString == null)
+            return null;
+        if (inString.Length == 0)
+            return inString;
+        else if (inString.Length == 1)
+            return char.ToUpper(inString[0]).ToString();
+        else
+            return char.ToUpper(inString[0]) + inString.Substring(1);
+    }
+
+    public static double NextGaussianDouble() {
+        double u, v, S;
+
+        do {
+            u = 2.0 * UnityEngine.Random.value - 1.0;
+            v = 2.0 * UnityEngine.Random.value - 1.0;
+            S = u * u + v * v;
+        }
+        while (S >= 1.0);
+
+        double fac = Math.Sqrt(-2.0 * Math.Log(S) / S);
+        return u * fac;
     }
 }

@@ -69,17 +69,17 @@ public class Library : MonoBehaviour {
         new Book("Father Humility", "Joshua Quentin David", "Hailed by some as the new great American novel", "I'm exhausted by all these authors with their big books!"),
         new Book("Journal of Dairy Science Volume 62", "The section on yogurt production is dogeared and highlighted."),
         new Book("Arrest me, arrest you! : zen-dada prose poems by Gillian Isaac", @"""Cop, cop / everybody's a cop / doo wop doo wop"""),
-        new Book("Dolems, Henges, Megaliths: Large Rocks and Where To Find Them", "Sophia M.", "", "It seems quite comprehensive."),
+        new Book("Dolems, Henges, Megaliths: Large Rocks and Where To Find Them", "Sophia M.", "", "I love a good henge!"),
         new Book("Undoing Yourself with Energized Meditation and Other Devices", "C. S. Hyatt", "", "I feel my robotic behavior dropping away already!"),
-        new Book("Hardy, Hardy, and Powers. Nuclear Reactor Engineering" , "", "3rd Ed", "This is a highly technical textbook about nuclear reactor design."),
+        new Book("Hardy, Hardy, and Powers. Nuclear Reactor Engineering" , "", "3rd Ed", "I feel inspired! I want to become a nuclear reactor engineer!"),
         new Book("Illustrated Circus Sideshows", "Elaborate re-creations, diagrams, background, and history of various circus stunts."),
-        new Book("The Book of Urizen", "William Blake", @"""He saw Urizen deadly black, / In his chains bound, & Pity began,"""),
+        new Book("The Book of Urizen", "William Blake", @"What is this guy talking about?"),
         new Book("Faust", "Goethe", "If this Faust guy is so smart, why does he keep making all these dumb decisions?"),
         new Book("A biography of Beethoven", "Five chapters, quite illuminating."),
         new Book("The Long and Bloody Trail West", "Atlas McTavish", "Wow, how nihilistic and violent! This must be a Very Important Book!"),
         new Book("I Fought Bigfoot at Yosemite Falls", "Anon", "15 pages, illustrated", "What rubbish!"),
         new Book("The Briefcase: A History", "I never realized I had so many questions about briefcases!"),
-        new Book("A travel guide to Nova Scotia", "Well, it looks pretty nice."),
+        new Book("A travel guide to Nova Scotia", "That's where Moby was from, right? Oh wait, that was "),
         new Book("Paying the Ultimate Price: Fast Lives and Loose Change in the Vending Machine Underworld", "Written with unusual clarity and insight. Self-published."),
         new Book("The Autocrat of the Breakfast Nook", "Judge Henry Adams Jr.", "What a pompous windbag!"),
         new Book("Coolidge", "P. Hoffman", @"Ah, yes. The ""Oatmeal and Toast"" President."),
@@ -89,6 +89,8 @@ public class Library : MonoBehaviour {
         new Book("The Dummy's Guide to Amassing Wealth", "Matt Lictor", "Second edition", "The actual financial advice here, such as it is, is flimsy at best."),
         new Book("101 Photographs of Snails!", "Bob", "", "If I had to pick a favorite, it'd be #30."),
         new Book("I Hate Fish!", "Susan Wraithewhite", "", "She makes a strong argument."),
+        new Book("Murder in the Sex House", "Bill Powers", "", "I can't wait to find out what happens next!"),
+        new Book("Outta My Face, World! The Tammy Baxter Story", "Tammy Baxter", "", "I feel a renewed lust for life!"),
     };
     public static Stack<Book> bookBag = new Stack<Book>();
 
@@ -110,7 +112,6 @@ public class Library : MonoBehaviour {
 
     public static Book nextBook() {
         if (bookBag.Count == 0) {
-            Debug.Log("shuffling bookbag");
             bookBag = new Stack<Book>(Toolbox.Shuffle(books));
         }
         return bookBag.Pop();

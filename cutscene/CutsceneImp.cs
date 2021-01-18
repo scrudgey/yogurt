@@ -49,6 +49,8 @@ public class CutsceneImp : Cutscene {
         impAnimate.enabled = false;
         impRenderer.sprite = impAnimate.frames[0];
         this.analyzand = analyzand;
+
+        Item item = analyzand.GetComponent<Item>();
         Controllable playerController = GameManager.Instance.playerObject.GetComponent<Controllable>();
         UINew.Instance.RefreshUI();
         if (GetIngredients()) {
@@ -57,9 +59,9 @@ public class CutsceneImp : Cutscene {
         } else if (GetPotion()) {
             cutsceneState = CutsceneState.describeIngredient;
             StartIngredientAnalysis();
-        } else if (analyzand.name.ToLower().Contains("necronomicon")) {
+        } else if (item != null && item.impDescription != "") {
             cutsceneState = CutsceneState.describeIngredient;
-            StartNecronomiconAnalysis();
+            StartNecronomiconAnalysis(item);
         } else {
             RefuseAnalysis();
         }
@@ -88,13 +90,12 @@ public class CutsceneImp : Cutscene {
         newNode.text.Add("IMPCALLBACK3");
         SetDialogue(newNode);
     }
-    void StartNecronomiconAnalysis() {
+    void StartNecronomiconAnalysis(Item item) {
         DialogueNode newNode = new DialogueNode();
         newNode.text.Add("Gra ha ha ha... Yes, show me your trinket....");
-        newNode.text.Add("How have you come to possess the necronomicon?");
-        newNode.text.Add("It is a book of great evil, and great power!");
-        newNode.text.Add("It can be used to open ancient sealed portals to other places and dimensions.");
-        newNode.text.Add("Get it out of here! Do not use it under any circumstances!!!");
+        foreach (string line in item.impDescription.Split('\n')) {
+            newNode.text.Add(line);
+        }
         newNode.text.Add("IMPCALLBACK3");
         SetDialogue(newNode);
     }
@@ -200,7 +201,17 @@ public class CutsceneImp : Cutscene {
     }
 
     public bool GetIngredients() {
+
         Intrinsics intrinsics = analyzand.GetComponent<Intrinsics>();
+        if (intrinsics == null)
+            return false;
+
+        List<Buff> buffs = new List<Buff>(intrinsics.buffs);
+        LiquidResevoir resevoir = analyzand.GetComponent<LiquidResevoir>();
+        if (resevoir != null) {
+            buffs.AddRange(resevoir.liquid.buffs);
+        }
+        buffs = Buff.FlattenBuffs(buffs);
 
         Comparison<Buff> comparison = (Buff x, Buff y) => {
             // Less than 0	x is less than y.
@@ -215,15 +226,25 @@ public class CutsceneImp : Cutscene {
             }
             return 0;
         };
-        if (intrinsics == null)
-            return false;
-        intrinsics.buffs.Sort(comparison);
-        if (intrinsics.buffs.Count > 0) {
-            buffType = intrinsics.buffs[0].type; // TODO: change
+        buffs.Sort(comparison);
+
+        // unlock potions 
+        foreach (Buff buff in buffs) {
+            PotionData dat = buffMap[buff.type];
+            MutablePotionData mutableData = GameManager.Instance.data.collectedPotions[dat.name];
+            mutableData.unlockedIngredient1 = true;
+            mutableData.unlockedIngredient2 = true;
+            GameManager.Instance.data.collectedPotions[dat.name] = mutableData;
+        }
+
+        // unlock the whole potion
+        if (buffs.Count > 0) {
+            buffType = buffs[0].type;
             potionData = buffMap[buffType];
             return true;
         } else if (intrinsics.liveBuffs.Count > 0) {
-            buffType = intrinsics.liveBuffs[0].type; // TODO: change
+            intrinsics.liveBuffs.Sort(comparison);
+            buffType = intrinsics.liveBuffs[0].type;
             potionData = buffMap[buffType];
             return true;
         }
@@ -233,11 +254,44 @@ public class CutsceneImp : Cutscene {
         LiquidContainer liquidContainer = analyzand.GetComponent<LiquidContainer>();
         foreach (KeyValuePair<BuffType, PotionData> kvp in buffMap) {
             if (kvp.Value.ingredient1.prefabName == analyzand.name || kvp.Value.ingredient2.prefabName == analyzand.name) {
+                // unlock the ingredient
+                if (kvp.Value.ingredient1.prefabName == analyzand.name) {
+                    MutablePotionData mutableData = GameManager.Instance.data.collectedPotions[kvp.Value.name];
+                    Debug.Log($"unlocking {mutableData.name} ingredient 1");
+                    mutableData.unlockedIngredient1 = true;
+                    GameManager.Instance.data.collectedPotions[kvp.Value.name] = mutableData;
+                }
+                if (kvp.Value.ingredient2.prefabName == analyzand.name) {
+                    MutablePotionData mutableData = GameManager.Instance.data.collectedPotions[kvp.Value.name];
+                    Debug.Log($"unlocking {mutableData.name} ingredient 2");
+
+                    mutableData.unlockedIngredient2 = true;
+                    GameManager.Instance.data.collectedPotions[kvp.Value.name] = mutableData;
+                }
+
+
                 potionData = kvp.Value;
                 ingredient = "What a lovely " + Toolbox.Instance.GetName(analyzand) + ".";
                 return true;
             }
             if (liquidContainer != null && (kvp.Value.ingredient1.prefabName == liquidContainer.liquid.name || kvp.Value.ingredient2.prefabName == liquidContainer.liquid.name)) {
+                // unlock the ingredient
+                if (kvp.Value.ingredient1.prefabName == liquidContainer.liquid.name) {
+
+                    MutablePotionData mutableData = GameManager.Instance.data.collectedPotions[kvp.Value.name];
+                    Debug.Log($"unlocking {mutableData.name} ingredient 1");
+
+                    mutableData.unlockedIngredient1 = true;
+                    GameManager.Instance.data.collectedPotions[kvp.Value.name] = mutableData;
+                }
+                if (kvp.Value.ingredient2.prefabName == liquidContainer.liquid.name) {
+                    MutablePotionData mutableData = GameManager.Instance.data.collectedPotions[kvp.Value.name];
+                    Debug.Log($"unlocking {mutableData.name} ingredient 2");
+
+                    mutableData.unlockedIngredient2 = true;
+                    GameManager.Instance.data.collectedPotions[kvp.Value.name] = mutableData;
+                }
+
                 potionData = kvp.Value;
                 ingredient = "I see you have brought me " + liquidContainer.liquid.name + ".";
                 return true;

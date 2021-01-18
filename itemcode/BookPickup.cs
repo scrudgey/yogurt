@@ -6,6 +6,9 @@ public class BookPickup : Pickup, ISaveable {
     private Book _book;
     public Book book {
         get {
+            if (_book == null) {
+                _book = Library.nextBook();
+            }
             return _book;
         }
         set {
@@ -27,6 +30,7 @@ public class BookPickup : Pickup, ISaveable {
         spriteRenderer.sprite = bookSprites[sprite];
     }
     public void SaveData(PersistentComponent data) {
+        // if ()
         data.strings["title"] = book.title;
         data.strings["author"] = book.author;
         data.strings["comments"] = book.comments;

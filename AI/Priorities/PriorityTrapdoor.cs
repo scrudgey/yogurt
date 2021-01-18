@@ -19,7 +19,7 @@ namespace AI {
             player = new Ref<GameObject>(GameManager.Instance.playerObject);
             Goal getToZone = new GoalWalkToPoint(gameObject, control, new Ref<Vector2>((Vector2)guardPoint));
             Goal lookGoal = new GoalLookInDirection(gameObject, control, Vector2.down);
-            Goal observe = new GoalObserveObject(gameObject, control, player);
+            Goal observe = new GoalPlayerInTrap(gameObject, control, player);
             GoalTriggerTrapdoor trap = new GoalTriggerTrapdoor(gameObject, control);
             boolSwitch = trap.successSwitch;
             lookGoal.requirements.Add(getToZone);

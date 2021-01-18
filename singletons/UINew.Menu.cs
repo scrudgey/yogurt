@@ -9,7 +9,7 @@ public partial class UINew : Singleton<UINew> {
         none, escape, inventory, speech, closet,
         scriptSelect, commercialReport, newDayReport, email,
         diary, dialogue, phone, perk, teleport, tv, perkBrowser,
-        loadoutEditor
+        loadoutEditor, beverageMenu, recipeMenu
     }
     private Dictionary<MenuType, string> menuPrefabs = new Dictionary<MenuType, string>{
         {MenuType.escape,                   "UI/PauseMenu"},
@@ -19,7 +19,7 @@ public partial class UINew : Singleton<UINew> {
         {MenuType.scriptSelect,             "UI/ScriptSelector"},
         {MenuType.commercialReport,         "UI/commercialReport"},
         {MenuType.newDayReport,             "UI/NewDayReport"},
-        {MenuType.email,                    "UI/EmailUI"},
+        {MenuType.email,                    "UI/NeoEmailUI"},
         {MenuType.diary,                    "UI/Diary"},
         {MenuType.dialogue,                 "UI/DialogueMenu"},
         {MenuType.phone,                    "UI/PhoneMenu"},
@@ -27,7 +27,9 @@ public partial class UINew : Singleton<UINew> {
         {MenuType.teleport,                 "UI/TeleportMenu"},
         {MenuType.tv,                       "UI/TVMenu"},
         {MenuType.perkBrowser,              "UI/PerkBrowser"},
-        {MenuType.loadoutEditor,            "UI/AdvancedClosetMenu"}
+        {MenuType.loadoutEditor,            "UI/AdvancedClosetMenu"},
+        {MenuType.beverageMenu,             "UI/BeverageMenu"},
+        {MenuType.recipeMenu,               "UI/RecipeMenu"},
     };
 
     private static readonly List<MenuType> ActionRequired = new List<MenuType> { MenuType.commercialReport, MenuType.diary, MenuType.perk, MenuType.dialogue };

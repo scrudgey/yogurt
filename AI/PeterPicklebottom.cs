@@ -18,6 +18,17 @@ public class PeterPicklebottom : MonoBehaviour {
     public AudioClip[] takeSound;
     private AudioSource audioSource;
     public float slewTime = 1f;
+    public void SetTargets() {
+        targets = new Stack<Duplicatable>();
+        int maxNumber = Random.Range(5, 10);
+        foreach (Duplicatable dup in GameObject.FindObjectsOfType<Duplicatable>()) {
+            if (dup.PickleReady()) {
+                targets.Push(dup);
+            }
+            if (targets.Count >= maxNumber)
+                break;
+        }
+    }
     public void Start() {
         controllable = GetComponent<SimpleControl>();
         controller = new Controller(controllable);
@@ -31,11 +42,7 @@ public class PeterPicklebottom : MonoBehaviour {
                 }
             }
             if (targets == null) {
-                targets = new Stack<Duplicatable>();
-                foreach (Duplicatable dup in FindObjectsOfType<Duplicatable>()) {
-                    if (dup.PickleReady())
-                        targets.Push(dup);
-                }
+                SetTargets();
             }
             if (targets.Count > 0) {
                 target.val = targets.Pop();
@@ -67,9 +74,12 @@ public class PeterPicklebottom : MonoBehaviour {
 
         switch (state) {
             case AIState.walkToTarget:
-                if (target.val == null && targets.Count > 0) {
+                while (target.val == null && targets.Count > 0) {
                     target.val = targets.Pop();
-                    objRef.val = target.val.gameObject;
+                    if (target.val != null) {
+                        objRef.val = target.val.gameObject;
+                        Debug.Log(target.val);
+                    }
                 }
                 if (target.val == null && targets.Count == 0) {
                     state = AIState.leave;

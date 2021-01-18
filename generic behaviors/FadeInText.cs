@@ -11,6 +11,8 @@ public class FadeInText : MonoBehaviour {
     public bool fadeOut;
     public float fadeOutTimer;
     public float timeTillFadeOut;
+    public float delay;
+    public float timer;
     void Start() {
         text = GetComponent<Text>();
         outlines = new List<Outline>(GetComponents<Outline>());
@@ -20,6 +22,12 @@ public class FadeInText : MonoBehaviour {
         }
         color.a = 0f;
         outlineColor.a = 0f;
+        if (!fadeOut) {
+            text.color = Color.clear;
+            foreach (Outline outline in outlines) {
+                outline.effectColor = Color.clear;
+            }
+        }
     }
     public void Reset() {
         color.a = 0f;
@@ -34,6 +42,9 @@ public class FadeInText : MonoBehaviour {
         color.a = 0f;
     }
     void Update() {
+        timer += Time.deltaTime;
+        if (timer < delay)
+            return;
         if (fadeOut) {
             fadeOutTimer += Time.deltaTime;
         }

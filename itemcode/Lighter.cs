@@ -7,7 +7,7 @@ public class Lighter : Interactive {
     private bool flameon;
     private Collider2D flameRadius;
     private Dictionary<GameObject, Flammable> flammables = new Dictionary<GameObject, Flammable>();
-    static List<string> forbiddenTags = new List<string>(new string[] { "occurrenceFlag", "background", "sightcone" });
+    static List<string> forbiddenTags = new List<string>(new string[] { "occurrenceFlag", "background", "sightcone", "sky" });
     void Start() {
         pickup = GetComponent<Pickup>();
         Interaction f = new Interaction(this, "Fire", "Fire");

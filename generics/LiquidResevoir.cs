@@ -17,6 +17,14 @@ public class LiquidResevoir : Interactive {
             drinker.selfOnOtherConsent = true;
             interactions.Add(drinker);
         }
+        if (liquid.flammable) {
+            Flammable flammable = Toolbox.GetOrCreateComponent<Flammable>(gameObject);
+            flammable.flashpoint = 1f;
+
+            Explosive explosive = Toolbox.GetOrCreateComponent<Explosive>(gameObject);
+            DamageThreshhold threshhold = new DamageThreshhold(damageType.fire, DamageThreshhold.ThreshholdType.impulse, 100, 0.1f);
+            explosive.threshHolds.Add(threshhold);
+        }
     }
     public void Drink(Eater eater) {
         if (eater) {

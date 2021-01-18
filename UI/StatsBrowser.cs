@@ -15,9 +15,16 @@ public class StatsBrowser : MonoBehaviour {
         {StatType.hatsEaten, "hats eaten"},
         {StatType.immolations, "times immolated"},
         {StatType.selfImmolations, "self immolations"},
+
         {StatType.deathByCombat, "death by combat"},
         {StatType.deathByMisadventure, "death by misadventure"},
         {StatType.deathByAsphyxiation, "death by asphyxiation"},
+        {StatType.deathByAcid, "death by acid"},
+        {StatType.deathByPotion, "death by potion"},
+        {StatType.deathByFire, "death by fire"},
+        {StatType.deathByExplosion, "death by explosion"},
+        {StatType.deathByExplodingHead, "death by exploding head"},
+
         {StatType.mayorsSassed, "mayors sassed"},
         {StatType.actsOfCannibalism, "acts of cannibalism"},
         {StatType.heartsEaten, "hearts eaten"},
@@ -25,7 +32,6 @@ public class StatsBrowser : MonoBehaviour {
         {StatType.othersSetOnFire, "others set on fire"},
         {StatType.monstersKilled, "monsters killed"},
         {StatType.murders, "murders"},
-        {StatType.deathByExplosion, "death by explosion"},
         {StatType.bedsMade, "beds made"},
         {StatType.booksBurned, "books burned"},
     };

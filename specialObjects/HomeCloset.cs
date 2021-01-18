@@ -39,6 +39,7 @@ public class HomeCloset : Interactive {
             ) {
 
             var menuType = PlayerPrefs.GetString(prefsKey_ClosetMenuType, "simple");
+            UINew.Instance.RefreshUI(active: false);
             if (menuType == "simple" || type == HomeCloset.ClosetType.clothing || type == HomeCloset.ClosetType.food) {
                 GameObject menuObject = UINew.Instance.ShowMenu(UINew.MenuType.closet);
                 ClosetButtonHandler menu = menuObject.GetComponent<ClosetButtonHandler>();
@@ -98,7 +99,10 @@ public class HomeCloset : Interactive {
             case ClosetType.items:
                 return true;
             case ClosetType.food:
-                return pickup.GetComponent<Edible>() != null;
+                Edible edible = pickup.GetComponent<Edible>();
+                if (edible != null) {
+                    return !edible.inedible;
+                } else return false;
             case ClosetType.clothing:
                 return pickup.GetComponent<Uniform>() != null;
             default:

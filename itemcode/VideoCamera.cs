@@ -50,7 +50,7 @@ public class VideoCamera : Interactive {
     }
     IEnumerator ShowDiary() {
         yield return new WaitForSeconds(1f);
-        GameManager.Instance.ShowDiaryEntry("firstCommercial");
+        GameManager.Instance.ShowDiaryEntryDelay("firstCommercial", delay: 0.5f);
     }
     IEnumerator EaseIn(Transform target) {
         float t = 0;
@@ -123,6 +123,9 @@ public class VideoCamera : Interactive {
         }
     }
     public void Enable() {
+        CameraTutorialText ctt = GetComponent<CameraTutorialText>();
+        if (ctt != null)
+            ctt.Disable();
         UINew.Instance.ShowMenu(UINew.MenuType.scriptSelect);
     }
     public bool Enable_Validation() {

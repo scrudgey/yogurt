@@ -5,10 +5,17 @@ using Poisson;
 
 [System.Serializable]
 
-public enum ImpactResult { none, damageNormal, damageStrong, damageCosmic, damageOther, damageSilent, repelNormal, repelEthereal, repelInvulnerable, repelOther, repelSilent }
+public enum ImpactResult { none, damageNormal, damageStrong, damageCosmic, damageOther, damageSilent, repelNormal, repelEthereal, repelInvulnerable, repelOther, repelSilent, repelFireproof }
 
 public enum damageType { physical, fire, any, cutting, piercing, cosmic, asphyxiation, explosion, acid }
+
 public abstract class Damageable : MonoBehaviour {
+    public static HashSet<ImpactResult> DamageResults = new HashSet<ImpactResult> {
+        ImpactResult.damageNormal, ImpactResult.damageCosmic, ImpactResult.damageStrong, ImpactResult.damageOther, ImpactResult.damageSilent
+    };
+    public static HashSet<ImpactResult> RepelResults = new HashSet<ImpactResult> {
+        ImpactResult.repelNormal, ImpactResult.repelEthereal, ImpactResult.repelInvulnerable, ImpactResult.repelOther, ImpactResult.repelSilent, ImpactResult.repelFireproof
+    };
     public Dictionary<BuffType, Buff> netBuffs = Intrinsics.emptyBuffMap();
     public bool immuneToFire;
     public bool immuneToPhysical;
@@ -27,15 +34,9 @@ public abstract class Damageable : MonoBehaviour {
     public MessageDamage cacheFiredMessage;
     private float cachedTime;
     private List<Gibs> impactGibs = new List<Gibs>();
+    public float blockTextTimer;
     public virtual void Awake() {
-        if (gibsContainerPrefab != null) {
-            GameObject gibsContainer = Instantiate(gibsContainerPrefab) as GameObject;
-            foreach (Gibs gib in gibsContainer.GetComponents<Gibs>()) {
-                Gibs newGib = gameObject.AddComponent<Gibs>();
-                newGib.CopyFrom(gib);
-            }
-            Destroy(gibsContainer);
-        }
+        LoadGibsPrefab();
         if (impactSounds != null && impactSounds.Length == 0)
             impactSounds = Resources.LoadAll<AudioClip>("sounds/impact_normal/");
         if (strongImpactSounds != null && strongImpactSounds.Length == 0)
@@ -59,6 +60,16 @@ public abstract class Damageable : MonoBehaviour {
         controllable = GetComponent<Controllable>();
         Toolbox.RegisterMessageCallback<MessageDamage>(this, HandleMessageDamage);
         Toolbox.RegisterMessageCallback<MessageNetIntrinsic>(this, HandleNetIntrinsic);
+    }
+    public void LoadGibsPrefab() {
+        if (gibsContainerPrefab != null) {
+            GameObject gibsContainer = Instantiate(gibsContainerPrefab) as GameObject;
+            foreach (Gibs gib in gibsContainer.GetComponents<Gibs>()) {
+                Gibs newGib = gameObject.AddComponent<Gibs>();
+                newGib.CopyFrom(gib);
+            }
+            Destroy(gibsContainer);
+        }
     }
     public virtual void HandleNetIntrinsic(MessageNetIntrinsic message) {
         netBuffs = message.netBuffs;
@@ -85,6 +96,18 @@ public abstract class Damageable : MonoBehaviour {
                 cacheFiredMessage = null;
             }
         }
+        if (blockTextTimer > 0) {
+            blockTextTimer -= Time.deltaTime;
+        }
+    }
+    public void BlockText(string text, Color color) {
+        if (blockTextTimer > 0)
+            return;
+        blockTextTimer = 5f;
+        GameObject blocktext = GameObject.Instantiate(Resources.Load("UI/Blocktext"), transform.position, Quaternion.identity) as GameObject;
+        InvulnerabilityText invulnerabilityText = blocktext.GetComponentInChildren<InvulnerabilityText>();
+        invulnerabilityText.text.text = text;
+        invulnerabilityText.color = color;
     }
     public virtual void TakeDamage(MessageDamage message) {
         if (!enabled)
@@ -99,20 +122,26 @@ public abstract class Damageable : MonoBehaviour {
             return;
 
         ImpactResult result = Vulnerable(message, netBuffs);
-        AudioClip[] sounds = new AudioClip[0];
 
+        AudioClip[] sounds = new AudioClip[0];
         switch (result) {
             case ImpactResult.repelEthereal:
+                BlockText("* ethereal *", Color.cyan);
                 if (message.type != damageType.fire && message.type != damageType.acid)
                     sounds = etherealRepelSounds;
                 break;
             case ImpactResult.repelInvulnerable:
+                BlockText("* invulnerable *", Color.yellow);
                 if (message.type != damageType.fire && message.type != damageType.acid)
                     sounds = invulnerableRepelSounds;
                 break;
             case ImpactResult.repelNormal:
+                BlockText("* armor *", Color.white);
                 if (message.type != damageType.fire && message.type != damageType.acid)
                     sounds = repelSounds;
+                break;
+            case ImpactResult.repelFireproof:
+                BlockText("* fireproof *", Color.red);
                 break;
             // case ImpactResult.repelOther:
             //     sounds = repelSounds;
@@ -132,6 +161,11 @@ public abstract class Damageable : MonoBehaviour {
             case ImpactResult.damageStrong:
                 sounds = strongImpactSounds;
                 Instantiate(Resources.Load("particles/explosion1"), transform.position, Quaternion.identity);
+
+                CameraControl cam = GameObject.FindObjectOfType<CameraControl>();
+                float distanceToCamera = Vector2.Distance(transform.position, cam.transform.position) * 10;
+                float amount = Mathf.Min(0.1f, 0.1f / distanceToCamera);
+                cam.Shake(amount);
                 break;
             default:
                 break;
@@ -191,14 +225,9 @@ public abstract class Damageable : MonoBehaviour {
         }
         ClaimsManager.Instance.WasDestroyed(gameObject);
         Destroy(gameObject);
+        gameObject.SendMessage("OnDestruct", SendMessageOptions.DontRequireReceiver);
     }
 
-    public static HashSet<ImpactResult> DamageResults = new HashSet<ImpactResult> {
-        ImpactResult.damageNormal, ImpactResult.damageCosmic, ImpactResult.damageStrong, ImpactResult.damageOther, ImpactResult.damageSilent
-    };
-    public static HashSet<ImpactResult> RepelResults = new HashSet<ImpactResult> {
-        ImpactResult.repelNormal, ImpactResult.repelEthereal, ImpactResult.repelInvulnerable, ImpactResult.repelOther, ImpactResult.repelSilent
-    };
     public static ImpactResult Vulnerable(MessageDamage message, Dictionary<BuffType, Buff> netBuffs) {
         if (!message.strength) {
             switch (message.type) {
@@ -247,7 +276,7 @@ public abstract class Damageable : MonoBehaviour {
                     }
                     break;
                 case damageType.fire:
-                    if (fireproof) result = ImpactResult.repelOther;
+                    if (fireproof) result = ImpactResult.repelFireproof;
                     if (ethereal) {
                         result = ImpactResult.repelEthereal;
                     }

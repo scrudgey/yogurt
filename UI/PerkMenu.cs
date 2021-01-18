@@ -10,6 +10,7 @@ public class PerkMenu : MonoBehaviour {
     public Text perkDescText;
     public Text requiredText;
     public Text levelText;
+    public Text buttonText;
     public Button doneButton;
     public Button acceptButton;
     public bool perkChosen;
@@ -46,28 +47,71 @@ public class PerkMenu : MonoBehaviour {
                 numberCollected += 1;
             }
         }
-        levelText.text = "Level: " + numberCollected.ToString();
+        levelText.text = "";
+
+        SetLevelText();
         PopulatePerkList();
 
         MusicController.Instance.EnqueueMusic(new MusicChela());
     }
+    void SetLevelText() {
+        string text = $"Level {numberCollected} ";
+        switch (numberCollected) {
+            default:
+            case 1:
+                text += "Yogurt Neophyte";
+                break;
+
+            case 2:
+                text += "Yogurt Adept";
+                break;
+
+            case 3:
+                text += "Yogurtmancer";
+                break;
+            case 4:
+                text += "Yogurtmancer";
+                break;
+
+            case 5:
+                text += "Yogurt Master";
+                break;
+            case 6:
+                text += "Yogurt Master";
+                break;
+            case 7:
+                text += "Yogurt Master";
+                break;
+
+            case 8:
+                text += "Yogurt Champion";
+                break;
+        }
+        levelText.text = text;
+    }
     void PopulatePerkList() {
         effects.buttons = new List<Button>(builtInButtons);
-        GameObject[] perkPrefabs = Resources.LoadAll("data/perks/", typeof(GameObject))
-            .Cast<GameObject>()
-            .ToArray();
+        List<GameObject> perkPrefabs = Resources.LoadAll("data/perks/", typeof(GameObject))
+    .Cast<GameObject>()
+    .ToList();
         requiredText.text = "";
         foreach (Transform child in buttonList) {
             Destroy(child.gameObject);
         }
 
         Dictionary<GameObject, PerkComponent> perkComponents = new Dictionary<GameObject, PerkComponent>();
+        List<GameObject> removeThese = new List<GameObject>();
         foreach (GameObject prefab in perkPrefabs) {
             PerkComponent component = prefab.GetComponent<PerkComponent>();
-            if (component)
+            if (component && !component.disablePerk)
                 perkComponents[prefab] = component;
+            if (component && component.disablePerk)
+                removeThese.Add(prefab);
         }
-        perkPrefabs = perkPrefabs.OrderBy(p => perkComponents[p].perk.requiredPerks).ToArray();
+        foreach (GameObject removeMe in removeThese) {
+            perkPrefabs.Remove(removeMe);
+        }
+        perkPrefabs = perkPrefabs.OrderBy(p => perkComponents[p].perk.requiredPerks).ToList();
         foreach (GameObject prefab in perkPrefabs) {
             PerkComponent component = perkComponents[prefab];
 
@@ -123,6 +167,7 @@ public class PerkMenu : MonoBehaviour {
     public void AcceptButtonClicked() {
         if (selectedPerk == null)
             return;
+        buttonText.text = "CHOOSE PERK (0)";
         perkChosen = true;
         acceptButton.interactable = false;
         doneButton.interactable = true;
@@ -141,11 +186,10 @@ public class PerkMenu : MonoBehaviour {
         }
         selectedPerk.GetComponent<Button>().interactable = false;
         UINew.Instance.RefreshUI(active: true);
-        // UINew.Instance.PlayUISound("sounds/8-bit/BOUNCE3");
         GameManager.Instance.PlayPublicSound(Resources.Load("sounds/8-bit/BOUNCE3") as AudioClip);
 
         numberCollected += 1;
-        levelText.text = "Level: " + numberCollected.ToString();
+        SetLevelText();
     }
     public void DoneButtonClick() {
         UINew.Instance.CloseActiveMenu();

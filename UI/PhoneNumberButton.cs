@@ -7,6 +7,8 @@ public class PhoneNumberButton : MonoBehaviour {
     public enum phoneNumber { fire, police, clown, pizza }
     public phoneNumber number;
     public Image image;
+    public Text display;
+    public Text numberText;
     public void Clicked() {
         menu.PhoneButtonCallback(this);
     }
@@ -14,20 +16,23 @@ public class PhoneNumberButton : MonoBehaviour {
         image = GetComponent<Image>();
     }
     public void SetPhoneType(phoneNumber number) {
-        Text display = transform.Find("Text").GetComponent<Text>();
         this.number = number;
         switch (number) {
             case phoneNumber.fire:
                 display.text = "fire";
+                numberText.text = "911";
                 break;
             case phoneNumber.police:
                 display.text = "police";
+                numberText.text = "911";
                 break;
             case phoneNumber.clown:
                 display.text = "clown";
+                numberText.text = "555-6294";
                 break;
             case phoneNumber.pizza:
                 display.text = "pizza";
+                numberText.text = "555-2717";
                 break;
             default:
                 break;

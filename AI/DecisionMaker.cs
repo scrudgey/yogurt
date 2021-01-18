@@ -45,7 +45,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         Attack, FightFire, ProtectPossessions,
         ReadScript, RunAway, Wander, ProtectZone,
         MakeBalloonAnimals, InvestigateNoise, PrioritySocialize,
-        Panic, Sentry, Trapdoor, DeliverPizza, Dance, Haunt
+        Panic, Sentry, Trapdoor, DeliverPizza, Dance, Haunt, Taunt, SellSmoothies, SingPraise
     }
     // the ONLY reason we need this redundant structure is so that I can expose
     // a selectable default priority type in unity editor.
@@ -66,6 +66,10 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         {typeof(PriorityDeliverPizza), PriorityType.DeliverPizza},
         {typeof(PriorityDance), PriorityType.Dance},
         {typeof(PriorityApproachPlayer), PriorityType.Haunt},
+        {typeof(PriorityTaunt), PriorityType.Taunt},
+        {typeof(PrioritySellSmoothies), PriorityType.SellSmoothies},
+        {typeof(PrioritySingPraise), PriorityType.SingPraise},
+
     };
     public string activePriorityName;
     public PriorityType defaultPriorityType;
@@ -83,6 +87,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
     public BoxCollider2D protectionZone = null;
     public Collider2D warnZone = null;
     public Vector3 guardPoint;
+    public Vector2 guardDirection = Vector2.right;
     public bool initialized = false;
     public bool debug;
 
@@ -92,6 +97,8 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
     }
 
     public void Initialize() {
+        if (initialized)
+            return;
         // Debug.Log("decision maker initialize");
         initialized = true;
         // make sure there's Awareness
@@ -99,7 +106,8 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         awareness.decisionMaker = this;
         awareness.enabled = this.enabled;
         control = new Controller(GetComponent<Controllable>());
-
+        control.lostControlDelegate += LostControl;
+        control.gainedControlDelegate += GainedControl;
         // start awareness with knowledge of possessions
         if (possession != null) {
             initialAwareness.Add(possession);
@@ -132,13 +140,13 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
             InitializePriority(new PriorityReactToCamera(gameObject, control, personality.camPref), typeof(PriorityReactToCamera));
         }
         if (protectionZone != null) {
-            InitializePriority(new PriorityProtectZone(gameObject, control, protectionZone, guardPoint), typeof(PriorityProtectZone));
+            InitializePriority(new PriorityProtectZone(gameObject, control, protectionZone, guardPoint, guardDirection), typeof(PriorityProtectZone));
         }
         if (defaultPriorityType == PriorityType.MakeBalloonAnimals) {
             InitializePriority(new PriorityMakeBalloonAnimals(gameObject, control), typeof(PriorityMakeBalloonAnimals));
         }
         if (defaultPriorityType == PriorityType.Sentry) {
-            InitializePriority(new PrioritySentry(gameObject, control), typeof(PrioritySentry));
+            InitializePriority(new PrioritySentry(gameObject, control, guardPoint, guardDirection), typeof(PrioritySentry));
         }
         if (defaultPriorityType == PriorityType.Trapdoor) {
             InitializePriority(new PriorityTrapdoor(gameObject, control, transform.position), typeof(PriorityTrapdoor));
@@ -152,9 +160,26 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         if (personality.haunt == Personality.Haunt.yes) {
             InitializePriority(new PriorityApproachPlayer(gameObject, control), typeof(PriorityApproachPlayer));
         }
+        if (defaultPriorityType == PriorityType.Taunt) {
+            InitializePriority(new PriorityTaunt(gameObject, control), typeof(PriorityTaunt));
+        }
+        if (defaultPriorityType == PriorityType.SellSmoothies) {
+            InitializePriority(new PrioritySellSmoothies(gameObject, control, guardPoint), typeof(PrioritySellSmoothies));
+        }
+        if (defaultPriorityType == PriorityType.SingPraise) {
+            InitializePriority(new PrioritySingPraise(gameObject, control), typeof(PrioritySingPraise));
+        }
 
         Toolbox.RegisterMessageCallback<MessageHitstun>(this, HandleHitStun);
         Toolbox.RegisterMessageCallback<Message>(this, ReceiveMessage);
+    }
+    public void LostControl() {
+        if (activePriority != null)
+            activePriority.ExitPriority();
+    }
+    public void GainedControl() {
+        if (activePriority != null)
+            activePriority.EnterPriority();
     }
     public void InitializePriority(Priority priority, Type type) {
         priorities.Add(priority);
@@ -198,10 +223,12 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         activePriorityName = activePriority.priorityName;
 
         if (activePriority != oldActivePriority) {
-            control.ResetInput();
-            if (oldActivePriority != null)
-                oldActivePriority.ExitPriority();
-            activePriority.EnterPriority();
+            if (control.Authenticate(debug: true)) {
+                control.ResetInput();
+                if (oldActivePriority != null)
+                    oldActivePriority.ExitPriority();
+                activePriority.EnterPriority();
+            }
         }
         if (activePriority != null) {
             // Debug.Log(activePriority.ToString() + " " + activePriority.Urgency(personality).ToString());
@@ -224,6 +251,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
                 }
             }
         }
+
         if (protectionZone != null)
             MySaver.UpdateGameObjectReference(protectionZone.gameObject, data, "protectID", overWriteWithNull: false);
         if (warnZone != null)
@@ -250,8 +278,9 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
             }
         }
         if (protectionZone != null) {
-            priorities.Add(new PriorityProtectZone(gameObject, control, protectionZone, guardPoint));
+            priorities.Add(new PriorityProtectZone(gameObject, control, protectionZone, guardPoint, guardDirection));
         }
+
 
         foreach (Priority priority in priorities) {
             foreach (Type priorityType in priorityTypes.Keys) {
@@ -260,6 +289,18 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
                     if (data.floats.ContainsKey(priorityName)) {
                         priority.urgency = data.floats[priorityName];
                     }
+                }
+            }
+
+            // this is a hack to prevent the pizza delivery boy from trying to deliver pizzas after save/load.
+            // true solution would require making priorities stateful.
+            if (defaultPriorityType == PriorityType.DeliverPizza) {
+                if (priority.GetType() == typeof(PriorityWander)) {
+                    defaultPriority = priority;
+                }
+                if (priority.GetType() == typeof(PriorityDeliverPizza)) {
+                    PriorityDeliverPizza pdp = (PriorityDeliverPizza)priority;
+                    pdp.boolSwitch.conditionMet = true;
                 }
             }
         }

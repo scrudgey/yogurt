@@ -35,9 +35,6 @@ public class PersistentObject {
         sceneName = SceneManager.GetActiveScene().name;
     }
     public PersistentObject(GameObject gameObject) {
-        // id = MySaver.NextIDNumber();
-        id = System.Guid.NewGuid();
-        MySaver.objectDataBase[id] = this;
         creationDate = GameManager.Instance.data.days;
 
         name = gameObject.name;
@@ -58,14 +55,23 @@ public class PersistentObject {
             // id = marker.id;
             apartmentObject = marker.apartmentObject;
             foreach (GameObject childObject in marker.persistentChildren) {
+                if (childObject == null)
+                    continue;
                 PersistentObject persistentChildObject = new PersistentObject(childObject);
                 persistentChildObject.parentObject = childObject.name;
                 persistentChildren[childObject.name] = persistentChildObject;
                 persistentChildObject.childObject = true;
             }
+            id = marker.id;
+        } else {
+            // Debug.LogWarning($"creating persistent object for object with no marker!");
+            // Debug.LogWarning($"{gameObject}");
+            id = System.Guid.NewGuid();
         }
-        prefabPath = @"prefabs/" + name;
-        prefabPath = regexSpace.Replace(prefabPath, "_");
+
+        // prefabPath = @"prefabs/" + name;
+        // prefabPath = regexSpace.Replace(prefabPath, "_");
+        prefabPath = Toolbox.GetPrefabPath(gameObject);
         if (Resources.Load(prefabPath) == null) {
             noPrefab = true;
             name = gameObject.name;
@@ -90,8 +96,6 @@ public class PersistentObject {
             ISaveable saveable = component as ISaveable;
             if (saveable != null) {
                 // TODO: update each component, don't override.
-                // saveable.LoadInit();
-                // Debug.Log(component.GetType());
                 if (!persistentComponents.ContainsKey(component.GetType().ToString())) {
                     Debug.Log("broken persistentComponent reference");
                     Debug.Log(component.GetType());
@@ -104,12 +108,22 @@ public class PersistentObject {
         foreach (KeyValuePair<string, PersistentObject> kvp in persistentChildren) {
             if (kvp.Value == this)
                 continue;
-            GameObject childObject = parentObject.transform.Find(kvp.Key).gameObject;
+            Transform childTransform = parentObject.transform.Find(kvp.Key);
+            if (childTransform == null)
+                continue;
+            GameObject childObject = childTransform.gameObject;
             kvp.Value.HandleSave(parentObject.transform.Find(kvp.Key).gameObject);
         }
     }
     public void HandleLoad(GameObject parentObject) {
-        parentObject.transform.rotation = transformRotation;
+        MyMarker parentMarker = parentObject.GetComponent<MyMarker>();
+        if (parentMarker != null) {
+            parentMarker.id = id;
+        } else {
+            // Debug.LogWarning($"loaded object {parentObject} has no marker id: {id}");
+        }
+
+        parentObject.transform.localRotation = transformRotation;
         parentObject.transform.localScale = transformScale;
         SpriteRenderer spriteRenderer = parentObject.GetComponent<SpriteRenderer>();
         if (spriteRenderer != null) {

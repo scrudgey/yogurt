@@ -10,7 +10,7 @@ public class Interaction {
     public List<System.Type> parameterTypes;
     public bool debug;
     public Interactive parent;
-    public string action;
+    public string functionName;
     public GameObject lastTarget;
     public GameObject defaultTarget;
     public int defaultPriority;
@@ -32,16 +32,14 @@ public class Interaction {
     private System.Reflection.MethodInfo validationMethodInfo;
     private System.Reflection.MethodInfo descMethodInfo;
     private System.Reflection.MethodInfo desireMethodInfo;
-    // private DesireFunction desireFunction;
     public bool selfOnOtherConsent = true;
     public bool selfOnSelfConsent = true;
     public bool otherOnSelfConsent = true;
     public bool holdingOnOtherConsent = true;
-    // public bool inertOnPlayerConsent = true;
     public string descString = null;
     public Interaction(Interactive o, string name, string functionName) {
         this.parameterTypes = new List<System.Type>();
-        this.action = functionName;
+        this.functionName = functionName;
         this.actionName = name;
         this.parent = o;
         // this.hideInTopMenu = manualHide;
@@ -70,7 +68,7 @@ public class Interaction {
     // method and store the reference.
     public void ConfigureValidator() {
         if (validationFunction) {
-            validationMethodInfo = parent.GetType().GetMethod(action + "_Validation");
+            validationMethodInfo = parent.GetType().GetMethod(functionName + "_Validation");
             if (validationMethodInfo == null)
                 Debug.Log("interaction validation function was not located.");
         }
@@ -173,6 +171,8 @@ public class Interaction {
         } else {
             actionDelegate(parameters[0] as Component);
         }
+        InputController.Instance.lastAction = functionName;
+        // Debug.Log($"setting last action to {functionName}");
     }
     public desire GetDesire(GameObject commandTarget, GameObject requester, List<object> parameters) {
         DecisionMaker dm = commandTarget.GetComponent<DecisionMaker>();

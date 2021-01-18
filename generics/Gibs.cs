@@ -40,13 +40,15 @@ public class Gibs : MonoBehaviour {
             Emit(message);
         }
     }
-    public void Emit(MessageDamage message) {
+    public List<GameObject> Emit(MessageDamage message) {
         if (message.suppressGibs)
-            return;
+            return new List<GameObject>();
         if (!DamageTypeMatch(damageCondition, message.type))
-            return;
+            return new List<GameObject>();
+        List<GameObject> output = new List<GameObject>();
         for (int i = 0; i < number; i++) {
             GameObject bit = Instantiate(particle, transform.position, Quaternion.identity) as GameObject;
+            output.Add(bit);
             SpriteRenderer sprite = bit.GetComponent<SpriteRenderer>();
             sprite.color = color;
             if (applyAnimationSkinColor) {
@@ -62,7 +64,7 @@ public class Gibs : MonoBehaviour {
                 Toolbox.Instance.DisableAndReenable(damageable, 0.2f);
             }
             if (notPhysical)
-                return;
+                continue;
             // Rigidbody2D bitBody = Toolbox.GetOrCreateComponent<Rigidbody2D>(bit);
             PhysicalBootstrapper bitPhys = Toolbox.GetOrCreateComponent<PhysicalBootstrapper>(bit);
             PhysicalBootstrapper myBoot = GetComponent<PhysicalBootstrapper>();
@@ -82,7 +84,6 @@ public class Gibs : MonoBehaviour {
             bit.transform.position = transform.position + randomWalk + new Vector3(0, height, 0);
 
             // TODO: figure this out
-            // TODO: allow strong impacts to affect
             // emit in the direction between point of impact and center of mass
             // if we both have physical, calculate z direction as well
 
@@ -106,7 +107,7 @@ public class Gibs : MonoBehaviour {
             bitPhys.initVelocity = force;
             bitPhys.doInit = true;
         }
-        // Debug.Break();
+        return output;
     }
     public static bool DamageTypeMatch(damageType dam1, damageType dam2) {
         if (dam1 == dam2)

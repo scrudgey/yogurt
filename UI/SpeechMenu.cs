@@ -1,8 +1,11 @@
 ﻿using UnityEngine;
 
 public class SpeechMenu : MonoBehaviour {
+    public GameObject detectiveButton;
     public void Start() {
         GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
+        // enable / disable detective button
+        detectiveButton.SetActive(GameManager.Instance.data.yogurtDetective);
     }
     public void SwearButton() {
         MessageSpeech message = new MessageSpeech("");
@@ -17,6 +20,10 @@ public class SpeechMenu : MonoBehaviour {
     public void InsultButton() {
         UINew.Instance.CloseActiveMenu();
         InputController.Instance.state = InputController.ControlState.insultSelect;
+    }
+    public void DetectButton() {
+        UINew.Instance.CloseActiveMenu();
+        InputController.Instance.state = InputController.ControlState.detectSelect;
     }
     // public void RandomButton() {
     //     MessageSpeech message = new MessageSpeech();

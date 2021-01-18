@@ -11,6 +11,10 @@ public class Email {
     public string subject;
     public string content;
     public bool read;
+    public string dateString;
+    public string torsoSprite;
+    public string headSprite;
+    public int skinColor;
 
     public static Email LoadEmail(string filename) {
         try {

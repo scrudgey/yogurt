@@ -20,10 +20,12 @@ public class Flammable : MonoBehaviour, ISaveable {
     public bool silent; // if true, flammable will not generate occurrence flags
     // public bool coldFire;
     private float burnTimer;
+    private Hurtable myHurtable;
     public void SetBurnTimer() {
-        burnTimer = 0.2f;
+        burnTimer = 0.1f;
     }
     void Start() {
+        myHurtable = GetComponent<Hurtable>();
         pickup = GetComponent<Pickup>();
 
         //add the particle effect and set its position
@@ -53,7 +55,7 @@ public class Flammable : MonoBehaviour, ISaveable {
         fireRadius.isTrigger = true;
         fireRadius.radius = 0.1f;
         fireRadius.name = "fire";
-        fire.gameObject.layer = 13;
+        fire.gameObject.layer = LayerMask.NameToLayer("impact");
         //ensure that there is a speaker
         audioSource = Toolbox.Instance.SetUpAudioSource(fireChild);
         burnSounds = Resources.Load("sounds/Crackling Fire", typeof(AudioClip)) as AudioClip;
@@ -66,12 +68,15 @@ public class Flammable : MonoBehaviour, ISaveable {
     void HandleNetIntrinsic(MessageNetIntrinsic message) {
         // netBuffs = message.netBuffs;
         if (message.netBuffs[BuffType.fireproof].boolValue || message.netBuffs[BuffType.fireproof].floatValue > 0) {
+            // Debug.Log($"{this} fireproof on");
             fireproof = true;
         } else {
+            // Debug.Log($"{this} fireproof off");
             fireproof = false;
         }
     }
     public void HandleDamageMessage(MessageDamage message) {
+        // Debug.Log($"{this} handling net damage {message.type}");
         if (message.type == damageType.fire) {
             SetBurnTimer();
             responsibleParty = message.responsibleParty;
@@ -112,14 +117,12 @@ public class Flammable : MonoBehaviour, ISaveable {
             onFire = true;
             if (playSounds) {
                 audioSource.PlayOneShot(igniteSounds[Random.Range(0, 1)]);
-                audioSource.loop = true;
-                audioSource.clip = burnSounds;
-                audioSource.Play();
+                RequestPlayAudio();
             }
             OccurrenceFire fireData = new OccurrenceFire();
             fireData.flamingObject = gameObject;
             Toolbox.Instance.OccurenceFlag(gameObject, fireData);
-            if (responsibleParty == GameManager.Instance.playerObject && gameObject != GameManager.Instance.playerObject) {
+            if (myHurtable != null && responsibleParty == GameManager.Instance.playerObject && gameObject != GameManager.Instance.playerObject) {
                 GameManager.Instance.IncrementStat(StatType.othersSetOnFire, 1);
             }
         }
@@ -150,7 +153,7 @@ public class Flammable : MonoBehaviour, ISaveable {
         } else {
             if (fireParticles.isPlaying) {
                 fireParticles.Stop();
-                audioSource.Stop();
+                RequestStopAudio();
             }
         }
     }
@@ -167,4 +170,36 @@ public class Flammable : MonoBehaviour, ISaveable {
         if (data.bools.ContainsKey("fireproof"))
             fireproof = data.bools["fireproof"];
     }
+
+    public void SpontaneouslyCombust() {
+        heat += 100f;
+        SetBurnTimer();
+        fireRetardantBuffer = 0f;
+        onFire = true;
+    }
+
+    void OnDestroy() {
+        if (audioPlayingFires.Contains(this)) {
+            audioPlayingFires.Remove(this);
+        }
+    }
+    void RequestPlayAudio() {
+        // TODO: reservoir sampling algorithm here
+        if (audioPlayingFires.Count > 3) {
+            return;
+        }
+        audioPlayingFires.Add(this);
+        audioSource.loop = true;
+        audioSource.clip = burnSounds;
+        audioSource.pitch = UnityEngine.Random.Range(0.95f, 1.05f);
+        audioSource.time = Random.Range(0, burnSounds.length);
+        audioSource.Play();
+    }
+    void RequestStopAudio() {
+        audioSource.Stop();
+        if (audioPlayingFires.Contains(this)) {
+            audioPlayingFires.Remove(this);
+        }
+    }
+    public static HashSet<Flammable> audioPlayingFires = new HashSet<Flammable>();
 }

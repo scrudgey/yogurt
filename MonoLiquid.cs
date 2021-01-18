@@ -43,16 +43,22 @@ public class MonoLiquid : MonoBehaviour, ISaveable {
                 foreach (Transform child in coll.transform) {
                     if (child.name == "stain(Clone)") {
                         numberStains += 1;
-                        if (numberStains >= 5)
+                        if (numberStains >= 3)
                             break;
                     }
                 }
-                if (numberStains < 5) {
+                if (numberStains < 3) {
                     GameObject stain = CreateStain(coll.gameObject, transform.position);
                     Toolbox.Instance.AddLiveBuffs(coll.gameObject, gameObject);
                     SpriteRenderer stainRenderer = stain.GetComponent<SpriteRenderer>();
                     stainRenderer.color = liquid.color;
                     Liquid.MonoLiquidify(stain, liquid);
+                    Flammable stainFlammable = stain.GetComponentInParent<Flammable>();
+                    Flammable myFlammable = GetComponent<Flammable>();
+                    if (stainFlammable != null && myFlammable != null && myFlammable.onFire) {
+                        stainFlammable.SpontaneouslyCombust();
+                        stainFlammable.responsibleParty = myFlammable.responsibleParty;
+                    }
 
                     EventData data = Toolbox.Instance.DataFlag(
                         coll.gameObject,
@@ -76,6 +82,7 @@ public class MonoLiquid : MonoBehaviour, ISaveable {
                     }
                 }
                 ClaimsManager.Instance.WasDestroyed(gameObject);
+                Destroy(gameObject);
             }
     }
     public void LoadLiquid(string type) {
@@ -92,9 +99,9 @@ public class MonoLiquid : MonoBehaviour, ISaveable {
         // data.whatHappened = liquid.name + " was spilled";
         // data.noun = "spilling";
         GameObject puddle = Instantiate(Resources.Load("prefabs/Puddle"), transform.position, Quaternion.identity) as GameObject;
-        // puddle.layer = 4;
         PhysicalBootstrapper pb = GetComponent<PhysicalBootstrapper>();
-        pb.DestroyPhysical();
+        if (pb != null)
+            pb.DestroyPhysical();
         Liquid.MonoLiquidify(puddle, liquid);
         Edible puddleEdible = puddle.GetComponent<Edible>();
         Edible edible = GetComponent<Edible>();
@@ -104,6 +111,12 @@ public class MonoLiquid : MonoBehaviour, ISaveable {
         }
         Destroy(gameObject);
         ClaimsManager.Instance.WasDestroyed(gameObject);
+        Flammable puddleFlammable = puddle.GetComponent<Flammable>();
+        Flammable myFlammable = GetComponent<Flammable>();
+        if (puddleFlammable != null && myFlammable != null && myFlammable.onFire) {
+            puddleFlammable.SpontaneouslyCombust();
+            puddleFlammable.responsibleParty = myFlammable.responsibleParty;
+        }
     }
     public void SaveData(PersistentComponent data) {
         // data

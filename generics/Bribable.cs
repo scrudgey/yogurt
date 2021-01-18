@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using AI;
 
 public class Bribable : Interactive {
     public string receive = "dollar";
@@ -54,6 +55,21 @@ public class Bribable : Interactive {
         if (awareness != null) {
             PersonalAssessment pa = awareness.FormPersonalAssessment(otherInv.gameObject);
             pa.status = PersonalAssessment.friendStatus.friend;
+
+            // null out protection zones
+            awareness.protectZone = null;
+        }
+
+        DecisionMaker ai = gameObject.GetComponent<DecisionMaker>();
+        if (ai != null) {
+            if (ai.defaultPriorityType == DecisionMaker.PriorityType.ProtectZone) {
+                ai.defaultPriorityType = DecisionMaker.PriorityType.Wander;
+                foreach (Priority priority in ai.priorities) {
+                    if (priority.GetType() == typeof(PriorityWander)) {
+                        ai.defaultPriority = priority;
+                    }
+                }
+            }
         }
     }
 }

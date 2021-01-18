@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using System;
 
 public class Toilet : Container {
     private AudioSource audioSource;
@@ -67,7 +68,23 @@ public class Toilet : Container {
         ClaimsManager.Instance.WasDestroyed(target.gameObject);
         MySaver.Save();
         MyMarker marker = target.GetComponent<MyMarker>();
-        GameManager.Instance.data.toiletItems.Add(marker.id);
+
+        HashSet<Guid> itemTree = new HashSet<Guid>();
+        MySaver.RecursivelyAddTree(itemTree, marker.id);
+
+        if (MySaver.objectDataBase.ContainsKey(marker.id)) {
+            PersistentObject itemObj = MySaver.objectDataBase[marker.id];
+            foreach (KeyValuePair<string, PersistentObject> kvp in itemObj.persistentChildren) {
+                MySaver.RecursivelyAddTree(itemTree, kvp.Value.id);
+            }
+        }
+
+        foreach (Guid idn in itemTree) {
+            GameManager.Instance.data.toiletItems.Add(idn);
+        }
+        // there needs to be a disabled objects cleanup here!
+        // if there is a disabled object that belongs to the flushed object but is not in the flushed object
+        // it will not be cleaned up properly.
         Destroy(target.gameObject);
     }
 }

@@ -12,9 +12,6 @@ namespace AI {
             successSwitch = new ConditionBoolSwitch(g);
             routines.Add(new RoutineTrapdoor(g, c, speech, successSwitch));
 
-            // routines.Add(new Routine)
-
-            // successSwitch.conditionMet = true;
             successCondition = successSwitch;
         }
     }

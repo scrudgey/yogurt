@@ -7,7 +7,7 @@ public class Fire : MonoBehaviour {
     private MessageDamage message = new MessageDamage();
     private HashSet<GameObject> damageQueue = new HashSet<GameObject>();
     private float damageTimer;
-    static List<string> forbiddenTags = new List<string>(new string[] { "occurrenceFlag", "background", "sightcone" });
+    static List<string> forbiddenTags = new List<string>(new string[] { "occurrenceFlag", "background", "sightcone", "sky" });
     void Start() {
         message = new MessageDamage(0.1f, damageType.fire);
         message.impersonal = true;

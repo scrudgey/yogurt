@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
+using System;
 
 [System.Serializable]
 public class Buff {
@@ -78,6 +80,20 @@ public class Buff {
         {BuffType.undead, "undead"},
     };
 
+
+    public static List<Buff> FlattenBuffs(List<Buff> l1) {
+        List<Buff> flattenedBuffs = new List<Buff>();
+        foreach (BuffType buffType in Enum.GetValues(typeof(BuffType))) {
+            IEnumerable<Buff> subBuffs = l1.Where(x => x.type == buffType);
+            if (subBuffs.Count() > 0) {
+                flattenedBuffs.Add(l1
+                .Where(x => x.type == buffType)
+                .Aggregate<Buff>((prod, next) => prod + next)
+                );
+            }
+        }
+        return flattenedBuffs;
+    }
 }
 public enum BuffType {
     telepathy,
@@ -108,4 +124,5 @@ public class BuffData {
         this.prefabName = prefabName;
         this.spriteColor = color;
     }
+    public BuffData() { }
 }

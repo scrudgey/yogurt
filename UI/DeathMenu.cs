@@ -6,16 +6,12 @@ using UnityEngine.InputSystem;
 public class DeathMenu : MonoBehaviour {
     public bool buttonVisible;
     public GameObject button;
+    public GameObject resurrectButton;
     public List<Rigidbody2D> letters;
     public bool lettersInactive;
     private float timer;
-    // public MyControls controls;
     bool keypressedThisFrame;
     void Awake() {
-        // controls = new MyControls();
-
-        // controls.Player.Primary.Enable();
-
         InputController.Instance.PrimaryAction.action.performed += _ => keypressedThisFrame = true;
     }
     void Start() {
@@ -23,8 +19,10 @@ public class DeathMenu : MonoBehaviour {
         canvas.worldCamera = GameManager.Instance.cam;
 
         button = transform.Find("Button").gameObject;
+        resurrectButton = transform.Find("ResurrectButton").gameObject;
         lettersInactive = false;
         button.SetActive(false);
+        resurrectButton.SetActive(false);
         letters.Add(transform.Find("Y").GetComponent<Rigidbody2D>());
         letters.Add(transform.Find("O").GetComponent<Rigidbody2D>());
         letters.Add(transform.Find("U").GetComponent<Rigidbody2D>());
@@ -46,6 +44,15 @@ public class DeathMenu : MonoBehaviour {
     public void ButtonCallback() {
         GameManager.Instance.NewDayCutscene();
     }
+    public void ResurrectButtonCallback() {
+        GameManager.Instance.data.lichRevivalToday = true;
+        GameObject lich = GameObject.Instantiate(Resources.Load("prefabs/Lich"), GameManager.Instance.lastPlayerPosition, Quaternion.identity) as GameObject;
+        Destroy(GameManager.Instance.playerObject);
+        GameManager.Instance.SetFocus(lich);
+        Toolbox.SetGender(lich, GameManager.Instance.data.defaultGender, changeHead: false);
+        Destroy(gameObject);
+        GameObject.Instantiate(Resources.Load("particles/licheffect"), GameManager.Instance.lastPlayerPosition, Quaternion.identity);
+    }
     IEnumerator ChangeMusic() {
         MusicController.Instance.StopTrack();
         yield return new WaitForSeconds(2f);
@@ -56,10 +63,7 @@ public class DeathMenu : MonoBehaviour {
         timer += Time.deltaTime;
         if (keypressedThisFrame && timer > 1) {
             if (!buttonVisible) {
-                buttonVisible = true;
-                button.SetActive(true);
-            } else {
-
+                ShowButtons();
             }
         }
         bool tempLettersInactive = true;
@@ -75,10 +79,16 @@ public class DeathMenu : MonoBehaviour {
             }
         }
         if (lettersInactive && !buttonVisible) {
-            buttonVisible = true;
-            button.SetActive(true);
+            ShowButtons();
         }
 
         keypressedThisFrame = false;
+    }
+    public void ShowButtons() {
+        buttonVisible = true;
+        button.SetActive(true);
+        if (GameManager.Instance.data.perks["resurrection"] == true && !GameManager.Instance.data.lichRevivalToday) {
+            resurrectButton.SetActive(true);
+        }
     }
 }

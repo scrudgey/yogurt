@@ -17,6 +17,7 @@ public class Puddle : MonoBehaviour {
         spriteRenderer.sprite = sprites[Random.Range(0, 4)];
         MonoLiquid monoliquid = GetComponent<MonoLiquid>();
         if (monoliquid) {
+            monoliquid.edible.eatSound = Resources.Load("sounds/eating/slurp") as AudioClip;
             Item item = GetComponent<Item>();
             item.itemName = "puddle of " + monoliquid.liquid.name;
         }

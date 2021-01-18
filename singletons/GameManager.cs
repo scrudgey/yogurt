@@ -6,6 +6,13 @@ using UnityEngine.SceneManagement;
 using System.Linq;
 using System;
 
+public enum GameState {
+    normal,
+    endCredits,
+    postCredits,
+    ceoPlus
+}
+
 [System.Serializable]
 public class GameData {
     public string prefabName;
@@ -14,11 +21,14 @@ public class GameData {
     public float money;
     public List<string> collectedObjects;
     public List<string> collectedItems;
+    public List<Liquid> collectedLiquids;
     public List<string> newCollectedItems;
     public List<string> collectedFood;
     public List<string> newCollectedFood;
     public List<string> collectedClothes;
     public List<string> newCollectedClothes;
+    public List<Liquid> newCollectedLiquids;
+    public SerializableDictionary<string, MutablePotionData> collectedPotions;
     public int[] collectedChelas = new int[10];
     public int itemsCollectedToday;
     public int clothesCollectedToday;
@@ -27,7 +37,6 @@ public class GameData {
     public SerializableDictionary<string, bool> itemCheckedOut;
     public SerializableDictionary<string, bool> perks;
     public string lastSavedPlayerPath;
-    public string lastSavedScenePath;
     public string saveDate;
     public System.DateTime saveDateTime;
     public float secondsPlayed;
@@ -44,12 +53,16 @@ public class GameData {
     public SerializableDictionary<StatType, Stat> stats = new SerializableDictionary<StatType, Stat>();
     public List<string> commercialsInitializedToday;
     public List<Email> emails = new List<Email>();
+    public List<string> phoneQueue = new List<string>();
+    public List<string> phoneCallsAll = new List<string>();
     public List<string> televisionShows;
     public HashSet<string> newTelevisionShows;
     public List<string> packages;
     public bool firstTimeLeavingHouse;
     public bool mayorCutsceneHappened;
     public bool visitedStudio;
+    public bool visitedHell;
+    public bool visitedThroneRoom;
     public bool finishedCommercial;
     public bool visitedMoon;
     public bool teleporterUnlocked;
@@ -62,16 +75,27 @@ public class GameData {
     public bool foughtSpiritToday;
     public bool mayorLibraryShuffled;
     public int gangMembersDefeated;
-
+    public bool lichRevivalToday;
     public Commercial activeCommercial;
     public bool recordingCommercial;
-
+    public HashSet<string> queuedMagicianSequences = new HashSet<string>();
+    public HashSet<string> finishedMagicianSequences = new HashSet<string>();
+    public string activeMagicianSequence = "";
+    public string queuedDiaryEntry = "";
     public List<System.Guid> toiletItems = new List<System.Guid>();
     public bool loadedSewerItemsToday = false;
+    public bool yogurtDetective = false;
+    public bool showedFirstCEODiary = false;
+    public GameState state = GameState.postCredits;
+
     public GameData() {
         days = 0;
-        saveDate = System.DateTime.Now.ToString();
+        SetSaveDateTime();
+    }
+    public void SetSaveDateTime() {
         saveDateTime = System.DateTime.Now;
+        // saveDate = System.DateTime.Now.ToString();
+        saveDate = saveDateTime.ToString("MMMM dd HH:mm");
     }
 
 }
@@ -94,7 +118,7 @@ public partial class GameManager : Singleton<GameManager> {
         {"chamber", "meditation chamber"},
         {"dungeon", "oubliette"},
         {"potion", "apothecary"},
-        {"cave3", "sewer"},
+        {"cave3", "sewers"},
         {"moon_pool", "moon pool"},
         {"moon_town", "moon town"},
         {"neighborhood", "outdoors"},
@@ -105,16 +129,25 @@ public partial class GameManager : Singleton<GameManager> {
         {"cave4", "tomb"},
         {"apartment", "apartment"},
         {"boardroom", "yogurt HQ"},
-        {"hell1", "hell"},
+        // {"hell1", "hell"},
         {"venus1", "venus"},
         {"fountain", "ruins"},
         {"gravy_studio", "gravy commercial studio"},
+        {"hells_kitchen", "hell's kitchen"},
+        {"hells_landing", "hell's landing"},
+        {"venus_temple", "venus temple"},
+        {"hells_vomit_ratchet", "hell's utility tunnel"},
+        {"lower_hell", "lower hell"},
+        {"office", "yogurt CEO's office"},
+        {"hells_chamber", "hell's chamber"},
     };
     public GameData data;
+    public bool titleIntroPlayed;
     public string saveGameName = "test";
     private CameraControl cameraControl;
     public Camera cam;
     public GameObject playerObject;
+    public Vector3 lastPlayerPosition;
     public float gravity = 3.0f;
     public float sceneTime;
     private bool awaitNewDayPrompt;
@@ -124,11 +157,14 @@ public partial class GameManager : Singleton<GameManager> {
     public AudioSource publicAudio;
     public bool playerIsDead;
     public bool debug = true;
+    public bool demo = false;
     public bool failedLevelLoad = false;
     public Gender playerGender;
-
+    public bool loadingSavedGame = false;
+    private System.Collections.IEnumerator throneroomCoroutine;
     public delegate void BooleanObserver(bool value);
     public static BooleanObserver onRecordingChange;
+    static public readonly int HellDoorClosesOnDay = 3; // possible to get to hell in 3 days
 
     public void PlayPublicSound(AudioClip clip) {
         if (clip == null)
@@ -147,27 +183,68 @@ public partial class GameManager : Singleton<GameManager> {
         if (data == null) {
             data = InitializedGameData();
             // ReceiveEmail("duplicator");
-            // ReceiveEmail("golf_club");
-            // ReceivePackage("kaiser_helmet");
-            // ReceivePackage("duplicator");
+            // ReceiveEmail("armor");
+            // ReceiveEmail("cannon");
+            // ReceiveEmail("gravy1");
+            // ReceiveEmail("hell");
+            // ReceiveEmail("scorpion");
+            // ReceiveEmail("boardroom");
             // ReceivePackage("golf_club");
+
+            // ReceivePhoneCall("airplane");
+            // ReceivePhoneCall("office");
         }
         if (saveGameName == "test")
             MySaver.CleanupSaves();
         if (!InCutsceneLevel()) {
-            NewGame(switchlevel: false);
+            if (data.state == GameState.endCredits) {
+                Debug.Log("start credit sequence");
+                // change music to credit sequence?
+                cam = GameObject.FindObjectOfType<Camera>();
+                CutsceneManager.Instance.InitializeCutscene<CutsceneCredits>();
+                CutsceneManager.Instance.cutscene.Configure();
+            } else {
+                NewGame(switchlevel: false);
+            }
         } else {
             InitializeNonPlayableLevel();
         }
+
+        // these are for debug. in production, data.state will never start as anything other than normal.
+        // remember to change the real code, in scene was loaded
+        if (data.state == GameState.postCredits) {
+            SetupDevilsOffer();
+        }
+        if (data.state == GameState.ceoPlus) {
+            GameObject origPlayer = GameManager.Instance.playerObject;
+            GameObject ceo = GameObject.Instantiate(Resources.Load("prefabs/CEO"), GameManager.Instance.playerObject.transform.position, Quaternion.identity) as GameObject;
+            GameManager.Instance.SetFocus(ceo);
+            GameObject.Destroy(origPlayer);
+            GameManager.Instance.data.prefabName = "CEO";
+            MySaver.Save();
+        }
         SceneManager.sceneLoaded += SceneWasLoaded;
         // these bits are for debug!
+
         Scene scene = SceneManager.GetActiveScene();
         if (scene.name == "boardroom_cutscene") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneBoardroom>();
             CutsceneManager.Instance.cutscene.Configure();
         }
+        if (scene.name == "office_cutscene") {
+            CutsceneManager.Instance.InitializeCutscene<CutsceneOffice>();
+            CutsceneManager.Instance.cutscene.Configure();
+        }
         if (scene.name == "anti_mayor_cutscene") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneAntiMayor>();
+            CutsceneManager.Instance.cutscene.Configure();
+        }
+        if (scene.name == "airport_cutscene") {
+            CutsceneManager.Instance.InitializeCutscene<CutsceneAirport>();
+            CutsceneManager.Instance.cutscene.Configure();
+        }
+        if (scene.name == "bar") {
+            CutsceneManager.Instance.InitializeCutscene<CutsceneBar>();
             CutsceneManager.Instance.cutscene.Configure();
         }
 
@@ -176,6 +253,9 @@ public partial class GameManager : Singleton<GameManager> {
     void Update() {
         if (data == null)
             return;
+        if (playerObject != null) {
+            lastPlayerPosition = playerObject.transform.position;
+        }
         string sceneName = SceneManager.GetActiveScene().name;
         timeSinceLastSave += Time.deltaTime;
         intervalTimer += Time.deltaTime;
@@ -190,6 +270,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
         if (awaitNewDayPrompt && sceneTime > 2f) {
             awaitNewDayPrompt = false;
+            UINew.Instance.RefreshUI(active: false);
             UINew.Instance.ShowMenu(UINew.MenuType.newDayReport);
         }
         if (sceneTime > 0.1f && !data.unlockedScenes.Contains(sceneName) && !InCutsceneLevel() && GameManager.sceneNames.ContainsKey(sceneName)) {
@@ -197,39 +278,23 @@ public partial class GameManager : Singleton<GameManager> {
             UINew.Instance.ShowSceneText("- " + GameManager.sceneNames[sceneName] + " -");
         }
     }
-    public void ExplodeHead() {
-        Head head = playerObject.GetComponentInChildren<Head>();
-        Hurtable hurtable = playerObject.GetComponent<Hurtable>();
-        Duplicatable duplicatable = playerObject.GetComponent<Duplicatable>();
-
-        MessageDamage message = new MessageDamage(100f, damageType.physical);
-        Vector2 rand = UnityEngine.Random.insideUnitCircle;
-        message.force = new Vector3(rand.x, rand.y, 2f).normalized;
-
-        if (head != null) {
-            GameObject headGibs = Resources.Load("prefabs/gibs/headGibsContainer") as GameObject;
-            foreach (Gibs gib in headGibs.GetComponents<Gibs>()) {
-                Gibs newGib = head.gameObject.AddComponent<Gibs>();
-                newGib.CopyFrom(gib);
-                newGib.Emit(message);
-            }
-            AudioClip boom = Resources.Load("sounds/explosion/cannon") as AudioClip;
-            PlayPublicSound(boom);
-            Destroy(head.gameObject);
-        }
-
+    public void ExplodeHead(GameObject target) {
+        Hurtable hurtable = target.GetComponent<Hurtable>();
+        Duplicatable duplicatable = target.GetComponent<Duplicatable>();
         if (hurtable != null) {
-            hurtable.Die(message, damageType.physical);
+            // hurtable.Die(message, damageType.physical);
+            hurtable.ExplodeHead();
         } else if (duplicatable != null) {
             duplicatable.Nullify();
         } else {
-            Destroy(playerObject);
-            PlayerDeath();
+            Destroy(target);
+            if (target == playerObject) {
+                PlayerDeath();
+            }
         }
     }
     public bool InCutsceneLevel() {
-        return SceneManager.GetActiveScene().buildIndex <= 3;
-        // return SceneManager.GetActiveScene().buildIndex <= 4;
+        return SceneManager.GetActiveScene().buildIndex <= 8;
     }
     public void FocusIntrinsicsChanged(Intrinsics intrinsics) {
         Dictionary<BuffType, Buff> netBuffs = intrinsics.NetBuffs();
@@ -247,15 +312,9 @@ public partial class GameManager : Singleton<GameManager> {
         UINew.Instance.UpdateStatusIcons(intrinsics);
     }
     public void SetFocus(GameObject target) {
-        // if (playerObject != null) {
-        // Controllable oldControl = playerObject.GetComponent<Controllable>();
-        // oldControl.control = Controllable.ControlType.AI;
-        // }
         Toolbox.Instance.SwitchAudioListener(target);
         playerObject = target;
-        // Controllable targetControl = playerObject.GetComponent<Controllable>();
         InputController.Instance.focus = target.GetComponent<Controllable>();
-        // targetControl.control = Controllable.ControlType.player;
         cameraControl = FindObjectOfType<CameraControl>();
         if (cameraControl)
             cameraControl.focus = target;
@@ -265,8 +324,8 @@ public partial class GameManager : Singleton<GameManager> {
         Outfit playerOutfit = target.GetComponent<Outfit>();
         if (playerOutfit) {
             playerGender = playerOutfit.gender;
-            string prefabName = playerOutfit.wornUniformName;
-            if (prefabName != "nude" && prefabName != "nude_female") {
+            if (!playerOutfit.nude) {
+                string prefabName = playerOutfit.wornUniformName;
                 GameObject uniform = Instantiate(Resources.Load("prefabs/" + prefabName)) as GameObject;
                 CheckItemCollection(uniform, playerObject);
                 DestroyImmediate(uniform);
@@ -289,22 +348,58 @@ public partial class GameManager : Singleton<GameManager> {
             if (playerInv.holding)
                 CheckItemCollection(playerInv.holding.gameObject, playerObject);
         }
+        Collider2D collider = target.GetComponent<Collider2D>();
+        foreach (CameraZoomZone zoomZone in GameObject.FindObjectsOfType<CameraZoomZone>()) {
+            zoomZone.ForceRecalculate(collider);
+        }
+        Hurtable hurtable = target.GetComponent<Hurtable>();
+        if (hurtable != null) {
+            playerIsDead = hurtable.hitState == Controllable.HitState.dead;
+        }
+
+        string sceneName = SceneManager.GetActiveScene().name;
+        if (sceneName == "hallucination") {
+            if (playerObject.GetComponent<HallucinationTrail>() == null) {
+                HallucinationTrail ht = playerObject.AddComponent<HallucinationTrail>();
+                ht.interval = 0.2f;
+                ht.color = Color.red;
+                ht.trailLifetime = 0.5f;
+                ht.colorInterval = 0.1f;
+                ht.trailPrefab = Resources.Load("hallucination") as GameObject;
+            }
+        }
         // refresh UI
         UINew.Instance.RefreshUI(active: true);
     }
     public void LeaveScene(string toSceneName, int toEntryNumber) {
         Time.timeScale = 0f;
-
         UINew.Instance.FadeOut(() => DoLeaveScene(toSceneName, toEntryNumber));
     }
     public void SceneWasLoaded(Scene scene, LoadSceneMode mode) {
-        UINew.Instance.FadeIn(() => DoSceneWasLoaded(scene, mode));
+        UINew.Instance.Blackout();
+
         Toolbox.Instance.numberOfLiveSpeakers = 0;
-        publicAudio.Stop();
+        if (publicAudio != null)
+            publicAudio.Stop();
         sceneTime = 0f;
-        if (InCutsceneLevel()) {
+        // Debug.Log($"scene was loaded: {scene.name}");
+        Flammable.audioPlayingFires = new HashSet<Flammable>(); // probably unnecessary
+
+        if (throneroomCoroutine != null)
+            StopCoroutine(throneroomCoroutine);
+
+        if (data != null && data.state == GameState.endCredits) {
+            // if this is a credit sequence, run the credit cutscene
+
+            // change music to credit sequence?
+            cam = GameObject.FindObjectOfType<Camera>();
+            CutsceneManager.Instance.InitializeCutscene<CutsceneCredits>();
+            CutsceneManager.Instance.cutscene.Configure();
+        } else if (InCutsceneLevel()) {
+            MusicController.Instance.SceneChange(scene.name);
             InitializeNonPlayableLevel();
         } else {
+            MusicController.Instance.SceneChange(scene.name);
             try {
                 InitializePlayableLevel(loadLevel: true);
                 failedLevelLoad = false;
@@ -321,25 +416,43 @@ public partial class GameManager : Singleton<GameManager> {
                 return;
             }
         }
-        MusicController.Instance.SceneChange(scene.name);
+        if (data != null && data.state == GameState.postCredits) {
+            SetupDevilsOffer();
+        }
         Time.timeScale = 0f;
+        UINew.Instance.FadeIn(() => Time.timeScale = 1f);
+    }
+    public void SetupDevilsOffer() {
+        // post credits: the devil's offer
+        data.teleportedToday = true;
+        Transform satanRoot = GameObject.Find("Satan").transform;
+        Transform playerRoot = playerObject.transform;
+        GameObject doorway = GameObject.Find("doorway");
+        // GameObject hastur = GameObject.Find("Hastur");
+        // GameObject shabnax = GameObject.Find("Shabnax");
+        // Destroy(hastur);
+        // Destroy(shabnax);
+        Destroy(doorway);
+        foreach (MyMarker marker in FindObjectsOfType<MyMarker>()) {
+            if (marker.transform.IsChildOf(satanRoot) || marker.transform.IsChildOf(playerRoot)) {
+                continue;
+            }
+            Destroy(marker.gameObject);
+        }
+        GameObject lockedDoor = GameObject.Find("lockedDoor");
+        lockedDoor.GetComponent<SpriteRenderer>().enabled = true;
+        lockedDoor.GetComponent<PolygonCollider2D>().enabled = true;
+        satanRoot.GetComponent<Speech>().defaultMonologue = "satan_offer";
+        satanRoot.GetComponent<Awareness>().FormPersonalAssessment(playerObject).status = PersonalAssessment.friendStatus.friend;
     }
     public void DoLeaveScene(string toSceneName, int toEntryNumber) {
         Time.timeScale = 1f;
-
         MySaver.Save();
         data.entryID = toEntryNumber;
         SceneManager.LoadScene(toSceneName);
     }
-    public void DoSceneWasLoaded(Scene scene, LoadSceneMode mode) {
-        Time.timeScale = 1f;
-    }
     void ResetGameState() {
         try {
-            // FileInfo playerFile = new FileInfo(GameManager.Instance.data.lastSavedPlayerPath);
-            // if (playerFile.Exists) {
-            //     playerFile.Delete();
-            // }
             MySaver.BackupFailedSave();
             MySaver.CleanupSaves();
 
@@ -384,10 +497,12 @@ public partial class GameManager : Singleton<GameManager> {
         UINew.Instance.ConfigureUIElements();
         if (loadLevel) {
             playerObject = MySaver.LoadScene(newDayLoad: data.entryID == -99);
+            // Debug.Log(playerObject);
             if (data.entryID == -99) {
                 // reset apartment by deleting all controllables
                 foreach (Controllable controllable in GameObject.FindObjectsOfType<Controllable>()) {
                     if (controllable.gameObject != playerObject) {
+                        // Debug.Log($"destroying {controllable.gameObject}");
                         Destroy(controllable.gameObject);
                     }
                 }
@@ -407,12 +522,38 @@ public partial class GameManager : Singleton<GameManager> {
         }
 
         SetFocus(playerObject);
-        // cam.transform.position = playerObject.transform.position;
         InputController.Instance.state = InputController.ControlState.normal;
         UINew.Instance.RefreshUI(active: true);
+        // do not enter if we are loading the scene from main menu
+        if (!loadingSavedGame) {
+            SpecificSceneInitialize(sceneName);
+            PlayerEnter();
+        }
+        loadingSavedGame = false;
 
+        Vector3 position = playerObject.transform.position;
+        position.z = -10;
+        cam.transform.position = position;
+
+
+        if (data.activeCommercial != null) {
+            CheckCommercialInitialization(data.activeCommercial, sceneName);
+        }
+        if (playerIsDead) {
+            UINew.Instance.RefreshUI(active: false);
+            Instantiate(Resources.Load("UI/deathMenu"));
+            CameraControl camControl = FindObjectOfType<CameraControl>();
+            Toolbox.Instance.SwitchAudioListener(camControl.gameObject);
+            camControl.audioSource.PlayOneShot(Resources.Load("sounds/xylophone/x4") as AudioClip);
+        }
+    }
+    public void SpecificSceneInitialize(string sceneName) {
         if (sceneName == "neighborhood") {
             GameObject packageSpawnPoint = GameObject.Find("packageSpawnPoint");
+            if (data.state == GameState.ceoPlus) {
+                GameObject condo = GameObject.Find("condos2/condo");
+                condo.GetComponent<SpriteRenderer>().enabled = true;
+            }
             if (data.firstTimeLeavingHouse) {
                 foreach (string package in data.packages) {
                     if (!data.collectedItems.Contains(package)) {
@@ -437,7 +578,13 @@ public partial class GameManager : Singleton<GameManager> {
                 if (ctt != null)
                     ctt.Enable();
             }
-            ShowDiaryEntry("diaryStudio");
+            throneroomCoroutine = waitAndShowDiary(1.5f, "diaryStudio");
+            StartCoroutine(throneroomCoroutine);
+        }
+        if (sceneName == "hells_landing" && !data.visitedHell) {
+            data.visitedHell = true;
+            throneroomCoroutine = waitAndShowDiary(2, "hell");
+            StartCoroutine(throneroomCoroutine);
         }
         if (sceneName == "cave1" || sceneName == "cave2" || (sceneName == "cave3" && data.entryID == 3) || (sceneName == "cave4" && data.entryID == 0)) {
             CutsceneManager.Instance.InitializeCutscene<CutsceneFall>();
@@ -447,6 +594,35 @@ public partial class GameManager : Singleton<GameManager> {
         }
         if (sceneName == "space") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneSpace>();
+        }
+        if (sceneName == "portal_hell") {
+            CutscenePortal cutscene = new CutscenePortal();
+            cutscene.destination = CutscenePortal.Destination.hell;
+            CutsceneManager.Instance.InitializeCutscene(cutscene);
+        }
+        if (sceneName == "portal_magic") {
+            CutscenePortal cutscene = new CutscenePortal();
+            cutscene.destination = CutscenePortal.Destination.magic;
+            CutsceneManager.Instance.InitializeCutscene(cutscene);
+        }
+        if (sceneName == "portal_venus") {
+            CutscenePortal cutscene = new CutscenePortal();
+            cutscene.destination = CutscenePortal.Destination.venus;
+            CutsceneManager.Instance.InitializeCutscene(cutscene);
+        }
+        if (sceneName == "portal_ceo") {
+            CutscenePortal cutscene = new CutscenePortal();
+            cutscene.destination = CutscenePortal.Destination.ceo;
+            CutsceneManager.Instance.InitializeCutscene(cutscene);
+        }
+        if (sceneName == "office") {
+            // remove the other CEO
+            if (data.state == GameState.ceoPlus) {
+                foreach (GameObject ceo in GameObject.FindObjectsOfType<GameObject>().Where(obj => obj.name == "CEO")) {
+                    if (ceo != playerObject)
+                        Destroy(ceo);
+                }
+            }
         }
         if (sceneName == "moon1" && (data.entryID == 420 || data.entryID == 99)) {
             CutsceneManager.Instance.InitializeCutscene<CutsceneMoonLanding>();
@@ -464,28 +640,112 @@ public partial class GameManager : Singleton<GameManager> {
             Collider2D toiletZone = GameObject.Find("toiletZone").GetComponent<Collider2D>();
             Bounds bounds = toiletZone.bounds;
             MySaver.LoadObjects(data.toiletItems);
+            MySaver.HandleLoadedPersistents(data.toiletItems, newDayLoad: false);
             foreach (MyMarker marker in GameObject.FindObjectsOfType<MyMarker>()) {
                 if (data.toiletItems.Contains(marker.id)) {
-                    marker.transform.position = bounds.center + new Vector3(
+                    Debug.Log($"loading toilet item {marker.gameObject}");
+                    Vector3 newPos = bounds.center + new Vector3(
                         (UnityEngine.Random.value - 0.5f) * bounds.size.x,
                         (UnityEngine.Random.value - 0.5f) * bounds.size.y,
                         (UnityEngine.Random.value - 0.5f) * bounds.size.z
                     );
+                    marker.transform.position = newPos;
+                    PhysicalBootstrapper pb = marker.gameObject.GetComponent<PhysicalBootstrapper>();
+                    pb.doLoad = false;
+                    // Debug.Log($"toilet position {marker.transform.position}");
+                    // MySaver.objectDataBase[marker.id].transformPosition = newPos;
                 }
             }
         }
-        PlayerEnter();
-        if (data.activeCommercial != null) {
-            CheckCommercialInitialization(data.activeCommercial, sceneName);
+        if (sceneName == "devils_throneroom") {
+            if (!data.visitedThroneRoom) {
+                throneroomCoroutine = CutsceneManager.Instance.waitAndStartCutscene<CutsceneThroneroom>(2);
+                StartCoroutine(throneroomCoroutine);
+                data.visitedThroneRoom = true;
+            }
         }
-        if (playerIsDead) {
-            UINew.Instance.RefreshUI(active: false);
-            Instantiate(Resources.Load("UI/deathMenu"));
-            CameraControl camControl = FindObjectOfType<CameraControl>();
-            camControl.audioSource.PlayOneShot(Resources.Load("sounds/xylophone/x4") as AudioClip);
-            Toolbox.Instance.SwitchAudioListener(GameObject.Find("Main Camera"));
+        if (sceneName == "apartment") {
+            if (data.days == 3) {
+                ReceivePhoneCall("office");
+            }
+            if (data.days == 10) {
+                ReceivePhoneCall("airplane");
+            }
+            if (data.days == 20) {
+                ReceivePhoneCall("bar");
+            }
+            if (!debug) {
+                if (data.days >= 5) {
+                    data.queuedMagicianSequences.Add("magician");
+                }
+                if (data.days >= 15) {
+                    data.queuedMagicianSequences.Add("magician2");
+                }
+            }
+
+            foreach (string sequence in data.queuedMagicianSequences) {
+                if (!data.finishedMagicianSequences.Contains(sequence)) {
+                    SetupMagicianSequence(sequence);
+                    break;
+                }
+            }
+            if (data.state == GameState.ceoPlus && !data.showedFirstCEODiary) {
+                data.showedFirstCEODiary = true;
+                StartCoroutine(waitAndShowDiary(1.5f, "ceo"));
+                StartCoroutine(waitAndShowDiary(3.5f, "ceo2"));
+            }
+        }
+        if (sceneName == "hallucination") {
+            if (data.activeMagicianSequence != "") {
+                GameObject magician = GameObject.Find("Magician");
+                magician.GetComponent<Speech>().defaultMonologue = data.activeMagicianSequence;
+            }
+            HallucinationTrail ht = playerObject.AddComponent<HallucinationTrail>();
+            ht.interval = 0.2f;
+            ht.color = Color.red;
+            ht.trailLifetime = 0.5f;
+            ht.colorInterval = 0.1f;
+            ht.trailPrefab = Resources.Load("hallucination") as GameObject;
+        }
+        // TODO: switch magician dialogue in hallucination scene
+        if (data.days >= 2) {
+            UnlockTVShow("vampire1");
+        }
+
+        if (demo) {
+            if (sceneName == "moon1") {
+                throneroomCoroutine = CutsceneManager.Instance.waitAndStartCutscene<CutsceneDemo>(3);
+                StartCoroutine(throneroomCoroutine);
+            }
         }
     }
+    public System.Collections.IEnumerator waitAndShowDiary(float waitTime, string diary) {
+        yield return new WaitForSeconds(waitTime);
+        ShowDiaryEntry(diary);
+        yield return null;
+    }
+    public void SetupMagicianSequence(string sequence) {
+        Debug.Log($"setting up magician sequence {sequence}");
+        data.activeMagicianSequence = sequence;
+        // spawn the portal & effects
+        Vector3 pos = new Vector3(-0.863f, 0.604f, 0f);
+        GameObject.Instantiate(Resources.Load("cutscene/portal"), pos, Quaternion.identity);
+        GameObject particle1 = GameObject.Instantiate(Resources.Load("cutscene/portalParticle"), pos, Quaternion.identity) as GameObject;
+        GameObject particle2 = GameObject.Instantiate(Resources.Load("cutscene/portalParticle"), pos, Quaternion.identity) as GameObject;
+        CircularMotion motion1 = particle1.GetComponent<CircularMotion>();
+        motion1.radius = 0.15f;
+        motion1.frequency = 10;
+
+        CircularMotion motion2 = particle2.GetComponent<CircularMotion>();
+        motion2.radius = 0.15f;
+        motion2.frequency = -14;
+
+        GameObject nightShade = GameObject.Instantiate(Resources.Load("UI/nightShade")) as GameObject;
+        // nightShade.GetComponent<FadeInOut>().state = FadeInOut.State.pingPong;
+        nightShade.GetComponent<FadeInOut>().PingPong(0.2f, 0.53f, 8, Color.black);
+        nightShade.GetComponent<Canvas>().worldCamera = cam;
+    }
+
     public GameObject InstantiatePlayerPrefab() {
         // Debug.Log("instantiate player");
         GameObject obj = GameObject.Instantiate(Resources.Load("prefabs/" + data.prefabName)) as GameObject;
@@ -493,6 +753,7 @@ public partial class GameManager : Singleton<GameManager> {
         return obj;
     }
     public void InitializeNonPlayableLevel() {
+        cam = GameObject.FindObjectOfType<Camera>();
         string sceneName = SceneManager.GetActiveScene().name;
         InputController.Instance.state = InputController.ControlState.cutscene;
         UINew.Instance.RefreshUI();
@@ -503,8 +764,20 @@ public partial class GameManager : Singleton<GameManager> {
         if (sceneName == "boardroom_cutscene") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneBoardroom>();
         }
+        if (sceneName == "office_cutscene") {
+            CutsceneManager.Instance.InitializeCutscene<CutsceneOffice>();
+        }
+        if (sceneName == "airport_cutscene") {
+            CutsceneManager.Instance.InitializeCutscene<CutsceneAirport>();
+        }
+        if (sceneName == "bar") {
+            CutsceneManager.Instance.InitializeCutscene<CutsceneBar>();
+        }
         if (sceneName == "anti_mayor_cutscene") {
             CutsceneManager.Instance.InitializeCutscene<CutsceneAntiMayor>();
+        }
+        if (sceneName == "ending_cutscene") {
+            CutsceneManager.Instance.InitializeCutscene<CutsceneEnding>();
         }
     }
     void PlayerEnter() {
@@ -525,19 +798,11 @@ public partial class GameManager : Singleton<GameManager> {
                     PlayPublicSound(teleportEnter);
                     GameObject.Instantiate(Resources.Load("particles/teleportEntryEffect"), playerObject.transform.position, Quaternion.identity);
                     Toolbox.Instance.AudioSpeaker(teleportEnter, playerObject.transform.position);
-
                 }
             }
         }
     }
     void WakeUpInBed() {
-        Hurtable playerHurtable = playerObject.GetComponent<Hurtable>();
-        if (playerHurtable.hitState == Controllable.HitState.dead) {
-            Destroy(playerObject);
-            playerObject = InstantiatePlayerPrefab();
-            SetFocus(playerObject);
-        }
-
         // apartment normally does not reset. here, we want to reset certain items every morning.
         // if the item no longer exists, create it.
         // however, the item state will persist intra-day.
@@ -549,99 +814,108 @@ public partial class GameManager : Singleton<GameManager> {
         //          do not load corresponding persistent state (this is a tricky part)
         //              add a new flag to persistent objects and markers.
 
-        // detect new day on load
-
-        // toilet
-        // piggybank
-        // fridge
-
-        // people
-        // https://github.com/scrudgey/yogurt/issues/123
-
 
         foreach (Puddle puddle in GameObject.FindObjectsOfType<Puddle>()) {
             Destroy(puddle.gameObject);
         }
         Bed bed = GameObject.FindObjectOfType<Bed>();
-        if (bed) {
-            playerObject.SetActive(false);
-            Outfit outfit = playerObject.GetComponent<Outfit>();
-            if (outfit != null) {
-                outfit.initUniform = Resources.Load("prefabs/pajamas") as GameObject;
-            }
-            Head head = playerObject.GetComponentInChildren<Head>();
-            if (head != null && head.hat != null) {
-                Hat hat = head.RemoveHat();
-                Destroy(hat.gameObject);
-            }
-            Inventory focusInv = playerObject.GetComponent<Inventory>();
-            if (focusInv) {
-                focusInv.ClearInventory();
-                UINew.Instance.UpdateTopActionButtons();
-            }
-            Eater focusEater = playerObject.GetComponent<Eater>();
-            if (focusEater) {
-                focusEater.nutrition = 0;
-                focusEater.nausea = 0;
-                // empty the stomachs
-                while (focusEater.eatenStack.Count > 0) {
-                    GameObject eaten = focusEater.eatenStack.Pop();
-                    Destroy(eaten);
-                }
-            }
-            if (playerHurtable) {
-                playerHurtable.Reset();
-            }
-            Flammable playerFlammable = playerObject.GetComponent<Flammable>();
-            if (playerFlammable) {
-                playerFlammable.onFire = false;
-                playerFlammable.heat = 0;
-                playerFlammable.SetBurnTimer();
-            }
-            Intrinsics playerIntrinsics = playerObject.GetComponent<Intrinsics>();
-            if (playerIntrinsics) {
-                playerIntrinsics.liveBuffs = new List<Buff>();
-
-                Dictionary<BuffType, Buff> netBuffs = playerIntrinsics.NetBuffs();
-                if (!netBuffs[BuffType.undead].active()) {
-                    HeadAnimation headAnim = playerObject.GetComponentInChildren<HeadAnimation>();
-                    AdvancedAnimation advAnim = playerObject.GetComponent<AdvancedAnimation>();
-
-                    if (headAnim && headAnim.skinColor == SkinColor.undead) {
-                        Debug.Log("setting head to " + data.defaultSkinColor.ToString());
-                        headAnim.skinColor = data.defaultSkinColor;
-                        headAnim.LoadSprites();
-                    }
-                    if (advAnim && advAnim.skinColor == SkinColor.undead) {
-                        Debug.Log("setting adv anim to " + data.defaultSkinColor.ToString());
-                        advAnim.skinColor = data.defaultSkinColor;
-                        advAnim.LoadSprites();
-                    }
-                }
-                FocusIntrinsicsChanged(playerIntrinsics);
-            }
-
-            data.teleportedToday = false;
-            MySaver.Save();
-
-            if (data.days > 1) {
-                awaitNewDayPrompt = data.itemsCollectedToday + data.foodCollectedToday + data.clothesCollectedToday + data.newUnlockedCommercials.Count > 0;
-            } else {
-                awaitNewDayPrompt = false;
-                // show WASD
-                GameObject.Instantiate(Resources.Load("UI/WASD"), new Vector3(0.183f, -0.703f, 0f), Quaternion.identity);
-            }
-
-            bed.SleepCutscene();
+        playerObject.SetActive(false);
+        Outfit outfit = playerObject.GetComponent<Outfit>();
+        if (outfit != null) {
+            outfit.initUniform = Resources.Load("prefabs/pajamas") as GameObject;
         }
+        Head head = playerObject.GetComponentInChildren<Head>();
+        if (head != null && head.hat != null) {
+            Hat hat = head.RemoveHat();
+            MySaver.RemoveObject(hat.gameObject);
+            DestroyImmediate(hat.gameObject);
+        }
+        Inventory focusInv = playerObject.GetComponent<Inventory>();
+        if (focusInv) {
+            focusInv.ClearInventory();
+            UINew.Instance.UpdateTopActionButtons();
+        }
+        Eater focusEater = playerObject.GetComponent<Eater>();
+        if (focusEater) {
+            focusEater.nutrition = 0;
+            focusEater.nausea = 0;
+            // empty the stomachs
+            while (focusEater.eatenQueue.Count > 0) {
+                GameObject eaten = focusEater.eatenQueue.First.Value;
+                MySaver.RemoveObject(eaten);
+                focusEater.eatenQueue.RemoveFirst();
+                DestroyImmediate(eaten);
+            }
+        }
+
+        Flammable playerFlammable = playerObject.GetComponent<Flammable>();
+        if (playerFlammable) {
+            playerFlammable.onFire = false;
+            playerFlammable.heat = 0;
+            playerFlammable.SetBurnTimer();
+        }
+        Intrinsics playerIntrinsics = playerObject.GetComponent<Intrinsics>();
+        if (playerIntrinsics) {
+            playerIntrinsics.liveBuffs = new List<Buff>();
+
+            Dictionary<BuffType, Buff> netBuffs = playerIntrinsics.NetBuffs();
+            if (!netBuffs[BuffType.undead].active()) {
+                HeadAnimation headAnim = playerObject.GetComponentInChildren<HeadAnimation>();
+                AdvancedAnimation advAnim = playerObject.GetComponent<AdvancedAnimation>();
+
+                if (headAnim && headAnim.skinColor == SkinColor.undead) {
+                    // Debug.Log("setting head to " + data.defaultSkinColor.ToString());
+                    headAnim.skinColor = data.defaultSkinColor;
+                    headAnim.LoadSprites();
+                }
+                if (advAnim && advAnim.skinColor == SkinColor.undead) {
+                    // Debug.Log("setting adv anim to " + data.defaultSkinColor.ToString());
+                    advAnim.skinColor = data.defaultSkinColor;
+                    advAnim.LoadSprites();
+                }
+            }
+            FocusIntrinsicsChanged(playerIntrinsics);
+        }
+
+        data.teleportedToday = false;
+        MySaver.Save();
+
+        if (data.days > 1) {
+            awaitNewDayPrompt = data.itemsCollectedToday + data.foodCollectedToday + data.clothesCollectedToday + data.newUnlockedCommercials.Count > 0;
+        } else {
+            awaitNewDayPrompt = false;
+            // show WASD
+            GameObject.Instantiate(Resources.Load("UI/WASD"), new Vector3(-0.73f, -0.703f, 0f), Quaternion.identity);
+        }
+
         Computer computer = GameObject.FindObjectOfType<Computer>();
         if (computer != null) {
             computer.CheckBubble();
         }
+        Hurtable playerHurtable = playerObject.GetComponent<Hurtable>();
+        if (playerHurtable.hitState == Controllable.HitState.dead) {
+            Debug.Log("loaded player is dead.");
+            string prefabPath = Toolbox.GetPrefabPath(playerObject);
+            Destroy(playerObject);
+            playerObject = GameObject.Instantiate(Resources.Load(prefabPath)) as GameObject;
+            SetFocus(playerObject);
+            playerObject.SetActive(false);
+            UINew.Instance.RefreshUI(active: false);
+            // playerIsDead = false;
+        }
+        if (playerHurtable) {
+            playerHurtable.Reset();
+        }
+        // instantiate original player character if missing
+        if (!data.prefabName.ToLower().Contains(Toolbox.Instance.CloneRemover(playerObject.name).ToLower())) {
+            GameObject origPlayer = InstantiatePlayerPrefab();
+            GameObject spawnPoint = GameObject.Find("SpawnPoint");
+            origPlayer.transform.position = spawnPoint.transform.position;
+        }
+        bed.SleepCutscene();
     }
 
     public void NewGame(bool switchlevel = true) {
-        Debug.Log("New game");
         if (data == null)
             data = InitializedGameData();
         if (switchlevel) {
@@ -651,7 +925,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
         if (!debug) {
             ReceiveEmail("start");
-            UnlockTVShow("vampire1");
+            // UnlockTVShow("vampire1");
         } else {
             UnlockTVShow("vampire1");
             UnlockTVShow("vampire2");
@@ -664,14 +938,18 @@ public partial class GameManager : Singleton<GameManager> {
         data.loadedDay = false;
         MySaver.CleanupSaves();
         MySaver.SaveObjectDatabase();
-        List<string> keys = new List<string>(data.itemCheckedOut.Keys);
-        foreach (string key in keys) {
-            data.itemCheckedOut[key] = false;
-        }
         DetermineClosetNews();
         SceneManager.LoadScene("apartment");
         sceneTime = 0f;
         data.entryID = -99;
+        ResetDailyMetrics();
+        SetRecordingStatus(false);
+    }
+    public void ResetDailyMetrics() {
+        List<string> keys = new List<string>(data.itemCheckedOut.Keys);
+        foreach (string key in keys) {
+            data.itemCheckedOut[key] = false;
+        }
         data.firstTimeLeavingHouse = true;
         data.mayorAwardToday = false;
         data.foughtSpiritToday = false;
@@ -679,8 +957,8 @@ public partial class GameManager : Singleton<GameManager> {
         data.gangMembersDefeated = 0;
         data.activeCommercial = null;
         data.loadedSewerItemsToday = false;
+        data.lichRevivalToday = false;
         data.commercialsInitializedToday = new List<string>();
-        SetRecordingStatus(false);
     }
     public void DetermineClosetNews() {
         closetHasNew[HomeCloset.ClosetType.items] = false;
@@ -716,10 +994,39 @@ public partial class GameManager : Singleton<GameManager> {
         sceneTime = 0f;
         data.entryID = -99;
     }
+    public void EndingCutscene() {
+        SceneManager.LoadScene("ending_cutscene");
+        sceneTime = 0f;
+        data.entryID = -99;
+    }
     public void AntiMayorCutscene() {
         SceneManager.LoadScene("anti_mayor_cutscene");
         sceneTime = 0f;
         data.entryID = -99;
+    }
+    public void OfficeCutscene() {
+        SceneManager.LoadScene("office_cutscene");
+        sceneTime = 0f;
+        data.entryID = -99;
+    }
+    public void AirplaneCutscene() {
+        SceneManager.LoadScene("airport_cutscene");
+        sceneTime = 0f;
+        data.entryID = -99;
+    }
+    public void BarCutscene() {
+        SceneManager.LoadScene("bar");
+        sceneTime = 0f;
+        data.entryID = -99;
+    }
+    public void ReturnToPhone() {
+        SceneManager.LoadScene("apartment");
+        sceneTime = 0f;
+        data.entryID = 77;
+    }
+    public void StartCEOSequence() {
+        data.state = GameState.ceoPlus;
+        DoLeaveScene("portal_ceo", -99);
     }
     public void TitleScreen() {
         data = null;
@@ -735,9 +1042,15 @@ public partial class GameManager : Singleton<GameManager> {
         data.newCollectedItems = new List<string>();
         data.collectedObjects = new List<string>();
         data.collectedFood = new List<string>();
+        data.collectedLiquids = new List<Liquid>();
+        data.newCollectedLiquids = new List<Liquid>();
         data.newCollectedFood = new List<string>();
         data.collectedClothes = new List<string>();
         data.newCollectedClothes = new List<string>();
+        data.collectedPotions = new SerializableDictionary<string, MutablePotionData>();
+        foreach (PotionData potionData in PotionComponent.LoadAllPotions()) {
+            data.collectedPotions[potionData.name] = new MutablePotionData(potionData);
+        }
         data.commercialsInitializedToday = new List<string>();
 
         data.packages = new List<string>();
@@ -749,13 +1062,17 @@ public partial class GameManager : Singleton<GameManager> {
             {"hypnosis", false},
             {"swear", false},
             {"potion", false},
-            {"burn", false},
+            // {"burn", false},
+            {"beverage", false},
+            {"resurrection", false}
         };
         data.collectedClothes.Add("blue_shirt");
         data.collectedClothes.Add("pajamas");
+        data.collectedClothes.Add("blue_skirt");
 
         data.collectedObjects.Add("glass_jar");
         data.collectedObjects.Add("blue_shirt");
+        data.collectedObjects.Add("blue_skirt");
         data.collectedObjects.Add("pajamas");
         data.collectedObjects.Add("egg");
 
@@ -764,6 +1081,7 @@ public partial class GameManager : Singleton<GameManager> {
         data.itemCheckedOut["pajamas"] = false;
         data.itemCheckedOut["egg"] = false;
         data.itemCheckedOut["blue_shirt"] = false;
+        data.itemCheckedOut["blue_skirt"] = false;
         data.itemCheckedOut["glass_jar"] = false;
         data.firstTimeLeavingHouse = true;
         // initialize commercials
@@ -792,12 +1110,18 @@ public partial class GameManager : Singleton<GameManager> {
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("nullify1"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("nullify2"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("dungeon"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("hell"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("satan"));
             data.perks["hypnosis"] = true;
             data.perks["vomit"] = true;
             data.perks["eat_all"] = true;
             data.perks["swear"] = true;
-            data.perks["potion"] = false;
-            data.perks["burn"] = false;
+            data.perks["potion"] = true;
+            // data.perks["burn"] = false;
+            data.perks["resurrection"] = false;
+            data.perks["beverage"] = true;
+            data.perks["resurrection"] = true;
+
             data.collectedObjects.Add("crown");
             data.collectedClothes.Add("crown");
             data.itemCheckedOut["crown"] = false;
@@ -807,7 +1131,9 @@ public partial class GameManager : Singleton<GameManager> {
             data.teleporterUnlocked = true;
             data.mayorCutsceneHappened = true;
             data.visitedStudio = true;
+            data.visitedHell = true;
             data.visitedMoon = true;
+            data.visitedThroneRoom = true;
             data.finishedCommercial = true;
 
             data.collectedObjects.Add("package");
@@ -815,12 +1141,20 @@ public partial class GameManager : Singleton<GameManager> {
             data.collectedObjects.Add("cosmic_nullifier");
             data.itemCheckedOut["cosmic_nullifier"] = false;
             data.cosmicName = GameManager.Instance.CosmicName();
+            data.yogurtDetective = true;
         }
         data.recordingCommercial = false;
         data.completeCommercials = new HashSet<Commercial>();
         // initialize achievements
         data.achievements = AchievementManager.LoadAchievements();
         data.stats = new SerializableDictionary<StatType, Stat>();
+
+        // TODO: DELETE THIS!!!
+        // unlock satan's throneroom- not in the ordinary game.
+        // data.unlockedScenes.Add("devils_throneroom");
+        // sceneNames["devils_throneroom"] = "devils_throneroom";
+        // data.teleporterUnlocked = true;
+
         return data;
     }
 
@@ -831,7 +1165,6 @@ public partial class GameManager : Singleton<GameManager> {
         if (!Directory.Exists(path))
             Directory.CreateDirectory(path);
         path = Path.Combine(path, saveGameName + ".xml");
-        data.lastSavedScenePath = path;
         return path;
     }
     public string LevelSavePath() {
@@ -840,7 +1173,6 @@ public partial class GameManager : Singleton<GameManager> {
         if (!Directory.Exists(path))
             Directory.CreateDirectory(path);
         path = Path.Combine(path, SceneManager.GetActiveScene().name + "_state.xml");
-        data.lastSavedScenePath = path;
         return path;
     }
     public string PlayerSavePath() {
@@ -850,15 +1182,13 @@ public partial class GameManager : Singleton<GameManager> {
             Directory.CreateDirectory(path);
         string playerName = Toolbox.Instance.GetName(GameManager.Instance.playerObject);
         path = Path.Combine(path, "player_" + playerName + "_state.xml");
-        data.lastSavedPlayerPath = path;
         return path;
     }
     public void SaveGameData() {
-
+        Debug.LogWarning("saving game data");
         data.secondsPlayed += timeSinceLastSave;
         data.lastScene = SceneManager.GetActiveScene().name;
-        data.saveDateTime = System.DateTime.Now;
-        data.saveDate = System.DateTime.Now.ToString();
+        data.SetSaveDateTime();
 
         var serializer = new XmlSerializer(typeof(GameData));
         string path = Path.Combine(Application.persistentDataPath, saveGameName);
@@ -893,6 +1223,7 @@ public partial class GameManager : Singleton<GameManager> {
         }
     }
     public void LoadGameDataIntoMemory(string gameName) {
+        loadingSavedGame = true;
         MySaver.objectDataBase = null;
         saveGameName = gameName;
         // Debug.Log("Loadsavegame into memory");
@@ -926,7 +1257,59 @@ public partial class GameManager : Singleton<GameManager> {
         }
         return data;
     }
+    public void CheckLiquidCollection(Liquid l, GameObject owner) {
+        // Debug.Log("check liquid");
+        if (owner != playerObject)
+            return;
+        foreach (Liquid atomicLiquid in l.atomicLiquids) {
+            // again, not redefining equality because i'm lazy / kinda buzzed
+            bool match = false;
+            foreach (Liquid collectedLiquid in data.collectedLiquids) {
+                if (collectedLiquid.Equals(atomicLiquid)) {
+                    match = true;
+                    continue;
+                }
+            }
+            if (match) continue;
+            // Debug.Log($"collecting {atomicLiquid.name}");
+            Liquid newAtomicLiquid = new Liquid(atomicLiquid);
+            newAtomicLiquid.newLiquid = true;
+            data.collectedLiquids.Add(newAtomicLiquid);
+            data.newCollectedLiquids.Add(newAtomicLiquid);
+        }
 
+        foreach (Liquid collectedLiquid in data.collectedLiquids) {
+            if (collectedLiquid.Equals(l)) {
+                CheckLiquidAchievement();
+                return;
+            }
+        }
+        // Debug.Log($"collecting {l.name}");
+        Liquid newLiquid = new Liquid(l);
+        newLiquid.newLiquid = true;
+        data.collectedLiquids.Add(newLiquid);
+        data.newCollectedLiquids.Add(newLiquid);
+        CheckLiquidAchievement();
+    }
+    public void CheckLiquidAchievement() {
+
+        int collectedRegWater = 0;
+        int collectedRiverWater = 0;
+        int collectedMoonWater = 0;
+        int collectedToiletWater = 0;
+        foreach (Liquid liquid in data.collectedLiquids) {
+            if (liquid.name.ToLower() == "water")
+                collectedRegWater = 1;
+            if (liquid.name.ToLower() == "river water")
+                collectedRiverWater = 1;
+            if (liquid.name.ToLower() == "toilet water")
+                collectedToiletWater = 1;
+            if (liquid.name.ToLower() == "moon water")
+                collectedMoonWater = 1;
+        }
+        int totalWaters = collectedRegWater + collectedRiverWater + collectedToiletWater + collectedMoonWater;
+        SetStat(StatType.typesOfWaterCollected, totalWaters);
+    }
     public void CheckItemCollection(GameObject obj, GameObject owner) {
         if (owner != playerObject)
             return;
@@ -972,7 +1355,7 @@ public partial class GameManager : Singleton<GameManager> {
 
             if (pickup == null || !pickup.heavyObject) {
                 if (filename.ToLower().Contains("cosmic_nullifier")) {
-                    ShowDiaryEntry("nullifier");
+                    ShowDiaryEntryDelay("nullifier", delay: 0.5f);
                 }
                 data.collectedObjects.Add(filename);
                 data.itemCheckedOut[filename] = true;
@@ -1020,11 +1403,23 @@ public partial class GameManager : Singleton<GameManager> {
         }
         Email newEmail = Email.LoadEmail(emailName);
         newEmail.read = false;
+        newEmail.dateString = System.DateTime.Now.ToString("MMM dd HH:mm");
         data.emails.Add(newEmail);
         Computer computer = GameObject.FindObjectOfType<Computer>();
         if (computer != null) {
             computer.CheckBubble();
         }
+    }
+    public void ReceivePhoneCall(string cutscene) {
+        if (data == null)
+            return;
+        if (data.phoneCallsAll.Contains(cutscene))
+            return;
+        Debug.Log("receiving phoneCall " + cutscene);
+        data.phoneQueue.Add(cutscene);
+        Telephone computer = GameObject.FindObjectOfType<Telephone>();
+        computer.PhoneCall(cutscene);
+        data.phoneCallsAll.Add(cutscene);
     }
     public void UnlockTVShow(string showName) {
         if (data.televisionShows.Contains(showName))
@@ -1055,17 +1450,26 @@ public partial class GameManager : Singleton<GameManager> {
         Diary diary = diaryObject.GetComponent<Diary>();
         diary.loadDiaryName = diaryName;
     }
+    public void ShowDiaryEntryDelay(string diaryName, float delay = 2f) {
+        throneroomCoroutine = waitAndShowDiary(delay, diaryName);
+        StartCoroutine(throneroomCoroutine);
+    }
     public void PlayerDeath() {
         if (playerIsDead)
             return;
         playerIsDead = true;
         data.deaths += 1;
-        // MySaver.Save();
+        MySaver.Save();
         UINew.Instance.RefreshUI(active: false);
-        Instantiate(Resources.Load("UI/deathMenu"));
-        CameraControl camControl = FindObjectOfType<CameraControl>();
-        camControl.audioSource.PlayOneShot(Resources.Load("sounds/xylophone/x4") as AudioClip);
-        Toolbox.Instance.SwitchAudioListener(GameObject.Find("Main Camera"));
+        if (data.state == GameState.postCredits) {
+            Debug.Log("start good ending!");
+            CutsceneManager.Instance.InitializeCutscene<CutscenePostCreditsDeath>();
+        } else {
+            Instantiate(Resources.Load("UI/deathMenu"));
+            CameraControl camControl = FindObjectOfType<CameraControl>();
+            camControl.audioSource.PlayOneShot(Resources.Load("sounds/xylophone/x4") as AudioClip);
+            Toolbox.Instance.SwitchAudioListener(GameObject.Find("Main Camera"));
+        }
     }
 
     public string CosmicName() {
@@ -1077,6 +1481,21 @@ public partial class GameManager : Singleton<GameManager> {
             "Magna Morti",
             "Quadriceps Potentia",
             "Pontifex Prime",
+            "Hapax Legomenon",
+            "Tetrax Noster",
+            "Nobilissimus",
+            "Princeps Oculus",
+            "Cubicularius Draconus",
+            "Ipsissimus",
+            "Magister Oraculum",
+            "Adeptus Lux",
+            "Arcanum Arcanorum",
+            "Tesseract Invisible",
+            "The Infinite Circle",
+            "Astron Argon",
+            "Travicullaris",
+            "Void Treader",
+            "Stellar Flame",
         };
         return names[UnityEngine.Random.Range(0, names.Count)];
     }

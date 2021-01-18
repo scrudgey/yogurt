@@ -45,6 +45,8 @@ public class PersonalAssessment {
 }
 
 public class Awareness : MonoBehaviour, ISaveable, IDirectable {
+    public enum WarnType { knight, demogorgon }
+    public WarnType warnType;
     public List<Ref<GameObject>> newPeopleList = new List<Ref<GameObject>>();
     public float socializationTimer;
     public static Dictionary<Rating, string> reactions = new Dictionary<Rating, string>(){
@@ -56,6 +58,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         };
     public DecisionMaker decisionMaker;
     public List<GameObject> initialAwareness;
+    public List<GameObject> initialFriends;
     public DropOutStack.DropOutStack<EventData> shortTermMemory = new DropOutStack.DropOutStack<EventData>(1000);
     public GameObject possession;
     public Collider2D protectZone;
@@ -82,7 +85,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
     // private Controllable control;
     private float speciousPresent;
     private const float perceptionInterval = 0.25f;
-    private List<GameObject> fieldOfView = new List<GameObject>();
+    public List<GameObject> fieldOfView = new List<GameObject>();
     private bool viewed;
     public Controllable.HitState hitState;
     public Ref<GameObject> nearestEnemy = new Ref<GameObject>(null);
@@ -109,6 +112,12 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                 Perceive();
             }
         }
+        if (initialFriends != null)
+            foreach (GameObject other in initialFriends) {
+                PersonalAssessment assessment = FormPersonalAssessment(other);
+                if (assessment != null)
+                    assessment.status = PersonalAssessment.friendStatus.friend;
+            }
     }
     void Awake() {
         lastNEvents.Limit = 25;
@@ -285,7 +294,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         if (other.transform.IsChildOf(transform.root))
             return;
         // if it's background
-        if (other.gameObject.layer == 8)
+        if (other.gameObject.layer == LayerMask.NameToLayer("background") || other.tag == "sky")
             return;
         if (speciousPresent <= 0) {
             if (viewed == false) {
@@ -432,6 +441,9 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                     if (whatHappened.Contains(myName)) {
                         whatHappened = whatHappened.Replace(myName, "I");
                     }
+
+                    whatHappened = Toolbox.CapitalizeFirstLetter(whatHappened);
+
                     if (UnityEngine.Random.Range(0f, 1f) < 0.5f) {
                         if (UnityEngine.Random.Range(0f, 1f) < 0.5f)
                             message.phrase = $"{whatHappened}! {reactions[rating]}";
@@ -469,7 +481,6 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         switch (assessment.status) {
             case PersonalAssessment.friendStatus.enemy:
                 phrase = "{greet-enemy}";
-
                 break;
             case PersonalAssessment.friendStatus.friend:
                 phrase = "{greet-friend}";
@@ -478,6 +489,10 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
             case PersonalAssessment.friendStatus.neutral:
                 phrase = "{greet-neutral}";
                 break;
+        }
+        Speech mySpeech = GetComponent<Speech>();
+        if (mySpeech != null) {
+            mySpeech.grammar.SetSymbol("interlocutor", Toolbox.Instance.GetName(target));
         }
         MessageSpeech message = new MessageSpeech(phrase);
         message.nimrod = true;
@@ -500,17 +515,17 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                 attacker.status = PersonalAssessment.friendStatus.enemy;
             }
         }
-        if (dat.victim == gameObject) {
-            // A. Getting hit
-            // B. Getting hit, but not enough to hurt
-            // MessageSpeech message = new MessageSpeech("How dare you!");
-            // Debug.Log(dat.amount);
-            // Toolbox.Instance.SendMessage(gameObject, this, message);
-        } else if (dat.attacker != gameObject) {
-            // F. Witnessing violence to other
-            MessageSpeech message = new MessageSpeech("Whoah! Yikes!");
-            Toolbox.Instance.SendMessage(gameObject, this, message);
-        }
+        // if (dat.victim == gameObject) {
+        //     // A. Getting hit
+        //     // B. Getting hit, but not enough to hurt
+        //     // MessageSpeech message = new MessageSpeech("How dare you!");
+        //     // Debug.Log(dat.amount);
+        //     // Toolbox.Instance.SendMessage(gameObject, this, message);
+        // } else if (dat.attacker != gameObject) {
+        //     // F. Witnessing violence to other
+        //     // MessageSpeech message = new MessageSpeech("Whoah! Yikes!");
+        //     // Toolbox.Instance.SendMessage(gameObject, this, message);
+        // }
         if (attacker == null || victim == null) {
             return;
         }
@@ -567,19 +582,37 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                 if (protectZone != null) {
                     if (warnZone.bounds.Contains(knowledge.transform.position) &&
                         GameManager.Instance.sceneTime - assessment.timeWarned > 7f &&
-                        assessment.status != PersonalAssessment.friendStatus.enemy) {
+                        assessment.status != PersonalAssessment.friendStatus.enemy &&
+                        assessment.status != PersonalAssessment.friendStatus.friend) {
+
                         assessment.timeWarned = GameManager.Instance.sceneTime;
                         string phrase = "";
-                        if (!assessment.warned) {
-                            phrase = "Halt! Come no closer!";
-                        } else {
-                            phrase = "I am sworn to protect this bridge";
+                        switch (warnType) {
+                            default:
+                            case WarnType.knight:
+                                if (!assessment.warned) {
+                                    phrase = "Halt! Come no closer!";
+                                } else {
+                                    phrase = "I am sworn to protect this bridge";
+                                }
+                                break;
+                            case WarnType.demogorgon:
+                                if (!assessment.warned) {
+                                    phrase = "Stay back!";
+                                } else {
+                                    phrase = "I will kill you if you come any closer!";
+                                }
+                                break;
                         }
+
                         MessageSpeech message = new MessageSpeech(phrase);
                         Toolbox.Instance.SendMessage(gameObject, this, message);
                         assessment.warned = true;
                     }
-                    if (protectZone.bounds.Contains(knowledge.transform.position)) {
+                    if (protectZone.bounds.Contains(knowledge.transform.position) &&
+                        assessment.status != PersonalAssessment.friendStatus.friend) {
+
+                        // set enemy
                         assessment.status = PersonalAssessment.friendStatus.enemy;
                         foreach (Priority priority in decisionMaker.priorities) {
                             MessageThreaten threat = new MessageThreaten();
@@ -624,6 +657,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                 Debug.Log("no root controllable. quitting...");
             return null;
         }
+
         GameObject rootObject = rootControllable.gameObject;
         if (debug)
             Debug.Log("root object: " + rootObject.name);
@@ -729,6 +763,9 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         data.ints["hitstate"] = (int)hitState;
         data.knowledgeBase = new List<SerializedKnowledge>();
         data.people = new List<SerializedPersonalAssessment>();
+        if (data.GUIDs.ContainsKey("possession")) {
+            data.GUIDs.Remove("possession");
+        }
         if (possession != null) {
             MySaver.UpdateGameObjectReference(possession, data, "possession", overWriteWithNull: false);
             // MySaver.AddToReferenceTree(data.id, possession);

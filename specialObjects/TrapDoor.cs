@@ -7,6 +7,7 @@ public class TrapDoor : MonoBehaviour {
     public SpriteMask mask;
     public AudioClip activeSound;
     public AudioClip leaveSound;
+    public AudioClip fallSound;
     public List<ParticleSystem> particles;
     public bool active = false;
     private float timer;
@@ -21,9 +22,13 @@ public class TrapDoor : MonoBehaviour {
         }
     }
     void OnTriggerEnter2D(Collider2D collider) {
+        if (InputController.forbiddenTags.Contains(collider.tag))
+            return;
         Exit(collider);
     }
     void OnTriggerStay2D(Collider2D collider) {
+        if (InputController.forbiddenTags.Contains(collider.tag))
+            return;
         Exit(collider);
     }
     void Update() {
@@ -38,6 +43,8 @@ public class TrapDoor : MonoBehaviour {
     void Exit(Collider2D collider) {
         if (!active)
             return;
+        if (fallSound != null)
+            GameManager.Instance.publicAudio.PlayOneShot(fallSound);
         if (collider.gameObject == GameManager.Instance.playerObject) {
             InputController.Instance.state = InputController.ControlState.cutscene;
             UINew.Instance.RefreshUI(active: false);

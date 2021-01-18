@@ -4,17 +4,14 @@ using UnityEditor;
 
 ////TODO: support multi-object editing
 
-namespace UnityEngine.InputSystem.Samples.RebindUI
-{
+namespace UnityEngine.InputSystem.Samples.RebindUI {
     /// <summary>
     /// A custom inspector for <see cref="RebindActionUI"/> which provides a more convenient way for
     /// picking the binding which to rebind.
     /// </summary>
     [CustomEditor(typeof(RebindActionUI))]
-    public class RebindActionUIEditor : UnityEditor.Editor
-    {
-        protected void OnEnable()
-        {
+    public class RebindActionUIEditor : UnityEditor.Editor {
+        protected void OnEnable() {
             m_ActionProperty = serializedObject.FindProperty("m_Action");
             m_BindingIdProperty = serializedObject.FindProperty("m_BindingId");
             m_ActionLabelProperty = serializedObject.FindProperty("m_ActionLabel");
@@ -29,19 +26,16 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
             RefreshBindingOptions();
         }
 
-        public override void OnInspectorGUI()
-        {
+        public override void OnInspectorGUI() {
             EditorGUI.BeginChangeCheck();
 
             // Binding section.
             EditorGUILayout.LabelField(m_BindingLabel, Styles.boldLabel);
-            using (new EditorGUI.IndentLevelScope())
-            {
+            using (new EditorGUI.IndentLevelScope()) {
                 EditorGUILayout.PropertyField(m_ActionProperty);
 
                 var newSelectedBinding = EditorGUILayout.Popup(m_BindingLabel, m_SelectedBindingOption, m_BindingOptions);
-                if (newSelectedBinding != m_SelectedBindingOption)
-                {
+                if (newSelectedBinding != m_SelectedBindingOption) {
                     var bindingId = m_BindingOptionValues[newSelectedBinding];
                     m_BindingIdProperty.stringValue = bindingId;
                     m_SelectedBindingOption = newSelectedBinding;
@@ -56,8 +50,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
             // UI section.
             EditorGUILayout.Space();
             EditorGUILayout.LabelField(m_UILabel, Styles.boldLabel);
-            using (new EditorGUI.IndentLevelScope())
-            {
+            using (new EditorGUI.IndentLevelScope()) {
                 EditorGUILayout.PropertyField(m_ActionLabelProperty);
                 EditorGUILayout.PropertyField(m_BindingTextProperty);
                 EditorGUILayout.PropertyField(m_RebindOverlayProperty);
@@ -67,27 +60,23 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
             // Events section.
             EditorGUILayout.Space();
             EditorGUILayout.LabelField(m_EventsLabel, Styles.boldLabel);
-            using (new EditorGUI.IndentLevelScope())
-            {
+            using (new EditorGUI.IndentLevelScope()) {
                 EditorGUILayout.PropertyField(m_RebindStartEventProperty);
                 EditorGUILayout.PropertyField(m_RebindStopEventProperty);
                 EditorGUILayout.PropertyField(m_UpdateBindingUIEventProperty);
             }
 
-            if (EditorGUI.EndChangeCheck())
-            {
+            if (EditorGUI.EndChangeCheck()) {
                 serializedObject.ApplyModifiedProperties();
                 RefreshBindingOptions();
             }
         }
 
-        protected void RefreshBindingOptions()
-        {
+        protected void RefreshBindingOptions() {
             var actionReference = (InputActionReference)m_ActionProperty.objectReferenceValue;
             var action = actionReference?.action;
 
-            if (action == null)
-            {
+            if (action == null) {
                 m_BindingOptions = new GUIContent[0];
                 m_BindingOptionValues = new string[0];
                 m_SelectedBindingOption = -1;
@@ -102,8 +91,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
             m_SelectedBindingOption = -1;
 
             var currentBindingId = m_BindingIdProperty.stringValue;
-            for (var i = 0; i < bindingCount; ++i)
-            {
+            for (var i = 0; i < bindingCount; ++i) {
                 var binding = bindings[i];
                 var bindingId = binding.id.ToString();
                 var haveBindingGroups = !string.IsNullOrEmpty(binding.groups);
@@ -128,11 +116,9 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
                 displayString = displayString.Replace('/', '\\');
 
                 // If the binding is part of control schemes, mention them.
-                if (haveBindingGroups)
-                {
+                if (haveBindingGroups) {
                     var asset = action.actionMap?.asset;
-                    if (asset != null)
-                    {
+                    if (asset != null) {
                         var controlSchemes = string.Join(", ",
                             binding.groups.Split(InputBinding.Separator)
                                 .Select(x => asset.controlSchemes.FirstOrDefault(c => c.bindingGroup == x).name));
@@ -168,8 +154,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
         private string[] m_BindingOptionValues;
         private int m_SelectedBindingOption;
 
-        private static class Styles
-        {
+        private static class Styles {
             public static GUIStyle boldLabel = new GUIStyle("MiniBoldLabel");
         }
     }

@@ -6,6 +6,7 @@ namespace AI {
     public class GoalUsePhone : Goal {
         public bool phoneCalled;
         private RoutineUseTelephone telRoutine;
+        public bool findingFail;
         public GoalUsePhone(GameObject g, Controller c) : base(g, c) {
             successCondition = new ConditionBoolSwitch(g);
             Telephone phoneObject = GameObject.FindObjectOfType<Telephone>();
@@ -13,6 +14,8 @@ namespace AI {
                 Ref<GameObject> phoneRef = new Ref<GameObject>(phoneObject.gameObject);
                 telRoutine = new RoutineUseTelephone(g, c, phoneRef, (ConditionBoolSwitch)successCondition);
                 routines.Add(telRoutine);
+            } else {
+                findingFail = true;
             }
         }
         public override void Update() {

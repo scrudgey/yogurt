@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System;
 
 [System.Serializable]
-public class Liquid {
+public class Liquid { //: IEquatable<Liquid> {
     public string name;
     public string filename;
     public float colorR;
@@ -20,16 +21,65 @@ public class Liquid {
     public bool vomit;
     public List<string> ingredients = new List<string>();
     public List<Buff> buffs = new List<Buff>();
+    public HashSet<Liquid> atomicLiquids = new HashSet<Liquid>();
+    public bool newLiquid;
     public Liquid() {
         // needed for serialization
     }
-    public Liquid(float r, float g, float b) {
-        color = new Color(r / 255.0F, g / 255.0F, b / 255.0F);
-        vegetable = 1;
-        nutrition = 10;
+    public Liquid(Liquid that) { // deep copy
+        this.name = that.name;
+        this.filename = that.filename;
+        this.colorR = that.colorR;
+        this.colorG = that.colorG;
+        this.colorB = that.colorB;
+        this.colorA = that.colorA;
+        this.color = that.color;
+        this.nutrition = that.nutrition;
+        this.vegetable = that.vegetable;
+        this.meat = that.meat;
+        this.immoral = that.immoral;
+        this.offal = that.offal;
+        this.flammable = that.flammable;
+        this.vomit = that.vomit;
+        this.ingredients = that.ingredients;
+        this.newLiquid = that.newLiquid;
+
+        this.ingredients = new List<string>();
+        foreach (string ingredient in that.ingredients) {
+            this.ingredients.Add(ingredient);
+        }
+
+        this.atomicLiquids = new HashSet<Liquid>();
+        foreach (Liquid atomicLiquid in that.atomicLiquids) {
+            this.atomicLiquids.Add(new Liquid(atomicLiquid));
+        }
+
+        this.buffs = new List<Buff>();
+        foreach (Buff buff in that.buffs) {
+            this.buffs.Add(new Buff(buff));
+        }
+    }
+
+    public bool Equals(Liquid that) {
+        return this.name == that.name &&
+        this.filename == that.filename &&
+        // this.colorR == that.colorR &&
+        // this.colorG == that.colorG &&
+        // this.colorB == that.colorB &&
+        // this.colorA == that.colorA &&
+        // this.color == that.color &&
+        this.nutrition == that.nutrition &&
+        this.vegetable == that.vegetable &&
+        this.meat == that.meat &&
+        this.immoral == that.immoral &&
+        this.offal == that.offal &&
+        this.flammable == that.flammable &&
+        this.vomit == that.vomit;
+        // this.ingredients == that.ingredients &&
+        // this.buffs == that.buffs;
     }
     public static Liquid MixLiquids(Liquid l1, Liquid l2) {
-        Liquid returnLiquid = l1;
+        Liquid returnLiquid = new Liquid(l1);
         returnLiquid.filename = l1.filename;
         returnLiquid.vegetable = l1.vegetable + l2.vegetable;
         returnLiquid.meat = l1.meat + l2.meat;
@@ -44,51 +94,88 @@ public class Liquid {
         // returnLiquid.color = new Color(returnLiquid.colorR / 255.0F, returnLiquid.colorG / 255.0F, returnLiquid.colorB / 255.0F);
 
         if (l2.ingredients.Count > 0) {
-            l1.ingredients.AddRange(l2.ingredients);
-            l1.ingredients = l1.ingredients.Distinct().ToList();
+            returnLiquid.ingredients.AddRange(l2.ingredients);
+            returnLiquid.ingredients = returnLiquid.ingredients.Distinct().ToList();
         }
-        l1.ingredients.Add(l1.name);
-        l1.ingredients.Add(l2.name);
+        returnLiquid.ingredients.Add(returnLiquid.name);
+        returnLiquid.ingredients.Add(l2.name);
 
         // TODO: smarter add here
-        l1.buffs.AddRange(l2.buffs);
+        returnLiquid.buffs.AddRange(l2.buffs);
 
-        l1.name = GetName(l1);
+        returnLiquid.name = GetName(returnLiquid);
+
+        // I'm doing this instead of redefining equality / hash because I don't feel like it
+        foreach (Liquid atomicLiquid in l2.atomicLiquids) {
+            bool collision = false;
+            foreach (Liquid myLiquid in returnLiquid.atomicLiquids) {
+                if (myLiquid.Equals(atomicLiquid)) {
+                    collision = true;
+                    break;
+                }
+            }
+            if (!collision) {
+                // Debug.Log("adding atomic liquid " + atomicLiquid.name);
+                returnLiquid.atomicLiquids.Add(atomicLiquid);
+            }
+        }
         return returnLiquid;
     }
     public static Color AddColors(Color x, Color y) {
         List<Color32> c = Colors.colors.Values.ToList();
         return c[Mathf.Abs(x.GetHashCode() + y.GetHashCode()) % c.Count];
     }
-    public static Buff MixPotion(Liquid liq) {
+    public static List<Buff> MixPotion(Liquid liq) {
         List<PotionData> potions = PotionComponent.LoadAllPotions();
+        List<Buff> newlyMixedBuffs = new List<Buff>();
         foreach (PotionData potion in potions) {
-            if (potion.Satisfied(liq.ingredients) && !liq.buffs.Contains(potion.buff)) {
-                // liq.ingredients.Remove(potion.ingredient1.prefabName);
-                // liq.ingredients.Remove(potion.ingredient2.prefabName);
-                Buff newBuff = potion.buff;
-                if (GameManager.Instance.data.perks["potion"]) {
-                    newBuff.lifetime = 0;
+            if (potion.Satisfied(liq.ingredients)) {
+                if (potion.makeYogurt) {
+                    liq = LoadLiquid("yogurt");
+
+                } else if (!liq.buffs.Contains(potion.buff)) {
+                    Buff newBuff = potion.buff;
+                    if (GameManager.Instance.data.perks["potion"]) {
+                        newBuff.lifetime = 0;
+                    }
+                    newlyMixedBuffs.Add(newBuff);
                 }
-                return newBuff;
+
+                // unlock potion
+                MutablePotionData mutableData = GameManager.Instance.data.collectedPotions[potion.name];
+                mutableData.unlockedIngredient1 = true;
+                mutableData.unlockedIngredient2 = true;
+                GameManager.Instance.data.collectedPotions[potion.name] = mutableData;
             }
         }
-        return null;
+        return newlyMixedBuffs;
+    }
+    public static bool MixYogurt(Liquid liquid) {
+        GameObject potionPrefab = Resources.Load("data/potions/yogurt") as GameObject;
+        PotionComponent component = potionPrefab.GetComponent<PotionComponent>();
+        PotionData potionData = new PotionData(component.potionData);
+        return potionData.Satisfied(liquid.ingredients);
     }
     public static string GetName(Liquid liq) {
+
+        string returnString = "";
+
         if (liq.buffs.Count > 0) {
-            return NameOfBuffs(liq);
+            returnString = NameOfBuffs(liq);
         } else if (liq.ingredients.Count == 0) {
-            return liq.name;
+            returnString = liq.name;
         } else if (liq.ingredients.Count == 1) {
-            return liq.ingredients.ToList()[0] + " juice";
+            returnString = liq.ingredients.ToList()[0] + " juice";
         } else if (liq.ingredients.Count == 2) {
             List<string> ingredients = liq.ingredients.ToList();
-            return ingredients[0] + "-" + ingredients[1] + " juice";
+            returnString = ingredients[0] + "-" + ingredients[1] + " juice";
         } else if (liq.ingredients.Count > 2) {
-            return NameOfQualities(liq);
+            returnString = NameOfQualities(liq);
         }
-        return "";
+        if (liq.vomit) {
+            returnString = "vomited-up " + returnString;
+        }
+        return returnString;
     }
     public static string NameOfQualities(Liquid liq) {
         Dictionary<string, float> qualities = new Dictionary<string, float>(){
@@ -186,14 +273,12 @@ public class Liquid {
             // buff.lifetime = 20f;
             l.buffs.Add(buff);
         }
+        l.atomicLiquids.Add(new Liquid(l));
         return l;
     }
     public static void MonoLiquidify(GameObject target, Liquid liquid) {
-        // Debug.Log(target);
-        // Debug.Log(liquid == null);
-        // TODO: create intrinsics on gameobject and add liquid intrinsic
         MonoLiquid monoLiquid = Toolbox.GetOrCreateComponent<MonoLiquid>(target);
-        monoLiquid.liquid = liquid;
+        monoLiquid.liquid = new Liquid(liquid);
         monoLiquid.edible.nutrition = liquid.nutrition;
         monoLiquid.edible.vegetable = liquid.vegetable > 0;
         monoLiquid.edible.meat = liquid.meat > 0;
@@ -201,7 +286,6 @@ public class Liquid {
         monoLiquid.edible.offal = liquid.offal > 0;
         monoLiquid.edible.pureeColor = liquid.color;
         monoLiquid.edible.vomit = liquid.vomit;
-        monoLiquid.edible.eatSound = Resources.Load("sounds/eating/slurp") as AudioClip;
         if (liquid.flammable) {
             Flammable existingFlammable = target.transform.root.GetComponentInChildren<Flammable>();
             if (existingFlammable == null) {

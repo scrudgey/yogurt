@@ -14,6 +14,7 @@ public class StartMenu : MonoBehaviour {
     public ItemCollectionInspector itemCollectionInspector;
     public AchievementBrowser achievementBrowser;
     public StatsBrowser statsBrowser;
+    public DeleteInspector deleteInspector;
     public GameObject settingsMenu;
     public GameObject prompt;
     public GameObject alert;
@@ -34,12 +35,13 @@ public class StartMenu : MonoBehaviour {
     public Image previewPortrait;
 
     // public MyControls controls;
+    public AudioClip menuOpenSound;
+    public AudioClip menuOpenMoreSound;
+    public AudioClip menuClosedSound;
+    public AudioClip effectSound;
+    public AudioClip flushSound;
     bool keypressedThisFrame;
     void Awake() {
-        // controls = new MyControls();
-
-        // controls.Player.Escape.Enable();
-
         InputController.Instance.EscapeAction.action.performed += _ => keypressedThisFrame = true;
     }
 
@@ -54,9 +56,10 @@ public class StartMenu : MonoBehaviour {
         itemCollectionInspector.gameObject.SetActive(false);
         achievementBrowser.gameObject.SetActive(false);
         statsBrowser.gameObject.SetActive(false);
+        deleteInspector.gameObject.SetActive(false);
         mainMenu.SetActive(false);
         alert.SetActive(false);
-        logo.SetActive(true);
+        // logo.SetActive(true);
         state = menuState.anykey;
     }
     void Update() {
@@ -64,6 +67,7 @@ public class StartMenu : MonoBehaviour {
             state = menuState.main;
             mainMenu.SetActive(true);
             prompt.SetActive(false);
+            GameManager.Instance.PlayPublicSound(menuOpenSound);
         }
         if (keypressedThisFrame) {
             if (saveInspector.gameObject.activeInHierarchy) {
@@ -105,6 +109,7 @@ public class StartMenu : MonoBehaviour {
         mainMenu.SetActive(false);
         saveInspector.gameObject.SetActive(false);
         settingsMenu.SetActive(false);
+        deleteInspector.gameObject.SetActive(false);
         switch (switchTo) {
             case menuState.startNew:
                 OpenNewGameMenu();
@@ -131,7 +136,7 @@ public class StartMenu : MonoBehaviour {
         } else {
             RandomizeName();
         }
-        // TODO: randomize gender, skin color
+        GameManager.Instance.PlayPublicSound(menuOpenSound);
     }
 
 
@@ -140,18 +145,30 @@ public class StartMenu : MonoBehaviour {
     }
     public void LoadButton() {
         SwitchMenu(menuState.load);
+        GameManager.Instance.PlayPublicSound(menuOpenSound);
     }
     public void NewGameCancel() {
         SwitchMenu(menuState.main);
+        GameManager.Instance.PlayPublicSound(menuClosedSound);
     }
     public void LoadGameCancel() {
         SwitchMenu(menuState.main);
+        GameManager.Instance.PlayPublicSound(menuClosedSound);
+    }
+    public void DeleteGame(SaveGameSelectorScript saveGame) {
+        // Debug.Log($"delete {saveGame.saveName}");
+        MySaver.DeleteSave(saveGame.saveName);
+        deleteInspector.gameObject.SetActive(false);
+        SwitchMenu(menuState.load);
+        GameManager.Instance.PlayPublicSound(flushSound);
     }
     public void SettingsButton() {
         SwitchMenu(menuState.settings);
+        GameManager.Instance.PlayPublicSound(menuOpenSound);
     }
     public void CloseSettingsMenu() {
         SwitchMenu(menuState.main);
+        GameManager.Instance.PlayPublicSound(menuClosedSound);
     }
     public void ContinueButton() {
         // TODO: catch if there is no save game
@@ -160,7 +177,7 @@ public class StartMenu : MonoBehaviour {
         DirectoryInfo info = new DirectoryInfo(Application.persistentDataPath);
         DirectoryInfo[] dirs = info.GetDirectories();
         foreach (DirectoryInfo dir in dirs) {
-            if (dir.Name == "test" || dir.Name == "Unity")
+            if (dir.Name == "test" || dir.Name == "Unity" || dir.Name == "crashdump")
                 continue;
             GameData data = GameManager.Instance.LoadGameData(dir.Name);
             datas.Add(dir.Name);
@@ -189,11 +206,12 @@ public class StartMenu : MonoBehaviour {
                 SwitchMenu(menuState.main);
                 break;
         }
+        GameManager.Instance.PlayPublicSound(menuClosedSound);
     }
     public void NewGameOK() {
         InputField field = newGameMenu.transform.Find("InputField").gameObject.GetComponent<InputField>();
         string newName = field.text;
-        if (newName.Length == 0 || newName == "test" || newName == "Unity") {
+        if (newName.Length == 0 || newName == "test" || newName == "Unity" || newName == "crashdump") {
             ShowAlert("Bad name!!!");
             return;
         }
@@ -240,40 +258,53 @@ public class StartMenu : MonoBehaviour {
         loadGameMenu.gameObject.SetActive(false);
         saveInspector.gameObject.SetActive(true);
         saveInspector.Initialize(this, saveGame);
+        GameManager.Instance.PlayPublicSound(menuOpenMoreSound);
+    }
+    public void DeleteSaveGamePrompt(SaveGameSelectorScript saveGame) {
+        loadGameMenu.gameObject.SetActive(false);
+        deleteInspector.gameObject.SetActive(true);
+        deleteInspector.Initialize(this, saveGame);
+        GameManager.Instance.PlayPublicSound(menuOpenMoreSound);
     }
     public void InspectItemCollection(GameData data) {
         saveInspector.gameObject.SetActive(false);
         itemCollectionInspector.gameObject.SetActive(true);
         itemCollectionInspector.Initialize(this, data);
-        // ite
+        GameManager.Instance.PlayPublicSound(menuOpenMoreSound);
     }
     public void CloseItemCollectionInspector() {
         itemCollectionInspector.gameObject.SetActive(false);
         saveInspector.gameObject.SetActive(true);
+        // GameManager.Instance.PlayPublicSound(menuClosedSound);
     }
     public void InspectAchievements(GameData data) {
         saveInspector.gameObject.SetActive(false);
         achievementBrowser.gameObject.SetActive(true);
         achievementBrowser.Initialize(data);
+        GameManager.Instance.PlayPublicSound(menuOpenMoreSound);
     }
     public void CloseAchievementBrowser() {
         achievementBrowser.gameObject.SetActive(false);
         saveInspector.gameObject.SetActive(true);
+        // GameManager.Instance.PlayPublicSound(menuClosedSound);
     }
     public void InspectStats(GameData data) {
         saveInspector.gameObject.SetActive(false);
         statsBrowser.gameObject.SetActive(true);
         statsBrowser.Initialize(data);
+        GameManager.Instance.PlayPublicSound(menuOpenMoreSound);
     }
     public void CloseStatsBrowser() {
         statsBrowser.gameObject.SetActive(false);
         saveInspector.gameObject.SetActive(true);
+        // GameManager.Instance.PlayPublicSound(menuClosedSound);
     }
 
     public void ShowAlert(string text) {
         alert.SetActive(true);
         Text alertText = alert.transform.Find("Text").GetComponent<Text>();
         alertText.text = text;
+        GameManager.Instance.PlayPublicSound(menuOpenMoreSound);
     }
     public void RandomizePlayer() {
         InputField input = newGameMenu.transform.Find("InputField").GetComponent<InputField>();
@@ -364,11 +395,4 @@ public class StartMenu : MonoBehaviour {
 
         previewPrefab.sprite = Toolbox.ApplySkinToneToSprite(newSprite, selectedSkinColor);
     }
-
-    // void RemapButtonClicked(InputAction actionToRebind) {
-    //     var rebindOperation = actionToRebind.PerformInteractiveRebinding()
-    //                 .WithControlsExcluding("Mouse") // To avoid accidental input from mouse motion
-    //                 .OnMatchWaitForAnother(0.1f)
-    //                 .Start();
-    // }
 }

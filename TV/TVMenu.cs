@@ -8,7 +8,6 @@ using System;
 using TMPro;
 
 public class TVMenu : MonoBehaviour {
-    public Text hideText;
     public TextMeshProUGUI showText;
     public Text episodeNameText;
     public Image image;
@@ -26,8 +25,17 @@ public class TVMenu : MonoBehaviour {
     public Regex newlineMatcher = new Regex(@"::");
     public List<Sprite> animationSprites = new List<Sprite>();
     public Television television;
+    public Button leftButton;
+    public Button rightButton;
     public int animationIndex;
-    public int showIndex;
+    private int _showIndex;
+    public int showIndex {
+        get { return _showIndex; }
+        set {
+            _showIndex = value;
+            SetEpisodeButtons();
+        }
+    }
     public void ChannelCallback(int number) {
         showIndex += number;
         if (showIndex >= GameManager.Instance.data.televisionShows.Count) {
@@ -37,6 +45,16 @@ public class TVMenu : MonoBehaviour {
         }
         StartShow();
     }
+    public void SetEpisodeButtons() {
+        leftButton.interactable = true;
+        rightButton.interactable = true;
+        if (showIndex <= 0) {
+            leftButton.interactable = false;
+        }
+        if (showIndex == GameManager.Instance.data.televisionShows.Count - 1) {
+            rightButton.interactable = false;
+        }
+    }
     public void PowerButtonCallback() {
         EndShow();
         UINew.Instance.CloseActiveMenu();
@@ -44,12 +62,21 @@ public class TVMenu : MonoBehaviour {
     public void Start() {
         slewTime = 0;
         animationTimer = 0;
-        // string filename = GameManager.Instance.data.televisionShows.Last();
         showIndex = GameManager.Instance.data.televisionShows.Count - 1;
-        // StartShow(TelevisionShow.LoadByFilename(filename));
         StartShow();
     }
     public void StartShow() {
+        if (showIndex == -1) {
+            show = null;
+            timer = 0;
+            animationTimer = 0;
+            slewTime = 0;
+            image.color = new Color(19, 19, 19, 255);
+            image.enabled = false;
+            showText.text = "Looks like there's nothing on TV.";
+            episodeNameText.text = "";
+            return;
+        }
         string filename = GameManager.Instance.data.televisionShows[showIndex];
         if (GameManager.Instance.data.newTelevisionShows.Contains(filename)) {
             GameManager.Instance.data.newTelevisionShows = new HashSet<string>();
@@ -64,7 +91,7 @@ public class TVMenu : MonoBehaviour {
         image.color = new Color(19, 19, 19, 255);
         image.enabled = false;
         showText.text = "";
-        hideText.text = "";
+        // hideText.text = "";
         episodeNameText.text = show.name;
     }
     public void Update() {
@@ -139,22 +166,22 @@ public class TVMenu : MonoBehaviour {
             EndShow();
         } else {
             // Debug.Log("set text: " + line);
-            hideText.gameObject.SetActive(true);
+            showText.gameObject.SetActive(true);
             if (line == "***") {
-                hideText.gameObject.SetActive(false);
+                showText.gameObject.SetActive(false);
             }
             line = newlineMatcher.Replace(line, "\n");
-            hideText.text = line;
-            showText.text = line;
+            showText.text = $"<font=\"Roboto-Bold SDF\"><mark=#000000 padding=\"30, 30, 30, 30\">{line}</mark></font>";
+            // showText.text = line;
         }
     }
 
     public void EndShow() {
         show = null;
         image.sprite = null;
-        hideText.text = "";
+        // hideText.text = "";
         showText.text = "";
-        hideText.gameObject.SetActive(false);
+        showText.gameObject.SetActive(false);
         image.color = new Color(19, 19, 19, 255);
         image.enabled = false;
         if (myTrack != null) {

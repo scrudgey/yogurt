@@ -10,7 +10,6 @@ public class Gunpowder : MonoBehaviour {
         // data.noun = "spilling";
 
         GameObject puddle = Instantiate(gunpowderPile, transform.position, Quaternion.identity) as GameObject;
-        // puddle.layer = 4;
         PhysicalBootstrapper pb = GetComponent<PhysicalBootstrapper>();
         pb.DestroyPhysical();
         // Liquid.MonoLiquidify(puddle, liquid);

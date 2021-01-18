@@ -23,7 +23,9 @@ public partial class UINew : Singleton<UINew> {
                 List<InputController.ControlState> selectStates = new List<InputController.ControlState>{
                     InputController.ControlState.swearSelect,
                     InputController.ControlState.insultSelect,
-                    InputController.ControlState.hypnosisSelect};
+                    InputController.ControlState.hypnosisSelect,
+                    InputController.ControlState.detectSelect
+                    };
                 if (InputController.Instance.state == InputController.ControlState.commandSelect) {
                     string commandName = Toolbox.Instance.GetName(InputController.Instance.commandTarget);
                     if (target != null) {
@@ -44,6 +46,9 @@ public partial class UINew : Singleton<UINew> {
                             case InputController.ControlState.hypnosisSelect:
                                 SetActionText("Hypnotize " + lastTarget);
                                 break;
+                            case InputController.ControlState.detectSelect:
+                                SetActionText("Question " + lastTarget);
+                                break;
                         }
                     } else {
                         switch (InputController.Instance.state) {
@@ -56,11 +61,13 @@ public partial class UINew : Singleton<UINew> {
                             case InputController.ControlState.hypnosisSelect:
                                 SetActionText("Hypnotize ...");
                                 break;
-
+                            case InputController.ControlState.detectSelect:
+                                SetActionText("Question ...");
+                                break;
                         }
                     }
                 } else if (target != null) {
-                    lastTarget = Toolbox.Instance.GetName(target);
+                    lastTarget = Toolbox.Instance.GetName(target, applyThe: false);
                     SetActionText(lastTarget);
                 } else if (cursorOverButton) {
                     SetActionText(actionButtonText);
@@ -95,16 +102,16 @@ public partial class UINew : Singleton<UINew> {
                 if (cursorText.activeInHierarchy)
                     cursorText.SetActive(false);
                 if (highlight) {
-                    Cursor.SetCursor(cursorHighlight, new Vector2(28, 16), CursorMode.Auto);
+                    Cursor.SetCursor(cursorHighlight, new Vector2(56, 34), CursorMode.Auto);
                 } else {
-                    Cursor.SetCursor(cursorDefault, new Vector2(28, 16), CursorMode.Auto);
+                    Cursor.SetCursor(cursorDefault, new Vector2(56, 34), CursorMode.Auto);
                 }
                 break;
             case InputController.ControlState.inMenu:
             case InputController.ControlState.waitForMenu:
                 if (cursorText.activeInHierarchy)
                     cursorText.SetActive(false);
-                Cursor.SetCursor(cursorHighlight, new Vector2(28, 16), CursorMode.Auto);
+                Cursor.SetCursor(cursorHighlight, new Vector2(56, 34), CursorMode.Auto);
                 break;
             case InputController.ControlState.commandSelect:
                 SetCursorText("COMMAND");
@@ -114,6 +121,9 @@ public partial class UINew : Singleton<UINew> {
                 break;
             case InputController.ControlState.insultSelect:
                 SetCursorText("INSULT");
+                break;
+            case InputController.ControlState.detectSelect:
+                SetCursorText("QUESTION");
                 break;
             case InputController.ControlState.swearSelect:
                 SetCursorText("SWEAR\nAT");
@@ -185,20 +195,33 @@ public partial class UINew : Singleton<UINew> {
         }
 
         bool highlight = false;
+        GameObject target = null;
         RaycastHit2D[] hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue()), Vector2.zero);
         foreach (RaycastHit2D hit in hits) {
             if (hit.collider != null && !InputController.forbiddenTags.Contains(hit.collider.tag)) {
                 highlight = true;
             }
         }
-        GameObject target = null;
         if (highlight) {
             GameObject top = InputController.Instance.GetFrontObject(hits);
             target = InputController.Instance.GetBaseInteractive(top.transform);
         }
-        bool cursorOverButton = EventSystem.current.IsPointerOverGameObject();
+        bool cursorOverButton = false;
+        if (EventSystem.current != null) {
+            cursorOverButton = EventSystem.current.IsPointerOverGameObject();
+        }
 
         UpdateCursor(highlight);
         UpdateActionText(highlight, target, cursorOverButton);
+    }
+    public void UpdateStomachDisplay() {
+        if (GameManager.Instance.playerObject == null)
+            return;
+        if (!GameManager.Instance.data.perks["vomit"])
+            return;
+        Eater eater = GameManager.Instance.playerObject.GetComponent<Eater>();
+        if (eater != null && stomachDisplayManager != null) {
+            stomachDisplayManager.UpdateContents(eater);
+        }
     }
 }
