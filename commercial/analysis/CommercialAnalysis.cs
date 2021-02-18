@@ -90,5 +90,9 @@ namespace analysis {
         public DescribableOccurrenceData Memorable() {
             return commercial.GetChildren().OrderByDescending(o => commercial.GetNotability(o)).First();
         }
+
+        public List<DescribableOccurrenceData> TopEvents() {
+            return commercial.GetChildren().OrderByDescending(o => o.quality.Values.Sum()).ToList();
+        }
     }
 }

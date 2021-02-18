@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
+using TMPro;
 public class SoundEffect : MonoBehaviour {
     private string words;
     public bool speaking = false;
@@ -11,7 +11,7 @@ public class SoundEffect : MonoBehaviour {
 
     private FollowGameObjectInCamera follower;
     private GameObject flipper;
-    private Text bubbleText;
+    private TextMeshProUGUI bubbleText;
     void Awake() {
         if (transform.Find("SpeechChild") == null) {
             GameObject speechFramework = Instantiate(Resources.Load("UI/SpeechChild"), transform.position, Quaternion.identity) as GameObject;
@@ -22,7 +22,7 @@ public class SoundEffect : MonoBehaviour {
         flipper = transform.Find("SpeechChild").gameObject;
         Transform bubbleParent = transform.Find("SpeechChild/Speechbubble");
         Canvas bubbleCanvas = bubbleParent.GetComponent<Canvas>();
-        bubbleText = bubbleParent.transform.Find("Text").gameObject.GetComponent<Text>();
+        bubbleText = bubbleParent.transform.Find("Text2").gameObject.GetComponent<TextMeshProUGUI>();
 
         bubbleText.text = "";
         follower = bubbleText.GetComponent<FollowGameObjectInCamera>();

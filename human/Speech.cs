@@ -5,6 +5,7 @@ using System.Text;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Nimrod;
+using TMPro;
 public struct MessagePhrase {
     public MessagePhrase(string phrase, int profanity) {
         this.phrase = phrase;
@@ -105,7 +106,9 @@ public class Speech : Interactive, ISaveable {
                 swearList.Add(false);
             }
         }
-        return new MessagePhrase(sb.ToString(), profanity);
+        string outString = sb.ToString();
+        outString = Regex.Replace(outString, censorChar.ToString(), "<sprite=0>");
+        return new MessagePhrase(outString, profanity);
         // return sb.ToString();
     }
 
@@ -135,7 +138,7 @@ public class Speech : Interactive, ISaveable {
     private float speakTimeTotal;
     private FollowGameObjectInCamera follower;
     private GameObject flipper;
-    private Text bubbleText;
+    private TextMeshProUGUI bubbleText;
     private float speakSpeed;
     private bool[] swearMask;
     public bool vomiting;
@@ -189,7 +192,7 @@ public class Speech : Interactive, ISaveable {
         flipper = transform.Find("SpeechChild").gameObject;
         Transform bubbleParent = transform.Find("SpeechChild/Speechbubble");
         Canvas bubbleCanvas = bubbleParent.GetComponent<Canvas>();
-        bubbleText = bubbleParent.transform.Find("Text").gameObject.GetComponent<Text>();
+        bubbleText = bubbleParent.transform.Find("Text2").GetComponent<TextMeshProUGUI>();
 
         bubbleText.text = "";
         follower = bubbleText.GetComponent<FollowGameObjectInCamera>();
@@ -686,20 +689,21 @@ public class Speech : Interactive, ISaveable {
 
 
     public static float DurationHold(string phrase) {
-        return DoubleSeat(phrase.Length, 2f, 50f, 5f, 2f);
+        // return DoubleSeat(phrase.Length, 2f, 50f, 5f, 2f);
+        return LinearDuration(phrase);
     }
-    public static float DoubleSeat(float x, float a, float w, float max, float min) {
-        float result = 0f;
-        if (x / w > 1) {
-            x = w;
-        }
-        if (x / w <= 0.5) {
-            result = Mathf.Pow(2 * x / w, a) / 2 * (max - min) + min;
-        } else {
-            result = (1f - Mathf.Pow(2f - 2f * (x / w), a) / 2f) * (max - min) + min;
-        }
-        return result;
-    }
+    // public static float DoubleSeat(float x, float a, float w, float max, float min) {
+    //     float result = 0f;
+    //     if (x / w > 1) {
+    //         x = w;
+    //     }
+    //     if (x / w <= 0.5) {
+    //         result = Mathf.Pow(2 * x / w, a) / 2 * (max - min) + min;
+    //     } else {
+    //         result = (1f - Mathf.Pow(2f - 2f * (x / w), a) / 2f) * (max - min) + min;
+    //     }
+    //     return result;
+    // }
     public static float LinearDuration(string phrase) {
         float slope = GameManager.Instance.GetDurationCoefficient();
         return slope * phrase.Length + 1;

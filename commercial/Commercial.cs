@@ -26,7 +26,10 @@ public class Commercial : MetaDescribable<DescribableOccurrenceData> {
     public HashSet<string> visitedLocations = new HashSet<string>();
     public HashSet<string> outfits = new HashSet<string>();
     public bool gravy;
+    public bool sabotage;
     public List<Objective> objectives = new List<Objective>();
+    [XmlIgnore]
+    private Dictionary<string, int> uniqueEvents = new Dictionary<string, int>();
     public Commercial(Commercial other) {
         this.name = other.name;
         this.description = other.description;
@@ -38,6 +41,7 @@ public class Commercial : MetaDescribable<DescribableOccurrenceData> {
         this.unlockItem = other.unlockItem;
         this.email = other.email;
         this.gravy = other.gravy;
+        this.sabotage = other.sabotage;
         this.hallucination = other.hallucination;
     }
     public static Commercial LoadCommercialByFilename(string filename) {
@@ -72,12 +76,21 @@ public class Commercial : MetaDescribable<DescribableOccurrenceData> {
                 c.objectives.Add(new ObjectiveScorpion());
             } else if (key == "gravyCommercial") {
                 c.gravy = true;
+            } else if (key == "sabotage") {
+                c.sabotage = true;
             } else if (key == "hallucination") {
                 c.hallucination = bits[1];
             } else {
                 c.objectives.Add(new ObjectiveProperty(bits));
             }
         }
+        c.quality = new SerializableDictionary<Rating, float>(){
+            {Rating.disgusting, 0f},
+            {Rating.disturbing, 0f},
+            {Rating.chaos, 0f},
+            {Rating.offensive, 0f},
+            {Rating.positive, 0f}
+        };
         return c;
     }
     public void ProcessOccurrence(Occurrence oc) {
@@ -109,8 +122,24 @@ public class Commercial : MetaDescribable<DescribableOccurrenceData> {
                 transcript.Add(data.transcriptLine);
             }
         }
-        AddChild(occurrence.describable);
+
+        if (uniqueEvents.ContainsKey(occurrence.describable.Qualstring())) {
+            // accept the event with a probability inversely proportional to the number we have seen
+            if (Random.Range(0, uniqueEvents[oc.data.describable.Qualstring()]) < 1) {
+                uniqueEvents[oc.data.describable.Qualstring()] += 2;
+                RecordOccurrence(oc);
+            }
+        } else {
+            uniqueEvents[oc.data.describable.Qualstring()] = 1;
+            RecordOccurrence(oc);
+        }
+
         UINew.Instance.UpdateObjectives();
+    }
+
+    public void RecordOccurrence(Occurrence oc) {
+        AddChild(oc.data.describable);
+        UINew.Instance.UpdateMetrics(o: oc);
     }
     public Commercial() {
         unlockUponCompletion = new List<string>();

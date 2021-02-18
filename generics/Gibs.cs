@@ -21,6 +21,14 @@ public class Gibs : MonoBehaviour {
     public LoHi initVelocity = new LoHi(0.5f, 0.5f);
     public LoHi initAngleFromHorizontal = new LoHi(0.1f, 0.9f);
     public float impactEmitExpectedPer100;
+    public bool liquid;
+    public string liquidName;
+    private Liquid loadedLiquid;
+    void Start() {
+        if (liquid) {
+            loadedLiquid = Liquid.LoadLiquid(liquidName);
+        }
+    }
     public void CopyFrom(Gibs other) {
         applyAnimationSkinColor = other.applyAnimationSkinColor;
         damageCondition = other.damageCondition;
@@ -47,6 +55,22 @@ public class Gibs : MonoBehaviour {
             return new List<GameObject>();
         List<GameObject> output = new List<GameObject>();
         for (int i = 0; i < number; i++) {
+            if (liquid) {
+                Vector3 vel = message.force * Random.Range(initVelocity.low, initVelocity.high) / 12f;
+                if (message.strength)
+                    vel *= 4f;
+                if (message.angleAboveHorizontal != 0) {
+                    initAngleFromHorizontal.low = message.angleAboveHorizontal;
+                    initAngleFromHorizontal.high = message.angleAboveHorizontal;
+                }
+                float theta = Random.Range(initAngleFromHorizontal.low, initAngleFromHorizontal.high);
+                vel.z = vel.magnitude * Mathf.Sin(theta);
+                vel.x = vel.x * Mathf.Cos(theta);
+                vel.y = vel.y * Mathf.Cos(theta);
+                // (Liquid l, float severity, GameObject spiller, float initHeight, Vector3 initVelocity, bool noCollision = true)
+                Toolbox.Instance.SpawnDroplet(loadedLiquid, 0.1f, gameObject, Random.Range(initHeight.low, initHeight.high), vel);
+                continue;
+            }
             GameObject bit = Instantiate(particle, transform.position, Quaternion.identity) as GameObject;
             output.Add(bit);
             SpriteRenderer sprite = bit.GetComponent<SpriteRenderer>();

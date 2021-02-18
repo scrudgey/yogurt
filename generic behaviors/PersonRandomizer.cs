@@ -34,7 +34,7 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
     public float randomItemProbability;
     public float deleteProbability;
     private bool configured = false;
-    void LateUpdate() {
+    public void LateUpdate() {
         if (configured)
             return;
         if (UnityEngine.Random.Range(0f, 1f) < deleteProbability) {

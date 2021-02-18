@@ -9,6 +9,7 @@ public class Destructible : Damageable, ISaveable {
     public float fireMultiplier = 1f;
     public float cosmicMultiplier = 1f;
     public float explosionMultiplier = 2f;
+    public float acidMultiplier = 1f;
     public AudioSource audioSource;
     public override void Awake() {
         base.Awake();
@@ -33,7 +34,7 @@ public class Destructible : Damageable, ISaveable {
     public override void CalculateDamage(MessageDamage message) {
         float damage = message.amount;
         switch (message.type) {
-            case damageType.acid:
+
             case damageType.piercing:
             case damageType.cutting:
             case damageType.physical:
@@ -50,6 +51,9 @@ public class Destructible : Damageable, ISaveable {
                 break;
             case damageType.explosion:
                 damage = message.amount * explosionMultiplier;
+                break;
+            case damageType.acid:
+                damage = message.amount * acidMultiplier;
                 break;
             default:
                 break;

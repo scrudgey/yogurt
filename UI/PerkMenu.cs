@@ -22,7 +22,9 @@ public class PerkMenu : MonoBehaviour {
     public UIButtonEffects effects;
     public AspectRatioFitter aspectRatioFitter;
     public delegate void MyDelegate();
-    public MyDelegate menuClosed;
+    // public MyDelegate menuClosed;
+    public Chela chela;
+
     void Start() {
         effects = GetComponent<UIButtonEffects>();
         GetComponent<Canvas>().worldCamera = GameManager.Instance.cam;
@@ -189,15 +191,17 @@ public class PerkMenu : MonoBehaviour {
         GameManager.Instance.PlayPublicSound(Resources.Load("sounds/8-bit/BOUNCE3") as AudioClip);
 
         numberCollected += 1;
+        chela.Disappear();
         SetLevelText();
     }
     public void DoneButtonClick() {
         UINew.Instance.CloseActiveMenu();
+
         MusicController.Instance.End();
     }
     void OnDestroy() {
-        if (menuClosed != null)
-            menuClosed();
+        // if (menuClosed != null)
+        //     menuClosed();
     }
 
 }

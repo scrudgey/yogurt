@@ -33,6 +33,9 @@ public class FadeInOut : MonoBehaviour {
                 outline = text.gameObject.GetComponent<Outline>();
 
         }
+        public virtual void End() {
+            complete = true;
+        }
         protected void SetColor(float alpha) {
             Color newColor = new Color(targetColor.r, targetColor.g, targetColor.b, alpha);
             Color blackColor = new Color(0f, 0f, 0f, alpha); // a hack
@@ -57,6 +60,7 @@ public class FadeInOut : MonoBehaviour {
         }
         public override void Update() {
             base.Update();
+            // Debug.Log(timer);
             if (frames < 2) {
                 timer = 0f;
                 frames += 1;
@@ -66,12 +70,14 @@ public class FadeInOut : MonoBehaviour {
             // Color color = new Color(0, 0, 0, alpha);
             SetColor(alpha);
             if (timer > fadeInTime) {
-                SetColor(0);
-
-                if (callback != null)
-                    callback();
-                complete = true;
+                End();
             }
+        }
+        public override void End() {
+            base.End();
+            SetColor(0);
+            if (callback != null)
+                callback();
         }
     }
     class FadeOutModule : FaderModule {
@@ -82,14 +88,16 @@ public class FadeInOut : MonoBehaviour {
         public override void Update() {
             base.Update();
             float alpha = (float)PennerDoubleAnimation.CircEaseOut(timer, 0, 1, fadeOutTime);
-
             SetColor(alpha);
             if (timer > fadeOutTime) {
-                SetColor(1f);
-                if (callback != null)
-                    callback();
-                complete = true;
+                End();
             }
+        }
+        public override void End() {
+            base.End();
+            SetColor(1f);
+            if (callback != null)
+                callback();
         }
     }
     class FadePingPong : FaderModule {
@@ -116,9 +124,9 @@ public class FadeInOut : MonoBehaviour {
         // Debug.Log($"{gameObject} start fade in");
         modules.Push(new FadeInModule(callback, image, text, targetColor, fadeInTime));
     }
-    public void FadeOut(Action callback, Color targetColor) {
+    public void FadeOut(Action callback, Color targetColor, float fadeTime = 0.5f) {
         // Debug.Log("{gameObject} start fade out");
-        modules.Push(new FadeOutModule(callback, image, text, targetColor, fadeOutTime));
+        modules.Push(new FadeOutModule(callback, image, text, targetColor, fadeTime));
     }
     public void PingPong(float minAlpha, float maxAlpha, float period, Color targetColor) {
         modules.Push(new FadePingPong(null, image, text, targetColor, minAlpha, maxAlpha, period));
@@ -128,6 +136,12 @@ public class FadeInOut : MonoBehaviour {
             image.color = Color.black;
         if (text != null)
             text.color = Color.clear;
+    }
+    public void White() {
+        if (image != null)
+            image.color = Color.white;
+        if (text != null)
+            text.color = Color.white;
     }
     public void Clear() {
         if (image != null)
@@ -145,5 +159,19 @@ public class FadeInOut : MonoBehaviour {
                 modules.Push(module);
             }
         }
+    }
+    public void ClearAllModules() {
+
+        // may not want to enable this code:
+        // it makes sense to clean up modules but this leads to
+        // an infinite new day cutscene loop for some reason.
+
+        // while (modules.Count > 0) {
+        //     FaderModule module = modules.Pop();
+        //     if (!module.complete)
+        //         module.End();
+        // }
+
+        modules = new Stack<FaderModule>();
     }
 }

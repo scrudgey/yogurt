@@ -54,7 +54,6 @@ public partial class GameManager : Singleton<GameManager> {
     }
     public void CommercialCompleted() {
         Commercial commercial = GameManager.Instance.data.activeCommercial;
-        data.completeCommercials.Add(commercial);
         foreach (string unlock in commercial.unlockUponCompletion) {
             UnlockCommercial(unlock);
         }
@@ -64,9 +63,7 @@ public partial class GameManager : Singleton<GameManager> {
         if (commercial.email != "") {
             ReceiveEmail(commercial.email);
         }
-        Debug.Log(commercial.hallucination);
         if (commercial.hallucination != "") {
-
             data.queuedMagicianSequences.Add(commercial.hallucination);
             Debug.Log(data.queuedMagicianSequences);
         }
@@ -74,9 +71,11 @@ public partial class GameManager : Singleton<GameManager> {
         UINew.Instance.RefreshUI(active: false);
 
         GameObject report = UINew.Instance.ShowMenu(UINew.MenuType.commercialReport);
-        CommercialReportMenu menu = report.GetComponent<CommercialReportMenu>();
+        NeoCommercialReportMenu menu = report.GetComponent<NeoCommercialReportMenu>();
         menu.commercial = commercial;
-        report.GetComponent<CommercialReportMenu>().Report(commercial);
+        report.GetComponent<NeoCommercialReportMenu>().Report(commercial);
+        data.completeCommercials.Add(commercial);
+        data.setupSabotage = false;
     }
     public void StartCommercial(Commercial commercial) {
         GameManager.Instance.data.activeCommercial = commercial;
@@ -94,6 +93,9 @@ public partial class GameManager : Singleton<GameManager> {
         data.recordingCommercial = value;
         if (GameManager.onRecordingChange != null)
             GameManager.onRecordingChange(value);
+        if (!value) {
+            data.setupSabotage = false;
+        }
     }
     public void CheckCommercialInitialization(Commercial commercial, string sceneName) {
         if (data.commercialsInitializedToday.Contains(commercial.name))

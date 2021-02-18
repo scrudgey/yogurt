@@ -11,6 +11,6 @@ public class SceneButton : MonoBehaviour {
         this.menu = menu;
         this.scene_name = scene_name;
         Text text = transform.Find("Text").GetComponent<Text>();
-        text.text = GameManager.sceneNames[scene_name];
+        text.text = TeleportMenu.GetSceneName(scene_name);
     }
 }

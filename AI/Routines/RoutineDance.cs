@@ -80,7 +80,8 @@ namespace AI {
             // shadow
 
             // spritesheet
-            spritesheet = Resources.LoadAll<Sprite>("spritesheets/anchorite_dance 2") as Sprite[];
+            // spritesheet = Resources.LoadAll<Sprite>("spritesheets/anchorite_dance 2") as Sprite[];
+            spritesheet = Toolbox.MemoizedSkinTone("anchorite_dance", SkinColor.dark);
             headSprites = headAnimation.sprites;
 
             if (personality.dancer == Personality.Dancer.leader) {

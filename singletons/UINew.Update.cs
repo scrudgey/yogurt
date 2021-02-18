@@ -4,8 +4,19 @@ using UnityEngine.UI;
 using Easings;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using TMPro;
 
 public partial class UINew : Singleton<UINew> {
+
+    Dictionary<Rating, TextMeshProUGUI> metrics() {
+        return new Dictionary<Rating, TextMeshProUGUI>{
+        {Rating.disgusting, disgustingCounter},
+        {Rating.disturbing, disturbingCounter},
+        {Rating.offensive, offensiveCounter},
+        {Rating.chaos, chaosCounter},
+        {Rating.positive, positiveCounter}
+    };
+    }
 
     public void UpdateActionText(bool highlight, GameObject target, bool cursorOverButton) {
         if (GameManager.Instance.playerIsDead || GameManager.Instance.InCutsceneLevel()) {
@@ -94,6 +105,33 @@ public partial class UINew : Singleton<UINew> {
         }
         foreach (VideoCamera vid in GameObject.FindObjectsOfType<VideoCamera>()) {
             vid.UpdateStatus();
+        }
+    }
+    public void UpdateMetrics(Occurrence o = null) {
+        if (GameManager.Instance.data == null) {
+            metricsDock.SetActive(false);
+        }
+        // if (InputController.Instance.state != InputController.ControlState.normal) {
+        //     metricsDock.SetActive(false);
+        // }
+        if (GameManager.Instance.data.recordingCommercial) {
+            metricsDock.SetActive(true);
+            disgustingCounter.text = GameManager.Instance.data.activeCommercial.quality[Rating.disgusting].ToString();
+            disturbingCounter.text = GameManager.Instance.data.activeCommercial.quality[Rating.disturbing].ToString();
+            offensiveCounter.text = GameManager.Instance.data.activeCommercial.quality[Rating.offensive].ToString();
+            chaosCounter.text = GameManager.Instance.data.activeCommercial.quality[Rating.chaos].ToString();
+            positiveCounter.text = GameManager.Instance.data.activeCommercial.quality[Rating.positive].ToString();
+
+            if (o != null) {
+                foreach (KeyValuePair<Rating, TextMeshProUGUI> kvp in metrics()) {
+                    if (o.data.describable.quality[kvp.Key] > 0) {
+                        kvp.Value.GetComponent<TextFX>().StartBounce(o.data.describable.quality[kvp.Key]);
+                    }
+                }
+            }
+
+        } else {
+            metricsDock.SetActive(false);
         }
     }
     public void UpdateCursor(bool highlight) {

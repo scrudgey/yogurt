@@ -154,18 +154,32 @@ public partial class UINew : Singleton<UINew> {
         statusIcon.transform.SetParent(iconDock, false);
         return icon;
     }
-    public void FadeOut(Action callback) {
-        // Debug.Log("fade out");
-        fader.FadeOut(callback, Color.black);
+    public void FadeOut(Action callback, float fadeOutTime = 0.5f) {
+        Debug.Log("fade out");
+        fader.FadeOut(callback, Color.black, fadeTime: fadeOutTime);
     }
     public void FadeIn(Action callback) {
-        // Debug.Log("fade in");
+        Debug.Log("fade in");
         fader.FadeIn(callback, Color.black);
     }
+    public void WhiteIn(Action callback) {
+        Debug.Log("white in");
+        fader.FadeIn(callback, Color.white);
+    }
     public void Blackout() {
+        Debug.Log("blackout");
         fader.Black();
     }
+    public void WhiteOut() {
+        Debug.Log("whiteout");
+        fader.White();
+    }
+    public void ClearFaderModules() {
+        Debug.Log("clearfadermodules");
+        fader.ClearAllModules();
+    }
     public void Clear() {
+        Debug.Log("clear");
         fader.Clear();
     }
     public void FadeInCredits(string title, string contents, bool left = true) {

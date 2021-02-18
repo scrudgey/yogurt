@@ -24,6 +24,12 @@ public partial class UINew : Singleton<UINew> {
     private GameObject hypnosisButton;
     private GameObject vomitButton;
     private GameObject teleportButton;
+    private GameObject metricsDock;
+    private TextMeshProUGUI disgustingCounter;
+    private TextMeshProUGUI disturbingCounter;
+    private TextMeshProUGUI offensiveCounter;
+    private TextMeshProUGUI chaosCounter;
+    private TextMeshProUGUI positiveCounter;
     private bool init = false;
     public bool inventoryVisible = false;
     public Text status;
@@ -112,7 +118,7 @@ public partial class UINew : Singleton<UINew> {
         musicToggle = UICanvas.transform.Find("musicToggle").gameObject;
         cursorText = UICanvas.transform.Find("cursorText").gameObject;
         cursorTextText = cursorText.GetComponent<Text>();
-        actionTextObject = UICanvas.transform.Find("ActionText").GetComponent<Text>();
+        actionTextObject = UICanvas.transform.Find("bottomDock/ActionText").GetComponent<Text>();
         sceneNameText = UICanvas.transform.Find("sceneText").GetComponent<Text>();
         sceneNameText.enabled = false;
         lifebar = UICanvas.transform.Find("topright/lifebar/mask/fill").GetComponent<RectTransform>();
@@ -128,6 +134,13 @@ public partial class UINew : Singleton<UINew> {
         creditsRightContent = UICanvas.transform.Find("credits/rightCredits/credContents").GetComponent<Text>();
         creditsRightTitle = UICanvas.transform.Find("credits/rightCredits/credTitle").GetComponent<Text>();
         creditsRightMoreContent = UICanvas.transform.Find("credits/rightCredits/muchText").GetComponent<TextMeshProUGUI>();
+
+        metricsDock = UICanvas.transform.Find("bottomDock/metricsDock").gameObject;
+        disgustingCounter = metricsDock.transform.Find("metrics/disgusting/counter").GetComponent<TextMeshProUGUI>();
+        disturbingCounter = metricsDock.transform.Find("metrics/disturbing/counter").GetComponent<TextMeshProUGUI>();
+        offensiveCounter = metricsDock.transform.Find("metrics/offensive/counter").GetComponent<TextMeshProUGUI>();
+        chaosCounter = metricsDock.transform.Find("metrics/chaos/counter").GetComponent<TextMeshProUGUI>();
+        positiveCounter = metricsDock.transform.Find("metrics/positive/counter").GetComponent<TextMeshProUGUI>();
 
         creditsLeftContent.text = "";
         creditsLeftTitle.text = "";
@@ -180,6 +193,9 @@ public partial class UINew : Singleton<UINew> {
 
         // objectives
         UpdateObjectives();
+
+        // metrics
+        UpdateMetrics();
 
         // buff effects
         foreach (Transform child in iconDock) {

@@ -20,6 +20,7 @@ public class CutsceneImp : Cutscene {
         BuffType.ethereal,
         BuffType.invulnerable,
         BuffType.death,
+        BuffType.acidDamage
     };
 
     private enum CutsceneState { none, describePotion, describeIngredient }

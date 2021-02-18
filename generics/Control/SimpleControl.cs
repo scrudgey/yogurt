@@ -154,12 +154,10 @@ public class SimpleControl : Controllable, ISaveable {
         UpdateDirection();
     }
 
-    // bootstrapper.BroadcastMessage("GroundModeStart", this, SendMessageOptions.DontRequireReceiver);
     public void GroundModeStart() {
         this.enabled = true;
     }
     public void FlyModeStart() {
         this.enabled = false;
-
     }
 }

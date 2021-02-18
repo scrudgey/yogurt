@@ -17,7 +17,11 @@ public class Bed : Doorway {
     public override void Awake() {
         keypressedThisFrame = false;
         InputController.Instance.PrimaryAction.action.performed += ctx => {
-            keypressedThisFrame = ctx.ReadValueAsButton();
+            if (CutsceneManager.Instance.cutscene == null) {
+                keypressedThisFrame = ctx.ReadValueAsButton();
+            } else {
+                keypressedThisFrame = false;
+            }
         };
         InputController.Instance.PrimaryAction.action.Enable();
 
@@ -81,6 +85,13 @@ public class Bed : Doorway {
             CutsceneManager.Instance.InitializeCutscene<CutscenePickleBottom>();
         }
         UINew.Instance.RefreshUI(active: false);
+
+        if (GameManager.Instance.data.deaths >= 1 && GameManager.Instance.data.deathCutscenesPlayed == 0) {
+            GameManager.Instance.data.deathCutscenesPlayed = 1;
+            // GameManager.Instance.ShowDiaryEntryDelay("death1", delay: 0.5f);
+            CutsceneManager.Instance.InitializeCutscene<CutsceneFirstDeath>();
+        }
+
         Update();
     }
     void Update() {
@@ -138,11 +149,7 @@ public class Bed : Doorway {
             GameManager.Instance.ShowDiaryEntryDelay("diaryNew", delay: 0.5f);
             return;
         }
-        if (GameManager.Instance.data.deaths >= 1 && GameManager.Instance.data.deathCutscenesPlayed == 0) {
-            GameManager.Instance.data.deathCutscenesPlayed = 1;
-            GameManager.Instance.ShowDiaryEntryDelay("death1", delay: 0.5f);
-            return;
-        }
+
         InputController.Instance.state = InputController.ControlState.normal;
     }
 }

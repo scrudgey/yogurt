@@ -277,7 +277,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         holding.GetComponent<Rigidbody2D>().isKinematic = false;
         holding.GetComponent<Collider2D>().isTrigger = false;
         PhysicalBootstrapper phys = holding.GetComponent<PhysicalBootstrapper>();
-        if (phys) {
+        if (phys && phys.enabled) {
             Vector2 initV = Vector2.ClampMagnitude(direction, 0.1f);
             initV = initV + GetComponent<Rigidbody2D>().velocity;
             float vx = initV.x;
@@ -342,7 +342,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
     private void DoThrow() {
         ClaimsManager.Instance.DisclaimObject(throwObject, this);
         PhysicalBootstrapper phys = throwObject.GetComponent<PhysicalBootstrapper>();
-        if (phys) {
+        if (phys && phys.enabled) {
             phys.thrownBy = gameObject;
             Rigidbody2D myBody = GetComponent<Rigidbody2D>();
             phys.doInit = false;
@@ -372,6 +372,11 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
                     phys.physical.temporaryDisabledColliders.Add(collider);
                 }
             }
+        } else {
+            // throwObject.transform.SetParent(null);
+            holding = throwObject.GetComponent<Pickup>();
+            DropItem();
+            // DropDripper();
         }
         MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.throwing, false);
         Toolbox.Instance.SendMessage(gameObject, this, anim);
@@ -449,6 +454,9 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
                     break;
             }
         }
+        if (GetComponent<Animation>() == null) {
+            StartSwing();
+        }
 
         // foreach (Rigidbody2D body in holding.GetComponentsInChildren<Rigidbody2D>()) {
         //     Debug.Log(body);
@@ -514,7 +522,6 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         SoftDropItem();
         MessageStun message = new MessageStun();
         message.timeout = Random.Range(0.3f, 0.45f);
-        // message.
         Toolbox.Instance.SendMessage(gameObject, this, message);
     }
     public void WasDestroyed(GameObject obj) {

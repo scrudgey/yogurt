@@ -456,6 +456,7 @@ public class Hurtable : Damageable, ISaveable {
             hitState = Controllable.HitState.stun;
             hitStunCounter = 0.5f;
         }
+        gameObject.SendMessage("OnGetUp", SendMessageOptions.DontRequireReceiver);
     }
     public void DoubleOver(bool val) {
         if (val) {

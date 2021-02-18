@@ -94,8 +94,6 @@ public class VideoCamera : Interactive {
         seenFlags.Add(col.transform.root.gameObject);
         Qualities qualities = col.GetComponent<Qualities>();
         if (qualities != null) {
-            // TODO: no messageoccurrence??
-            // EventData data = qualities.ToEvent();
             GameManager.Instance.data.activeCommercial.AddChild(qualities.ToDescribable());
         }
         Occurrence occurrence = col.gameObject.GetComponent<Occurrence>();
@@ -103,7 +101,13 @@ public class VideoCamera : Interactive {
             GameManager.Instance.data.activeCommercial.ProcessOccurrence(occurrence); // adds child
         }
     }
-
+    public void Update() {
+        if (GameManager.Instance.data.recordingCommercial) {
+            regionIndicator.SetActive(true);
+        } else {
+            regionIndicator.SetActive(false);
+        }
+    }
     public void UpdateStatus() {
         if (GameManager.Instance.data == null) {
             return;
@@ -114,7 +118,7 @@ public class VideoCamera : Interactive {
             regionIndicator.SetActive(false);
         }
 
-        if (GameManager.Instance.data.activeCommercial == null) {
+        if (GameManager.Instance.data.activeCommercial == null || !GameManager.Instance.data.recordingCommercial) {
             return;
         } else if (GameManager.Instance.data.activeCommercial.Evaluate()) {
             EnableBubble();

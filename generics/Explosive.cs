@@ -38,6 +38,7 @@ public class Explosive : MonoBehaviour {
     public Dictionary<BuffType, Buff> netBuffs = new Dictionary<BuffType, Buff>();
     public Intrinsics intrinsics;
     public bool ignoreDamage;
+    public List<AudioClip> explosionSounds = new List<AudioClip>();
     void Start() {
         Toolbox.RegisterMessageCallback<MessageDamage>(this, HandleMessageDamage);
         intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject);
@@ -77,7 +78,10 @@ public class Explosive : MonoBehaviour {
         impact.size = 0.70f;
         impact.message = message;
 
-        Toolbox.Instance.AudioSpeaker("explosion/cannon", transform.position);
+        if (explosionSounds.Count > 0) {
+            AudioClip explosionSound = explosionSounds[Random.Range(0, explosionSounds.Count)];
+            Toolbox.Instance.AudioSpeaker(explosionSound, transform.position);
+        }
 
         GameObject fx = GameObject.Instantiate(Resources.Load("particles/explosion")) as GameObject;
         fx.transform.position = transform.position;

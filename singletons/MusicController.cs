@@ -32,7 +32,8 @@ public enum TrackName {
     venus,
     creeptunnel,
     lowerhell,
-    satansthone
+    satansthone,
+    gravy
 }
 [System.Serializable]
 public class Track : IEquatable<Track> {
@@ -197,6 +198,11 @@ public class MusicThroneroom : Music {
         tracks = new Stack<Track>(new List<Track> { new Track(TrackName.satansthone) });
     }
 }
+public class MusicGravy : Music {
+    public MusicGravy() {
+        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.gravy) });
+    }
+}
 public class MusicController : Singleton<MusicController> {
 
     static Dictionary<TrackName, string> trackFiles = new Dictionary<TrackName, string>(){
@@ -224,6 +230,7 @@ public class MusicController : Singleton<MusicController> {
         {TrackName.creeptunnel, "Creep Tunnels Draft #5 YESSIR"},
         {TrackName.lowerhell, "Lower HELL Draftz Test #5 YC3 2020"},
         {TrackName.satansthone, "Final SATAN VER#1 Vox _ No Bass YC3 2020"},
+        {TrackName.gravy, "Scram Gravy Commercial Ver#5 Drip Plop YC3 2020"}
     };
 
     static Dictionary<string, Func<Music>> sceneMusic = new Dictionary<string, Func<Music>>() {
@@ -256,7 +263,7 @@ public class MusicController : Singleton<MusicController> {
         {"cave3", () => new MusicMayorAttic()},
         {"cave4", () => new MusicMayorAttic()},
         {"anti_mayor_cutscene", () => new MusicMayorAttic()},
-        {"gravy_studio", () => new MusicMoon()},
+        // {"gravy_studio", () => new MusicMoon()},
         {"mountain", () => new MusicMountain()},
         {"volcano", () => new MusicMountain()},
         {"venus1", () => new MusicVenus()},
@@ -271,6 +278,7 @@ public class MusicController : Singleton<MusicController> {
         {"boardroom", () => new MusicBeat()},
         {"office", () => new MusicBeat()},
         {"bar", () => new MusicBeat()},
+        {"gravy_studio", () => new MusicGravy()},
     };
     // TODO: add studio
     public static Dictionary<TrackName, AudioClip> tracks = new Dictionary<TrackName, AudioClip>();
@@ -285,12 +293,20 @@ public class MusicController : Singleton<MusicController> {
         audioSource = Toolbox.GetOrCreateComponent<AudioSource>(gameObject);
         AudioMixer mixer = Resources.Load("mixers/MusicMixer") as AudioMixer;
         audioSource.outputAudioMixerGroup = mixer.FindMatchingGroups("Master")[0];
-        // load tracks
+        StartCoroutine(LoadMusic());
+    }
+    IEnumerator LoadMusic() {
+        float time1 = Time.realtimeSinceStartup;
         foreach (KeyValuePair<TrackName, string> kvp in trackFiles) {
-            // Debug.Log("loading music/" + kvp.Value + " ...");
-            AudioClip clip = Resources.Load("music/" + kvp.Value) as AudioClip;
-            tracks[kvp.Key] = clip;
+            Debug.Log("loading music/" + kvp.Value + " ...");
+            var request = Resources.LoadAsync("music/" + kvp.Value);
+            while (!request.isDone) {
+                yield return request;
+            }
+            tracks[kvp.Key] = request.asset as AudioClip;
         }
+        float time2 = Time.realtimeSinceStartup;
+        Debug.Log($"time to load music: {time2 - time1}");
     }
     public void Update() {
         if (cam != null)
@@ -365,6 +381,16 @@ public class MusicController : Singleton<MusicController> {
         if (stack.Count > 0)
             PlayTrack(stack.Peek());
     }
+    AudioClip GetTrack(TrackName trackName) {
+        if (tracks.ContainsKey(trackName)) {
+            return tracks[trackName];
+        } else {
+            Debug.Log($"quickloading {trackName}");
+            AudioClip clip = Resources.Load("music/" + trackFiles[trackName]) as AudioClip;
+            tracks[trackName] = clip;
+            return clip;
+        }
+    }
     public void PlayTrack(Track track) {
         if (!GameManager.Instance.GetMusicState()) {
             StopTrack();
@@ -373,12 +399,16 @@ public class MusicController : Singleton<MusicController> {
         if (track.trackName == TrackName.none)
             return;
 
-        audioSource.clip = tracks[track.trackName];
+        audioSource.clip = GetTrack(track.trackName);
         audioSource.volume = track.volume;
         audioSource.Play();
         nowPlayingTrack = track;
+
+        // audioSource.time = track.playTime % audioSource.clip.length;
         audioSource.time = track.playTime;
+        Debug.Log($"{track.playTime} | {track.playTime % audioSource.clip.length}");
         audioSource.loop = track.loop;
+        // GetTrack(track.trackName).length;
         if (!track.loop) {
             endCoroutine = StartCoroutine(endRoutine(audioSource.clip.length));
         }

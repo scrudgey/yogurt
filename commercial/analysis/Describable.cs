@@ -16,6 +16,17 @@ namespace analysis {
             {Rating.offensive, 0f},
             {Rating.positive, 0f}
         };
+
+        // writing my own special hash code b/c i dont feel like overriding the 
+        // real thing and dealing with all that. just need a little bit of special code. so there
+        public string Qualstring() {
+            string qual = $"{quality[Rating.disgusting]} " +
+                $"{quality[Rating.disturbing]} " +
+                $"{quality[Rating.offensive]} " +
+                $"{quality[Rating.chaos]} " +
+                $"{quality[Rating.positive]}";
+            return $"{whatHappened}: {qual}";
+        }
         public Describable() {
             quality = new SerializableDictionary<Rating, float>(){
                 {Rating.disgusting, 0f},

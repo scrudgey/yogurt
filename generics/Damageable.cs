@@ -35,6 +35,7 @@ public abstract class Damageable : MonoBehaviour {
     private float cachedTime;
     private List<Gibs> impactGibs = new List<Gibs>();
     public float blockTextTimer;
+    // public static readonly MessageDamage acidDamage = new MessageDamage(2, damageType.acid);
     public virtual void Awake() {
         LoadGibsPrefab();
         if (impactSounds != null && impactSounds.Length == 0)
@@ -95,10 +96,20 @@ public abstract class Damageable : MonoBehaviour {
                 TakeDamage(cacheFiredMessage);
                 cacheFiredMessage = null;
             }
+            if (netBuffs[BuffType.acidDamage].active()) {
+                // health += Time.deltaTime * 10f;
+
+                MessageDamage acidDamage = new MessageDamage(Time.deltaTime * 150f, damageType.acid);
+                if (gameObject == GameManager.Instance.playerObject) {
+                    acidDamage = new MessageDamage(Time.deltaTime * 400f, damageType.acid);
+                }
+                TakeDamage(acidDamage);
+            }
         }
         if (blockTextTimer > 0) {
             blockTextTimer -= Time.deltaTime;
         }
+
     }
     public void BlockText(string text, Color color) {
         if (blockTextTimer > 0)

@@ -10,7 +10,9 @@ public class emailEntryButton : MonoBehaviour {
     public Button button;
     public Color highlightColor;
     public Color regularColor;
+    public Image focusIndicator;
     public void Initialize(EmailUI ui, Email initEmail) {
+        focusIndicator.enabled = false;
         button = GetComponent<Button>();
         emailUI = ui;
         email = initEmail;
@@ -32,9 +34,13 @@ public class emailEntryButton : MonoBehaviour {
     public void Clicked() {
         emailUI.EmailEntryCallback(email);
         email.read = true;
+        focusIndicator.enabled = true;
         // button.Select();
         // ColorBlock cb = button.colors;
         // cb.normalColor = highlightColor;
         // button.colors = cb;
+    }
+    public void ClearFocusIndicator() {
+        focusIndicator.enabled = false;
     }
 }

@@ -26,12 +26,15 @@ public class TeleportMenu : MonoBehaviour {
         teleportButton = transform.Find("main/buttonBar/teleport").GetComponent<Button>();
         teleportButton.interactable = false;
     }
+    public static string GetSceneName(string scene) {
+        if (GameManager.sceneNames.ContainsKey(scene)) { return GameManager.sceneNames[scene]; } else return scene;
+    }
     public void PopulateSceneList() {
         effects.buttons = new List<Button>(builtInButtons);
         SetReferences();
         List<string> sceneList = GameManager.Instance.data.unlockedScenes.ToList<string>();
-        sceneList.OrderBy(scene => GameManager.sceneNames[scene]);
-        foreach (string scene in sceneList.OrderBy(scene => GameManager.sceneNames[scene])) {
+        sceneList.OrderBy(scene => GetSceneName(scene));
+        foreach (string scene in sceneList.OrderBy(scene => GetSceneName(scene))) {
             GameObject buttonObject = Instantiate(Resources.Load("UI/SceneButton")) as GameObject;
             buttonObject.transform.SetParent(buttonList, false);
             SceneButton button = buttonObject.GetComponent<SceneButton>();
@@ -44,7 +47,8 @@ public class TeleportMenu : MonoBehaviour {
         descriptionText.gameObject.SetActive(true);
         teleportButton.interactable = true;
         // update image with selected scene info
-        descriptionText.text = "Teleport to: " + GameManager.sceneNames[button.scene_name];
+
+        descriptionText.text = "Teleport to: " + GetSceneName(button.scene_name);
         selectedButton = button;
     }
     public void TeleportButtonCallback() {

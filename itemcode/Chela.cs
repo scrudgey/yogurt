@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 public class Chela : Item {
     public int chelaID;
     public ParticleSystem poofEffect;
@@ -13,14 +14,22 @@ public class Chela : Item {
     public void OpenPerkMenu() {
         GameObject menu = UINew.Instance.ShowMenu(UINew.MenuType.perk);
         PerkMenu perkMenu = menu.GetComponent<PerkMenu>();
-        perkMenu.menuClosed += MenuWasClosed;
+        perkMenu.chela = this;
+        // perkMenu.menuClosed += MenuWasClosed;
     }
     public string OpenPerkMenu_desc() {
         return "Choose Perk";
     }
-    public void MenuWasClosed() {
+    void Poof() {
         GameManager.Instance.data.collectedChelas[chelaID] = 1;
         Destroy(gameObject);
         GameObject.Instantiate(poofEffect, transform.position, Quaternion.identity);
+    }
+    public void Disappear() {
+        StartCoroutine(StartPoof());
+    }
+    IEnumerator StartPoof() {
+        yield return new WaitForSeconds(0.01f);
+        Poof();
     }
 }

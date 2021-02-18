@@ -202,6 +202,13 @@ public class Eater : Interactive, ISaveable {
                 if (mliquid.liquid.name == "yogurt") {
                     GameManager.Instance.IncrementStat(StatType.yogurtEaten, 1);
                 }
+                if (mliquid.liquid.name == "health tonic") {
+                    Debug.Log("health tonic");
+                    Hurtable hurtable = GetComponent<Hurtable>();
+                    if (hurtable != null) {
+                        hurtable.health = hurtable.maxHealth;
+                    }
+                }
             }
         }
         if (container) {

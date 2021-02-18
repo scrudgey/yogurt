@@ -11,6 +11,7 @@ public class TrapDoor : MonoBehaviour {
     public List<ParticleSystem> particles;
     public bool active = false;
     private float timer;
+    bool tripped;
     public void Activate() {
         active = true;
         spriteRenderer.enabled = true;
@@ -34,7 +35,8 @@ public class TrapDoor : MonoBehaviour {
     void Update() {
         if (timer > 0) {
             timer += Time.deltaTime;
-            if (timer > 3f) {
+            if (timer > 3f & !tripped) {
+                tripped = true;
                 GameManager.Instance.publicAudio.PlayOneShot(leaveSound);
                 GameManager.Instance.LeaveScene("dungeon", 0);
             }

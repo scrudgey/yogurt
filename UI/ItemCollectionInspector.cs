@@ -47,6 +47,7 @@ public class ItemCollectionInspector : MonoBehaviour {
     public void EntryClickedCallback(ItemCollectionButton script) {
         // update icon
         sprite.sprite = script.sprite;
+        sprite.preserveAspect = true;
         // update description
         descriptionText.text = script.description;
         itemName.text = script.itemName;

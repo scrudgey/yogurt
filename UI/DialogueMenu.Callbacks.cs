@@ -49,6 +49,10 @@ public partial class DialogueMenu : MonoBehaviour {
             MayorAward();
             nextLine = true;
         }
+        if (text == "MAYORSABOTAGE") {
+            GameManager.Instance.data.sabotageMissionsUnlocked = true;
+            nextLine = true;
+        }
         if (text == "GODBLESS") {
             target.GetComponent<Godhead>().Bless();
             UINew.Instance.CloseActiveMenu();

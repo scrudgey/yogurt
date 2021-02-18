@@ -7,16 +7,19 @@ public class Intrinsics : MonoBehaviour, ISaveable {
     public List<Buff> liveBuffs = new List<Buff>();
     public Dictionary<Component, Intrinsics> children = new Dictionary<Component, Intrinsics>();
     public Dictionary<BuffType, GameObject> intrinsicFX;
+    public bool disableStrengthFx = false;
     public void AddChild(Component owner, Intrinsics donor) {
         children[owner] = donor;
         donor.parent = this;
         IntrinsicsChanged();
+        // Debug.Log($"{this} added child {owner}");
     }
     public void RemoveChild(Component owner) {
         if (children.ContainsKey(owner)) {
             children[owner].parent = null;
             children.Remove(owner);
             IntrinsicsChanged();
+            // Debug.Log($"{this} removed child {owner}");
         }
     }
     public void CreateLiveBuffs(List<Buff> newBuffs) {
@@ -105,7 +108,8 @@ public class Intrinsics : MonoBehaviour, ISaveable {
                     UpdateBuffEffect(kvp.Value, "particles/vampire_particles");
                     break;
                 case BuffType.strength:
-                    UpdateBuffEffect(kvp.Value, "particles/strength_particles");
+                    if (!disableStrengthFx)
+                        UpdateBuffEffect(kvp.Value, "particles/strength_particles");
                     break;
                 case BuffType.ethereal:
                     if (kvp.Value.boolValue || kvp.Value.floatValue > 0) {

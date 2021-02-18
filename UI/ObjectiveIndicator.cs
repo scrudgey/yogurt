@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class ObjectiveIndicator : MonoBehaviour {
     public Image checkbox;
-    public Text description;
+    public TextMeshProUGUI description;
     public Sprite unfinishedSprite;
     public Sprite finishedSprite;
     // public CommercialProperty targetProperty;

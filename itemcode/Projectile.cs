@@ -10,6 +10,7 @@ public class Projectile : MonoBehaviour {
     private RotateTowardMotion rotator;
     public bool destroyOnImpact;
     public GameObject destroyEffect;
+    public Liquid liquid;
     void Awake() {
         message = new MessageDamage(damage, damageType);
         message.impactSounds = hurtableImpactSounds;
@@ -20,21 +21,20 @@ public class Projectile : MonoBehaviour {
     void OnTriggerEnter2D(Collider2D coll) {
         if (coll.isTrigger)
             return;
-        Hurtable hurtable = coll.gameObject.GetComponentInParent<Hurtable>();
+        Damageable hurtable = coll.gameObject.GetComponentInParent<Damageable>();
+        Debug.Log($"collision {coll} {hurtable}");
         if (hurtable) {
             Toolbox.Instance.SendMessage(coll.gameObject, this, message);
             Toolbox.Instance.AudioSpeaker(hurtableImpactSounds[Random.Range(0, hurtableImpactSounds.Length)], transform.position);
         } else {
             Toolbox.Instance.AudioSpeaker(wallImpactSounds[Random.Range(0, wallImpactSounds.Length)], transform.position);
         }
-        ClaimsManager.Instance.WasDestroyed(gameObject);
-        Dispose();
-        if (destroyEffect != null) {
-            GameObject.Instantiate(destroyEffect, transform.position, Quaternion.identity);
-        }
+        OnPhysicalImpact();
     }
     void OnCollisionEnter2D(Collision2D coll) {
-        Hurtable hurtable = coll.gameObject.GetComponent<Hurtable>();
+        Damageable hurtable = coll.gameObject.GetComponent<Damageable>();
+        Debug.Log($"collision {hurtable}");
+
         if (hurtable) {
             Toolbox.Instance.SendMessage(coll.gameObject, this, message);
             ClaimsManager.Instance.WasDestroyed(gameObject);
@@ -42,15 +42,28 @@ public class Projectile : MonoBehaviour {
             if (destroyEffect != null) {
                 GameObject.Instantiate(destroyEffect, transform.position, Quaternion.identity);
             }
+
         } else {
-            if (destroyOnImpact) {
-                ClaimsManager.Instance.WasDestroyed(gameObject);
-                Dispose();
-                if (destroyEffect != null) {
-                    GameObject.Instantiate(destroyEffect, transform.position, Quaternion.identity);
-                }
-            } else {
+            if (!destroyOnImpact) {
                 Rebound(coll);
+            }
+        }
+        if (liquid.name != "") {
+            Eater eater = coll.gameObject.GetComponent<Eater>();
+            if (eater != null) {
+                GameObject sip = Instantiate(Resources.Load("prefabs/droplet"), transform.position, Quaternion.identity) as GameObject;
+                Liquid.MonoLiquidify(sip, liquid);
+                eater.Eat(sip.GetComponent<Edible>());
+            }
+        }
+        OnPhysicalImpact();
+    }
+    public void OnPhysicalImpact() {
+        if (destroyOnImpact) {
+            ClaimsManager.Instance.WasDestroyed(gameObject);
+            Destroy(gameObject);
+            if (destroyEffect != null) {
+                GameObject.Instantiate(destroyEffect, transform.position, Quaternion.identity);
             }
         }
     }

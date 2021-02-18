@@ -19,6 +19,13 @@ public abstract class Objective {
 
 [System.Serializable]
 public class ObjectiveProperty : Objective {
+    Dictionary<string, Rating> ratings = new Dictionary<string, Rating>{
+        {"disgusting", Rating.disgusting},
+        {"disturbing", Rating.disturbing},
+        {"offensive", Rating.offensive},
+        {"chaos", Rating.chaos},
+        {"positive", Rating.positive},
+    };
     // yogurt,≥,1,eat yogurt on camera
     public string key;
 
@@ -50,27 +57,33 @@ public class ObjectiveProperty : Objective {
     }
     public ObjectiveProperty() { } // required for serialization 
     override public bool RequirementsMet(Commercial commercial) {
+
+        // if metric, check metric. otherwise, check property
+        if (ratings.ContainsKey(key)) {
+            float metric = commercial.quality[ratings[key]];
+            return Compare(metric);
+        }
         CommercialProperty property = null;
         commercial.properties.TryGetValue(key, out property);
         if (property == null) {
             return false;
         }
-        return Compare(property);
+        return Compare(property.val);
     }
-    public bool Compare(CommercialProperty otherProperty) {
+    public bool Compare(float otherProperty) {
         switch (comparison) {
             case CommercialComparison.equal:
-                return otherProperty.val == this.val;
+                return otherProperty == this.val;
             case CommercialComparison.notequal:
-                return otherProperty.val != this.val;
+                return otherProperty != this.val;
             case CommercialComparison.greater:
-                return otherProperty.val > this.val;
+                return otherProperty > this.val;
             case CommercialComparison.less:
-                return otherProperty.val < this.val;
+                return otherProperty < this.val;
             case CommercialComparison.greaterEqual:
-                return otherProperty.val >= this.val;
+                return otherProperty >= this.val;
             case CommercialComparison.lessEqual:
-                return otherProperty.val <= this.val;
+                return otherProperty <= this.val;
             default:
                 return true;
         }

@@ -487,11 +487,6 @@ public partial class Toolbox : Singleton<Toolbox> {
         Intrinsics donorIntrins = GetOrCreateComponent<Intrinsics>(donor);
         hostIntrins.CreateLiveBuffs(donorIntrins.buffs);
     }
-    public void AddPromotedLiveBuffs(GameObject host, GameObject donor) {
-        Intrinsics hostIntrins = GetOrCreateComponent<Intrinsics>(host);
-        Intrinsics donorIntrins = GetOrCreateComponent<Intrinsics>(donor);
-        hostIntrins.CreatePromotedLiveBuffs(donorIntrins.buffs);
-    }
     public void AddChildIntrinsics(GameObject host, Component component, GameObject donor) {
         Intrinsics hostIntrins = GetOrCreateComponent<Intrinsics>(host);
         Intrinsics donorIntrins = GetOrCreateComponent<Intrinsics>(donor);
@@ -569,7 +564,6 @@ public partial class Toolbox : Singleton<Toolbox> {
             return cache[key];
         };
     }
-    static Dictionary<string, Sprite[]> skinToneCache = new Dictionary<string, Sprite[]>();
     public static Func<string, SkinColor, Sprite[]> MemoizedSkinTone = Memoize<string, SkinColor, Sprite[]>(ApplySkinToneToSpriteSheet);
     public static Sprite[] ApplySkinToneToSpriteSheet(string sheetname, SkinColor skinColor) {
         Sprite[] sprites = Resources.LoadAll<Sprite>("spritesheets/" + sheetname);

@@ -490,6 +490,9 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
                 phrase = "{greet-neutral}";
                 break;
         }
+        if (netBuffs[BuffType.enraged].active()) {
+            phrase = "{greet-enemy}";
+        }
         Speech mySpeech = GetComponent<Speech>();
         if (mySpeech != null) {
             mySpeech.grammar.SetSymbol("interlocutor", Toolbox.Instance.GetName(target));

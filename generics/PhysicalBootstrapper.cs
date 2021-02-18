@@ -124,6 +124,7 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
 
         horizon = new GameObject("horizon");
         horizon.layer = LayerMask.NameToLayer("horizon");
+        horizon.tag = "horizon";
         Rigidbody2D shadowBody = horizon.AddComponent<Rigidbody2D>();
         shadowBody.bodyType = RigidbodyType2D.Kinematic;
         horizon.AddComponent<EdgeCollider2D>();
@@ -362,6 +363,8 @@ public class PhysicalBootstrapper : Interactive, ISaveable {
             return;
         if (impactsMiss)
             return;
+
+        physical.BroadcastMessage("OnPhysicalImpact", physical, SendMessageOptions.DontRequireReceiver);
         if (physical.currentMode == Physical.mode.zip) {
             Rebound();
         } else {

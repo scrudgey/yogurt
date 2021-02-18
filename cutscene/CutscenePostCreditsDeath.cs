@@ -26,6 +26,8 @@ public class CutscenePostCreditsDeath : Cutscene {
     Vector3 camInitialPosition;
     readonly float SpiralInTime = 15f;
     bool startGoodEnding;
+    bool playedRisingTone;
+    BackgroundColorController backgroundColorController;
     public override void Configure() {
         UINew.Instance.RefreshUI(active: false);
         playerObj = GameManager.Instance.playerObject;
@@ -54,6 +56,8 @@ public class CutscenePostCreditsDeath : Cutscene {
         camInitialPosition = camControl.transform.position;
 
         GameManager.Instance.PlayPublicSound(Resources.Load("sounds/8-bit/sfx_exp_various7") as AudioClip);
+
+        backgroundColorController = new BackgroundColorController(camera);
     }
     public void SceneWasLoaded(Scene scene, LoadSceneMode mode) {
         // UINew.Instance.FadeIn(() => { });
@@ -82,9 +86,11 @@ public class CutscenePostCreditsDeath : Cutscene {
         GameManager.Instance.SetFocus(playerObj);
         playerObj.transform.position = GameManager.Instance.lastPlayerPosition;
         DisableAllComponents(playerObj);
+        UINew.Instance.RefreshUI(active: false);
     }
     public override void Update() {
         timer += Time.deltaTime;
+        backgroundColorController.Update();
         switch (state) {
             case State.explode:
                 float severity = (float)PennerDoubleAnimation.ExpoEaseOut(timer, 0.65f, -0.65f, 5f);
@@ -154,6 +160,11 @@ public class CutscenePostCreditsDeath : Cutscene {
                 Vector2 playerPos = new Vector2(Mathf.Cos(timer * frequency + phi), Mathf.Sin(timer * frequency + phi)) * radius + mid;
                 Vector2 satanPos = new Vector2(Mathf.Cos(timer * frequency + Mathf.PI + phi), Mathf.Sin(timer * frequency + Mathf.PI + phi)) * radius + mid;
 
+                if (timer > SpiralInTime - 9f && !playedRisingTone) {
+                    playedRisingTone = true;
+                    // rising_synth.ogg
+                    GameManager.Instance.PlayPublicSound(Resources.Load("sounds/rising_synth") as AudioClip);
+                }
 
                 playerPos = camera.ScreenToWorldPoint(playerPos);
                 satanPos = camera.ScreenToWorldPoint(satanPos);
@@ -289,5 +300,68 @@ public class CutscenePostCreditsDeath : Cutscene {
         base.CleanUp();
         satanController.Deregister();
         magicianController.Deregister();
+    }
+}
+
+public class BackgroundColorController {
+    enum State { normal, colorLerp }
+    State state;
+    public static List<Color> ColorSequence = new List<Color> {
+        Color.blue,
+        Color.green,
+        Color.red,
+        Color.magenta,
+        Color.yellow,
+        Color.cyan
+    };
+    int index;
+    private Camera cam;
+    private HSBColor color;
+    float indexChangeInterval;
+    float timer;
+    private Color targetColor;
+    public BackgroundColorController(Camera camera) {
+        this.cam = camera;
+        color = HSBColor.FromColor(cam.backgroundColor);
+        indexChangeInterval = 3f;
+    }
+
+    public void Update() {
+        timer += Time.deltaTime;
+        // Debug.Log($"{state} {timer}");
+        switch (state) {
+            case State.normal:
+                if (timer > indexChangeInterval) {
+                    state = State.colorLerp;
+                    timer = 0f;
+                    index += 1;
+                    if (index >= ColorSequence.Count) index = 0;
+                    targetColor = ColorSequence[index];
+                    indexChangeInterval *= 0.99f;
+                }
+                color.h += Time.deltaTime / 30f;
+                if (color.h > 1)
+                    color.h -= 1f;
+                break;
+            case State.colorLerp:
+                Color current = color.ToColor();
+                Color newColor = Color.Lerp(current, targetColor, 0.1f);
+                if (ApproximatelyEqual(current, newColor)) {
+                    // Debug.Log("state: normal");
+                    state = State.normal;
+                    timer = 0f;
+                }
+                color = HSBColor.FromColor(newColor);
+                break;
+        }
+        if (cam != null)
+            cam.backgroundColor = color.ToColor();
+    }
+
+    static bool ApproximatelyEqual(Color c1, Color c2) {
+        return ((int)(c1.r * 1000) == (int)(c2.r * 1000)) &&
+        ((int)(c1.g * 1000) == (int)(c2.g * 1000)) &&
+        ((int)(c1.b * 1000) == (int)(c2.b * 1000));
+
     }
 }

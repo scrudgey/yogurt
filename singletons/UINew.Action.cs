@@ -158,17 +158,17 @@ public partial class UINew : Singleton<UINew> {
             initPosition = (initPosition - centerPosition) / (renderingCamera.pixelWidth / 800f);
             // CreateIndicator(initPosition, Color.blue);
 
-            if (initPosition.y > canvasRect.rect.height / 2f) {
-                initPosition.y = (canvasRect.rect.height / 2f) - 1f;
+            if (initPosition.y + 45 > canvasRect.rect.height / 2f) {
+                initPosition.y = (canvasRect.rect.height / 2f) - 45f;
             }
-            if (initPosition.y < canvasRect.rect.height / -2f) {
-                initPosition.y = (canvasRect.rect.height / -2f) + 1f;
+            if (initPosition.y - 45f < canvasRect.rect.height / -2f) {
+                initPosition.y = (canvasRect.rect.height / -2f) + 45f;
             }
-            if (initPosition.x > canvasRect.rect.width / 2f) {
-                initPosition.x = (canvasRect.rect.width / 2f) - 1f;
+            if (initPosition.x + 45 > canvasRect.rect.width / 2f) {
+                initPosition.x = (canvasRect.rect.width / 2f) - 45f;
             }
-            if (initPosition.x < canvasRect.rect.width / -2f) {
-                initPosition.x = (canvasRect.rect.width / -2f) + 1f;
+            if (initPosition.x - 45 < canvasRect.rect.width / -2f) {
+                initPosition.x = (canvasRect.rect.width / -2f) + 45f;
             }
             button.gameobject.transform.localPosition = initPosition;
 

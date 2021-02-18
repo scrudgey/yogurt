@@ -10,17 +10,19 @@ public class Package : Interactive, ISaveable {
     }
     void Start() {
         Gibs gibs = gameObject.AddComponent<Gibs>();
-        gibs.particle = Resources.Load("prefabs/" + contents) as GameObject;
+        GameObject content = Resources.Load("prefabs/" + contents) as GameObject;
+        if (content == null) {
+            content = Resources.Load("prefabs/eggplant") as GameObject;
+            Debug.Log($"package could not find {contents}");
+        }
+        gibs.particle = content;
         gibs.number = 1;
         gibs.damageCondition = damageType.any;
-
         Bones bones = GetComponent<Bones>();
         if (bones != null) {
             // set sprite
-            GameObject obj = Resources.Load("prefabs/" + contents) as GameObject;
-            SpriteRenderer objRenderer = obj.GetComponent<SpriteRenderer>();
+            SpriteRenderer objRenderer = content.GetComponent<SpriteRenderer>();
             bones.boneSprite = objRenderer.sprite;
-
             bones.Start();
         }
     }

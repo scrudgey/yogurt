@@ -32,10 +32,12 @@ public class WASDGraphic : MonoBehaviour {
             outlineColor.a = (float)PennerDoubleAnimation.QuintEaseIn(timer, 0, 1, fadeInTime);
             outline.effectColor = outlineColor;
         }
-
-        if (Keyboard.current.anyKey.isPressed) {
-            // stop
-            Destroy(gameObject);
+        if (timer > 1f) {
+            if (Keyboard.current.anyKey.isPressed) {
+                // stop
+                Destroy(gameObject);
+            }
         }
+
     }
 }

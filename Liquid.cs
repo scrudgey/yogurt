@@ -266,11 +266,11 @@ public class Liquid { //: IEquatable<Liquid> {
             buff.lifetime = 5f;
             l.buffs.Add(buff);
         }
-        if (data.ContainsKey("death")) {
+        if (data.ContainsKey("acid")) {
             Buff buff = new Buff();
-            buff.type = BuffType.death;
+            buff.type = BuffType.acidDamage;
             buff.boolValue = true;
-            // buff.lifetime = 20f;
+            buff.lifetime = 20f;
             l.buffs.Add(buff);
         }
         l.atomicLiquids.Add(new Liquid(l));

@@ -36,9 +36,7 @@ public partial class GameManager : Singleton<GameManager> {
             MusicController.Instance.StopTrack();
         }
     }
-    public void SetDurationCoefficient(float val) {
-        PlayerPrefs.SetFloat(prefsKey_Duration, val);
-    }
+
 
     public float GetMusicVolume() {
         return PlayerPrefs.GetFloat(prefsKey_MusicVolume, 1f);
@@ -50,7 +48,10 @@ public partial class GameManager : Singleton<GameManager> {
         return PlayerPrefs.GetInt(prefsKey_MusicOn, 1) == 1;
     }
     public float GetDurationCoefficient() {
-        return PlayerPrefs.GetFloat(prefsKey_Duration, 0.1f);
+        return PlayerPrefs.GetFloat(prefsKey_Duration, 0.05f);
+    }
+    public void SetDurationCoefficient(float val) {
+        PlayerPrefs.SetFloat(prefsKey_Duration, val);
     }
 }
 

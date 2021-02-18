@@ -250,6 +250,20 @@ public class StartMenu : MonoBehaviour {
                     break;
             }
         }
+        if (newName == "NateEnd") {
+            GameManager.Instance.data.collectedObjects.Add("camcorder");
+            GameManager.Instance.data.collectedObjects.Add("yogurt");
+
+            GameManager.Instance.data.collectedItems.Add("camcorder");
+            GameManager.Instance.data.collectedItems.Add("yogurt");
+            GameManager.Instance.data.unlockedScenes.Add("devils_throneroom");
+            GameManager.Instance.data.teleporterUnlocked = true;
+
+            GameManager.Instance.data.itemCheckedOut["camcorder"] = false;
+            GameManager.Instance.data.itemCheckedOut["yogurt"] = false;
+
+            GameManager.Instance.data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("satan"));
+        }
         GameManager.Instance.saveGameName = newName;
         GameManager.Instance.SaveGameData();
         GameManager.Instance.NewGame();

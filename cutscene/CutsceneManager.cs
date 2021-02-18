@@ -50,10 +50,25 @@ public class CutsceneManager : Singleton<CutsceneManager> {
             }
         }
     }
+    void Update() {
+        if (cutscene == null) {
+            return;
+        }
+        // for now, we'll manually filter down 
+        if (cutscene.GetType() == typeof(CutsceneFirstDeath)) {
+            DoUpdate();
+        }
+    }
     void FixedUpdate() {
         if (cutscene == null) {
             return;
         }
+        if (cutscene.GetType() != typeof(CutsceneFirstDeath)) {
+            DoUpdate();
+        }
+    }
+
+    void DoUpdate() {
         if (cutscene.complete) {
             cutscene.CleanUp();
             cutscene = null;

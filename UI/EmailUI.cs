@@ -64,8 +64,9 @@ public class EmailUI : MonoBehaviour {
             }
         }
         if (selectedEmail != null) {
-            EmailEntryCallback(selectedEmail.email);
             selectedEmail.button.Select();
+            selectedEmail.Clicked();
+            // EmailEntryCallback(selectedEmail.email);
         }
         effects.Configure();
     }
@@ -89,6 +90,7 @@ public class EmailUI : MonoBehaviour {
 
         foreach (emailEntryButton button in emailButtons) {
             button.CheckReadStatus();
+            button.ClearFocusIndicator();
         }
         computer.CheckBubble();
     }

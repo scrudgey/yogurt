@@ -57,6 +57,7 @@ public class GameData {
     public List<string> phoneCallsAll = new List<string>();
     public List<string> televisionShows;
     public HashSet<string> newTelevisionShows;
+    public List<string> packagesReceivedToday = new List<string>();
     public List<string> packages;
     public bool firstTimeLeavingHouse;
     public bool mayorCutsceneHappened;
@@ -76,6 +77,7 @@ public class GameData {
     public bool mayorLibraryShuffled;
     public int gangMembersDefeated;
     public bool lichRevivalToday;
+    public bool setupSabotage;
     public Commercial activeCommercial;
     public bool recordingCommercial;
     public HashSet<string> queuedMagicianSequences = new HashSet<string>();
@@ -86,8 +88,15 @@ public class GameData {
     public bool loadedSewerItemsToday = false;
     public bool yogurtDetective = false;
     public bool showedFirstCEODiary = false;
-    public GameState state = GameState.postCredits;
-
+    public GameState state = GameState.normal;
+    public bool sabotageMissionsUnlocked = false;
+    public SerializableDictionary<Rating, float> topRatings = new SerializableDictionary<Rating, float>{
+        {Rating.disgusting, 0},
+        {Rating.disturbing, 0},
+        {Rating.offensive, 0},
+        {Rating.chaos, 0},
+        {Rating.positive, 0}
+    };
     public GameData() {
         days = 0;
         SetSaveDateTime();
@@ -193,6 +202,7 @@ public partial class GameManager : Singleton<GameManager> {
 
             // ReceivePhoneCall("airplane");
             // ReceivePhoneCall("office");
+            // data.queuedMagicianSequences.Add("magician3");
         }
         if (saveGameName == "test")
             MySaver.CleanupSaves();
@@ -419,8 +429,12 @@ public partial class GameManager : Singleton<GameManager> {
         if (data != null && data.state == GameState.postCredits) {
             SetupDevilsOffer();
         }
-        Time.timeScale = 0f;
-        UINew.Instance.FadeIn(() => Time.timeScale = 1f);
+        if (CutsceneManager.Instance.cutscene != null && CutsceneManager.Instance.cutscene.GetType() == typeof(CutsceneFirstDeath)) {
+            // Debug.Log("skip fadein");
+        } else {
+            Time.timeScale = 0f;
+            UINew.Instance.FadeIn(() => Time.timeScale = 1f);
+        }
     }
     public void SetupDevilsOffer() {
         // post credits: the devil's offer
@@ -428,10 +442,6 @@ public partial class GameManager : Singleton<GameManager> {
         Transform satanRoot = GameObject.Find("Satan").transform;
         Transform playerRoot = playerObject.transform;
         GameObject doorway = GameObject.Find("doorway");
-        // GameObject hastur = GameObject.Find("Hastur");
-        // GameObject shabnax = GameObject.Find("Shabnax");
-        // Destroy(hastur);
-        // Destroy(shabnax);
         Destroy(doorway);
         foreach (MyMarker marker in FindObjectsOfType<MyMarker>()) {
             if (marker.transform.IsChildOf(satanRoot) || marker.transform.IsChildOf(playerRoot)) {
@@ -550,19 +560,24 @@ public partial class GameManager : Singleton<GameManager> {
     public void SpecificSceneInitialize(string sceneName) {
         if (sceneName == "neighborhood") {
             GameObject packageSpawnPoint = GameObject.Find("packageSpawnPoint");
+            CircleCollider2D packageSpawnCircle = packageSpawnPoint.GetComponent<CircleCollider2D>();
             if (data.state == GameState.ceoPlus) {
                 GameObject condo = GameObject.Find("condos2/condo");
                 condo.GetComponent<SpriteRenderer>().enabled = true;
             }
-            if (data.firstTimeLeavingHouse) {
-                foreach (string package in data.packages) {
-                    if (!data.collectedItems.Contains(package)) {
-                        GameObject packageObject = Instantiate(Resources.Load("prefabs/package"), packageSpawnPoint.transform.position, Quaternion.identity) as GameObject;
-                        Package pack = packageObject.GetComponent<Package>();
-                        pack.contents = package;
-                    }
+            // if (data.firstTimeLeavingHouse) {
+            foreach (string package in data.packages) {
+                if (!data.collectedItems.Contains(package) && !data.packagesReceivedToday.Contains(package)) {
+                    // TODO: choose random point inside region
+                    Vector3 position = (Vector2)packageSpawnCircle.transform.position + UnityEngine.Random.insideUnitCircle * packageSpawnCircle.radius;
+                    position.z = 0f;
+                    GameObject packageObject = Instantiate(Resources.Load("prefabs/package"), position, Quaternion.identity) as GameObject;
+                    Package pack = packageObject.GetComponent<Package>();
+                    pack.contents = package;
+                    data.packagesReceivedToday.Add(package);
                 }
             }
+            // }
             if (!data.mayorCutsceneHappened) {
                 CutsceneManager.Instance.InitializeCutscene<CutsceneMayor>();
                 data.mayorCutsceneHappened = true;
@@ -570,16 +585,22 @@ public partial class GameManager : Singleton<GameManager> {
             }
             data.firstTimeLeavingHouse = false;
         }
-        if (sceneName == "studio" && !data.visitedStudio) {
-            data.visitedStudio = true;
-            VideoCamera videoCamera = GameObject.FindObjectOfType<VideoCamera>();
-            if (videoCamera != null) {
-                CameraTutorialText ctt = videoCamera.GetComponent<CameraTutorialText>();
-                if (ctt != null)
-                    ctt.Enable();
+        if (sceneName == "studio") {
+            if (!data.visitedStudio) {
+                data.visitedStudio = true;
+                VideoCamera videoCamera = GameObject.FindObjectOfType<VideoCamera>();
+                if (videoCamera != null) {
+                    CameraTutorialText ctt = videoCamera.GetComponent<CameraTutorialText>();
+                    if (ctt != null)
+                        ctt.Enable();
+                }
+                throneroomCoroutine = waitAndShowDiary(1.5f, "diaryStudio");
+                StartCoroutine(throneroomCoroutine);
             }
-            throneroomCoroutine = waitAndShowDiary(1.5f, "diaryStudio");
-            StartCoroutine(throneroomCoroutine);
+            if (data.activeCommercial != null && data.activeCommercial.sabotage && !data.setupSabotage) {
+                SetupSabotageMission();
+            }
+
         }
         if (sceneName == "hells_landing" && !data.visitedHell) {
             data.visitedHell = true;
@@ -681,6 +702,9 @@ public partial class GameManager : Singleton<GameManager> {
                 if (data.days >= 15) {
                     data.queuedMagicianSequences.Add("magician2");
                 }
+                if (data.days >= 25) {
+                    data.queuedMagicianSequences.Add("magician3");
+                }
             }
 
             foreach (string sequence in data.queuedMagicianSequences) {
@@ -723,6 +747,28 @@ public partial class GameManager : Singleton<GameManager> {
         yield return new WaitForSeconds(waitTime);
         ShowDiaryEntry(diary);
         yield return null;
+    }
+    public void SetupSabotageMission() {
+        data.setupSabotage = true;
+        // instantiate other actor
+        // set the actor personality commercial type to yogurt eater
+        Vector3 spawnPoint = GameObject.Find("alternatePoint").transform.position;
+
+        // create second actor
+        GameObject costar = GameObject.Instantiate(Resources.Load("prefabs/randomPerson_normal"), spawnPoint, Quaternion.identity) as GameObject;
+
+        // ensure randomizer has happened first
+        PersonRandomizer randomizer = costar.GetComponent<PersonRandomizer>();
+        randomizer.deleteProbability = 0;
+        // randomizer.randomizePersonality = false;
+        randomizer.LateUpdate();
+
+        // second actor is a yogurt eater
+        DecisionMaker ai = costar.GetComponent<DecisionMaker>();
+        ai.personality.camPref = Personality.CameraPreference.eater;
+        ai.defaultPriorityType = DecisionMaker.PriorityType.ReadScript;
+        ai.initialized = false;
+        ai.Initialize();
     }
     public void SetupMagicianSequence(string sequence) {
         Debug.Log($"setting up magician sequence {sequence}");
@@ -958,7 +1004,9 @@ public partial class GameManager : Singleton<GameManager> {
         data.activeCommercial = null;
         data.loadedSewerItemsToday = false;
         data.lichRevivalToday = false;
+        data.setupSabotage = false;
         data.commercialsInitializedToday = new List<string>();
+        data.packagesReceivedToday = new List<string>();
     }
     public void DetermineClosetNews() {
         closetHasNew[HomeCloset.ClosetType.items] = false;
@@ -1091,6 +1139,7 @@ public partial class GameManager : Singleton<GameManager> {
         data.unlockedScenes = new HashSet<string>();
         data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eat1"));
         data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("gravy1"));
+        data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("sabo1"));
         data.unlockedScenes.Add("studio");
 
         data.televisionShows = new List<string>();
@@ -1112,6 +1161,23 @@ public partial class GameManager : Singleton<GameManager> {
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("dungeon"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("hell"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("satan"));
+
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("disgust1"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("disgust2"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("disgust3"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("disturb1"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("disturb2"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("disturb3"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("offensive1"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("offensive2"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("offensive3"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("sabo2"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("sabo3"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("combat2"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("combat3"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("gravy2"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("gravy3"));
+
             data.perks["hypnosis"] = true;
             data.perks["vomit"] = true;
             data.perks["eat_all"] = true;

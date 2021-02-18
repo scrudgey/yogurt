@@ -173,8 +173,15 @@ public class CutsceneCredits : Cutscene {
                 break;
             case "forest":
                 module = new RightCreditModule(camera) {
-                    titleString = "- Music -",
+                    titleString = "- Music and Special Effects -",
                     contentString = "Nathan Wiswall"
+                };
+                // camera.orthographicSize = 0.6f;
+                break;
+            case "chamber":
+                module = new LeftCreditModule(camera) {
+                    titleString = "- Graphics, Design, World, Puzzles -",
+                    contentString = "Ryan Foltz"
                 };
                 // camera.orthographicSize = 0.6f;
                 break;
@@ -216,6 +223,9 @@ public class CutsceneCredits : Cutscene {
                 GameManager.Instance.LeaveScene("forest", 1);
                 break;
             case "forest":
+                GameManager.Instance.LeaveScene("chamber", 1);
+                break;
+            case "chamber":
                 GameManager.Instance.LeaveScene("lower_hell", 1);
                 break;
             case "lower_hell":
