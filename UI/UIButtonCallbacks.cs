@@ -95,7 +95,7 @@ public class UIButtonCallbacks : MonoBehaviour {
         HashSet<string> clothes = new HashSet<string>();
         foreach (GameObject prefab in prefabs) {
             Edible objectEdible = prefab.GetComponent<Edible>();
-            if (objectEdible != null) {
+            if (objectEdible != null && !objectEdible.inedible) {
                 food.Add(prefab.name);
             }
             if (prefab.GetComponent<Uniform>() || prefab.GetComponent<Hat>()) {
@@ -107,7 +107,7 @@ public class UIButtonCallbacks : MonoBehaviour {
         }
         Debug.Log("number of items: " + items.Count().ToString());
         Debug.Log("number of food: " + food.Count().ToString());
-        Debug.Log("number of clothes: " + food.Count().ToString());
+        Debug.Log("number of clothes: " + clothes.Count().ToString());
         // commercials
         TextAsset[] commercials = Resources.LoadAll("data/commercials/", typeof(TextAsset))
             .Cast<TextAsset>()

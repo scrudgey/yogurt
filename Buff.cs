@@ -79,6 +79,7 @@ public class Buff {
         {BuffType.telepathy, "telepathy"},
         {BuffType.undead, "undead"},
         {BuffType.acidDamage, "acid"},
+        {BuffType.polymorph, "polymorph"}
     };
 
 
@@ -112,7 +113,8 @@ public enum BuffType {
     death,
     clearHeaded,
     enraged,
-    acidDamage
+    acidDamage,
+    polymorph
 }
 [System.Serializable]
 public class BuffData {

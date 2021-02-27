@@ -108,8 +108,8 @@ public class SaveInspector : MonoBehaviour {
                 if (potionData.unlockedIngredient1) completeIngredients += 1;
                 if (potionData.unlockedIngredient2) completeIngredients += 1;
             }
-            this.objectStat = new CompletionStat(data.collectedObjects.Count, 128); // note: regenerate these numbers
-            this.commercialStat = new CompletionStat(data.completeCommercials.Count, 23);
+            this.objectStat = new CompletionStat(data.collectedObjects.Count, 153); // note: regenerate these numbers
+            this.commercialStat = new CompletionStat(data.completeCommercials.Count, 35);
             this.achievementStat = new CompletionStat(completeAchievements, data.achievements.Count);
             this.levelStat = new CompletionStat(data.unlockedScenes.Count, GameManager.sceneNames.Count);
             this.recipeStat = new CompletionStat(completeIngredients, 13 * 2);

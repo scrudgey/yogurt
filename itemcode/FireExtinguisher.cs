@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
-
+using System.Collections.Generic;
 public class FireExtinguisher : Interactive, IDirectable {
     public GameObject particle;
     public float emissionSpeed;
     public float emissionRate;
     private float emissionTimeout;
-    public AudioClip spraySound;
+    public List<AudioClip> spraySound;
     public Sprite spraySprite;
     private Sprite defaultSprite;
     private SpriteRenderer spriteRenderer;
@@ -23,8 +23,6 @@ public class FireExtinguisher : Interactive, IDirectable {
 
         Interaction spray2 = new Interaction(this, "Spray", "SprayObject");
         spray2.continuous = true;
-        // spray2.inertOnPlayerConsent = false;
-        // spray2.otherOnPlayerConsent = true;
         spray2.selfOnSelfConsent = false;
         spray2.otherOnSelfConsent = false;
 
@@ -35,13 +33,6 @@ public class FireExtinguisher : Interactive, IDirectable {
 
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
 
-        // if (!GetComponent<AudioSource>()) {
-        //     gameObject.AddComponent<AudioSource>();
-        // }
-        // GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Logarithmic;
-        // GetComponent<AudioSource>().minDistance = 0.4f;
-        // GetComponent<AudioSource>().maxDistance = 5.42f;
-        // GetComponent<AudioSource>().playOnAwake = false;
         spriteRenderer = GetComponent<SpriteRenderer>();
         defaultSprite = spriteRenderer.sprite;
     }
@@ -57,10 +48,11 @@ public class FireExtinguisher : Interactive, IDirectable {
     void FixedUpdate() {
         if (doSpray) {
             if (!audioSource.isPlaying) {
-                audioSource.clip = spraySound;
+                audioSource.clip = spraySound[Random.Range(0, spraySound.Count)];
                 audioSource.Play();
             }
-            spriteRenderer.sprite = spraySprite;
+            if (spraySprite != null)
+                spriteRenderer.sprite = spraySprite;
             GameObject particles = Instantiate(particle, transform.position, Quaternion.identity) as GameObject;
             Vector2 force = direction * emissionSpeed;
             Collider2D projectileCollider = particles.GetComponent<Collider2D>();
@@ -72,7 +64,7 @@ public class FireExtinguisher : Interactive, IDirectable {
                     Physics2D.IgnoreCollision(collider, projectileCollider, true);
                 }
             }
-            particles.GetComponent<Rigidbody2D>().AddForce(force * Time.deltaTime, ForceMode2D.Impulse);
+            particles.GetComponent<Rigidbody2D>().AddForce(force * Time.fixedDeltaTime, ForceMode2D.Impulse);
             ChemicalSpray spray = particles.GetComponent<ChemicalSpray>();
             if (spray) {
                 Pickup myPickup = GetComponent<Pickup>();

@@ -55,7 +55,7 @@ public class Chainsaw : Pickup, ISaveable {
             }
         }
 
-        damageTimer += Time.deltaTime;
+        damageTimer += Time.fixedDeltaTime;
         if (damageTimer > 0.1f) {
             damageTimer = 0;
             foreach (GameObject obj in damageQueue) {

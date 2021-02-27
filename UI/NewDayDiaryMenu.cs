@@ -26,6 +26,10 @@ public class NewDayDiaryMenu : MonoBehaviour {
             topItemPanel.SetActive(false);
         }
 
+        foreach (Transform child in commercialsPanel.transform) {
+            Destroy(child.gameObject);
+        }
+
         GameManager.Instance.data.itemsCollectedToday = 0;
         GameManager.Instance.data.foodCollectedToday = 0;
         GameManager.Instance.data.clothesCollectedToday = 0;

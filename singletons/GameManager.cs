@@ -75,7 +75,7 @@ public class GameData {
     public bool mayorAwardToday;
     public bool foughtSpiritToday;
     public bool mayorLibraryShuffled;
-    public int gangMembersDefeated;
+    public int baddiesDefeated;
     public bool lichRevivalToday;
     public bool setupSabotage;
     public Commercial activeCommercial;
@@ -165,7 +165,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = true;
+    public bool debug = false;
     public bool demo = false;
     public bool failedLevelLoad = false;
     public Gender playerGender;
@@ -1000,7 +1000,7 @@ public partial class GameManager : Singleton<GameManager> {
         data.mayorAwardToday = false;
         data.foughtSpiritToday = false;
         data.mayorLibraryShuffled = false;
-        data.gangMembersDefeated = 0;
+        data.baddiesDefeated = 0;
         data.activeCommercial = null;
         data.loadedSewerItemsToday = false;
         data.lichRevivalToday = false;
@@ -1175,6 +1175,7 @@ public partial class GameManager : Singleton<GameManager> {
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("sabo3"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("combat2"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("combat3"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("combat4"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("gravy2"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("gravy3"));
 
@@ -1214,12 +1215,6 @@ public partial class GameManager : Singleton<GameManager> {
         // initialize achievements
         data.achievements = AchievementManager.LoadAchievements();
         data.stats = new SerializableDictionary<StatType, Stat>();
-
-        // TODO: DELETE THIS!!!
-        // unlock satan's throneroom- not in the ordinary game.
-        // data.unlockedScenes.Add("devils_throneroom");
-        // sceneNames["devils_throneroom"] = "devils_throneroom";
-        // data.teleporterUnlocked = true;
 
         return data;
     }

@@ -84,6 +84,7 @@ public class MessageSpeech : Message {
         return speechData;
     }
 }
+[System.Serializable]
 public class MessageDamage : Message {
     public float amount;
     public damageType type;

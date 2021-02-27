@@ -4,6 +4,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using TMPro;
 
 public class DialogueNode {
     public List<string> text = new List<string>();
@@ -47,6 +48,13 @@ public class Monologue {
     }
     public string GetString() {
         currentString = text.Peek().Substring(0, index);
+        if (index > 0)
+            if (currentString.Substring(index - 1, 1) == "<") {
+                //<sprite=0>
+                index += 9;
+                currentString = text.Peek().Substring(0, index);
+            }
+
         index += 1;
         return currentString;
         // return Toolbox.Instance.CloneRemover(speaker.name) + ": " + currentString;
@@ -76,7 +84,7 @@ public partial class DialogueMenu : MonoBehaviour {
     public Image portrait2;
     public GameObject portraitContainer1;
     public GameObject portraitContainer2;
-    public Text speechText;
+    public TextMeshProUGUI speechText;
     public Text largeText;
     public TextSize textSize {
         get { return _activeText; }
@@ -86,13 +94,13 @@ public partial class DialogueMenu : MonoBehaviour {
         }
     }
     private TextSize _activeText;
-    public Text choice1Text;
-    public Text choice2Text;
-    public Text choice3Text;
+    public TextMeshProUGUI choice1Text;
+    public TextMeshProUGUI choice2Text;
+    public TextMeshProUGUI choice3Text;
     public GameObject choice1Object;
     public GameObject choice2Object;
     public GameObject choice3Object;
-    public Text promptText;
+    public TextMeshProUGUI promptText;
     public GameObject choicePanel;
     public Button giveButton;
     public Button insultButton;
@@ -144,13 +152,13 @@ public partial class DialogueMenu : MonoBehaviour {
         portraitContainer1 = transform.Find("base/dialogueElements/main/portrait1").gameObject;
         portraitContainer2 = transform.Find("base/dialogueElements/main/portrait2").gameObject;
 
-        speechText = transform.Find("base/dialogueElements/main/speechPanel/speechText").GetComponent<Text>();
+        speechText = transform.Find("base/dialogueElements/main/speechPanel/speechText").GetComponent<TextMeshProUGUI>();
         largeText = transform.Find("base/dialogueElements/main/speechPanel/largeSpeechText").GetComponent<Text>();
 
-        promptText = transform.Find("base/dialogueElements/main/speechPanel/textPrompt").GetComponent<Text>();
-        choice1Text = transform.Find("base/dialogueElements/choicePanel/choice1/Text").GetComponent<Text>();
-        choice2Text = transform.Find("base/dialogueElements/choicePanel/choice2/Text").GetComponent<Text>();
-        choice3Text = transform.Find("base/dialogueElements/choicePanel/choice3/Text").GetComponent<Text>();
+        promptText = transform.Find("base/dialogueElements/main/speechPanel/textPrompt").GetComponent<TextMeshProUGUI>();
+        choice1Text = transform.Find("base/dialogueElements/choicePanel/choice1/Text").GetComponent<TextMeshProUGUI>();
+        choice2Text = transform.Find("base/dialogueElements/choicePanel/choice2/Text").GetComponent<TextMeshProUGUI>();
+        choice3Text = transform.Find("base/dialogueElements/choicePanel/choice3/Text").GetComponent<TextMeshProUGUI>();
         choice1Object = transform.Find("base/dialogueElements/choicePanel/choice1/").gameObject;
         choice2Object = transform.Find("base/dialogueElements/choicePanel/choice2/").gameObject;
         choice3Object = transform.Find("base/dialogueElements/choicePanel/choice3/").gameObject;

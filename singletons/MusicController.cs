@@ -33,7 +33,8 @@ public enum TrackName {
     creeptunnel,
     lowerhell,
     satansthone,
-    gravy
+    gravy,
+    antimayor
 }
 [System.Serializable]
 public class Track : IEquatable<Track> {
@@ -203,6 +204,11 @@ public class MusicGravy : Music {
         tracks = new Stack<Track>(new List<Track> { new Track(TrackName.gravy) });
     }
 }
+public class MusicAntiMayor : Music {
+    public MusicAntiMayor() {
+        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.antimayor) });
+    }
+}
 public class MusicController : Singleton<MusicController> {
 
     static Dictionary<TrackName, string> trackFiles = new Dictionary<TrackName, string>(){
@@ -230,7 +236,8 @@ public class MusicController : Singleton<MusicController> {
         {TrackName.creeptunnel, "Creep Tunnels Draft #5 YESSIR"},
         {TrackName.lowerhell, "Lower HELL Draftz Test #5 YC3 2020"},
         {TrackName.satansthone, "Final SATAN VER#1 Vox _ No Bass YC3 2020"},
-        {TrackName.gravy, "Scram Gravy Commercial Ver#5 Drip Plop YC3 2020"}
+        {TrackName.gravy, "Scram Gravy Commercial Ver#5 Drip Plop YC3 2020"},
+        {TrackName.antimayor, "ANTI MAYOR Ver#2 Final Sleaze YC3 2021"},
     };
 
     static Dictionary<string, Func<Music>> sceneMusic = new Dictionary<string, Func<Music>>() {
@@ -244,8 +251,8 @@ public class MusicController : Singleton<MusicController> {
         {"moon_pool", () => new MusicMoon()},
         {"moon_town", () => new MusicMoon()},
         {"moon_cave", () => new MusicMoon()},
-        {"anti_mayors_house",() => new MusicMoon()},
-        {"tower", () => new MusicMoon()},
+        // {"anti_mayors_house",() => new MusicMoon()},
+        {"tower", () => new MusicAntiMayor()},
         {"boardroom_cutscene", () => new MusicBeat()},
         // {"morning_cutscene", musicBeat},
         {"forest", () => new MusicCreepy()},
@@ -262,8 +269,7 @@ public class MusicController : Singleton<MusicController> {
         {"cave2", () => new MusicMayorAttic()},
         {"cave3", () => new MusicMayorAttic()},
         {"cave4", () => new MusicMayorAttic()},
-        {"anti_mayor_cutscene", () => new MusicMayorAttic()},
-        // {"gravy_studio", () => new MusicMoon()},
+        // {"anti_mayor_cutscene", () => new MusicMayorAttic()},
         {"mountain", () => new MusicMountain()},
         {"volcano", () => new MusicMountain()},
         {"venus1", () => new MusicVenus()},
@@ -279,6 +285,8 @@ public class MusicController : Singleton<MusicController> {
         {"office", () => new MusicBeat()},
         {"bar", () => new MusicBeat()},
         {"gravy_studio", () => new MusicGravy()},
+        {"anti_mayor_cutscene", () => new MusicAntiMayor()},
+        {"anti_mayors_house", () => new MusicAntiMayor()},
     };
     // TODO: add studio
     public static Dictionary<TrackName, AudioClip> tracks = new Dictionary<TrackName, AudioClip>();

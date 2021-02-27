@@ -73,6 +73,8 @@ public class VideoCamera : Interactive {
         GameManager.Instance.EvaluateCommercial();
     }
     public bool FinishButtonClick_Validation() {
+        if (!GameManager.Instance.data.recordingCommercial)
+            return false;
         if (GameManager.Instance.data.activeCommercial == null)
             return false;
         return GameManager.Instance.data.activeCommercial.Evaluate();
@@ -87,14 +89,15 @@ public class VideoCamera : Interactive {
             return;
         if (!GameManager.Instance.data.recordingCommercial)
             return;
-        if (seenFlags.Contains(col.transform.root.gameObject))
-            return;
+        // if (seenFlags.Contains(col.transform.root.gameObject))
+        //     return;
         if (col.tag == "occurrenceSound")
             return;
         seenFlags.Add(col.transform.root.gameObject);
-        Qualities qualities = col.GetComponent<Qualities>();
-        if (qualities != null) {
+        foreach (Qualities qualities in col.GetComponentsInChildren<Qualities>()) {
             GameManager.Instance.data.activeCommercial.AddChild(qualities.ToDescribable());
+            Debug.Log(qualities.ToDescribable().whatHappened);
+            UINew.Instance.UpdateObjectives();
         }
         Occurrence occurrence = col.gameObject.GetComponent<Occurrence>();
         if (occurrence != null) {
@@ -102,7 +105,7 @@ public class VideoCamera : Interactive {
         }
     }
     public void Update() {
-        if (GameManager.Instance.data.recordingCommercial) {
+        if (GameManager.Instance.data != null && GameManager.Instance.data.recordingCommercial) {
             regionIndicator.SetActive(true);
         } else {
             regionIndicator.SetActive(false);
@@ -130,6 +133,7 @@ public class VideoCamera : Interactive {
         CameraTutorialText ctt = GetComponent<CameraTutorialText>();
         if (ctt != null)
             ctt.Disable();
+        seenFlags = new HashSet<GameObject>();
         UINew.Instance.ShowMenu(UINew.MenuType.scriptSelect);
     }
     public bool Enable_Validation() {

@@ -8,8 +8,10 @@ public class PhysicalImpact : MonoBehaviour {
     public CircleCollider2D circle;
     public BoxCollider2D box;
     public bool useBoxCollider;
+    public bool stickAround;
     void Start() {
-        Destroy(gameObject, 0.05f);
+        if (!stickAround)
+            Destroy(gameObject, 0.05f);
         CircleCollider2D circle = GetComponent<CircleCollider2D>();
         circle.radius = size;
         if (useBoxCollider) {
@@ -17,7 +19,8 @@ public class PhysicalImpact : MonoBehaviour {
             box.enabled = true;
         } else {
             circle.enabled = true;
-            box.enabled = false;
+            if (box != null)
+                box.enabled = false;
         }
     }
     void OnTriggerEnter2D(Collider2D collider) {

@@ -188,6 +188,9 @@ public class Liquid { //: IEquatable<Liquid> {
     }
     public static string NameOfBuffs(Liquid liq) {
         Dictionary<BuffType, PotionData> buffMap = PotionComponent.BuffToPotion();
+        foreach (KeyValuePair<BuffType, PotionData> kvp in buffMap) {
+            Debug.Log($"{kvp.Key} {kvp.Value}");
+        }
         if (liq.buffs.Count == 0) {
             return "water";
         } else if (liq.buffs.Count == 1) {
@@ -195,6 +198,7 @@ public class Liquid { //: IEquatable<Liquid> {
             if (liq.buffs[0].lifetime == 0) {
                 return "potion of permanent " + buffMap[liq.buffs[0].type].name;
             } else {
+                Debug.Log(liq.buffs[0].type);
                 return "potion of " + buffMap[liq.buffs[0].type].name;
             }
         } else if (liq.buffs.Count == 2) {
@@ -271,6 +275,19 @@ public class Liquid { //: IEquatable<Liquid> {
             buff.type = BuffType.acidDamage;
             buff.boolValue = true;
             buff.lifetime = 20f;
+            l.buffs.Add(buff);
+        }
+        if (data.ContainsKey("polymorph")) {
+            Buff buff = new Buff();
+            buff.type = BuffType.polymorph;
+            buff.boolValue = true;
+            buff.lifetime = 2f;
+            l.buffs.Add(buff);
+        }
+        if (data.ContainsKey("death")) {
+            Buff buff = new Buff();
+            buff.type = BuffType.death;
+            buff.boolValue = true;
             l.buffs.Add(buff);
         }
         l.atomicLiquids.Add(new Liquid(l));

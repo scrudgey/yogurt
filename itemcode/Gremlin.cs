@@ -220,13 +220,11 @@ public class Gremlin : MonoBehaviour {
 // * if holding, press F randomly
 
 // then every few seconds, choose at random from the list:
-// run to random item
-//      use them
+
 // * drop item
 // * eat items
 // * throw item
 // * grab
-// disable / enable z-locking
 // * swear / insult
 // * drink something
 // * scale flipper
@@ -234,6 +232,9 @@ public class Gremlin : MonoBehaviour {
 // * throw
 // * divide into two
 // put on hats?
+// disable / enable z-locking
+// run to random item
+//      use them
 
 // * should be hurtable / killable / gibbable
 //      batteries drop out

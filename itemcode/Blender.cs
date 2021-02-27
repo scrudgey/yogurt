@@ -74,7 +74,7 @@ public class Blender : Container, ISaveable {
             if (items.Count > 0) {
                 MessageDamage message = new MessageDamage();
                 message.suppressGibs = true;
-                message.amount = Time.deltaTime * 10;
+                message.amount = Time.fixedDeltaTime * 10;
                 message.force = Vector2.up;
                 message.type = damageType.physical;
                 message.suppressImpactSound = true;

@@ -94,15 +94,15 @@ public class ScriptSelectionMenu : MonoBehaviour {
 
         foreach (Commercial script in incompleteCommercials) {
             GameObject newEntry = CreateScriptButton(script);
-            if (firstEntry == null) {
-                firstEntry = newEntry;
-            }
+            // if (firstEntry == null) {
+            firstEntry = newEntry;
+            // }
         }
         foreach (Commercial script in completeCommercials) {
             GameObject newEntry = CreateScriptButton(script);
-            if (firstEntry == null) {
-                firstEntry = newEntry;
-            }
+            // if (firstEntry == null) {
+            firstEntry = newEntry;
+            // }
         }
 
         EventSystem.current.SetSelectedGameObject(firstEntry);
@@ -113,6 +113,7 @@ public class ScriptSelectionMenu : MonoBehaviour {
         GameObject newEntry = Instantiate(Resources.Load("UI/ScriptListEntry")) as GameObject;
         effects.buttons.Add(newEntry.GetComponent<Button>());
         newEntry.transform.SetParent(scrollContent.transform, false);
+        newEntry.transform.SetAsFirstSibling();
         ScriptListEntry scriptEntry = newEntry.GetComponent<ScriptListEntry>();
         scriptEntry.Configure(script, this);
         return newEntry;

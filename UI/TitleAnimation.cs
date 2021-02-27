@@ -65,6 +65,7 @@ public class TitleAnimation : MonoBehaviour {
         }
     }
     void Skip() {
+        GameObject.FindObjectOfType<StartMenu>().ShowPrompt();
         timer = 0;
         state = State.whiteout;
         GameManager.Instance.PlayPublicSound(whiteOutSound);
@@ -114,6 +115,7 @@ public class TitleAnimation : MonoBehaviour {
     }
 
     void ClearEffects() {
+        GameObject.FindObjectOfType<StartMenu>().ShowPrompt();
         GameManager.Instance.titleIntroPlayed = true;
         GameManager.Instance.PlayPublicSound(revealSound);
         whiteOut.enabled = false;

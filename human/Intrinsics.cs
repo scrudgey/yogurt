@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 public class Intrinsics : MonoBehaviour, ISaveable {
     public Intrinsics parent;
@@ -158,6 +159,40 @@ public class Intrinsics : MonoBehaviour, ISaveable {
                         }
                     }
                     break;
+                case BuffType.polymorph:
+                    if (kvp.Value.active()) {
+                        PersonRandomizer randomizer = gameObject.GetComponent<PersonRandomizer>();
+                        if (randomizer == null) {
+                            randomizer = gameObject.AddComponent<PersonRandomizer>();
+                        }
+                        randomizer.continuous = true;
+                        randomizer.configured = false;
+
+                        randomizer.randomizeGender = true;
+                        randomizer.randomizeHead = true;
+                        randomizer.randomizePersonality = true;
+                        randomizer.randomizeSkinColor = true;
+
+                        GameObject prefab = Resources.Load("prefabs/randomPerson full") as GameObject;
+                        PersonRandomizer src = prefab.GetComponent<PersonRandomizer>();
+                        randomizer.randomOutfits = src.randomOutfits;
+                        randomizer.randomFemaleOutfits = src.randomFemaleOutfits;
+                        randomizer.maleHeads = src.maleHeads;
+                        randomizer.femaleHeads = src.femaleHeads;
+                        randomizer.randomVoices = src.randomVoices;
+                        randomizer.randomHats = src.randomHats;
+
+                        randomizer.randomHatProbability = 0.1f;
+                        randomizer.randomItemProbability = 0f;
+                        randomizer.deleteProbability = 0f;
+
+                    } else {
+                        foreach (PersonRandomizer randomizer in gameObject.GetComponents<PersonRandomizer>()) {
+                            if (randomizer.continuous)
+                                randomizer.configured = true;
+                        }
+                    }
+                    break;
                 default:
                     break;
             }
@@ -167,7 +202,7 @@ public class Intrinsics : MonoBehaviour, ISaveable {
     public void UpdateBuffEffect(Buff buff, string prefabPath) {
         if (intrinsicFX == null)
             return;
-        if (buff.boolValue || buff.floatValue > 0) {
+        if (buff.active()) {
             if (intrinsicFX[buff.type] == null) {
                 intrinsicFX[buff.type] = Instantiate(Resources.Load(prefabPath), transform.position, Quaternion.identity) as GameObject;
                 intrinsicFX[buff.type].transform.SetParent(transform, false);

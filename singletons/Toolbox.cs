@@ -647,8 +647,7 @@ public partial class Toolbox : Singleton<Toolbox> {
         // Speech speech = target.GetComponent<Speech>();
         HeadAnimation headAnimation = target.GetComponentInChildren<HeadAnimation>();
         Outfit outfit = target.GetComponent<Outfit>();
-
-        if (changeHead) {
+        if (headAnimation != null && changeHead) {
             switch (gender) {
                 case Gender.male:
                     headAnimation.spriteSheet = "generic3_head";

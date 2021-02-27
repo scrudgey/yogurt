@@ -41,6 +41,7 @@ public class StartMenu : MonoBehaviour {
     public AudioClip effectSound;
     public AudioClip flushSound;
     bool keypressedThisFrame;
+    bool promptShown;
     void Awake() {
         InputController.Instance.EscapeAction.action.performed += _ => keypressedThisFrame = true;
     }
@@ -49,7 +50,7 @@ public class StartMenu : MonoBehaviour {
     void Start() {
         AudioSource source = GetComponent<AudioSource>();
         source.Play();
-        prompt.SetActive(true);
+        // prompt.SetActive(true);
         newGameMenu.SetActive(false);
         loadGameMenu.gameObject.SetActive(false);
         saveInspector.gameObject.SetActive(false);
@@ -61,6 +62,12 @@ public class StartMenu : MonoBehaviour {
         alert.SetActive(false);
         // logo.SetActive(true);
         state = menuState.anykey;
+    }
+    public void ShowPrompt() {
+        if (promptShown)
+            return;
+        promptShown = true;
+        prompt.SetActive(true);
     }
     void Update() {
         if (Keyboard.current.anyKey.isPressed && state == menuState.anykey) {

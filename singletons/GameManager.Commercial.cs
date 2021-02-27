@@ -78,6 +78,7 @@ public partial class GameManager : Singleton<GameManager> {
         data.setupSabotage = false;
     }
     public void StartCommercial(Commercial commercial) {
+        GameManager.Instance.data.baddiesDefeated = 0;
         GameManager.Instance.data.activeCommercial = commercial;
         SetRecordingStatus(true);
         foreach (VideoCamera vid in GameObject.FindObjectsOfType<VideoCamera>()) {
@@ -101,11 +102,11 @@ public partial class GameManager : Singleton<GameManager> {
         if (data.commercialsInitializedToday.Contains(commercial.name))
             return;
 
-        // TODO: check if this level supports greaser entrance first
-        if (commercial.name == "1950s Greaser Beatdown") {
+        if (commercial.name == "1950s Greaser Beatdown" || commercial.name == "Combat II" || commercial.name == "Combat III" || commercial.name == "Combat IV") {
             if (CutsceneScorpion.FindValidDoorway() != null) {
                 data.commercialsInitializedToday.Add(commercial.name);
-                CutsceneManager.Instance.InitializeCutscene<CutsceneScorpion>();
+                // CutsceneManager.Instance.InitializeCutscene<CutsceneScorpion>();
+                CutsceneManager.Instance.InitializeCutscene(new CutsceneScorpion(commercial.name));
             }
         }
 

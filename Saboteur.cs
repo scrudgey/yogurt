@@ -17,9 +17,9 @@ public class Saboteur : Interactive {
         cancelAct.holdingOnOtherConsent = false;
         interactions.Add(cancelAct);
 
-        // if (GameManager.Instance.data.completeCommercials.Count < 2) {
-        //     Destroy(gameObject);
-        // }
+        if (GameManager.Instance.data.completeCommercials.Count < 2) {
+            Destroy(gameObject);
+        }
     }
 
     public void Enable() {
@@ -36,7 +36,7 @@ public class Saboteur : Interactive {
         UINew.Instance.ClearObjectives();
     }
     public bool Cancel_Validation() {
-        return GameManager.Instance.data.recordingCommercial;
+        return GameManager.Instance.data != null && GameManager.Instance.data.recordingCommercial;
     }
 
 }

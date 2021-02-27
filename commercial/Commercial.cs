@@ -73,7 +73,9 @@ public class Commercial : MetaDescribable<DescribableOccurrenceData> {
             } else if (key == "eatName") {
                 c.objectives.Add(new ObjectiveEatName(bits));
             } else if (key == "killScorpion") {
-                c.objectives.Add(new ObjectiveScorpion());
+                c.objectives.Add(new ObjectiveScorpion(bits));
+            } else if (key == "mayorhead") {
+                c.objectives.Add(new ObjectiveMayorHead());
             } else if (key == "gravyCommercial") {
                 c.gravy = true;
             } else if (key == "sabotage") {

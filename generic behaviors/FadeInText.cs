@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
-
+using TMPro;
 public class FadeInText : MonoBehaviour {
     private Text text;
+    private TextMeshProUGUI tmpText;
     private HSBColor color;
     private HSBColor outlineColor;
     private List<Outline> outlines;
@@ -15,15 +16,22 @@ public class FadeInText : MonoBehaviour {
     public float timer;
     void Start() {
         text = GetComponent<Text>();
+        tmpText = GetComponent<TextMeshProUGUI>();
         outlines = new List<Outline>(GetComponents<Outline>());
-        color = HSBColor.FromColor(text.color);
+        if (text != null)
+            color = HSBColor.FromColor(text.color);
+        if (tmpText != null)
+            color = HSBColor.FromColor(tmpText.faceColor);
         if (outlines.Count > 0) {
             outlineColor = HSBColor.FromColor(outlines[0].effectColor);
         }
         color.a = 0f;
         outlineColor.a = 0f;
         if (!fadeOut) {
-            text.color = Color.clear;
+            if (text != null)
+                text.color = Color.clear;
+            if (tmpText != null)
+                tmpText.color = Color.clear;
             foreach (Outline outline in outlines) {
                 outline.effectColor = Color.clear;
             }
@@ -38,7 +46,13 @@ public class FadeInText : MonoBehaviour {
         if (!text) {
             text = GetComponent<Text>();
         }
-        color = HSBColor.FromColor(text.color);
+        if (!tmpText) {
+            tmpText = GetComponent<TextMeshProUGUI>();
+        }
+        if (text != null)
+            color = HSBColor.FromColor(text.color);
+        if (tmpText != null)
+            color = HSBColor.FromColor(tmpText.color);
         color.a = 0f;
     }
     void Update() {
@@ -59,7 +73,10 @@ public class FadeInText : MonoBehaviour {
                 gameObject.SetActive(false);
             }
         }
-        text.color = color.ToColor();
+        if (text != null)
+            text.color = color.ToColor();
+        if (tmpText != null)
+            tmpText.color = color.ToColor();
         foreach (Outline outline in outlines) {
             outline.effectColor = outlineColor.ToColor();
         }

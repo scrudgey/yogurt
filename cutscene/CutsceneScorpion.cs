@@ -14,6 +14,10 @@ public class CutsceneScorpion : Cutscene {
     private CameraControl camControl;
     Speech speech;
     private int numSwitchblades = 0;
+    private string sceneName;
+    public CutsceneScorpion(string cutsceneName) {
+        this.sceneName = cutsceneName;
+    }
     public static Doorway FindValidDoorway() {
         foreach (Doorway doorway in GameObject.FindObjectsOfType<Doorway>()) {
             if (doorway.name == "door" && !doorway.spawnPoint && doorway.entryID != 420) {
@@ -27,8 +31,36 @@ public class CutsceneScorpion : Cutscene {
         camControl = GameObject.FindObjectOfType<CameraControl>();
         state = State.spawn;
         doorway = FindValidDoorway();
-        greaserPrefab = Resources.Load("prefabs/greaser") as GameObject;
+        greaserPrefab = null;
+        switch (sceneName) {
+            default:
+            case "1950s Greaser Beatdown":
+                greaserPrefab = Resources.Load("prefabs/greaser") as GameObject;
+                break;
+            case "Combat II":
+                greaserPrefab = Resources.Load("prefabs/Bruiser") as GameObject;
+                break;
+            case "Combat III":
+                greaserPrefab = Resources.Load("prefabs/BillGhost") as GameObject;
+                break;
+            case "Combat IV":
+                greaserPrefab = Resources.Load("prefabs/Tharr") as GameObject;
+                break;
+        }
         MusicController.Instance.EnqueueMusic(new MusicGreaser());
+    }
+    private bool SufficientGreasers() {
+        switch (sceneName) {
+            default:
+            case "1950s Greaser Beatdown":
+                return greasers.Count >= 5;
+            case "Combat II":
+                return greasers.Count >= 2;
+            case "Combat III":
+            case "Combat IV":
+                return greasers.Count >= 1;
+        }
+
     }
     public override void Update() {
         timer += Time.deltaTime;
@@ -36,7 +68,7 @@ public class CutsceneScorpion : Cutscene {
             if (timer > 0.3f) {
                 timer = 0f;
                 CutsceneManager.Instance.StartCoroutine(walkCoroutine());
-                if (greasers.Count >= 5) {
+                if (SufficientGreasers()) {
                     state = State.slew;
                 }
             }
@@ -49,6 +81,9 @@ public class CutsceneScorpion : Cutscene {
                 state = State.dialogue;
             }
         }
+    }
+    private GameObject SpawnGreaser() {
+        return GameObject.Instantiate(greaserPrefab, doorway.transform.position, Quaternion.identity) as GameObject;
     }
     private IEnumerator walkCoroutine() {
         // Vector2 random = Random.insideUnitCircle.normalized;
@@ -78,7 +113,7 @@ public class CutsceneScorpion : Cutscene {
                 break;
         }
 
-        GameObject greaser = GameObject.Instantiate(greaserPrefab, doorway.transform.position, Quaternion.identity) as GameObject;
+        GameObject greaser = SpawnGreaser();
         greasers.Add(greaser);
         if (greasers.Count == 1) {
             camControl.focus = greaser;
@@ -112,13 +147,14 @@ public class CutsceneScorpion : Cutscene {
             DecisionMaker ai = greaser.GetComponent<DecisionMaker>();
             ai.enabled = true;
 
-            if ((Random.Range(0f, 1f) < 0.15f) || (greasers.Count == 0 && numSwitchblades == 0)) {
-                GameObject switchBlade = GameObject.Instantiate(Resources.Load("prefabs/switchblade"), greaser.transform.position, Quaternion.identity) as GameObject;
-                Inventory inv = greaser.GetComponent<Inventory>();
-                Pickup pickup = switchBlade.GetComponent<Pickup>();
-                inv.GetItem(pickup);
-                numSwitchblades += 1;
-            }
+            if (sceneName == "1950s Greaser Beatdown")
+                if ((Random.Range(0f, 1f) < 0.15f) || (greasers.Count == 0 && numSwitchblades == 0)) {
+                    GameObject switchBlade = GameObject.Instantiate(Resources.Load("prefabs/switchblade"), greaser.transform.position, Quaternion.identity) as GameObject;
+                    Inventory inv = greaser.GetComponent<Inventory>();
+                    Pickup pickup = switchBlade.GetComponent<Pickup>();
+                    inv.GetItem(pickup);
+                    numSwitchblades += 1;
+                }
 
             Awareness awareness = greaser.GetComponent<Awareness>();
             foreach (GameObject otherGreaser in greasers) {

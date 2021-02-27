@@ -33,7 +33,6 @@ public class Projectile : MonoBehaviour {
     }
     void OnCollisionEnter2D(Collision2D coll) {
         Damageable hurtable = coll.gameObject.GetComponent<Damageable>();
-        Debug.Log($"collision {hurtable}");
 
         if (hurtable) {
             Toolbox.Instance.SendMessage(coll.gameObject, this, message);

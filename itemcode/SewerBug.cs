@@ -48,7 +48,7 @@ public class SewerBug : MonoBehaviour {
 
     void FixedUpdate() {
         if (runTime > 0) {
-            runTime -= Time.deltaTime;
+            runTime -= Time.fixedDeltaTime;
         }
         if (state == State.run) {
             velocity = Toolbox.Instance.RotateZ(velocity, dTheta);
@@ -57,7 +57,7 @@ public class SewerBug : MonoBehaviour {
                 runTime = Random.Range(3f, 5f);
             }
 
-            spriteTimer -= Time.deltaTime;
+            spriteTimer -= Time.fixedDeltaTime;
             if (spriteTimer < 0) {
                 spriteIndex += 1;
                 spriteTimer = 0.05f;

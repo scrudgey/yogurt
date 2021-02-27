@@ -33,7 +33,8 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
     public float randomHatProbability;
     public float randomItemProbability;
     public float deleteProbability;
-    private bool configured = false;
+    public bool configured = false;
+    public bool continuous;
     public void LateUpdate() {
         if (configured)
             return;
@@ -58,29 +59,30 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
         Outfit outfit = GetComponent<Outfit>();
         Uniform uniform = null;
 
-        switch (gender) {
-            case Gender.male:
-                if (randomOutfits != null && randomOutfits.Count > 0) {
-                    uniform = GameObject.Instantiate(randomOutfits[UnityEngine.Random.Range(0, randomOutfits.Count)]);
-                    GameObject removedUniform = outfit.DonUniform(uniform, cleanStains: false);
-                    if (removedUniform)
-                        Destroy(removedUniform);
-                }
-                break;
-            case Gender.female:
-                if (randomFemaleOutfits != null && randomFemaleOutfits.Count > 0) {
-                    uniform = GameObject.Instantiate(randomFemaleOutfits[UnityEngine.Random.Range(0, randomFemaleOutfits.Count)]);
-                    GameObject removedUniform = outfit.DonUniform(uniform, cleanStains: false);
-                    if (removedUniform)
-                        Destroy(removedUniform);
-                }
-                break;
-        }
+        if (outfit != null)
+            switch (gender) {
+                case Gender.male:
+                    if (randomOutfits != null && randomOutfits.Count > 0) {
+                        uniform = GameObject.Instantiate(randomOutfits[UnityEngine.Random.Range(0, randomOutfits.Count)]);
+                        GameObject removedUniform = outfit.DonUniform(uniform, cleanStains: false);
+                        if (removedUniform)
+                            Destroy(removedUniform);
+                    }
+                    break;
+                case Gender.female:
+                    if (randomFemaleOutfits != null && randomFemaleOutfits.Count > 0) {
+                        uniform = GameObject.Instantiate(randomFemaleOutfits[UnityEngine.Random.Range(0, randomFemaleOutfits.Count)]);
+                        GameObject removedUniform = outfit.DonUniform(uniform, cleanStains: false);
+                        if (removedUniform)
+                            Destroy(removedUniform);
+                    }
+                    break;
+            }
 
 
+        HeadAnimation headAnimation = GetComponentInChildren<HeadAnimation>();
 
-        if (randomizeHead) {
-            HeadAnimation head = GetComponentInChildren<HeadAnimation>();
+        if (randomizeHead && headAnimation != null) {
             Portrait portrait = null;
             switch (gender) {
                 case Gender.male:
@@ -90,11 +92,11 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
                     portrait = femaleHeads[UnityEngine.Random.Range(0, femaleHeads.Count)].portrait;
                     break;
             }
-            head.baseName = portrait.baseName;
+            headAnimation.baseName = portrait.baseName;
             Speech speech = GetComponent<Speech>();
             speech.portrait = portrait.sprites.ToArray();
             Toolbox.SetSkinColor(gameObject, portrait.skinColor);
-            head.LoadSprites();
+            headAnimation.LoadSprites();
         } else {
             if (randomizeSkinColor) {
                 SkinColor skinColor = (SkinColor)UnityEngine.Random.Range(0, 3);
@@ -134,8 +136,10 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
             );
 
             DecisionMaker decisionMaker = GetComponent<DecisionMaker>();
-            decisionMaker.personality = personality;
-            decisionMaker.Initialize();
+            if (decisionMaker != null) {
+                decisionMaker.personality = personality;
+                decisionMaker.Initialize();
+            }
         }
 
         if (randomItems != null && randomItems.Count > 0) {
@@ -145,12 +149,15 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
                 inv.GetItem(randomItem);
             }
         }
+        Head head = GetComponentInChildren<Head>();
 
-        if (randomHats != null && randomHats.Count > 0) {
+        if (head != null && randomHats != null && randomHats.Count > 0) {
             if (UnityEngine.Random.Range(0f, 1f) < randomHatProbability) {
-                Head head = GetComponentInChildren<Head>();
                 Hat randomHat = GameObject.Instantiate(randomHats[UnityEngine.Random.Range(0, randomHats.Count)], transform.position, Quaternion.identity);
-                head.DonHat(randomHat);
+                GameObject removed = head.DonHat(randomHat);
+                if (removed != null) {
+                    Destroy(removed);
+                }
             }
         }
 
@@ -193,8 +200,8 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
         if (awareness) {
             awareness.socializationTimer = -1f * UnityEngine.Random.Range(0f, 10f);
         }
-
-        configured = true;
+        if (!continuous)
+            configured = true;
     }
 
     public void SaveData(PersistentComponent data) {

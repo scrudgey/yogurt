@@ -327,10 +327,27 @@ public class Hurtable : Damageable, ISaveable {
         }
         Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData);
 
-        if (gameObject.name.StartsWith("greaser")) {
-            GameManager.Instance.data.gangMembersDefeated += 1;
+        void IncrementStat() {
+            GameManager.Instance.data.baddiesDefeated += 1;
             UINew.Instance.UpdateObjectives();
         }
+
+        if (GameManager.Instance.data.activeCommercial != null) {
+            Commercial commercial = GameManager.Instance.data.activeCommercial;
+            if (commercial.name == "1950s Greaser Beatdown" && gameObject.name.StartsWith("greaser")) {
+                IncrementStat();
+            }
+            if (commercial.name == "Combat II" && gameObject.name.StartsWith("Bruiser")) {
+                IncrementStat();
+            }
+            if (commercial.name == "Combat III" && gameObject.name.StartsWith("BillGhost")) {
+                IncrementStat();
+            }
+            if (commercial.name == "Combat IV" && gameObject.name.StartsWith("Tharr")) {
+                IncrementStat();
+            }
+        }
+
     }
 
     override protected void Update() {

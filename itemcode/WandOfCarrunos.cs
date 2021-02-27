@@ -12,7 +12,6 @@ public class WandOfCarrunos : MonoBehaviour {
             return;
         // damageQueue.Add(coll.gameObject);
         GameObject target = InputController.Instance.GetBaseInteractive(coll.transform);
-        Debug.Log($"enter {target}");
         Toolbox.Instance.AddChildIntrinsics(target, this, gameObject);
     }
     void OnTriggerExit2D(Collider2D coll) {
@@ -23,7 +22,6 @@ public class WandOfCarrunos : MonoBehaviour {
             return;
         GameObject target = InputController.Instance.GetBaseInteractive(coll.transform);
 
-        Debug.Log($"exit {target}");
         Toolbox.Instance.RemoveChildIntrinsics(target, this);
     }
 }

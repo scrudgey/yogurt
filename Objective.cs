@@ -141,13 +141,29 @@ public class ObjectiveEatName : Objective {
 [System.Serializable]
 public class ObjectiveScorpion : Objective {
     public string eaterOutfit;
-    public ObjectiveScorpion() {
-        // eaterOutfit = bits[1];
-        // desc = bits[2];
-        this.desc = "defeat the Scorpion Gang";
+    int limit;
+    public ObjectiveScorpion() { } // required for serialization
+    public ObjectiveScorpion(string[] bits) {
+        this.limit = int.Parse(bits[1]);
+        this.desc = bits[2];
     }
     override public bool RequirementsMet(Commercial commercial) {
         // return commercial.yogurtEaterOutfits.Contains(eaterOutfit);
-        return GameManager.Instance.data.gangMembersDefeated >= 5;
+        return GameManager.Instance.data.baddiesDefeated >= limit;
+    }
+}
+
+[System.Serializable]
+public class ObjectiveMayorHead : Objective {
+    public ObjectiveMayorHead() {
+        this.desc = "Bring the mayor's head to the gravy studio";
+    } // required for serialization
+    override public bool RequirementsMet(Commercial commercial) {
+        foreach (DescribableOccurrenceData data in commercial.GetChildren()) {
+            if (data.whatHappened == "I saw the mayor's head") {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -78,7 +78,7 @@ public class CameraControl : MonoBehaviour {
         if (focusBody != null) {
             focusVelocity = focusBody.velocity;
         } else {
-            focusVelocity = (focus.transform.position - previousPosition) / Time.deltaTime;
+            focusVelocity = (focus.transform.position - previousPosition) / Time.fixedDeltaTime;
         }
         focusVelocity *= velocityFactor;
 
