@@ -58,11 +58,8 @@ public class FireExtinguisher : Interactive, IDirectable {
             Collider2D projectileCollider = particles.GetComponent<Collider2D>();
             Physics2D.IgnoreCollision(GetComponent<Collider2D>(), projectileCollider, true);
             // ignore collisions with parent object: so the player doesn't spray herself with fire extinguisher
-            if (transform.parent != null) {
-                Collider2D[] parentColliders = transform.root.GetComponentsInChildren<Collider2D>();
-                foreach (Collider2D collider in parentColliders) {
-                    Physics2D.IgnoreCollision(collider, projectileCollider, true);
-                }
+            foreach (Collider2D collider in transform.root.GetComponentsInChildren<Collider2D>()) {
+                Physics2D.IgnoreCollision(collider, projectileCollider, true);
             }
             particles.GetComponent<Rigidbody2D>().AddForce(force * Time.fixedDeltaTime, ForceMode2D.Impulse);
             ChemicalSpray spray = particles.GetComponent<ChemicalSpray>();

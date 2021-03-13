@@ -77,32 +77,37 @@ public class ScriptSelectionMenu : MonoBehaviour {
     }
     public void LoadCommercials(bool gravy = false, bool sabotage = false) {
         GameObject firstEntry = null;
-        HashSet<Commercial> unlockedCommercials = new HashSet<Commercial>();
+
+        HashSet<Commercial> completeCommercials = new HashSet<Commercial>();
+        HashSet<Commercial> incompleteCommercials = new HashSet<Commercial>();
 
         foreach (Commercial commercial in GameManager.Instance.data.unlockedCommercials) {
             if (gravy == commercial.gravy && sabotage == commercial.sabotage) {
-                unlockedCommercials.Add(commercial);
+                incompleteCommercials.Add(commercial);
             }
         }
 
-        HashSet<Commercial> completeCommercials = new HashSet<Commercial>(unlockedCommercials);
-        completeCommercials.IntersectWith(GameManager.Instance.data.completeCommercials);
-
-        HashSet<Commercial> incompleteCommercials = new HashSet<Commercial>(unlockedCommercials);
-        incompleteCommercials.ExceptWith(GameManager.Instance.data.completeCommercials);
-
-
-        foreach (Commercial script in incompleteCommercials) {
-            GameObject newEntry = CreateScriptButton(script);
-            // if (firstEntry == null) {
-            firstEntry = newEntry;
-            // }
+        // yeah this is terrible. so what
+        foreach (Commercial commercial in incompleteCommercials) {
+            foreach (Commercial completed in GameManager.Instance.data.completeCommercials) {
+                if (completed.name == commercial.name) {
+                    completeCommercials.Add(commercial);
+                }
+            }
         }
+        foreach (Commercial commercial in completeCommercials) {
+            incompleteCommercials.Remove(commercial);
+        }
+
+
+
         foreach (Commercial script in completeCommercials) {
             GameObject newEntry = CreateScriptButton(script);
-            // if (firstEntry == null) {
             firstEntry = newEntry;
-            // }
+        }
+        foreach (Commercial script in incompleteCommercials) {
+            GameObject newEntry = CreateScriptButton(script);
+            firstEntry = newEntry;
         }
 
         EventSystem.current.SetSelectedGameObject(firstEntry);

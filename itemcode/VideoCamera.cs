@@ -96,7 +96,7 @@ public class VideoCamera : Interactive {
         seenFlags.Add(col.transform.root.gameObject);
         foreach (Qualities qualities in col.GetComponentsInChildren<Qualities>()) {
             GameManager.Instance.data.activeCommercial.AddChild(qualities.ToDescribable());
-            Debug.Log(qualities.ToDescribable().whatHappened);
+            // Debug.Log(qualities.ToDescribable().whatHappened);
             UINew.Instance.UpdateObjectives();
         }
         Occurrence occurrence = col.gameObject.GetComponent<Occurrence>();

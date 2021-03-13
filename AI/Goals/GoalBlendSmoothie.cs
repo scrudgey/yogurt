@@ -6,6 +6,7 @@ namespace AI {
     public class GoalBlendSmoothie : Goal {
         Ref<GameObject> cauldron;
         // Blender blender;
+        LambdaRef<Blender> blender;
         Inventory inventory;
         public RoutineUseBlender routine;
         public ConditionBoolSwitch condition;
@@ -18,11 +19,15 @@ namespace AI {
             condition = new ConditionBoolSwitch(g);
             successCondition = condition;
 
-            if (cauldron.val != null) {
-                Blender blender = cauldron.val.GetComponent<Blender>();
-                routine = new RoutineUseBlender(g, c, blender, inventory, condition);
-                routines.Add(routine);
-            }
+            // if (cauldron.val != null) {
+            // Blender blender = cauldron.val.GetComponent<Blender>();
+            blender = new LambdaRef<Blender>(null, () => {
+                if (cauldron.val == null) return null;
+                return cauldron.val.GetComponent<Blender>();
+            });
+            routine = new RoutineUseBlender(g, c, blender, inventory, condition);
+            routines.Add(routine);
+            // }
         }
         public void Reset() {
             routine.Reset();

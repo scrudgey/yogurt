@@ -88,6 +88,7 @@ public class CutsceneAirport : Cutscene {
             head.DirectionChange(Vector2.right);
         }
 
+        GameManager.Instance.data.ceoFled = true;
 
         moeObj.SetActive(false);
         larryObj.SetActive(false);

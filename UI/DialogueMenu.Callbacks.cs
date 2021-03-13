@@ -29,6 +29,10 @@ public partial class DialogueMenu : MonoBehaviour {
             PoleStarCallback();
             nextLine = true;
         }
+        if (text == "GONGSOUND") {
+            GameManager.Instance.PlayPublicSound(Resources.Load("music/GONG Nice YC3") as AudioClip);
+            nextLine = true;
+        }
         if (text == "VAMPIRETRAP") {
             doTrapDoor = true;
             nextLine = true;
@@ -160,7 +164,8 @@ public partial class DialogueMenu : MonoBehaviour {
             yield return new WaitForSeconds(1.0f);
             control.LookAtPoint(GameManager.Instance.playerObject.transform.position);
             // AudioClip congratsClip = Resources.Load("music/Short CONGRATS YC3") as AudioClip;
-            MusicController.Instance.EnqueueMusic(new MusicCongrats());
+            // MusicController.Instance.EnqueueMusic(new MusicCongrats());
+            MusicController.Instance.EnqueueMusic(new Music(new Track(TrackName.congrats, loop: false)));
             GameObject confetti = Resources.Load("particles/confetti explosion") as GameObject;
             // Toolbox.Instance.AudioSpeaker(congratsClip, controllable.transform.position);
             GameObject.Instantiate(confetti, controllable.transform.position, Quaternion.identity);

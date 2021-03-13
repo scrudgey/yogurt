@@ -76,7 +76,7 @@ public class LiquidContainer : Interactive, ISaveable {
     }
     public void HandleDamage(MessageDamage message) {
         if (message.type == damageType.physical || message.type == damageType.cutting) {
-            if (!lid)
+            if (!lid && message.amount > Time.fixedDeltaTime * 20)
                 Spill();
         }
     }
@@ -118,6 +118,7 @@ public class LiquidContainer : Interactive, ISaveable {
         string myname = Toolbox.Instance.GetName(gameObject);
         string resname = Toolbox.Instance.GetName(l.gameObject);
         return "Fill " + myname + " with " + l.liquid.name + " from " + resname;
+        // return $"Pour {l.liquid.name} from {resname} into {myname}";
     }
     public void FillWithLiquid(Liquid l) {
         if (amount > 0) {

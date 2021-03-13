@@ -40,6 +40,12 @@ public enum TrackName {
 public class Track : IEquatable<Track> {
     public TrackName trackName;
     public float playTime;
+    public AudioClip clip {
+        get {
+            return MusicController.Instance.GetTrack(trackName);
+        }
+        set { }
+    }
     public bool loop;
     public float volume = 1;
     public Track(TrackName trackName, bool loop = true, float vol = 1) {
@@ -79,139 +85,95 @@ public class Track : IEquatable<Track> {
 [System.Serializable]
 public class Music {
     public Stack<Track> tracks;
-}
-public class MusicTitle : Music {
-    public MusicTitle() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.mainTitle) });
+    public List<TrackName> trackNames;
+    public AudioSource audioSource;
+    public IEnumerator coroutine;
+    public IEnumerator PlayCoroutine(Track track) {
+        if (track.loop) {
+            while (true) {
+                track.playTime += Time.unscaledDeltaTime;
+                yield return null;
+            }
+        } else {
+            while (track.playTime < track.clip.length) {
+                track.playTime += Time.unscaledDeltaTime;
+                yield return null;
+            }
+            StopMusic();
+            yield return null;
+        }
     }
-}
-public class MusicApartment : Music {
-    public MusicApartment() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.apartment, vol: 0.5f) });
+    public Music(Track track) {
+        this.tracks = new Stack<Track>();
+        this.trackNames = new List<TrackName>();
+        this.audioSource = MusicController.Instance.audioSource;
+        AddTrack(track);
     }
-}
-public class MusicNone : Music {
-    public MusicNone() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.none) });
+    public Music(IEnumerable<Track> tracks) {
+        this.tracks = new Stack<Track>();
+        this.trackNames = new List<TrackName>();
+        this.audioSource = MusicController.Instance.audioSource;
+        foreach (Track track in tracks) {
+            AddTrack(track);
+        }
     }
-}
-public class MusicChamber : Music {
-    public MusicChamber() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.lithophone) });
+    void AddTrack(Track track) {
+        tracks.Push(track);
+        trackNames.Add(track.trackName);
     }
-}
-public class MusicCreepy : Music {
-    public MusicCreepy() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.creepyAmbient) });
+    public void Play() {
+        if (tracks.Count == 0)
+            return;
+        Track track = tracks.Peek();
+        // Debug.Log($"Music play track {track.trackName}");
+        if (track.trackName == TrackName.none) {
+            StopMusic();
+        }
+        // if a track was paused, the coroutine will remain
+        if (coroutine == null) {
+            // Debug.Log($"setting up coroutine for track: {track.trackName}");
+            coroutine = PlayCoroutine(track);
+        }
+        MusicController.Instance.StartCoroutine(coroutine);
+        // Debug.Log($"{track.playTime} | {track.playTime % audioSource.clip.length}");
+        audioSource.clip = track.clip;
+        audioSource.volume = track.volume;
+        audioSource.time = track.playTime % track.clip.length;
+        audioSource.loop = track.loop;
+        audioSource.Play();
     }
-}
-
-public class MusicSpace : Music {
-    public MusicSpace() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.moonWarp) });
+    void StopMusic() {
+        // Debug.Log("Music stop");
+        Pause();
+        coroutine = null;
+        tracks.Pop();
+        if (tracks.Count > 0) {
+            Play();
+        } else {
+            MusicController.Instance.End();
+        }
     }
-}
-public class MusicMoon : Music {
-    public MusicMoon() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.moonCave) });
+    public void Pause() {
+        // Debug.Log("Music pause");
+        audioSource.Stop();
+        if (coroutine != null) {
+            MusicController.Instance.StopCoroutine(coroutine);
+        }
     }
-}
-public class MusicBeat : Music {
-    public MusicBeat() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.fillerBeat) });
-    }
-}
-public class MusicMayor : Music {
-    public MusicMayor() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.mayor) });
-    }
-}
-public class MusicMayorAttic : Music {
-    public MusicMayorAttic() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.mayor_attic) });
-    }
-}
-public class MusicVamp : Music {
-    public MusicVamp() {
-        tracks = new Stack<Track>(new List<Track> {
-            new Track(TrackName.dracLoop, vol:0.5f),
-            new Track(TrackName.dracIntro, loop: false, vol:0.5f),
-            });
-    }
-}
-public class MusicTweak : Music {
-    public MusicTweak() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.tweakDelay) });
-    }
-}
-public class MusicChela : Music {
-    public MusicChela() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.chela) });
-    }
-}
-public class MusicItem : Music {
-    public MusicItem() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.itemAcquired, loop: false) });
-    }
-}
-public class MusicCongrats : Music {
-    public MusicCongrats() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.congrats, loop: false) });
-    }
-}
-public class MusicTVR2 : Music {
-    public MusicTVR2() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.tv_r2d2) });
-    }
-}
-public class MusicMountain : Music {
-    public MusicMountain() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.mountain, vol: 6f) });
-    }
-}
-public class MusicImp : Music {
-    public MusicImp() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.imp, vol: 0.75f) });
-    }
-}
-public class MusicGreaser : Music {
-    public MusicGreaser() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.greaser) });
-    }
-}
-public class MusicVenus : Music {
-    public MusicVenus() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.venus) });
-    }
-}
-public class MusicCreep : Music {
-    public MusicCreep() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.creeptunnel) });
-    }
-}
-public class MusicHell : Music {
-    public MusicHell() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.lowerhell) });
-    }
-}
-public class MusicThroneroom : Music {
-    public MusicThroneroom() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.satansthone) });
-    }
-}
-public class MusicGravy : Music {
-    public MusicGravy() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.gravy) });
-    }
-}
-public class MusicAntiMayor : Music {
-    public MusicAntiMayor() {
-        tracks = new Stack<Track>(new List<Track> { new Track(TrackName.antimayor) });
+    public bool Equality(Music music2) {
+        // if (tracks.Count != music2.tracks.Count)
+        //     return false;
+        HashSet<TrackName> tracks1 = new HashSet<TrackName>(trackNames);
+        HashSet<TrackName> tracks2 = new HashSet<TrackName>(music2.trackNames);
+        tracks1.ExceptWith(tracks2);
+        // Debug.Log(tracks1.Count);
+        return tracks1.Count == 0;
     }
 }
 public class MusicController : Singleton<MusicController> {
+    // ideally, should be a FSM with play, pause, enqueue
 
-    static Dictionary<TrackName, string> trackFiles = new Dictionary<TrackName, string>(){
+    static Dictionary<TrackName, string> trackFiles = new Dictionary<TrackName, string>{
         {TrackName.mainTitle, "Title Screen LOOP #2 YC3 2020"},
         {TrackName.apartment, "Main Vamp w keys YC3"},
         {TrackName.creepyAmbient, "ForestMoon Alternate Loop YC3"},
@@ -240,62 +202,75 @@ public class MusicController : Singleton<MusicController> {
         {TrackName.antimayor, "ANTI MAYOR Ver#2 Final Sleaze YC3 2021"},
     };
 
-    static Dictionary<string, Func<Music>> sceneMusic = new Dictionary<string, Func<Music>>() {
-        // {"title", () => new MusicTitle()},
-        {"chamber", () => new MusicChamber()},
-        {"space", () => new MusicSpace()},
-        {"portal", () => new MusicSpace()},
-        {"portal_venus", () => new MusicSpace()},
-        {"portal_hell", () => new MusicSpace()},
-        {"moon1", () => new MusicMoon()},
-        {"moon_pool", () => new MusicMoon()},
-        {"moon_town", () => new MusicMoon()},
-        {"moon_cave", () => new MusicMoon()},
-        // {"anti_mayors_house",() => new MusicMoon()},
-        {"tower", () => new MusicAntiMayor()},
-        {"boardroom_cutscene", () => new MusicBeat()},
-        // {"morning_cutscene", musicBeat},
-        {"forest", () => new MusicCreepy()},
-        {"woods", () => new MusicCreepy()},
-        {"potion", () => new MusicImp()},
-        {"vampire_house", () => new MusicVamp()},
-        {"dungeon", () => new MusicVamp()},
-        {"house", () => new MusicApartment()},
-        {"apartment", () => new MusicApartment()},
-        {"neighborhood", () => new MusicApartment()},
-        {"mayors_house", () => new MusicMayor()},
-        {"mayors_attic", () => new MusicMayorAttic()},
-        {"cave1", () => new MusicMayorAttic()},
-        {"cave2", () => new MusicMayorAttic()},
-        {"cave3", () => new MusicMayorAttic()},
-        {"cave4", () => new MusicMayorAttic()},
-        // {"anti_mayor_cutscene", () => new MusicMayorAttic()},
-        {"mountain", () => new MusicMountain()},
-        {"volcano", () => new MusicMountain()},
-        {"venus1", () => new MusicVenus()},
-        {"venus_temple", () => new MusicVenus()},
-        {"hells_kitchen", () => new MusicCreep()},
-        {"hells_landing", () => new MusicCreep()},
-        {"lower_hell", () => new MusicHell()},
-        {"devils_throneroom", () => new MusicThroneroom()},
-        {"office_cutscene", () => new MusicBeat()},
-        {"airport_cutscene", () => new MusicBeat()},
-        {"hallucination", () => new MusicMountain()},
-        {"boardroom", () => new MusicBeat()},
-        {"office", () => new MusicBeat()},
-        {"bar", () => new MusicBeat()},
-        {"gravy_studio", () => new MusicGravy()},
-        {"anti_mayor_cutscene", () => new MusicAntiMayor()},
-        {"anti_mayors_house", () => new MusicAntiMayor()},
-    };
     // TODO: add studio
+    Dictionary<string, Func<Music>> sceneMusic = new Dictionary<string, Func<Music>>() {
+        // {"title", () => new MusicTitle()},
+        {"chamber", () => new Music(new Track(TrackName.lithophone))}, // MusicChamber
+        {"space", () => new Music(new Track(TrackName.moonWarp))}, // MusicSpace
+        {"portal", () => new Music(new Track(TrackName.moonWarp))},
+        {"portal_venus", () => new Music(new Track(TrackName.moonWarp))},
+        {"portal_hell", () => new Music(new Track(TrackName.moonWarp))},
+        {"moon1", () => new Music(new Track(TrackName.moonCave))}, // MusicMoon
+        {"moon_pool", () => new Music(new Track(TrackName.moonCave))},
+        {"moon_town", () => new Music(new Track(TrackName.moonCave))},
+        {"moon_cave", () => new Music(new Track(TrackName.moonCave))},
+        // {"anti_mayors_house",() => new MusicMoon()},
+        {"tower", () => new Music(new Track(TrackName.antimayor))}, // MusicAntiMayor
+        {"boardroom_cutscene", () => new Music(new Track(TrackName.fillerBeat))}, // MusicBeat
+        // {"morning_cutscene", musicBeat},
+        {"forest", () => new Music(new Track(TrackName.creepyAmbient))}, // MusicCreepy
+        {"woods", () => new Music(new Track(TrackName.creepyAmbient))},
+        {"potion", () => new Music(new Track(TrackName.imp, vol: 0.75f))}, // MusicImp
+        {"vampire_house", () => new Music(new List<Track> {
+            new Track(TrackName.dracLoop, vol:0.5f),
+            new Track(TrackName.dracIntro, loop: false, vol:0.5f)})
+        }, // MusicVamp
+        {"dungeon", () => new Music(new List<Track> {
+            new Track(TrackName.dracLoop, vol:0.5f),
+            new Track(TrackName.dracIntro, loop: false, vol:0.5f)})
+        },
+        {"house", () => new Music(new Track(TrackName.apartment, vol: 0.5f))}, // MusicApartment
+        {"apartment", () => new Music(new Track(TrackName.apartment, vol: 0.5f))},
+        {"neighborhood", () => new Music(new Track(TrackName.apartment, vol: 0.5f))},
+        {"mayors_house", () => new Music(new Track(TrackName.mayor))}, // MusicMayor
+        {"mayors_attic", () => new Music(new Track(TrackName.mayor_attic))}, // MusicMayorAttic
+        {"cave1", () => new Music(new Track(TrackName.mayor_attic))},
+        {"cave2", () => new Music(new Track(TrackName.mayor_attic))},
+        {"cave3", () => new Music(new Track(TrackName.mayor_attic))},
+        {"cave4", () => new Music(new Track(TrackName.mayor_attic))},
+        // {"anti_mayor_cutscene", () => new MusicMayorAttic()},
+        {"mountain", () => new Music(new Track(TrackName.mountain, vol: 6f))}, // MusicMountain
+        {"volcano", () => new Music(new Track(TrackName.mountain, vol: 6f))},
+        {"venus1", () => new Music(new Track(TrackName.venus))}, // MusicVenus
+        {"venus_temple", () => new Music(new Track(TrackName.venus))},
+        {"hells_kitchen", () => new Music(new Track(TrackName.venus))},
+        {"hells_landing", () => new Music(new Track(TrackName.venus))},
+        {"lower_hell", () => new Music(new Track(TrackName.lowerhell, vol: 0.5f))}, // MusicHell
+        {"devils_throneroom", () => new Music(new Track(TrackName.satansthone))}, // MusicThroneroom
+        {"office_cutscene", () => new Music(new Track(TrackName.fillerBeat) )}, // MusicBeat
+        {"airport_cutscene", () => new Music(new Track(TrackName.fillerBeat) )},
+        {"hallucination", () => new Music(new Track(TrackName.mountain, vol: 6f))},
+        {"boardroom", () => new Music(new Track(TrackName.fillerBeat) )},
+        {"office", () => new Music(new Track(TrackName.fillerBeat) )},
+        {"bar", () => new Music(new Track(TrackName.fillerBeat) )},
+        {"gravy_studio", () => new Music(new Track(TrackName.gravy))}, // MusicGravy
+        {"anti_mayor_cutscene", () => new Music(new Track(TrackName.antimayor))}, // MusicAntiMayor
+        {"anti_mayors_house", () => new Music(new Track(TrackName.antimayor))},
+    };
     public static Dictionary<TrackName, AudioClip> tracks = new Dictionary<TrackName, AudioClip>();
-    public Camera cam; // TOOD: make obsolete
+    public AudioClip GetTrack(TrackName trackName) {
+        if (tracks.ContainsKey(trackName)) {
+            return tracks[trackName];
+        } else {
+            // Debug.Log($"quickloading {trackName}");
+            AudioClip clip = Resources.Load("music/" + trackFiles[trackName]) as AudioClip;
+            tracks[trackName] = clip;
+            return clip;
+        }
+    }
+    public Camera cam;
     public AudioSource audioSource;
-    public Track nowPlayingTrack;
-    public Music nowPlayingMusic;
-    public Stack<Track> stack = new Stack<Track>();
-    public Coroutine endCoroutine;
+    public Stack<Music> stack = new Stack<Music>();
     public void Awake() {
         SetCamera();
         audioSource = Toolbox.GetOrCreateComponent<AudioSource>(gameObject);
@@ -306,7 +281,7 @@ public class MusicController : Singleton<MusicController> {
     IEnumerator LoadMusic() {
         float time1 = Time.realtimeSinceStartup;
         foreach (KeyValuePair<TrackName, string> kvp in trackFiles) {
-            Debug.Log("loading music/" + kvp.Value + " ...");
+            // Debug.Log("loading music/" + kvp.Value + " ...");
             var request = Resources.LoadAsync("music/" + kvp.Value);
             while (!request.isDone) {
                 yield return request;
@@ -319,9 +294,6 @@ public class MusicController : Singleton<MusicController> {
     public void Update() {
         if (cam != null)
             transform.position = cam.transform.position;
-        if (nowPlayingTrack != null) {
-            nowPlayingTrack.playTime += Time.unscaledDeltaTime;
-        }
     }
     public void SetCamera() {
         cam = GameObject.FindObjectOfType<Camera>();
@@ -331,104 +303,58 @@ public class MusicController : Singleton<MusicController> {
         if (sceneMusic.ContainsKey(sceneName)) {
             Music newMusic = sceneMusic[sceneName]();
             SetMusic(newMusic);
-        } else {
-
         }
     }
+    /* clear currently music stack and start the provided music */
     public void SetMusic(Music newMusic) {
         // if (nowPlayingMusic != null) {
         //     Debug.Log(MusicEquality(newMusic, nowPlayingMusic));
         //     Debug.Log($"{newMusic.GetType()} {nowPlayingMusic.GetType()}");
         // }
-        if (nowPlayingMusic != null && MusicEquality(newMusic, nowPlayingMusic)) {
-            return;
+        if (stack.Count == 0 || !newMusic.Equality(stack.Peek())) {
+            StopMusic();
+            stack = new Stack<Music>();
+            stack.Push(newMusic);
+            Play();
         }
-        if (endCoroutine != null)
-            StopCoroutine(endCoroutine);
-        stack = newMusic.tracks;
-        nowPlayingMusic = newMusic;
-        PlayNextTrack();
     }
-    public bool MusicEquality(Music music1, Music music2) {
-        if (music1.GetType() != music2.GetType())
-            return false;
-        if (music1.tracks.Count != music2.tracks.Count)
-            return false;
-        if (music1.tracks.Count > 0 && music2.tracks.Count > 0)
-            if (music1.tracks.Peek().trackName != music2.tracks.Peek().trackName)
-                return false;
-        return true;
+    public void StopMusic() {
+        if (stack.Count == 0)
+            return;
+        stack.Peek().Pause();
     }
     public void RestartMusic() {
-        if (endCoroutine != null)
-            StopCoroutine(endCoroutine);
-        if (nowPlayingMusic != null) {
-            stack = nowPlayingMusic.tracks;
+        // if there is music in the stack, restart it
+        if (stack.Count > 0) {
+            stack.Peek().Play();
         } else {
-            Scene scene = SceneManager.GetActiveScene();
-            Music newMusic = sceneMusic[scene.name]();
-            SetMusic(newMusic);
+            SceneChange(SceneManager.GetActiveScene().name);
         }
-        PlayNextTrack();
     }
     public void EnqueueMusic(Music music) {
-        while (music.tracks.Count > 0) {
-            stack.Push(music.tracks.Pop());
-        }
-        // PAUSE current track
-        StopTrack();
-        PlayNextTrack();
+        stack.Peek().Pause();
+        stack.Push(music);
+        Play();
     }
     public void End() {
-        stack.Pop();
-        StopTrack();
-        PlayNextTrack();
-    }
-    public void PlayNextTrack() {
-        StopTrack();
+        // Debug.Log("controller end music");
         if (stack.Count > 0)
-            PlayTrack(stack.Peek());
-    }
-    AudioClip GetTrack(TrackName trackName) {
-        if (tracks.ContainsKey(trackName)) {
-            return tracks[trackName];
-        } else {
-            Debug.Log($"quickloading {trackName}");
-            AudioClip clip = Resources.Load("music/" + trackFiles[trackName]) as AudioClip;
-            tracks[trackName] = clip;
-            return clip;
+            stack.Peek().Pause();
+        stack.Pop();
+        if (stack.Count > 0) {
+            Play();
         }
     }
-    public void PlayTrack(Track track) {
-        if (!GameManager.Instance.GetMusicState()) {
-            StopTrack();
-            return;
-        }
-        if (track.trackName == TrackName.none)
-            return;
-
-        audioSource.clip = GetTrack(track.trackName);
-        audioSource.volume = track.volume;
-        audioSource.Play();
-        nowPlayingTrack = track;
-
-        // audioSource.time = track.playTime % audioSource.clip.length;
-        audioSource.time = track.playTime;
-        Debug.Log($"{track.playTime} | {track.playTime % audioSource.clip.length}");
-        audioSource.loop = track.loop;
-        // GetTrack(track.trackName).length;
-        if (!track.loop) {
-            endCoroutine = StartCoroutine(endRoutine(audioSource.clip.length));
+    public void Play() {
+        // Debug.Log($"Controller play. stack size: {stack.Count}");
+        if (stack.Count > 0 && GameManager.Instance.GetMusicState()) {
+            // Debug.Log($"playing music that starts with track {stack.Peek().trackNames[0]}");
+            stack.Peek().Play();
         }
     }
     private IEnumerator endRoutine(float time) {
         yield return new WaitForSecondsRealtime(time);
         End();
     }
-    public void StopTrack() {
-        if (nowPlayingTrack == null)
-            return;
-        audioSource.Stop();
-        nowPlayingTrack = null;
-    }
+
 }

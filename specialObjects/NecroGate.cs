@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class NecroGate : Doorway {
-    public bool locked;
     MessageSpeech message;
     public AnimateFrames animateFrames;
     public Sprite[] unlockedFrames;

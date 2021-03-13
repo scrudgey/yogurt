@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public class CosmicNullifier : Pickup {
     // public Interaction nullify;
@@ -19,9 +20,24 @@ public class CosmicNullifier : Pickup {
         duplicatable.Nullify();
 
         // TODO: better self-destruct sequence here
-        Destroy(gameObject);
-        GameObject.Instantiate(Resources.Load("particles/nullifier_destruction"), transform.position, Quaternion.identity);
-        ClaimsManager.Instance.WasDestroyed(gameObject);
+        Intrinsics intrinsics = Toolbox.GetOrCreateComponent<Intrinsics>(gameObject);
+        Dictionary<BuffType, Buff> netbuffs = intrinsics.NetBuffs();
+
+        if (netbuffs[BuffType.invulnerable].active()) {
+
+        } else {
+            Destroy(gameObject);
+            GameObject.Instantiate(Resources.Load("particles/nullifier_destruction"), transform.position, Quaternion.identity);
+            ClaimsManager.Instance.WasDestroyed(gameObject);
+            Hurtable hurtable = gameObject.GetComponent<Hurtable>();
+            if (hurtable) {
+                hurtable.LogTypeOfDeath(new MessageDamage(1f, damageType.cosmic) {
+                    responsibleParty = holder.gameObject,
+                    weaponName = "cosmic nullifier"
+                });
+            }
+        }
+
     }
     public bool Nullify_Validation(Duplicatable duplicatable) {
         if (duplicatable.gameObject == null)

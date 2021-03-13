@@ -210,9 +210,13 @@ public class Container : MayorLock, IExcludable, ISaveable {
     public virtual void WasDestroyed(GameObject obj) {
         Pickup pickup = obj.GetComponent<Pickup>();
         LiquidContainer liquidContainer = obj.GetComponent<LiquidContainer>();
+        LiquidResevoir liquidReservoir = obj.GetComponent<LiquidResevoir>();
         LiquidContainer myLiquidContainer = GetComponent<LiquidContainer>();
         if (liquidContainer && myLiquidContainer) {
             myLiquidContainer.FillFromContainer(liquidContainer);
+        }
+        if (liquidReservoir && myLiquidContainer) {
+            myLiquidContainer.FillFromReservoir(liquidReservoir);
         }
         if (pickup != null) {
             if (items.Contains(pickup)) {

@@ -15,6 +15,7 @@ public class Blender : Container, ISaveable {
     private LiquidContainer liquidContainer;
     private AudioSource audioSource;
     private PhysicalBootstrapper pb;
+    public bool turnOffOnLoad;
     protected override void Awake() {
         base.Awake();
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -168,6 +169,9 @@ public class Blender : Container, ISaveable {
     public override void LoadData(PersistentComponent data) {
         base.LoadData(data);
         power = data.bools["power"];
+        if (turnOffOnLoad) {
+            power = false;
+        }
         if (blenderType == BlenderType.blender) {
             if (data.bools["lid"]) {
                 spriteRenderer.sprite = spriteSheet[0];

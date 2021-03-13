@@ -76,13 +76,15 @@ public class Interactor {
         foreach (Interaction interaction in sourceInteractive.interactions) {
             if (interaction.debug) {
                 Debug.Log("Checking the consent for interaction " + interaction.actionName);
-                Debug.Log("target is " + targType.ToString());
                 Debug.Log("source is " + sourceType);
+                Debug.Log("target is " + targType.ToString());
                 Debug.Log("other on self consent: " + interaction.otherOnSelfConsent);
                 Debug.Log("self on other consent: " + interaction.selfOnOtherConsent);
                 Debug.Log("self on self consent: " + interaction.selfOnSelfConsent);
+                Debug.Log("holding on other consent: " + interaction.holdingOnOtherConsent);
             }
             bool enabled = true;
+            // source on target
             if (!interaction.selfOnOtherConsent && sourceType == TargetType.self && targType == TargetType.other) {
                 enabled = false;
                 continue;
@@ -95,7 +97,7 @@ public class Interactor {
                 enabled = false;
                 continue;
             }
-
+            // source is other, target is holding
             if (sourceType == TargetType.holding && targType == TargetType.other) {
                 if (!interaction.holdingOnOtherConsent || (interaction.holdingOnOtherConsent && !interaction.selfOnOtherConsent)) {
                     enabled = false;

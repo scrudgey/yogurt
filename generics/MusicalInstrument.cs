@@ -8,16 +8,15 @@ public class MusicalInstrument : Interactive {
     public List<string> playTexts = new List<string>();
     public List<AudioClip> playSounds = new List<AudioClip>();
     public LoHi pitchRange;
+    public bool annoying;
     void Awake() {
         soundEffect = GetComponent<SoundEffect>();
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         Interaction balloon = new Interaction(this, "Play", "Play");
         balloon.defaultPriority = 2;
-        // balloon.hideInClickMenu = true;
         balloon.otherOnSelfConsent = false;
         balloon.selfOnOtherConsent = false;
         balloon.holdingOnOtherConsent = false;
-        // balloon.inertOnPlayerConsent = false;
         interactions.Add(balloon);
     }
 
@@ -29,6 +28,10 @@ public class MusicalInstrument : Interactive {
         }
         if (playTexts.Count > 0) {
             soundEffect.Say(playTexts[Random.Range(0, playTexts.Count)]);
+        }
+        if (annoying) {
+            EventData noiseData = EventData.AnnoyingNoise();
+            Toolbox.Instance.OccurenceFlag(gameObject, noiseData);
         }
     }
 }

@@ -6,22 +6,27 @@ public class ScriptListEntry : MonoBehaviour {
     public ScriptSelectionMenu menu;
     public bool complete;
     Button button;
-    Color highColor;
-    Color normColor;
-    Color completeColor = Color.black;
     public bool highlight = false;
-    void Start() {
-        button = GetComponent<Button>();
-        highColor = button.colors.highlightedColor;
-        normColor = button.colors.normalColor;
+    public Text text;
+    public Shadow shadow;
 
-        ColorBlock block = button.colors;
+    //  TODO: fix image color: set to white
+
+
+    [Header("incomplete")]
+    public ColorBlock incompleteColors;
+    [Header("complete")]
+    public ColorBlock completeColors;
+
+    void Start() {
+        text = GetComponentInChildren<Text>();
+        // shadow = GetComponentInChildren<Shadow>();
+        button = GetComponent<Button>();
         if (complete) {
-            block.normalColor = completeColor;
+            button.colors = completeColors;
         } else {
-            block.normalColor = normColor;
+            button.colors = incompleteColors;
         }
-        button.colors = block;
     }
     public void Configure(Commercial c, ScriptSelectionMenu scriptMenu) {
         Text entryText = transform.Find("ScriptName").GetComponent<Text>();
@@ -41,18 +46,21 @@ public class ScriptListEntry : MonoBehaviour {
     }
     void Update() {
         if (highlight) {
-            ColorBlock block = button.colors;
-            block.normalColor = highColor;
-            button.colors = block;
+            text.color = Color.black;
+            shadow.enabled = false;
+        } else {
+            text.color = Color.white;
+            shadow.enabled = true;
         }
     }
     public void ResetColors() {
-        ColorBlock block = button.colors;
-        if (complete) {
-            block.normalColor = completeColor;
-        } else {
-            block.normalColor = normColor;
-        }
-        button.colors = block;
+        // TODO: change this
+        // ColorBlock block = button.colors;
+        // if (complete) {
+        //     // block.normalColor = completeColor;
+        // } else {
+        //     // block.normalColor = normColor;
+        // }
+        // button.colors = block;
     }
 }

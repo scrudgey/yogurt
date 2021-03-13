@@ -33,7 +33,7 @@ public partial class GameManager : Singleton<GameManager> {
         if (value) {
             MusicController.Instance.RestartMusic();
         } else {
-            MusicController.Instance.StopTrack();
+            MusicController.Instance.StopMusic();
         }
     }
 

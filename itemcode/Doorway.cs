@@ -11,6 +11,8 @@ public class Doorway : Interactive {
     public string actionDesc = "Exit";
     public Transform enterPoint;
     public bool smallEntrance;
+    public bool locked;
+
     public virtual void Awake() {
         Interaction leaveaction = new Interaction(this, actionDesc, "Leave");
         interactions.Add(leaveaction);

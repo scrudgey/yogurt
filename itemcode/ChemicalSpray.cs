@@ -5,7 +5,21 @@ public class ChemicalSpray : MonoBehaviour {
     public GameObject responsibleParty;
     private float height;
     public bool staining;
+    public static HashSet<string> forbiddenTags = new HashSet<string>() {
+        "fire",
+        "sightcone",
+        "table",
+        "background",
+        "occurrenceFlag",
+        "occurrenceSound",
+        "footprint",
+        "zombieSpawnZone",
+        "sky",
+        "projectile"
+        };
     void OnCollisionEnter2D(Collision2D coll) {
+        if (forbiddenTags.Contains(coll.collider.tag))
+            return;
         Instantiate(collisionPlume, transform.position, Quaternion.identity);
         foreach (Flammable flam in coll.gameObject.GetComponentsInParent<Flammable>()) {
             if (flam.onFire) {

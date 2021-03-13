@@ -9,8 +9,9 @@ public class Cannon : Interactive, ISaveable {
     public Interaction shootPlayerAction;
     public Interaction shootItemAction;
     public Interaction chargeAction;
-
+    public AudioClip loadSound;
     Transform ejectionPoint;
+    public ParticleSystem loadFx;
     void Start() {
         ejectionPoint = transform.Find("ejectionPoint");
 
@@ -23,6 +24,7 @@ public class Cannon : Interactive, ISaveable {
 
         chargeAction = new Interaction(this, "Fill", "ChargeCannon");
         chargeAction.descString = "Fill cannon with gunpowder";
+        chargeAction.validationFunction = true;
         interactions.Add(chargeAction);
 
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
@@ -36,7 +38,7 @@ public class Cannon : Interactive, ISaveable {
     }
     public void StartShootPlayer() {
         if (charged) {
-            charged = false;
+            // charged = false;
             MySaver.Save();
             disableInteractions = true;
             CutsceneManager.Instance.InitializeCutscene<CutsceneCannon>();
@@ -48,7 +50,7 @@ public class Cannon : Interactive, ISaveable {
 
     public void StartShootItem(PhysicalBootstrapper pb) {
         if (charged) {
-            charged = false;
+            // charged = false;
             StartCoroutine(ShootItemRoutine(pb));
         } else {
             MessageSpeech message = new MessageSpeech("No gunpowder!");
@@ -64,7 +66,13 @@ public class Cannon : Interactive, ISaveable {
             // Debug.Log("it's full");
         } else {
             charged = true;
+            // TODO: play sfx
+            audioSource.PlayOneShot(loadSound);
+            loadFx.Play();
         }
+    }
+    public bool ChargeCannon_Validation(GunpowderKeg keg) {
+        return !charged;
     }
     public void SaveData(PersistentComponent data) {
         data.bools["charged"] = charged;

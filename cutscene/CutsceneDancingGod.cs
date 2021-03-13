@@ -9,8 +9,8 @@ public class CutsceneDancingGod : Cutscene {
     CameraControl cam;
     float timer;
     PhysicalBootstrapper item;
-    GameObject pankrator;
-    Controller pankratorController;
+    // GameObject pankrator;
+    List<Controller> pankratorControllers;
     Controller playerController;
     public void Configure(PhysicalBootstrapper item) {
         this.item = item;
@@ -27,8 +27,9 @@ public class CutsceneDancingGod : Cutscene {
         UINew.Instance.RefreshUI(active: false);
         item.gameObject.SetActive(false);
 
-        pankrator = GameObject.Find("Pankrator");
-        pankratorController = new Controller(pankrator);
+        pankratorControllers = new List<Controller>();
+        pankratorControllers.Add(new Controller(GameObject.Find("Pankrator")));
+        pankratorControllers.Add(new Controller(GameObject.Find("Sybil")));
         playerController = new Controller(InputController.Instance.focus);
     }
     public override void Update() {
@@ -109,7 +110,9 @@ public class CutsceneDancingGod : Cutscene {
         cam.offset = new Vector3(0, 0.2f, 0);
         dancingGod.transform.localPosition = Vector3.Lerp(dancingGod.transform.localPosition, dancingGod.initPosition, 0.1f);
         if (Vector2.Distance(dancingGod.transform.localPosition, dancingGod.initPosition) < 0.01f) {
-            pankratorController.Deregister();
+            foreach (Controller controller in pankratorControllers) {
+                controller.Deregister();
+            }
             playerController.Deregister();
             complete = true;
             dancingGod.numberOfJumps = 0;
@@ -117,7 +120,9 @@ public class CutsceneDancingGod : Cutscene {
             UINew.Instance.RefreshUI(active: true);
         }
         if (timer > 2f) {
-            pankratorController.Deregister();
+            foreach (Controller controller in pankratorControllers) {
+                controller.Deregister();
+            }
             playerController.Deregister();
             complete = true;
             UINew.Instance.RefreshUI(active: true);

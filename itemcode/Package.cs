@@ -30,7 +30,7 @@ public class Package : Interactive, ISaveable {
         Destructible destructo = GetComponent<Destructible>();
         destructo.Die();
         if (!GameManager.Instance.data.collectedObjects.Contains(contents)) {
-            MusicController.Instance.EnqueueMusic(new MusicItem());
+            MusicController.Instance.EnqueueMusic(new Music(new Track(TrackName.itemAcquired, loop: false)));
         }
     }
     public string Open_desc() {

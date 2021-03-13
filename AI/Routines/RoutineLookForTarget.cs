@@ -25,6 +25,9 @@ namespace AI {
             }
             foreach (GameObject obj in awareness.fieldOfView) {
                 if (obj.GetComponent<Controllable>() != null) {
+                    PersonalAssessment pa = awareness.FormPersonalAssessment(obj);
+                    if (pa != null && pa.status == PersonalAssessment.friendStatus.friend)
+                        continue;
                     target = obj;
                     return status.success;
                 }

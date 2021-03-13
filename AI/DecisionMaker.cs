@@ -16,6 +16,7 @@ public class Personality {
     public enum PizzaDeliverer { no, yes };
     public enum Dancer { no, follower, leader };
     public enum Haunt { no, yes };
+    public enum Insulter { no, yes };
     public Bravery bravery;
     public Stoicism stoicism;
     public BattleStyle battleStyle;
@@ -26,7 +27,8 @@ public class Personality {
     public PizzaDeliverer pizzaDeliverer;
     public Dancer dancer;
     public Haunt haunt;
-    public Personality(Bravery bravery, CameraPreference camPref, Stoicism stoicism, BattleStyle battleStyle, Suggestible suggestible, Social social, CombatProfficiency combatProficiency, PizzaDeliverer pizzaDeliverer, Dancer dancer, Haunt haunt) {
+    public Insulter insulter;
+    public Personality(Bravery bravery, CameraPreference camPref, Stoicism stoicism, BattleStyle battleStyle, Suggestible suggestible, Social social, CombatProfficiency combatProficiency, PizzaDeliverer pizzaDeliverer, Dancer dancer, Haunt haunt, Insulter insulter) {
         this.bravery = bravery;
         this.camPref = camPref;
         this.stoicism = stoicism;
@@ -37,6 +39,7 @@ public class Personality {
         this.pizzaDeliverer = pizzaDeliverer;
         this.dancer = dancer;
         this.haunt = haunt;
+        this.insulter = insulter;
     }
 }
 
@@ -160,7 +163,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
         if (personality.haunt == Personality.Haunt.yes) {
             InitializePriority(new PriorityApproachPlayer(gameObject, control), typeof(PriorityApproachPlayer));
         }
-        if (defaultPriorityType == PriorityType.Taunt) {
+        if (defaultPriorityType == PriorityType.Taunt || personality.insulter == Personality.Insulter.yes) {
             InitializePriority(new PriorityTaunt(gameObject, control), typeof(PriorityTaunt));
         }
         if (defaultPriorityType == PriorityType.SellSmoothies) {

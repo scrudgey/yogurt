@@ -33,7 +33,7 @@ public class CutscenePostCreditsDeath : Cutscene {
         playerObj = GameManager.Instance.playerObject;
         Debug.Log("starting post credits death");
         // stop music
-        MusicController.Instance.StopTrack();
+        MusicController.Instance.StopMusic();
         configured = true;
         satanObj = GameObject.Find("Satan");
         if (satanObj == null) {

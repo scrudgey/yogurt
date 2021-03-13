@@ -24,6 +24,7 @@ public class Gibs : MonoBehaviour {
     public bool liquid;
     public string liquidName;
     private Liquid loadedLiquid;
+    public List<Buff> buffs = new List<Buff>();
     void Start() {
         if (liquid) {
             loadedLiquid = Liquid.LoadLiquid(liquidName);
@@ -42,6 +43,10 @@ public class Gibs : MonoBehaviour {
         initVelocity.high = other.initVelocity.high;
         initAngleFromHorizontal.low = other.initAngleFromHorizontal.low;
         initAngleFromHorizontal.high = other.initAngleFromHorizontal.high;
+        buffs = new List<Buff>();
+        foreach (Buff buff in other.buffs) {
+            buffs.Add(new Buff(buff));
+        }
     }
     public void Emit(int number, MessageDamage message) {
         for (int i = 0; i < number; i++) {
@@ -130,6 +135,12 @@ public class Gibs : MonoBehaviour {
             bitPhys.Set3Motion(force);
             bitPhys.initVelocity = force;
             bitPhys.doInit = true;
+
+            if (buffs.Count > 0) {
+                Intrinsics gibIntrins = Toolbox.GetOrCreateComponent<Intrinsics>(bit);
+                gibIntrins.CreatePromotedLiveBuffs(buffs);
+                // gibIntrins.
+            }
         }
         return output;
     }

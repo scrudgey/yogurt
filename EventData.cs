@@ -328,6 +328,18 @@ public class EventData : Describable {
         data.whatHappened = grammar.Parse("{main}");
         return data;
     }
+    public static EventData AnnoyingNoise() {
+        EventData data = new EventData(disturbing: 0, disgusting: 0, chaos: 1, offensive: 1, positive: 0);
+        data.key = "noise";
+        data.val = 1f;
+        data.popupDesc = "noise";
+        data.noun = "noises";
+
+        Grammar grammar = new Grammar();
+        grammar.Load("annoying");
+        data.whatHappened = grammar.Parse("{main}");
+        return data;
+    }
     public static EventData Explosion(GameObject explosive) {
         EventData data = new EventData(disturbing: 0, disgusting: 0, chaos: 3, offensive: 0, positive: 1);
         data.key = "explosions";

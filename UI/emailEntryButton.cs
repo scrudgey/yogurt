@@ -8,9 +8,14 @@ public class emailEntryButton : MonoBehaviour {
     public Text nameText;
     public Text dateText;
     public Button button;
-    public Color highlightColor;
-    public Color regularColor;
     public Image focusIndicator;
+
+
+
+    [Header("incomplete")]
+    public ColorBlock incompleteColors;
+    [Header("complete")]
+    public ColorBlock completeColors;
     public void Initialize(EmailUI ui, Email initEmail) {
         focusIndicator.enabled = false;
         button = GetComponent<Button>();
@@ -27,9 +32,13 @@ public class emailEntryButton : MonoBehaviour {
     public void CheckReadStatus() {
         if (email.read) {
             newText.text = "";
+            button.colors = completeColors;
         } else {
             newText.text = "!";
+            button.colors = incompleteColors;
         }
+
+
     }
     public void Clicked() {
         emailUI.EmailEntryCallback(email);

@@ -6,10 +6,9 @@ using UnityEngine.InputSystem;
 using System.Xml.Serialization;
 using System.IO;
 using System;
-
+using UnityEngine.SceneManagement;
 
 public class InputController : Singleton<InputController> {
-    // public MyControls x;
     public enum ControlState {
         normal,
         inMenu,
@@ -22,11 +21,19 @@ public class InputController : Singleton<InputController> {
         detectSelect
     }
     private Controllable _focus;
+    Controller haltedController = new Controller();
+
     public Controllable focus {
         get {
             return _focus;
         }
         set {
+            if (SceneManager.GetActiveScene().name == "cave3") {
+                haltedController.Deregister();
+                // Debug.Log("halting controllable in cave3");
+                if (_focus != null)
+                    haltedController.Register(_focus);
+            }
             _focus = value;
             if (_focus != null) {
                 EnableControls();
@@ -51,7 +58,7 @@ public class InputController : Singleton<InputController> {
     }
     private GameObject lastLeftClicked;
     private GameObject lastClicked;
-    public static List<string> forbiddenTags = new List<string>() {
+    public static HashSet<string> forbiddenTags = new HashSet<string>() {
         "fire",
         "sightcone",
         "table",
@@ -239,6 +246,12 @@ public class InputController : Singleton<InputController> {
         RunAction.action.canceled += _ => runHeld = false;
 
         EnableControls();
+
+        SceneManager.activeSceneChanged += SceneChanged;
+    }
+    public void SceneChanged(Scene one, Scene two) {
+        // Debug.Log("clearing halted controllers");
+        haltedController.Deregister();
     }
     void ChangeState(ControlState previousState) {
         // TODO: code for transitioning between states
@@ -401,12 +414,14 @@ public class InputController : Singleton<InputController> {
         return one;
     }
     public GameObject GetFrontObject(RaycastHit2D[] hits, bool debug = false) {
-        if (debug)
+        if (debug) {
             Debug.Log("*******************");
+            Debug.Log($"hits: {hits.Length}");
+        }
         List<GameObject> candidates = new List<GameObject>();
         foreach (RaycastHit2D hit in hits) {
-            if (debug)
-                Debug.Log(hit.collider.gameObject);
+            // if (debug)
+            // Debug.Log(hit.collider.gameObject);
             if (hit.collider != null && !forbiddenTags.Contains(hit.collider.tag)) {
                 candidates.Add(hit.collider.gameObject);
             }
@@ -421,6 +436,12 @@ public class InputController : Singleton<InputController> {
             // if (candidate.name == "maincollider") {
             //     return candidate;
             // }
+            if (debug)
+                Debug.Log(candidate);
+            Controllable controllable = candidate.GetComponentInParent<Controllable>();
+            if (controllable != null) {
+                return candidate;
+            }
             if (front == null) {
                 front = candidate;
                 frontRenderer = candidate.GetComponent<SpriteRenderer>();
@@ -506,11 +527,14 @@ public class InputController : Singleton<InputController> {
 
     public void DoQuickAction(GameObject actor, GameObject clicked) {
         Inventory inv = actor.GetComponent<Inventory>();
-        Pickup other = clicked.GetComponent<Pickup>();
+        Pickup pickup = clicked.GetComponent<Pickup>();
         Grabbable grabbable = clicked.GetComponent<Grabbable>();
         Bed bed = clicked.GetComponent<Bed>();
         VideoCamera camera = clicked.GetComponent<VideoCamera>();
-        if (bed != null) {
+        Doorway door = clicked.GetComponent<Doorway>();
+        if (door != null && door.GetType() != typeof(Bed) && !door.disableInteractions && !door.locked) {
+            door.Leave();
+        } else if (bed != null) {
             if (Vector2.Distance(clicked.transform.position, actor.transform.position) < QuickActionMaxDistance) {
                 bed.MakeBed();
                 UINew.Instance.RefreshUI(active: true);
@@ -522,12 +546,12 @@ public class InputController : Singleton<InputController> {
                 UINew.Instance.RefreshUI(active: true);
                 ResetLastLeftClicked();
             }
-        } else if (other != null && inv != null) {  // if the obj can be picked up:
+        } else if (pickup != null && inv != null) {  // if the obj can be picked up:
             //  pick up the object
             if (Vector2.Distance(clicked.transform.position, actor.transform.position) < QuickActionMaxDistance) {
                 if (inv != null && inv.holding != null && !inv.holding.heavyObject)
                     inv.StashItem(inv.holding.gameObject);
-                inv.GetItem(other);
+                inv.GetItem(pickup);
                 UINew.Instance.RefreshUI(active: true);
                 ResetLastLeftClicked();
             }
@@ -667,7 +691,7 @@ public class InputController : Singleton<InputController> {
         }
     }
     public void LeftClicked(GameObject clicked, GameObject clickSite) {
-        // Debug.Log("clicked "+clicked.name + " last: "+lastLeftClicked);
+        // Debug.Log("clicked " + clicked.name + " last: " + lastLeftClicked);
         if (lastLeftClicked == clicked) {
             UINew.Instance.ClearWorldButtons();
             lastLeftClicked = null;

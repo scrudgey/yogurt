@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class LiquidEntryScript : MonoBehaviour {
+public class LiquidEntryScript : MonoBehaviour, IPointerEnterHandler {
     public Text entryText;
     public Text newText;
     public Liquid liquid;
@@ -23,7 +24,10 @@ public class LiquidEntryScript : MonoBehaviour {
     public void Clicked() {
         menu.ItemClick(this);
     }
-    public void MouseOver() {
+    // public void MouseOver() {
+    //     menu.MouseOver(this);
+    // }
+    public void OnPointerEnter(PointerEventData eventData) {
         menu.MouseOver(this);
     }
 }

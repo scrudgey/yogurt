@@ -123,7 +123,8 @@ public class TitleAnimation : MonoBehaviour {
         // pulser.enabled = true;
         topLogo.SetActive(true);
         bottomLogo.SetActive(false);
-        MusicController.Instance.EnqueueMusic(new MusicTitle());
+        // MusicController.Instance.EnqueueMusic(new MusicTitle());
+        MusicController.Instance.EnqueueMusic(new Music(new Track(TrackName.mainTitle)));
         mainMenu.SetActive(true);
         particles.Play();
     }

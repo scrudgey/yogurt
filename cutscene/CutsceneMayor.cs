@@ -29,7 +29,8 @@ public class CutsceneMayor : Cutscene {
         playerController = new Controller(playerControllable);
         playerController.SetDirection(Vector2.down);
         UINew.Instance.RefreshUI();
-        MusicController.Instance.EnqueueMusic(new MusicMayor());
+        // MusicController.Instance.EnqueueMusic(new MusicMayor());
+        MusicController.Instance.EnqueueMusic(new Music(new Track(TrackName.mayor)));
     }
     public override void Update() {
         if (!inPosition) {

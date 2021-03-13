@@ -3,7 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class WandOfCarrunos : MonoBehaviour {
-    public static List<string> forbiddenTags = new List<string>(new string[] { "occurrenceFlag", "occurrenceSound", "background", "sightcone", "sky", "horizon", "fire" });
+    public static List<string> forbiddenTags = new List<string>(new string[] {
+        "occurrenceFlag",
+        "occurrenceSound",
+        "background",
+        "sightcone",
+        "sky",
+        "horizon",
+        "fire",
+        "zombieSpawnZone"
+         });
 
     void OnTriggerEnter2D(Collider2D coll) {
         if (forbiddenTags.Contains(coll.tag))

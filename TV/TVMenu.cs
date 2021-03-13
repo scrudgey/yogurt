@@ -121,7 +121,7 @@ public class TVMenu : MonoBehaviour {
             line = show.Next();
         if (musicMatcher.IsMatch(line)) {
             if (myTrack != null)
-                MusicController.Instance.StopTrack();
+                MusicController.Instance.End();
             Match musicMatch = musicMatcher.Match(line);
             GroupCollection groups = musicMatch.Groups;
 

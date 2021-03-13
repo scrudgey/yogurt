@@ -11,6 +11,7 @@ public class Destructible : Damageable, ISaveable {
     public float explosionMultiplier = 2f;
     public float acidMultiplier = 1f;
     public AudioSource audioSource;
+    public GameObject revealOnDeath;
     public override void Awake() {
         base.Awake();
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
@@ -88,6 +89,9 @@ public class Destructible : Damageable, ISaveable {
             if (Toolbox.Instance.CloneRemover(name) == "book") {
                 GameManager.Instance.IncrementStat(StatType.booksBurned, 1);
             }
+        }
+        if (revealOnDeath != null) {
+            revealOnDeath.SetActive(true);
         }
     }
     void OnCollisionEnter2D(Collision2D col) {

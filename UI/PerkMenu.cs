@@ -54,7 +54,8 @@ public class PerkMenu : MonoBehaviour {
         SetLevelText();
         PopulatePerkList();
 
-        MusicController.Instance.EnqueueMusic(new MusicChela());
+        // MusicController.Instance.EnqueueMusic(new MusicChela());
+        MusicController.Instance.EnqueueMusic(new Music(new Track(TrackName.chela)));
     }
     void SetLevelText() {
         string text = $"Level {numberCollected} ";

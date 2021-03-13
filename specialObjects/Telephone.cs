@@ -119,7 +119,7 @@ public class Telephone : Item {
                 //do clown spawn
                 Vector3 tempPos = enterDoor.transform.position;
                 tempPos.y = tempPos.y - 0.05f;
-                Instantiate(Resources.Load("prefabs/Clown"), tempPos, Quaternion.identity);
+                Instantiate(Resources.Load("prefabs/clown"), tempPos, Quaternion.identity);
                 enterDoor.PlayEnterSound();
             }
         }

@@ -17,6 +17,7 @@ public class Slasher : MonoBehaviour {
             Physics2D.IgnoreCollision(circleCollider, responsibleCollider, true);
             Physics2D.IgnoreCollision(boxCollider, responsibleCollider, true);
         }
+        // Debug.Break();
     }
     void SlashOff() {
         // currently empty but referred to in animation

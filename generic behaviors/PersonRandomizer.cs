@@ -132,7 +132,8 @@ public class PersonRandomizer : MonoBehaviour, ISaveable {
                 (Personality.CombatProfficiency)combatProfficiencies.GetValue(random.Next(combatProfficiencies.Length)),
                 Personality.PizzaDeliverer.no,
                 Personality.Dancer.no,
-                Personality.Haunt.no
+                Personality.Haunt.no,
+                Personality.Insulter.no
             );
 
             DecisionMaker decisionMaker = GetComponent<DecisionMaker>();

@@ -83,6 +83,10 @@ public class OccurrenceFire : OccurrenceData {
     public override void Descriptions() {
         Hurtable hurtable = flamingObject.GetComponent<Hurtable>();
         string objectName = Toolbox.Instance.GetName(flamingObject);
+        MonoLiquid monoLiquid = flamingObject.GetComponent<MonoLiquid>();
+        if (monoLiquid != null) {
+            objectName = monoLiquid.liquid.name;
+        }
         EventData data = new EventData(chaos: 2);
 
         data.whatHappened = $"the {objectName} burned";

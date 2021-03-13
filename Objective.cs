@@ -9,6 +9,7 @@ using System.Linq;
 [XmlInclude(typeof(ObjectiveLocation))]
 [XmlInclude(typeof(ObjectiveEatName))]
 [XmlInclude(typeof(ObjectiveScorpion))]
+[XmlInclude(typeof(ObjectiveMayorHead))]
 public abstract class Objective {
     public string desc;
     public abstract bool RequirementsMet(Commercial commercial);
@@ -140,15 +141,13 @@ public class ObjectiveEatName : Objective {
 
 [System.Serializable]
 public class ObjectiveScorpion : Objective {
-    public string eaterOutfit;
-    int limit;
+    public int limit;
     public ObjectiveScorpion() { } // required for serialization
     public ObjectiveScorpion(string[] bits) {
         this.limit = int.Parse(bits[1]);
         this.desc = bits[2];
     }
     override public bool RequirementsMet(Commercial commercial) {
-        // return commercial.yogurtEaterOutfits.Contains(eaterOutfit);
         return GameManager.Instance.data.baddiesDefeated >= limit;
     }
 }

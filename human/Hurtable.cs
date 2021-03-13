@@ -328,6 +328,7 @@ public class Hurtable : Damageable, ISaveable {
         Toolbox.Instance.OccurenceFlag(gameObject, occurrenceData);
 
         void IncrementStat() {
+            // Debug.Log("baddie defeated");
             GameManager.Instance.data.baddiesDefeated += 1;
             UINew.Instance.UpdateObjectives();
         }

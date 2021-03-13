@@ -105,7 +105,7 @@ public class CutsceneNeconomicon : Cutscene {
                         necroGates = true;
                     }
                     if (necroGates)
-                        MusicController.Instance.EnqueueMusic(new MusicSpace());
+                        MusicController.Instance.EnqueueMusic(new Music(new Track(TrackName.moonWarp)));
                 }
                 break;
             case State.hovering:

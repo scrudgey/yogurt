@@ -244,7 +244,6 @@ public abstract class Damageable : MonoBehaviour {
             switch (message.type) {
                 case damageType.physical:
                 case damageType.cutting:
-                case damageType.acid:
                 case damageType.piercing:
                     message.amount = Mathf.Max(message.amount - netBuffs[BuffType.armor].floatValue, 0);
                     break;

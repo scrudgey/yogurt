@@ -291,29 +291,30 @@ public class Speech : Interactive, ISaveable {
         }
     }
     public void MagicianCallback() {
+        Debug.Log("magician callback");
         if (GameManager.Instance.data.activeMagicianSequence != "") {
             GameManager.Instance.data.queuedDiaryEntry = GameManager.Instance.data.activeMagicianSequence;
             GameManager.Instance.data.finishedMagicianSequences.Add(GameManager.Instance.data.activeMagicianSequence);
             GameManager.Instance.data.activeMagicianSequence = "";
-            GameManager.Instance.data.yogurtDetective = true;
-            GameManager.Instance.ResetDailyMetrics();
-
-            // spawn portal
-            Vector3 pos = new Vector3(-1.802f, -1.395f, 0f);
-            GameObject portal = GameObject.Instantiate(Resources.Load("cutscene/portal"), pos, Quaternion.identity) as GameObject;
-            GameObject particle1 = GameObject.Instantiate(Resources.Load("cutscene/portalParticle"), pos, Quaternion.identity) as GameObject;
-            GameObject particle2 = GameObject.Instantiate(Resources.Load("cutscene/portalParticle"), pos, Quaternion.identity) as GameObject;
-            CircularMotion motion2 = particle2.GetComponent<CircularMotion>();
-            motion2.radius = 0.15f;
-            motion2.frequency = -14;
-
-            // set portal
-            Doorway doorway = portal.GetComponent<Doorway>();
-            doorway.destination = "apartment";
-            doorway.destinationEntry = -99;
-
-            defaultMonologue = "magician_closed";
         }
+        GameManager.Instance.data.yogurtDetective = true;
+        GameManager.Instance.ResetDailyMetrics();
+
+        // spawn portal
+        Vector3 pos = new Vector3(-1.802f, -1.395f, 0f);
+        GameObject portal = GameObject.Instantiate(Resources.Load("cutscene/portal"), pos, Quaternion.identity) as GameObject;
+        GameObject particle1 = GameObject.Instantiate(Resources.Load("cutscene/portalParticle"), pos, Quaternion.identity) as GameObject;
+        GameObject particle2 = GameObject.Instantiate(Resources.Load("cutscene/portalParticle"), pos, Quaternion.identity) as GameObject;
+        CircularMotion motion2 = particle2.GetComponent<CircularMotion>();
+        motion2.radius = 0.15f;
+        motion2.frequency = -14;
+
+        // set portal
+        Doorway doorway = portal.GetComponent<Doorway>();
+        doorway.destination = "apartment";
+        doorway.destinationEntry = -99;
+
+        defaultMonologue = "magician_closed";
     }
     public DialogueMenu SpeakWith() {
         UINew.Instance.RefreshUI();

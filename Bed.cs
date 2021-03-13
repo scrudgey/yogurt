@@ -86,11 +86,6 @@ public class Bed : Doorway {
         }
         UINew.Instance.RefreshUI(active: false);
 
-        if (GameManager.Instance.data.deaths >= 1 && GameManager.Instance.data.deathCutscenesPlayed == 0) {
-            GameManager.Instance.data.deathCutscenesPlayed = 1;
-            // GameManager.Instance.ShowDiaryEntryDelay("death1", delay: 0.5f);
-            CutsceneManager.Instance.InitializeCutscene<CutsceneFirstDeath>();
-        }
 
         Update();
     }

@@ -4,7 +4,10 @@ namespace AI {
     public class PrioritySellSmoothies : Priority {
         public Ref<int> smoothieOrder = new Ref<int>(-1);
         public Ref<GameObject> playerObject = new Ref<GameObject>(null);
-        public Ref<GameObject> cauldronObject = new Ref<GameObject>(null);
+        // public Ref<GameObject> cauldronObject = new Ref<GameObject>(null);
+        public LambdaRef<GameObject> cauldronObject = new LambdaRef<GameObject>(null, () => {
+            return GameObject.Find("blendingCauldron");
+        });
         public PrioritySellSmoothies(GameObject g, Controller c, Vector3 guardPoint) : base(g, c) {
             priorityName = "sellSmoothies";
 
@@ -23,8 +26,6 @@ namespace AI {
             // 2. walk to player
             // 3. deliver smoothie
 
-            cauldronObject.val = GameObject.Find("blendingCauldron");
-
             Goal getToZone = new GoalWalkToPoint(gameObject, control, new Ref<Vector2>((Vector2)guardPoint));
 
             Goal lookGoal = new GoalLookInDirection(gameObject, control, Vector2.down);
@@ -41,7 +42,7 @@ namespace AI {
 
             Goal approach = new GoalWalkToObject(gameObject, control, cauldronObject, range: 0.1f);
             approach.requirements.Add(holdIngredientGoal);
-            // approach.ignoreRequirementsIfConditionMet = true;
+            approach.ignoreRequirementsIfConditionMet = true;
 
             GoalBlendSmoothie blendIngredientGoal = new GoalBlendSmoothie(gameObject, c, cauldronObject, smoothieOrder);
             blendIngredientGoal.requirements.Add(approach);

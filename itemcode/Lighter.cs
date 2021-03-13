@@ -7,8 +7,18 @@ public class Lighter : Interactive {
     private bool flameon;
     private Collider2D flameRadius;
     private Dictionary<GameObject, Flammable> flammables = new Dictionary<GameObject, Flammable>();
-    static List<string> forbiddenTags = new List<string>(new string[] { "occurrenceFlag", "background", "sightcone", "sky" });
-    void Start() {
+    static List<string> forbiddenTags = new List<string>{
+        "occurrenceFlag",
+        "occurrenceSound",
+        "background",
+        "sightcone",
+        "sky",
+        "horizon",
+        "fire",
+        "zombieSpawnZone"
+         };
+
+    void Awake() {
         pickup = GetComponent<Pickup>();
         Interaction f = new Interaction(this, "Fire", "Fire");
         f.holdingOnOtherConsent = false;

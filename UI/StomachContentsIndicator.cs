@@ -76,7 +76,7 @@ public class StomachContentsIndicator : MonoBehaviour {
     public IEnumerator EaseIn() {
         float timer = 0f;
         while (timer < easeInTime) {
-            timer += Time.deltaTime;
+            timer += Time.unscaledDeltaTime;
             float scale = (float)PennerDoubleAnimation.ExpoEaseOut(timer, 0, 50f, easeInTime);
             rectTransform.sizeDelta = new Vector2(60f, scale);
             icon.rectTransform.localScale = new Vector2(1f, scale / 60f);
@@ -87,7 +87,7 @@ public class StomachContentsIndicator : MonoBehaviour {
     public IEnumerator EaseOut() {
         float timer = 0f;
         while (timer < easeInTime) {
-            timer += Time.deltaTime;
+            timer += Time.unscaledDeltaTime;
             float scale = (float)PennerDoubleAnimation.ExpoEaseIn(timer, 50f, -50f, easeInTime);
             rectTransform.sizeDelta = new Vector2(60f, scale);
             icon.rectTransform.localScale = new Vector2(1f, scale / 60f);

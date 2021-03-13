@@ -140,6 +140,7 @@ public class Gremlin : MonoBehaviour {
             }
         }
     }
+    public AudioClip[] sounds;
     Module module;
     public Controller controller;
     public SimpleControl controllable;
@@ -147,6 +148,7 @@ public class Gremlin : MonoBehaviour {
     public Speech speech;
     public Eater eater;
     RoutineWander wanderRoutine;
+    public AudioSource audioSource;
     float baseTimer;
     public void Start() {
         controllable = GetComponent<SimpleControl>();
@@ -156,6 +158,7 @@ public class Gremlin : MonoBehaviour {
         speech = GetComponent<Speech>();
         wanderRoutine = new RoutineWander(gameObject, controller);
         baseTimer = Random.Range(0, 3f);
+        audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
     }
     void Update() {
         if (module == null) {
@@ -164,6 +167,7 @@ public class Gremlin : MonoBehaviour {
             module.Update();
             if (module.complete) {
                 module = null;
+                audioSource.PlayOneShot(sounds[Random.Range(0, sounds.Length)]);
             }
         }
     }

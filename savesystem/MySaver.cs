@@ -355,7 +355,7 @@ public class MySaver {
                     Debug.Log("WARNING: Object not found " + persistent.prefabPath);
                     continue;
                 }
-                Debug.Log($"loaded object {idn} {go}");
+                // Debug.Log($"loaded object {idn} {go}");
                 loadedObjects[persistent.id] = go;
                 go.name = Toolbox.Instance.CloneRemover(go.name);
                 if (!rootObject)

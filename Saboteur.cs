@@ -17,7 +17,7 @@ public class Saboteur : Interactive {
         cancelAct.holdingOnOtherConsent = false;
         interactions.Add(cancelAct);
 
-        if (GameManager.Instance.data.completeCommercials.Count < 2) {
+        if (GameManager.Instance.data != null && GameManager.Instance.data.completeCommercials.Count < 2) {
             Destroy(gameObject);
         }
     }

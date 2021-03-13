@@ -117,7 +117,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         }
     }
     void HandleNetIntrinsic(MessageNetIntrinsic message) {
-        strong = message.netBuffs[BuffType.strength].boolValue;
+        strong = message.netBuffs[BuffType.strength].active();
         if (holding) {
             if (!strong) {
                 if (holding.heavyObject) {
@@ -501,7 +501,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         message.force = weapon.damage * direction;
         message.amount = weapon.damage;
         message.responsibleParty = gameObject;
-        message.strength = netBuffs[BuffType.strength].boolValue;
+        message.strength = netBuffs[BuffType.strength].active();
         message.type = weapon.damageType;
         s.message = message;
 
@@ -550,7 +550,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         message.force = 40f * direction;
         message.amount = 40f;
         message.responsibleParty = gameObject;
-        message.strength = netBuffs[BuffType.strength].boolValue;
+        message.strength = netBuffs[BuffType.strength].active();
         message.type = damageType.physical;
         impact.message = message;
         Collider2D slashCollider = slash.GetComponent<Collider2D>();

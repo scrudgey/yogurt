@@ -35,6 +35,8 @@ public class CutsceneScorpion : Cutscene {
         switch (sceneName) {
             default:
             case "1950s Greaser Beatdown":
+                // MusicController.Instance.EnqueueMusic(new MusicGreaser());
+                MusicController.Instance.EnqueueMusic(new Music(new Track(TrackName.greaser)));
                 greaserPrefab = Resources.Load("prefabs/greaser") as GameObject;
                 break;
             case "Combat II":
@@ -47,7 +49,6 @@ public class CutsceneScorpion : Cutscene {
                 greaserPrefab = Resources.Load("prefabs/Tharr") as GameObject;
                 break;
         }
-        MusicController.Instance.EnqueueMusic(new MusicGreaser());
     }
     private bool SufficientGreasers() {
         switch (sceneName) {
@@ -91,27 +92,46 @@ public class CutsceneScorpion : Cutscene {
         // Vector2 target = (Vector2)doorway.transform.position + random;
 
         Vector2 target = (Vector2)doorway.transform.position;
-        switch (greasers.Count) {
+        switch (sceneName) {
             default:
-            case 0:
-                target += new Vector2(-1, -1);
-                break;
-            case 1:
-                target += new Vector2(-1, -1);
-                break;
-            case 2:
-                target += new Vector2(1, -1);
+            case "1950s Greaser Beatdown":
+                switch (greasers.Count) {
+                    default:
+                    case 0:
+                        target += new Vector2(-1, -1);
+                        break;
+                    case 1:
+                        target += new Vector2(-1, -1);
+                        break;
+                    case 2:
+                        target += new Vector2(1, -1);
 
-                break;
-            case 3:
-                target += new Vector2(1, -1);
+                        break;
+                    case 3:
+                        target += new Vector2(1, -1);
 
-                break;
-            case 4:
-                target += new Vector2(0, -1);
+                        break;
+                    case 4:
+                        target += new Vector2(0, -1);
 
+                        break;
+                }
+                break;
+            case "Combat II":
+            case "Combat III":
+            case "Combat IV":
+                switch (greasers.Count) {
+                    default:
+                    case 0:
+                        target += new Vector2(0, -1);
+                        break;
+                    case 1:
+                        target += new Vector2(1, -1);
+                        break;
+                }
                 break;
         }
+
 
         GameObject greaser = SpawnGreaser();
         greasers.Add(greaser);

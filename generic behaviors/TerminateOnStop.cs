@@ -5,7 +5,18 @@ using System;
 
 public class TerminateOnStop : MonoBehaviour {
     public Rigidbody2D myRigidBody;
-    List<Type> typesToRemove = new List<Type>() { typeof(Rigidbody2D), typeof(Collider2D), typeof(FlipSpriteRandom), typeof(OrderByY), typeof(FlipScintillator) };
+    List<Type> typesToRemove = new List<Type>() {
+        typeof(Rigidbody2D),
+        typeof(Collider2D),
+        typeof(FlipSpriteRandom),
+        typeof(OrderByY),
+        typeof(FlipScintillator),
+        typeof(Flammable),
+        typeof(RandomSprite),
+        typeof(Destructible),
+        typeof(MessageRouter),
+        typeof(AudioSource)
+         };
     void Awake() {
         myRigidBody = GetComponent<Rigidbody2D>();
     }
@@ -24,11 +35,20 @@ public class TerminateOnStop : MonoBehaviour {
         }
     }
     void DestroyComponents() {
-        foreach (Type type in typesToRemove) {
-            Component component = GetComponent(type);
-            while (component != null) {
-                DestroyImmediate(component);
-                component = GetComponent(type);
+        // foreach (Type type in typesToRemove) {
+        //     Component component = GetComponent(type);
+        //     while (component != null) {
+        //         DestroyImmediate(component);
+        //         component = GetComponent(type);
+        //     }
+        // }
+        foreach (Component component in GetComponents<Component>()) {
+            Type componentType = component.GetType();
+            if (componentType != typeof(SpriteRenderer) &&
+            componentType != typeof(GameObject) &&
+            componentType != typeof(Transform)
+            ) {
+                Destroy(component);
             }
         }
     }

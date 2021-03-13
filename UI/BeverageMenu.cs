@@ -80,13 +80,16 @@ public class BeverageMenu : MonoBehaviour {
         // buffsText.text = string.Join("\n", buffs.ToList());
         icon.color = script.liquid.color;
 
+        List<string> buffstrings = new List<string>();
         foreach (Buff buff in script.liquid.buffs) {
             string buffName = Buff.buffNames[buff.type];
             if (buff.lifetime == 0) {
                 buffName = "permanent " + buffName;
             }
-            buffsText.text = buffsText.text + buffName + "\n";
+            // buffsText.text = buffsText.text + buffName + "\n";
+            buffstrings.Add(buffName);
         }
+        buffsText.text = string.Join("\n", buffstrings);
 
         if (ingredientsText.text == "") {
             ingredientsText.text = script.liquid.name;

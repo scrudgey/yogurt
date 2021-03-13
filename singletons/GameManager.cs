@@ -90,6 +90,7 @@ public class GameData {
     public bool showedFirstCEODiary = false;
     public GameState state = GameState.normal;
     public bool sabotageMissionsUnlocked = false;
+    public bool ceoFled = false;
     public SerializableDictionary<Rating, float> topRatings = new SerializableDictionary<Rating, float>{
         {Rating.disgusting, 0},
         {Rating.disturbing, 0},
@@ -118,7 +119,7 @@ public partial class GameManager : Singleton<GameManager> {
         {"moon1", "moon"},
         {"studio", "yogurt commercial studio"},
         {"volcano", "volcano"},
-        {"room2", "item room"},
+        // {"room2", "item room"},
         {"moon_cave", "moon temple"},
         {"woods", "woods"},
         {"vampire_house", "mansion"},
@@ -140,7 +141,7 @@ public partial class GameManager : Singleton<GameManager> {
         {"boardroom", "yogurt HQ"},
         // {"hell1", "hell"},
         {"venus1", "venus"},
-        {"fountain", "ruins"},
+        // {"fountain", "ruins"},
         {"gravy_studio", "gravy commercial studio"},
         {"hells_kitchen", "hell's kitchen"},
         {"hells_landing", "hell's landing"},
@@ -165,7 +166,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = false;
+    public bool debug = true;
     public bool demo = false;
     public bool failedLevelLoad = false;
     public Gender playerGender;
@@ -198,6 +199,7 @@ public partial class GameManager : Singleton<GameManager> {
             // ReceiveEmail("hell");
             // ReceiveEmail("scorpion");
             // ReceiveEmail("boardroom");
+
             // ReceivePackage("golf_club");
 
             // ReceivePhoneCall("airplane");
@@ -686,33 +688,42 @@ public partial class GameManager : Singleton<GameManager> {
             }
         }
         if (sceneName == "apartment") {
-            if (data.days == 3) {
-                ReceivePhoneCall("office");
-            }
-            if (data.days == 10) {
-                ReceivePhoneCall("airplane");
-            }
-            if (data.days == 20) {
-                ReceivePhoneCall("bar");
-            }
-            if (!debug) {
-                if (data.days >= 5) {
-                    data.queuedMagicianSequences.Add("magician");
-                }
-                if (data.days >= 15) {
-                    data.queuedMagicianSequences.Add("magician2");
-                }
-                if (data.days >= 25) {
-                    data.queuedMagicianSequences.Add("magician3");
+            if (data.state == GameState.normal) {
+
+                // play first death cutscene first of all
+
+                // otherwise, check to see if new phone calls should happen
+
+                // if everything else has passed, check for hallucination sequences.
+
+                if (GameManager.Instance.data.deaths >= 1 && GameManager.Instance.data.deathCutscenesPlayed == 0) {
+                    GameManager.Instance.data.deathCutscenesPlayed = 1;
+                    CutsceneManager.Instance.InitializeCutscene<CutsceneFirstDeath>();
+                } else if (data.days >= 3 && !data.phoneCallsAll.Contains("office")) {
+                    ReceivePhoneCall("office");
+                } else if (data.days >= 10 && !data.phoneCallsAll.Contains("airplane")) {
+                    ReceivePhoneCall("airplane");
+                } else if (data.days >= 20 && !data.phoneCallsAll.Contains("bar")) {
+                    ReceivePhoneCall("bar");
+                } else {
+                    if (data.days >= 5) {
+                        data.queuedMagicianSequences.Add("magician");
+                    }
+                    if (data.days >= 15) {
+                        data.queuedMagicianSequences.Add("magician2");
+                    }
+                    if (data.days >= 25) {
+                        data.queuedMagicianSequences.Add("magician3");
+                    }
+                    foreach (string sequence in data.queuedMagicianSequences) {
+                        if (!data.finishedMagicianSequences.Contains(sequence)) {
+                            SetupMagicianSequence(sequence);
+                            break;
+                        }
+                    }
                 }
             }
 
-            foreach (string sequence in data.queuedMagicianSequences) {
-                if (!data.finishedMagicianSequences.Contains(sequence)) {
-                    SetupMagicianSequence(sequence);
-                    break;
-                }
-            }
             if (data.state == GameState.ceoPlus && !data.showedFirstCEODiary) {
                 data.showedFirstCEODiary = true;
                 StartCoroutine(waitAndShowDiary(1.5f, "ceo"));
@@ -1141,14 +1152,24 @@ public partial class GameManager : Singleton<GameManager> {
         data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("gravy1"));
         data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("sabo1"));
         data.unlockedScenes.Add("studio");
+        data.completeCommercials = new HashSet<Commercial>();
 
         data.televisionShows = new List<string>();
         data.newTelevisionShows = new HashSet<string>();
 
         if (debug) {
             data.days = 5;
-            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eat2"));
-            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eggplant1"));
+
+            // data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eat2"));
+            Commercial c1 = Commercial.LoadCommercialByFilename("eat2");
+            data.unlockedCommercials.Add(c1);
+            data.completeCommercials.Add(c1);
+
+            // data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eggplant1"));
+            Commercial c2 = Commercial.LoadCommercialByFilename("eggplant1");
+            data.unlockedCommercials.Add(c2);
+            data.completeCommercials.Add(c2);
+
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eggplant10"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("fireman"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("badboy"));
@@ -1189,9 +1210,9 @@ public partial class GameManager : Singleton<GameManager> {
             data.perks["beverage"] = true;
             data.perks["resurrection"] = true;
 
-            data.collectedObjects.Add("crown");
-            data.collectedClothes.Add("crown");
-            data.itemCheckedOut["crown"] = false;
+            data.collectedObjects.Add("lighter");
+            // data.collectedClothes.Add("crown");
+            data.itemCheckedOut["lighter"] = false;
             foreach (string sceneName in sceneNames.Keys) {
                 data.unlockedScenes.Add(sceneName);
             }
@@ -1211,7 +1232,6 @@ public partial class GameManager : Singleton<GameManager> {
             data.yogurtDetective = true;
         }
         data.recordingCommercial = false;
-        data.completeCommercials = new HashSet<Commercial>();
         // initialize achievements
         data.achievements = AchievementManager.LoadAchievements();
         data.stats = new SerializableDictionary<StatType, Stat>();
@@ -1479,8 +1499,10 @@ public partial class GameManager : Singleton<GameManager> {
         Debug.Log("receiving phoneCall " + cutscene);
         data.phoneQueue.Add(cutscene);
         Telephone computer = GameObject.FindObjectOfType<Telephone>();
-        computer.PhoneCall(cutscene);
-        data.phoneCallsAll.Add(cutscene);
+        if (!computer.isRinging) {
+            computer.PhoneCall(cutscene);
+            data.phoneCallsAll.Add(cutscene);
+        }
     }
     public void UnlockTVShow(string showName) {
         if (data.televisionShows.Contains(showName))

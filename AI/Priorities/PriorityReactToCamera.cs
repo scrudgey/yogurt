@@ -96,7 +96,7 @@ namespace AI {
                 return Priority.urgencySmall;
             } else if (camPref == Personality.CameraPreference.ambivalent || camPref == Personality.CameraPreference.excited) {
                 if (onCamera)
-                    return Priority.urgencyPressing;
+                    return Priority.urgencyLarge;
                 else
                     return -1;
             }

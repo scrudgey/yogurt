@@ -54,10 +54,10 @@ public class DeathMenu : MonoBehaviour {
         GameObject.Instantiate(Resources.Load("particles/licheffect"), GameManager.Instance.lastPlayerPosition, Quaternion.identity);
     }
     IEnumerator ChangeMusic() {
-        MusicController.Instance.StopTrack();
+        MusicController.Instance.StopMusic();
         yield return new WaitForSeconds(2f);
-        if (MusicController.Instance.nowPlayingTrack == null)
-            MusicController.Instance.SetMusic(new MusicTweak());
+        // if (MusicController.Instance.nowPlayingTrack == null)
+        MusicController.Instance.SetMusic(new Music(new Track(TrackName.tweakDelay)));
     }
     void Update() {
         timer += Time.deltaTime;
