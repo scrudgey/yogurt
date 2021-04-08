@@ -24,7 +24,8 @@ public class HeadAnimation : MonoBehaviour, IDirectable, ISaveable {
     private string sequence {
         get { return _sequence; }
         set {
-            if (_sequence != value) {
+
+            if (_sequence != value || !animationComponent.isPlaying) {
                 _sequence = value;
                 UpdateSequence();
             }
@@ -43,15 +44,16 @@ public class HeadAnimation : MonoBehaviour, IDirectable, ISaveable {
     private float eatingCountDown;
     public Controllable.HitState hitState;
     private string lastPressed;
+    Animation animationComponent;
     public void LoadSprites() {
         // sprites = Toolbox.ApplySkinToneToSpriteSheet(spriteSheet, skinColor);
         sprites = Toolbox.MemoizedSkinTone(spriteSheet, skinColor);
     }
     public void UpdateSequence() {
-        Animation animationComponent = GetComponent<Animation>();
         animationComponent.Play(sequence);
     }
     public void Awake() {
+        animationComponent = GetComponent<Animation>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         MessageDirectable directableMessage = new MessageDirectable();
         directableMessage.addDirectable.Add(this);

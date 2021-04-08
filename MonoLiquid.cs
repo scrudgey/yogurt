@@ -58,6 +58,7 @@ public class MonoLiquid : MonoBehaviour, ISaveable {
                     if (stainFlammable != null && myFlammable != null && myFlammable.onFire) {
                         stainFlammable.SpontaneouslyCombust();
                         stainFlammable.responsibleParty = myFlammable.responsibleParty;
+                        // Debug.Log(stainFlammable.responsibleParty);
                     }
 
                     EventData data = Toolbox.Instance.DataFlag(
@@ -116,6 +117,7 @@ public class MonoLiquid : MonoBehaviour, ISaveable {
         if (puddleFlammable != null && myFlammable != null && myFlammable.onFire) {
             puddleFlammable.SpontaneouslyCombust();
             puddleFlammable.responsibleParty = myFlammable.responsibleParty;
+            // Debug.Log(puddleFlammable.responsibleParty);
         }
     }
     public void SaveData(PersistentComponent data) {

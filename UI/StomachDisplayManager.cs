@@ -8,9 +8,10 @@ public class StomachDisplayManager : MonoBehaviour {
     public Text stomachText;
     public Dictionary<System.Guid, StomachContentsIndicator> items = new Dictionary<System.Guid, StomachContentsIndicator>();
 
-    void Start() {
-        items = new Dictionary<System.Guid, StomachContentsIndicator>();
-    }
+    // void Start() {
+    //     Debug.Log("starting");
+    //     items = new Dictionary<System.Guid, StomachContentsIndicator>();
+    // }
     // when update is called, determine if something must be added or removed.
 
     // figure out if there are new items. if so, create new item indicator.
@@ -21,7 +22,7 @@ public class StomachDisplayManager : MonoBehaviour {
         foreach (GameObject eatenObject in eater.eatenQueue) {
             MyMarker marker = eatenObject.GetComponent<MyMarker>();
             if (marker == null) {
-                Debug.LogWarning($"eaten object with no marker: {eatenObject}");
+                // Debug.LogWarning($"eaten object with no marker: {eatenObject}");
                 continue;
             }
             eatenObjects[marker.id] = eatenObject;

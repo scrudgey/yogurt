@@ -17,6 +17,10 @@ public class Recruiter : Interactive {
         interactions.Add(speak);
     }
     public void Recruit(Speech other) {
+        MySaver.Save();
+        GameManager.Instance.SaveGameData();
+        MySaver.SaveObjectDatabase();
+
         target = other.gameObject;
         UINew.Instance.RefreshUI();
         GameObject menuObject = UINew.Instance.ShowMenu(UINew.MenuType.dialogue);
@@ -47,7 +51,6 @@ public class Recruiter : Interactive {
         }
 
         GameManager.Instance.saveGameName = newName;
-        GameManager.Instance.SaveGameData();
         GameManager.Instance.NewGame();
     }
 

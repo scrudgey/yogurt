@@ -128,7 +128,15 @@ public partial class DialogueMenu : MonoBehaviour {
     private bool doVampireAttack;
     public bool keypressedThisFrame;
     static List<string> cutsceneDialogues = new List<string>{
-        "polestar_first", "vampire", "dancing_god", "dancing_god_bless", "dancing_god_destroy", "magician", "magician2", "magician3"
+        "polestar_first",
+        "vampire",
+        "dancing_god",
+        "dancing_god_bless",
+        "dancing_god_destroy",
+        "magician",
+        "magician2",
+        "magician3",
+        "text1"
     };
     void Awake() {
         keypressedThisFrame = false;

@@ -32,6 +32,7 @@ public class CutscenePickleBottom : Cutscene {
         configured = true;
     }
     public override void Update() {
+        camControl.focus = peter;
         if (peterAI.targets.Count == 0 && peterAI.target.val == null) {
             complete = true;
         }

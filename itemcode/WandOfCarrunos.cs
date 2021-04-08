@@ -11,7 +11,8 @@ public class WandOfCarrunos : MonoBehaviour {
         "sky",
         "horizon",
         "fire",
-        "zombieSpawnZone"
+        "zombieSpawnZone",
+        "projectile"
          });
 
     void OnTriggerEnter2D(Collider2D coll) {

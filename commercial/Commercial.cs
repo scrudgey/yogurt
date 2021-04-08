@@ -27,6 +27,8 @@ public class Commercial : MetaDescribable<DescribableOccurrenceData> {
     public HashSet<string> outfits = new HashSet<string>();
     public bool gravy;
     public bool sabotage;
+    public bool gremlin;
+
     public List<Objective> objectives = new List<Objective>();
     [XmlIgnore]
     private Dictionary<string, int> uniqueEvents = new Dictionary<string, int>();
@@ -43,6 +45,7 @@ public class Commercial : MetaDescribable<DescribableOccurrenceData> {
         this.gravy = other.gravy;
         this.sabotage = other.sabotage;
         this.hallucination = other.hallucination;
+        this.gremlin = other.gremlin;
     }
     public static Commercial LoadCommercialByFilename(string filename) {
         Commercial c = new Commercial();
@@ -82,6 +85,8 @@ public class Commercial : MetaDescribable<DescribableOccurrenceData> {
                 c.sabotage = true;
             } else if (key == "hallucination") {
                 c.hallucination = bits[1];
+            } else if (key == "gremlins") {
+                c.gremlin = true;
             } else {
                 c.objectives.Add(new ObjectiveProperty(bits));
             }
@@ -118,7 +123,7 @@ public class Commercial : MetaDescribable<DescribableOccurrenceData> {
                 yogurtEaterNames.Add(eatOccurrence.eaterName);
             }
         }
-        foreach (EventData data in occurrence.describable.GetChildren()) {
+        foreach (EventData data in occurrence.NetEvents()) {
             IncrementValue(data);
             if (data.transcriptLine != null) {
                 transcript.Add(data.transcriptLine);
@@ -140,7 +145,7 @@ public class Commercial : MetaDescribable<DescribableOccurrenceData> {
     }
 
     public void RecordOccurrence(Occurrence oc) {
-        AddChild(oc.data.describable);
+        AddChild(oc.data.NetDescribable());
         UINew.Instance.UpdateMetrics(o: oc);
     }
     public Commercial() {

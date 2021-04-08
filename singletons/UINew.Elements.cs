@@ -122,8 +122,8 @@ public partial class UINew : Singleton<UINew> {
     public void UpdateStatusIcons(Intrinsics intrinsics) {
         HashSet<BuffType> existingBuffs = ClearStatusIcons();
         foreach (KeyValuePair<BuffType, Buff> buff in intrinsics.NetBuffs()) {
-            if (buff.Value.active()) {
 
+            if (buff.Value.active()) {
                 GameObject icon = UINew.Instance.AddStatusIcon(buff.Value);
                 ParticleSystem particles = icon.GetComponentInChildren<ParticleSystem>();
                 if (!existingBuffs.Contains(buff.Value.type)) {

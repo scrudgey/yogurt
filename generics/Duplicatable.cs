@@ -54,9 +54,9 @@ public class Duplicatable : Interactive, ISaveable {
         if (nullifyFX != null) {
             Instantiate(nullifyFX, transform.position, Quaternion.identity);
         }
-        // OccurrenceEat eatData = new OccurrenceEat();
-        EventData nullData = EventData.Nullification(gameObject);
-        Toolbox.Instance.OccurenceFlag(gameObject, nullData);
+
+        EventData dupData = EventData.Nullification(gameObject);
+        Toolbox.Instance.OccurenceFlag(gameObject, dupData);
 
         Container container = GetComponent<Container>();
         if (container != null) {

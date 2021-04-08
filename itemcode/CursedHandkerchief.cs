@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class CursedHandkerchief : MonoBehaviour {
     public Pickup pickup;
-    // public Explosive explosive;
     public SpriteRenderer spriteRenderer;
     public GameObject ray;
     public AudioClip shootSound;

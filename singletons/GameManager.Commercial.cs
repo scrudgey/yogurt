@@ -123,6 +123,32 @@ public partial class GameManager : Singleton<GameManager> {
             GameObject.Instantiate(Resources.Load("prefabs/effigy"), point1.position, Quaternion.identity);
             GameObject.Instantiate(Resources.Load("prefabs/effigy_ignorance"), point2.position, Quaternion.identity);
         }
+
+        if (commercial.gremlin) {
+            GameObject player = GameManager.Instance.playerObject;
+            GameObject zone = GameObject.FindWithTag("zombieSpawnZone");
+            Collider2D zombieZonezone = zone.GetComponent<Collider2D>();
+            for (int i = 0; i < 5; i++) {
+                Vector3 position = Toolbox.RandomPointInBox(zombieZonezone.bounds, player.transform.position);
+                GameObject.Instantiate(Resources.Load("prefabs/gremlin"), position, Quaternion.identity);
+            }
+            Vector3 objectPosition = Toolbox.RandomPointInBox(zombieZonezone.bounds, player.transform.position);
+            GameObject.Instantiate(Resources.Load("prefabs/VX_nerve_gas_ventilator"), objectPosition, Quaternion.identity);
+
+            objectPosition = Toolbox.RandomPointInBox(zombieZonezone.bounds, player.transform.position);
+            GameObject.Instantiate(Resources.Load("prefabs/baseball_bat"), objectPosition, Quaternion.identity);
+
+            objectPosition = Toolbox.RandomPointInBox(zombieZonezone.bounds, player.transform.position);
+            GameObject.Instantiate(Resources.Load("prefabs/golf_club"), objectPosition, Quaternion.identity);
+
+            for (int i = 0; i < 3; i++) {
+                objectPosition = Toolbox.RandomPointInBox(zombieZonezone.bounds, player.transform.position);
+                GameObject.Instantiate(Resources.Load("prefabs/hand_grenade"), objectPosition, Quaternion.identity);
+
+                objectPosition = Toolbox.RandomPointInBox(zombieZonezone.bounds, player.transform.position);
+                GameObject.Instantiate(Resources.Load("prefabs/crossbow"), objectPosition, Quaternion.identity);
+            }
+        }
     }
 }
 

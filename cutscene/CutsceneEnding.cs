@@ -249,6 +249,7 @@ public class CutsceneEnding : Cutscene {
         configured = true;
         controller = GameObject.FindObjectOfType<EndingCutsceneController>();
         CameraControl camControl = GameObject.FindObjectOfType<CameraControl>();
+        MusicController.Instance.EnqueueMusic(new Music(new Track(TrackName.ending, loop: false)));
 
         startModule = new StartModule(controller.objLongShot, controller.objCanvas, controller.settingText);
         viewingModule = new SpeechModule(controller.objViewingRoom, "endingViewing", controller.ViewingMoeSpeech, controller.ViewingCurlySpeech, controller.ViewingLarrySpeech, controller.ViewingSatanSpeech);

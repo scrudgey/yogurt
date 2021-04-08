@@ -106,7 +106,8 @@ public class UIButtonEffects : MonoBehaviour, IPointerDownHandler, IPointerEnter
     public void Play(AudioClip clip) {
         if (clip != null) {
             // GameManager.Instance.PlayPublicSound(clip);
-            audioSource.PlayOneShot(clip);
+            if (audioSource.enabled)
+                audioSource.PlayOneShot(clip);
         }
     }
     IEnumerator BubbleIn() {

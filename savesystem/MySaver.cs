@@ -110,6 +110,7 @@ public class MySaver {
 
     }
     public static void Save() {
+        Debug.LogWarning("saving");
         referenceTree = new Dictionary<Guid, List<Guid>>();
         savedObjects = new Dictionary<GameObject, Guid>();
         var listSerializer = new XmlSerializer(typeof(List<Guid>));
@@ -152,9 +153,9 @@ public class MySaver {
             PersistentObject persistent;
             // either get the existing persistent in the database, or make a new one
             if (objectDataBase.ContainsKey(marker.id)) {
-                // Debug.Log($"updating persistent object {gameObject}: {marker.id}");
                 persistent = objectDataBase[marker.id];
                 persistent.Update(gameObject);
+                // Debug.Log($"updating persistent object {gameObject}: {marker.id} {persistent.transformPosition}");
             } else {
 
                 // Debug.Log($"creating new persistent object {gameObject}: {marker.id}");

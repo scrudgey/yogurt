@@ -124,54 +124,36 @@ public partial class Toolbox : Singleton<Toolbox> {
         }
         return s;
     }
-    public void OccurenceFlag(GameObject spawner, EventData data) {
-        GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
-        GameObject noise = GameObject.Instantiate(Resources.Load("NoiseFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
-        Occurrence occurrence = flag.GetComponent<Occurrence>();
-        Occurrence noiseOccurrence = noise.GetComponent<Occurrence>();
-        OccurrenceData occurrenceData = new OccurrenceEvent(data) {
+    public EventData DataFlag(GameObject spawner, string noun, string whatHappened, float chaos = 0, float disgusting = 0, float disturbing = 0, float offensive = 0, float positive = 0) {
+        EventData eventData = new EventData(chaos: chaos, disgusting: disgusting, disturbing: disturbing, offensive: offensive, positive: positive);
+        eventData.noun = noun;
+        eventData.whatHappened = whatHappened;
+        OccurenceFlag(spawner, eventData);
+        return eventData;
+    }
+    public void OccurenceFlag(GameObject spawner, EventData eventData) {
+        OccurenceFlag(spawner,
+        new OccurrenceEvent(eventData) {
             involved = new HashSet<GameObject>() { spawner }
-        };
-        occurrence.data = occurrenceData;
-        noiseOccurrence.data = occurrenceData;
-        occurrenceData.CalculateDescriptions();
-        // Debug.Log(occurrenceData.describable.whatHappened);
-        if (occurrenceData.describable.whatHappened.ToLower().Contains("tina")) {
-            Debug.LogError(occurrenceData.describable.whatHappened);
         }
+        );
     }
     public void OccurenceFlag(GameObject spawner, OccurrenceData data) {
         GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
         GameObject noise = GameObject.Instantiate(Resources.Load("NoiseFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
+
         Occurrence occurrence = flag.GetComponent<Occurrence>();
         Occurrence noiseOccurrence = noise.GetComponent<Occurrence>();
+
         occurrence.data = data;
         noiseOccurrence.data = data;
         data.CalculateDescriptions();
         // Debug.Log(data.describable.whatHappened);
-        if (data.describable.whatHappened.ToLower().Contains("tina")) {
-            Debug.LogError(data.describable.whatHappened);
-        }
+        // if (data.describable.whatHappened.ToLower().Contains("tina")) {
+        //     Debug.LogError(data.describable.whatHappened);
+        // }
     }
-    public EventData DataFlag(GameObject spawner, string noun, string whatHappened, float chaos = 0, float disgusting = 0, float disturbing = 0, float offensive = 0, float positive = 0) {
-        GameObject flag = Instantiate(Resources.Load("OccurrenceFlag"), spawner.transform.position, Quaternion.identity) as GameObject;
-        Occurrence occurrence = flag.GetComponent<Occurrence>();
 
-        EventData eventData = new EventData(chaos: chaos, disgusting: disgusting, disturbing: disturbing, offensive: offensive, positive: positive);
-        eventData.noun = noun;
-        eventData.whatHappened = whatHappened;
-        OccurrenceEvent data = new OccurrenceEvent(eventData) {
-            involved = new HashSet<GameObject>() { spawner }
-        };
-        data.CalculateDescriptions();
-
-        occurrence.data = data;
-        // Debug.Log(data.describable.whatHappened);
-        if (data.describable.whatHappened.ToLower().Contains("tina")) {
-            Debug.LogError(data.describable.whatHappened);
-        }
-        return eventData;
-    }
     public AudioSource SetUpAudioSource(GameObject g) {
         AudioSource source = g.GetComponent<AudioSource>();
         if (!source) {
@@ -678,11 +660,6 @@ public partial class Toolbox : Singleton<Toolbox> {
         } else return SkinColor.light;
     }
 
-    public void deactivateEventually(GameObject target) {
-        DestroyAfterTime dat = target.AddComponent<DestroyAfterTime>();
-        dat.deactivate = true;
-        dat.lifetime = 3f;
-    }
     public static string CapitalizeFirstLetter(string inString) {
         if (inString == null)
             return null;
@@ -706,5 +683,32 @@ public partial class Toolbox : Singleton<Toolbox> {
 
         double fac = Math.Sqrt(-2.0 * Math.Log(S) / S);
         return u * fac;
+    }
+    public static void CleanUpChildren(GameObject playerObject) {
+        if (playerObject == null)
+            return;
+        Head head = playerObject.GetComponentInChildren<Head>();
+        if (head != null && head.hat != null) {
+            Hat hat = head.RemoveHat();
+            MySaver.RemoveObject(hat.gameObject);
+            DestroyImmediate(hat.gameObject);
+        }
+        Inventory focusInv = playerObject.GetComponent<Inventory>();
+        if (focusInv) {
+            focusInv.ClearInventory(); // does RemoveObject
+            UINew.Instance.UpdateTopActionButtons();
+        }
+        Eater focusEater = playerObject.GetComponent<Eater>();
+        if (focusEater) {
+            focusEater.nutrition = 0;
+            focusEater.nausea = 0;
+            // empty the stomachs
+            while (focusEater.eatenQueue.Count > 0) {
+                GameObject eaten = focusEater.eatenQueue.First.Value;
+                MySaver.RemoveObject(eaten);
+                focusEater.eatenQueue.RemoveFirst();
+                DestroyImmediate(eaten);
+            }
+        }
     }
 }

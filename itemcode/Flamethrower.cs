@@ -9,6 +9,7 @@ public class Flamethrower : SquirtGun {
     public AudioClip flameLoop;
     public float soundTimer;
     public bool startSoundPlayed;
+    public Pickup pickup;
     public override void doSquirt(Vector3 direction, Vector3 position) {
         if (sprayTimer > 0)
             return;
@@ -23,7 +24,12 @@ public class Flamethrower : SquirtGun {
         Flammable dropletFlammable = droplet.GetComponent<Flammable>();
         if (dropletFlammable) {
             dropletFlammable.SpontaneouslyCombust();
-            dropletFlammable.responsibleParty = gameObject;
+            if (pickup != null && pickup.holder != null) {
+                dropletFlammable.responsibleParty = pickup.holder.gameObject;
+                // Debug.Log(dropletFlammable.responsibleParty);
+            } else {
+                dropletFlammable.responsibleParty = gameObject;
+            }
         }
         sprayTimer = sprayInterval;
         soundTimer = 0.2f;
@@ -76,6 +82,8 @@ public class Flamethrower : SquirtGun {
             spray2.dontWipeInterface = true;
             spray2.validationFunction = true;
             spray2.continuous = true;
+
+            pickup = GetComponent<Pickup>();
 
             interactions.Add(spray2);
             if (liquidSprite)

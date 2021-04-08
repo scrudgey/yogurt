@@ -79,7 +79,10 @@ public class Buff {
         {BuffType.telepathy, "telepathy"},
         {BuffType.undead, "undead"},
         {BuffType.acidDamage, "acid"},
-        {BuffType.polymorph, "polymorph"}
+        {BuffType.polymorph, "polymorph"},
+        {BuffType.offensive, "offensive"},
+        {BuffType.disturbing, "disturbing"},
+        {BuffType.disgusting, "disgusting"},
     };
 
 
@@ -114,7 +117,10 @@ public enum BuffType {
     clearHeaded,
     enraged,
     acidDamage,
-    polymorph
+    polymorph,
+    offensive,
+    disturbing,
+    disgusting
 }
 [System.Serializable]
 public class BuffData {

@@ -384,7 +384,7 @@ public class Awareness : MonoBehaviour, ISaveable, IDirectable {
         Toolbox.Instance.SendMessage(gameObject, this, new MessageOccurrence(od));
         if (od is OccurrenceViolence)
             WitnessViolence((OccurrenceViolence)od);
-        foreach (EventData e in od.describable.GetChildren()) {
+        foreach (EventData e in od.NetEvents()) {
             ReactToEvent(e, od.involvedParties());
         }
     }

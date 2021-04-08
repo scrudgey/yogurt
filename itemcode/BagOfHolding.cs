@@ -106,13 +106,7 @@ public class BagOfHolding : Interactive, IExcludable, ISaveable {
     public bool Store_Validation(GameObject obj) {
         MyMarker marker = obj.GetComponent<MyMarker>();
         if (marker != null && !marker.apartmentObject) {
-
-            // if the player is holding something, we want to invalidate so that "put" will apply to the held object
-            // Inventory inv = obj.GetComponent<Inventory>();
-            // if (inv != null && inv.holding != null) {
-            //     return false;
-            // }
-
+            if (obj.name.ToLower().Contains("window")) return false; // wow so hack
             return true;
         } else return false;
     }
@@ -120,7 +114,7 @@ public class BagOfHolding : Interactive, IExcludable, ISaveable {
         if (maxNumber == 0 || items.Count < maxNumber) {
             AddItem(obj);
         } else {
-            // Toolbox.Instance.SendMessage(inv.gameObject, this, new MessageSpeech("It's full.") as Message);
+
         }
     }
 

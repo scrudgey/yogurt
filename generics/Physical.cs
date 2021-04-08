@@ -295,6 +295,8 @@ public class Physical : MonoBehaviour {
         }
     }
     void StartTable() {
+        if (table == null)
+            StopTable();
         // Debug.Log(name + " start table");
         Vector2 newOffset = new Vector2(0f, table.height);
         horizonCollider.offset = newOffset;

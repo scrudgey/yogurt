@@ -15,13 +15,16 @@ public class Package : Interactive, ISaveable {
             content = Resources.Load("prefabs/eggplant") as GameObject;
             Debug.Log($"package could not find {contents}");
         }
+        SpriteRenderer objRenderer = content.GetComponent<SpriteRenderer>();
+        if (objRenderer != null) {
+            gibs.color = objRenderer.color;
+        }
         gibs.particle = content;
         gibs.number = 1;
         gibs.damageCondition = damageType.any;
         Bones bones = GetComponent<Bones>();
         if (bones != null) {
             // set sprite
-            SpriteRenderer objRenderer = content.GetComponent<SpriteRenderer>();
             bones.boneSprite = objRenderer.sprite;
             bones.Start();
         }

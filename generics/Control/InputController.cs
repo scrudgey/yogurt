@@ -533,7 +533,9 @@ public class InputController : Singleton<InputController> {
         VideoCamera camera = clicked.GetComponent<VideoCamera>();
         Doorway door = clicked.GetComponent<Doorway>();
         if (door != null && door.GetType() != typeof(Bed) && !door.disableInteractions && !door.locked) {
-            door.Leave();
+            if (InteractionIsWithinRange(door.leaveaction)) {
+                door.Leave();
+            }
         } else if (bed != null) {
             if (Vector2.Distance(clicked.transform.position, actor.transform.position) < QuickActionMaxDistance) {
                 bed.MakeBed();

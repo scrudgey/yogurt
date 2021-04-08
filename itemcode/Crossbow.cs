@@ -75,6 +75,10 @@ public class Crossbow : Interactive, IDirectable, ISaveable {
         phys.impactsMiss = true;
         Vector2 initpos = transform.position;
         Inventory holderInv = GetComponentInParent<Inventory>();
+        Projectile projectile = dart.GetComponent<Projectile>();
+        if (projectile != null) {
+            projectile.responsibleParty = holderInv.gameObject;
+        }
         float initHeight = height;
         if (holderInv) {
             initHeight += holderInv.dropHeight;

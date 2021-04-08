@@ -44,6 +44,13 @@ public class DescribableOccurrenceData : MetaDescribable<EventData> {
             AddChild(child);
         }
     }
+    public DescribableOccurrenceData WithMultiplier(Dictionary<Rating, float> multiplier) {
+        DescribableOccurrenceData output = new DescribableOccurrenceData();
+        foreach (EventData child in GetChildren()) {
+            output.AddChild(child.WithMultiplier(multiplier));
+        }
+        return output;
+    }
 }
 
 [System.Serializable]
@@ -57,6 +64,46 @@ public abstract class OccurrenceData {
     public abstract void Descriptions();
     protected virtual void AddChild(EventData child) {
         describable.AddChild(child);
+    }
+    public List<EventData> NetEvents() {
+        List<EventData> newData = new List<EventData>();
+        Dictionary<Rating, float> multiplier = NetMultiplier();
+        foreach (EventData origData in describable.GetChildren()) {
+            newData.Add(origData.WithMultiplier(multiplier));
+        }
+        return newData;
+    }
+    public DescribableOccurrenceData NetDescribable() {
+        return describable.WithMultiplier(NetMultiplier());
+    }
+    Dictionary<Rating, float> NetMultiplier() {
+        Dictionary<Rating, float> multipliers = new Dictionary<Rating, float>{
+            {Rating.chaos, 1},
+            {Rating.disgusting, 1},
+            {Rating.disturbing, 1},
+            {Rating.offensive, 1},
+            {Rating.positive, 1}
+        };
+        foreach (GameObject go in involvedParties()) {
+            if (go == null)
+                continue;
+            foreach (Intrinsics intrinsics in go.GetComponentsInParent<Intrinsics>()) {
+                float offensiveValue = intrinsics.NetBuffs()[BuffType.offensive].floatValue;
+                float disturbingValue = intrinsics.NetBuffs()[BuffType.disturbing].floatValue;
+                float disgustingValue = intrinsics.NetBuffs()[BuffType.disgusting].floatValue;
+                if (offensiveValue >= 1f) {
+                    multipliers[Rating.offensive] *= offensiveValue;
+                }
+                if (disturbingValue >= 1f) {
+                    multipliers[Rating.disturbing] *= disturbingValue;
+                }
+                if (disgustingValue >= 1f) {
+                    multipliers[Rating.disgusting] *= disgustingValue;
+                }
+            }
+
+        }
+        return multipliers;
     }
 }
 public class OccurrenceEvent : OccurrenceData {
@@ -77,6 +124,8 @@ public class OccurrenceEvent : OccurrenceData {
 public class OccurrenceFire : OccurrenceData {
     public GameObject flamingObject;
     public bool extinguished;
+    public bool ignition;
+    public GameObject responsibleParty;
     public override HashSet<GameObject> involvedParties() {
         return new HashSet<GameObject> { flamingObject };
     }
@@ -89,11 +138,32 @@ public class OccurrenceFire : OccurrenceData {
         }
         EventData data = new EventData(chaos: 2);
 
-        data.whatHappened = $"the {objectName} burned";
-        if (hurtable) {
+        if (extinguished) {
+            data = new EventData(chaos: 0, disturbing: 0, offensive: 0, positive: 3);
+            data.whatHappened = $"{objectName} was extinguished";
+        } else if (ignition) {
             data = new EventData(chaos: 3, disturbing: 2, offensive: 1, positive: -1);
-            data.whatHappened = $"{objectName} burned";
+            if (responsibleParty != null) {
+                string responsible = Toolbox.Instance.GetName(responsibleParty);
+
+                data.whatHappened = $"{responsible} set the {objectName} on fire";
+                if (hurtable) {
+                    data.whatHappened = $"{responsible} set {objectName} on fire";
+                }
+            } else {
+                data.whatHappened = $"the {objectName} was set on fire";
+                if (hurtable) {
+                    data.whatHappened = $"{objectName} was set on fire";
+                }
+            }
+        } else {
+            data = new EventData(chaos: 3, disturbing: 2, offensive: 1, positive: -1);
+            data.whatHappened = $"the {objectName} burned";
+            if (hurtable) {
+                data.whatHappened = $"{objectName} burned";
+            }
         }
+
         data.noun = "fire";
 
         AddChild(data);

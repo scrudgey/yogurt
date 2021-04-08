@@ -6,6 +6,7 @@ using System;
 public class CutsceneImp : Cutscene {
     static public List<BuffType> buffPriority = new List<BuffType>(){
         BuffType.telepathy,
+        BuffType.polymorph,
         BuffType.poison,
         BuffType.coughing,
         BuffType.undead,
@@ -20,7 +21,10 @@ public class CutsceneImp : Cutscene {
         BuffType.ethereal,
         BuffType.invulnerable,
         BuffType.death,
-        BuffType.acidDamage
+        BuffType.acidDamage,
+        BuffType.offensive,
+        BuffType.disgusting,
+        BuffType.disturbing,
     };
 
     private enum CutsceneState { none, describePotion, describeIngredient }
@@ -197,8 +201,15 @@ public class CutsceneImp : Cutscene {
     public void Finish() {
         complete = true;
         impAnimate.enabled = true;
-        Toolbox.Instance.deactivateEventually(impSeller.leftPoint);
-        Toolbox.Instance.deactivateEventually(impSeller.rightPoint);
+        deactivateEventually(impSeller.leftPoint);
+        deactivateEventually(impSeller.rightPoint);
+    }
+    public void deactivateEventually(GameObject target) {
+        // DestroyAfterTime dat = target.AddComponent<DestroyAfterTime>();
+        DestroyAfterTime dat = Toolbox.GetOrCreateComponent<DestroyAfterTime>(target);
+        dat.timer = 0;
+        dat.deactivate = true;
+        dat.lifetime = 3f;
     }
 
     public bool GetIngredients() {

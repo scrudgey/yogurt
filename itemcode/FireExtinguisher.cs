@@ -12,6 +12,7 @@ public class FireExtinguisher : Interactive, IDirectable {
     private Vector2 direction = Vector2.right;
     private AudioSource audioSource;
     private bool doSpray;
+    private Pickup myPickup;
     void Awake() {
         Interaction spray = new Interaction(this, "Spray", "Spray");
         spray.defaultPriority = 2;
@@ -35,6 +36,8 @@ public class FireExtinguisher : Interactive, IDirectable {
 
         spriteRenderer = GetComponent<SpriteRenderer>();
         defaultSprite = spriteRenderer.sprite;
+
+        myPickup = GetComponent<Pickup>();
     }
     public void Spray() {
         if (emissionTimeout <= 0f) {
@@ -63,12 +66,8 @@ public class FireExtinguisher : Interactive, IDirectable {
             }
             particles.GetComponent<Rigidbody2D>().AddForce(force * Time.fixedDeltaTime, ForceMode2D.Impulse);
             ChemicalSpray spray = particles.GetComponent<ChemicalSpray>();
-            if (spray) {
-                Pickup myPickup = GetComponent<Pickup>();
-                if (myPickup) {
-                    if (myPickup.holder)
-                        spray.responsibleParty = myPickup.holder.gameObject;
-                }
+            if (spray && myPickup && myPickup.holder) {
+                spray.responsibleParty = myPickup.holder.gameObject;
             }
             emissionTimeout += emissionRate;
         }

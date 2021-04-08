@@ -263,7 +263,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
     }
     public void LoadData(PersistentComponent data) {
         hitState = (Controllable.HitState)data.ints["hitstate"];
-        initialAwareness = new List<GameObject>();
+        initialAwareness = new List<GameObject>(); // this probably won't work because load is called after Awake, but it shouldn't matter?
         guardPoint = data.vectors["guardPoint"];
         if (data.GUIDs.ContainsKey("protectID")) {
             GameObject protectObject = MySaver.IDToGameObject(data.GUIDs["protectID"]);
@@ -281,7 +281,7 @@ public class DecisionMaker : MonoBehaviour, ISaveable {
             }
         }
         if (protectionZone != null) {
-            priorities.Add(new PriorityProtectZone(gameObject, control, protectionZone, guardPoint, guardDirection));
+            InitializePriority(new PriorityProtectZone(gameObject, control, protectionZone, guardPoint, guardDirection), typeof(PriorityProtectZone));
         }
 
 

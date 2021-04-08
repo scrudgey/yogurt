@@ -19,12 +19,7 @@ public class NewDayDiaryMenu : MonoBehaviour {
         foodNum.text = GameManager.Instance.data.foodCollectedToday.ToString();
         clothingNum.text = GameManager.Instance.data.clothesCollectedToday.ToString();
 
-        // set up top item
-        if (GameManager.Instance.data.itemsCollectedToday > 0) {
-            ConfigureTopItem();
-        } else {
-            topItemPanel.SetActive(false);
-        }
+
 
         foreach (Transform child in commercialsPanel.transform) {
             Destroy(child.gameObject);
@@ -47,6 +42,12 @@ public class NewDayDiaryMenu : MonoBehaviour {
         }
         GameManager.Instance.data.newUnlockedCommercials = new HashSet<Commercial>();
 
+        // set up top item
+        if (GameManager.Instance.data.newCollectedItems.Count > 0) {
+            ConfigureTopItem();
+        } else {
+            topItemPanel.SetActive(false);
+        }
     }
 
     void ConfigureTopItem() {
@@ -54,26 +55,31 @@ public class NewDayDiaryMenu : MonoBehaviour {
 
         GameObject item = Resources.Load("prefabs/" + itemName) as GameObject;
 
-        Item itemComponent = item.GetComponent<Item>();
-        Pickup itemPickup = item.GetComponent<Pickup>();
-        SpriteRenderer itemRenderer = item.GetComponent<SpriteRenderer>();
-        if (itemComponent != null) {
-            itemName = itemComponent.itemName;
-        } else itemName = Toolbox.Instance.GetName(item);
-        topItemText.text = itemName;
+        if (item != null) {
+            Item itemComponent = item.GetComponent<Item>();
+            Pickup itemPickup = item.GetComponent<Pickup>();
+            SpriteRenderer itemRenderer = item.GetComponent<SpriteRenderer>();
+            if (itemComponent != null) {
+                itemName = itemComponent.itemName;
+            } else itemName = Toolbox.Instance.GetName(item);
+            topItemText.text = itemName;
 
-        if (itemPickup != null && itemPickup.icon != null) {
-            topItemIcon.sprite = itemPickup.icon;
-            // TODO: someday, use c# 6 null-conditional or monads
-            Transform balloon = item.transform.Find("balloon");
-            if (balloon != null) {
-                SpriteRenderer balloonRenderer = balloon.GetComponent<SpriteRenderer>();
-                if (balloonRenderer != null) {
-                    topItemIcon.color = balloonRenderer.color;
+            if (itemPickup != null && itemPickup.icon != null) {
+                topItemIcon.sprite = itemPickup.icon;
+                // TODO: someday, use c# 6 null-conditional or monads
+                Transform balloon = item.transform.Find("balloon");
+                if (balloon != null) {
+                    SpriteRenderer balloonRenderer = balloon.GetComponent<SpriteRenderer>();
+                    if (balloonRenderer != null) {
+                        topItemIcon.color = balloonRenderer.color;
+                    }
                 }
+            } else if (itemRenderer != null) {
+                topItemIcon.sprite = itemRenderer.sprite;
             }
-        } else topItemIcon.sprite = itemRenderer.sprite;
-
+        } else {
+            topItemPanel.SetActive(false);
+        }
         // do not destroy item, because it's just a loaded prefab.
     }
 

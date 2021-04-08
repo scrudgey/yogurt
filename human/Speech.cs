@@ -69,7 +69,9 @@ public class Speech : Interactive, ISaveable {
         // var pattern = "(?<label>\"formatter\"): ([\"])(?<tag>.*)([\"])";
         string dayHook = @"\$\$DAYS\$\$";
         //Create a substitution pattern for the Replace method
-        string replacePattern = $"{GameManager.Instance.data.days - GameManager.HellDoorClosesOnDay} days";
+        string replacePattern = "";
+        if (GameManager.Instance.data != null)
+            replacePattern = $"{GameManager.Instance.data.days - GameManager.HellDoorClosesOnDay} days";
         return Regex.Replace(instring, dayHook, replacePattern, RegexOptions.IgnoreCase);
     }
     public static MessagePhrase ProcessDialogue(string phrase, ref List<bool> swearList) {

@@ -75,7 +75,7 @@ public class Eater : Interactive, ISaveable {
         netIntrinsics = message.netBuffs;
     }
     public void HandleOccurrence(MessageOccurrence message) {
-        foreach (EventData data in message.data.describable.GetChildren())
+        foreach (EventData data in message.data.NetEvents())
             ReactToOccurrence(data);
     }
     void Update() {
@@ -284,15 +284,6 @@ public class Eater : Interactive, ISaveable {
             // eaten <- {secondEaten} 
             GameObject eaten = eatenQueue.First.Value;
             eatenQueue.RemoveFirst();
-
-            // GameObject eaten = eatenQueue.Dequeue();
-            // string eatenName = Toolbox.Instance.GetName(eaten);
-            // data.strings[$"eaten{index}"] = eatenName;
-            // Debug.Log($"{this} adding eaten to reference tree: {eatenName}");
-            // MySaver.UpdateGameObjectReference(eaten, data, $"eaten{index}");
-            // MySaver.AddToReferenceTree(gameObject, eaten);
-            // index++;
-
             data.vomit = eaten.gameObject;
             eaten.SetActive(true);
             eaten.transform.position = transform.position;

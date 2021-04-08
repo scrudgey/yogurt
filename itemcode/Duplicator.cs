@@ -36,6 +36,9 @@ public class Duplicator : Interactive, IDirectable {
         if (particles != null) {
             particles.Play();
         }
+
+        EventData nullData = EventData.Duplication(duplicatable.gameObject);
+        Toolbox.Instance.OccurenceFlag(gameObject, nullData);
     }
     public bool Duplicate_Validation(Duplicatable duplicatable) {
         if (!duplicatable.duplicatable)

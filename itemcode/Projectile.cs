@@ -11,6 +11,7 @@ public class Projectile : MonoBehaviour {
     public bool destroyOnImpact;
     public GameObject destroyEffect;
     public Liquid liquid;
+    public GameObject responsibleParty;
     void Awake() {
         message = new MessageDamage(damage, damageType);
         message.impactSounds = hurtableImpactSounds;
@@ -22,7 +23,10 @@ public class Projectile : MonoBehaviour {
         if (coll.isTrigger)
             return;
         Damageable hurtable = coll.gameObject.GetComponentInParent<Damageable>();
-        Debug.Log($"collision {coll} {hurtable}");
+        // Debug.Log($"collision {coll} {hurtable}");
+        if (responsibleParty != null) {
+            message.responsibleParty = responsibleParty;
+        }
         if (hurtable) {
             Toolbox.Instance.SendMessage(coll.gameObject, this, message);
             Toolbox.Instance.AudioSpeaker(hurtableImpactSounds[Random.Range(0, hurtableImpactSounds.Length)], transform.position);
@@ -33,7 +37,9 @@ public class Projectile : MonoBehaviour {
     }
     void OnCollisionEnter2D(Collision2D coll) {
         Damageable hurtable = coll.gameObject.GetComponent<Damageable>();
-
+        if (responsibleParty != null) {
+            message.responsibleParty = responsibleParty;
+        }
         if (hurtable) {
             Toolbox.Instance.SendMessage(coll.gameObject, this, message);
             ClaimsManager.Instance.WasDestroyed(gameObject);

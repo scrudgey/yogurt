@@ -192,6 +192,7 @@ public abstract class Damageable : MonoBehaviour {
         if (DamageResults.Contains(result)) {
             lastMessage = message;
             if (message.responsibleParty != null) {
+                // TODO: more logic around this part.
                 lastAttacker = message.responsibleParty;
             }
             impersonalAttacker = message.impersonal;
@@ -217,6 +218,7 @@ public abstract class Damageable : MonoBehaviour {
     }
     public abstract void CalculateDamage(MessageDamage message);
     public virtual void Destruct() {
+        Toolbox.CleanUpChildren(gameObject);
         if (gameObject.name.Contains("ghost") && SceneManager.GetActiveScene().name == "mayors_attic") {
             GameManager.Instance.data.ghostsKilled += 1;
         }
@@ -227,9 +229,8 @@ public abstract class Damageable : MonoBehaviour {
             GameObject.Instantiate(Resources.Load("particles/cosmic_destruction"), transform.position, Quaternion.identity);
         }
         Intrinsics myIntrinsics = GetComponent<Intrinsics>();
-        // TODO: does this ruin undead gibs?
         foreach (Gibs gib in GetComponents<Gibs>())
-            gib.Emit(lastMessage);//, intrinsics: myIntrinsics);
+            gib.Emit(lastMessage);
         PhysicalBootstrapper phys = GetComponent<PhysicalBootstrapper>();
         if (phys) {
             phys.DestroyPhysical();

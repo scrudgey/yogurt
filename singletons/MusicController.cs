@@ -34,7 +34,8 @@ public enum TrackName {
     lowerhell,
     satansthone,
     gravy,
-    antimayor
+    antimayor,
+    ending
 }
 [System.Serializable]
 public class Track : IEquatable<Track> {
@@ -200,6 +201,7 @@ public class MusicController : Singleton<MusicController> {
         {TrackName.satansthone, "Final SATAN VER#1 Vox _ No Bass YC3 2020"},
         {TrackName.gravy, "Scram Gravy Commercial Ver#5 Drip Plop YC3 2020"},
         {TrackName.antimayor, "ANTI MAYOR Ver#2 Final Sleaze YC3 2021"},
+        {TrackName.ending, "ENDING THEME Ver#6 alls well what ends well YC3 2021"}
     };
 
     // TODO: add studio
@@ -210,6 +212,7 @@ public class MusicController : Singleton<MusicController> {
         {"portal", () => new Music(new Track(TrackName.moonWarp))},
         {"portal_venus", () => new Music(new Track(TrackName.moonWarp))},
         {"portal_hell", () => new Music(new Track(TrackName.moonWarp))},
+        {"portal_magic", () => new Music(new Track(TrackName.moonWarp))},
         {"moon1", () => new Music(new Track(TrackName.moonCave))}, // MusicMoon
         {"moon_pool", () => new Music(new Track(TrackName.moonCave))},
         {"moon_town", () => new Music(new Track(TrackName.moonCave))},
@@ -242,9 +245,9 @@ public class MusicController : Singleton<MusicController> {
         {"mountain", () => new Music(new Track(TrackName.mountain, vol: 6f))}, // MusicMountain
         {"volcano", () => new Music(new Track(TrackName.mountain, vol: 6f))},
         {"venus1", () => new Music(new Track(TrackName.venus))}, // MusicVenus
-        {"venus_temple", () => new Music(new Track(TrackName.venus))},
-        {"hells_kitchen", () => new Music(new Track(TrackName.venus))},
-        {"hells_landing", () => new Music(new Track(TrackName.venus))},
+        {"venus_temple", () => new Music(new Track(TrackName.creeptunnel))},
+        {"hells_kitchen", () => new Music(new Track(TrackName.creeptunnel))},
+        {"hells_landing", () => new Music(new Track(TrackName.creeptunnel))},
         {"lower_hell", () => new Music(new Track(TrackName.lowerhell, vol: 0.5f))}, // MusicHell
         {"devils_throneroom", () => new Music(new Track(TrackName.satansthone))}, // MusicThroneroom
         {"office_cutscene", () => new Music(new Track(TrackName.fillerBeat) )}, // MusicBeat
@@ -332,7 +335,8 @@ public class MusicController : Singleton<MusicController> {
         }
     }
     public void EnqueueMusic(Music music) {
-        stack.Peek().Pause();
+        if (stack.Count > 0)
+            stack.Peek().Pause();
         stack.Push(music);
         Play();
     }

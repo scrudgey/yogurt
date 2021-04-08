@@ -285,6 +285,7 @@ namespace analysis {
         }
         public static string QualityKey(Rating rating) {
             switch (rating) {
+                default:
                 case Rating.chaos:
                     return "{quality-chaos}";
                 case Rating.disgusting:
@@ -296,7 +297,6 @@ namespace analysis {
                 case Rating.positive:
                     return "{quality-positive}";
             }
-            return "";
         }
         // public HashSet<string> Adjectives(int number) {
         //     // warning: will have weird behavior if you try a big number

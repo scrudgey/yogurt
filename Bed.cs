@@ -75,15 +75,7 @@ public class Bed : Doorway {
         bubble.gameObject.SetActive(true);
         Toolbox.Instance.SwitchAudioListener(gameObject);
         sleeping = true;
-        // TODO: peter picklebottom cutscene threshhold
-        int collectible = 0;
-        foreach (Duplicatable dup in GameObject.FindObjectsOfType<Duplicatable>()) {
-            if (dup.PickleReady())
-                collectible++;
-        }
-        if (collectible > 3 && GameManager.Instance.data.days > 1 && !GameManager.Instance.data.loadedDay && GameManager.Instance.data.activeMagicianSequence == "") {
-            CutsceneManager.Instance.InitializeCutscene<CutscenePickleBottom>();
-        }
+
         UINew.Instance.RefreshUI(active: false);
 
 

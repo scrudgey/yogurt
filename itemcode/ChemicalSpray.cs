@@ -5,22 +5,30 @@ public class ChemicalSpray : MonoBehaviour {
     public GameObject responsibleParty;
     private float height;
     public bool staining;
-    public static HashSet<string> forbiddenTags = new HashSet<string>() {
-        "fire",
-        "sightcone",
-        "table",
-        "background",
-        "occurrenceFlag",
-        "occurrenceSound",
-        "footprint",
-        "zombieSpawnZone",
-        "sky",
-        "projectile"
-        };
+    // public static HashSet<string> forbiddenTags = new HashSet<string>() {
+    //     "fire",
+    //     "sightcone",
+    //     "table",
+    //     // "background",
+    //     "occurrenceFlag",
+    //     "occurrenceSound",
+    //     "footprint",
+    //     "zombieSpawnZone",
+    //     "sky",
+    //     "projectile"
+    //     };
     void OnCollisionEnter2D(Collision2D coll) {
-        if (forbiddenTags.Contains(coll.collider.tag))
-            return;
-        Instantiate(collisionPlume, transform.position, Quaternion.identity);
+        // if (forbiddenTags.Contains(coll.collider.tag)) {
+        //     return;
+        // }
+        // Debug.Log($"{coll}: {coll.collider.tag}");
+        GameObject plume = Instantiate(collisionPlume, transform.position, Quaternion.identity);
+        if (plume) {
+            NerveGasPlume nerveGas = plume.GetComponent<NerveGasPlume>();
+            if (nerveGas) {
+                nerveGas.responsibleParty = responsibleParty;
+            }
+        }
         foreach (Flammable flam in coll.gameObject.GetComponentsInParent<Flammable>()) {
             if (flam.onFire) {
                 flam.onFire = false;
@@ -39,7 +47,7 @@ public class ChemicalSpray : MonoBehaviour {
         impact.responsibleParty = responsibleParty;
         impact.suppressImpactSound = true;
         Toolbox.Instance.SendMessage(coll.gameObject, this, impact);
-        if (staining && coll.collider.gameObject.layer == LayerMask.NameToLayer("main")) {
+        if (staining && coll.gameObject.layer == LayerMask.NameToLayer("main")) {
             GameObject splash = Instantiate(Resources.Load("prefabs/splash"), transform.position, Quaternion.identity) as GameObject;
             SpriteRenderer splashSprite = splash.GetComponent<SpriteRenderer>();
             splashSprite.color = Color.red;

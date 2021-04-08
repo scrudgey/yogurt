@@ -81,6 +81,9 @@ public class CutsceneNeconomicon : Cutscene {
         Toolbox.Instance.AudioSpeaker("ominous", player.transform.position);
 
 
+        EventData necroData = EventData.Necronomicon(player);
+        Toolbox.Instance.OccurenceFlag(player, necroData);
+
         grammar.Load("horror");
     }
     public override void Update() {

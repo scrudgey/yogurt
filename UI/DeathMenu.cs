@@ -47,7 +47,13 @@ public class DeathMenu : MonoBehaviour {
     public void ResurrectButtonCallback() {
         GameManager.Instance.data.lichRevivalToday = true;
         GameObject lich = GameObject.Instantiate(Resources.Load("prefabs/Lich"), GameManager.Instance.lastPlayerPosition, Quaternion.identity) as GameObject;
+
+        GameObject playerObject = GameManager.Instance.playerObject;
+        Toolbox.CleanUpChildren(GameManager.Instance.playerObject);
         Destroy(GameManager.Instance.playerObject);
+
+
+
         GameManager.Instance.SetFocus(lich);
         Toolbox.SetGender(lich, GameManager.Instance.data.defaultGender, changeHead: false);
         Destroy(gameObject);

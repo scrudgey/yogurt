@@ -119,8 +119,11 @@ public class Flammable : MonoBehaviour, ISaveable {
                 audioSource.PlayOneShot(igniteSounds[Random.Range(0, 1)]);
                 RequestPlayAudio();
             }
-            OccurrenceFire fireData = new OccurrenceFire();
-            fireData.flamingObject = gameObject;
+            OccurrenceFire fireData = new OccurrenceFire() {
+                ignition = true,
+                flamingObject = gameObject,
+                responsibleParty = responsibleParty
+            };
             Toolbox.Instance.OccurenceFlag(gameObject, fireData);
             if (myHurtable != null && responsibleParty == GameManager.Instance.playerObject && gameObject != GameManager.Instance.playerObject) {
                 GameManager.Instance.IncrementStat(StatType.othersSetOnFire, 1);
@@ -143,7 +146,7 @@ public class Flammable : MonoBehaviour, ISaveable {
             }
             // if i am on fire, i take damage.
             MessageDamage message = new MessageDamage(0.55f, damageType.fire);
-            message.responsibleParty = gameObject;
+            message.responsibleParty = responsibleParty;
             Toolbox.Instance.SendMessage(gameObject, this, message, sendUpwards: false);
             if (Random.Range(0, 300f) < 1) {
                 string name = Toolbox.Instance.GetName(gameObject);

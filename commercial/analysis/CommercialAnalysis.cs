@@ -92,6 +92,7 @@ namespace analysis {
         }
 
         public List<DescribableOccurrenceData> TopEvents() {
+            // "Highlights" in the commercial report menu
             return commercial.GetChildren().OrderByDescending(o => o.quality.Values.Sum()).ToList();
         }
     }

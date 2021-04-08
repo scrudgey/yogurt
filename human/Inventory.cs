@@ -312,6 +312,7 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
                 items[i].SetActive(true);
                 items[i].transform.position = holdpoint.position;
                 items[i].transform.SetParent(holdpoint);
+                items[i].transform.localScale = Vector3.one;
                 items[i].GetComponent<Rigidbody2D>().isKinematic = true;
                 items[i].GetComponent<Collider2D>().isTrigger = true;
                 items[i].GetComponent<Pickup>().holder = this;
@@ -337,6 +338,11 @@ public class Inventory : Interactive, IExcludable, IDirectable, ISaveable {
         if (holding) {
             throwObject = holding.gameObject;
             holding = null;
+        } else {
+            MessageAnimation anim = new MessageAnimation(MessageAnimation.AnimType.throwing, false);
+            Toolbox.Instance.SendMessage(gameObject, this, anim);
+            throwObject = null;
+
         }
     }
     private void DoThrow() {

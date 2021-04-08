@@ -12,9 +12,9 @@ public class Doorway : Interactive {
     public Transform enterPoint;
     public bool smallEntrance;
     public bool locked;
-
+    public Interaction leaveaction;
     public virtual void Awake() {
-        Interaction leaveaction = new Interaction(this, actionDesc, "Leave");
+        leaveaction = new Interaction(this, actionDesc, "Leave");
         interactions.Add(leaveaction);
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
     }

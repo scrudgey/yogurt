@@ -23,15 +23,15 @@ public class NeoCommercialReportMenu : MonoBehaviour {
         switch (rating) {
             default:
             case Rating.disturbing:
-                return "<sprite=1>";
-            case Rating.disgusting:
-                return "<sprite=0>";
-            case Rating.offensive:
                 return "<sprite=2>";
-            case Rating.chaos:
+            case Rating.disgusting:
+                return "<sprite=1>";
+            case Rating.offensive:
                 return "<sprite=3>";
-            case Rating.positive:
+            case Rating.chaos:
                 return "<sprite=4>";
+            case Rating.positive:
+                return "<sprite=5>";
         }
     }
     Dictionary<Rating, TextMeshProUGUI> metricScores() {
@@ -98,7 +98,7 @@ public class NeoCommercialReportMenu : MonoBehaviour {
         UINew.Instance.ClearFaderModules();
 
         if (commercial != null && commercial.cutscene != "none") {
-            if (commercial.gravy) {
+            if (commercial.gravy || commercial.sabotage) {
                 GameManager.Instance.AntiMayorCutscene();
             } else if (commercial.cutscene == "ending") {
                 GameManager.Instance.EndingCutscene();
@@ -249,9 +249,11 @@ public class NeoCommercialReportMenu : MonoBehaviour {
             // Debug.Log($"{oc.whatHappened}");
             string entry = oc.whatHappened;
             foreach (Rating rating in Enum.GetValues(typeof(Rating))) {
-                if (oc.quality[rating] > 0) {
+                if (oc.quality[rating] > 0 && oc.quality[rating] < 5) {
                     // Debug.Log($"{rating}: {oc.quality[rating]}");
                     entry += Spacer + String.Concat(Enumerable.Repeat(RatingToSprite(rating), (int)oc.quality[rating]));
+                } else if (oc.quality[rating] >= 5) {
+                    entry += Spacer + $"{RatingToSprite(rating)}   x{oc.quality[rating]}";
                 }
             }
             entry += Spacer + "\n";

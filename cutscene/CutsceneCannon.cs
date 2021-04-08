@@ -62,8 +62,9 @@ public class CutsceneCannon : Cutscene {
         if (timer > 4f) {
             // switch scenes
             complete = true;
-            GameManager.Instance.data.entryID = 1;
-            SceneManager.LoadScene("space");
+            // GameManager.Instance.data.entryID = 1;
+            // SceneManager.LoadScene("space");
+            GameManager.Instance.LeaveScene("space", 1);
         }
     }
 }

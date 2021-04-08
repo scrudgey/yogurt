@@ -115,7 +115,7 @@ public partial class GameManager : Singleton<GameManager> {
         {"cave1", "deathtrap cave"},
         {"cave2", "deathtrap cave II"},
         {"forest", "forest"},
-        {"house", "house"},
+        // {"house", "house"},
         {"moon1", "moon"},
         {"studio", "yogurt commercial studio"},
         {"volcano", "volcano"},
@@ -228,10 +228,12 @@ public partial class GameManager : Singleton<GameManager> {
             SetupDevilsOffer();
         }
         if (data.state == GameState.ceoPlus) {
-            GameObject origPlayer = GameManager.Instance.playerObject;
-            GameObject ceo = GameObject.Instantiate(Resources.Load("prefabs/CEO"), GameManager.Instance.playerObject.transform.position, Quaternion.identity) as GameObject;
-            GameManager.Instance.SetFocus(ceo);
-            GameObject.Destroy(origPlayer);
+            if (GameManager.Instance.playerObject != null) {
+                GameObject origPlayer = GameManager.Instance.playerObject;
+                GameObject ceo = GameObject.Instantiate(Resources.Load("prefabs/CEO"), GameManager.Instance.playerObject.transform.position, Quaternion.identity) as GameObject;
+                GameManager.Instance.SetFocus(ceo);
+                GameObject.Destroy(origPlayer);
+            }
             GameManager.Instance.data.prefabName = "CEO";
             MySaver.Save();
         }
@@ -439,12 +441,23 @@ public partial class GameManager : Singleton<GameManager> {
         }
     }
     public void SetupDevilsOffer() {
+        MusicController.Instance.StopMusic();
         // post credits: the devil's offer
         data.teleportedToday = true;
-        Transform satanRoot = GameObject.Find("Satan").transform;
+        GameObject satanObject = GameObject.Find("Satan");
+        if (satanObject == null) {
+            satanObject = GameObject.Instantiate(Resources.Load("prefabs/Satan"), new Vector3(0.807f, -0.677f, 0f), Quaternion.identity) as GameObject;
+
+        }
+        // Transform satanRoot = null;
+        // if (satanObject != null) {
+        Transform satanRoot = satanObject.transform;
+        // }
+
         Transform playerRoot = playerObject.transform;
         GameObject doorway = GameObject.Find("doorway");
-        Destroy(doorway);
+        if (doorway != null)
+            Destroy(doorway);
         foreach (MyMarker marker in FindObjectsOfType<MyMarker>()) {
             if (marker.transform.IsChildOf(satanRoot) || marker.transform.IsChildOf(playerRoot)) {
                 continue;
@@ -452,8 +465,10 @@ public partial class GameManager : Singleton<GameManager> {
             Destroy(marker.gameObject);
         }
         GameObject lockedDoor = GameObject.Find("lockedDoor");
-        lockedDoor.GetComponent<SpriteRenderer>().enabled = true;
-        lockedDoor.GetComponent<PolygonCollider2D>().enabled = true;
+        if (lockedDoor != null) {
+            lockedDoor.GetComponent<SpriteRenderer>().enabled = true;
+            lockedDoor.GetComponent<PolygonCollider2D>().enabled = true;
+        }
         satanRoot.GetComponent<Speech>().defaultMonologue = "satan_offer";
         satanRoot.GetComponent<Awareness>().FormPersonalAssessment(playerObject).status = PersonalAssessment.friendStatus.friend;
     }
@@ -721,6 +736,17 @@ public partial class GameManager : Singleton<GameManager> {
                             break;
                         }
                     }
+
+                    if (data.entryID == -99) {
+                        int collectible = 0;
+                        foreach (Duplicatable dup in GameObject.FindObjectsOfType<Duplicatable>()) {
+                            if (dup.PickleReady())
+                                collectible++;
+                        }
+                        if (collectible > 3 && GameManager.Instance.data.days > 1 && !GameManager.Instance.data.loadedDay && GameManager.Instance.data.activeMagicianSequence == "") {
+                            CutsceneManager.Instance.InitializeCutscene<CutscenePickleBottom>();
+                        }
+                    }
                 }
             }
 
@@ -742,7 +768,6 @@ public partial class GameManager : Singleton<GameManager> {
             ht.colorInterval = 0.1f;
             ht.trailPrefab = Resources.Load("hallucination") as GameObject;
         }
-        // TODO: switch magician dialogue in hallucination scene
         if (data.days >= 2) {
             UnlockTVShow("vampire1");
         }
@@ -881,29 +906,7 @@ public partial class GameManager : Singleton<GameManager> {
         if (outfit != null) {
             outfit.initUniform = Resources.Load("prefabs/pajamas") as GameObject;
         }
-        Head head = playerObject.GetComponentInChildren<Head>();
-        if (head != null && head.hat != null) {
-            Hat hat = head.RemoveHat();
-            MySaver.RemoveObject(hat.gameObject);
-            DestroyImmediate(hat.gameObject);
-        }
-        Inventory focusInv = playerObject.GetComponent<Inventory>();
-        if (focusInv) {
-            focusInv.ClearInventory();
-            UINew.Instance.UpdateTopActionButtons();
-        }
-        Eater focusEater = playerObject.GetComponent<Eater>();
-        if (focusEater) {
-            focusEater.nutrition = 0;
-            focusEater.nausea = 0;
-            // empty the stomachs
-            while (focusEater.eatenQueue.Count > 0) {
-                GameObject eaten = focusEater.eatenQueue.First.Value;
-                MySaver.RemoveObject(eaten);
-                focusEater.eatenQueue.RemoveFirst();
-                DestroyImmediate(eaten);
-            }
-        }
+        Toolbox.CleanUpChildren(playerObject);
 
         Flammable playerFlammable = playerObject.GetComponent<Flammable>();
         if (playerFlammable) {
@@ -986,6 +989,7 @@ public partial class GameManager : Singleton<GameManager> {
         } else {
             UnlockTVShow("vampire1");
             UnlockTVShow("vampire2");
+            UnlockTVShow("vampire3");
         }
         sceneTime = 0f;
         timeSinceLastSave = 0f;
@@ -1199,6 +1203,7 @@ public partial class GameManager : Singleton<GameManager> {
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("combat4"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("gravy2"));
             data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("gravy3"));
+            data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("gravy4"));
 
             data.perks["hypnosis"] = true;
             data.perks["vomit"] = true;
@@ -1403,6 +1408,9 @@ public partial class GameManager : Singleton<GameManager> {
         }
         if (filename.ToLower() == "strength_potion") {
             ReceiveEmail("strength");
+        }
+        if (filename.ToLower().Contains("gunpowder")) {
+            GameManager.Instance.UnlockTVShow("vampire3");
         }
         if (GameManager.Instance.data.perks["vomit"] &&
         GameManager.Instance.data.perks["eat_all"] &&

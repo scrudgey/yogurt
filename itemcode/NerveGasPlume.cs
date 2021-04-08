@@ -11,6 +11,9 @@ public class NerveGasPlume : MonoBehaviour {
     //     oxygen damage(?)
     //     acid damage
     Rigidbody2D body;
+    public GameObject responsibleParty;
+    // TODO: periodically clean this up
+    public static HashSet<GameObject> triggeredObjects = new HashSet<GameObject>();
     void Start() {
         body = GetComponent<Rigidbody2D>();
         body.velocity = Random.insideUnitCircle * 5f;
@@ -23,5 +26,11 @@ public class NerveGasPlume : MonoBehaviour {
         // damageQueue.Add(coll.gameObject);
         GameObject target = InputController.Instance.GetBaseInteractive(coll.transform);
         Toolbox.Instance.AddLiveBuffs(target, gameObject);
+
+        if (!triggeredObjects.Contains(target)) {
+            triggeredObjects.Add(target);
+            EventData headExpldeData = EventData.ChemicalWeapon(target, responsibleParty);
+            Toolbox.Instance.OccurenceFlag(target, headExpldeData);
+        }
     }
 }
