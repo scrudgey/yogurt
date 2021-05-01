@@ -206,9 +206,11 @@ public class Speech : Interactive, ISaveable {
             Vector3 tempscale = transform.localScale.normalized;
             flipper.transform.localScale = tempscale;
         }
-        if (voice != null) {
+        if (voice != null && voice != "") {
             AudioClip[] voiceSounds = Resources.LoadAll<AudioClip>("sounds/speechSets/" + voice);
             speakSounds = speakSounds.Concat(voiceSounds).ToArray();
+        } else {
+            speakSounds = new AudioClip[] { };
         }
         // gibberizer = gameObject.AddComponent<SoundGibberizer>();
         gibberizer = Toolbox.GetOrCreateComponent<SoundGibberizer>(gameObject);

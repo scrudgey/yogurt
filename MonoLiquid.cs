@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 public class MonoLiquid : MonoBehaviour, ISaveable {
     public Liquid liquid;
     public Edible edible;
@@ -40,48 +41,55 @@ public class MonoLiquid : MonoBehaviour, ISaveable {
                 rectTransform.Rotate(new Vector3(0, 0, Random.Range(0f, 360f)));
 
                 int numberStains = 0;
+                Stack<Transform> childrenToDestroy = new Stack<Transform>();
                 foreach (Transform child in coll.transform) {
                     if (child.name == "stain(Clone)") {
                         numberStains += 1;
-                        if (numberStains >= 3)
-                            break;
+                        if (numberStains >= 3) {
+                            // Destroy(child);
+                            childrenToDestroy.Push(child);
+                        }
                     }
                 }
-                if (numberStains < 3) {
-                    GameObject stain = CreateStain(coll.gameObject, transform.position);
-                    Toolbox.Instance.AddLiveBuffs(coll.gameObject, gameObject);
-                    SpriteRenderer stainRenderer = stain.GetComponent<SpriteRenderer>();
-                    stainRenderer.color = liquid.color;
-                    Liquid.MonoLiquidify(stain, liquid);
-                    Flammable stainFlammable = stain.GetComponentInParent<Flammable>();
-                    Flammable myFlammable = GetComponent<Flammable>();
-                    if (stainFlammable != null && myFlammable != null && myFlammable.onFire) {
-                        stainFlammable.SpontaneouslyCombust();
-                        stainFlammable.responsibleParty = myFlammable.responsibleParty;
-                        // Debug.Log(stainFlammable.responsibleParty);
-                    }
+                while (childrenToDestroy.Count > 0) {
+                    Destroy(childrenToDestroy.Pop().gameObject);
+                }
 
-                    EventData data = Toolbox.Instance.DataFlag(
-                        coll.gameObject,
-                        "staining",
-                        liquid.name + " stained " + Toolbox.Instance.GetName(coll.gameObject),
-                        chaos: 1,
-                        disgusting: 1);
-                    // data.noun = "staining";
-                    // data.whatHappened = liquid.name + " stained " + Toolbox.Instance.GetName(coll.gameObject);
-                    if (liquid.immoral > 0) {
-                        data.quality[Rating.chaos] += 1;
-                        data.quality[Rating.disturbing] += 1;
-                    }
-                    if (liquid.vomit) {
-                        data.quality[Rating.chaos] += 1;
-                        data.quality[Rating.disgusting] += 1;
-                    }
-                    if (liquid.offal > 0) {
-                        data.quality[Rating.chaos] += 1;
-                        data.quality[Rating.disgusting] += 1;
-                    }
+                // if (numberStains < 3) {
+                GameObject stain = CreateStain(coll.gameObject, transform.position);
+                Toolbox.Instance.AddLiveBuffs(coll.gameObject, gameObject);
+                SpriteRenderer stainRenderer = stain.GetComponent<SpriteRenderer>();
+                stainRenderer.color = liquid.color;
+                Liquid.MonoLiquidify(stain, liquid);
+                Flammable stainFlammable = stain.GetComponentInParent<Flammable>();
+                Flammable myFlammable = GetComponent<Flammable>();
+                if (stainFlammable != null && myFlammable != null && myFlammable.onFire) {
+                    stainFlammable.SpontaneouslyCombust();
+                    stainFlammable.responsibleParty = myFlammable.responsibleParty;
+                    // Debug.Log(stainFlammable.responsibleParty);
                 }
+
+                EventData data = Toolbox.Instance.DataFlag(
+                    coll.gameObject,
+                    "staining",
+                    liquid.name + " stained " + Toolbox.Instance.GetName(coll.gameObject),
+                    chaos: 1,
+                    disgusting: 1);
+                // data.noun = "staining";
+                // data.whatHappened = liquid.name + " stained " + Toolbox.Instance.GetName(coll.gameObject);
+                if (liquid.immoral > 0) {
+                    data.quality[Rating.chaos] += 1;
+                    data.quality[Rating.disturbing] += 1;
+                }
+                if (liquid.vomit) {
+                    data.quality[Rating.chaos] += 1;
+                    data.quality[Rating.disgusting] += 1;
+                }
+                if (liquid.offal > 0) {
+                    data.quality[Rating.chaos] += 1;
+                    data.quality[Rating.disgusting] += 1;
+                }
+                // }
                 ClaimsManager.Instance.WasDestroyed(gameObject);
                 Destroy(gameObject);
             }

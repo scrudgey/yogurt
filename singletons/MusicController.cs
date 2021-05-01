@@ -245,7 +245,7 @@ public class MusicController : Singleton<MusicController> {
         {"mountain", () => new Music(new Track(TrackName.mountain, vol: 6f))}, // MusicMountain
         {"volcano", () => new Music(new Track(TrackName.mountain, vol: 6f))},
         {"venus1", () => new Music(new Track(TrackName.venus))}, // MusicVenus
-        {"venus_temple", () => new Music(new Track(TrackName.creeptunnel))},
+        {"venus_temple", () => new Music(new Track(TrackName.venus))},
         {"hells_kitchen", () => new Music(new Track(TrackName.creeptunnel))},
         {"hells_landing", () => new Music(new Track(TrackName.creeptunnel))},
         {"lower_hell", () => new Music(new Track(TrackName.lowerhell, vol: 0.5f))}, // MusicHell
@@ -259,6 +259,7 @@ public class MusicController : Singleton<MusicController> {
         {"gravy_studio", () => new Music(new Track(TrackName.gravy))}, // MusicGravy
         {"anti_mayor_cutscene", () => new Music(new Track(TrackName.antimayor))}, // MusicAntiMayor
         {"anti_mayors_house", () => new Music(new Track(TrackName.antimayor))},
+        {"hells_chamber", () => new Music(new Track(TrackName.antimayor))},
     };
     public static Dictionary<TrackName, AudioClip> tracks = new Dictionary<TrackName, AudioClip>();
     public AudioClip GetTrack(TrackName trackName) {

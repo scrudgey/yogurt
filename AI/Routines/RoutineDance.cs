@@ -90,6 +90,8 @@ namespace AI {
                 hopSound = Resources.LoadAll<AudioClip>("sounds/toms") as AudioClip[];
                 // posesound
                 poseSound = Resources.LoadAll<AudioClip>("sounds/chant") as AudioClip[];
+
+                headSprites = Toolbox.MemoizedSkinTone("polestar_head", SkinColor.dark);
             }
             headAnimation.Awake();
             headAnimation.LoadSprites();

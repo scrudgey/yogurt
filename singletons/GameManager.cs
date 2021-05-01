@@ -166,7 +166,7 @@ public partial class GameManager : Singleton<GameManager> {
     public Dictionary<HomeCloset.ClosetType, bool> closetHasNew = new Dictionary<HomeCloset.ClosetType, bool>();
     public AudioSource publicAudio;
     public bool playerIsDead;
-    public bool debug = true;
+    public bool debug = false;
     public bool demo = false;
     public bool failedLevelLoad = false;
     public Gender playerGender;
@@ -665,7 +665,7 @@ public partial class GameManager : Singleton<GameManager> {
         if (sceneName == "moon1" && (data.entryID == 420 || data.entryID == 99)) {
             CutsceneManager.Instance.InitializeCutscene<CutsceneMoonLanding>();
         }
-        if (sceneName == "mayors_house" && data.ghostsKilled >= 3 && !data.collectedItems.Contains("key_to_city") && !data.mayorAwardToday) {
+        if (sceneName == "mayors_house" && data.ghostsKilled >= 3 && !data.mayorAwardToday) {
             GameObject mayor = GameObject.Find("Mayor");
             if (mayor != null) {
                 Speech mayorSpeech = mayor.GetComponent<Speech>();
@@ -1155,7 +1155,7 @@ public partial class GameManager : Singleton<GameManager> {
         data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("eat1"));
         data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("gravy1"));
         data.unlockedCommercials.Add(Commercial.LoadCommercialByFilename("sabo1"));
-        data.unlockedScenes.Add("studio");
+        // data.unlockedScenes.Add("studio");
         data.completeCommercials = new HashSet<Commercial>();
 
         data.televisionShows = new List<string>();

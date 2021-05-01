@@ -198,10 +198,10 @@ public class NeoCommercialReportMenu : MonoBehaviour {
         float commercialRating = commercial.quality[rating];
         TextMeshProUGUI text = metricScores()[rating];
         text.text = ((int)commercialRating).ToString();
-        if (commercialRating > 25 && commercialRating < 50) {
+        if (commercialRating > 50 && commercialRating < 100) {
             text.fontStyle = FontStyles.Bold;
             StartCoroutine(BubbleText(0.5f, text.transform));
-        } else if (commercialRating > 50) {
+        } else if (commercialRating > 100 && commercialRating < 300) {
             text.fontStyle = FontStyles.Bold;
             text.color = Color.white;
             text.enableVertexGradient = true;
@@ -210,6 +210,17 @@ public class NeoCommercialReportMenu : MonoBehaviour {
             newGrad.topRight = Color.yellow;
             newGrad.bottomLeft = Color.red;
             newGrad.bottomRight = Color.red;
+            text.colorGradient = newGrad;
+            StartCoroutine(BubbleText(1f, text.transform));
+        } else if (commercialRating > 300) {
+            text.fontStyle = FontStyles.Italic;
+            text.color = Color.white;
+            text.enableVertexGradient = true;
+            VertexGradient newGrad = new VertexGradient();
+            newGrad.topLeft = Color.red;
+            newGrad.topRight = Color.red;
+            newGrad.bottomLeft = Color.green;
+            newGrad.bottomRight = Color.green;
             text.colorGradient = newGrad;
             StartCoroutine(BubbleText(1f, text.transform));
         }
