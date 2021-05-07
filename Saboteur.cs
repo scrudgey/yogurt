@@ -17,6 +17,12 @@ public class Saboteur : Interactive {
         cancelAct.holdingOnOtherConsent = false;
         interactions.Add(cancelAct);
 
+        Interaction finish = new Interaction(this, "Finish", "Finish");
+        finish.descString = "Finish mission";
+        finish.validationFunction = true;
+        finish.holdingOnOtherConsent = false;
+        interactions.Add(finish);
+
         if (GameManager.Instance.data != null && GameManager.Instance.data.completeCommercials.Count < 2) {
             Destroy(gameObject);
         }
@@ -36,7 +42,30 @@ public class Saboteur : Interactive {
         UINew.Instance.ClearObjectives();
     }
     public bool Cancel_Validation() {
-        return GameManager.Instance.data != null && GameManager.Instance.data.recordingCommercial;
+        if (GameManager.Instance.data == null)
+            return false;
+        if (!GameManager.Instance.data.recordingCommercial)
+            return false;
+        if (GameManager.Instance.data.activeCommercial == null)
+            return false;
+        return !GameManager.Instance.data.activeCommercial.Evaluate();
+    }
+
+    public void Finish() {
+        GameManager.Instance.SetRecordingStatus(false);
+        GameManager.Instance.EvaluateCommercial();
+    }
+    public bool Finish_Validation() {
+        if (GameManager.Instance.data == null)
+            return false;
+        if (!GameManager.Instance.data.recordingCommercial)
+            return false;
+        if (GameManager.Instance.data.activeCommercial == null)
+            return false;
+        return GameManager.Instance.data.activeCommercial.Evaluate();
+    }
+    public string Finish_desc() {
+        return "Finish mission";
     }
 
 }

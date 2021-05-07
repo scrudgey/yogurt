@@ -148,7 +148,11 @@ public class VideoCamera : Interactive {
         regionIndicator.SetActive(false);
     }
     public bool Cancel_Validation() {
-        return GameManager.Instance.data.recordingCommercial;
+        if (!GameManager.Instance.data.recordingCommercial)
+            return false;
+        if (GameManager.Instance.data.activeCommercial == null)
+            return false;
+        return GameManager.Instance.data.recordingCommercial && !GameManager.Instance.data.activeCommercial.Evaluate(); ;
     }
 
 }

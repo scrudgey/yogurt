@@ -54,6 +54,7 @@ public class CutsceneDancingGod : Cutscene {
         }
     }
     public override void CleanUp() {
+        MusicController.Instance.End();
         UINew.Instance.RefreshUI(active: true);
     }
     void UpdateWalkTo() {
@@ -81,6 +82,7 @@ public class CutsceneDancingGod : Cutscene {
         timer = 0f;
         cam.maxSize = 0.85f;
         cam.offset = new Vector3(0, 0.4f, 0);
+        MusicController.Instance.EnqueueMusic(new Music(new Track(TrackName.shiva)));
     }
     void UpdateJump() {
         dancingGod.enabled = false;

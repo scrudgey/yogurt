@@ -618,6 +618,8 @@ public partial class GameManager : Singleton<GameManager> {
                 SetupSabotageMission();
             }
 
+
+
         }
         if (sceneName == "hells_landing" && !data.visitedHell) {
             data.visitedHell = true;

@@ -9,7 +9,7 @@ public class TelevisionShow {
     public Sprite[] sprites;
     public Stack<string> elements = new Stack<string>();
     public static Dictionary<string, Func<Music>> musicTracks = new Dictionary<string, Func<Music>>(){
-        {"TVR2", () => new Music(new Track(TrackName.tv_r2d2))},
+        {"TVR2", () => new Music(new Track(TrackName.tv_r2d2, loop:false))},
     };
     public static TelevisionShow LoadByFilename(string filename) {
         TelevisionShow show = new TelevisionShow();

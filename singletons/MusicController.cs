@@ -35,7 +35,8 @@ public enum TrackName {
     satansthone,
     gravy,
     antimayor,
-    ending
+    ending,
+    shiva,
 }
 [System.Serializable]
 public class Track : IEquatable<Track> {
@@ -175,8 +176,8 @@ public class MusicController : Singleton<MusicController> {
     // ideally, should be a FSM with play, pause, enqueue
 
     static Dictionary<TrackName, string> trackFiles = new Dictionary<TrackName, string>{
-        {TrackName.mainTitle, "Title Screen LOOP #2 YC3 2020"},
-        {TrackName.apartment, "Main Vamp w keys YC3"},
+        {TrackName.mainTitle, "TITLE Screen LOOP Ver#3 synth bass YC3 2021"},
+        {TrackName.apartment, "MAIN LOOP YC3 Ver#3 loop there it is YC3 2021"},
         {TrackName.creepyAmbient, "ForestMoon Alternate Loop YC3"},
         {TrackName.lithophone, "Lithophone LOOP REMIX YC3"},
         {TrackName.jingle, "Yogurt JINGLE Ver. #7 Jingle All The Way YC3 2020"},
@@ -185,23 +186,24 @@ public class MusicController : Singleton<MusicController> {
         {TrackName.fillerBeat, "Filler Beat YC3"},
         {TrackName.tweakDelay, "tweakDelay YC3"},
         {TrackName.chela, "Chela Theme YC3"},
-        {TrackName.dracIntro, "Dracula Mansion INTRO YC3"},
-        {TrackName.dracLoop, "Dracula Mansion LOOP YC3"},
+        {TrackName.dracIntro, "Dracula Mansion INTRO Ver#5 Hi _ Lo YC3 2021"},
+        {TrackName.dracLoop, "Dracula Mansion LOOP Ver#5 Hi _ Lo YC3 2021"},
         {TrackName.itemAcquired, "Item Acquisition Ver#2 - No One Suspects The Acquisition YC3 2020"},
         {TrackName.congrats, "Short CONGRATS YC3"},
         {TrackName.mayor, "Mayor_s House #3 Housin_ Thangs YC3 2020"},
         {TrackName.mayor_attic, "Mayor's ATTIC #1 YC3"},
-        {TrackName.tv_r2d2, "TV-r2d2"},
+        {TrackName.tv_r2d2, "VAMPIRE ASSASSINZ Ver#5 Game On YC3 2021"},
         {TrackName.mountain, "Mountain Ambience #2 YC3 2020"},
         {TrackName.greaser, "Greaser Theme #5 ALL IN -- YC3 2020"},
         {TrackName.imp, "IMP's Theme Draft #11 CABBAGEPATCH ADAMS _ YC3 2020"},
         {TrackName.venus, "VENUS Theme1 YC3"},
         {TrackName.creeptunnel, "Creep Tunnels Draft #5 YESSIR"},
         {TrackName.lowerhell, "Lower HELL Draftz Test #5 YC3 2020"},
-        {TrackName.satansthone, "Final SATAN VER#1 Vox _ No Bass YC3 2020"},
-        {TrackName.gravy, "Scram Gravy Commercial Ver#5 Drip Plop YC3 2020"},
-        {TrackName.antimayor, "ANTI MAYOR Ver#2 Final Sleaze YC3 2021"},
-        {TrackName.ending, "ENDING THEME Ver#6 alls well what ends well YC3 2021"}
+        {TrackName.satansthone, "Final SATAN VER#7 HAIL SATAN YC3 2020"},
+        {TrackName.gravy, "Scram Gravy Commercial Ver#9 STEREO SLOP YC3 2021"},
+        {TrackName.antimayor, "ANTI MAYOR Ver#6 arriba abajo al lado al centro YC3 2021"},
+        {TrackName.ending, "ENDING THEME Ver#6 alls well what ends well YC3 2021"},
+        {TrackName.shiva, "SHIVA Mountain Theme Ver#4 YC3 2021"},
     };
 
     // TODO: add studio
