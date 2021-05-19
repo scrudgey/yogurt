@@ -28,6 +28,10 @@ public class CutscenePostCreditsDeath : Cutscene {
     bool startGoodEnding;
     bool playedRisingTone;
     BackgroundColorController backgroundColorController;
+    TextMeshProUGUI poem1;
+    TextMeshProUGUI poem2;
+    TextMeshProUGUI poem3;
+    TextMeshProUGUI poem4;
     public override void Configure() {
         UINew.Instance.RefreshUI(active: false);
         playerObj = GameManager.Instance.playerObject;
@@ -58,23 +62,33 @@ public class CutscenePostCreditsDeath : Cutscene {
         GameManager.Instance.PlayPublicSound(Resources.Load("sounds/8-bit/sfx_exp_various7") as AudioClip);
 
         backgroundColorController = new BackgroundColorController(camera);
+
+        InputController.Instance.suspendInput = true;
+
+        foreach (Collider2D collider in playerObj.GetComponentsInChildren<Collider2D>()) {
+            collider.enabled = false;
+        }
     }
     public void SceneWasLoaded(Scene scene, LoadSceneMode mode) {
-        // UINew.Instance.FadeIn(() => { });
         UINew.Instance.Clear();
         state = State.goodEnd1;
 
         panel1Image = GameObject.Find("Canvas/panel1/logo").GetComponent<Image>();
         panel1Text = GameObject.Find("Canvas/panel1/text").GetComponent<TextMeshProUGUI>();
 
-        // panel1Text.out
+        poem1 = GameObject.Find("Canvas/panel2/text1").GetComponent<TextMeshProUGUI>();
+        poem2 = GameObject.Find("Canvas/panel2/text2").GetComponent<TextMeshProUGUI>();
+        poem3 = GameObject.Find("Canvas/panel2/text3").GetComponent<TextMeshProUGUI>();
+        poem4 = GameObject.Find("Canvas/panel2/text4").GetComponent<TextMeshProUGUI>();
+
         timer = 0f;
     }
     void CreateFreshSatan() {
         if (satanObj != null) {
             GameObject.Destroy(satanObj);
         }
-        satanObj = GameObject.Instantiate(Resources.Load("prefabs/Satan")) as GameObject;
+        satanObj = GameObject.Instantiate(Resources.Load("prefabs/Satan"), satanPosition, Quaternion.identity) as GameObject;
+        satanObj.transform.localScale = new Vector3(-1f, 1f, 1f);
         satanController = new Controller(satanObj);
         DisableAllComponents(satanObj);
     }
@@ -151,7 +165,7 @@ public class CutscenePostCreditsDeath : Cutscene {
                 }
                 break;
             case State.end:
-
+                UINew.Instance.RefreshUI(active: false);
                 // float radius = camera.pixelHeight / 2f;
                 float radius = (float)PennerDoubleAnimation.ExpoEaseIn(timer, camera.pixelHeight / 2f, -1f * camera.pixelHeight / 2f, SpiralInTime);
                 float frequency = (float)PennerDoubleAnimation.ExpoEaseIn(timer, 0.1f, 10f, SpiralInTime);
@@ -188,8 +202,8 @@ public class CutscenePostCreditsDeath : Cutscene {
                     timer = 0f;
                 }
                 if (!startGoodEnding) {
-                    panel1Image.color = new Color(1f, 1f, 1f, logoAlpha);
-                    panel1Text.outlineColor = new Color(0f, 0f, 0f, textAlpha);
+                    panel1Image.color = new Color(1f, 1f, 1f, 0);
+                    panel1Text.outlineColor = new Color(0f, 0f, 0f, 0);
                     break;
                 }
                 logoAlpha = (float)PennerDoubleAnimation.QuadEaseIn(timer, 0f, 1f, 5f);
@@ -202,6 +216,7 @@ public class CutscenePostCreditsDeath : Cutscene {
                     textAlpha = (float)PennerDoubleAnimation.QuadEaseIn(timer - 13f, 1f, -1f, 5f);
                 }
                 if (timer > 20f) {
+                    timer = 0f;
                     state = State.goodEnd2;
                 }
                 // Debug.Log($"{logoAlpha} {textAlpha}");
@@ -209,6 +224,32 @@ public class CutscenePostCreditsDeath : Cutscene {
                 Color textColor = new Color(0f, 0f, 0f, textAlpha);
                 panel1Image.color = logoColor;
                 panel1Text.outlineColor = textColor;
+                break;
+            case State.goodEnd2:
+
+                if (timer > 15f) {
+                    poem1.color = new Color(0f, 0f, 0f, (float)PennerDoubleAnimation.QuadEaseIn(timer - 15f, 1f, -1f, 7f));
+                    poem2.color = new Color(0f, 0f, 0f, (float)PennerDoubleAnimation.QuadEaseIn(timer - 15f, 1f, -1f, 7f));
+                    poem3.color = new Color(0f, 0f, 0f, (float)PennerDoubleAnimation.QuadEaseIn(timer - 15f, 1f, -1f, 7f));
+                    poem4.color = new Color(0f, 0f, 0f, (float)PennerDoubleAnimation.QuadEaseIn(timer - 15f, 1f, -1f, 7f));
+                } else {
+                    poem1.color = new Color(0f, 0f, 0f, (float)PennerDoubleAnimation.QuadEaseIn(timer, 0f, 1f, 1f));
+                    if (timer > 4f) {
+                        poem2.color = new Color(0f, 0f, 0f, (float)PennerDoubleAnimation.QuadEaseIn(timer - 4f, 0f, 1f, 1f));
+                    }
+                    if (timer > 8f) {
+                        poem3.color = new Color(0f, 0f, 0f, (float)PennerDoubleAnimation.QuadEaseIn(timer - 8f, 0f, 1f, 1f));
+                    }
+                    if (timer > 8.5f) {
+                        poem4.color = new Color(0f, 0f, 0f, (float)PennerDoubleAnimation.QuadEaseIn(timer - 8.5f, 0f, 1f, 1f));
+                    }
+                }
+
+                if (timer > 24f) {
+                    complete = true;
+                    SceneManager.LoadScene("title");
+                }
+
                 break;
             default:
                 break;

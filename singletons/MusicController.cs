@@ -192,7 +192,7 @@ public class MusicController : Singleton<MusicController> {
         {TrackName.congrats, "Short CONGRATS YC3"},
         {TrackName.mayor, "Mayor_s House #3 Housin_ Thangs YC3 2020"},
         {TrackName.mayor_attic, "Mayor's ATTIC #1 YC3"},
-        {TrackName.tv_r2d2, "VAMPIRE ASSASSINZ Ver#5 Game On YC3 2021"},
+        {TrackName.tv_r2d2, "Vampire Assassins Ver#6 LOOP YC3 2021"},
         {TrackName.mountain, "Mountain Ambience #2 YC3 2020"},
         {TrackName.greaser, "Greaser Theme #5 ALL IN -- YC3 2020"},
         {TrackName.imp, "IMP's Theme Draft #11 CABBAGEPATCH ADAMS _ YC3 2020"},

@@ -205,6 +205,7 @@ public partial class GameManager : Singleton<GameManager> {
             // ReceivePhoneCall("airplane");
             // ReceivePhoneCall("office");
             // data.queuedMagicianSequences.Add("magician3");
+            // data.state = GameState.postCredits;
         }
         if (saveGameName == "test")
             MySaver.CleanupSaves();
@@ -447,12 +448,15 @@ public partial class GameManager : Singleton<GameManager> {
         GameObject satanObject = GameObject.Find("Satan");
         if (satanObject == null) {
             satanObject = GameObject.Instantiate(Resources.Load("prefabs/Satan"), new Vector3(0.807f, -0.677f, 0f), Quaternion.identity) as GameObject;
-
         }
-        // Transform satanRoot = null;
-        // if (satanObject != null) {
+        Hurtable satanHurtable = satanObject.GetComponent<Hurtable>();
+        if (satanHurtable.hitState >= Controllable.HitState.dead) {
+            Destroy(satanObject);
+            satanObject = GameObject.Instantiate(Resources.Load("prefabs/Satan"), new Vector3(0.807f, -0.677f, 0f), Quaternion.identity) as GameObject;
+        }
+        satanObject.name = "Satan";
+
         Transform satanRoot = satanObject.transform;
-        // }
 
         Transform playerRoot = playerObject.transform;
         GameObject doorway = GameObject.Find("doorway");
