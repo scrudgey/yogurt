@@ -64,7 +64,7 @@ public class MySaver {
             if (file.Name == LoadoutEditor.loadoutFileName)
                 continue;
             if (file.Name != "apartment_state.xml") {
-                // Debug.Log($"deleting file {file.FullName}");
+                Debug.Log($"deleting file {file.FullName}");
                 File.Delete(file.FullName);
             }
         }
@@ -490,6 +490,7 @@ public class MySaver {
             string temppath = Path.Combine(destDirName, file.Name);
             FileInfo info = new FileInfo(temppath);
             if (info.Exists) {
+                Debug.Log($"DElETING {temppath}");
                 info.Delete();
             }
             file.CopyTo(temppath, false);

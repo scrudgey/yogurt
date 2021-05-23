@@ -29,6 +29,8 @@ public class Recruiter : Interactive {
         dialogue.RecruitAsk(other);
     }
     public bool Recruit_Validation(Speech other) {
+        if (other.notRecruitable)
+            return false;
         return GameManager.Instance.data.state == GameState.ceoPlus;
     }
     public string Recruit_desc(Speech other) {

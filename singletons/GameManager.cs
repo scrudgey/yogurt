@@ -205,7 +205,7 @@ public partial class GameManager : Singleton<GameManager> {
             // ReceivePhoneCall("airplane");
             // ReceivePhoneCall("office");
             // data.queuedMagicianSequences.Add("magician3");
-            // data.state = GameState.postCredits;
+            // data.state = GameState.ceoPlus;
         }
         if (saveGameName == "test")
             MySaver.CleanupSaves();
@@ -489,11 +489,11 @@ public partial class GameManager : Singleton<GameManager> {
 
             string housePath = Path.Combine(Application.persistentDataPath, GameManager.Instance.saveGameName, "apartment_state.xml");
             string[] paths = new string[] { housePath, GameManager.Instance.data.lastSavedPlayerPath };
-
             foreach (string path in paths) {
                 FileInfo info = new FileInfo(path);
                 if (!info.Exists)
                     continue;
+                Debug.Log($"DELETING {path}");
                 info.Delete();
             }
             NewGame();

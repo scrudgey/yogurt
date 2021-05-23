@@ -16,7 +16,15 @@ public class LoadGameMenu : MonoBehaviour {
         if (name == "test" || name == "Unity") {
             return DateTime.Now;
         } else {
-            return datas[name].saveDateTime;
+            if (datas.ContainsKey(name)) {
+                if (datas[name] != null) {
+                    return datas[name].saveDateTime;
+                } else {
+                    return DateTime.Today;
+                }
+            } else {
+                return DateTime.Today;
+            }
         }
     }
     public void ConfigLoadMenu(StartMenu startMenu) {

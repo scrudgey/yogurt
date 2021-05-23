@@ -17,6 +17,7 @@ public struct MessagePhrase {
 public class Speech : Interactive, ISaveable {
     public bool the;
     public string speechName;
+    public bool notRecruitable;
     static string[] swearWords = new string[]{
         @"\bshit\b",
         @"\bShit\b",

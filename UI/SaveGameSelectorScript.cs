@@ -26,6 +26,8 @@ public class SaveGameSelectorScript : MonoBehaviour {
         completionText = temp.GetComponent<Text>();
     }
     public void Configure(StartMenu startMenu, DirectoryInfo dir, GameData data) {
+        if (data == null)
+            return;
         this.data = data;
         this.startMenu = startMenu;
         // nameText.text = dir.Name;
