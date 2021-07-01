@@ -478,7 +478,7 @@ public partial class DialogueMenu : MonoBehaviour {
         Say(new Monologue(target, ender));
 
         List<string> response = new List<string>();
-        response.Add("why certainly my good man!");
+        response.Add("Why certainly  [[my good man|my fair lady]]!");
         Say(new Monologue(target, response.ToArray()));
     }
     public void AttemptTrade() {

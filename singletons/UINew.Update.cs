@@ -110,7 +110,7 @@ public partial class UINew : Singleton<UINew> {
     public void UpdateMetrics(Occurrence o = null) {
         if (GameManager.Instance.data == null) {
             metricsDock.SetActive(false);
-        } else if (GameManager.Instance.data.recordingCommercial) {
+        } else if (GameManager.Instance.data.recordingCommercial && GameManager.Instance.data.activeCommercial != null) {
             metricsDock.SetActive(true);
             disgustingCounter.text = GameManager.Instance.data.activeCommercial.quality[Rating.disgusting].ToString();
             disturbingCounter.text = GameManager.Instance.data.activeCommercial.quality[Rating.disturbing].ToString();
@@ -130,6 +130,7 @@ public partial class UINew : Singleton<UINew> {
             metricsDock.SetActive(false);
         }
     }
+
     public void UpdateCursor(bool highlight) {
         switch (InputController.Instance.state) {
             case InputController.ControlState.normal:

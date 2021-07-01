@@ -1243,6 +1243,7 @@ public partial class GameManager : Singleton<GameManager> {
             data.yogurtDetective = true;
         }
         data.recordingCommercial = false;
+        data.activeCommercial = null;
         // initialize achievements
         data.achievements = AchievementManager.LoadAchievements();
         data.stats = new SerializableDictionary<StatType, Stat>();
