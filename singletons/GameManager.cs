@@ -680,26 +680,37 @@ public partial class GameManager : Singleton<GameManager> {
             }
         }
         if (sceneName == "cave3" && !data.loadedSewerItemsToday) {
-            data.loadedSewerItemsToday = true;
-            Collider2D toiletZone = GameObject.Find("toiletZone").GetComponent<Collider2D>();
-            Bounds bounds = toiletZone.bounds;
-            MySaver.LoadObjects(data.toiletItems);
-            MySaver.HandleLoadedPersistents(data.toiletItems, newDayLoad: false);
-            foreach (MyMarker marker in GameObject.FindObjectsOfType<MyMarker>()) {
-                if (data.toiletItems.Contains(marker.id)) {
-                    Debug.Log($"loading toilet item {marker.gameObject}");
-                    Vector3 newPos = bounds.center + new Vector3(
-                        (UnityEngine.Random.value - 0.5f) * bounds.size.x,
-                        (UnityEngine.Random.value - 0.5f) * bounds.size.y,
-                        (UnityEngine.Random.value - 0.5f) * bounds.size.z
-                    );
-                    marker.transform.position = newPos;
-                    PhysicalBootstrapper pb = marker.gameObject.GetComponent<PhysicalBootstrapper>();
-                    pb.doLoad = false;
-                    // Debug.Log($"toilet position {marker.transform.position}");
-                    // MySaver.objectDataBase[marker.id].transformPosition = newPos;
+            try {
+                data.loadedSewerItemsToday = true;
+                Collider2D toiletZone = GameObject.Find("toiletZone").GetComponent<Collider2D>();
+                Bounds bounds = toiletZone.bounds;
+                MySaver.LoadObjects(data.toiletItems);
+                MySaver.HandleLoadedPersistents(data.toiletItems, newDayLoad: false);
+                foreach (MyMarker marker in GameObject.FindObjectsOfType<MyMarker>()) {
+                    if (data.toiletItems.Contains(marker.id)) {
+                        Debug.Log($"loading toilet item {marker.gameObject}");
+                        Vector3 newPos = bounds.center + new Vector3(
+                            (UnityEngine.Random.value - 0.5f) * bounds.size.x,
+                            (UnityEngine.Random.value - 0.5f) * bounds.size.y,
+                            (UnityEngine.Random.value - 0.5f) * bounds.size.z
+                        );
+                        marker.transform.position = newPos;
+                        PhysicalBootstrapper pb = marker.gameObject.GetComponent<PhysicalBootstrapper>();
+                        if (pb != null)
+                            pb.doLoad = false;
+                        // Debug.Log($"toilet position {marker.transform.position}");
+                        // MySaver.objectDataBase[marker.id].transformPosition = newPos;
+                    }
                 }
             }
+            catch (Exception e) {
+                Debug.LogError("error on toilet load!!! ya dingus!!!!");
+                Debug.LogError(e);
+                data.loadedSewerItemsToday = true;
+                data.toiletItems = new List<Guid>();
+            }
+
+
         }
         if (sceneName == "devils_throneroom") {
             if (!data.visitedThroneRoom) {

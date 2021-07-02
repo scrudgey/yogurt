@@ -22,6 +22,7 @@ public class Chainsaw : Pickup, ISaveable {
     public AudioClip revStart;
     public AudioClip rev;
     public AudioClip revStop;
+    public AudioClip cuttingNoise;
     void Awake() {
         audioSource = Toolbox.Instance.SetUpAudioSource(gameObject);
         pb = GetComponent<PhysicalBootstrapper>();
@@ -89,22 +90,32 @@ public class Chainsaw : Pickup, ISaveable {
             }
             damageQueue = new HashSet<GameObject>();
         }
+
         if (revTimer > 0) {
-            if (audioSource.clip != rev) {// && audioSource.clip != revStop) {
-                audioSource.clip = rev;
-                audioSource.Play();
+
+            if (damageQueue.Count > 0 && audioSource.clip != cuttingNoise) {
+                audioSource.clip = cuttingNoise;
             }
-            if (!audioSource.isPlaying && revTimer > 0) {
+            if (damageQueue.Count == 0 && audioSource.clip == blendNoise) {
                 audioSource.clip = rev;
+            }
+            if (!audioSource.isPlaying) {
+                if (damageQueue.Count > 0 && audioSource.clip != cuttingNoise) {
+                    audioSource.clip = cuttingNoise;
+                } else if (damageQueue.Count == 0 && audioSource.clip != rev) {
+                    audioSource.clip = rev;
+                }
                 audioSource.Play();
             }
             revTimer -= Time.deltaTime;
+            DoVibrate();
+
             if (revTimer <= 0) {
                 audioSource.clip = revStop;
                 audioSource.Play();
             }
-            DoVibrate();
         }
+
         if (power) {
             if (!audioSource.isPlaying) {
                 audioSource.clip = blendNoise;

@@ -10,6 +10,8 @@ public class Stain : MonoBehaviour, ISaveable {
         }
     }
     public void ConfigureParentObject(GameObject parent) {
+        if (parent == null)
+            return;
         this.parent = parent;
         transform.position = parent.transform.position;
 
